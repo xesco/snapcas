@@ -458,18 +458,15 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 ## Limits
 
 - A game that uses more mapper segments than the four mapped at the snapshot does
-  not run. Of 204 tapes of the collection probed in `openMSX`, 2 write the mapper
-  registers, one of them to select segment 10h.
+  not run.
 - DOS's four pages must be in one memory mapper, with enough free segments for the
   image's holding and service segments and the worker. A game with a long tape needs
   a large mapper: Moonwalker's 236 KB tape does not fit in an NMS 8250's 128 KB.
-- A game with the tape service runs only if it leaves FCC9h to FD88h unused. Of the
-  204 probed tapes, 20 write there.
+- A game with the tape service runs only if it leaves FCC9h to FD88h unused.
 - A game that reads the tape with its own code gets no tape service, so it runs only
   if it loads in a single pass.
 - A snapshot taken without an interrupt overwrites the 21 bytes below the stack
-  pointer with the tail. Of the 204 probed tapes, 9 run with interrupts off after
-  their load, among them Freddy Hardest and Moonwalker.
+  pointer with the tail.
 
 ## Formats
 
