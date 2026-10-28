@@ -7,8 +7,8 @@ one starts, and the whole test suite runs with one command, `make test`.
 
 ## Test setup
 
-The build pins its tools, and the tests read their inputs from two folders that the
-user names, because `snapcas` cannot ship CAS files or DOS system files.
+The build pins its tools, and the tests read the CAS files and the MSX-DOS system
+files from two folders that the user names, because `snapcas` cannot ship them.
 
 | Item | Value |
 |---|---|
@@ -16,18 +16,18 @@ user names, because `snapcas` cannot ship CAS files or DOS system files.
 | Emulator | `openMSX` 22.0, on the path, with the system ROMs of the test machines and of the `msxdos2` cartridge |
 | Python | Python 3, standard library only |
 | `CAS_DIR` | Make variable: the folder of the user's CAS files |
-| `DOS_DIR` | Make variable: a folder with `nextor/` (`NEXTOR.SYS`, `COMMAND2.COM`), `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`) |
+| Nextor | `NEXTOR.SYS` 2.11 and `COMMAND2.COM` 2.44 from Nextor 2.1.0's `tools.zip`, downloaded by the Makefile into `out/dl/nextor/`, checked by SHA-256 |
+| `DOS_DIR` | Make variable: a folder with `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`) |
 
 The test machines are the six shipped machine files and two machine files that only
-the tests use, in `machines/test/`. Each one boots a DOS from one of `DOS_DIR`'s
-folders:
+the tests use, in `machines/test/`. Each one boots the DOS of its row:
 
-| Machine file | DOS folder | Why |
+| Machine file | DOS | Why |
 |---|---|---|
-| `advanced/phc28s`, `basic/vg8020`, `basic/msx2ide`, `advanced/mfrsd` | `nextor/` | Shipped |
-| `basic/nms8250`, `advanced/hbf700p` | `msxdos2/`, with the `msxdos2` cartridge in the machine file | Shipped |
-| `test/nms8250-dos1` | `msxdos1/`, from the NMS 8250's own disk ROM | No shipped machine runs MSX-DOS 1 |
-| `test/nms8250-512k` | `msxdos2/` | An NMS 8250 whose single mapper holds 512 KB, because 128 KB cannot hold Moonwalker's 236 KB tape |
+| `advanced/phc28s`, `basic/vg8020`, `basic/msx2ide`, `advanced/mfrsd` | Nextor | Shipped |
+| `basic/nms8250`, `advanced/hbf700p` | `DOS_DIR/msxdos2/`, with the `msxdos2` cartridge in the machine file | Shipped |
+| `test/nms8250-dos1` | `DOS_DIR/msxdos1/`, from the NMS 8250's own disk ROM | No shipped machine runs MSX-DOS 1 |
+| `test/nms8250-512k` | `DOS_DIR/msxdos2/` | An NMS 8250 whose single mapper holds 512 KB, because 128 KB cannot hold Moonwalker's 236 KB tape |
 
 `test/nms8250-512k` uses a machine configuration that the tests install in a private
 `openMSX` home, named by `OPENMSX_HOME`, with links to the user's system ROMs.
@@ -59,10 +59,11 @@ adds:
 - A first `SNAPCAS.COM` that opens `<GAME>.IMG`, prints its usage without a name,
   and prints an error when the file is missing or is not an image.
 
-The test boots `advanced/phc28s` with a disk of `DOS_DIR/nextor/`'s files and
-`SNAPCAS.COM`, runs `SNAPCAS` and `SNAPCAS NONE`, and reads the usage and the error
-from the screen with `get_screen`. It proves the assembler, the disk image, the boot
-keys and the screen reading.
+The test boots `advanced/phc28s` with a disk of Nextor's files, `SNAPCAS.COM` and
+two bad images: `SHORT.IMG` of 3 bytes and `BAD.IMG`, which starts with `SNAPCAS2`.
+It runs `SNAPCAS`, then `SNAPCAS` with `NONE`, `SHORT` and `BAD`, and reads the
+usage and the three errors from the screen with `get_screen`. It proves the
+assembler, the disk image, the boot keys and the screen reading.
 
 ## Step 2: capture
 

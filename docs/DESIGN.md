@@ -64,7 +64,6 @@ lines, as in this example for a Sanyo PHC-28S with a RAM cartridge and a Carnivo
 ```
 openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2
 disk hda
-boot "Carnivore 2 MFC" esc
 boot "DefConfig" space
 ```
 
@@ -72,7 +71,7 @@ boot "DefConfig" space
 |---|---|
 | `openmsx` | The `openMSX` arguments that reproduce the machine |
 | `disk` | The `openMSX` command that inserts `check.py`'s disk image, such as `hda` for an IDE interface or `diska` for a floppy drive |
-| `boot` | A text on the screen during boot and the key to press when it appears. Each key has its own line, matched in order |
+| `boot` | A text on the screen during boot and the key to press when it appears. Each key has its own line, matched in order. A menu can show its text before it reads the keyboard, so the key is pressed again each second while the text stays, up to 10 times |
 
 `openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
 the `-ext` options sets the slots, and it must match the real machine's. `boot`
@@ -417,12 +416,13 @@ ran only during the load is harmless.
 
 ## Check
 
-`tools/check.py` makes a disk image with `openMSX`'s `diskmanipulator`, with the
-`--dos` folder's files, `SNAPCAS.COM`, the image and an `AUTOEXEC.BAT` that runs
-`SNAPCAS <GAME>`. The folder holds `NEXTOR.SYS` and `COMMAND2.COM`, `MSXDOS2.SYS`
-and `COMMAND2.COM`, or `MSXDOS.SYS` and `COMMAND.COM`, which `snapcas` cannot ship.
-`check.py` boots the machine with that disk and the `boot` keys, and writes its
-report to `check/report.txt`:
+`tools/check.py` makes a disk image with `openMSX`'s `diskmanipulator`: a 720 KB
+image without a partition table, which Nextor reads from its first sector and
+MSX-DOS reads as a floppy disk. It holds the `--dos` folder's files, `SNAPCAS.COM`,
+the image and an `AUTOEXEC.BAT` that runs `SNAPCAS <GAME>`. The folder holds
+`NEXTOR.SYS` and `COMMAND2.COM`, `MSXDOS2.SYS` and `COMMAND2.COM`, or `MSXDOS.SYS`
+and `COMMAND.COM`, which `snapcas` cannot ship. `check.py` boots the machine with
+that disk and the `boot` keys, and writes its report to `check/report.txt`:
 
 1. A breakpoint at the tail's last instruction, which must fire within 120 seconds,
    compares the machine with the snapshot: the kept RAM pages, the stored VRAM
