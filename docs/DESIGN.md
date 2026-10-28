@@ -17,10 +17,18 @@ of the CAS file.
 | `out/<game>/<GAME>.IMG` | `tools/build.py` | The image that the restorer reads ([Image](#image)) |
 | `out/<game>/<GAME>.COM` | `tools/build.py` | The restorer, from `src/` ([Restorer](#restorer)) |
 
-A game goes through four commands: `tools/capture.py <game> <machine>`, then
-`tools/build.py <game>`, then `tools/check.py <game> <machine>` ([Check](#check)),
-and then the user runs `<GAME>` on the real machine. The tools are Python 3 programs
-that need only Python 3 and openMSX, so they run on macOS, Linux and Windows.
+A game goes through four commands, in this order:
+
+1. `tools/capture.py <game> <machine>` loads the game in openMSX and saves the
+   snapshot ([Capture](#capture)).
+2. `tools/build.py <game>` writes the image and the restorer ([Image](#image)).
+3. `tools/check.py <game> <machine>` runs the restorer in openMSX and saves
+   screenshots ([Check](#check)).
+4. `<GAME>`, on the real machine, puts the snapshot back and starts the game
+   ([Restorer](#restorer)).
+
+The tools are Python 3 programs that need only Python 3 and openMSX, so they run on
+macOS, Linux and Windows.
 
 ## Game file
 
