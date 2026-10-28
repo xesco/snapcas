@@ -50,7 +50,7 @@ The game file holds one `key value` pair per line. Only `cas` is required.
 | `cas` | `GAUNTLET.CAS` | The CAS file | |
 | `side2` | `GAUNTLEB.CAS` | The CAS file of the tape's second side | None |
 | `keys` | `100 space` | A key that the capture presses, and the time in seconds; one line per key | None |
-| `pause` | `return` | The key that the capture presses when the load waits for a key | `space` |
+| `continue` | `f1` | A key that the capture tries first, before space and Return, to continue a load that waits for a key | None |
 | `snapshot` | `at 120` | The time of the snapshot, in place of the moment the capture determines | Determined by the capture |
 | `rewind` | `graph` | The key that the player holds to rewind the tape | `stop` |
 | `sha1` | `d9aaa549…` | The SHA-1 of the CAS file that the game file was made for. When the user's CAS file differs and the game file has `patch` lines, `build.py` stops with an error, because a patch fits only one dump | None |
@@ -65,7 +65,7 @@ neither for a known game or a common machine:
 
 | Directory | Contents |
 |---|---|
-| `games/` | A game file for each tape of File-Hunter's MSX CAS collection, named after its File-Hunter file name, with its `sha1` and with the `side2`, `pause` and `patch` lines that the game needs, made by running the capture on each tape |
+| `games/` | A game file for each tape of File-Hunter's MSX CAS collection, named after its File-Hunter file name, with its `sha1` and with the `side2`, `continue` and `patch` lines that the game needs, made by running the capture on each tape |
 | `machines/basic/` | Common configurations: an MSX1 with 64 KB and a Carnivore2 (Philips VG-8020); an MSX2 with its own mapper and a floppy drive under MSX-DOS 2 (Philips NMS 8250); an MSX2 with a Sunrise IDE interface under Nextor |
 | `machines/advanced/` | Less common layouts: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 (Sanyo PHC-28S); an MSX1 with a MegaFlashROM SCC+ SD; an MSX2 whose slot 0 is expanded (Sony HB-F700P) |
 
@@ -95,12 +95,15 @@ file in `openMSX`, and the two must match.
    `TAPIN`, and waits until the game has not read the tape for 10 seconds. It then
    proceeds as follows:
    - If the game has read every block, the script takes the snapshot.
-   - Otherwise, the script saves `openMSX`'s state and presses the `pause` key. If
-     the game reads the tape again within 10 seconds, the load was waiting for that
-     key, and step 4 restarts. If not, the script reloads the saved state and takes
-     the snapshot; the unread blocks are then loaded during play.
+   - Otherwise, the script saves `openMSX`'s state and tries the keys that continue
+     a load that waits for a key: the game file's `continue` key, then space, then
+     Return. After each key, if the game reads the tape again within 10 seconds, the
+     load was waiting for that key, and step 4 restarts. If not, the script reloads
+     the saved state and tries the next key. When no key continues the load, the
+     script reloads the saved state and takes the snapshot; the unread blocks are
+     then loaded during play.
 
-A load that waits for a choice that the `pause` key cannot make, such as Gauntlet's
+A load that waits for a choice that none of these keys makes, such as Gauntlet's
 choice of players and character with the joystick, therefore gets its snapshot at
 that screen. The player makes the choice on the real machine, and the tape service
 supplies the rest of the load
