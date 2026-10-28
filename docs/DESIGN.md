@@ -199,7 +199,6 @@ required `patch` line.
 
 ## Limits
 
-- An image runs only on the machine described by its machine file.
 - A game that requires a joystick before its snapshot requires a person during the
   capture, because `openMSX` cannot operate a joystick from a script.
 - A game that uses more mapper segments than the four mapped at the snapshot does
