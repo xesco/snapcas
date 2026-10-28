@@ -12,10 +12,10 @@ of the CAS file.
 | File | Written by | What it holds |
 |---|---|---|
 | `machines/<machine>.txt` | A person, once per machine | The openMSX arguments that copy the machine, with its cartridges in the same slots |
-| `games/<game>/game.txt` | A person or an LLM | What the game needs ([Game file](#game-file)) |
-| `games/<game>/snap/` | `tools/capture.py` | The snapshot ([Capture](#capture)) |
-| `out/<game>/<GAME>.IMG` | `tools/build.py` | The image that the restorer reads ([Image](#image)) |
-| `out/<game>/<GAME>.COM` | `tools/build.py` | The restorer, from `src/` ([Restorer](#restorer)) |
+| `games/<game>/game.txt` | A person or an LLM | What the game needs |
+| `games/<game>/snap/` | `tools/capture.py` | The snapshot |
+| `out/<game>/<GAME>.IMG` | `tools/build.py` | The image that the restorer reads |
+| `out/<game>/<GAME>.COM` | `tools/build.py` | The restorer, from `src/` |
 
 A game goes through four commands, in this order:
 
