@@ -11,7 +11,7 @@ remaining blocks of the CAS file.
 
 | File | Written by | Contents |
 |---|---|---|
-| `machines/<machine>.txt` | A person, once per machine | The `openMSX` arguments that reproduce the machine, with its cartridges in the same slots |
+| `machines/<machine>.txt` | A person, once per machine | How to start the machine in `openMSX` ([Machine file](#machine-file)) |
 | `games/<game>/game.txt` | A person or an LLM | The game's settings |
 | `games/<game>/snap/` | `tools/capture.py` | The snapshot |
 | `out/<game>/<GAME>.IMG` | `tools/build.py` | The image that the restorer reads |
@@ -30,6 +30,17 @@ Each game is processed by four commands, in this order:
 The tools are Python 3 programs that require only Python 3 and `openMSX`, so they
 run on macOS, Linux and Windows.
 
+## Machine file
+
+The machine file holds one `openmsx` line, one `disk` line and any number of `boot`
+lines:
+
+| Line | Example | Meaning |
+|---|---|---|
+| `openmsx` | `openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2` | The `openMSX` arguments that reproduce the machine, with its cartridges in the same slots |
+| `disk` | `disk hda` | The `openMSX` command that inserts the disk image of `check.py`: `hda` for an IDE interface, such as the Carnivore2's, or `diska` for a floppy drive |
+| `boot` | `boot 2 esc` | A key pressed at a time in seconds after power-on, to pass a cartridge's boot menu, such as the Carnivore2's; one line per key |
+
 ## Game file
 
 The game file holds one `key value` pair per line. Only `cas` is required.
@@ -42,6 +53,7 @@ The game file holds one `key value` pair per line. Only `cas` is required.
 | `pause` | `return` | The key that the capture presses when the load waits for a key | `space` |
 | `snapshot` | `at 120` | The time of the snapshot, in place of the moment the capture determines | Determined by the capture |
 | `rewind` | `graph` | The key that the player holds to rewind the tape | `stop` |
+| `entry` | `F000` | The address of the tape service's entry in page 3, when the game uses `SLTWRK` | `SLTWRK` |
 | `patch` | `8D31 CD E1 00 > CD E1 FC` | A change to the snapshot's RAM: address, old bytes, new bytes | None |
 | `probe` | `8D31 hl=9000 de=0010` | A tape routine that `check.py` runs, with its register values | The routines that the scan finds |
 
@@ -50,9 +62,11 @@ The game file holds one `key value` pair per line. Only `cas` is required.
 `tools/capture.py` runs `openMSX` with the machine file's arguments and the script
 `tools/capture.tcl`. The script performs the following steps:
 
-1. Boots with `SHIFT` held, so that the disk system remains disabled and the machine
-   starts BASIC as a cassette machine with these cartridges does. *To verify* with
-   Nextor on a Carnivore2.
+1. Boots the machine with no disk, presses the `boot` keys, and waits for BASIC's
+   `Ok`. It then sets page 3 as `CASGO`'s stage 2 does: RET (C9h) in every hook from
+   FD9Ah to FFC9h, 00h at F37Dh, which some loaders read to refuse a disk system,
+   and zeros in `SLTATR` and `SLTWRK`.[^sys] It types `CLEAR200,&HF380`, which sets
+   BASIC's memory top to a cassette machine's.
 2. Inserts the CAS file into the cassette player and types the load command that the
    first block's type requires: `BLOAD"CAS:",R`, `CLOAD` followed by `RUN`, or
    `RUN"CAS:"`.
@@ -72,7 +86,7 @@ The capture writes the snapshot to `snap/`:
 |---|---|---|
 | `ram/<ps>-<ss>-<page>.bin` | 16 KB for each page that holds RAM, by primary slot, subslot and page | The `slotted memory` debuggable; a page holds RAM when its device in `slotmap` is RAM or a memory mapper |
 | `vram.bin` | 16 KB of video RAM | `VRAM` |
-| `state.txt` | CPU registers, interrupt mode and state, slot register, subslot registers, mapper registers, VDP registers 0 to 7, PSG registers 0 to 13, and the number of bytes read | `reg`, `debug read` |
+| `state.txt` | CPU registers, interrupt mode and state, slot register, subslot registers, mapper registers, VDP registers 0 to 7, PSG registers 0 to 13, and the number of bytes read | `reg` for the CPU; `debug read` on `MapperIO`, `VDP regs` and `PSG regs`; for each expanded slot, the byte at FFFFh, inverted, read while a `debug write` to port A8h selects that slot in page 3 |
 
 ## Image
 
@@ -122,7 +136,7 @@ The restorer installs the tape service only for a game with unread blocks or a
 |---|---|---|
 | T0 | A mapper segment that the game does not use, selected in page 0 in place of the BIOS ROM | A copy of the machine's BIOS in which the tape routines `TAPION`, `TAPIN`, `TAPIOF` and `STMOTR`[^tape] are replaced by the service's routines, as in `CASGO` (`src/tape.asm`, `src/t0.asm`) |
 | Tape data | Mapper segments | The image's tape data, 16381 bytes per segment, read through page 0 as `CASGO`'s T0 reads it |
-| Entry in page 3 | `SLTWRK`, when the snapshot shows that area empty | Selects T0 in page 0, calls `TAPION` or `TAPIN`, and restores the game's slots, as `CASGO`'s trampolines do |
+| Entry in page 3 | `SLTWRK` when its 128 bytes are still zero in the snapshot, or else the game file's `entry` address; with neither, `build.py` stops with an error | Selects T0 in page 0, calls `TAPION` or `TAPIN`, and restores the game's slots, as `CASGO`'s trampolines do |
 | `H.PARD` | FEB2h | Selects T0 in page 0 before each BASIC load[^tape] |
 
 The service records the tape position as a block number, treating side 1's unread
@@ -187,9 +201,12 @@ required `patch` line.
 
 [^dos2]: `ALL_SEG`, through the jump table that `EXTBIO` returns: MSX-DOS 2 Program
     Interface Specification, section 5.2.
-[^ports]: VDP ports 98h and 99h, PSG ports A0h, A1h and A2h: MSX Red Book, chapter
-    *to verify*.
+[^ports]: VDP ports 98h and 99h, and VDP registers 0 to 7: MSX Red Book, chapter 2. PSG
+    ports A0h, A1h and A2h: chapter 3.
 [^slots]: Slot register at port A8h, subslot register at FFFFh, which reads back
     inverted: MSX Red Book, chapter 1.
 [^tape]: `TAPION` 00E1h, `TAPIN` 00E4h, `TAPIOF` 00E7h, `STMOTR` 00F3h, `H.PARD` FEB2h: MSX Red
     Book, chapters 4 and 6.
+[^sys]: The hooks from FD9Ah to FFC9h, `SLTATR` at FCC9h, `SLTWRK` at FD09h and
+    `HIMEM` at FC4Ah, whose value on a cassette machine is F380h: MSX Red Book,
+    chapter 6.
