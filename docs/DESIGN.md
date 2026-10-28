@@ -5,7 +5,8 @@ the game from its CAS file, in its own cassette player, on a copy of the user's
 machine, and `snapcas` saves the machine's state when the game is ready. On the real
 machine, the restorer, `SNAPCAS.COM`, restores that state and transfers control to
 the game. A game that loads further data during play also receives a tape service,
-which supplies the rest of the tape from memory.
+which supplies the rest of the tape from memory. The build steps and their tests are
+in [PLAN.md](PLAN.md).
 
 ## Terms
 
