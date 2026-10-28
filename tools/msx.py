@@ -66,20 +66,24 @@ def tcl_word(text):
     return "{" + text + "}"
 
 
-def press(key):
-    """Tcl that presses a key for 0.1 seconds of emulated time."""
+def press(key, hold=0.1):
+    """Tcl that presses a key for hold seconds of emulated time."""
     row, bit = KEYS[key]
     mask = 1 << bit
-    return f"keymatrixdown {row} {mask}; after time 0.1 [list keymatrixup {row} {mask}]"
+    return f"keymatrixdown {row} {mask}; after time {hold} [list keymatrixup {row} {mask}]"
 
 
 # Procedures that every script gets. screen returns the text screen without
-# its null characters. boot waits for each boot text in turn and presses its
+# its null characters, or nothing in a graphics mode, which get_screen cannot
+# read. boot waits for each boot text in turn and presses its
 # key, then runs the command done. A menu can show its text before it reads the
 # keyboard, so boot presses the key again each second while the text is still
 # on the screen, up to 10 times.
 PRELUDE = """
-proc screen {} { string map [list \\0 ""] [get_screen] }
+proc screen {} {
+  if {[catch {get_screen} text]} { return "" }
+  string map [list \\0 ""] $text
+}
 proc boot {steps done {tries 0}} {
   if {[llength $steps] == 0} { eval $done; return }
   lassign [lindex $steps 0] text key

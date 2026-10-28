@@ -15,7 +15,7 @@ files from two folders that the user names, because `snapcas` cannot ship them.
 | Assembler | sjasmplus 1.24.0, downloaded and built by the Makefile, checked by SHA-256 |
 | Emulator | `openMSX` 22.0, on the path, with the system ROMs of the test machines and of the `msxdos2` cartridge |
 | Python | Python 3, standard library only |
-| `CAS_DIR` | Make variable: the folder of the user's CAS files |
+| `CAS_DIR` | Make variable: the folder of the user's CAS files, by default `tapes/`, which git ignores |
 | Nextor | `NEXTOR.SYS` 2.11 and `COMMAND2.COM` 2.44 from Nextor 2.1.0's `tools.zip`, downloaded by the Makefile into `out/dl/nextor/`, checked by SHA-256 |
 | `DOS_DIR` | Make variable: a folder with `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`) |
 
@@ -32,15 +32,16 @@ the tests use, in `machines/test/`. Each one boots the DOS of its row:
 `test/nms8250-512k` uses a machine configuration that the tests install in a private
 `openMSX` home, named by `OPENMSX_HOME`, with links to the user's system ROMs.
 
-The corpus is a fixed set of CAS files, one or more for each case that the design
-lists:
+The corpus is a fixed set of CAS files from File-Hunter's collection, one or more
+for each case that the design lists:
 
 | Case | File | Load command |
 |---|---|---|
 | Single load, the first game that failed on the PHC-28S | `FREDDY.CAS` (Freddy Hardest) | `RUN"CAS:"` |
 | Single load, slot search from slot 0 up | `FERNANDO.CAS` (Fernando Martin Basket Master) | `RUN"CAS:"` |
-| Single load that waits for a key | `ABADIA.CAS` (La Abadia del Crimen), `MOONRIDE.CAS` (Moonrider) | `BLOAD"CAS:",R`, `RUN"CAS:"` |
-| Single load, BASIC program | A `CLOAD` file that reads its whole tape, chosen in step 2 from `CAS_DIR` | `CLOAD` |
+| Single load that pauses on its own for 16 seconds | `022-MOON.CAS` (Moonrider) | `RUN"CAS:"` |
+| Single load that waits for a key, on an NMS 8250: on the PHC-28S its loader puts slot 1 in page 3 and crashes | `ABADIA.CAS` (La Abadia del Crimen) | `BLOAD"CAS:",R` |
+| Single load, BASIC program | `CALDERO.CAS` (El Caldero Magico) | `CLOAD` |
 | BASIC program that loads during play, T0 in place of the ROM | `COMPUTAD.CAS` (Computadora Adivina) | `CLOAD` |
 | Load during play, side 2 | `TOUR-91.CAS` and `TOUR-91B.CAS` (Tour 91) | `RUN"CAS:"` |
 | Load during play, side 2, joystick choice | `GAUNTLET.CAS` and `GAUNTLEB.CAS` (Gauntlet) | `RUN"CAS:"` |
@@ -68,13 +69,15 @@ assembler, the disk image, the boot keys and the screen reading.
 ## Step 2: capture
 
 This step writes `tools/capture.py`: capture steps 1 to 6, the RAM rules and the
-snapshot files ([Capture](DESIGN.md#capture)). The tests capture the single-load
-files of the corpus on `advanced/phc28s`, and check:
+snapshot files ([Capture](DESIGN.md#capture)), and the machine file `basic/nms8250`.
+The tests capture the single-load files of the corpus, all on `advanced/phc28s`
+except `ABADIA.CAS` on `basic/nms8250`, and check:
 
-- That `state.txt` holds every name of the register table, and `service` is 0.
+- That `state.txt` holds every name of the register table, and that `service` is 0
+  for the files on `advanced/phc28s`.
 - That every kept page holds RAM and is in slot 0's page 3, in slot 1 or in the
   Carnivore2's subslot 2-2, and that the Carnivore2's mapper has 64 segments.
-- That `ABADIA.CAS` and `MOONRIDE.CAS` continue after a key, and `log.txt` names it.
+- That `ABADIA.CAS` continues after a key, and `log.txt` names it.
 - That a second capture of the same file gives the same snapshot.
 
 ## Step 3: build

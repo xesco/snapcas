@@ -3,6 +3,10 @@
 #   make        build bin/SNAPCAS.COM
 #   make test   run the tests in openMSX
 #
+# The tests read the CAS files from CAS_DIR, by default tapes/, a folder that git
+# ignores because snapcas cannot ship CAS files. The tests that need them are
+# skipped when the folder does not exist.
+#
 # The Makefile downloads its tools into out/, each pinned by version and SHA-256:
 # the sjasmplus assembler's source, which it builds, and Nextor's NEXTOR.SYS and
 # COMMAND2.COM for the test disks. The tests run openMSX 22.0 from the path, in
@@ -11,6 +15,7 @@
 
 SJASMPLUS_VERSION := 1.24.0
 SYSTEMROMS ?= $(HOME)/.openMSX/share/systemroms
+CAS_DIR ?= tapes
 
 OUT       := out
 DL        := $(OUT)/dl
@@ -43,7 +48,7 @@ $(EMU_HOME)/share/systemroms:
 	ln -sfn $(SYSTEMROMS) $@
 
 test: bin/SNAPCAS.COM $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
-	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) \
+	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) \
 	  python3 -I -m unittest discover -s tests -v
 
 clean:

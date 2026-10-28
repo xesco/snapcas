@@ -136,51 +136,65 @@ the snapshot to `snap/`, or `snap/error.txt` when a `boot` text or BASIC's `Ok` 
 not appear within 120 seconds, the load runs for more than 3,600 seconds, or step 5
 restarts more than 20 times. It performs the following steps:
 
-1. Starts `openMSX`'s reverse recording and a write watchpoint on port A0h, which
-   keeps the PSG register selected last, boots the machine with no disk, presses the
-   `boot` keys, and waits for BASIC's `Ok`. It stops with an error unless the ROM's
-   byte at 002Dh is 0 (MSX1) or 1 (MSX2).
-2. Removes the disk system from page 3 with `debug write`. It writes RET (C9h) in
-   every hook from FD9Ah to FFC9h and at `EXTBIO`, `DISINT` and `ENAINT`, so that
-   nothing calls the disk system. It writes 00h at F37Dh, which some loaders read to
-   refuse to run with a disk system. It writes zeros from FCC9h to FD88h, `SLTATR`
-   and `SLTWRK`, so that no extension ROM claims them and the tape service can use
-   them. It then types `CLEAR200,&HF380`, which sets `HIMEM` to a cassette machine's
-   F380h.
+1. Starts a write watchpoint on port A0h, which keeps the PSG register selected
+   last, boots the machine with no disk, presses the `boot` keys, and waits for
+   BASIC's `Ok`, then 10 seconds more, as a person would. A disk system can still be
+   busy just after `Ok`: on the Sanyo PHC-28S with a Carnivore2, Moonrider loads
+   when the load starts 9 seconds after the boot menu, and stops when it starts
+   after 5.
+2. Stops with an error unless the ROM's byte at 002Dh is 0 (MSX1) or 1 (MSX2), and
+   reads `EXPTBL` at FCC1h and `EXBRSA` at FAF8h, the slot IDs of the ROMs, once,
+   because a game can overwrite page 3. It then removes the disk system from page 3
+   with `debug write`. It writes RET (C9h) in every hook from FD9Ah to FFC9h and at
+   `EXTBIO`, `DISINT` and `ENAINT`, so that nothing calls the disk system. It writes
+   00h at F37Dh, which some loaders read to refuse to run with a disk system. It
+   writes zeros from FCC9h to FD88h, `SLTATR` and `SLTWRK`, so that no extension ROM
+   claims them and the tape service can use them. It then types `CLEAR200,&HF380`,
+   which sets `HIMEM` to a cassette machine's F380h.
 3. Inserts the CAS file of side 1 into the cassette player, notes the slots selected
    in each page, and types the load command for the first header's type
-   ([CAS data](#cas-data)): `BLOAD"CAS:",R`, `CLOAD` followed by `RUN`, or
-   `RUN"CAS:"`. Side 2 is never inserted.
+   ([CAS data](#cas-data)): `BLOAD"CAS:",R`, `CLOAD`, or `RUN"CAS:"`. After `CLOAD`,
+   it types `RUN` when the motor has stopped for 1 second. Side 2 is never inserted.
 4. Presses the `keys`, and logs these events with their times:
    - The tape position, kept as the tape service would keep it, from breakpoints at
      the addresses that the jump table entries 00E1h and 00E4h jump to, `TAPION` and
      `TAPIN`, while page 0 selects the main ROM.
    - Each slot and subslot selected in a page, from write watchpoints on port A8h
      and on FFFFh.
-5. Polls bit 4 of PPI port C, the cassette motor (0 = on), every 0.1 seconds. The
-   wait ends when the motor has been off, or the player has been at the tape's end
-   (`cassetteplayer getpos` at least `getlength` minus 0.01), for 10 seconds, and
-   the last `keys` time has passed. With `snapshot at`, the capture instead waits
-   for that time and goes to step 6. Otherwise it goes back with the reverse
-   recording to 1 second into those 10 seconds, drops the events logged after that
-   moment, schedules again the `keys` that come after it, and proceeds:
+   - Each start and stop of the cassette motor.
+5. Polls bit 4 of PPI port C, the cassette motor (0 = on), every 0.1 seconds. When
+   the motor has been off, or the player has been at the tape's end
+   (`cassetteplayer getpos` at least `getlength` minus 0.01), for 1 second, it saves
+   the machine with `savestate`. The wait ends when that has lasted 30 seconds and
+   the last `keys` time has passed, because a game can pause its own load: Moonrider
+   pauses for 16 seconds. With `snapshot at`, the capture instead waits for that
+   time and goes to step 6. Otherwise it goes back to the saved moment with
+   `loadstate`, and proceeds:
    - If side 1 is read, it goes to step 6. Side 1 is read when the `TAPION` and
      `TAPIN` breakpoints fired and every block after the tape position is under 16
-     bytes or equal to a block before it.
+     bytes or equal to a block before it. A CAS file pads each block to a multiple
+     of 8 bytes, so a block counts as read when at most 7 bytes of it are left.
    - Otherwise it tries the game file's `continue` key, then space, then Return,
-     each from that same moment. If the motor starts within 10 seconds of a key, the
-     load was waiting for that key: the capture logs the key and restarts step 5. If
-     no key starts it, the rest is loaded during play, and it goes to step 6 from
-     that moment.
+     each from the saved moment and held for 0.5 seconds, because a loader can read
+     the keyboard rarely. If the motor starts within 10 seconds of a key, the load
+     was waiting for that key: the capture logs the key and restarts step 5. If no
+     key starts it, the rest is loaded during play, and it goes to step 6 from the
+     saved moment.
+
+   `loadstate` restores the machine but neither the script's variables nor its
+   timers, so each time the capture also restores its logged state from the saved
+   moment and schedules again its polling and the `keys` that come after that
+   moment.
 6. Takes the snapshot when the CPU next accepts an interrupt while no VDP command is
    running (status register 2, bit 0, is 0) and both VDP latches are empty. A probe
    breakpoint on `z80.acceptIRQ` marks the acceptance, and a breakpoint at the
    handler's address, 0038h in interrupt modes 0 and 1 or the word at I × 256 + FFh
    in mode 2, takes the snapshot there: the return address is pushed and interrupts
    are off. When no such interrupt comes within 1 second, it takes the snapshot
-   where the CPU is. It stops with an error when the CPU is then halted, or when the
-   game gets the tape service and the program counter is in the main ROM's 19DDh to
-   1B44h.
+   where the CPU is. It stops with an error when the CPU is then halted, which
+   `openMSX` shows as a program counter just after a HALT (76h) that does not move,
+   or when the game gets the tape service and the program counter is in the main
+   ROM's 19DDh to 1B44h.
 
 The game gets the tape service when the `TAPION` and `TAPIN` breakpoints fired and
 either side 1 is not read or the game file has `side2`. A load that waits for a
@@ -217,11 +231,12 @@ overwrites a segment changes nothing it keeps:
 | `subrom.bin` | 16 KB on an MSX2: the sub-ROM, from the slot that `EXBRSA` names |
 | `vram.bin` | The `physical VRAM` debuggable: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938 |
 | `state.txt` | One `name value` per line, values in hexadecimal, as below |
-| `log.txt` | The logged events, and the `continue` key that worked |
+| `log.txt` | The logged events and the capture's decisions, in time order: each stop of the load with the screen's text, the key that continued it, each mapper's size, and how the snapshot was taken. Its last line names the `continue` key that worked |
 
 | `state.txt` names | Source in `openMSX` |
 |---|---|
-| `af`, `bc`, `de`, `hl`, `af2`, `bc2`, `de2`, `hl2`, `ix`, `iy`, `sp`, `pc`, `i`, `im`, `iff` | `reg` |
+| `af`, `bc`, `de`, `hl`, `af2`, `bc2`, `de2`, `hl2`, `ix`, `iy`, `sp`, `pc`, `i`, `im` | `reg` |
+| `iff` | Bit 0 of `reg IFF`: 1 when interrupts are on |
 | `a8`, `ppic` | `debug read` on ports A8h and AAh |
 | `sub0` to `sub3`, `-` when not expanded | For a slot that `EXPTBL` marks expanded, the byte at FFFFh, inverted, read while page 3 selects that slot |
 | `fc` to `ff`, `-` without a mapper | `MSX Memory Mapper I/O`: the values written, which each mapper masks to its size |
@@ -452,6 +467,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | Tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register. Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave the ROM there at the snapshot: Moonwalker and Time Out |
 | Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games. Of those games, 20 build stubs that T0 alone does not intercept |
+| Rewind the capture with `savestate` and `loadstate` | `openMSX`'s `reverse goto` replays the input recorded after its target, while each key try must start from the saved moment with no other input |
 | A tape with both sides, a wrap, and fixed rewind and flip keys | In 41 of those 51 games the unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
 | GRAPH as the rewind key, SELECT as the flip key | GRAPH alone types no character and BASIC ignores it, while STOP pauses a BASIC program and the function keys type text. SELECT only puts one character in the key buffer |
 
