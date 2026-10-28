@@ -13,7 +13,7 @@ in [PLAN.md](PLAN.md).
 | Term | Meaning |
 |---|---|
 | Page | One of the four 16 KB parts of the Z80's 64 KB address space: page 0 is 0000h to 3FFFh, page 3 is C000h to FFFFh |
-| Slot, subslot | Where the memory in a page comes from: one of four primary slots, and in an expanded slot one of four subslots[^slots] |
+| Slot, subslot | Where the memory in a page comes from: one of four primary slots, and in an expanded slot one of four subslots |
 | Slot ID | A slot in one byte: bit 7 set when expanded, bits 3 and 2 the subslot, bits 1 and 0 the primary slot |
 | Segment | A 16 KB block of a memory mapper, selected into a page by the mapper registers at ports FCh to FFh |
 | DOS's mapper | The mapper that holds DOS's four pages on the real machine |
@@ -140,13 +140,13 @@ restarts more than 20 times. It performs the following steps:
 1. Starts `openMSX`'s reverse recording and a write watchpoint on port A0h, which
    keeps the PSG register selected last, boots the machine with no disk, presses the
    `boot` keys, and waits for BASIC's `Ok`. It stops with an error unless the ROM's
-   byte at 002Dh is 0 (MSX1) or 1 (MSX2).[^grauw]
+   byte at 002Dh is 0 (MSX1) or 1 (MSX2).
 2. Removes the disk system from page 3 with `debug write`: RET (C9h) in every hook
    from FD9Ah to FFC9h and at `EXTBIO`, `DISINT` and `ENAINT`, so that nothing calls
    the disk system; 00h at F37Dh, which some loaders read to refuse to run with a
    disk system; and zeros from FCC9h to FD88h, `SLTATR` and `SLTWRK`, so that no
-   extension ROM claims them and the tape service can use them.[^sys] It types
-   `CLEAR200,&HF380`, which sets `HIMEM` to a cassette machine's F380h.[^clear]
+   extension ROM claims them and the tape service can use them. It types
+   `CLEAR200,&HF380`, which sets `HIMEM` to a cassette machine's F380h.
 3. Inserts the CAS file of side 1 into the cassette player, notes the slots selected
    in each page, and types the load command for the first header's type
    ([CAS data](#cas-data)): `BLOAD"CAS:",R`, `CLOAD` followed by `RUN`, or
@@ -157,13 +157,13 @@ restarts more than 20 times. It performs the following steps:
      `TAPIN`, while page 0 selects the main ROM.
    - Each slot and subslot selected in a page, from write watchpoints on port A8h
      and on FFFFh.
-5. Polls bit 4 of PPI port C, the cassette motor (0 = on),[^ports] every 0.1
-   seconds. The wait ends when the motor has been off, or the player has been at the
-   tape's end (`cassetteplayer getpos` at least `getlength` minus 0.01), for 10
-   seconds, and the last `keys` time has passed. With `snapshot at`, the capture
-   instead waits for that time and goes to step 6. Otherwise it goes back with the
-   reverse recording to 1 second into those 10 seconds, drops the events logged
-   after that moment, schedules again the `keys` that come after it, and proceeds:
+5. Polls bit 4 of PPI port C, the cassette motor (0 = on), every 0.1 seconds. The
+   wait ends when the motor has been off, or the player has been at the tape's end
+   (`cassetteplayer getpos` at least `getlength` minus 0.01), for 10 seconds, and
+   the last `keys` time has passed. With `snapshot at`, the capture instead waits
+   for that time and goes to step 6. Otherwise it goes back with the reverse
+   recording to 1 second into those 10 seconds, drops the events logged after that
+   moment, schedules again the `keys` that come after it, and proceeds:
    - If side 1 is read, it goes to step 6. Side 1 is read when the `TAPION` and
      `TAPIN` breakpoints fired and every block after the tape position is under 16
      bytes or equal to a block before it.
@@ -193,11 +193,11 @@ real machine, and the tape service supplies the rest.
 The capture reads memory through the CPU's view, the `memory` debuggable, after it
 selects a slot in a page with `debug write` on port A8h and, in a slot that `EXPTBL`
 marks expanded, on FFFFh while page 3 selects that slot, and writes both back
-afterwards.[^sys] This works for every device, including those that expand their
-slot themselves, such as the Carnivore2. The snapshot keeps each page that holds RAM
-and was selected at step 3, during the load or at the snapshot. The capture reads
-these pages first and tests them afterwards, so a write that switches a ROM's bank
-or overwrites a segment changes nothing it keeps:
+afterwards. This works for every device, including those that expand their slot
+themselves, such as the Carnivore2. The snapshot keeps each page that holds RAM and
+was selected at step 3, during the load or at the snapshot. The capture reads these
+pages first and tests them afterwards, so a write that switches a ROM's bank or
+overwrites a segment changes nothing it keeps:
 
 - A page holds RAM when the byte at its first address takes a written value and its
   complement.
@@ -214,7 +214,7 @@ or overwrites a segment changes nothing it keeps:
 |---|---|
 | `ram/<ps>-<ss>-<page>-<seg>.bin` | 16 KB for each RAM page kept, by primary slot, subslot (`x` when not expanded), page and segment (`x` when not in a mapper) |
 | `rom.bin` | 32 KB: pages 0 and 1 of the main ROM, from the slot that `EXPTBL` names |
-| `subrom.bin` | 16 KB on an MSX2: the sub-ROM, from the slot that `EXBRSA` names[^grauw] |
+| `subrom.bin` | 16 KB on an MSX2: the sub-ROM, from the slot that `EXBRSA` names |
 | `vram.bin` | The `physical VRAM` debuggable: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938 |
 | `state.txt` | One `name value` per line, values in hexadecimal, as below |
 | `log.txt` | The logged events, and the `continue` key that worked |
@@ -261,15 +261,14 @@ expects.
 below 4000h, and it holds the worker twice, assembled to run in pages 1 and 2. Under
 MSX-DOS 2 and Nextor, it selects segments in pages 1 and 2 with `PUT_P1` and
 `PUT_P2`, and learns DOS's segments with `GET_P0` to `GET_P3`; under MSX-DOS 1, it
-writes the mapper registers, and DOS's segments are 3, 2, 1 and 0.[^dos2] It
-performs the following steps, and until step 4 it can stop with a message and return
-to DOS:
+writes the mapper registers, and DOS's segments are 3, 2, 1 and 0. It performs the
+following steps, and until step 4 it can stop with a message and return to DOS:
 
 1. Opens `<GAME>.IMG`, whose name DOS has placed in the FCB at 005Ch, with the
    extension set to IMG; without a name, it prints its usage. It reads the image's
-   first 4,096 bytes with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`,[^fcb]
-   and checks:
-   - That `RAMAD0` to `RAMAD3` name one slot, DOS's mapper.[^grauw]
+   first 4,096 bytes with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`, and
+   checks:
+   - That `RAMAD0` to `RAMAD3` name one slot, DOS's mapper.
    - That the CRC-16 of the main ROM and of the sub-ROM equal the image's. The
      worker reads them in page 2, with pages 0 and 1 selecting the ROM.
    - That page 1 or page 2 can hold the worker at the end: a page other than the
@@ -306,9 +305,9 @@ to DOS:
      does not describe this machine.
    - A VRAM block is read into page 2 and written to the VDP through ports 98h and
      99h and register 14, with interrupts off and the display blanked by writing
-     register 1 with `RG1SAV`'s value and bit 6 clear.[^sys] A block of zeros is
-     written without a read. DOS's text mode has no planar layout, so the bytes go
-     to VRAM as stored.
+     register 1 with `RG1SAV`'s value and bit 6 clear. A block of zeros is written
+     without a read. DOS's text mode has no planar layout, so the bytes go to VRAM
+     as stored.
    - A service segment or a RAM page of DOS's mapper is read into its segment
      through page 1 or 2.
 
@@ -353,7 +352,7 @@ The tape service keeps the tape in service segments, and has these parts:
 
 `build.py` builds T0 from `rom.bin`, so it first checks that each jump table entry
 below jumps to its address, as in the standard MSX BIOS; the restorer's ROM check
-ensures that the real ROM equals `rom.bin`.[^tape]
+ensures that the real ROM equals `rom.bin`.
 
 | Entry | Routine | Address it must jump to |
 |---|---|---|
@@ -533,12 +532,10 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 `build.py` lists the writes in this order:
 
 1. For each PSG register from 0 to 15, its number to port A0h and its value to port
-   A1h, with register 7's bits 7 and 6 forced to 1 and 0; then `psgsel` to port
-   A0h.[^ports]
+   A1h, with register 7's bits 7 and 6 forced to 1 and 0; then `psgsel` to port A0h.
 2. PPI port C to port AAh.
 3. On a V9938: 0 to register 16, the 16 palette entries to port 9Ah, 2 bytes each,
-   then 32 to register 17, for auto-increment, and registers 32 to 45 to port
-   9Bh.[^v9938]
+   then 32 to register 17, for auto-increment, and registers 32 to 45 to port 9Bh.
 4. VDP registers 0 to 7, or 0 to 23, to port 99h, as a value and 80h plus the
    register's number.
 5. The VRAM pointer to port 99h: its low byte, then its high bits with 40h for a
@@ -558,37 +555,10 @@ block has none of these types. The tape position is an offset in this data.
 ### Key names
 
 The key names are the MSX keyboard matrix's special keys, which have the same place
-on every keyboard layout.[^keys]
+on every keyboard layout.
 
 | Row | Bit 0 | Bit 1 | Bit 2 | Bit 3 | Bit 4 | Bit 5 | Bit 6 | Bit 7 |
 |---|---|---|---|---|---|---|---|---|
 | 6 | `shift` | `ctrl` | `graph` | `caps` | `code` | `f1` | `f2` | `f3` |
 | 7 | `f4` | `f5` | `esc` | `tab` | `stop` | `bs` | `select` | `return` |
 | 8 | `space` | `home` | `ins` | `del` | `left` | `up` | `down` | `right` |
-
-[^slots]: Slot register at port A8h, subslot register at FFFFh, which reads back
-    inverted: MSX Red Book, chapter 1.
-[^sys]: The hooks from FD9Ah to FFC9h, `EXPTBL` at FCC1h, `SLTTBL` at FCC5h, `SLTATR`
-    at FCC9h, `SLTWRK` at FD09h, `HIMEM` at FC4Ah, `JIFFY` at FC9Eh and `RG1SAV` at
-    F3E0h: MSX Red Book, chapter 6. `EXTBIO` at FFCAh, `DISINT` at FFCFh and
-    `ENAINT` at FFD4h: map.grauw.nl, system variables.
-[^clear]: `CLEAR` sets `HIMEM` and accepts no value above F380h: MSX Red Book, chapter
-    5.
-[^tape]: The jump table entries of `TAPION`, `TAPIN`, `TAPIOF`, `TAPOON`, `TAPOUT`,
-    `TAPOOF`, `STMOTR` (00F3h) and `OUTDO`, and the routines' addresses in the
-    standard BIOS: MSX Red Book, chapter 4.
-[^ports]: VDP ports 98h and 99h, and VDP registers 0 to 7: MSX Red Book, chapter 2.
-    PSG ports A0h, A1h and A2h, and registers 7, 14 and 15: chapter 3. PPI port C at
-    AAh, whose bit 4 controls the cassette motor: chapter 1.
-[^v9938]: V9938 registers 0 to 45, register 14 for VRAM above 16 KB, register 17's
-    indirect access through port 9Bh, the palette port 9Ah, and status register 2:
-    MSX2 Technical Handbook, chapter 4.
-[^grauw]: The MSX version at 002Dh of the main ROM, `EXBRSA` at FAF8h, the slot of the
-    sub-ROM, and `RAMAD0` to `RAMAD3` at F341h to F344h, DOS's RAM slots:
-    map.grauw.nl, system variables and BIOS entries.
-[^dos2]: `ALL_SEG`, `GET_P0` to `GET_P3`, `PUT_P1` and `PUT_P2`, through the jump
-    table that `EXTBIO` returns: MSX-DOS 2 Program Interface Specification, sections
-    5.2 and 5.4.
-[^fcb]: `_FOPEN` 0Fh, `_SETDTA` 1Ah and `_RDBLK` 27h, the FCB functions of MSX-DOS 1
-    that MSX-DOS 2 keeps: MSX-DOS 2 Function Codes Specification.
-[^keys]: The keyboard matrix, rows 6 to 8: MSX Red Book, chapter 1.
