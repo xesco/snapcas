@@ -201,9 +201,9 @@ or overwrites a segment changes nothing it keeps:
 
 - A page holds RAM when the byte at its first address takes a written value and its
   complement.
-- A RAM page is in a mapper when, with its mapper register set to two values in
-  turn, a marker byte written at its first address under each value reads back under
-  that value.
+- A RAM page is in a mapper when two different marker bytes, written at its first
+  address under two values of its mapper register, each read back under their own
+  value after both are written.
 - The mapper's size comes from the count that the restorer uses under MSX-DOS 1
   ([Restorer](#restorer), step 2). A page's segment is its mapper register's value
   modulo that size.
@@ -288,8 +288,8 @@ to DOS:
      page 1 or 2, goes straight into it.
    - Each other RAM page of DOS's mapper gets a holding segment, copied into its own
      segment in step 6.
-   - Each service segment gets one segment, and so does the worker, which the
-     restorer copies into its segment.
+   - Each service segment gets one of the segments left, and so does the worker,
+     which the restorer copies into its segment.
 
    It stops when there are too few, naming the segments needed and free.
 3. Reads the records in this order, through the FCB's random record field: the RAM
@@ -516,7 +516,7 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 
 | Offset | Bytes | Instruction |
 |---|---|---|
-| 0 | `3E nn` | `LD A,nn`: the worker's page's segment, filled in by the restorer |
+| 0 | `3E nn` | `LD A,nn`: the snapshot's value of the worker's page's mapper register, filled in by the restorer |
 | 2 | `D3 nn` | `OUT (nn),A`: FDh or FEh, filled in by the restorer |
 | 4 | `3E nn` | `LD A,nn`: the slot register, filled in by the restorer |
 | 6 | `D3 A8` | `OUT (0A8h),A` |

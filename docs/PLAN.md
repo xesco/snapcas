@@ -13,18 +13,24 @@ user names, because `snapcas` cannot ship CAS files or DOS system files.
 | Item | Value |
 |---|---|
 | Assembler | sjasmplus 1.24.0, downloaded and built by the Makefile, checked by SHA-256 |
-| Emulator | `openMSX` 22.0, on the path, with the system ROMs of the test machines |
+| Emulator | `openMSX` 22.0, on the path, with the system ROMs of the test machines and of the `msxdos2` cartridge |
 | Python | Python 3, standard library only |
 | `CAS_DIR` | Make variable: the folder of the user's CAS files |
-| `DOS_DIR` | Make variable: a folder with `nextor/` (`NEXTOR.SYS`, `COMMAND2.COM`) and `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) |
-| Test machines | The shipped machine files, `advanced/phc28s` first |
+| `DOS_DIR` | Make variable: a folder with `nextor/` (`NEXTOR.SYS`, `COMMAND2.COM`), `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`) |
 
-Each test machine boots the DOS of its machine file:
+The test machines are the six shipped machine files and two machine files that only
+the tests use, in `machines/test/`. Each one boots a DOS from one of `DOS_DIR`'s
+folders:
 
-| Machine file | DOS folder |
-|---|---|
-| `advanced/phc28s`, `basic/vg8020`, `basic/msx2ide`, `advanced/mfrsd` | `nextor/` |
-| `basic/nms8250`, `advanced/hbf700p` | `msxdos2/`, with the `msxdos2` cartridge in the machine file |
+| Machine file | DOS folder | Why |
+|---|---|---|
+| `advanced/phc28s`, `basic/vg8020`, `basic/msx2ide`, `advanced/mfrsd` | `nextor/` | Shipped |
+| `basic/nms8250`, `advanced/hbf700p` | `msxdos2/`, with the `msxdos2` cartridge in the machine file | Shipped |
+| `test/nms8250-dos1` | `msxdos1/`, from the NMS 8250's own disk ROM | No shipped machine runs MSX-DOS 1 |
+| `test/nms8250-512k` | `msxdos2/` | An NMS 8250 whose single mapper holds 512 KB, because 128 KB cannot hold Moonwalker's 236 KB tape |
+
+`test/nms8250-512k` uses a machine configuration that the tests install in a private
+`openMSX` home, named by `OPENMSX_HOME`, with links to the user's system ROMs.
 
 The corpus is a fixed set of CAS files, one or more for each case that the design
 lists:
@@ -38,7 +44,7 @@ lists:
 | BASIC program that loads during play, T0 in place of the ROM | `COMPUTAD.CAS` (Computadora Adivina) | `CLOAD` |
 | Load during play, side 2 | `TOUR-91.CAS` and `TOUR-91B.CAS` (Tour 91) | `RUN"CAS:"` |
 | Load during play, side 2, joystick choice | `GAUNTLET.CAS` and `GAUNTLEB.CAS` (Gauntlet) | `RUN"CAS:"` |
-| Load during play, page 0 RAM in DOS's mapper, on an NMS 8250 | `MOONWALK.CAS` (Moonwalker) | `RUN"CAS:"` |
+| Load during play, page 0 RAM in DOS's mapper | `MOONWALK.CAS` (Moonwalker) | `RUN"CAS:"` |
 
 ## Step 1: build and harness
 
@@ -46,22 +52,23 @@ This step sets up the build and the code that every tool uses to run `openMSX`. 
 adds:
 
 - A Makefile that builds sjasmplus and `bin/SNAPCAS.COM`, and runs the tests.
+- The machine file `advanced/phc28s`.
 - `tools/msx.py`, which reads a machine file, starts `openMSX` with a Tcl script,
-  presses the `boot` keys, and makes a disk image with `diskmanipulator`.
+  presses the `boot` keys, and makes, with `diskmanipulator`, a disk image of the
+  kind that the machine file's `disk` command takes.
 - A first `SNAPCAS.COM` that opens `<GAME>.IMG`, prints its usage without a name,
   and prints an error when the file is missing or is not an image.
 
 The test boots `advanced/phc28s` with a disk of `DOS_DIR/nextor/`'s files and
-`SNAPCAS.COM`, runs `SNAPCAS NONE`, and reads the error from the screen with
-`get_screen`. It proves the assembler, the disk image, the boot keys and the screen
-reading.
+`SNAPCAS.COM`, runs `SNAPCAS` and `SNAPCAS NONE`, and reads the usage and the error
+from the screen with `get_screen`. It proves the assembler, the disk image, the boot
+keys and the screen reading.
 
 ## Step 2: capture
 
-This step writes `tools/capture.py` for games without the tape service: capture
-steps 1 to 6, the RAM rules and the snapshot files ([Capture](DESIGN.md#capture)).
-The tests capture the single-load files of the corpus on `advanced/phc28s`, and
-check:
+This step writes `tools/capture.py`: capture steps 1 to 6, the RAM rules and the
+snapshot files ([Capture](DESIGN.md#capture)). The tests capture the single-load
+files of the corpus on `advanced/phc28s`, and check:
 
 - That `state.txt` holds every name of the register table, and `service` is 0.
 - That every kept page holds RAM and is in slot 0's page 3, in slot 1 or in the
@@ -80,21 +87,26 @@ record table, the port-write order and the tail's bytes against the design's tab
 ## Step 4: restorer and check
 
 This step writes `SNAPCAS.COM` without the tape service, restorer steps 1 to 7
-([Restorer](DESIGN.md#restorer)), and `tools/check.py`. The tests run `check.py` on
-each single-load file of the corpus, first on `advanced/phc28s`, then on
-`basic/vg8020`, `basic/nms8250` and `advanced/hbf700p`. Check point 1 must pass on
-each machine, and the screenshots stay in `check/` for the user to look at.
+([Restorer](DESIGN.md#restorer)), `tools/check.py`, and the machine files of its
+tests. The tests capture, build and check each single-load file of the corpus, first
+on `advanced/phc28s`, then on `basic/vg8020`, `basic/nms8250`, `advanced/hbf700p`
+and `test/nms8250-dos1`. Check point 1 must pass on each machine, except where the
+restorer stops because DOS leaves too few free segments: the test then checks that
+the restorer's message names the segments needed and free. The screenshots stay in
+`check/` for the user to look at.
 
 ## Step 5: tape service
 
 This step adds the tape service to `src/service.asm`, `build.py` and `SNAPCAS.COM`
-([Tape service](DESIGN.md#tape-service)). The tests run `check.py` on
-`COMPUTAD.CAS`, `TOUR-91.CAS` and `GAUNTLET.CAS` on `advanced/phc28s`, and on
-`MOONWALK.CAS` on `basic/nms8250`. Each test's Tcl script then gives the inputs that
-reach the game's next load, and checks in T0 that the tape position moves past its
-value at the snapshot. For Gauntlet, the script sets the joystick's value in
-register A after `IN A,(0A2h)`, because `openMSX` cannot press a joystick from a
-script. For Moonwalker, the test also checks that T0 stays out of page 0.
+([Tape service](DESIGN.md#tape-service)), and the machine file `test/nms8250-512k`
+with its machine configuration. The tests capture, build and check `COMPUTAD.CAS`,
+`TOUR-91.CAS` and `GAUNTLET.CAS` on `advanced/phc28s`, and `MOONWALK.CAS` on
+`test/nms8250-512k`, and check that `service` is 1 in each `state.txt`. Each test's
+Tcl script then gives the inputs that reach the game's next load, and checks in T0
+that the tape position moves past its value at the snapshot. For Gauntlet, the
+script sets the joystick's value in register A after `IN A,(0A2h)`, because
+`openMSX` cannot press a joystick from a script. For Moonwalker, the test also
+checks that T0 stays out of page 0.
 
 ## Step 6: scan
 
@@ -106,10 +118,12 @@ findings each one executes.
 
 ## Step 7: shipped files
 
-This step writes the six machine files ([Shipped files](DESIGN.md#shipped-files))
-and the game files for the collection, by running the capture over `CAS_DIR`. The
-test runs `check.py` on every game file on `advanced/phc28s` and `basic/vg8020`, and
-writes a report of passes and failures.
+This step writes the last two machine files, `basic/msx2ide` and `advanced/mfrsd`
+([Shipped files](DESIGN.md#shipped-files)), and the game files for the collection,
+by running the capture over `CAS_DIR` on `advanced/phc28s`. The tests check a
+single-load game on each of the six shipped machine files, then capture, build and
+check every game file on `advanced/phc28s` and `basic/vg8020`, and write a report of
+passes and failures.
 
 ## Step 8: real hardware
 
