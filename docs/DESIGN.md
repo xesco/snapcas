@@ -1,6 +1,6 @@
 # `snapcas` design
 
-`snapcas` starts a cassette game from disk on one real MSX. openMSX loads the game
+`snapcas` starts a cassette game from disk on one real MSX. `openMSX` loads the game
 from its CAS file, in its own cassette player, on a copy of the user's machine, and
 `snapcas` saves the machine's state when the game is ready. A program on the real
 machine, the restorer, restores that state and transfers control to the game. A game
@@ -11,7 +11,7 @@ remaining blocks of the CAS file.
 
 | File | Written by | Contents |
 |---|---|---|
-| `machines/<machine>.txt` | A person, once per machine | The openMSX arguments that reproduce the machine, with its cartridges in the same slots |
+| `machines/<machine>.txt` | A person, once per machine | The `openMSX` arguments that reproduce the machine, with its cartridges in the same slots |
 | `games/<game>/game.txt` | A person or an LLM | The game's settings |
 | `games/<game>/snap/` | `tools/capture.py` | The snapshot |
 | `out/<game>/<GAME>.IMG` | `tools/build.py` | The image that the restorer reads |
@@ -19,16 +19,16 @@ remaining blocks of the CAS file.
 
 Each game is processed by four commands, in this order:
 
-1. `tools/capture.py <game> <machine>` loads the game in openMSX and saves the
+1. `tools/capture.py <game> <machine>` loads the game in `openMSX` and saves the
    snapshot ([Capture](#capture)).
 2. `tools/build.py <game>` writes the image and the restorer ([Image](#image)).
-3. `tools/check.py <game> <machine>` runs the restorer in openMSX and saves
+3. `tools/check.py <game> <machine>` runs the restorer in `openMSX` and saves
    screenshots ([Check](#check)).
 4. `<GAME>`, on the real machine, restores the snapshot and starts the game
    ([Restorer](#restorer)).
 
-The tools are Python 3 programs that require only Python 3 and openMSX, so they run
-on macOS, Linux and Windows.
+The tools are Python 3 programs that require only Python 3 and `openMSX`, so they
+run on macOS, Linux and Windows.
 
 ## Game file
 
@@ -47,7 +47,7 @@ The game file holds one `key value` pair per line. Only `cas` is required.
 
 ## Capture
 
-`tools/capture.py` runs openMSX with the machine file's arguments and the script
+`tools/capture.py` runs `openMSX` with the machine file's arguments and the script
 `tools/capture.tcl`. The script performs the following steps:
 
 1. Boots with `SHIFT` held, so that the disk system remains disabled and the machine
@@ -61,14 +61,14 @@ The game file holds one `key value` pair per line. Only `cas` is required.
    `TAPIN`, and waits until the game has not read the tape for 10 seconds. It then
    proceeds as follows:
    - If the game has read every block, the script takes the snapshot.
-   - Otherwise, the script saves openMSX's state and presses the `pause` key. If the
-     game reads the tape again within 10 seconds, the load was waiting for that key,
-     and step 4 restarts. If not, the script reloads the saved state and takes the
-     snapshot; the unread blocks are then loaded during play.
+   - Otherwise, the script saves `openMSX`'s state and presses the `pause` key. If
+     the game reads the tape again within 10 seconds, the load was waiting for that
+     key, and step 4 restarts. If not, the script reloads the saved state and takes
+     the snapshot; the unread blocks are then loaded during play.
 
 The capture writes the snapshot to `snap/`:
 
-| File | Contents | openMSX source |
+| File | Contents | `openMSX` source |
 |---|---|---|
 | `ram/<ps>-<ss>-<page>.bin` | 16 KB for each page that holds RAM, by primary slot, subslot and page | The `slotted memory` debuggable; a page holds RAM when its device in `slotmap` is RAM or a memory mapper |
 | `vram.bin` | 16 KB of video RAM | `VRAM` |
@@ -103,11 +103,11 @@ performs the following steps:
 4. If the game uses the tape service, builds T0 and installs the service
    ([Tape service](#tape-service)).
 5. Copies each RAM page to its slot, subslot, page and mapper segment. The copier
-   runs from one of the restorer's own segments: from page 3 while it writes page 1,
-   then from page 1 while it writes pages 0, 2 and 3. It reads each page through a
-   window: page 2 while it writes pages 0, 1 and 3, and page 0 while it writes page
-   2. It sets each subslot register at FFFFh while that slot is selected in page
-      3,[^slots] and sets the subslot register of the snapshot's page 3 slot last.
+   runs from one of the restorer's own segments, which it selects in page 3 while it
+   writes page 1 and in page 1 while it writes the other pages. It reads the
+   snapshot's data through a window in page 2, or in page 0 while it writes page 2.
+   It sets each slot's subslot register at FFFFh while page 3 selects that
+   slot,[^slots] and sets the subslot register of the snapshot's page 3 slot last.
 6. Jumps to the tail, below the game's stack pointer, in the game's page 3 slot. The
    tail sets the slot register and the mapper registers, loads the CPU registers,
    sets the interrupt mode, enables interrupts if they were enabled at the snapshot,
@@ -156,14 +156,14 @@ service, it also runs each routine that the scan finds, and each `probe`, once f
 the restored state with the given register values, and verifies that the code
 reaches the tape service and reads the expected block. Code that a game generates
 only when the player reaches a given level is not visible to the scan. Such code
-appears as a hang during play, and a trace of that load in openMSX provides the
+appears as a hang during play, and a trace of that load in `openMSX` provides the
 required `patch` line.
 
 ## Decisions
 
 | Decision | Reason |
 |---|---|
-| Restore a snapshot instead of emulating the tape for the game's loader | The loader runs once, in openMSX, so its slot code, stubs and checks require no changes |
+| Restore a snapshot instead of emulating the tape for the game's loader | The loader runs once, in `openMSX`, so its slot code, stubs and checks require no changes |
 | Capture on a copy of the user's machine, with the disk system disabled | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
 | Install the tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
 | Scan both the snapshot and the unread blocks | Of 51 multi-load games in `CASGO`'s corpus, 20 build stubs that T0 alone does not intercept |
@@ -174,7 +174,7 @@ required `patch` line.
 
 - An image runs only on the machine described by its machine file.
 - A game that requires a joystick before its snapshot requires a person during the
-  capture, because openMSX cannot operate a joystick from a script.
+  capture, because `openMSX` cannot operate a joystick from a script.
 - A game that uses more mapper segments than the four mapped at the snapshot does
   not run.
 - A program that requires the cassette signal itself, such as Head Alignment Kit,
