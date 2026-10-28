@@ -204,9 +204,6 @@ required `patch` line.
   capture, because `openMSX` cannot operate a joystick from a script.
 - A game that uses more mapper segments than the four mapped at the snapshot does
   not run.
-- Only the PSG's sound is restored. A game that plays music on another sound chip,
-  such as the MSX-MUSIC of a Carnivore2 or an FM-PAC, at the snapshot moment is
-  silent on that chip until the game writes to it again.
 - Under MSX-DOS 1, the restorer runs only when page 3's slot holds the memory
   mapper.
 - A game that needs the tape service runs only on a machine whose BIOS keeps its
