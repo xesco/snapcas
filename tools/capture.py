@@ -58,6 +58,7 @@ def settings(game, machine, cas_path, data, snap):
         "headers": tcl_list(str(h) for h in cas.headers(data)),
         "needed": str(cas.needed_end(data)),
         "side2": "1" if game.side2 else "0",
+        "nosvc": "1" if game.service_no else "0",
         "keys": tcl_list(f"{t} {msx.tcl_word(tcl)}" for t, tcl in keys),
         "lastkey": str(max([t for t, _ in keys], default=0)),
         # A loader can read the keyboard rarely, so the keys that may

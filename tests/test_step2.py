@@ -45,6 +45,9 @@ def capture(game, folder=None):
     os.makedirs(games, exist_ok=True)
     with open(os.path.join(games, "game.txt"), "w") as f:
         f.write(f"cas {cas}\n")
+        if game == "abadia":
+            # La Abadia del Crimen leaves its last 16 KB unread during the load.
+            f.write("service no\n")
     result = subprocess.run(
         [sys.executable, "-I", os.path.join(ROOT, "tools", "capture.py"), games, machine,
          "--cas", CAS_DIR], capture_output=True, text=True)
@@ -111,6 +114,9 @@ class Step2(unittest.TestCase):
     def test_a_load_that_waits_for_a_key_continues(self):
         log = read_log(self.snap("abadia"))
         self.assertIn("continue space", log)
+
+    def test_service_no_leaves_out_the_tape_service(self):
+        self.assertEqual(read_state(self.snap("abadia"))["service"], "0")
 
     def test_a_second_capture_gives_the_same_snapshot(self):
         result, snap = capture("freddy")

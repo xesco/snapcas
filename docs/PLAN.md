@@ -77,7 +77,9 @@ except `ABADIA.CAS` on `basic/nms8250`, and check:
   for the files on `advanced/phc28s`.
 - That every kept page holds RAM and is in slot 0's page 3, in slot 1 or in the
   Carnivore2's subslot 2-2, and that the Carnivore2's mapper has 64 segments.
-- That `ABADIA.CAS` continues after a key, and `log.txt` names it.
+- That `ABADIA.CAS` continues after a key, and `log.txt` names it, and that its game
+  file's `service no` leaves out the tape service, because its last 16 KB stay
+  unread.
 - That a second capture of the same file gives the same snapshot.
 
 ## Step 3: build
@@ -85,8 +87,10 @@ except `ABADIA.CAS` on `basic/nms8250`, and check:
 This step writes `tools/build.py` for games without the tape service, and
 `src/service.asm` with the tail only. Python unit tests check the image header, the
 record table, the port-write order and the tail's bytes against the design's tables
-([Formats](DESIGN.md#formats)), on the snapshots of step 2, and check that
-`build.py` stops with an error when `SERVICE.BIN`'s version byte is wrong.
+([Formats](DESIGN.md#formats)), on the snapshots of step 2 and on one of
+`FREDDY.CAS` captured on `basic/nms8250`, for the V9938's port writes. They also
+check that `build.py` stops with an error when `SERVICE.BIN`'s version byte is
+wrong.
 
 ## Step 4: restorer and check
 

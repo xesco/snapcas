@@ -1,6 +1,6 @@
 # snapcas build and tests (docs/PLAN.md).
 #
-#   make        build bin/SNAPCAS.COM
+#   make        build bin/SNAPCAS.COM and bin/SERVICE.BIN
 #   make test   run the tests in openMSX
 #
 # The tests read the CAS files from CAS_DIR, by default tapes/, a folder that git
@@ -23,9 +23,13 @@ SJASMPLUS := $(OUT)/tools/sjasmplus
 NEXTOR    := $(DL)/nextor
 EMU_HOME  := $(OUT)/openmsx-home
 
-all: bin/SNAPCAS.COM
+all: bin/SNAPCAS.COM bin/SERVICE.BIN
 
 bin/SNAPCAS.COM: src/snapcas.asm $(SJASMPLUS)
+	mkdir -p bin
+	$(SJASMPLUS) --nologo --raw=$@ $<
+
+bin/SERVICE.BIN: src/service.asm $(SJASMPLUS)
 	mkdir -p bin
 	$(SJASMPLUS) --nologo --raw=$@ $<
 
@@ -47,7 +51,7 @@ $(EMU_HOME)/share/systemroms:
 	mkdir -p $(EMU_HOME)/share
 	ln -sfn $(SYSTEMROMS) $@
 
-test: bin/SNAPCAS.COM $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
+test: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) \
 	  python3 -I -m unittest discover -s tests -v
 

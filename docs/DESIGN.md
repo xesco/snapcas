@@ -35,7 +35,7 @@ in [PLAN.md](PLAN.md).
 | `out/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
 | `out/<machine>/<game>/check/` | `tools/check.py` | Screenshots and the check's report |
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
-| `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm`. It starts with a version byte and the offset of each part |
+| `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm` ([SERVICE.BIN](#servicebin)) |
 
 The `bin/` files are built with sjasmplus 1.24.0 and shipped. `<machine>` is a path
 below `machines/` without `.txt`, such as `basic/vg8020`. Each game is processed by
@@ -101,6 +101,7 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 | `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None |
 | `continue` | A key name that the capture tries before space and Return, to continue a load that waits for a key | None |
 | `snapshot` | `at` and a time, at which the capture takes the snapshot | Found by the capture |
+| `service` | `no` for a game that never reads the rest of its tape, though blocks of it stay unread. A game can read them only at its end, so `no` is for a game that someone has played to its end | Found by the capture |
 | `patch` | A place, the old bytes, `>`, the new bytes: `patch 1-x-3:0D31 CD E1 00 > CD E1 FC` | None |
 
 A place is a RAM page as `<ps>-<ss>-<page>:<offset>`, with the offset from the
@@ -114,9 +115,10 @@ from a CAS file's SHA-1.
 The repository ships a game file for each game of File-Hunter's MSX CAS collection
 in `games/`, named after its File-Hunter file name, with the `sha1` of its dumps.
 Its `side2` lines pair the Side A and Side B files of a game, its `continue` lines
-come from the key that the capture reports, and its `patch` lines from `check.py`
-and from traces of failed loads. It also ships these machine files, each checked
-with `check.py` and a single-load game:
+come from the key that the capture reports, its `service no` lines from games played
+to their end, and its `patch` lines from `check.py` and from traces of failed loads.
+It also ships these machine files, each checked with `check.py` and a single-load
+game:
 
 | File | Configuration |
 |---|---|
@@ -197,10 +199,11 @@ restarts more than 20 times. It performs the following steps:
    ROM's 19DDh to 1B44h.
 
 The game gets the tape service when the `TAPION` and `TAPIN` breakpoints fired and
-either side 1 is not read or the game file has `side2`. A load that waits for a
-choice that no key makes, such as Gauntlet's joystick choice of players, gets its
-snapshot at that screen after the key tries of step 5. The player chooses on the
-real machine, and the tape service supplies the rest.
+either side 1 is not read or the game file has `side2`, unless the game file has
+`service no`. A load that waits for a choice that no key makes, such as Gauntlet's
+joystick choice of players, gets its snapshot at that screen after the key tries of
+step 5. The player chooses on the real machine, and the tape service supplies the
+rest.
 
 ### RAM
 
@@ -543,14 +546,29 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 1. For each PSG register from 0 to 15, its number to port A0h and its value to port
    A1h, with register 7's bits 7 and 6 forced to 1 and 0, then `psgsel` to port A0h.
 2. PPI port C to port AAh.
-3. On a V9938: 0 to register 16, the 16 palette entries to port 9Ah, 2 bytes each,
-   then 32 to register 17, for auto-increment, and registers 32 to 45 to port 9Bh.
+3. On a V9938: 0 to register 16, the 16 palette entries to port 9Ah, 2 bytes each in
+   the order that the `VDP palette` debuggable holds them, red and blue first, then
+   32 to register 17, for auto-increment, and registers 32 to 45 to port 9Bh.
 4. VDP registers 0 to 7, or 0 to 23, to port 99h, as a value and 80h plus the
    register's number.
 5. The VRAM pointer to port 99h: its low byte, then its high bits with 40h for a
    write setup. A read setup writes the pointer minus 1, because the VDP reads ahead
    and advances the pointer. When the pointer's low 14 bits are 0, register 14 is
    written again first, with its value minus 1.
+
+### SERVICE.BIN
+
+`SERVICE.BIN` starts with a table of its parts, and `build.py` reads only the parts
+that it names:
+
+| Offset | Size | Field |
+|---|---|---|
+| 0 | 1 | Version: 1. `build.py` stops with an error on any other |
+| 1 | 1 | Number of parts |
+| 2 | 4 per part | Each part's offset and length in the file, 2 bytes each |
+
+Part 0 is the tail ([Tail](#tail)), with the operands that `build.py` and the
+restorer fill in set to 0.
 
 ### CAS data
 

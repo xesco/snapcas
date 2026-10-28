@@ -115,6 +115,7 @@ proc mapper_size {page} {
 #   ::S(headers)  the offsets of side 1's headers
 #   ::S(needed)   the end of the last block that the load must read
 #   ::S(side2)    1 when the game file has side2
+#   ::S(nosvc)    1 when the game file has service no
 #   ::S(keys)     [list time tcl] pairs, times from the load command
 #   ::S(lastkey)  the last keys time
 #   ::S(tries)    [list name tcl] pairs: the keys that may continue a load
@@ -378,7 +379,7 @@ proc vdp_quiet {} {
     return 1
 }
 proc step6 {} {
-    set ::st(service) [expr {$::st(tapion) > 0 && $::st(tapin) > 0 &&
+    set ::st(service) [expr {!$::S(nosvc) && $::st(tapion) > 0 && $::st(tapin) > 0 &&
                              (![side1_read] || $::S(side2))}]
     if {[reg IM] == 2} {
         set v [expr {[reg I] * 256 + 0xFF}]
