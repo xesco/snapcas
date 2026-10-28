@@ -80,6 +80,13 @@ The game file holds one `key value` pair per line. Only `cas` is required.
      key, and step 4 restarts. If not, the script reloads the saved state and takes
      the snapshot; the unread blocks are then loaded during play.
 
+A load that waits for a choice that the `pause` key cannot make, such as Gauntlet's
+choice of players and character with the joystick, therefore gets its snapshot at
+that screen. The player makes the choice on the real machine, and the tape service
+supplies the rest of the load
+([Games that load during play](#games-that-load-during-play)). The capture never
+needs a joystick, and the snapshot holds no choice that the player would make.
+
 The capture writes the snapshot to `snap/`:
 
 | File | Contents | `openMSX` source |
@@ -199,8 +206,6 @@ required `patch` line.
 
 ## Limits
 
-- A game that requires a joystick before its snapshot requires a person during the
-  capture, because `openMSX` cannot operate a joystick from a script.
 - A game that uses more mapper segments than the four mapped at the snapshot does
   not run.
 - Under MSX-DOS 1, the restorer runs only when page 3's slot holds the memory
