@@ -1,8 +1,8 @@
-# snapcas design
+# `snapcas` design
 
-snapcas starts a cassette game from disk on one real MSX. openMSX loads the game
+`snapcas` starts a cassette game from disk on one real MSX. openMSX loads the game
 from its CAS file, in its own cassette player, on a copy of the user's machine, and
-snapcas saves the machine's state when the game is ready. A program on the real
+`snapcas` saves the machine's state when the game is ready. A program on the real
 machine, the restorer, restores that state and transfers control to the game. A game
 that loads further data during play also receives a tape service, which supplies the
 remaining blocks of the CAS file.
@@ -50,7 +50,7 @@ The game file holds one `key value` pair per line. Only `cas` is required.
 `tools/capture.py` runs openMSX with the machine file's arguments and the script
 `tools/capture.tcl`. The script performs the following steps:
 
-1. Boots with SHIFT held, so that the disk system remains disabled and the machine
+1. Boots with `SHIFT` held, so that the disk system remains disabled and the machine
    starts BASIC as a cassette machine with these cartridges does. *To verify* with
    Nextor on a Carnivore2.
 2. Inserts the CAS file into the cassette player and types the load command that the
@@ -58,7 +58,7 @@ The game file holds one `key value` pair per line. Only `cas` is required.
    `RUN"CAS:"`.
 3. Presses the keys listed under `keys`.
 4. Counts the bytes that the game reads, with a breakpoint on the BIOS routine
-   TAPIN, and waits until the game has not read the tape for 10 seconds. It then
+   `TAPIN`, and waits until the game has not read the tape for 10 seconds. It then
    proceeds as follows:
    - If the game has read every block, the script takes the snapshot.
    - Otherwise, the script saves openMSX's state and presses the `pause` key. If the
@@ -96,7 +96,7 @@ snapshots taken one second apart.
 performs the following steps:
 
 1. Reads the image into free mapper segments, allocated with the DOS mapper routine
-   ALL_SEG.[^dos2] It stops with a message when the mapper is too small.
+   `ALL_SEG`.[^dos2] It stops with a message when the mapper is too small.
 2. Disables interrupts. From this point on, it calls neither DOS nor the BIOS.
 3. Writes the VRAM and VDP registers 0 to 7 through ports 98h and 99h, and PSG
    registers 0 to 13 through ports A0h and A1h.[^ports]
@@ -107,7 +107,7 @@ performs the following steps:
    then from page 1 while it writes pages 0, 2 and 3. It reads each page through a
    window: page 2 while it writes pages 0, 1 and 3, and page 0 while it writes page
    2. It sets each subslot register at FFFFh while that slot is selected in page
-   3,[^slots] and sets the subslot register of the snapshot's page 3 slot last.
+      3,[^slots] and sets the subslot register of the snapshot's page 3 slot last.
 6. Jumps to the tail, below the game's stack pointer, in the game's page 3 slot. The
    tail sets the slot register and the mapper registers, loads the CPU registers,
    sets the interrupt mode, enables interrupts if they were enabled at the snapshot,
@@ -120,19 +120,19 @@ The restorer installs the tape service only for a game with unread blocks or a
 
 | Part | Location | Function |
 |---|---|---|
-| T0 | A mapper segment that the game does not use, selected in page 0 in place of the BIOS ROM | A copy of the machine's BIOS in which the tape routines TAPION, TAPIN, TAPIOF and STMOTR[^tape] are replaced by the service's routines, as in CASGO (`src/tape.asm`, `src/t0.asm`) |
-| Tape data | Mapper segments | The image's tape data, 16381 bytes per segment, read through page 0 as CASGO's T0 reads it |
-| Entry in page 3 | SLTWRK, when the snapshot shows that area empty | Selects T0 in page 0, calls TAPION or TAPIN, and restores the game's slots, as CASGO's trampolines do |
-| H.PARD | FEB2h | Selects T0 in page 0 before each BASIC load[^tape] |
+| T0 | A mapper segment that the game does not use, selected in page 0 in place of the BIOS ROM | A copy of the machine's BIOS in which the tape routines `TAPION`, `TAPIN`, `TAPIOF` and `STMOTR`[^tape] are replaced by the service's routines, as in `CASGO` (`src/tape.asm`, `src/t0.asm`) |
+| Tape data | Mapper segments | The image's tape data, 16381 bytes per segment, read through page 0 as `CASGO`'s T0 reads it |
+| Entry in page 3 | `SLTWRK`, when the snapshot shows that area empty | Selects T0 in page 0, calls `TAPION` or `TAPIN`, and restores the game's slots, as `CASGO`'s trampolines do |
+| `H.PARD` | FEB2h | Selects T0 in page 0 before each BASIC load[^tape] |
 
 The service records the tape position as a block number, treating side 1's unread
 blocks and side 2's blocks as one tape:
 
 | Event | New position |
 |---|---|
-| TAPION finds the next header | The block that follows it |
-| TAPION reads past a side's last block | That side's first block |
-| TAPION is called while the `rewind` key is held | The first block of the current side |
+| `TAPION` finds the next header | The block that follows it |
+| `TAPION` reads past a side's last block | That side's first block |
+| `TAPION` is called while the `rewind` key is held | The first block of the current side |
 
 ## Scan
 
@@ -141,8 +141,8 @@ accesses the tape without going through T0:
 
 | Code | Pattern | Patch |
 |---|---|---|
-| A stub built with the tape's entry address | CASGO's `stub_build`, `stub_build_hl` and the loader family's build code | The high byte of the pushed entry address is changed to point to the entry in page 3 |
-| A call to the tape after the ROM is selected in page 0 | CASGO's `rom_back`, followed by `CALL 00E1h` or `CALL 00E4h` | The call is redirected to the entry in page 3 |
+| A stub built with the tape's entry address | `CASGO`'s `stub_build`, `stub_build_hl` and the loader family's build code | The high byte of the pushed entry address is changed to point to the entry in page 3 |
+| A call to the tape after the ROM is selected in page 0 | `CASGO`'s `rom_back`, followed by `CALL 00E1h` or `CALL 00E4h` | The call is redirected to the entry in page 3 |
 | A routine that reads the cassette signal | `IN A,(0A2h)` followed by a test of bit 7, in a loop | None; the scan lists the routine, and a `patch` line redirects its callers to the service |
 
 The scan reports each finding with its address and patch, and stops with an error
@@ -166,7 +166,7 @@ required `patch` line.
 | Restore a snapshot instead of emulating the tape for the game's loader | The loader runs once, in openMSX, so its slot code, stubs and checks require no changes |
 | Capture on a copy of the user's machine, with the disk system disabled | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
 | Install the tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
-| Scan both the snapshot and the unread blocks | Of 51 multi-load games in CASGO's corpus, 20 build stubs that T0 alone does not intercept |
+| Scan both the snapshot and the unread blocks | Of 51 multi-load games in `CASGO`'s corpus, 20 build stubs that T0 alone does not intercept |
 | Model the tape position with sides, a wrap and a rewind key | 41 of those 51 games read their blocks in order, without names, as from a real tape |
 | Verify later loads by the scan and by running each tape routine | Playing every game up to its later loads is not feasible |
 
@@ -185,11 +185,11 @@ required `patch` line.
 
 - MSX2 video: video RAM above 16 KB and VDP registers above 7.
 
-[^dos2]: ALL_SEG, through the jump table that EXTBIO returns: MSX-DOS 2 Program
+[^dos2]: `ALL_SEG`, through the jump table that `EXTBIO` returns: MSX-DOS 2 Program
     Interface Specification, section 5.2.
 [^ports]: VDP ports 98h and 99h, PSG ports A0h, A1h and A2h: MSX Red Book, chapter
     *to verify*.
 [^slots]: Slot register at port A8h, subslot register at FFFFh, which reads back
     inverted: MSX Red Book, chapter 1.
-[^tape]: TAPION 00E1h, TAPIN 00E4h, TAPIOF 00E7h, STMOTR 00F3h, H.PARD FEB2h: MSX Red
+[^tape]: `TAPION` 00E1h, `TAPIN` 00E4h, `TAPIOF` 00E7h, `STMOTR` 00F3h, `H.PARD` FEB2h: MSX Red
     Book, chapters 4 and 6.
