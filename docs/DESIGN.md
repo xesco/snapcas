@@ -394,7 +394,7 @@ on these events. The routines read the keyboard matrix through the PPI.
 |---|---|
 | `TAPION` or `TAPIN` reads past side 1's end | Side 2's start, as when the player turns the tape over; side 1's start when there is no side 2 |
 | `TAPION` or `TAPIN` reads past side 2's end | Side 2's start, as after a rewind |
-| `TAPION` is called while STOP is held without CTRL | The start of the current side |
+| `TAPION` is called while GRAPH is held | The start of the current side |
 | `TAPION` is called while SELECT is held | The start of the other side |
 
 ### Scan
@@ -452,6 +452,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register. Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave the ROM there at the snapshot: Moonwalker and Time Out |
 | Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games; 20 of those games build stubs that T0 alone does not intercept |
 | A tape with both sides, a wrap, and fixed rewind and flip keys | In 41 of those 51 games the unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
+| GRAPH as the rewind key, SELECT as the flip key | GRAPH alone types no character and BASIC ignores it, while STOP pauses a BASIC program and the function keys type text; SELECT only puts one character in the key buffer |
 
 ## Limits
 
