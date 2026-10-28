@@ -65,7 +65,7 @@ neither for a known game or a common machine:
 
 | Directory | Contents |
 |---|---|
-| `games/` | A game file for each tape of `CASGO`'s corpus, named after its File-Hunter file name, with its `sha1` and with the `side2`, `pause` and `patch` lines that the game needs, made by running the capture on each tape |
+| `games/` | A game file for each tape of File-Hunter's MSX CAS collection, named after its File-Hunter file name, with its `sha1` and with the `side2`, `pause` and `patch` lines that the game needs, made by running the capture on each tape |
 | `machines/basic/` | Common configurations: an MSX1 with 64 KB and a Carnivore2 (Philips VG-8020); an MSX2 with its own mapper and a floppy drive under MSX-DOS 2 (Philips NMS 8250); an MSX2 with a Sunrise IDE interface under Nextor |
 | `machines/advanced/` | Less common layouts: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 (Sanyo PHC-28S); an MSX1 with a MegaFlashROM SCC+ SD; an MSX2 whose slot 0 is expanded (Sony HB-F700P) |
 
@@ -82,10 +82,11 @@ file in `openMSX`, and the two must match.
 `tools/capture.tcl`. The script performs the following steps:
 
 1. Boots the machine with no disk, presses the `boot` keys, and waits for BASIC's
-   `Ok`. It then sets page 3 as `CASGO`'s stage 2 does: RET (C9h) in every hook from
-   FD9Ah to FFC9h, 00h at F37Dh, which some loaders read to refuse a disk system,
-   and zeros in `SLTATR` and `SLTWRK`.[^sys] It types `CLEAR200,&HF380`, which sets
-   BASIC's memory top to a cassette machine's.
+   `Ok`. It then removes the disk system from page 3: RET (C9h) in every hook from
+   FD9Ah to FFC9h, so that no interrupt reaches the disk system; 00h at F37Dh, which
+   some loaders read to refuse to run with a disk system; and zeros in `SLTATR` and
+   `SLTWRK`, so that no extension ROM claims them.[^sys] It types `CLEAR200,&HF380`,
+   which sets BASIC's memory top to a cassette machine's.
 2. Inserts the CAS file into the cassette player and types the load command that the
    first block's type requires: `BLOAD"CAS:",R`, `CLOAD` followed by `RUN`, or
    `RUN"CAS:"`.
@@ -166,16 +167,25 @@ mapper. It performs the following steps:
 ## Tape service
 
 The restorer installs the tape service only for a game with unread blocks or a
-`side2` file. T0 replaces the BIOS's tape code where the standard MSX BIOS has it,
-so `build.py` first checks `bios.bin` as `CASGO` checks the BIOS: the jump table's
-tape entries and `OUTDO`'s entry must point to the addresses that `CASGO`'s
-`bios_entries` lists. Otherwise it stops with an error.
+`side2` file. T0 replaces the BIOS's tape code at the addresses where the standard
+MSX BIOS has it, so `build.py` first checks `bios.bin`: each jump table entry in the
+table below must jump to its address. Otherwise it stops with an error.[^tape]
+
+| Entry | Routine | Address it must jump to |
+|---|---|---|
+| 00E1h | `TAPION` | 1A63h |
+| 00E4h | `TAPIN` | 1ABCh |
+| 00E7h | `TAPIOF` | 19E9h |
+| 00EAh | `TAPOON` | 19F1h |
+| 00EDh | `TAPOUT` | 1A19h |
+| 00F0h | `TAPOOF` | 19DDh, the start of the tape code |
+| 0018h | `OUTDO` | 1B45h, the end of the tape code |
 
 | Part | Location | Function |
 |---|---|---|
-| T0 | A mapper segment that the game does not use, selected in page 0 in place of the BIOS ROM | A copy of the machine's BIOS in which the tape routines `TAPION`, `TAPIN`, `TAPIOF` and `STMOTR`[^tape] are replaced by the service's routines, as in `CASGO` (`src/tape.asm`, `src/t0.asm`) |
-| Tape data | Mapper segments | The image's tape data, 16381 bytes per segment, read through page 0 as `CASGO`'s T0 reads it |
-| Entry in page 3 | `SLTWRK` when its 128 bytes are still zero in the snapshot, or else the game file's `entry` address; with neither, `build.py` stops with an error | Selects T0 in page 0, calls `TAPION` or `TAPIN`, and restores the game's slots, as `CASGO`'s trampolines do |
+| T0 | A mapper segment that the game does not use, selected in page 0 in place of the BIOS ROM | A copy of the machine's BIOS whose tape code, from 19DDh to 1B44h, is replaced by the service's routines for `TAPION`, `TAPIN`, `TAPIOF` and `STMOTR` |
+| Tape data | Mapper segments | The image's tape data, 16381 bytes per segment. `TAPIN` reads a byte by selecting the byte's segment in page 0, from code in T0, so the last 3 bytes of each segment hold the instructions that read the byte and select T0 again |
+| Entry in page 3 | `SLTWRK` when its 128 bytes are still zero in the snapshot, or else the game file's `entry` address; with neither, `build.py` stops with an error | Selects T0 in page 0, calls `TAPION` or `TAPIN`, and restores the game's slots |
 | `H.PARD` | FEB2h | Selects T0 in page 0 before each BASIC load[^tape] |
 
 The service records the tape position as a block number, treating side 1's unread
@@ -194,8 +204,8 @@ accesses the tape without going through T0:
 
 | Code | Pattern | Patch |
 |---|---|---|
-| A stub built with the tape's entry address | `CASGO`'s `stub_build`, `stub_build_hl` and the loader family's build code | The high byte of the pushed entry address is changed to point to the entry in page 3 |
-| A call to the tape after the ROM is selected in page 0 | `CASGO`'s `rom_back`, followed by `CALL 00E1h` or `CALL 00E4h` | The call is redirected to the entry in page 3 |
+| A stub built with the tape's entry address | `LD DE,00E1h / PUSH DE / LD DE,CDD9h / PUSH DE`, the same with 00EAh, and the same with HL in place of DE | The high byte of the pushed entry address is changed to point to the entry in page 3 |
+| A call to the tape after the ROM is selected in page 0 | `IN A,(0A8h) / AND 0F0h / OUT (0A8h),A`, which selects the ROM in pages 0 and 1, followed by `CALL 00E1h` or `CALL 00E4h` | The call is redirected to the entry in page 3 |
 | A routine that reads the cassette signal | `IN A,(0A2h)` followed by a test of bit 7, in a loop | None; the scan lists the routine, and a `patch` line redirects its callers to the service |
 
 The scan reports each finding with its address and patch, and stops with an error
@@ -216,10 +226,10 @@ required `patch` line.
 
 | Decision | Reason |
 |---|---|
-| Restore a snapshot instead of emulating the tape for the game's loader | The loader runs once, in `openMSX`, so its slot code, stubs and checks require no changes |
+| Restore a snapshot instead of emulating the tape while the game's own loader runs on the real machine | The loader runs once, in `openMSX`, so its slot code, stubs and checks require no changes |
 | Capture on a copy of the user's machine, with the disk system disabled | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
 | Install the tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
-| Scan both the snapshot and the unread blocks | Of 51 multi-load games in `CASGO`'s corpus, 20 build stubs that T0 alone does not intercept |
+| Scan both the snapshot and the unread blocks | Of 51 games that load during play, among the 1,653 files of File-Hunter's MSX CAS collection, 20 build stubs that T0 alone does not intercept |
 | Model the tape position with sides, a wrap and a rewind key | 41 of those 51 games read their blocks in order, without names, as from a real tape |
 | Verify later loads by the scan and by running each tape routine | Playing every game up to its later loads is not feasible |
 
@@ -245,8 +255,9 @@ required `patch` line.
     ports A0h, A1h and A2h: chapter 3. PPI port C at AAh: chapter 1.
 [^slots]: Slot register at port A8h, subslot register at FFFFh, which reads back
     inverted: MSX Red Book, chapter 1.
-[^tape]: `TAPION` 00E1h, `TAPIN` 00E4h, `TAPIOF` 00E7h, `STMOTR` 00F3h, `H.PARD` FEB2h: MSX Red
-    Book, chapters 4 and 6.
+[^tape]: The jump table entries of `TAPION`, `TAPIN`, `TAPIOF`, `TAPOON`, `TAPOUT`,
+    `TAPOOF`, `STMOTR` (00F3h) and `OUTDO`, the routines' addresses in the standard
+    BIOS, and the hook `H.PARD` at FEB2h: MSX Red Book, chapters 4 and 6.
 [^sys]: The hooks from FD9Ah to FFC9h, `SLTATR` at FCC9h, `SLTWRK` at FD09h and
     `HIMEM` at FC4Ah, whose value on a cassette machine is F380h: MSX Red Book,
     chapter 6.
