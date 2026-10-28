@@ -20,7 +20,7 @@ in [PLAN.md](PLAN.md).
 | DOS's segments | The segments in pages 0 to 3 when the restorer starts |
 | Image | `<GAME>.IMG`, the snapshot in the restorer's format ([Formats](#formats)) |
 | Worker | The part of the restorer that runs in page 1 or 2 while it changes the other pages |
-| Tail | The last 21 bytes of the restore, written below the game's stack pointer |
+| Tail | The restore's last code: 21 bytes written below the game's stack pointer |
 | T0 | A RAM copy of the BIOS's page 0 whose tape routines are the tape service's ([Tape service](#tape-service)) |
 | Service segment | A segment that holds T0 or tape data |
 
@@ -30,12 +30,12 @@ in [PLAN.md](PLAN.md).
 |---|---|---|
 | `machines/<machine>.txt` | A person, once per machine | How to start the machine in `openMSX` |
 | `games/<game>/game.txt` | A person or an LLM | The game's settings |
-| `games/<game>/snap/` | `tools/capture.py` | The snapshot |
-| `out/<game>/<GAME>.IMG` | `tools/build.py` | The image |
-| `out/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
-| `out/<game>/check/` | `tools/check.py` | Screenshots and the check's report |
+| `out/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
+| `out/<machine>/<game>/<GAME>.IMG` | `tools/build.py` | The image |
+| `out/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
+| `out/<machine>/<game>/check/` | `tools/check.py` | Screenshots and the check's report |
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
-| `bin/SERVICE.BIN`, `bin/SERVICE.SYM` | The developers | The tape service's routines, entries, entry code, reader and tail, from `src/service.asm`, with the symbols that `build.py` reads |
+| `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm`. It starts with a version byte and the offset of each part |
 
 The `bin/` files are built with sjasmplus 1.24.0 and shipped. `<machine>` is a path
 below `machines/` without `.txt`, such as `basic/vg8020`. Each game is processed by
@@ -71,7 +71,7 @@ boot "DefConfig" space
 | Line | Meaning |
 |---|---|
 | `openmsx` | The `openMSX` arguments that reproduce the machine |
-| `disk` | The command that inserts `check.py`'s disk image: `hda` for an IDE interface, `diska` for a floppy drive |
+| `disk` | The `openMSX` command that inserts `check.py`'s disk image, such as `hda` for an IDE interface or `diska` for a floppy drive |
 | `boot` | A text on the screen during boot and the key to press when it appears; one line per key, matched in order |
 
 `openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
@@ -158,13 +158,12 @@ restarts more than 20 times. It performs the following steps:
    - Each slot and subslot selected in a page, from write watchpoints on port A8h
      and on FFFFh.
 5. Polls bit 4 of PPI port C, the cassette motor (0 = on),[^ports] every 0.1
-   seconds. The wait begins when the motor stops or the player reaches the tape's
-   end (`cassetteplayer getpos` at least `getlength` minus 0.01), and ends 10
-   seconds later, but not before the last `keys` time. With `snapshot at`, the
-   capture instead waits for that time and goes to step 6. Otherwise it goes back
-   with the reverse recording to 1 second after the wait began, drops the events
-   logged after that moment, schedules again the `keys` that come after it, and
-   proceeds:
+   seconds. The wait ends when the motor has been off, or the player has been at the
+   tape's end (`cassetteplayer getpos` at least `getlength` minus 0.01), for 10
+   seconds, and the last `keys` time has passed. With `snapshot at`, the capture
+   instead waits for that time and goes to step 6. Otherwise it goes back with the
+   reverse recording to 1 second into those 10 seconds, drops the events logged
+   after that moment, schedules again the `keys` that come after it, and proceeds:
    - If side 1 is read, it goes to step 6. Side 1 is read when the `TAPION` and
      `TAPIN` breakpoints fired and every block after the tape position is under 16
      bytes or equal to a block before it.
@@ -176,35 +175,38 @@ restarts more than 20 times. It performs the following steps:
 6. Takes the snapshot when the CPU next accepts an interrupt while no VDP command is
    running (status register 2, bit 0, is 0) and both VDP latches are empty. A probe
    breakpoint on `z80.acceptIRQ` marks the acceptance, and a breakpoint at the
-   handler's address, 0038h in interrupt mode 1 or the word at I × 256 + FFh in mode
-   2, takes the snapshot there: the return address is pushed and interrupts are off.
-   When no such interrupt comes within 1 second, it takes the snapshot where the CPU
-   is. It stops with an error when the CPU is then halted, or when the game gets the
-   tape service and the program counter is in the main ROM's 19DDh to 1B44h.
+   handler's address, 0038h in interrupt modes 0 and 1 or the word at I × 256 + FFh
+   in mode 2, takes the snapshot there: the return address is pushed and interrupts
+   are off. When no such interrupt comes within 1 second, it takes the snapshot
+   where the CPU is. It stops with an error when the CPU is then halted, or when the
+   game gets the tape service and the program counter is in the main ROM's 19DDh to
+   1B44h.
 
-The game gets the tape service when the BIOS read part of the tape and side 1 is not
-read or the game file has `side2`. A load that waits for a choice that no key makes,
-such as Gauntlet's joystick choice of players, therefore gets its snapshot at that
-screen; the player chooses on the real machine, and the tape service supplies the
-rest.
+The game gets the tape service when the `TAPION` and `TAPIN` breakpoints fired and
+either side 1 is not read or the game file has `side2`. A load that waits for a
+choice that no key makes, such as Gauntlet's joystick choice of players, gets its
+snapshot at that screen after the key tries of step 5; the player chooses on the
+real machine, and the tape service supplies the rest.
 
 ### RAM
 
 The capture reads memory through the CPU's view, the `memory` debuggable, after it
 selects a slot in a page with `debug write` on port A8h and, in a slot that `EXPTBL`
-marks expanded, on FFFFh, and writes both back afterwards.[^sys] This works for
-every device, including those that expand their slot themselves, such as the
-Carnivore2. The snapshot keeps each page that the game selected at step 3, during
-the load or at the snapshot, and that holds RAM. The capture reads these pages
-first, then tests them, so that a write that switches a ROM's bank changes nothing
-it keeps:
+marks expanded, on FFFFh while page 3 selects that slot, and writes both back
+afterwards.[^sys] This works for every device, including those that expand their
+slot themselves, such as the Carnivore2. The snapshot keeps each page that holds RAM
+and was selected at step 3, during the load or at the snapshot. The capture reads
+these pages first and tests them afterwards, so a write that switches a ROM's bank
+or overwrites a segment changes nothing it keeps:
 
 - A page holds RAM when the byte at its first address takes a written value and its
-  complement; the capture writes the byte back.
-- A RAM page is in a mapper when a marker byte that it writes there changes when
-  another value is written to the page's mapper register; the capture restores both.
-- The mapper's size is the lowest power of 2, n, for which selecting segment n shows
-  segment 0's marker. The page's segment is the mapper register's value modulo n.
+  complement.
+- A RAM page is in a mapper when, with its mapper register set to two values in
+  turn, a marker byte written at its first address under each value reads back under
+  that value.
+- The mapper's size comes from the count that the restorer uses under MSX-DOS 1
+  ([Restorer](#restorer), step 2). A page's segment is its mapper register's value
+  modulo that size.
 
 ### Snapshot files
 
@@ -221,8 +223,8 @@ it keeps:
 |---|---|
 | `af`, `bc`, `de`, `hl`, `af2`, `bc2`, `de2`, `hl2`, `ix`, `iy`, `sp`, `pc`, `i`, `im`, `iff` | `reg` |
 | `a8`, `ppic` | `debug read` on ports A8h and AAh |
-| `sub0` to `sub3`, `-` when not expanded | The byte at FFFFh, inverted, read while page 3 selects that slot |
-| `fc` to `ff`, `-` without a mapper | `MSX Memory Mapper I/O`, modulo the mapper's size |
+| `sub0` to `sub3`, `-` when not expanded | For a slot that `EXPTBL` marks expanded, the byte at FFFFh, inverted, read while page 3 selects that slot |
+| `fc` to `ff`, `-` without a mapper | `MSX Memory Mapper I/O`: the values written, which each mapper masks to its size |
 | `vdp0` to `vdp23`, `vdp32` to `vdp45` | `VDP regs`; only 0 to 7 with an MSX1 VDP |
 | `pal0` to `pal15` | `VDP palette` |
 | `vramptr` | `VRAM pointer`, 14 bits, with bits 14 to 16 from register 14 |
@@ -235,7 +237,7 @@ it keeps:
 `tools/build.py` writes the image ([Formats](#formats)). It:
 
 - Stores each 16 KB block of `vram.bin`, as a block of zeros when it holds only
-  zeros.
+  zeros, and each RAM page, once for a segment that two pages select.
 - Turns the PSG, PPI and VDP state into a list of port writes, in the order that the
   restorer performs them ([Port writes](#port-writes)).
 - Writes the tail, from `SERVICE.BIN`, into the 21 bytes below the stack pointer. At
@@ -244,10 +246,14 @@ it keeps:
   FFFFh, or are not in a RAM page that the snapshot keeps.
 - With the tape service, builds T0 and the tape segments from `rom.bin`, the CAS
   files and `SERVICE.BIN`, writes the entries, the entry code and the reader into
-  the game's page 3, runs the scan, and applies the scan's patches and the `patch`
-  lines ([Tape service](#tape-service)). It stops with an error when FCC9h to FD88h
-  are not zero at the snapshot, or the tape needs more than 64 segments.
-- Prints the number of mapper segments that the image requires.
+  the game's page 3, with the snapshot's value of mapper register FCh at FD0Bh, runs
+  the scan, and applies the scan's patches and the `patch` lines
+  ([Tape service](#tape-service)). It stops with an error when FCC9h to FD88h are
+  not zero at the snapshot, or the tape needs more than 64 segments.
+- Prints the most mapper segments that the image can require.
+
+It stops with an error when the version byte of `SERVICE.BIN` is not the one it
+expects.
 
 ## Restorer
 
@@ -259,7 +265,8 @@ writes the mapper registers, and DOS's segments are 3, 2, 1 and 0.[^dos2] It
 performs the following steps, and until step 4 it can stop with a message and return
 to DOS:
 
-1. Opens `<GAME>.IMG`, whose name DOS has placed in the FCB at 005Ch, reads its
+1. Opens `<GAME>.IMG`, whose name DOS has placed in the FCB at 005Ch, with the
+   extension set to IMG; without a name, it prints its usage. It reads the image's
    first 4,096 bytes with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`,[^fcb]
    and checks:
    - That `RAMAD0` to `RAMAD3` name one slot, DOS's mapper.[^grauw]
@@ -281,7 +288,8 @@ to DOS:
      page 1 or 2, goes straight into it.
    - Each other RAM page of DOS's mapper gets a holding segment, copied into its own
      segment in step 6.
-   - Each service segment and the worker get one segment each.
+   - Each service segment gets one segment, and so does the worker, which the
+     restorer copies into its segment.
 
    It stops when there are too few, naming the segments needed and free.
 3. Reads the records in this order, through the FCB's random record field: the RAM
@@ -304,17 +312,19 @@ to DOS:
    - A service segment or a RAM page of DOS's mapper is read into its segment
      through page 1 or 2.
 
-   As the records arrive, it writes into them the values that depend on the real
-   machine:
+   As the records arrive, it fills in the values that depend on the real machine, in
+   the records and in the registers that step 6 writes:
    - In the tail: the worker's page's mapper register and its value, and the slot
      register ([Tail](#tail)).
    - With the tape service, in T0 at 1B04h: T0's segment, then the tape segments; in
      the game's page 3 at FD09h: DOS's mapper's slot ID, and at FD0Ah: T0's segment.
+   - With the tape service, when DOS's mapper is in an expanded slot, DOS's mapper's
+     subslot in the page 0 bits of that slot's subslot register, and in `SLTTBL` in
+     the game's page 3, so that the entry code can select T0.
    - With the tape service, when the snapshot's page 0 selects the main ROM and no
      RAM page kept for page 0 is in DOS's mapper, T0 replaces the ROM: page 0's slot
-     becomes DOS's mapper, mapper register FCh T0's segment, and, in an expanded
-     slot, the subslot register's page 0 bits DOS's mapper's subslot, also in
-     `SLTTBL` in the game's page 3.
+     becomes DOS's mapper, and mapper register FCh and the byte at FD0Bh become T0's
+     segment.
 4. Waits until `JIFFY` has advanced by 180, so that a floppy drive's motor stops,
    then disables interrupts. From this point on, it calls neither DOS nor the BIOS.
 5. Performs the port writes.
@@ -338,7 +348,7 @@ The tape service keeps the tape in service segments, and has these parts:
 | T0 | A service segment | The BIOS's page 0 with the service's routines from 19DDh to 1B44h |
 | Tape data | Service segments | Side 1, padded with zeros to a multiple of 8 bytes, then side 2 |
 | Entries | FCE1h, FCE4h, FCE7h, in `SLTATR` | Jumps to `TAPION`, `TAPIN` and `TAPIOF` for code that goes around T0 |
-| Entry code | `SLTWRK`, from FD09h | Selects T0 in page 0, calls the routine, and selects the game's page 0 again |
+| Entry code | `SLTWRK`, from FD0Ch, after its data at FD09h to FD0Bh | Selects T0 in page 0, calls the routine, and selects the game's page 0 again |
 | Reader | `SLTWRK` | `OUT (C),D / LD E,(HL) / OUT (C),B / RET`: reads a tape byte |
 
 `build.py` builds T0 from `rom.bin`, so it first checks that each jump table entry
@@ -374,8 +384,8 @@ is held.
 segment and B T0's segment, the reader selects the tape segment in page 0, reads the
 byte at HL into E, and selects T0 again. The entry code disables interrupts,
 switches to its own stack in `SLTWRK`, selects DOS's mapper and T0 in page 0, calls
-the routine, and selects the game's page 0, mapper register FCh and stack again. It
-returns with interrupts off, except after `TAPIOF`.
+the routine, and selects the game's page 0 and stack again, with mapper register FCh
+set to the value at FD0Bh. It returns with interrupts off, except after `TAPIOF`.
 
 The tape position starts where the game stopped reading at the snapshot, and moves
 on these events. The routines read the keyboard matrix through the PPI.
@@ -390,8 +400,8 @@ on these events. The routines read the keyboard matrix through the PPI.
 ### Scan
 
 With the tape service, `build.py` scans the snapshot's RAM pages and the unread
-blocks for code that reaches the tape without going through T0, applies the patches,
-and lists each finding and patch in `scan.txt`:
+blocks of both sides for code that reaches the tape without going through T0,
+applies the patches, and lists each finding and patch in `scan.txt`:
 
 | Code | Bytes | Patch |
 |---|---|---|
@@ -417,9 +427,8 @@ report to `check/report.txt`:
    compares the machine with the snapshot: the kept RAM pages, the stored VRAM
    blocks and the registers must be equal. The exceptions are the tail's bytes,
    FCC9h to FD88h, FFFFh in an expanded slot, the patched bytes, R, PSG register 7's
-   bits 7 and 6, and, when T0 replaces the ROM, page 0's slot, mapper register FCh,
-   the subslot register's page 0 bits and `SLTTBL`. A difference or a timeout fails
-   the check.
+   bits 7 and 6, and the values that restorer step 3 changes for the tape service. A
+   difference or a timeout fails the check.
 2. The game runs for 60 seconds, with a screenshot every 10 seconds in `check/`, and
    a breakpoint on each scan finding in a kept RAM page reports which findings the
    game executes. This point only reports.
@@ -455,6 +464,9 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 - A game with the tape service runs only on a machine whose BIOS keeps its tape code
   where the standard MSX BIOS does, only if it leaves FCC9h to FD88h unused, and not
   when its page 0 RAM is in DOS's mapper's primary slot with another subslot.
+- With the tape service, the entries' bytes in `SLTATR` mark extension ROMs that do
+  not exist, so a BASIC program that uses `CALL`, or a device that BASIC does not
+  know, fails.
 - A game that reads the tape with its own code gets no tape service, so it runs only
   if it loads in a single pass.
 - Code that selects the BIOS ROM in page 0 and calls the tape in a way that the scan
@@ -529,8 +541,9 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 4. VDP registers 0 to 7, or 0 to 23, to port 99h, as a value and 80h plus the
    register's number.
 5. The VRAM pointer to port 99h: its low byte, then its high bits with 40h for a
-   write setup. A read setup writes the pointer minus 1, borrowing from register 14,
-   because the VDP reads ahead and advances the pointer.
+   write setup. A read setup writes the pointer minus 1, because the VDP reads ahead
+   and advances the pointer; when the pointer's low 14 bits are 0, register 14 is
+   written again first, with its value minus 1.
 
 ### CAS data
 
