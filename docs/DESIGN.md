@@ -85,8 +85,9 @@ The capture writes the snapshot to `snap/`:
 | File | Contents | `openMSX` source |
 |---|---|---|
 | `ram/<ps>-<ss>-<page>.bin` | 16 KB for each page that holds RAM, by primary slot, subslot and page | The `slotted memory` debuggable; a page holds RAM when its device in `slotmap` is RAM or a memory mapper |
-| `vram.bin` | 16 KB of video RAM | `VRAM` |
-| `state.txt` | CPU registers, interrupt mode and state, slot register, subslot registers, mapper registers, VDP registers 0 to 7, PSG registers 0 to 13, and the number of bytes read | `reg` for the CPU; `debug read` on `MapperIO`, `VDP regs` and `PSG regs`; for each expanded slot, the byte at FFFFh, inverted, read while a `debug write` to port A8h selects that slot in page 3 |
+| `bios.bin` | 16 KB: page 0 of the main ROM, the slot that `EXPTBL` names | The `slotted memory` debuggable |
+| `vram.bin` | All of video RAM: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938 | `VRAM`; its size gives the VDP type |
+| `state.txt` | CPU registers, interrupt mode and state, slot register, subslot registers, mapper registers, PPI port C, VDP type, VDP registers (0 to 7 with an MSX1 VDP, 0 to 23 and the 16 palette entries with a V9938), PSG registers 0 to 13, and the number of bytes read | `reg` for the CPU; `debug read` on `MapperIO`, `VDP regs`, `VDP palette`, `PSG regs` and port AAh; for each expanded slot, the byte at FFFFh, inverted, read while a `debug write` to port A8h selects that slot in page 3 |
 
 ## Image
 
@@ -94,8 +95,8 @@ The capture writes the snapshot to `snap/`:
 
 | Part | Size | Contents |
 |---|---|---|
-| Header | 256 bytes | Signature `SNAPCAS1`, the values of `state.txt`, the number of RAM pages, a flag for the tape service, and the length of the tape data |
-| VRAM | 16 KB | `vram.bin` |
+| Header | 256 bytes | Signature `SNAPCAS1`, the values of `state.txt`, the VRAM size, the number of RAM pages, a flag for the tape service, and the length of the tape data |
+| VRAM | 16, 64 or 128 KB | `vram.bin` |
 | RAM pages | 4 bytes and 16 KB each | Primary slot, subslot (FFh when the slot is not expanded), page, mapper segment (FFh when the page is not in a mapper), then the page's contents, with the `patch` lines and the scan's patches applied |
 | Tape | Remainder of the file | Present only with the tape service: the unread blocks of side 1, then those of side 2, each with its CAS header |
 
@@ -106,14 +107,23 @@ snapshots taken one second apart.
 
 ## Restorer
 
-`<GAME>.COM` runs under Nextor or MSX-DOS 2 and requires a memory mapper. It
-performs the following steps:
+`<GAME>.COM` runs under MSX-DOS 1, MSX-DOS 2 or Nextor, and requires a memory
+mapper. It performs the following steps:
 
-1. Reads the image into free mapper segments, allocated with the DOS mapper routine
-   `ALL_SEG`.[^dos2] It stops with a message when the mapper is too small.
+1. Reads the image with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`, which
+   every MSX-DOS version has,[^fcb] into mapper segments. Under MSX-DOS 2 and Nextor
+   it allocates them with the mapper routine `ALL_SEG`.[^dos2] Under MSX-DOS 1,
+   which uses only the four segments it maps, it uses the segments above them, in
+   the mapper in page 3's slot, and counts them by writing a mark into each one's
+   first byte through page 2 and reading the marks back. It stops with a message
+   when the mapper is too small.
 2. Disables interrupts. From this point on, it calls neither DOS nor the BIOS.
-3. Writes the VRAM and VDP registers 0 to 7 through ports 98h and 99h, and PSG
-   registers 0 to 13 through ports A0h and A1h.[^ports]
+3. Writes the PSG registers 0 to 13 through ports A0h and A1h, PPI port C through
+   port AAh,[^ports] and the video state, by VDP type:
+   - MSX1 VDP: the 16 KB of VRAM and registers 0 to 7, through ports 98h and 99h.
+   - V9938: the VRAM through port 98h, with register 14 selecting each 16 KB block,
+     then registers 0 to 23 through port 99h and the palette through port
+     9Ah.[^v9938]
 4. If the game uses the tape service, builds T0 and installs the service
    ([Tape service](#tape-service)).
 5. Copies each RAM page to its slot, subslot, page and mapper segment. The copier
@@ -130,7 +140,10 @@ performs the following steps:
 ## Tape service
 
 The restorer installs the tape service only for a game with unread blocks or a
-`side2` file.
+`side2` file. T0 replaces the BIOS's tape code where the standard MSX BIOS has it,
+so `build.py` first checks `bios.bin` as `CASGO` checks the BIOS: the jump table's
+tape entries and `OUTDO`'s entry must point to the addresses that `CASGO`'s
+`bios_entries` lists. Otherwise it stops with an error.
 
 | Part | Location | Function |
 |---|---|---|
@@ -191,18 +204,23 @@ required `patch` line.
   capture, because `openMSX` cannot operate a joystick from a script.
 - A game that uses more mapper segments than the four mapped at the snapshot does
   not run.
+- Only the PSG's sound is restored. A game that plays music on another sound chip,
+  such as the MSX-MUSIC of a Carnivore2 or an FM-PAC, at the snapshot moment is
+  silent on that chip until the game writes to it again.
+- A game that needs the tape service runs only on a machine whose BIOS keeps its
+  tape code where the standard MSX BIOS does.
 - A program that requires the cassette signal itself, such as Head Alignment Kit,
   does not run. A game that reads the signal only to build bytes requires a `patch`
   line.
 
 ## Not in the first version
 
-- MSX2 video: video RAM above 16 KB and VDP registers above 7.
+- MSX2+ and turbo R: the V9958's registers above 23 and the turbo R's R800 mode.
 
 [^dos2]: `ALL_SEG`, through the jump table that `EXTBIO` returns: MSX-DOS 2 Program
     Interface Specification, section 5.2.
 [^ports]: VDP ports 98h and 99h, and VDP registers 0 to 7: MSX Red Book, chapter 2. PSG
-    ports A0h, A1h and A2h: chapter 3.
+    ports A0h, A1h and A2h: chapter 3. PPI port C at AAh: chapter 1.
 [^slots]: Slot register at port A8h, subslot register at FFFFh, which reads back
     inverted: MSX Red Book, chapter 1.
 [^tape]: `TAPION` 00E1h, `TAPIN` 00E4h, `TAPIOF` 00E7h, `STMOTR` 00F3h, `H.PARD` FEB2h: MSX Red
@@ -210,3 +228,7 @@ required `patch` line.
 [^sys]: The hooks from FD9Ah to FFC9h, `SLTATR` at FCC9h, `SLTWRK` at FD09h and
     `HIMEM` at FC4Ah, whose value on a cassette machine is F380h: MSX Red Book,
     chapter 6.
+[^v9938]: V9938 registers, register 14 for VRAM above 16 KB, and the palette port 9Ah:
+    MSX2 Technical Handbook, chapter 4.
+[^fcb]: `_FOPEN` 0Fh, `_SETDTA` 1Ah and `_RDBLK` 27h, the FCB functions of MSX-DOS 1
+    that MSX-DOS 2 keeps: MSX-DOS 2 Function Codes Specification.
