@@ -47,8 +47,8 @@ One `key value` per line. Only `cas` is required.
 
 ## Capture
 
-`tools/capture.py` runs openMSX with the machine file's arguments and
-`tools/capture.tcl`, which does this:
+`tools/capture.py` runs openMSX with the machine file's arguments and the script
+`tools/capture.tcl`. The script performs the following steps:
 
 1. Boots with SHIFT held, so the disk system stays off and the machine starts BASIC
    as a cassette machine with these cartridges does. *To verify* with Nextor on a
@@ -89,7 +89,8 @@ free: when the bytes there differ between two snapshots taken a second apart.
 
 ## Restorer
 
-`<GAME>.COM` runs under Nextor or MSX-DOS 2 with a memory mapper. It:
+`<GAME>.COM` runs under Nextor or MSX-DOS 2 and requires a memory mapper. It
+performs the following steps:
 
 1. Reads the image into free mapper segments, which it takes with the DOS mapper
    routine ALL_SEG.[^dos2] It stops with a message when the mapper is too small.
