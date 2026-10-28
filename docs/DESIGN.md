@@ -458,24 +458,18 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 ## Limits
 
 - A game that uses more mapper segments than the four mapped at the snapshot does
-  not run.
+  not run. Of 204 tapes of the collection probed in `openMSX`, 2 write the mapper
+  registers, one of them to select segment 10h.
 - DOS's four pages must be in one memory mapper, with enough free segments for the
-  image's holding and service segments and the worker. Under MSX-DOS 1, DOS must be
-  in segments 3 to 0, as the MSX2 BIOS and Nextor set them.
-- The restorer needs a page 1 or 2 that selects DOS's mapper at the end.
-- A game with the tape service runs only on a machine whose BIOS keeps its tape code
-  where the standard MSX BIOS does, only if it leaves FCC9h to FD88h unused, and not
-  when its page 0 RAM is in DOS's mapper's primary slot with another subslot.
-- With the tape service, the entries' bytes in `SLTATR` mark extension ROMs that do
-  not exist, so a BASIC program that uses `CALL`, or a device that BASIC does not
-  know, fails.
+  image's holding and service segments and the worker. A game with a long tape needs
+  a large mapper: Moonwalker's 236 KB tape does not fit in an NMS 8250's 128 KB.
+- A game with the tape service runs only if it leaves FCC9h to FD88h unused. Of the
+  204 probed tapes, 20 write there.
 - A game that reads the tape with its own code gets no tape service, so it runs only
   if it loads in a single pass.
-- Code that selects the BIOS ROM in page 0 and calls the tape in a way that the scan
-  does not recognize does not reach the tape service.
 - A snapshot taken without an interrupt overwrites the 21 bytes below the stack
-  pointer with the tail.
-- MSX2+ and turbo R are not supported: the V9958's registers above 23 and the R800.
+  pointer with the tail. Of the 204 probed tapes, 9 run with interrupts off after
+  their load, among them Freddy Hardest and Moonwalker.
 
 ## Formats
 
