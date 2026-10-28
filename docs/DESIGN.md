@@ -39,7 +39,7 @@ lines:
 |---|---|---|
 | `openmsx` | `openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2` | The `openMSX` arguments that reproduce the machine, with its cartridges in the same slots |
 | `disk` | `disk hda` | The `openMSX` command that inserts the disk image of `check.py`: `hda` for an IDE interface, such as the Carnivore2's, or `diska` for a floppy drive |
-| `boot` | `boot 2 esc` | A key pressed at a time in seconds after power-on, to pass a cartridge's boot menu, such as the Carnivore2's; one line per key |
+| `boot` | `boot "Carnivore 2 MFC" esc` | A key pressed when a text appears on the screen during boot, to pass a cartridge's boot menu, such as the Carnivore2's. The capture reads the screen with `openMSX`'s `get_screen`, so the menu must be in a text mode. One line per key, matched in order |
 
 ## Game file
 
@@ -53,9 +53,28 @@ The game file holds one `key value` pair per line. Only `cas` is required.
 | `pause` | `return` | The key that the capture presses when the load waits for a key | `space` |
 | `snapshot` | `at 120` | The time of the snapshot, in place of the moment the capture determines | Determined by the capture |
 | `rewind` | `graph` | The key that the player holds to rewind the tape | `stop` |
+| `sha1` | `d9aaa549…` | The SHA-1 of the CAS file that the game file was made for. When the user's CAS file differs and the game file has `patch` lines, `build.py` stops with an error, because a patch fits only one dump | None |
 | `entry` | `F000` | The address of the tape service's entry in page 3, when the game uses `SLTWRK` | `SLTWRK` |
 | `patch` | `8D31 CD E1 00 > CD E1 FC` | A change to the snapshot's RAM: address, old bytes, new bytes | None |
 | `probe` | `8D31 hl=9000 de=0010` | A tape routine that `check.py` runs, with its register values | The routines that the scan finds |
+
+## Shipped files
+
+The repository ships game files and machine files, so that a user needs to write
+neither for a known game or a common machine:
+
+| Directory | Contents |
+|---|---|
+| `games/` | A game file for each tape of `CASGO`'s corpus, named after its File-Hunter file name, with its `sha1` and with the `side2`, `pause` and `patch` lines that the game needs, made by running the capture on each tape |
+| `machines/basic/` | Common configurations: an MSX1 with 64 KB and a Carnivore2 (Philips VG-8020); an MSX2 with its own mapper and a floppy drive under MSX-DOS 2 (Philips NMS 8250); an MSX2 with a Sunrise IDE interface under Nextor |
+| `machines/advanced/` | Less common layouts: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 (Sanyo PHC-28S); an MSX1 with a MegaFlashROM SCC+ SD; an MSX2 whose slot 0 is expanded (Sony HB-F700P) |
+
+`check.py` checks each shipped machine file with a reference game. A machine file
+must list the cartridges in the slots that they occupy on the real machine. To
+confirm it, the user runs `SLOTS.COM`, built from `src/slots.asm`, on the real
+machine: it prints the slot register, `EXPTBL` and, for each slot, whether it is
+expanded and which pages hold RAM. `check.py` prints the same output for the machine
+file in `openMSX`, and the two must match.
 
 ## Capture
 
