@@ -72,18 +72,18 @@ boot "DefConfig" space
 |---|---|
 | `openmsx` | The `openMSX` arguments that reproduce the machine |
 | `disk` | The `openMSX` command that inserts `check.py`'s disk image, such as `hda` for an IDE interface or `diska` for a floppy drive |
-| `boot` | A text on the screen during boot and the key to press when it appears; one line per key, matched in order |
+| `boot` | A text on the screen during boot and the key to press when it appears. Each key has its own line, matched in order |
 
 `openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
 the `-ext` options sets the slots, and it must match the real machine's. `boot`
-lines pass a cartridge's boot menu, such as the Carnivore2's; the tools read the
+lines pass a cartridge's boot menu, such as the Carnivore2's. The tools read the
 screen with `get_screen`, so such a menu must be in a text mode.
 
 ## Game file
 
 A game file holds one setting per line: a key, a space and a value. A line that
 starts with `#` is a comment, and blank lines are ignored. Times are decimal
-emulated seconds from the moment the load command is typed; addresses and bytes are
+emulated seconds from the moment the load command is typed. Addresses and bytes are
 hexadecimal. Only `cas` is required. This example is for Gauntlet, which loads its
 levels from the tape's second side:
 
@@ -99,7 +99,7 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 | `side2` | The CAS file of side 2 | None |
 | `sha1` | The SHA-1 of `cas`, then that of `side2` | None |
 | `name` | `<GAME>`, up to 8 letters and digits | The folder name in upper case, cut to 8 letters and digits |
-| `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types; one press per line | None |
+| `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None |
 | `continue` | A key name that the capture tries before space and Return, to continue a load that waits for a key | None |
 | `snapshot` | `at` and a time, at which the capture takes the snapshot | Found by the capture |
 | `patch` | A place, the old bytes, `>`, the new bytes: `patch 1-x-3:0D31 CD E1 00 > CD E1 FC` | None |
@@ -141,12 +141,13 @@ restarts more than 20 times. It performs the following steps:
    keeps the PSG register selected last, boots the machine with no disk, presses the
    `boot` keys, and waits for BASIC's `Ok`. It stops with an error unless the ROM's
    byte at 002Dh is 0 (MSX1) or 1 (MSX2).
-2. Removes the disk system from page 3 with `debug write`: RET (C9h) in every hook
-   from FD9Ah to FFC9h and at `EXTBIO`, `DISINT` and `ENAINT`, so that nothing calls
-   the disk system; 00h at F37Dh, which some loaders read to refuse to run with a
-   disk system; and zeros from FCC9h to FD88h, `SLTATR` and `SLTWRK`, so that no
-   extension ROM claims them and the tape service can use them. It types
-   `CLEAR200,&HF380`, which sets `HIMEM` to a cassette machine's F380h.
+2. Removes the disk system from page 3 with `debug write`. It writes RET (C9h) in
+   every hook from FD9Ah to FFC9h and at `EXTBIO`, `DISINT` and `ENAINT`, so that
+   nothing calls the disk system. It writes 00h at F37Dh, which some loaders read to
+   refuse to run with a disk system. It writes zeros from FCC9h to FD88h, `SLTATR`
+   and `SLTWRK`, so that no extension ROM claims them and the tape service can use
+   them. It then types `CLEAR200,&HF380`, which sets `HIMEM` to a cassette machine's
+   F380h.
 3. Inserts the CAS file of side 1 into the cassette player, notes the slots selected
    in each page, and types the load command for the first header's type
    ([CAS data](#cas-data)): `BLOAD"CAS:",R`, `CLOAD` followed by `RUN`, or
@@ -185,7 +186,7 @@ restarts more than 20 times. It performs the following steps:
 The game gets the tape service when the `TAPION` and `TAPIN` breakpoints fired and
 either side 1 is not read or the game file has `side2`. A load that waits for a
 choice that no key makes, such as Gauntlet's joystick choice of players, gets its
-snapshot at that screen after the key tries of step 5; the player chooses on the
+snapshot at that screen after the key tries of step 5. The player chooses on the
 real machine, and the tape service supplies the rest.
 
 ### RAM
@@ -225,7 +226,7 @@ overwrites a segment changes nothing it keeps:
 | `a8`, `ppic` | `debug read` on ports A8h and AAh |
 | `sub0` to `sub3`, `-` when not expanded | For a slot that `EXPTBL` marks expanded, the byte at FFFFh, inverted, read while page 3 selects that slot |
 | `fc` to `ff`, `-` without a mapper | `MSX Memory Mapper I/O`: the values written, which each mapper masks to its size |
-| `vdp0` to `vdp23`, `vdp32` to `vdp45` | `VDP regs`; only 0 to 7 with an MSX1 VDP |
+| `vdp0` to `vdp23`, `vdp32` to `vdp45` | `VDP regs`, which holds only 0 to 7 with an MSX1 VDP |
 | `pal0` to `pal15` | `VDP palette` |
 | `vramptr` | `VRAM pointer`, 14 bits, with bits 14 to 16 from register 14 |
 | `vramwrite` | `VRAM access status`: 1 after a write setup, 0 after a read setup |
@@ -260,12 +261,12 @@ expects.
 `SNAPCAS.COM` runs under MSX-DOS 1, MSX-DOS 2 or Nextor. Its code and stack stay
 below 4000h, and it holds the worker twice, assembled to run in pages 1 and 2. Under
 MSX-DOS 2 and Nextor, it selects segments in pages 1 and 2 with `PUT_P1` and
-`PUT_P2`, and learns DOS's segments with `GET_P0` to `GET_P3`; under MSX-DOS 1, it
+`PUT_P2`, and learns DOS's segments with `GET_P0` to `GET_P3`. Under MSX-DOS 1, it
 writes the mapper registers, and DOS's segments are 3, 2, 1 and 0. It performs the
 following steps, and until step 4 it can stop with a message and return to DOS:
 
 1. Opens `<GAME>.IMG`, whose name DOS has placed in the FCB at 005Ch, with the
-   extension set to IMG; without a name, it prints its usage. It reads the image's
+   extension set to IMG. Without a name, it prints its usage. It reads the image's
    first 4,096 bytes with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`, and
    checks:
    - That `RAMAD0` to `RAMAD3` name one slot, DOS's mapper.
@@ -278,11 +279,11 @@ following steps, and until step 4 it can stop with a message and return to DOS:
      primary slot with another subslot.
    - That each record's segment is within DOS's mapper's size.
 2. Allocates every free segment of DOS's mapper: under MSX-DOS 2 and Nextor with
-   `ALL_SEG` until it fails; under MSX-DOS 1, segments 4 and up. MSX-DOS 1 gives no
-   count, so, with interrupts off and through page 2, the restorer saves the first
-   byte of segments 0 to 3, writes each segment's number into its first byte from
-   255 down to 0, reads them back from 4 up to the first mismatch, and restores the
-   saved bytes. It then assigns the segments:
+   `ALL_SEG` until it fails, and under MSX-DOS 1, segments 4 and up. MSX-DOS 1 gives
+   no count, so, with interrupts off and through page 2, the restorer saves the
+   first byte of segments 0 to 3, writes each segment's number into its first byte
+   from 255 down to 0, reads them back from 4 up to the first mismatch, and restores
+   the saved bytes. It then assigns the segments:
    - A RAM page of DOS's mapper whose own segment is free, or is DOS's segment in
      page 1 or 2, goes straight into it.
    - Each other RAM page of DOS's mapper gets a holding segment, copied into its own
@@ -299,7 +300,7 @@ following steps, and until step 4 it can stop with a message and return to DOS:
      page's bits of the subslot register changed, sets the page's mapper register to
      the record's segment when it has one, copies the page, reads it back, and
      selects DOS's pages again, all with interrupts off. The worker runs in page 1,
-     with its stack there, for a target in page 0; the restorer itself copies to
+     with its stack there, for a target in page 0. The restorer itself copies to
      pages 1 to 3. In an expanded slot, the copy of page 3 stops at FFFEh, because
      FFFFh is the subslot register. A mismatch stops the restorer: the machine file
      does not describe this machine.
@@ -315,8 +316,9 @@ following steps, and until step 4 it can stop with a message and return to DOS:
    the records and in the registers that step 6 writes:
    - In the tail: the worker's page's mapper register and its value, and the slot
      register ([Tail](#tail)).
-   - With the tape service, in T0 at 1B04h: T0's segment, then the tape segments; in
-     the game's page 3 at FD09h: DOS's mapper's slot ID, and at FD0Ah: T0's segment.
+   - With the tape service, in T0 at 1B04h: T0's segment, then the tape segments.
+   - With the tape service, in the game's page 3 at FD09h: DOS's mapper's slot ID,
+     and at FD0Ah: T0's segment.
    - With the tape service, when DOS's mapper is in an expanded slot, DOS's mapper's
      subslot in the page 0 bits of that slot's subslot register, and in `SLTTBL` in
      the game's page 3, so that the entry code can select T0.
@@ -351,7 +353,7 @@ The tape service keeps the tape in service segments, and has these parts:
 | Reader | `SLTWRK` | `OUT (C),D / LD E,(HL) / OUT (C),B / RET`: reads a tape byte |
 
 `build.py` builds T0 from `rom.bin`, so it first checks that each jump table entry
-below jumps to its address, as in the standard MSX BIOS; the restorer's ROM check
+below jumps to its address, as in the standard MSX BIOS. The restorer's ROM check
 ensures that the real ROM equals `rom.bin`.
 
 | Entry | Routine | Address it must jump to |
@@ -391,7 +393,7 @@ on these events. The routines read the keyboard matrix through the PPI.
 
 | Event | New position |
 |---|---|
-| `TAPION` or `TAPIN` reads past side 1's end | Side 2's start, as when the player turns the tape over; side 1's start when there is no side 2 |
+| `TAPION` or `TAPIN` reads past side 1's end | Side 2's start, as when the player turns the tape over, or side 1's start when there is no side 2 |
 | `TAPION` or `TAPIN` reads past side 2's end | Side 2's start, as after a rewind |
 | `TAPION` is called while GRAPH is held | The start of the current side |
 | `TAPION` is called while SELECT is held | The start of the other side |
@@ -449,9 +451,9 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | One restorer for every image | The user updates one program, and DOS passes it the image's name |
 | Tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register. Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave the ROM there at the snapshot: Moonwalker and Time Out |
-| Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games; 20 of those games build stubs that T0 alone does not intercept |
+| Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games. Of those games, 20 build stubs that T0 alone does not intercept |
 | A tape with both sides, a wrap, and fixed rewind and flip keys | In 41 of those 51 games the unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
-| GRAPH as the rewind key, SELECT as the flip key | GRAPH alone types no character and BASIC ignores it, while STOP pauses a BASIC program and the function keys type text; SELECT only puts one character in the key buffer |
+| GRAPH as the rewind key, SELECT as the flip key | GRAPH alone types no character and BASIC ignores it, while STOP pauses a BASIC program and the function keys type text. SELECT only puts one character in the key buffer |
 
 ## Limits
 
@@ -532,7 +534,7 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 `build.py` lists the writes in this order:
 
 1. For each PSG register from 0 to 15, its number to port A0h and its value to port
-   A1h, with register 7's bits 7 and 6 forced to 1 and 0; then `psgsel` to port A0h.
+   A1h, with register 7's bits 7 and 6 forced to 1 and 0, then `psgsel` to port A0h.
 2. PPI port C to port AAh.
 3. On a V9938: 0 to register 16, the 16 palette entries to port 9Ah, 2 bytes each,
    then 32 to register 17, for auto-increment, and registers 32 to 45 to port 9Bh.
@@ -540,7 +542,7 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
    register's number.
 5. The VRAM pointer to port 99h: its low byte, then its high bits with 40h for a
    write setup. A read setup writes the pointer minus 1, because the VDP reads ahead
-   and advances the pointer; when the pointer's low 14 bits are 0, register 14 is
+   and advances the pointer. When the pointer's low 14 bits are 0, register 14 is
    written again first, with its value minus 1.
 
 ### CAS data
