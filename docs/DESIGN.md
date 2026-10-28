@@ -13,13 +13,14 @@ of the CAS file.
 |---|---|---|
 | `machines/<machine>.txt` | A person, once per machine | The openMSX arguments that copy the machine, with its cartridges in the same slots |
 | `games/<game>/game.txt` | A person or an LLM | What the game needs ([Game file](#game-file)) |
-| `games/<game>/snap/` | `tools/capture.sh` | The snapshot ([Capture](#capture)) |
+| `games/<game>/snap/` | `tools/capture.py` | The snapshot ([Capture](#capture)) |
 | `out/<game>/<GAME>.IMG` | `tools/build.py` | The image that the restorer reads ([Image](#image)) |
 | `out/<game>/<GAME>.COM` | `tools/build.py` | The restorer, from `src/` ([Restorer](#restorer)) |
 
-A game goes through four commands: `tools/capture.sh <game> <machine>`, then
-`tools/build.py <game>`, then `tools/check.sh <game> <machine>` ([Check](#check)),
-and then the user runs `<GAME>` on the real machine.
+A game goes through four commands: `tools/capture.py <game> <machine>`, then
+`tools/build.py <game>`, then `tools/check.py <game> <machine>` ([Check](#check)),
+and then the user runs `<GAME>` on the real machine. The tools are Python 3 programs
+that need only Python 3 and openMSX, so they run on macOS, Linux and Windows.
 
 ## Game file
 
@@ -34,11 +35,11 @@ One `key value` per line. Only `cas` is required.
 | `snapshot` | `at 120` | The time of the snapshot, in place of the capture's own choice | The capture's choice |
 | `rewind` | `graph` | The key the player holds to rewind the tape | `stop` |
 | `patch` | `8D31 CD E1 00 > CD E1 FC` | A change to the snapshot's RAM: address, old bytes, new bytes | None |
-| `probe` | `8D31 hl=9000 de=0010` | A tape routine that `check.sh` runs, with its registers | The scan's finds |
+| `probe` | `8D31 hl=9000 de=0010` | A tape routine that `check.py` runs, with its registers | The scan's finds |
 
 ## Capture
 
-`tools/capture.sh` runs openMSX with the machine file's arguments and
+`tools/capture.py` runs openMSX with the machine file's arguments and
 `tools/capture.tcl`, which does this:
 
 1. Boots with SHIFT held, so the disk system stays off and the machine starts BASIC
@@ -136,7 +137,7 @@ has no patch and no `patch` line covers it.
 
 ## Check
 
-`tools/check.sh` boots the machine file's machine with its disk system, runs the
+`tools/check.py` boots the machine file's machine with its disk system, runs the
 restorer, and saves a screenshot every 10 seconds. With the tape service it also
 runs each scan find and each `probe` once, from the restored state, with the given
 registers, and checks that the code reaches the tape service and reads the block it
