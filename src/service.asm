@@ -7,7 +7,7 @@
 
         include "service.inc"
 
-VERSION equ 6
+VERSION equ 7
 
         org 0
 
@@ -247,7 +247,7 @@ header: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h
         assert $ = T_SEGS
         ds T_SEGS_MAX,0
         assert $ = T_PAGE
-        ds 5,0
+        ds 6,0
         assert $ = T_BORDER
         ds 10,0                 ; as C_BORDER to C_TWO
 

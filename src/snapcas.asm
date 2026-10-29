@@ -483,7 +483,7 @@ check_records:
         ; the mapper there.
         ld a,(dos_slot)
         bit 7,a
-        jr z,.subslot
+        jr z,.rom
         and 3
         ld e,a
         ld d,0
@@ -504,12 +504,11 @@ check_records:
         and 3
         ld de,t_t0sub
         jp nz,stop_name
-        jr .subslot
 .rom:
         ld a,(p0)
         ; T0 replaces the ROM when page 0 selects it, no RAM page for page 0
         ; is in DOS's mapper, and the game file has no rom keep: page 0 then
-        ; selects DOS's mapper.
+        ; selects DOS's mapper. This holds in both modes.
         rrca
         jr c,.subslot
         ld a,(H_FLAGS)
@@ -1140,7 +1139,7 @@ dos_page:
         add a,a
         add a,a
         djnz .slot
-        ld (8000h+(T_PAGE & 3FFFh)+1),a
+        ld (8000h+(T_PAGE & 3FFFh)+2),a
         ld de,8000h+(T_SEGS & 3FFFh)
         ld bc,T_SEGS_MAX
         jr .table

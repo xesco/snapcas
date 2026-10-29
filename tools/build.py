@@ -21,7 +21,7 @@ sys.path.insert(0, HERE)
 import gamefile  # noqa: E402
 import scan  # noqa: E402
 
-SERVICE_VERSION = 6
+SERVICE_VERSION = 7
 PAGE = 16384
 HEADER_SIZE = 4096
 MAGIC = b"SNAPCAS3"
@@ -215,20 +215,19 @@ def service_page(state, pages, length, wanted=None):
 
 def borrowed_page(state, pages):
     """For the mode without a part in page 3: the page that TAPIN borrows, and
-    T0's data for it: the slot register's mask for the page, the restorer's
-    byte, the mapper register's port, the page's first address's high byte and
-    the game's segment there. The page is page 2 or page 1, the first that
-    does not hold the stack and is in a mapper at the snapshot, or else the
-    first that does not hold the stack (DESIGN.md, Without a part in page 3)."""
-    free = [page for page in (2, 1) if num(state, "sp") >> 14 != page]
-    mapped = [page for page in free if getattr(selected_page(state, pages, page), "seg", None) is not None]
-    page = (mapped + free)[0]
+    T0's data for it: TAPIN's byte, the slot register's mask for the page, the
+    restorer's byte, the mapper register's port, the page's first address's
+    high byte and the game's segment there. The page is page 2 or page 1, the
+    first that is in a mapper at the snapshot, or else page 2 (DESIGN.md,
+    Without a part in page 3)."""
+    mapped = [page for page in (2, 1) if getattr(selected_page(state, pages, page), "seg", None) is not None]
+    page = (mapped + [2])[0]
     found = selected_page(state, pages, page)
     register = "f" + "cdef"[page]
     if state[register] == "-":
         raise BuildError("service t0 needs a mapper at the snapshot")
     seg = found.seg if found is not None and found.seg is not None else num(state, register)
-    return page, bytes([~(3 << 2 * page) & 0xFF, 0, 0xFC + page, page * 0x40, seg])
+    return page, bytes([0, ~(3 << 2 * page) & 0xFF, 0, 0xFC + page, page * 0x40, seg])
 
 
 def service_segments(snap, parts, side1, side2, pages, state, tail_address, page, t0_mode):
@@ -255,7 +254,7 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
         t0[TAPE_CODE:TAPE_CODE + len(t0m)] = t0m
         for n, target in enumerate(targets[:7]):
             t0[0xE1 + 3 * n:0xE4 + 3 * n] = bytes([0xC3]) + struct.pack("<H", target)
-        t0[t_page:t_page + 5] = borrowed_page(state, pages)[1]
+        t0[t_page:t_page + 6] = borrowed_page(state, pages)[1]
         start, data = 0, t0
         tape = bytearray(side1 + side2)
     else:

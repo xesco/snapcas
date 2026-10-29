@@ -38,7 +38,9 @@ def tcl_list(items):
 def key_tcl(kind, value):
     if kind == "key":
         return msx.press(value)
-    return f"type {msx.tcl_word(value)}"
+    # The text as hex, so that the command needs no quoting inside the keys
+    # list's braces.
+    return f"type [binary format H* {value.encode('latin-1').hex()}]"
 
 
 def game_folder(game):

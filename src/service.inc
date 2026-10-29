@@ -42,10 +42,11 @@ T_START   equ 19E6h     ; side 1's start, 0, 3 bytes
 T_HEADER  equ 19E9h     ; the CAS header, 8 bytes
 T_SEGS    equ 19F1h     ; restorer: the tape's segments
 T_SEGS_MAX equ 16       ; so the tape holds up to 256 KB
-T_PAGE    equ 1A01h     ; build.py: the slot register's mask for the borrowed
-                        ; page, then the restorer: DOS's mapper's slot in that
-                        ; page's bits, then build.py: its mapper register's
-                        ; port, its first address's high byte, the game's segment
-T_BORDER  equ 1A06h     ; build.py: the flash's data, the tape speed and the
+T_PAGE    equ 1A01h     ; the game's slot register while TAPIN borrows a page,
+                        ; build.py: the slot register's mask for that page,
+                        ; the restorer: DOS's mapper's slot in its bits,
+                        ; build.py: its mapper register's port, its first
+                        ; address's high byte, the game's segment there
+T_BORDER  equ 1A07h     ; build.py: the flash's data, the tape speed and the
                         ; side 2 byte, as from C_BORDER to C_TWO
 

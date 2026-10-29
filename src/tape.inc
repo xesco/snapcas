@@ -69,12 +69,15 @@ next_byte:
         ld d,a
         ld e,l                  ; the byte's offset in its segment
         if T0MODE
-        ; Through the borrowed page: D_PAGE holds the slot register's mask and
-        ; bits that select DOS's mapper there, its mapper register's port, its
-        ; first address's high byte, and the game's segment there.
+        ; Through the borrowed page, without the stack, which that page can
+        ; hold: D_PAGE keeps the game's slot register meanwhile, then holds
+        ; the slot register's mask and bits that select DOS's mapper there,
+        ; its mapper register's port, its first address's high byte, and the
+        ; game's segment there.
         ld hl,D_PAGE
         in a,(0A8h)
-        push af
+        ld (hl),a
+        inc hl
         and (hl)
         inc hl
         or (hl)
@@ -91,7 +94,7 @@ next_byte:
         out (c),b
         ld e,(hl)
         out (c),a
-        pop af
+        ld a,(D_PAGE)
         out (0A8h),a
         else
         ; Through the reader in page 3, in page 0.
@@ -194,9 +197,8 @@ wrap:
         ld a,(D_TWO)            ; 0 when the tape has no side 2
         or a
         jr z,side_a             ; past side 1's end without a side 2
-        ld hl,D_POS
         ld de,D_TOTAL
-        call lt24
+        call on_side1.pos
         jr nc,side_b.two        ; past side 2's end
         ld a,1
 .side:
@@ -231,10 +233,12 @@ to_side:
         pop de
         jp mark
 
-; Returns carry when the tape position is on side 1.
+; Returns carry when the tape position is on side 1, or from .pos, below the 3
+; bytes at DE.
 on_side1:
-        ld hl,D_POS
         ld de,D_S1END
+.pos:
+        ld hl,D_POS
 ; Returns carry when the 3 bytes at HL are below those at DE: (HL) minus (DE),
 ; byte by byte with the borrow.
 lt24:

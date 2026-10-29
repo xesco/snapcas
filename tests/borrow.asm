@@ -1,7 +1,8 @@
 ; A test game for the tape service without a part in page 3 (DESIGN.md,
 ; Without a part in page 3), on the Sanyo PHC-28S with its RAM cartridge in
-; slot 1: page 2 holds that cartridge's RAM, which is not in a mapper, so
-; TAPIN must borrow page 2 through the slot register. test_step6.py writes
+; slot 1: page 2 holds that cartridge's RAM, which is not in a mapper, and
+; the stack, so TAPIN must borrow page 2 through the slot register, without
+; the stack. test_step6.py writes
 ; this binary to a CAS file, followed by a block of the bytes 0 to 255.
 ;
 ; The game waits about 60 seconds, so that the capture takes its snapshot
@@ -21,6 +22,7 @@ start:
         and 0CFh
         or 10h                  ; page 2: slot 1, the RAM cartridge
         out (0A8h),a
+        ld sp,0C000h            ; the stack in page 2
         ei
         ld hl,0
         ld (JIFFY),hl

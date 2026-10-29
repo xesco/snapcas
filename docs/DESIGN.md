@@ -536,9 +536,9 @@ the three switches:
 
 | Switch | Without a part in page 3 |
 |---|---|
-| The entry code selects T0 in page 0 | The game reaches T0 by slot. T0 stays in mapper register FCh for good, so page 0 shows T0 whenever the game selects DOS's mapper there, and T0's jump table, from 00E1h to 00F3h, is the only set of entries |
+| The entry code selects T0 in page 0 | The game reaches T0 by slot. T0 stays in mapper register FCh for good, so page 0 shows T0 whenever the game selects DOS's mapper there, and T0's jump table, from 00E1h to 00F3h, is the only set of entries. When the snapshot has the ROM in page 0, the restorer selects T0 there instead, by the default mode's rule ([Restorer](#restorer)), so that BASIC's own `BLOAD`, which Tokyo Nampa Street uses for each scene, reaches T0 |
 | The trampoline selects the code segment | The routines run in T0: they, the tape position, the table of the tape's segments and the flash's data take the 360 bytes from 19DDh to 1B44h, which an assertion in `src/service.asm` checks. `src/tape.inc` holds the routines, which `service.asm` assembles in the code segment and in T0, and `build.py` points T0's jump table at T0's copy |
-| The reader selects the tape's segments in page 0 | `TAPIN` reads through page 2 or page 1, which `build.py` chooses: the first that does not hold the stack and is a page of a mapper at the snapshot, or else the first that does not hold the stack. With interrupts off, it selects DOS's mapper's slot in that page through the slot register and the byte's segment through FEh or FDh, reads the byte, and writes back the slot register and the snapshot's segment. A game whose RAM is in a slot without a mapper, as Doki Doki Penguinland's is on the Sanyo PHC-28S, can so lend its page |
+| The reader selects the tape's segments in page 0 | `TAPIN` reads through page 2 or page 1, which `build.py` chooses: the first that is a page of a mapper at the snapshot, or else page 2. With interrupts off, it keeps the slot register's value in T0, selects DOS's mapper's slot in that page through the slot register and the byte's segment through FEh or FDh, reads the byte, and writes back the slot register and the snapshot's segment. It uses no stack meanwhile, so the page can hold the game's stack, as Tokyo Nampa Street's page 2 does. A game whose RAM is in a slot without a mapper, as Bronx's is on the Sanyo PHC-28S, can also lend its page |
 
 The tape takes at most 16 segments, 256 KB, and starts at the first tape segment.
 `TAPIOF` and `TAPOOF` enable interrupts, as the BIOS's do. The keys and the flash
@@ -550,13 +550,13 @@ stops with an error, or the restorer with a message for the last condition:
 | Condition | Why |
 |---|---|
 | No RAM page kept for page 0 is in DOS's mapper | T0 takes the game's mapper register FCh for good |
-| Page 2 or page 1 does not hold the stack, and when the page is in DOS's mapper, the game keeps its segment there from then on | `TAPIN` borrows that page to read the tape |
+| When the borrowed page is in DOS's mapper, the game keeps its segment there from then on | `TAPIN` writes back the snapshot's segment |
 | When DOS's mapper's slot is expanded, the snapshot's subslot register of that slot selects the mapper in the borrowed page | The slot register alone then selects the mapper there. The restorer checks this, because only it knows DOS's mapper's slot |
 
-Code that calls the tape with the ROM selected in page 0 reaches the ROM, not T0, so
-the scan only lists its findings in this mode, and the game file sends that code to
-T0 with `patch` lines that make it select DOS's mapper in page 0. Moonwalker's
-loader computes the value that its stub writes to the slot register as
+Code that selects the ROM in page 0 itself and then calls the tape reaches the ROM,
+not T0, so the scan only lists its findings in this mode, and the game file sends
+that code to T0 with `patch` lines that make it select DOS's mapper in page 0.
+Moonwalker's loader computes the value that its stub writes to the slot register as
 `AND H / LD L,A`, the slot register with page 0's bits cleared, for slot 0. On the
 Sanyo PHC-28S the game keeps the slot register at A5h, so `LD L,0A6h` in their place
 selects slot 2, DOS's mapper. A game that writes FCh itself loses T0, and a game
