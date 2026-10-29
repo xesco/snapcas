@@ -2,13 +2,16 @@
 and the scan of each file of CAS_DIR that needs the tape service (DESIGN.md,
 Scan)."""
 import concurrent.futures
+import hashlib
 import os
 import re
+import struct
 import sys
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
+import cas  # noqa: E402
 import scan  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step4  # noqa: E402
@@ -19,7 +22,7 @@ MACHINE = "advanced/phc28s"
 WORK = os.path.join(ROOT, "out", "test", "step6")
 
 # Side 2 files, by the side 1 file of their game.
-SIDE2 = {"GAUNTLET.CAS": "GAUNTLEB.CAS", "TOUR-91.CAS": "TOUR-91B.CAS"}
+SIDE2 = {"GAUNTLET.CAS": "GAUNTLEB.CAS", "TOUR-91.CAS": "TOUR-91B.CAS", "SOOTLAND.CAS": "SOOTLANB.CAS"}
 
 # The findings confirmed by hand, by file.
 CONFIRMED = {
@@ -207,6 +210,105 @@ class WithoutAPartInPage3(unittest.TestCase):
         # load from the tape.
         self.assertGreater(self.values["tapion"], 0, self.values)
         self.assertEqual(self.values["pos"], 60418, self.values)
+
+
+def capture_build_check(name, text, cas_dir):
+    """Writes a game file, then captures, builds and checks the game, and
+    returns the failed step's error or the check's report."""
+    folder = os.path.join(WORK, "games", name)
+    os.makedirs(folder, exist_ok=True)
+    with open(os.path.join(folder, "game.txt"), "w") as f:
+        f.write(text)
+    for step in ("capture.py", "build.py"):
+        result = test_step4.tool(step, folder, MACHINE, "--cas", cas_dir)
+        if result.returncode != 0:
+            return f"{step}: {result.stderr.strip()}"
+    return test_step4.tool("check.py", folder, MACHINE, "--dos", test_step4.NEXTOR).stdout
+
+
+# Sootland selects RAM in slot 3, so its side1 patch makes its loader keep page
+# 3 in the PHC-28S's internal RAM and select the RAM cartridge for pages 1 and
+# 2. The capture must load the patched tape, or the game crashes.
+SOOTLAND = """cas SOOTLAND.CAS
+side2 SOOTLANB.CAS
+sha1 5ccf9a2463aa3144f3c03c2a23b798ba68d184e4 c2d10d8d5694de81b1192ec7d85aa80a10f89045
+capture test/phc28s-nodisk
+patch side1:024E 3E FC D3 A8 > 3E 14 D3 A8
+"""
+
+
+@unittest.skipUnless(all(os.path.isfile(os.path.join(CAS_DIR, f)) for f in ("SOOTLAND.CAS", "SOOTLANB.CAS")),
+                     "CAS_DIR holds no SOOTLAND.CAS and SOOTLANB.CAS")
+class PatchedTape(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        cls.report = capture_build_check("patched-sootland", SOOTLAND, CAS_DIR)
+        cls.values = {}
+        if cls.report.startswith("point 1: pass"):
+            test_step5.PLAYS["patched-sootland"] = ("patched-sootland", ["space"] * 3, 90, {})
+            cls.values = test_step5.play("patched-sootland")
+
+    def test_the_capture_loads_the_patched_tape(self):
+        with open(os.path.join(ROOT, "out", MACHINE, "patched-sootland", "snap", "side1.cas"), "rb") as f:
+            self.assertEqual(f.read()[0x24E:0x252], bytes.fromhex("3E 14 D3 A8"))
+
+    def test_the_game_reads_side_2_through_the_tape_service(self):
+        self.assertTrue(self.report.startswith("point 1: pass"), self.report)
+        self.assertGreater(self.values["pos"], self.values["pos0"], self.values)
+        self.assertGreaterEqual(self.values["pos0"], self.values["s1end"], self.values)
+
+
+def borrow_symbols():
+    with open(os.path.join(ROOT, "out", "borrow.sym")) as f:
+        return {name.rstrip(":"): int(value, 16) for name, _, value in (line.split() for line in f)}
+
+
+def borrow_tape():
+    """tests/borrow.asm as a binary file on tape, then a block of the bytes 0
+    to 255 (DESIGN.md, CAS data)."""
+    with open(os.path.join(ROOT, "out", "borrow.bin"), "rb") as f:
+        code = f.read()
+    start = borrow_symbols()["start"]
+
+    def padded(data):
+        return data + bytes(-len(data) % 8)
+    tape = padded(cas.HEADER + b"\xD0" * 10 + b"BORROW")
+    tape = padded(tape + cas.HEADER + struct.pack("<3H", start, start + len(code) - 1, start) + code)
+    return tape + cas.HEADER + bytes(range(256))
+
+
+@unittest.skipUnless(os.path.isfile(os.path.join(ROOT, "out", "borrow.bin")), "make builds out/borrow.bin")
+class BorrowedBySlot(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        tapes = os.path.join(WORK, "tapes")
+        os.makedirs(tapes, exist_ok=True)
+        with open(os.path.join(tapes, "BORROW.CAS"), "wb") as f:
+            f.write(borrow_tape())
+        # The patch selects slot 2 in page 0, DOS's mapper on the PHC-28S
+        # with the Carnivore2, in place of the ROM.
+        rom = borrow_symbols()["rom"] - 0xC000
+        text = (f"cas BORROW.CAS\nsha1 {hashlib.sha1(borrow_tape()).hexdigest()}\nservice t0\n"
+                f"patch page3:{rom:04X} F6 00 > F6 02\n")
+        cls.report = capture_build_check("t0-borrow", text, tapes)
+        cls.header = b""
+        cls.values = {}
+        if cls.report.startswith("point 1: pass"):
+            with open(os.path.join(ROOT, "out", MACHINE, "t0-borrow", "T0BORROW.SNP"), "rb") as f:
+                cls.header = f.read(64)
+            symbols = borrow_symbols()
+            test_step5.PLAYS["t0-borrow"] = ("t0-borrow", [], 90,
+                                             {"passed": symbols["passed"], "failed": symbols["failed"]}, True)
+            cls.values = test_step5.play("t0-borrow")
+
+    def test_tapin_borrows_page_2_outside_the_mapper(self):
+        self.assertTrue(self.report.startswith("point 1: pass"), self.report)
+        self.assertEqual(self.header[55], 2)  # the borrowed page
+        self.assertGreaterEqual(self.values["tapin"], 256, self.values)
+        self.assertGreater(self.values["passed"], 0, self.values)
+        self.assertEqual(self.values["failed"], 0, self.values)
 
 
 if __name__ == "__main__":

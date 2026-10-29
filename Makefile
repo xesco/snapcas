@@ -55,6 +55,11 @@ bin/SERVICE.BIN: src/service.asm src/service.inc tools/relocs.py $(SJASMPLUS)
 	$(SJASMPLUS) --nologo -DP3_PAGE=0FBh --raw=$(OUT)/service-fb.bin $<
 	python3 -I tools/relocs.py $(OUT)/service-fc.bin $(OUT)/service-fb.bin $@
 
+# A test game for the tape service through a borrowed page outside a mapper.
+$(OUT)/borrow.bin: tests/borrow.asm $(SJASMPLUS)
+	mkdir -p $(OUT)
+	$(SJASMPLUS) --nologo --raw=$@ --sym=$(OUT)/borrow.sym $<
+
 $(SJASMPLUS): $(DL)/sjasmplus-$(SJASMPLUS_VERSION)-src.tar.xz
 	rm -rf $(OUT)/tools/src
 	mkdir -p $(OUT)/tools/src
@@ -82,7 +87,7 @@ $(NMS8250_512K):
 	grep -q '<size>512</size>' $@.tmp
 	mv $@.tmp $@
 
-test: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(NMS8250_512K)
+test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(NMS8250_512K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I -m unittest discover -s tests -v
 
