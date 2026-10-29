@@ -23,6 +23,7 @@ in [PLAN.md](PLAN.md).
 | Tail | The restore's last code: 26 bytes written below the game's stack pointer |
 | T0 | A RAM copy of the BIOS's page 0 whose tape routines are the tape service's ([Tape service](#tape-service)) |
 | Service segment | A segment that holds T0 or tape data |
+| Replay | `<GAME>.RPL`, a recording of the load's screen and sound that the restorer can play before the restore ([Replay](#replay)) |
 
 ## Files and commands
 
@@ -32,6 +33,7 @@ in [PLAN.md](PLAN.md).
 | `games/<game>/game.txt` | A person or an LLM | The game's settings |
 | `out/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
 | `out/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image |
+| `out/<machine>/<game>/<GAME>.RPL` | `tools/build.py` | The replay |
 | `out/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
 | `out/<machine>/<game>/check/` | `tools/check.py` | The check's report and savestates |
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
@@ -49,7 +51,8 @@ four commands, in this order:
    verifies the restore ([Check](#check)). `<dir>` holds the user's DOS system
    files.
 4. The user copies `SNAPCAS.COM` and `<GAME>.SNP` to a disk of the real machine and
-   runs `SNAPCAS <GAME>`.
+   runs `SNAPCAS <GAME>`. With `<GAME>.RPL` beside them, `SNAPCAS <GAME> /R` first
+   shows the load as it happened in the capture.
 
 The tools are Python 3 programs that require only Python 3 and `openMSX` 22.0, so
 they run on macOS, Linux and Windows. They print errors on standard error, naming
@@ -236,6 +239,7 @@ overwrites a segment changes nothing it keeps:
 | `subrom.bin` | 16 KB on an MSX2: the sub-ROM, from the slot that `EXBRSA` names |
 | `vram.bin` | The `physical VRAM` debuggable: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938 |
 | `state.txt` | One `name value` per line, values in hexadecimal, as below |
+| `replay.log` | The VDP, PSG and cassette writes of the load, for the replay ([Replay](#replay)) |
 | `log.txt` | The logged events and the capture's decisions, in time order: each stop of the load with the screen's text, the key that continued it, each mapper's size, and how the snapshot was taken. Its last line names the `continue` key that worked |
 
 | `state.txt` names | Source in `openMSX` |
@@ -320,7 +324,8 @@ and until step 4 it can stop with a message and return to DOS:
    - Each service segment gets one of the segments left, and so does the worker,
      which the restorer copies into its segment.
 
-   It stops when there are too few, naming the segments needed and free.
+      It stops when there are too few, naming the segments needed and free. Then,
+      with `/R`, it plays the replay ([Replay](#replay)).
 3. Reads the records in this order, through the FCB's random record field: the RAM
    pages of slots other than DOS's mapper, the VRAM blocks, the service segments,
    and the RAM pages of DOS's mapper. It places each one:
@@ -445,6 +450,46 @@ to E4h for `TAPIN`, so the entries keep the BIOS's low bytes. A stub that pushes
 00EAh, `TAPOON`, writes the tape, and the scan leaves it alone. A patch in code that
 ran only during the load is harmless.
 
+## Replay
+
+The replay shows the load on the real machine as it happened in the capture: the
+loading screens being drawn, their music, the game's own pauses and its waits for a
+key, and the cassette motor's relay. Nothing of the loader runs again: the replay is
+a recording, played before the restore, so it works for every game whose capture
+works. It is optional, in its own file, `<GAME>.RPL`, and runs only with `/R`.
+
+The capture records it from the load command to the snapshot, in `snap/replay.log`,
+one line per write: the frame, the port and the value. A frame is one VDP interrupt
+period of the machine, 1/50 or 1/60 of a second. It logs:
+
+- Each write to the VDP's ports 98h to 9Bh and the PSG's ports A0h and A1h, from
+  write watchpoints.
+- Each change of the cassette motor and keyclick bits of PPI port C, bits 4 and 7,
+  as a bit set or reset on port ABh, so that the replay does not touch the keyboard
+  row bits.
+- Each wait that a key continued ([Capture](#capture), step 5), as the frames of the
+  wait's first 30 seconds, kept aside before the rewind, and the key.
+
+A rewind truncates the log to its length at the saved moment, as it puts back the
+rest of the logged state.
+
+`build.py` turns the log into a stream of commands ([Replay stream](#replay-stream))
+and compresses it in chunks with the LZ4 block format. The restorer, after step 2,
+plays the stream with interrupts off while it writes and on while it waits for the
+next frame:
+
+- It reads `<GAME>.RPL` one chunk at a time, with its own FCB, between frames.
+- It writes VRAM no faster than one byte every 29 cycles, 8 µs, which an MSX1 VDP
+  needs during the display.
+- At a wait, it plays the wait's frames in a loop until a key is pressed.
+- `/R2` to `/R9` play 2 to 9 frames for each frame that it waits.
+- While the motor runs at `/R` speed, it toggles the keyclick bit in each frame's
+  spare time at 1200 Hz for a 0 bit and 2400 Hz for a 1 bit, from the stream's own
+  bytes, so that the load sounds like a tape.
+
+When the replay ends, VRAM, the VDP's registers and the PSG's registers hold their
+values at the snapshot, and the restore goes on with step 3.
+
 ## Check
 
 `tools/check.py` makes a disk image with `openMSX`'s `diskmanipulator`: a 720 KB
@@ -486,6 +531,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | Port writes, T0 and the tail made by `build.py` | The restorer copies records and fills in only the values that depend on the real machine |
 | One restorer for every image | The user updates one program, and DOS passes it the image's name |
 | A game file can name the machine for the capture | On the Sanyo PHC-28S, La Abadia del Crimen's loader takes the RAM cartridge in slot 1 for an expanded slot and crashes, but loads without it. Its image then runs with the cartridge in place, because the game never selects slot 1 again |
+| Replay a recording of the load, not the load | Loading again on the real machine, through the tape service from the start, brings back what the snapshot avoids: loaders that go around T0 through their own slot code, loaders that use the page 0 RAM where T0 is, and loaders that trip over the machine's slots |
 | Tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register. Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave the ROM there at the snapshot: Moonwalker and Time Out |
 | Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games. Of those games, 20 build stubs that T0 alone does not intercept |
@@ -503,6 +549,8 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 - A game with the tape service runs only if it leaves FCC9h to FD88h unused.
 - A game that reads the tape with its own code gets no tape service, so it runs only
   if it loads in a single pass.
+- The replay is a recording: a loader that lets the player act while it loads shows
+  only what happened in the capture.
 - A snapshot taken without an interrupt overwrites the 26 bytes below the stack
   pointer with the tail.
 
@@ -590,6 +638,27 @@ that it names:
 
 Part 0 is the tail ([Tail](#tail)), with the operands that `build.py` and the
 restorer fill in set to 0.
+
+### Replay stream
+
+`<GAME>.RPL` starts with `SNAPRPL1`, a byte with the frame rate, 50 or 60, and a
+2-byte count of chunks. Each chunk is a 2-byte compressed length and an LZ4 block
+that decompresses to at most 16,384 bytes. The decompressed stream is a sequence of
+commands:
+
+| Command | Bytes | Meaning |
+|---|---|---|
+| End of frame | `00` | Wait for the next frame |
+| Wait | `01 n` | Wait n more frames, 1 to 255 |
+| Port write | `02 port value` | Write the value to the port: 99h, 9Ah, 9Bh, A0h, A1h or ABh |
+| VRAM bytes | `03 n` and n bytes | Write n bytes, 1 to 255, to port 98h |
+| Wait's start | `04` | The frames of a wait for a key start here |
+| Wait's end | `05` | Play the frames since `04` again until a key is pressed |
+| End | `FF` | The replay ends |
+
+A `02 A0h` write and the `02 A1h` write after it are written together, with
+interrupts off, so that the BIOS's interrupt handler, which selects PSG registers 14
+and 15 for the joysticks, cannot come between them.
 
 ### CAS data
 

@@ -135,7 +135,25 @@ multi-load file that it finds, and checks that the stub findings in `scan.txt` c
 the 20 games with stubs. It then runs `check.py` on those games and records which
 findings each one executes.
 
-## Step 7: shipped files
+## Step 7: replay
+
+This step adds the replay ([Replay](DESIGN.md#replay)): the recording in
+`capture.py`, the stream and its compression in `build.py`, and the playing with
+`/R` in `SNAPCAS.COM`. The tests check:
+
+- With Python unit tests, that the stream's commands and the LZ4 compression read
+  back what they wrote, and that a rewind truncates `replay.log`.
+- That after `SNAPCAS MOONRIDE /R` plays Moonrider's replay in `openMSX`, VRAM, the
+  VDP's registers and the PSG's registers equal the snapshot's, before the restore
+  goes on, and the same for the other single-load files of the corpus on
+  `advanced/phc28s`.
+- That a wait for a key holds the replay until a key is pressed, with `ABADIA.CAS`
+  on `basic/nms8250`.
+
+The step also reports the size of each `.RPL` file of the corpus, compressed and
+not, to judge the compression.
+
+## Step 8: shipped files
 
 This step writes the last two machine files, `basic/msx2ide` and `advanced/mfrsd`
 ([Shipped files](DESIGN.md#shipped-files)), and the game files for the collection,
@@ -144,7 +162,7 @@ single-load game on each of the six shipped machine files, then capture, build a
 check every game file on `advanced/phc28s` and `basic/vg8020`, and write a report of
 passes and failures.
 
-## Step 8: real hardware
+## Step 9: real hardware
 
 The user runs the corpus on the Sanyo PHC-28S with the Sony HBM-64 in slot 1 and the
 Carnivore2 in slot 2, and the results go in this page, with the machine and
