@@ -1,0 +1,4 @@
+# Super MSX n.3 (luglio-agosto 1987) - cas_3
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.3%20(luglio-agosto%201987)%20-%20cas_3.zip
+cas SUPER-MS.CAS
+sha1 dcc09cf7d6e985053ac6cb96157c91847ebf7e40

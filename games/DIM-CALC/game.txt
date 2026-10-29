@@ -1,0 +1,4 @@
+# Dim-Calc (1985)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Dim-Calc%20(1985)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas DIM-CALC.CAS
+sha1 db7b4da9621623e05063f9ed16978ffe9c2cf642

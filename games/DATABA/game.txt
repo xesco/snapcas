@@ -1,0 +1,4 @@
+# Databa (19xx)(Philips)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Databa%20(19xx)(Philips)%5BRUN'CAS-'%5D.zip
+cas DATABA.CAS
+sha1 546e8e0ca009ad6a2b6eca783ebf8c2d1708cb69

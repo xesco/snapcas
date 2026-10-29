@@ -1,0 +1,4 @@
+# Highway Encounter (1985)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Highway%20Encounter%20(1985)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas HIGHWAY.CAS
+sha1 7201d3b93669e99a97272be76144276a29100f8b

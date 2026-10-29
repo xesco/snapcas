@@ -1,0 +1,5 @@
+# Continental Circus (1989)(Virgin Mastertronic)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Continental%20Circus%20(1989)(Virgin%20Mastertronic)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas CONTINEN.CAS
+side2 CONTINEB.CAS
+sha1 a5a62d3f779caea14f62e7505d5874811f6504af d36e8832612a9e949a8b38735f6397b05edbfedf

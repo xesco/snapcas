@@ -1,0 +1,4 @@
+# Lazer Bykes (1985)(PSS)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Lazer%20Bykes%20(1985)(PSS)%5BBLOAD'CAS-'%2CR%5D.zip
+cas LAZER-BY.CAS
+sha1 04b86500b17e11c54731c96c2dd773306e469eab

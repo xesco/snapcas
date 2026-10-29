@@ -1,0 +1,4 @@
+# Trailblazer (1986)(Gremlin Graphics Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Trailblazer%20(1986)(Gremlin%20Graphics%20Software)%5BRUN'CAS-'%5D.zip
+cas TRAILBLA.CAS
+sha1 c231dae6acf0aedfafc1f6817e5b179090a31ff9

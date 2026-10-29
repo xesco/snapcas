@@ -1,0 +1,4 @@
+# Front Line (1984)(Taito)
+# https://download.file-hunter.com/Games/MSX1/CAS/Front%20Line%20(1984)(Taito).zip
+cas FRONT-LI.CAS
+sha1 10108bbb5fd7873d34e182d5dbc25eb846635ae4

@@ -1,0 +1,4 @@
+# Engesoft msxf-19 / Engesoft MSXF-19 - Lado B.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxf-19.zip
+cas ENGES19B.CAS
+sha1 b6834f0fce17621f60e54678a1f5d62ed74cae91

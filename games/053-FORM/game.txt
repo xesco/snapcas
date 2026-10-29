@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 053-Formula 1.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 053-FORM.CAS
+sha1 150297a876abe9944b2e2cf9d339766ea945a951

@@ -1,0 +1,4 @@
+# The Tomato Princess From Salad Land Part 3 (Side 2A)(1985)(Hudson Soft)(BLOAD'CAS-',R)
+# https://download.file-hunter.com/Games/MSX1/CAS/The%20Tomato%20Princess%20From%20Salad%20Land%20Part%203%20(Side%202A)(1985)(Hudson%20Soft)(BLOAD'CAS-'%2CR).zip
+cas THE-TOM3.CAS
+sha1 de918c988128fb77a307bf5b90a2f79285e72b83

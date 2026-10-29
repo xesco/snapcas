@@ -1,0 +1,4 @@
+# Zoot (1986)(Bug-Byte Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Zoot%20(1986)(Bug-Byte%20Software)%5BRUN'CAS-'%5D.zip
+cas ZOOT.CAS
+sha1 edcdb1ba2d8a412132393e672980385956a9e916

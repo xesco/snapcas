@@ -1,0 +1,4 @@
+# Grog's Revenge (1985)(US Gold)(GB)[RUN'CAS-']-FX2
+# https://download.file-hunter.com/Games/MSX1/CAS/Grog's%20Revenge%20(1985)(US%20Gold)(GB)%5BRUN'CAS-'%5D-FX2.zip
+cas GROG-S.CAS
+sha1 34c8ee7a8658f238cd9ae175ca0c42a6cd67098e

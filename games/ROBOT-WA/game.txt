@@ -1,0 +1,4 @@
+# Robot Wars (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Robot%20Wars%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas ROBOT-WA.CAS
+sha1 68c2ae89fe69ca6db9eb1f31d645d8933e8a1b22

@@ -1,0 +1,4 @@
+# Scapeghost - Part 3 (1989)(Level 9 Computing)[RUN'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Scapeghost%20-%20Part%203%20(1989)(Level%209%20Computing)%5BRUN'CAS-'%2CR%5D.zip
+cas SCAPEGH3.CAS
+sha1 58d8c07b8f90c7456ea52610f801e5228830b049

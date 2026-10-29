@@ -1,0 +1,4 @@
+# Terrahawks (2020) (Anemotionalfish) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Terrahawks%20(2020)%20(Anemotionalfish)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas TERRAHAW.CAS
+sha1 019c2109aab5210ee23becbf34876f0a345c05cf

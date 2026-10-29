@@ -1,0 +1,4 @@
+# Colt 36 (1987)(Topo Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Colt%2036%20(1987)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas COLT-36.CAS
+sha1 6af5ee37ec346b0376dff3c8d575aaa61c34a405

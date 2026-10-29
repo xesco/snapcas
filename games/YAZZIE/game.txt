@@ -1,0 +1,4 @@
+# Yazzie (2019) (Retrosouls) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Yazzie%20(2019)%20(Retrosouls)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas YAZZIE.CAS
+sha1 d6bb7bda995a78ca4f0c58986af757ff3d8774cd

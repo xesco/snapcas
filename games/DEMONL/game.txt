@@ -1,0 +1,4 @@
+# Demo, De - Lanceer (1985)(Philips)(nl)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Demo%2C%20De%20-%20Lanceer%20(1985)(Philips)(nl)%5BRUN'CAS-'%5D.zip
+cas DEMONL.CAS
+sha1 ff38a1cb45780d8d312f0b10c4a4ce870f6859c4

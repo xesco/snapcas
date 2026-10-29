@@ -1,0 +1,4 @@
+# Mini-Golf (1984)(Advance)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Mini-Golf%20(1984)(Advance)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MINI-GOL.CAS
+sha1 6095913ead0bcd8da804e8286be963a0c63c050d

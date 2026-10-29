@@ -1,0 +1,4 @@
+# Engesoft msxf-07 / Engesoft MSXF-07 - Lado B.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxf-07.zip
+cas ENGESO07.CAS
+sha1 b881f79081689ded6de0142262be7f081af77f61

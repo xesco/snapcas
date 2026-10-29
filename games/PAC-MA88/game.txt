@@ -1,0 +1,4 @@
+# Pac-Mania (1988)(Grandslam Entertainments)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Pac-Mania%20(1988)(Grandslam%20Entertainments)%5BBLOAD'CAS-'%2CR%5D.zip
+cas PAC-MA88.CAS
+sha1 0735fd5d1bf22da08b674f13eaaa3d66bf39d6a3

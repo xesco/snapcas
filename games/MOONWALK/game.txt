@@ -1,0 +1,5 @@
+# Moonwalker (1989)(US Gold)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Moonwalker%20(1989)(US%20Gold)%5BRUN'CAS-'%5D.zip
+cas MOONWALK.CAS
+sha1 1787776aeef9420ebb35c3ecb879a7c9a556a512
+snapshot at 135

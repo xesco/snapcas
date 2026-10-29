@@ -1,0 +1,4 @@
+# Damas (1985)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Damas%20(1985)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas DAMAS.CAS
+sha1 01723315d90b871ca57e7ab748701c943d1dd6f3

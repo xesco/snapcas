@@ -1,0 +1,4 @@
+# Destroyer (1986)(Mind Games Espana)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Destroyer%20(1986)(Mind%20Games%20Espana)%5BRUN'CAS-'%5D.zip
+cas DESTROYE.CAS
+sha1 0d1a85ed142b866373841ef97b2390c44a2a6b66

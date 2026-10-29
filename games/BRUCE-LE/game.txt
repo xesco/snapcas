@@ -1,0 +1,4 @@
+# Bruce Lee (1985)(Comptiq)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Bruce%20Lee%20(1985)(Comptiq)%5BRUN'CAS-'%5D.zip
+cas BRUCE-LE.CAS
+sha1 172b8e03663a53d2a919b9cd2217fe5a591406d4

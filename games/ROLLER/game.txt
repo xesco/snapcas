@@ -1,0 +1,4 @@
+# Roller (1987)(Triosoft)[RUN'CAS-',r]
+# https://download.file-hunter.com/Games/MSX1/CAS/Roller%20(1987)(Triosoft)%5BRUN'CAS-'%2Cr%5D.zip
+cas ROLLER.CAS
+sha1 e6eb065a8f381eab4fa1a41103db971daca9c282

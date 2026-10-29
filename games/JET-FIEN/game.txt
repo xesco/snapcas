@@ -1,0 +1,4 @@
+# Jet Fighter (1985)(Aackosoft)(NL)(en)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Jet%20Fighter%20(1985)(Aackosoft)(NL)(en)%5BRUN'CAS-'%5D.zip
+cas JET-FIEN.CAS
+sha1 2afbb3543a43ea73c77730b9b46cc8baf6c67da8

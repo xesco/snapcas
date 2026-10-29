@@ -1,0 +1,4 @@
+# Streaker (1987)(Bulldog)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Streaker%20(1987)(Bulldog)%5BRUN'CAS-'%5D.zip
+cas STREAKER.CAS
+sha1 903721f9f30088bc26b8dd049d2207df87c4bbbf

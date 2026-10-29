@@ -1,0 +1,4 @@
+# Turbo Pack A (1987)(Philips)(es) / 005-El gerente.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
+cas 005-EL.CAS
+sha1 d8fee968fd1a6d128e47170ccb73d5ebeca0922f

@@ -1,0 +1,5 @@
+# Gunsmoke (1987)(Go!)(Side A)[aka Desperado][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Gunsmoke%20(1987)(Go!)(Side%20A)%5Baka%20Desperado%5D%5BRUN'CAS-'%5D.zip
+cas GUNSMOKE.CAS
+side2 GUNSMOKB.CAS
+sha1 af17a78d71c808dae8e62b6c966c06a505f34462 ef295704a821ee76e33774108148ce79621e8c1a

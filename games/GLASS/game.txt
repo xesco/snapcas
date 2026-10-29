@@ -1,0 +1,4 @@
+# Glass (1985)(Quicksilva)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Glass%20(1985)(Quicksilva)(es)%5BRUN'CAS-'%5D.zip
+cas GLASS.CAS
+sha1 2001c92bab218c2937609c3219d2e40daad4b201

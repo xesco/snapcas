@@ -1,0 +1,4 @@
+# North Sea Helicopter (Aackosoft, 1985)
+# https://download.file-hunter.com/Games/MSX1/CAS/North%20Sea%20Helicopter%20(Aackosoft%2C%201985).zip
+cas NORTH-SE.CAS
+sha1 7fdefeb0b745449f22412089b138134437789df1

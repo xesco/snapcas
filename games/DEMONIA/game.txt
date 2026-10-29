@@ -1,0 +1,4 @@
+# Demonia (1986)(Microids)(fr)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Demonia%20(1986)(Microids)(fr)%5BRUN'CAS-'%5D.zip
+cas DEMONIA.CAS
+sha1 e87a3d5b24a6da38dd60e237d0120ed4ea20bde2

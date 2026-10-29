@@ -1,0 +1,4 @@
+# Cryptic Cube (Spectravideo) [_] [CLOAD-RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Cryptic%20Cube%20(Spectravideo)%20%5B_%5D%20%5BCLOAD-RUN%5D.zip
+cas CRYPTIC.CAS
+sha1 306f9857349ccbe5ebd088affb00b51e1d1d39ea

@@ -1,0 +1,4 @@
+# Colossus 4 Chess (1986)(CDS Microsystems)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Colossus%204%20Chess%20(1986)(CDS%20Microsystems)%5BBLOAD'CAS-'%2CR%5D.zip
+cas COLOSSUS.CAS
+sha1 8366d91fa9afbfa6e9b2e5b20fea73ffaccf7e44

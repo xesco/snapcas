@@ -1,0 +1,4 @@
+# Sky War (1988)(OMK Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Sky%20War%20(1988)(OMK%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas SKY-WAR.CAS
+sha1 ebb8b252f3b4baf1dab05093a32213bf2fdcff39

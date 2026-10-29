@@ -1,0 +1,4 @@
+# Datilografia (1986)(Sysout)
+# https://download.file-hunter.com/Games/MSX1/CAS/Datilografia%20(1986)(Sysout).zip
+cas DATILOGR.CAS
+sha1 5ae3797fb48e8846626470070a4de7028e714497

@@ -1,0 +1,5 @@
+# Defcom 1 (1989)(Iber Soft)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Defcom%201%20(1989)(Iber%20Soft)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas DEFCOM-1.CAS
+side2 DEFCOMB.CAS
+sha1 6dd24937a0a306a00333c0f18659021f3a73b5dd 81b8e18ddf73e9391e2700d4cb1c31f9e303b843

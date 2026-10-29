@@ -1,0 +1,4 @@
+# Abu Simbel Profanation (1986)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Abu%20Simbel%20Profanation%20(1986)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas ABU-SIMB.CAS
+sha1 83f414f9cdc7c37b5aa5ec220b1750826f2d2dd3

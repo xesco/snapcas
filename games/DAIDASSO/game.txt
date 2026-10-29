@@ -1,0 +1,4 @@
+# Daidasso. Great Escape (1985)(Carry Lab)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Daidasso.%20Great%20Escape%20(1985)(Carry%20Lab)%5BBLOAD'CAS-'%2CR%5D.zip
+cas DAIDASSO.CAS
+sha1 f0ff604ae83d023232d2d3a61597ccd7ac542352

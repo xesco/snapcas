@@ -1,0 +1,5 @@
+# Livingstone Supongo II (1989)(Opera Soft)(Side A)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Livingstone%20Supongo%20II%20(1989)(Opera%20Soft)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
+cas LIVINGII.CAS
+side2 LIVING89.CAS
+sha1 3b51154d31045b4f11de4d5da5f8ae9d92df072a d6f49f4267399edc77019814e279ef57aad6da11

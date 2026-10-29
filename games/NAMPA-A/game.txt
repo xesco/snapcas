@@ -1,0 +1,4 @@
+# Tokyo Nampa Street (ENIX, 1986) / NAMPA-A.CAS
+# https://download.file-hunter.com/Games/MSX1/CAS/Tokyo%20Nampa%20Street%20(ENIX%2C%201986).zip
+cas NAMPA-A.CAS
+sha1 480ee97312e65ed0a508b98f00deba9e9547d8ef

@@ -1,0 +1,4 @@
+# Post Mortem (1988)(Iber Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Post%20Mortem%20(1988)(Iber%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas POST-MOR.CAS
+sha1 0d27a377b264fac448dc9635054403e83d68f32e

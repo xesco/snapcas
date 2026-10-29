@@ -1,0 +1,4 @@
+# Bubbo World [RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Bubbo%20World%20%5BRUN'CAS-'%5D.zip
+cas BUBBO-WO.CAS
+sha1 882c202991f1d15f8046ba9e1fe68dd26b34a65a

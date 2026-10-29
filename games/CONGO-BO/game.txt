@@ -1,0 +1,4 @@
+# Congo Bongo (1983)(Sega)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Congo%20Bongo%20(1983)(Sega)%5BBLOAD'CAS-'%2CR%5D.zip
+cas CONGO-BO.CAS
+sha1 c15ad4ed7de51f22937fb0751df7cd0cd05b7190

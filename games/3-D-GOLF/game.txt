@@ -1,0 +1,4 @@
+# 3D Golf Simulation - High Speed Edition (1984)(T&E Soft)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/3D%20Golf%20Simulation%20-%20High%20Speed%20Edition%20(1984)(T%26E%20Soft)%5BCLOAD%20%2B%20RUN%5D.zip
+cas 3-D-GOLF.CAS
+sha1 9f60c584f64c237854ee131069646026997a97bd

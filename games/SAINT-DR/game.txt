@@ -1,0 +1,5 @@
+# Saint Dragon (1990)(Dro Soft)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Saint%20Dragon%20(1990)(Dro%20Soft)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas SAINT-DR.CAS
+side2 SAINTB.CAS
+sha1 8915d6adae4a5dc25af14150b9a34099235ecc84 f19e8bbc84e1d62597503b1ed71ceddfc3cbafb9

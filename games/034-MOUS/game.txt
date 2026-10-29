@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 066-Mouse.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 034-MOUS.CAS
+sha1 f79fe62bfe0e5ad815c7dbc58bbc31f96ffd2ef4

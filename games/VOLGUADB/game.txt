@@ -1,0 +1,4 @@
+# Volguard (1985)(dB-Soft)[RUN'CAS-']-patched
+# https://download.file-hunter.com/Games/MSX1/CAS/Volguard%20(1985)(dB-Soft)%5BRUN'CAS-'%5D-patched.zip
+cas VOLGUADB.CAS
+sha1 2d21b2556063ce40f2a211c9172ac64c88aa64cb

@@ -1,0 +1,4 @@
+# Firehawk (1987)(Players Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Firehawk%20(1987)(Players%20Software)%5BRUN'CAS-'%5D.zip
+cas FIREHAWK.CAS
+sha1 5dbfafdf9cd101567b8fdfc92fd6b69b8a4892d4

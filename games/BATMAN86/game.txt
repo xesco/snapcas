@@ -1,0 +1,4 @@
+# Batman (1986)(Ocean Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Batman%20(1986)(Ocean%20Software)%5BRUN'CAS-'%5D.zip
+cas BATMAN86.CAS
+sha1 7125c6fb172ffade863b89e4d9abff27bf977945

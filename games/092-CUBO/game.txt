@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 092-Cubo de Rubick.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 092-CUBO.CAS
+sha1 3e1fbe22b7b0eeb4ddf0e42fdcafe952caea2be3

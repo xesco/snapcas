@@ -1,0 +1,4 @@
+# Matamarcianos. Batalla Espacial (1986)(Manhattan Transfer)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Matamarcianos.%20Batalla%20Espacial%20(1986)(Manhattan%20Transfer)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MATAMARC.CAS
+sha1 5d7ddad75eb4d64f1b6a58f499615e423c3db939

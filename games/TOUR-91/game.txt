@@ -1,0 +1,5 @@
+# Tour 91 (1991)(Topo Soft)(es)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Tour%2091%20(1991)(Topo%20Soft)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas TOUR-91.CAS
+side2 TOUR-91B.CAS
+sha1 3d312101276198e9c18d593e42b94b5a0da5d54d 526c6dcc89fb7c19b2cc2257f90c03d308992699

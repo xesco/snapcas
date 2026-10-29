@@ -1,0 +1,5 @@
+# Scramble Spirits (1990)(Grandslam Entertainments)(Side A)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Scramble%20Spirits%20(1990)(Grandslam%20Entertainments)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
+cas SCRAMBLE.CAS
+side2 SCRAMBLB.CAS
+sha1 d56987b24478e45f4e63dbc8c3bc488f366a1b0c 341cc5d190fcce973cf66beea871c05d8e3514e7

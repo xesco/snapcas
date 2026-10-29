@@ -1,0 +1,4 @@
+# Wild Cat (1984)(Nippon Columbia)
+# https://download.file-hunter.com/Games/MSX1/CAS/Wild%20Cat%20(1984)(Nippon%20Columbia).zip
+cas WILD-CAT.CAS
+sha1 889617554cf78967dbb997a9d6ac063ba5415eec

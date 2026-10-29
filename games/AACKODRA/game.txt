@@ -1,0 +1,4 @@
+# Aackodraw & Paint (1985)(Aackosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Aackodraw%20%26%20Paint%20(1985)(Aackosoft)%5BRUN'CAS-'%5D.zip
+cas AACKODRA.CAS
+sha1 1e0c385708be2a33bc53b542dba25acf1fade22c

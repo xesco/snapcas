@@ -1,0 +1,4 @@
+# Poder Oscuro, El (1988)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Poder%20Oscuro%2C%20El%20(1988)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas PODER-OS.CAS
+sha1 ffe7df55200d00f2a21ccf23b37a2db012133bc2

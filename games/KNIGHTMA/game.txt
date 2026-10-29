@@ -1,0 +1,5 @@
+# Knightmare[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Knightmare%5BBLOAD'CAS-'%2CR%5D.zip
+cas KNIGHTMA.CAS
+sha1 f8d4faacc697318ad0514e86726a8bd843599f9f
+snapshot at 130

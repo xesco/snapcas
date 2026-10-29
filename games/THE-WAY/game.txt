@@ -1,0 +1,4 @@
+# The Way Of The Tiger (忍者タイガー) (1986)(Tomo Soft International)(Tape 1 Side B - Unarmed Combat).CAS
+# https://download.file-hunter.com/Games/MSX1/CAS/The%20Way%20Of%20The%20Tiger%20(%E5%BF%8D%E8%80%85%E3%82%BF%E3%82%A4%E3%82%AC%E3%83%BC)%20(1986)(Tomo%20Soft%20International)(Tape%201%20Side%20B%20-%20Unarmed%20Combat).zip
+cas THE-WAY.CAS
+sha1 ffd4fee6d72a8b12558bd1f45f6c9d0866e47c82

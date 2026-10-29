@@ -1,0 +1,4 @@
+# Chopper (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Chopper%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas CHOPPER.CAS
+sha1 3ac33a36a7a3e2d233929e45322ace708187282b

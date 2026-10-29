@@ -1,0 +1,4 @@
+# BMX Simulator (1987)(Codemasters)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/BMX%20Simulator%20(1987)(Codemasters)%5BRUN'CAS-'%5D.zip
+cas BMX-SIMU.CAS
+sha1 2bcc391661d991687c892fd264354b27a2f4a3f1

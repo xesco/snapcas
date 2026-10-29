@@ -1,0 +1,4 @@
+# Quartet (2019) (Ilkke and bitsofbas) (v1.1) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Quartet%20(2019)%20(Ilkke%20and%20bitsofbas)%20(v1.1)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas QUARTETV.CAS
+sha1 c0872fad13cfee1a922f0a19f31a9a3c4d10db18

@@ -1,0 +1,4 @@
+# Ink (2005)(INK TEAM)
+# https://download.file-hunter.com/Games/MSX1/CAS/Ink%20(2005)(INK%20TEAM).zip
+cas INK.CAS
+sha1 ec248dd96a1d3c18e319b9dc19172ec66b4fe81e

@@ -1,0 +1,4 @@
+# Xenon (1988)(Dro Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Xenon%20(1988)(Dro%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas XENON.CAS
+sha1 ff36ec9abfd753c1faf79ddc75c637cabfb87546

@@ -1,0 +1,4 @@
+# BCs Quest For Tyres [BLOAD'CAS-',r]
+# https://download.file-hunter.com/Games/MSX1/CAS/BCs%20Quest%20For%20Tyres%20%5BBLOAD'CAS-'%2Cr%5D.zip
+cas BCS-QUES.CAS
+sha1 742b6c37d83cd4126899ff13ca4412efbed9177a

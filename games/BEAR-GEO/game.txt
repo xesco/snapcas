@@ -1,0 +1,4 @@
+# Bear George (1985)(Soft Bee)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Bear%20George%20(1985)(Soft%20Bee)%5BRUN'CAS-'%5D.zip
+cas BEAR-GEO.CAS
+sha1 28cbbcdbcca2e28da1ec1db1ad5083c6de220fa5

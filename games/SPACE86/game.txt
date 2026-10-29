@@ -1,0 +1,4 @@
+# Space Busters (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Space%20Busters%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas SPACE86.CAS
+sha1 5e050cc911b8d90c4e8020e5596ac41e3fa51e60

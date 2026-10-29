@@ -1,0 +1,4 @@
+# Torreoscura - Part 2 (Bieno Marti & Pedro Fernández)(es)
+# https://download.file-hunter.com/Games/MSX1/CAS/Torreoscura%20-%20Part%202%20(Bieno%20Marti%20%26%20Pedro%20Fern%C3%A1ndez)(es).zip
+cas TORREOS2.CAS
+sha1 441307984bb3ba6ac3c9460af37482b8db44c680

@@ -1,0 +1,4 @@
+# Turbo Pack C (1987)(Philips)(es) / 038 - Mac Attack.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20C%20(1987)(Philips)(es).ZIP
+cas 038-MAC.CAS
+sha1 3cf5d8ccbbaabde1dab1b96f99178163258dc0b1

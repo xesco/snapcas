@@ -1,0 +1,4 @@
+# Survivors (1986)(Atlantis Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Survivors%20(1986)(Atlantis%20Software)%5BRUN'CAS-'%5D.zip
+cas SURVIV86.CAS
+sha1 44ad27a260f02ca201a772c330072485078771cd

@@ -1,0 +1,4 @@
+# H.E.R.O. (1984)(Activision)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/H.E.R.O.%20(1984)(Activision)%5BBLOAD'CAS-'%2CR%5D.zip
+cas H-E-R-O.CAS
+sha1 24d195d11a1c63ec2a96dd75f85a49980970bdf4

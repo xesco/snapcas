@@ -1,0 +1,4 @@
+# Milk Race (1987)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Milk%20Race%20(1987)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas MILK-RAC.CAS
+sha1 083044f87aca95715fef525ad12c7d7592600a4c

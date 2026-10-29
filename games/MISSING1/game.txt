@@ -1,0 +1,4 @@
+# Missing In The Okhotsk - Scene 2 (1985)(Login Soft)(Tape 1 - Side B)(ja)[BLOAD'CAS-',r].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Missing%20In%20The%20Okhotsk%20-%20Scene%202%20(1985)(Login%20Soft)(Tape%201%20-%20Side%20B)(ja)%5BBLOAD'CAS-'%2Cr%5D.zip
+cas MISSING1.CAS
+sha1 7c3cfa727759b92a58efe5caa32cdf3d8a7e4acd

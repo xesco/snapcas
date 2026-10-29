@@ -1,0 +1,4 @@
+# Score 3020 (1988)(Topo Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Score%203020%20(1988)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas SCORE-30.CAS
+sha1 74e0f23fbe51084a4cc2cfe7fe8ef722960d60d0

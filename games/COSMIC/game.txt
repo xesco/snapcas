@@ -1,0 +1,4 @@
+# Cosmic Sheriff (1989)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Cosmic%20Sheriff%20(1989)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas COSMIC.CAS
+sha1 a0c58fedbd94c86f509058b217692762661f87a7

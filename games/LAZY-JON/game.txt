@@ -1,0 +1,4 @@
+# Lazy Jones (1985)(Terminal Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Lazy%20Jones%20(1985)(Terminal%20Software)%5BRUN'CAS-'%5D.zip
+cas LAZY-JON.CAS
+sha1 82a6bd07df84214c6865f26e3ed544d062c708e8

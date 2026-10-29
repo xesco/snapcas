@@ -151,7 +151,7 @@ The step also takes the tests that need the scan:
 | `MAD-MIDE.CAS` | `advanced/phc28s` | The same |
 | `DESPERAD.CAS` | `advanced/phc28s` | The same, for a loader that selects the ROM in page 0 itself, with `IN A,(0A8h) / AND 0FCh / OR 00h / OUT (0A8h),A` |
 | `MOONWALK.CAS` | `advanced/phc28s` | With `service t0`, its snapshot in the intro and a `patch` line that makes its loader select DOS's mapper: that the main game loads through T0, to the end of its 22 KB block ([Without a part in page 3](DESIGN.md#without-a-part-in-page-3)) |
-| `SOOTLAND.CAS` | `advanced/phc28s`, captured on `test/phc28s-nodisk` | With a `side1` patch of the slot register's value that its loader writes: that the capture loads the patched tape, and that the game reads side 2 through the tape service ([Game file](DESIGN.md#game-file)) |
+| `SOOTLAND.CAS` | `advanced/phc28s`, captured on `advanced/phc28s-nodisk` | With a `side1` patch of the slot register's value that its loader writes: that the capture loads the patched tape, and that the game reads side 2 through the tape service ([Game file](DESIGN.md#game-file)) |
 | `tests/borrow.asm`, which the test writes to a CAS file with a block of the bytes 0 to 255 | `advanced/phc28s` | With `service t0` and a `patch` line that makes it select DOS's mapper in page 0: that `TAPIN` borrows page 2, which holds the RAM cartridge in slot 1 and the stack, through the slot register, and reads the block right |
 
 ## Step 7: replay
@@ -219,7 +219,7 @@ same files, to compare.
 | Date | Machine | Images | Result |
 |---|---|---|---|
 | 2026-10-29 | Sanyo PHC-28S, Sony HBM-64 in slot 1, Carnivore2 in slot 2, Nextor 2.1 | `FREDDY.SNP`, `FERNANDO.SNP`, `MOONRIDE.SNP`, `CALDERO.SNP`, from step 4 | All four games run |
-| 2026-10-29 | The same | `ABADIA.SNP`, captured with `capture test/phc28s-noslot1` | La Abadia del Crimen runs, with the RAM cartridge in slot 1 |
+| 2026-10-29 | The same | `ABADIA.SNP`, captured with `capture advanced/phc28s-noslot1` | La Abadia del Crimen runs, with the RAM cartridge in slot 1 |
 | 2026-10-29 | The same | `KNIGHTMA.SNP`, with `snapshot at 130`, and the 31 images of the step 4 batch | All run |
 | 2026-10-29 | The same | `GAUNTLET.SNP`, with `GAUNTLEB.CAS` as side 2, from step 5 | The main game and its levels load from the tape service, side 2 included, and the side's colour shows at the turn-over |
 | 2026-10-29 | The same | `MOONWALK.SNP`, with `service t0`, from step 6 | The game loads through T0 and plays. The loading messages show a few wrong pixels, likely VRAM writes that come faster than the VDP accepts, because the tape service returns a byte much sooner than a tape; step 8's `/T1200` is to confirm it |

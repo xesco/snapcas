@@ -1,0 +1,4 @@
+# Super MSX n.14 (settembre 1988) - cas_14 / super_msx_14_lato_B.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.14%20(settembre%201988)%20-%20cas_14.zip
+cas SUPER14B.CAS
+sha1 bc9fd14df07b44fe5a05c0043cb8d84f75c7b21a

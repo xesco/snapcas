@@ -1,0 +1,4 @@
+# Pyro-Man (Nice Ideas)(1985)(Fr)[Cload + Run]
+# https://download.file-hunter.com/Games/MSX1/CAS/Pyro-Man%20(Nice%20Ideas)(1985)(Fr)%5BCload%20%2B%20Run%5D.zip
+cas PYRO-MAN.CAS
+sha1 7eaeaed2c3e4a3338e110216f74d90247f2cba0e

@@ -1,0 +1,4 @@
+# Chuckie Egg (1985)(Aackosoft)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Chuckie%20Egg%20(1985)(Aackosoft)%5BBLOAD'CAS-'%2CR%5D.zip
+cas CHUCKI85.CAS
+sha1 cd82eb78df63ae6119749d9878484d6630c4835b

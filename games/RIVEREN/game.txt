@@ -1,0 +1,4 @@
+# River Chase (1984)(Soft Pro International)(JP)(en)[!][CLOAD + RUN][v0.8.5b]
+# https://download.file-hunter.com/Games/MSX1/CAS/River%20Chase%20(1984)(Soft%20Pro%20International)(JP)(en)%5B!%5D%5BCLOAD%20%2B%20RUN%5D%5Bv0.8.5b%5D.zip
+cas RIVEREN.CAS
+sha1 d70cce876199af4ec79b1018b535ae900762aa2a

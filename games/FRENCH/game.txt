@@ -1,0 +1,4 @@
+# French is Fun (1984)(CDS Software)
+# https://download.file-hunter.com/Games/MSX1/CAS/French%20is%20Fun%20(1984)(CDS%20Software).zip
+cas FRENCH.CAS
+sha1 629b582f4ffe18e0cb7abfb7804afcdd1806c946

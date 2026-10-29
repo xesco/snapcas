@@ -1,0 +1,4 @@
+# Break Out! (1985)(Toshiba-EMI)[needs 64k in slot 2][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Break%20Out!%20(1985)(Toshiba-EMI)%5Bneeds%2064k%20in%20slot%202%5D%5BRUN'CAS-'%5D.zip
+cas BREAK-OU.CAS
+sha1 7f5a140d241329f5184635f5567715e0a9f7860b

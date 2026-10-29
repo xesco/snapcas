@@ -1,0 +1,4 @@
+# Formation Z (1987)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Formation%20Z%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas FORMATIO.CAS
+sha1 a4e1336263687d57f23e2c74e83f6b98259f358b

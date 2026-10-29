@@ -1,0 +1,4 @@
+# Starbyte (1987)(Mister Chip)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Starbyte%20(1987)(Mister%20Chip)(es)%5BRUN'CAS-'%5D.zip
+cas STARBYTE.CAS
+sha1 049d474d98a750df9a4f7729e5c82877294b56e9

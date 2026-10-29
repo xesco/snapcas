@@ -1,0 +1,4 @@
+# Jump Jet (1985)(Anirog)(GB)[Run'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Jump%20Jet%20(1985)(Anirog)(GB)%5BRun'CAS-'%5D.zip
+cas JUMPGB.CAS
+sha1 5fd225697e8588661671fbf08450e069f191be11

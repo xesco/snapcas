@@ -1,0 +1,5 @@
+# Soviet (1990)(Opera Soft)(Side A)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Soviet%20(1990)(Opera%20Soft)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
+cas SOVIET.CAS
+side2 SOVIETB.CAS
+sha1 eb6cd536a85d2ee49cc9ea7e6c2e678a52dc967b 0a92dfdded56b8ba4d67c72ae52713b2289faa73

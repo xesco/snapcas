@@ -1,0 +1,4 @@
+# Peter Beardsley's International Football (1988)(Grandslam Entertainments)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Peter%20Beardsley's%20International%20Football%20(1988)(Grandslam%20Entertainments)%5BBLOAD'CAS-'%2CR%5D.zip
+cas PETER-BE.CAS
+sha1 69a70d459d69f900e25fcf46dc4b8fa97359555d

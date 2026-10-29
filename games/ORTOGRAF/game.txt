@@ -1,0 +1,4 @@
+# Ortografia III - Frases (19xx)(Mind Games Espana)(es)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Ortografia%20III%20-%20Frases%20(19xx)(Mind%20Games%20Espana)(es)%5BCLOAD%20%2B%20RUN%5D.zip
+cas ORTOGRAF.CAS
+sha1 f404cdfbd6927847717f4e6c61cafb74eec74807

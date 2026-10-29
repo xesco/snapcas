@@ -1,0 +1,4 @@
+# Battle Chopper (1985)(Methodic Solutions)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Battle%20Chopper%20(1985)(Methodic%20Solutions)%5BRUN'CAS-'%5D.zip
+cas BATTLE.CAS
+sha1 532ff3c42d74a30041d6a5bc46e6b0479951b4b7

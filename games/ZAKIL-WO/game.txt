@@ -1,0 +1,4 @@
+# Zakil Wood (1985)(Mr. Micro)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Zakil%20Wood%20(1985)(Mr.%20Micro)%5BBLOAD'CAS-'%2CR%5D.zip
+cas ZAKIL-WO.CAS
+sha1 bb9c4e1dcecc27bc5ef35705a4abac48d63119e6

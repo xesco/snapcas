@@ -1,0 +1,4 @@
+# Stormbringer (1987)(Mastertronic Added Dimension)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Stormbringer%20(1987)(Mastertronic%20Added%20Dimension)%5BRUN'CAS-'%5D.zip
+cas STORMCAS.CAS
+sha1 3e46490c96efab911d9c3a32baabeccbf64e05cf

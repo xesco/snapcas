@@ -1,0 +1,4 @@
+# Invaders (1986)(LiveWire Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Invaders%20(1986)(LiveWire%20Software)%5BRUN'CAS-'%5D.zip
+cas INVADERS.CAS
+sha1 348517a18489e299f2114046420ac3c635f8dcbf

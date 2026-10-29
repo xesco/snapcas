@@ -1,0 +1,4 @@
+# Misterio del Nilo, El (1987)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Misterio%20del%20Nilo%2C%20El%20(1987)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas MISTERIO.CAS
+sha1 25fee937a84eb4cd45375d74b5ee9434d055022b

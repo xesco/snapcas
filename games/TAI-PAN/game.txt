@@ -1,0 +1,5 @@
+# Tai-Pan (1987)(Ocean Software)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Tai-Pan%20(1987)(Ocean%20Software)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas TAI-PAN.CAS
+side2 TAI-PANB.CAS
+sha1 31ef405571ef683147250075b1b49b7608cf16e4 cfbe6ae6fb1b63cdcef31ffab7a806da194f3725

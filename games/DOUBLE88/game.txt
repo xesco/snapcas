@@ -1,0 +1,5 @@
+# Double Dragon (1988)(Dro Soft)(es)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Double%20Dragon%20(1988)(Dro%20Soft)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas DOUBLE88.CAS
+side2 DOUBLEB.CAS
+sha1 50b16328f7f9899d44a7bd797bb21ffa873280df 35ddbc4dbee26620eacf7864fb121502f384418d

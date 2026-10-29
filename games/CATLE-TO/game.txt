@@ -1,0 +1,4 @@
+# Catle Tomb (2023)(Gamecast Entertainment)
+# https://download.file-hunter.com/Games/MSX1/CAS/Catle%20Tomb%20(2023)(Gamecast%20Entertainment).zip
+cas CATLE-TO.CAS
+sha1 db44030117677f7875873600db4304b2996a39d9

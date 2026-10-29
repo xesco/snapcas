@@ -1,0 +1,4 @@
+# Fruit Machine (1985)(DK'Tronics)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Fruit%20Machine%20(1985)(DK'Tronics)%5BCLOAD%20%2B%20RUN%5D.zip
+cas FRUIT-MA.CAS
+sha1 8dc0a3c8057fb1887fb1d93c0d7bc849f462ae0b

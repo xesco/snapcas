@@ -1,0 +1,4 @@
+# Batman (1986)(Erbe Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Batman%20(1986)(Erbe%20Software)%5BRUN'CAS-'%5D.zip
+cas BATMAN.CAS
+sha1 784e81b0298520f01d9b2f4a9db7f63def17a1f2

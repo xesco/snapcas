@@ -1,0 +1,5 @@
+# Triple Comando (1988)(Dro Soft)(es)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Triple%20Comando%20(1988)(Dro%20Soft)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas TRIPLE.CAS
+side2 TRIPLEB.CAS
+sha1 eedc0b2117ab924c8164d000a6897d70708d2883 8adbe539649af732d4c17018fbd188edc3539418

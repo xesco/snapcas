@@ -1,0 +1,4 @@
+# Football Manager (1987)(Addictive Games)(GB)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Football%20Manager%20(1987)(Addictive%20Games)(GB)%5BRUN'CAS-'%5D.zip
+cas FOOTBALL.CAS
+sha1 b9f288cc75601c1ea49e61a91abaae545f1b6c3e

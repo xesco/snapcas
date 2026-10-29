@@ -1,0 +1,4 @@
+# Football Manager - World Cup Edition (1990)(Addictive)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Football%20Manager%20-%20World%20Cup%20Edition%20(1990)(Addictive)%5BRUN'CAS-'%5D.zip
+cas FOOTBCUP.CAS
+sha1 2a5cc2b9bbcd3029083546dedf99833c03e3bcea

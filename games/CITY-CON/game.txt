@@ -1,0 +1,4 @@
+# City Connection (1986)(Jaleco)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/City%20Connection%20(1986)(Jaleco)%5BRUN'CAS-'%5D.zip
+cas CITY-CON.CAS
+sha1 529d6ddbc89129bcb10fac2b6a1e24da86a7b975

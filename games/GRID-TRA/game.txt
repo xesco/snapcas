@@ -1,0 +1,4 @@
+# Grid Trap (1985)(LiveWire Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Grid%20Trap%20(1985)(LiveWire%20Software)%5BRUN'CAS-'%5D.zip
+cas GRID-TRA.CAS
+sha1 499394d36900f00145920450bc47b81510155da8

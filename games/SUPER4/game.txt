@@ -1,0 +1,4 @@
+# Super MSX n.4 (settembre 1987) - cas_4 / super_msx_4_lato_A.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.4%20(settembre%201987)%20-%20cas_4.zip
+cas SUPER4.CAS
+sha1 3719c9ec1ab2ea69d2d6bd060eed73150f3e5523

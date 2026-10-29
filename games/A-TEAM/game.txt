@@ -1,0 +1,4 @@
+# A-TEAM (1988)(Zafiro)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/A-TEAM%20(1988)(Zafiro)%5BCLOAD%20%2B%20RUN%5D.zip
+cas A-TEAM.CAS
+sha1 34fa7e3b19fa88edb9f0d6b80d955afd6f8f61aa

@@ -1,0 +1,4 @@
+# Games Designer (1985)(Quicksilva)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Games%20Designer%20(1985)(Quicksilva)%5BBLOAD'CAS-'%2CR%5D.zip
+cas GAMES-DE.CAS
+sha1 1babb1ce1d856e2d7d57de9f45729cc088c9ae5e

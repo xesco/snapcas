@@ -1,0 +1,4 @@
+# Last Dungeon, The (19xx)(Grupo de Trabajo Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Last%20Dungeon%2C%20The%20(19xx)(Grupo%20de%20Trabajo%20Software)%5BRUN'CAS-'%5D.zip
+cas LAST-DUN.CAS
+sha1 b11afb5855c51a5a767586c9f7d7a03db81526b7

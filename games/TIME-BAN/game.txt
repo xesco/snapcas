@@ -1,0 +1,4 @@
+# Time Bandits (1984)(PSS)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Time%20Bandits%20(1984)(PSS)%5BBLOAD'CAS-'%2CR%5D.zip
+cas TIME-BAN.CAS
+sha1 8bd73f6a51a4462bc905e8d7e2fea0223b36792d

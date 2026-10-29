@@ -1,0 +1,4 @@
+# Barn Stormer (1985)(Electric Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Barn%20Stormer%20(1985)(Electric%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas BARN-STO.CAS
+sha1 0a3ede1a2ed5a6accb34aec7fdcbf0352c08cd5f

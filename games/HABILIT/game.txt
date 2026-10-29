@@ -1,0 +1,4 @@
+# Habilit (1988)(Iber Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Habilit%20(1988)(Iber%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas HABILIT.CAS
+sha1 53b94382cfd6b12963e98071ce448e057bc1c473

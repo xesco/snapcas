@@ -1,0 +1,4 @@
+# Super Ilevan (POPCOM 1987-04)
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20Ilevan%20(POPCOM%201987-04).zip
+cas SUPER-IL.CAS
+sha1 59fbc7132548680ca974d7bcb89cc7b3ab654d80

@@ -1,0 +1,4 @@
+# The Queens Footsteps (2020) (Davide Bucci)[RUN'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/The%20Queens%20Footsteps%20(2020)%20(Davide%20Bucci)%5BRUN'CAS-'%2CR%5D.zip
+cas QUEEN.CAS
+sha1 1120d85e386c567b0670dc18b7dd1e113c2ce626

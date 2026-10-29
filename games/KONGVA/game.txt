@@ -1,0 +1,5 @@
+# Kong (Eurosoft) (VA Holding) (Side A) [RUN'CAS-'] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Kong%20(Eurosoft)%20(VA%20Holding)%20(Side%20A)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas KONGVA.CAS
+side2 KONGB.CAS
+sha1 b25fbd05451795d2a98d23258e443bcd980b4a73 7eaea59115cbad08c7361aa3374a4311f6448379

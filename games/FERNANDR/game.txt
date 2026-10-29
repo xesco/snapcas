@@ -1,0 +1,4 @@
+# Fernando Martin Basket Master (1987)(Dinamic Software)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Fernando%20Martin%20Basket%20Master%20(1987)(Dinamic%20Software)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas FERNANDR.CAS
+sha1 28426cadc201d41577195d78cb3910de0ce3168d

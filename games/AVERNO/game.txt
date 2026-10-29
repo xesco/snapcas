@@ -1,0 +1,4 @@
+# Averno (1989)(Proein Soft Line)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Averno%20(1989)(Proein%20Soft%20Line)(es)%5BRUN'CAS-'%5D.zip
+cas AVERNO.CAS
+sha1 4286d19082886fa35a37fc533f89428c014d0c2d

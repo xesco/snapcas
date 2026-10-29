@@ -1,0 +1,4 @@
+# MSX Screendump (1986)(Philips)(nl)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/MSX%20Screendump%20(1986)(Philips)(nl)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MSX-SCRE.CAS
+sha1 fc7979cd76418aaddf63a7e531aaa2dfe9dd4104

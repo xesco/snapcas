@@ -1,0 +1,3 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+service t0
+patch page0:38CD A4 6F > 2E A6

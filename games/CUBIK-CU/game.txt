@@ -1,0 +1,4 @@
+# Cubik. Cubo de Rubik (1985)(Monser)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Cubik.%20Cubo%20de%20Rubik%20(1985)(Monser)(es)%5BRUN'CAS-'%5D.zip
+cas CUBIK-CU.CAS
+sha1 8acacbe3ff88a179d139e6567700814448e863f4

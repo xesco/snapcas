@@ -1,0 +1,4 @@
+# Master of the Lamps (1985)(Activision)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Master%20of%20the%20Lamps%20(1985)(Activision)%5BRUN'CAS-'%5D.zip
+cas MASTETHE.CAS
+sha1 38e7463155e3d20d2ca89880bfe554cb09b8b1a6

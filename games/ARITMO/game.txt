@@ -1,0 +1,4 @@
+# Aritmo (1985)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Aritmo%20(1985)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas ARITMO.CAS
+sha1 7a56e93e619a365f2bf948e68d431b2df6ceb093

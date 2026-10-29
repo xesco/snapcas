@@ -1,0 +1,4 @@
+# Super Doors (1983)[BLOAD'CAS',r]
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20Doors%20(1983)%5BBLOAD'CAS'%2Cr%5D.zip
+cas SUPER-DO.CAS
+sha1 beb6ca52d6241ae11944b5af667629301dacc517

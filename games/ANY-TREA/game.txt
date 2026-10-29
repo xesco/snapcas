@@ -1,0 +1,4 @@
+# Any Treasure Day (2018) (Timmy) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Any%20Treasure%20Day%20(2018)%20(Timmy)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas ANY-TREA.CAS
+sha1 b30192287bf8ad96e046054bea0e264571d9e5a5

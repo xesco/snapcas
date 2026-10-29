@@ -1,0 +1,4 @@
+# Nonamed (1986)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Nonamed%20(1986)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas NONAMED.CAS
+sha1 5f60c61d4e8801eaa5b5095719e241e7b3bd1afe

@@ -1,0 +1,4 @@
+# Alien 8 Remake (2008) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Alien%208%20Remake%20(2008)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas ALIEN-8.CAS
+sha1 a20fc08d36c3ae41e27368034720f981efbddaa7

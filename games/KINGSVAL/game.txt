@@ -1,0 +1,4 @@
+# KingsVally[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/KingsVally%5BBLOAD'CAS-'%2CR%5D.zip
+cas KINGSVAL.CAS
+sha1 7f7659960acb099bc6d7696ee3bdb7e71d26ce7e

@@ -1,0 +1,5 @@
+# Operation Wolf (1988)(Ocean Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Operation%20Wolf%20(1988)(Ocean%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas OPERATIO.CAS
+side2 OPERATIB.CAS
+sha1 1437745ecd85ef712d0fd447c18f3747c02abd46 cd4880828db5fc37e5cee65e78015d142e9aa11a

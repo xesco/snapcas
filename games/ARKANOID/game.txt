@@ -1,0 +1,4 @@
+# Arkanoid (1986)(Taito)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Arkanoid%20(1986)(Taito)%5BRUN'CAS-'%5D.zip
+cas ARKANOID.CAS
+sha1 d140c06b7b16788769121b721e18eee11eac52ba

@@ -1,0 +1,4 @@
+# Mask II (1987)(Gremlin Graphics Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Mask%20II%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MASK-II.CAS
+sha1 f5bb0e86c5f3b69283ea1a4369ad4f5bc9b871c5

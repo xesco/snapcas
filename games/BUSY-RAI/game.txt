@@ -1,0 +1,4 @@
+# Busy Rainy Day (1983)(Hudson Soft)[BLOAD'CAS',r]
+# https://download.file-hunter.com/Games/MSX1/CAS/Busy%20Rainy%20Day%20(1983)(Hudson%20Soft)%5BBLOAD'CAS'%2Cr%5D.zip
+cas BUSY-RAI.CAS
+sha1 e7e41116c75165370498e4124862d20c7cd5e897

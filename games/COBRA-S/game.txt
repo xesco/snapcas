@@ -1,0 +1,4 @@
+# Cobra's Arc (1986)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Cobra's%20Arc%20(1986)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas COBRA-S.CAS
+sha1 4bb5ca34d849cebb811b1eae36d0e2c6483cc990

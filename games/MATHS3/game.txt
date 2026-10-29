@@ -1,0 +1,4 @@
+# Maths Invaders - Compilation Tape 3 (Eaglesoft) [RUN'CAS-'] [_].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Maths%20Invaders%20-%20Compilation%20Tape%203%20(Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas MATHS3.CAS
+sha1 e8fc0ffc5f9c6e588c645f4f55211184a0dd22dc

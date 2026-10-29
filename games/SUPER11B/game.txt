@@ -1,0 +1,4 @@
+# Super MSX n.11 (Aprile 1988) - cas_11 / super_msx_11_lato_B.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.11%20(Aprile%201988)%20-%20cas_11.zip
+cas SUPER11B.CAS
+sha1 8b716cf807acf587e35cd539ef54b74d1dcde86c

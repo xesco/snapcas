@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 080-Othello.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 042-OTHE.CAS
+sha1 adc806d8b71478269555aaf19e2d7a28cd56e7b3

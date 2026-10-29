@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 065-Snack-Bar.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 033-SNAC.CAS
+sha1 d91c09d658f28b4371af440c7a2ec58f9f62a88d

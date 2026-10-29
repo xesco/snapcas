@@ -1,0 +1,5 @@
+# Wing Man (1985)(Enix)(ja)(Side A)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Wing%20Man%20(1985)(Enix)(ja)(Side%20A)%5BCLOAD%20%2B%20RUN%5D.zip
+cas WING-MAA.CAS
+side2 WING-MAB.CAS
+sha1 679b21adf5dd874b24df35552327bdb0af793ab8 78b7007e08ef66a1c17c105de069919a63435cce

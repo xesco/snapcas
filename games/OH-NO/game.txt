@@ -1,0 +1,4 @@
+# Oh no! (Aka Oh Shit!) [Aackosoft] [Disprosoft] [1986][CLOAD+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Oh%20no!%20(Aka%20Oh%20Shit!)%20%5BAackosoft%5D%20%5BDisprosoft%5D%20%5B1986%5D%5BCLOAD%2BRUN%5D.zip
+cas OH-NO.CAS
+sha1 c34a96d25be4a3ae616659a24bd8c4a51f5ff222

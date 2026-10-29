@@ -1,0 +1,4 @@
+# 747 400b Flight Simulator (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/747%20400b%20Flight%20Simulator%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas 747-400.CAS
+sha1 d0309f6cc796042d188384b622439ef5fecc7f45

@@ -1,0 +1,4 @@
+# Winterhawk (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Winterhawk%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas WINTERHA.CAS
+sha1 e3163b5fb3eec6bd6ae28c2bd17cf8e6a6dfa92e

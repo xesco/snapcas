@@ -1,0 +1,4 @@
+# Graficas de Gestion (1985)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Graficas%20de%20Gestion%20(1985)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas GRAFICAS.CAS
+sha1 af627ec3eca083cf8fb95aafbef20b606f118abd

@@ -1,0 +1,4 @@
+# Vilzam - Cosmic Struggle (1985) (Yuichi Toyama)
+# https://download.file-hunter.com/Games/MSX1/CAS/Vilzam%20-%20Cosmic%20Struggle%20(1985)%20(Yuichi%20Toyama).zip
+cas VILZAM.CAS
+sha1 f6d4d504871f32b7aecd3a4bea3b5a8315ae3e6d

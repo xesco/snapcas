@@ -1,0 +1,4 @@
+# Tension (1988)(System 4)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Tension%20(1988)(System%204)(es)%5BRUN'CAS-'%5D.zip
+cas TENSION.CAS
+sha1 78c3edac1fd585a0b2c5069bc30a58ac086c6c28

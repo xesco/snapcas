@@ -1,0 +1,4 @@
+# Star Fighter (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Star%20Fighter%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas STAR-FIG.CAS
+sha1 2d546356eb6af721ee7e69cd87ba243dd2c7b8b2

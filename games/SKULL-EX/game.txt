@@ -1,0 +1,4 @@
+# Skull Exilon (1988)(Iber Soft)[aka Safari X][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Skull%20Exilon%20(1988)(Iber%20Soft)%5Baka%20Safari%20X%5D%5BRUN'CAS-'%5D.zip
+cas SKULL-EX.CAS
+sha1 deaf109d93ae184528e7a14dcd2b5bebb806d62f

@@ -1,0 +1,4 @@
+# Martianoids (1987)(Ultimate Play The Game)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Martianoids%20(1987)(Ultimate%20Play%20The%20Game)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MARTIANO.CAS
+sha1 58df58ad1615a7a6bd2454f4648e317aa96d8e94

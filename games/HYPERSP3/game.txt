@@ -1,0 +1,4 @@
+# HyperSports3[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/HyperSports3%5BBLOAD'CAS-'%2CR%5D.zip
+cas HYPERSP3.CAS
+sha1 a9675dbc6ae2a90929084ea18fb912f60dc74277

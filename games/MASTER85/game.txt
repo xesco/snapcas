@@ -1,0 +1,4 @@
+# Master Voice (1985)(Aackosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Master%20Voice%20(1985)(Aackosoft)%5BRUN'CAS-'%5D.zip
+cas MASTER85.CAS
+sha1 3d2d06d502172ef228877030e6e55d0e889f5375

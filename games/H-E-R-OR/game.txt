@@ -1,0 +1,4 @@
+# H.E.R.O. (1984)(Disprosoft)[Fixed][BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/H.E.R.O.%20(1984)(Disprosoft)%5BFixed%5D%5BBLOAD'CAS-'%2CR%5D.zip
+cas H-E-R-OR.CAS
+sha1 15d2ada5beff5b944c4bc98d826351dacd88f2ed

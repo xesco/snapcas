@@ -1,0 +1,4 @@
+# Word Pro v2.60 (1985)(Kuma Computers)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Word%20Pro%20v2.60%20(1985)(Kuma%20Computers)%5BBLOAD'CAS-'%2CR%5D.zip
+cas WORD-PRO.CAS
+sha1 087a9ee837fc4dd9955c8a1cd24ec75426559419

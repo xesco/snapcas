@@ -1,4 +1,0 @@
-# The PHC-28S without the Carnivore2, so without Nextor, for a game that crashes
-# when a disk system is present.
-openmsx -machine Sanyo_PHC-28S -ext ram64k
-disk hda

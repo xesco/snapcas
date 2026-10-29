@@ -1,0 +1,4 @@
+# Fnick Li- Fnick La (1986) LOGiN(Sony & Klon)
+# https://download.file-hunter.com/Games/MSX1/CAS/Fnick%20Li-%20Fnick%20La%20(1986)%20LOGiN(Sony%20%26%20Klon).zip
+cas FNICK-LI.CAS
+sha1 0d72523e33ccf8cb25c65728f22df615e60ba729

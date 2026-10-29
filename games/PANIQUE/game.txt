@@ -1,0 +1,4 @@
+# Panique (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Panique%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas PANIQUE.CAS
+sha1 4bd33cb07e3b2bf18466d9441b29b44180f9162f

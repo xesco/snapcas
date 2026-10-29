@@ -1,0 +1,4 @@
+# Pinball Blaster (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Pinball%20Blaster%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas PINBALL.CAS
+sha1 cd355195543954a0da2c60a4ebb7dd8878f51196

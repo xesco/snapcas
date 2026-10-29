@@ -1,0 +1,4 @@
+# The Munsters (1988)(Alternative Software)
+# https://download.file-hunter.com/Games/MSX1/CAS/The%20Munsters%20(1988)(Alternative%20Software).zip
+cas THE-MUNS.CAS
+sha1 5d47179ab4d9eb793d686ef4823d9a48a31d92ab

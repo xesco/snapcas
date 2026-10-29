@@ -1,0 +1,4 @@
+# Eddie Kidd Jump Challenge - Compilation Tape 3 (Eaglesoft) [RUN'CAS-'] [_].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Eddie%20Kidd%20Jump%20Challenge%20-%20Compilation%20Tape%203%20(Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas EDDIE3.CAS
+sha1 f9da00850af1c83f0dd3b5c6251b6611ac4b123c

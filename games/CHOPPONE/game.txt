@@ -1,0 +1,4 @@
+# Chopper One (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Chopper%20One%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas CHOPPONE.CAS
+sha1 15cdd2155c46c601a1d12e54963f9a38a1b528ce

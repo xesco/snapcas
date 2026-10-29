@@ -1,0 +1,4 @@
+# Tasword (1985)(Sony)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Tasword%20(1985)(Sony)(es)%5BRUN'CAS-'%5D.zip
+cas TASWORD.CAS
+sha1 74981561bebbea8873df3f1f6dd911b1921ead1d

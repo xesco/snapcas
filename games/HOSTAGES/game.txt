@@ -1,0 +1,4 @@
+# Hostages (1990)(Infogrames)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Hostages%20(1990)(Infogrames)%5BRUN'CAS-'%5D.zip
+cas HOSTAGES.CAS
+sha1 a1a6cd8638e71bd480977ad6423247299ddf028b

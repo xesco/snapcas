@@ -1,0 +1,4 @@
+# Finders Keepers (1986)(Mastertronic)[needs 64k in slot 2][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Finders%20Keepers%20(1986)(Mastertronic)%5Bneeds%2064k%20in%20slot%202%5D%5BRUN'CAS-'%5D.zip
+cas FINDERIN.CAS
+sha1 fb5e78d237e42fc4cccb1c9b4d8c74cfc0504c8d

@@ -1,0 +1,4 @@
+# UchiMata[+3][NR]
+# https://download.file-hunter.com/Games/MSX1/CAS/UchiMata%5B%2B3%5D%5BNR%5D.zip
+cas UCHIMATA.CAS
+sha1 604965ba31d18eea37bc4914a83a2e941cc76a3e

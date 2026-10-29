@@ -1,0 +1,4 @@
+# Cosmos (1985)(Sony)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Cosmos%20(1985)(Sony)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas COSMOS.CAS
+sha1 337104a580700e91e4fce32027517a8c6f578f65

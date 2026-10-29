@@ -1,0 +1,4 @@
+# Viaje al Centro de la Tierra (1989)(Topo Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Viaje%20al%20Centro%20de%20la%20Tierra%20(1989)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas VIAJE-AL.CAS
+sha1 dff833c730978394f57b5ad8715bf7da0a74e042

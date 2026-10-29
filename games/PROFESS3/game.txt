@@ -1,0 +1,4 @@
+# Professional Snooker Simulator (1987)(Codemasters)(M3)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Professional%20Snooker%20Simulator%20(1987)(Codemasters)(M3)%5BBLOAD'CAS-'%2CR%5D.zip
+cas PROFESS3.CAS
+sha1 e8fa6a140476e1ffaf12d3ab284df08e47f29524

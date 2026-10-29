@@ -1,0 +1,4 @@
+# Storm - Una's Lair (1986)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Storm%20-%20Una's%20Lair%20(1986)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas STORM-UN.CAS
+sha1 5fc2d80516810d4fdff787b844d9338b56c81203

@@ -1,0 +1,4 @@
+# Invierte y Gana (1986)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Invierte%20y%20Gana%20(1986)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas INVIERTE.CAS
+sha1 f5ba8cdf5bcf04e65eaca63ca958884f020feba8

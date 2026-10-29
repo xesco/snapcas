@@ -1,0 +1,4 @@
+# Genghis Khan (1991)(Positive)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Genghis%20Khan%20(1991)(Positive)%5BRUN'CAS-'%5D.zip
+cas GENGHIS.CAS
+sha1 92ad4231017923f21482dfcdc5068c347d9fcaf0

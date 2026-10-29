@@ -1,0 +1,5 @@
+# World Games (1987)(US Gold)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/World%20Games%20(1987)(US%20Gold)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas WORLD-GA.CAS
+side2 WORLDB.CAS
+sha1 1f2cfacd52c95c51030005a1f3df8fc48d446d81 d036636ec1e053c51d43e81cb6064d0de7256405

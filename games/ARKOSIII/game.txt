@@ -1,0 +1,4 @@
+# Arkos III (1988)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Arkos%20III%20(1988)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas ARKOSIII.CAS
+sha1 3f4738e63ffeb814d89998000dcdf9c7c74e2c4d

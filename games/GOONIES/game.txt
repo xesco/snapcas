@@ -1,0 +1,4 @@
+# Goonies  [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Goonies%20%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas GOONIES.CAS
+sha1 e6570949f795e29539a9dd051de2f2e5fcfa9638

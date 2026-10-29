@@ -1,0 +1,4 @@
+# Robot Wars (ByteBusters) (Aackosoft - Eaglesoft) (Compulogical) [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Robot%20Wars%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20(Compulogical)%20%5B_%5D.zip
+cas ROBOTAL.CAS
+sha1 a6c1dd06b275a52320289a33fa18642fe6de07af

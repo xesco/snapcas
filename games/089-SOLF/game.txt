@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 089-Solfeo.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 089-SOLF.CAS
+sha1 c8ae635ab220294705f4a6f225d117652567bd62

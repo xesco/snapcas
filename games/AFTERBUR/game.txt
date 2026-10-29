@@ -1,0 +1,5 @@
+# Afterburner (1988)(Activision)(Side A)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Afterburner%20(1988)(Activision)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
+cas AFTERBUR.CAS
+side2 AFTERBUB.CAS
+sha1 7517f6d94eb9742ad87e0b1c9a3cc06b3fd2acf1 1497b7956e2b17734b947d2825588a2a1e1554d0

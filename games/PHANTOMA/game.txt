@@ -1,0 +1,4 @@
+# Phantomas 2 (1986)(Dinamic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Phantomas%202%20(1986)(Dinamic)%5BRUN'CAS-'%5D.zip
+cas PHANTOMA.CAS
+sha1 d24bf89e56ed332a557786a439aa486f0b4be178

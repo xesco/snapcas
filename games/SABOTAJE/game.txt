@@ -1,0 +1,4 @@
+# Sabotaje (1988)(P.J. Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Sabotaje%20(1988)(P.J.%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas SABOTAJE.CAS
+sha1 49d9229bee271178098d6680065bf33d1c18bb7c

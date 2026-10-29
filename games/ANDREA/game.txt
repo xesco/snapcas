@@ -1,0 +1,4 @@
+# Andrea Petkovic Tennis [En] (2017)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Andrea%20Petkovic%20Tennis%20%5BEn%5D%20(2017)%5BBLOAD'CAS-'%2CR%5D.zip
+cas ANDREA.CAS
+sha1 dae96958a6d2acd1c325970173edf252e40cfbcc

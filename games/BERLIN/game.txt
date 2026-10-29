@@ -1,0 +1,4 @@
+# Berlin (1985)(Omega System)[CLOAD+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Berlin%20(1985)(Omega%20System)%5BCLOAD%2BRUN%5D.zip
+cas BERLIN.CAS
+sha1 30f32ed567fb8dc54ed604fb771e459dd274e0d3

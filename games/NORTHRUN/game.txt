@@ -1,0 +1,4 @@
+# North Sea Bullion Adventure (1985)(Kuma Computers)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/North%20Sea%20Bullion%20Adventure%20(1985)(Kuma%20Computers)%5BCLOAD%20%2B%20RUN%5D.zip
+cas NORTHRUN.CAS
+sha1 dea47f4adf20912a9b61e54ba852a33c8456fbbb

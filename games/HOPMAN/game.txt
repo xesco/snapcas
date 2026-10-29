@@ -1,0 +1,4 @@
+# Hopman (2023) (Inufuto)
+# https://download.file-hunter.com/Games/MSX1/CAS/Hopman%20(2023)%20(Inufuto).zip
+cas HOPMAN.CAS
+sha1 f69e7ae3f3fe96d296e9f2a800ec5537ad5ccf23

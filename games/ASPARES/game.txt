@@ -1,0 +1,4 @@
+# Aspar GP Master (1988)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Aspar%20GP%20Master%20(1988)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas ASPARES.CAS
+sha1 d607c5a6a2b3d58c000984836621c08c508c4da3

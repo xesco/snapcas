@@ -1,0 +1,4 @@
+# Humphrey (1988)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Humphrey%20(1988)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas HUMPHREY.CAS
+sha1 9bdb2c54d815139a62fb5388d945cd902bb1701e

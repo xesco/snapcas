@@ -1,0 +1,4 @@
+# Laberinto Binario - Binary Land (Sony Spain) (Indescomp) [BLOAD'CAS-',R] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Laberinto%20Binario%20-%20Binary%20Land%20(Sony%20Spain)%20(Indescomp)%20%5BBLOAD'CAS-'%2CR%5D%20%5B_%5D.zip
+cas LABERCAS.CAS
+sha1 de7a4c2840a0c8f90fdb89ab95e54dbe364cc65e

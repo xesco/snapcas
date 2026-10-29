@@ -1,0 +1,4 @@
+# Metropolis (1989)(Topo Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Metropolis%20(1989)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas METROPOL.CAS
+sha1 061ca4505091c9db66a9a075b4fd56cacec00226

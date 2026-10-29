@@ -1,0 +1,4 @@
+# Pescador Espacial, El (1986)(Anaya Multimedia)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Pescador%20Espacial%2C%20El%20(1986)(Anaya%20Multimedia)(es)%5BRUN'CAS-'%5D.zip
+cas PESCADOR.CAS
+sha1 866e7fc65e76e416338b0edeabe538fbc4a2c005

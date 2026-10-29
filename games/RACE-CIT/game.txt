@@ -1,0 +1,4 @@
+# Race City (1988)(Iber Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Race%20City%20(1988)(Iber%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas RACE-CIT.CAS
+sha1 001f41edac83743068e5003eca6a0774e5637760

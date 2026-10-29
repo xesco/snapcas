@@ -1,0 +1,4 @@
+# Battlot (2021)(Inufuto)
+# https://download.file-hunter.com/Games/MSX1/CAS/Battlot%20(2021)(Inufuto).zip
+cas BATTLOT.CAS
+sha1 0042f02f14a46c7c070998aa426eb828c84322fe

@@ -1,0 +1,5 @@
+# Senda Salvaje (1990)(Zigurat Software)(es)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Senda%20Salvaje%20(1990)(Zigurat%20Software)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas SENDA-SA.CAS
+side2 SENDAB.CAS
+sha1 3d1b71b2cd545a4eb0c3cc958aafc38949a76a74 ea293cb0460648017fc2d0d79e9e3fd0d58cbe90

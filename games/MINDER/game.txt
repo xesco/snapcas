@@ -1,0 +1,4 @@
+# Minder (1985) (dK'Tronics) [RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Minder%20(1985)%20(dK'Tronics)%20%5BRUN'CAS-'%5D.zip
+cas MINDER.CAS
+sha1 bfd7a60e49af6b93bf663ae1264f1b40c639e830

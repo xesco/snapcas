@@ -1,0 +1,4 @@
+# Darkwood Manor (19xx)(Kuma Computers)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Darkwood%20Manor%20(19xx)(Kuma%20Computers)%5BCLOAD%20%2B%20RUN%5D.zip
+cas DARKWOOD.CAS
+sha1 3614e6f9e5aee13a6fa9fddbc63bb849d98f8b37

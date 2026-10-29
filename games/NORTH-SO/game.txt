@@ -1,0 +1,5 @@
+# North & South (1991)(Infogrames)(M3)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/North%20%26%20South%20(1991)(Infogrames)(M3)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas NORTH-SO.CAS
+side2 NORTHB.CAS
+sha1 4ed740c01a55b73fec14d3eec22db2d55e0b8888 de862a2957eee17e75b93f274fd676b54b921450

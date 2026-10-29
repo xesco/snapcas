@@ -1,0 +1,4 @@
+# Cyberun (1985)(Ultimate Play The Game)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Cyberun%20(1985)(Ultimate%20Play%20The%20Game)%5BBLOAD'CAS-'%2CR%5D.zip
+cas CYBERUN.CAS
+sha1 cdb19acd38f244efef26d6b425cc5e381b77e1b7

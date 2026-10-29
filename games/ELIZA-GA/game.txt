@@ -1,0 +1,4 @@
+# Game Pack 1 (Aackosoft - Eaglesoft)[BASIC] / Eliza - Game Pack 1 (Aackosoft - Eaglesoft) [RUN'CAS-'] [_].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%201%20(Aackosoft%20-%20Eaglesoft)%5BBASIC%5D.zip
+cas ELIZA-GA.CAS
+sha1 2a07cc93042bb34bf59e4939aa1e1116e920ab2a

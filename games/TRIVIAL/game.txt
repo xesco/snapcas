@@ -1,0 +1,5 @@
+# Trivial Pursuit (1986)(Domark)(es)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Trivial%20Pursuit%20(1986)(Domark)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas TRIVIAL.CAS
+side2 TRIVIALB.CAS
+sha1 8674186adede52299e648b212a041407c165f5b3 e7b3e642731c0baeee33c97105eba223ae399f22

@@ -1,0 +1,4 @@
+# Pac-Land (1988)(Grandslam Entertainments)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Pac-Land%20(1988)(Grandslam%20Entertainments)%5BBLOAD'CAS-'%2CR%5D.zip
+cas PAC-LAND.CAS
+sha1 db933ef87d8800f48d1c4234e6dca06628914f78

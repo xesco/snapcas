@@ -1,0 +1,5 @@
+# Xyzolog (Electric Software) (Aackosoft) (Side 1) [BLOAD'CAS-',R] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Xyzolog%20(Electric%20Software)%20(Aackosoft)%20(Side%201)%20%5BBLOAD'CAS-'%2CR%5D%20%5B_%5D.zip
+cas XYZOLOG.CAS
+side2 XYZOLOG2.CAS
+sha1 d686c716dd2c3c1e64f7ca2d4665ba13cc1dc00b 5efb4645f05a63d2c191a9df143a9400b296b2fc

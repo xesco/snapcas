@@ -1,0 +1,4 @@
+# Vegetable Crash (HoneyBee Soft) (Hudson Soft) (Japan) [BLOAD'CAS-',R] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Vegetable%20Crash%20(HoneyBee%20Soft)%20(Hudson%20Soft)%20(Japan)%20%5BBLOAD'CAS-'%2CR%5D%20%5B_%5D.zip
+cas VEGETABL.CAS
+sha1 0299667f1b72d9dcd7a20ea54edc5b58cd83da0c

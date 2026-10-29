@@ -1,0 +1,4 @@
+# Manic Miner (1984)(Software Projects)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Manic%20Miner%20(1984)(Software%20Projects)%5BRUN'CAS-'%5D.zip
+cas MANIC-MI.CAS
+sha1 1d5fa154bcce76648c7d122e47defe90300e9d3c

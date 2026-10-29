@@ -1,0 +1,4 @@
+# Ortografia I - Vocabulario (19xx)(Mind Games Espana)(es)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Ortografia%20I%20-%20Vocabulario%20(19xx)(Mind%20Games%20Espana)(es)%5BCLOAD%20%2B%20RUN%5D.zip
+cas ORTOGRAI.CAS
+sha1 eb0a066458e9c5039cbfca54c9081d45ef9ede10

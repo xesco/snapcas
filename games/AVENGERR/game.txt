@@ -1,0 +1,4 @@
+# Avenger (1986)(Gremlin Graphics Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Avenger%20(1986)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas AVENGERR.CAS
+sha1 7b0a45191ecf03fb6770259760c0a11f458cb3d3

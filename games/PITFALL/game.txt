@@ -1,0 +1,4 @@
+# Pitfall II - Lost Caverns (1985)(Activision)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Pitfall%20II%20-%20Lost%20Caverns%20(1985)(Activision)%5BBLOAD'CAS-'%2CR%5D.zip
+cas PITFALL.CAS
+sha1 7ea3107cae3c4c195e50b541c2a17af0d2a6b4ad

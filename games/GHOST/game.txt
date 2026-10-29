@@ -1,0 +1,4 @@
+# Ghost (1989)(Mind Games Espana)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Ghost%20(1989)(Mind%20Games%20Espana)(es)%5BRUN'CAS-'%5D.zip
+cas GHOST.CAS
+sha1 9b32deac7b5fe011d658b6bcf8d1e9a062523577

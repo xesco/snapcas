@@ -1,0 +1,4 @@
+# Silicon Dreams II - Return to Eden v2 (1986)(Level 9 Computing)[a1 - Cracked][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Silicon%20Dreams%20II%20-%20Return%20to%20Eden%20v2%20(1986)(Level%209%20Computing)%5Ba1%20-%20Cracked%5D%5BRUN'CAS-'%5D.zip
+cas SILICCAS.CAS
+sha1 1ba2348abc96f2156a2da4381f3bf87bf34c73c2

@@ -1,0 +1,4 @@
+# Ice (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Ice%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas ICE.CAS
+sha1 1139bc065785f4d53408a00dd09fbb46ea2de52d

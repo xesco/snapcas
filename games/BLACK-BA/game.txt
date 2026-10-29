@@ -1,0 +1,4 @@
+# Black Bass, The (1986)(Hot-B)(ja)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Black%20Bass%2C%20The%20(1986)(Hot-B)(ja)%5BRUN'CAS-'%5D.zip
+cas BLACK-BA.CAS
+sha1 8dad49c11592ab74e98a6e325b4c62b445842ad9

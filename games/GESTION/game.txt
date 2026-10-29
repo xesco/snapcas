@@ -1,0 +1,4 @@
+# Gestion Familiar (1986)(Load 'n' Run)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Gestion%20Familiar%20(1986)(Load%20'n'%20Run)(es)%5BRUN'CAS-'%5D.zip
+cas GESTION.CAS
+sha1 d3dfa9ec7ecfaec71511d120bbf5030fc3d1fae4

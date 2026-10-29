@@ -1,0 +1,4 @@
+# 10th Frame (1986)(US Gold)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/10th%20Frame%20(1986)(US%20Gold)%5BRUN'CAS-'%5D.zip
+cas 10-TH-FR.CAS
+sha1 f0320645055bdb295dde27278bd82f055b20f0df

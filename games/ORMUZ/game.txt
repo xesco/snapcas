@@ -1,0 +1,4 @@
+# Ormuz (1988)(Iber Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Ormuz%20(1988)(Iber%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas ORMUZ.CAS
+sha1 87f503b9d32f15b7887551c573f4212ca2568971

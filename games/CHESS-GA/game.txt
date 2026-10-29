@@ -1,0 +1,4 @@
+# Chess Game, The (1985)(Eaglesoft)
+# https://download.file-hunter.com/Games/MSX1/CAS/Chess%20Game%2C%20The%20(1985)(Eaglesoft).zip
+cas CHESS-GA.CAS
+sha1 6866a1569613d23140ac8435e626a8faa67447c7

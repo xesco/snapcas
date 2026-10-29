@@ -1,0 +1,4 @@
+# Turmoil (1986)(Bug-Byte Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Turmoil%20(1986)(Bug-Byte%20Software)%5BRUN'CAS-'%5D.zip
+cas TURMOIL.CAS
+sha1 31c7eb911a8ca0db7660041f48a9c4903bd6786e

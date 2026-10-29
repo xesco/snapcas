@@ -1,0 +1,4 @@
+# Jumping Jack (1986)(Livewire)
+# https://download.file-hunter.com/Games/MSX1/CAS/Jumping%20Jack%20(1986)(Livewire).zip
+cas JUMPING.CAS
+sha1 95f7905ca611e7e0959c5fa4a5703fc4f5d7ba03

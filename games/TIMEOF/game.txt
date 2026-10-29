@@ -1,0 +1,4 @@
+# Time and Magik III - The Price of Magik v2(1988)(Level 9 Computing)[RUN'CAS-',r]
+# https://download.file-hunter.com/Games/MSX1/CAS/Time%20and%20Magik%20III%20-%20The%20Price%20of%20Magik%20v2(1988)(Level%209%20Computing)%5BRUN'CAS-'%2Cr%5D.zip
+cas TIMEOF.CAS
+sha1 d8c21b547d8aaf1236a3d24b780bff3ec2b13add

@@ -1,0 +1,4 @@
+# Demo, De - Hexapion (1985)(Philips)(nl)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Demo%2C%20De%20-%20Hexapion%20(1985)(Philips)(nl)%5BRUN'CAS-'%5D.zip
+cas DEMO-DE.CAS
+sha1 6e94c125fa39d16fadba77055a1067d666efa27e

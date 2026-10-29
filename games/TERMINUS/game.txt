@@ -1,0 +1,4 @@
+# Terminus - The Prison Planet (1987)(Mastertronic)[RUN'CAS',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Terminus%20-%20The%20Prison%20Planet%20(1987)(Mastertronic)%5BRUN'CAS'%2CR%5D.zip
+cas TERMINUS.CAS
+sha1 c1f1774345fb1e17b14e78a6006dc269a006ae10

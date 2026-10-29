@@ -1,0 +1,4 @@
+# Nightlife (1985)(Koei)(ja)
+# https://download.file-hunter.com/Games/MSX1/CAS/Nightlife%20(1985)(Koei)(ja).zip
+cas NIGHTLIF.CAS
+sha1 4cd75640da54c82be387d8372040911743f44c6d

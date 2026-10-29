@@ -1,0 +1,4 @@
+# Rampart, The (1988)(Iber Soft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Rampart%2C%20The%20(1988)(Iber%20Soft)%5BRUN'CAS-'%5D.zip
+cas RAMPART.CAS
+sha1 c1dbf390776ea8dc38bf3bb522f82a81209ed4f3

@@ -1,0 +1,4 @@
+# Paris-Dakar (1988)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Paris-Dakar%20(1988)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas PARIS-DA.CAS
+sha1 262f7027e99616fca5d73b91209f9ea4348bde99

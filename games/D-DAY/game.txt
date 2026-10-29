@@ -1,0 +1,4 @@
+# D-Day (1984)(Jaleco)
+# https://download.file-hunter.com/Games/MSX1/CAS/D-Day%20(1984)(Jaleco).zip
+cas D-DAY.CAS
+sha1 433b734179006740aa21601fef660697795551c7

@@ -1,0 +1,4 @@
+# Sky Diver (1984)(Hudson Soft)
+# https://download.file-hunter.com/Games/MSX1/CAS/Sky%20Diver%20(1984)(Hudson%20Soft).zip
+cas SKY-DIVE.CAS
+sha1 96873d866b7989d76964db1aaedeec13a6c9568b

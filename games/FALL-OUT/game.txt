@@ -1,0 +1,4 @@
+# Fall Out (1984)(Policy)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Fall%20Out%20(1984)(Policy)%5BCLOAD%20%2B%20RUN%5D.zip
+cas FALL-OUT.CAS
+sha1 bd8bddf3652eb52abf1fbf4522811d11d563f65a

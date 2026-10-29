@@ -1,0 +1,4 @@
+# Dustin (1987)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Dustin%20(1987)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas DUSTIN.CAS
+sha1 b01e3feea76a7610b004a955248d12e624bae350

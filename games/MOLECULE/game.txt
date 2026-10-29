@@ -1,0 +1,4 @@
+# Molecule Man (1986)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Molecule%20Man%20(1986)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas MOLECULE.CAS
+sha1 2726f91828dd5b92657372d103f3ee94600ce2ed

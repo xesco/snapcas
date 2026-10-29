@@ -1,0 +1,4 @@
+# Super Chess (1984)(Kuma Computers)[a][BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20Chess%20(1984)(Kuma%20Computers)%5Ba%5D%5BBLOAD'CAS-'%2CR%5D.zip
+cas SUPERA.CAS
+sha1 2715053cfcca34b76c2902d28ba7d08cffd3c665

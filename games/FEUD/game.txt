@@ -1,0 +1,4 @@
+# Feud (1987)(Bulldog)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Feud%20(1987)(Bulldog)%5BRUN'CAS-'%5D.zip
+cas FEUD.CAS
+sha1 6f472230d00fb810605bcde194e985a4f2d65d70

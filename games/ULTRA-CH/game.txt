@@ -1,0 +1,4 @@
+# Ultra Chess (1985)(Aackosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Ultra%20Chess%20(1985)(Aackosoft)%5BRUN'CAS-'%5D.zip
+cas ULTRA-CH.CAS
+sha1 5a6d3c7bbec77d1d01b8b44ca4683a07ecb36b88

@@ -1,0 +1,4 @@
+# Mystery Of The Mu Continent (1984)(Stratford Computer Center Corporation)(ja)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Mystery%20Of%20The%20Mu%20Continent%20(1984)(Stratford%20Computer%20Center%20Corporation)(ja)%5BCLOAD%20%2B%20RUN%5D.zip
+cas MYSTERMU.CAS
+sha1 4ff738b92e6c2421acc7b334c8290c062e2af785

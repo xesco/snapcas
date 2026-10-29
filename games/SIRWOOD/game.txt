@@ -1,0 +1,5 @@
+# Sirwood (1990)(Opera Soft)(Side A)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Sirwood%20(1990)(Opera%20Soft)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
+cas SIRWOOD.CAS
+side2 SIRWOODB.CAS
+sha1 4f8c44976a2d18d14821a4225070651442a7e67f 423d4bef008d2f2710a71167ac43163db5fe52ce

@@ -1,0 +1,4 @@
+# Time Scanner (1989)(Activision)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Time%20Scanner%20(1989)(Activision)%5BBLOAD'CAS-'%2CR%5D.zip
+cas TIME-SCA.CAS
+sha1 f3175d9890ab6b1f2c463e864e29c18692c2e41f

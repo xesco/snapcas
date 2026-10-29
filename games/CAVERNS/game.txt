@@ -1,0 +1,4 @@
+# Caverns Of Titan [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Caverns%20Of%20Titan%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas CAVERNS.CAS
+sha1 93bfc7ae882d184dd80dcf51ea42675fb4d8a80b

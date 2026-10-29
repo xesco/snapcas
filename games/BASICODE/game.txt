@@ -1,0 +1,4 @@
+# BASICODE-3(1987)(NOS)(NL)
+# https://download.file-hunter.com/Games/MSX1/CAS/BASICODE-3(1987)(NOS)(NL).zip
+cas BASICODE.CAS
+sha1 50370c4ac38d76f3d2b576dbca3c8c616540c970

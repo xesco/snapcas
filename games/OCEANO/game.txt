@@ -1,0 +1,4 @@
+# Oceano (2015) (EgoTrip) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Oceano%20(2015)%20(EgoTrip)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas OCEANO.CAS
+sha1 ce71e10239faf5fd6ba97867ce065218f183bfe0

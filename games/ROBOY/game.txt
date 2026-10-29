@@ -1,0 +1,4 @@
+# Roboy (1987)(Methodic Solutions)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Roboy%20(1987)(Methodic%20Solutions)%5BRUN'CAS-'%5D.zip
+cas ROBOY.CAS
+sha1 bfb06c062605e92c330e38aa985b617029844d8f

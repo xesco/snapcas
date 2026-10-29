@@ -1,0 +1,4 @@
+# Head Alignment Kit (1985)(Aackosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Head%20Alignment%20Kit%20(1985)(Aackosoft)%5BRUN'CAS-'%5D.zip
+cas HEAD-ALI.CAS
+sha1 acc648c3f70ab58ddc6e76423fda091c6c31cc26

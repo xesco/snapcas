@@ -1,0 +1,4 @@
+# Zoids - The Battle Begins (1985)(Martech Games)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Zoids%20-%20The%20Battle%20Begins%20(1985)(Martech%20Games)%5BRUN'CAS-'%5D.zip
+cas ZOIDS-TH.CAS
+sha1 d918c2b272f4c11a91096abd5034ac475a1b53a2

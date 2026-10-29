@@ -1,0 +1,4 @@
+# Dr. Jackle and Mr. Wide (1987)(Bulldog)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Dr.%20Jackle%20and%20Mr.%20Wide%20(1987)(Bulldog)%5BRUN'CAS-'%5D.zip
+cas DR-JACKL.CAS
+sha1 a9400afafa5e89f568333cb3400ccde4ad82ab96

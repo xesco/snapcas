@@ -1,0 +1,4 @@
+# Boom (1986)(Aackosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Boom%20(1986)(Aackosoft)%5BRUN'CAS-'%5D.zip
+cas BOOM.CAS
+sha1 b267c66475d40278b5b029ee871cb31971d00cf3

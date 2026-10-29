@@ -1,0 +1,4 @@
+# Silent Shadow (1988)(Topo Soft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Silent%20Shadow%20(1988)(Topo%20Soft)%5BRUN'CAS-'%5D.zip
+cas SILENT.CAS
+sha1 a914027bcb159a418bb7cea33fd7f403e8453b0b

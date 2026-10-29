@@ -1,0 +1,4 @@
+# Octagon Squad (1986)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Octagon%20Squad%20(1986)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas OCTAGON.CAS
+sha1 7acef4fc216df8674e62d3530b1aae89fc1cffe8

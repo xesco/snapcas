@@ -1,0 +1,4 @@
+# Spellbound (2023)(Mastropiero)
+# https://download.file-hunter.com/Games/MSX1/CAS/Spellbound%20(2023)(Mastropiero).zip
+cas SPELLBOU.CAS
+sha1 cfa584fcfa0d812a1e77a30b5a43d10cada7e008

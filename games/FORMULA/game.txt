@@ -1,0 +1,4 @@
+# Formula 1 Simulator (1985)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Formula%201%20Simulator%20(1985)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas FORMULA.CAS
+sha1 21564e88c02634d91623d5fad06de66dd8a4338f

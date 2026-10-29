@@ -1,0 +1,4 @@
+# Spartan X (1985)(Pony Canyon)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Spartan%20X%20(1985)(Pony%20Canyon)%5BCLOAD%20%2B%20RUN%5D.zip
+cas SPARTAN.CAS
+sha1 473dbe1dc843f4c43576c401399e47b8738982dd

@@ -1,0 +1,4 @@
+# Disenador de Graficos (1985)(Advance)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Disenador%20de%20Graficos%20(1985)(Advance)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas DISENADO.CAS
+sha1 9e815cb59211ff0e243e9f69e65dea4f60506ab9

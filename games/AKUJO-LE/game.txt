@@ -1,0 +1,4 @@
+# Akujo Legend (1986)(Dream Soft)(jp)[CLOAD+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Akujo%20Legend%20(1986)(Dream%20Soft)(jp)%5BCLOAD%2BRUN%5D.zip
+cas AKUJO-LE.CAS
+sha1 6a41c5ba1e3775da93fa1781054f2316839add3c

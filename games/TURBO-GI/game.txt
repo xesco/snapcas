@@ -1,0 +1,4 @@
+# Turbo Girl (1988)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Girl%20(1988)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas TURBO-GI.CAS
+sha1 a28fdd7236fd62112e54175f008c56bf4e2a3ead

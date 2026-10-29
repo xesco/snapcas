@@ -1,0 +1,4 @@
+# Mountain Bike Racer (1990)(Positive)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Mountain%20Bike%20Racer%20(1990)(Positive)%5BRUN'CAS-'%5D.zip
+cas MOUNTAIN.CAS
+sha1 437680147325dca6dceb0a8a6c490ce5d7a9ab35

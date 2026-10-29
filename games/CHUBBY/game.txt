@@ -1,0 +1,4 @@
+# Chubby Gristle (1987)(Grandslam Entertainment)
+# https://download.file-hunter.com/Games/MSX1/CAS/Chubby%20Gristle%20(1987)(Grandslam%20Entertainment).zip
+cas CHUBBY.CAS
+sha1 092ac3571c1a4cbb25fd98e7455fd6be00562535

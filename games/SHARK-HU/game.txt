@@ -1,0 +1,4 @@
+# Shark Hunter (1984)(Electric Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Shark%20Hunter%20(1984)(Electric%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas SHARK-HU.CAS
+sha1 0d45ec635ac4fe3077030d8c0b3960e3398fa0bb

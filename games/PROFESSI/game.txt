@@ -1,0 +1,4 @@
+# Professional Baseball Super Simulation (1984)(JDS)(ja)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Professional%20Baseball%20Super%20Simulation%20(1984)(JDS)(ja)%5BCLOAD%20%2B%20RUN%5D.zip
+cas PROFESSI.CAS
+sha1 ed5b68e4a77934c3a3aa8d1eeb37238cdb5a0a62

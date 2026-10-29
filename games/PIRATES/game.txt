@@ -1,0 +1,4 @@
+# Pirates (1988)(Halley Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Pirates%20(1988)(Halley%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas PIRATES.CAS
+sha1 bcdddce906a75d7715c44a61cc743726624338fc

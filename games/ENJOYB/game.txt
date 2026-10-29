@@ -1,0 +1,4 @@
+# Enjoy Triangle v3 tape 2 side B - You Are a Master Detective.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Enjoy%20Triangle%20volume%203%20(1986)(BAIT-AL-HIKMA)(ja)%5Bcas%5D.zip
+cas ENJOYB.CAS
+sha1 91ccf5e1f0945290f16c5f08c25552f2eb2778aa

@@ -1,0 +1,4 @@
+# Slime Center (2014)(N.I.)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Slime%20Center%20(2014)(N.I.)%5BBLOAD'CAS-'%2CR%5D.zip
+cas SLIME-CE.CAS
+sha1 faf158d294c16ba3b3ee43fb0a9f5300492d37cc

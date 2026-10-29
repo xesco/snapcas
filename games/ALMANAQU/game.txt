@@ -1,0 +1,4 @@
+# Almanaque (1986)(Load 'n' Run)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Almanaque%20(1986)(Load%20'n'%20Run)(es)%5BRUN'CAS-'%5D.zip
+cas ALMANAQU.CAS
+sha1 ae44c4ce226b5aa859776abd822f602663daf8b9

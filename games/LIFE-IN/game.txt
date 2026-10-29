@@ -1,0 +1,4 @@
+# Life in the Fast Lane (1987)(Methodic Solutions)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Life%20in%20the%20Fast%20Lane%20(1987)(Methodic%20Solutions)%5BRUN'CAS-'%5D.zip
+cas LIFE-IN.CAS
+sha1 551b765228284f01da35a35e528e87ac39454548

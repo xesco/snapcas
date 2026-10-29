@@ -1,0 +1,4 @@
+# Happy Fret (1985)(Micro Cabin)[a][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Happy%20Fret%20(1985)(Micro%20Cabin)%5Ba%5D%5BRUN'CAS-'%5D.zip
+cas HAPPYA.CAS
+sha1 bb2300dcb0a648ef07613896d7e22eb19fef8fbc

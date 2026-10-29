@@ -1,0 +1,4 @@
+# Game Pack 1 (Aackosoft - Eaglesoft)[BASIC] / Trap - Game Pack 1 (Aackosoft - Eaglesoft) [RUN'CAS-'] [_].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%201%20(Aackosoft%20-%20Eaglesoft)%5BBASIC%5D.zip
+cas TRAP-GAM.CAS
+sha1 1260c39bac1c6dc05611c47094d5343e39677381

@@ -1,0 +1,4 @@
+# Moon Rider (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Moon%20Rider%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas MOON-RID.CAS
+sha1 0eff9c4c1222287dd91f8e17b6df7a0d4acc1ae2

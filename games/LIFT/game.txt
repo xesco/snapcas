@@ -1,0 +1,4 @@
+# Lift (2021)(Inufuto)
+# https://download.file-hunter.com/Games/MSX1/CAS/Lift%20(2021)(Inufuto).zip
+cas LIFT.CAS
+sha1 a8d4b23b5df0d96886511eedee19063788a179fc

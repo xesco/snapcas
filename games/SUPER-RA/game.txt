@@ -1,0 +1,4 @@
+# Super Racer (1985)(Login Soft)[BLOAD'CAS-',R or BLOAD'CAS-'+CLOAD+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20Racer%20(1985)(Login%20Soft)%5BBLOAD'CAS-'%2CR%20or%20BLOAD'CAS-'%2BCLOAD%2BRUN%5D.zip
+cas SUPER-RA.CAS
+sha1 66cdeda807121c2667fb12aa5690abbc78dfed05

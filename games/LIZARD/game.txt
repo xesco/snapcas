@@ -1,0 +1,4 @@
+# Lizard Willy [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Lizard%20Willy%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas LIZARD.CAS
+sha1 b0ae218825219b1c5c5a7e51b24586ba7a257089

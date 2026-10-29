@@ -1,0 +1,4 @@
+# Turbo Pack A (1987)(Philips)(es) / 003-Test de capacidad.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
+cas 003-TEDE.CAS
+sha1 05a9b9deb4615f79b9a9979f1a4e0425c5e784bd

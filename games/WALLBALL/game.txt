@@ -1,0 +1,4 @@
+# Wallball (19xx)(Tynesoft)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Wallball%20(19xx)(Tynesoft)%5BBLOAD'CAS-'%2CR%5D.zip
+cas WALLBALL.CAS
+sha1 bbcf6bc1b080fe857b721af3038835b0fe450a43

@@ -1,0 +1,4 @@
+# Super MSX n.15 (ottobre 1988) - cas_15 / SUPER15B.CAS
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.15%20(ottobre%201988)%20-%20cas_15.zip
+cas SUPER15.CAS
+sha1 8404927cfc2d5b429d660858ef1921240054f7c3

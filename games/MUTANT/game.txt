@@ -1,0 +1,4 @@
+# Mutant Monty (1985)(Artic Computing)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Mutant%20Monty%20(1985)(Artic%20Computing)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MUTANT.CAS
+sha1 f11563d641e4179c2aaadf6842b89532b79075dc

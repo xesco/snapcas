@@ -1,0 +1,4 @@
+# Mystery House II (1984)(Micro Cabin)(en)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Mystery%20House%20II%20(1984)(Micro%20Cabin)(en)%5BCLOAD%20%2B%20RUN%5D.zip
+cas MYSTEREN.CAS
+sha1 62c3e93df44b0339ba186465e6082d99a6fe6ddc

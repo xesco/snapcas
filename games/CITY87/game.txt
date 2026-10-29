@@ -1,0 +1,4 @@
+# City Connection (1987)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/City%20Connection%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas CITY87.CAS
+sha1 36f01d1775de6c76515c64542de0e9e9d8f3c2ef

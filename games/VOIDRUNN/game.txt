@@ -1,0 +1,4 @@
+# Voidrunner (1987)(Mastertronic Added Dimension)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Voidrunner%20(1987)(Mastertronic%20Added%20Dimension)%5BRUN'CAS-'%5D.zip
+cas VOIDRUNN.CAS
+sha1 1dfb2d8decd459dacc67f50437980edbe078a646

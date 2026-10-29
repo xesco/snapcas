@@ -1,0 +1,4 @@
+# Mandragore (Infogrames)(1987)(fr)(Tape 2 Side B)[BLOAD'CAS-',R].CAS
+# https://download.file-hunter.com/Games/MSX1/CAS/Mandragore%20(Infogrames)(1987)(fr)(Tape%202%20Side%20B)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MANDRAGR.CAS
+sha1 6cf0593667bca1942816ae7295ac3b9b6029fec0

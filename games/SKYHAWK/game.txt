@@ -1,0 +1,4 @@
+# Skyhawk (1986)(Bug-Byte Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Skyhawk%20(1986)(Bug-Byte%20Software)%5BRUN'CAS-'%5D.zip
+cas SKYHAWK.CAS
+sha1 ad3227d794bea3f6efd00f49d4149dc2df80e7aa

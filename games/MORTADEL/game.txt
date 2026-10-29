@@ -1,0 +1,4 @@
+# Mortadelo y Filemon (1988)(Dro Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Mortadelo%20y%20Filemon%20(1988)(Dro%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas MORTADEL.CAS
+sha1 fd2b436646cddd2875e771b6557de82aecfd7b53

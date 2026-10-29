@@ -1,0 +1,4 @@
+# Terrorpods (1989)(Dro Soft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Terrorpods%20(1989)(Dro%20Soft)%5BRUN'CAS-'%5D.zip
+cas TERRORPO.CAS
+sha1 29de41f1216b7397654745d2ccaec33139961fa7

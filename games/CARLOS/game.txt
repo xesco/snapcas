@@ -1,0 +1,4 @@
+# Carlos Sainz (1990)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Carlos%20Sainz%20(1990)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas CARLOS.CAS
+sha1 0b4685f24ce23e053c4dee8f59c266931aa928b9

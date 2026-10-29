@@ -1,0 +1,4 @@
+# Valkyr (1985)(Gremlin Graphics Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Valkyr%20(1985)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas VALKYR.CAS
+sha1 7382a9a6a10a181fe0d5d4cf61529049b16ef931

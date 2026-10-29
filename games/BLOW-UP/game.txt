@@ -1,0 +1,4 @@
+# Blow Up (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Blow%20Up%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas BLOW-UP.CAS
+sha1 bb002e82bc95b6226e26db2e0bb33dbdc309a93d

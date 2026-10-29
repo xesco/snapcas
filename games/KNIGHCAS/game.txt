@@ -1,0 +1,4 @@
+# Knight Orc - Part 2 - A Kind of Magic (1987)(Level 9 Computing)[a1 - Cracked][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Orc%20-%20Part%202%20-%20A%20Kind%20of%20Magic%20(1987)(Level%209%20Computing)%5Ba1%20-%20Cracked%5D%5BRUN'CAS-'%5D.zip
+cas KNIGHCAS.CAS
+sha1 9c8dd03f5642e271643a41b418c11346c5100343

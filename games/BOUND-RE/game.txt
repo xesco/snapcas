@@ -1,0 +1,4 @@
+# Bound Rescue (1984)(Shouji Ogawa)
+# https://download.file-hunter.com/Games/MSX1/CAS/Bound%20Rescue%20(1984)(Shouji%20Ogawa).zip
+cas BOUND-RE.CAS
+sha1 3617b220b8cb6bdf0104e3b25fd112845bf1ba11

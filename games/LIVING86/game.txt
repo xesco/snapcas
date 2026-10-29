@@ -1,0 +1,4 @@
+# Livingstone Supongo (1986)(Opera Soft)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Livingstone%20Supongo%20(1986)(Opera%20Soft)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas LIVING86.CAS
+sha1 156cafbe048665d2d2e34ad4167cb48a247e674e

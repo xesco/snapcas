@@ -1,0 +1,4 @@
+# Winter Events (1987)(Anco Software)[a][CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Winter%20Events%20(1987)(Anco%20Software)%5Ba%5D%5BCLOAD%20%2B%20RUN%5D.zip
+cas WINTER87.CAS
+sha1 27875c8aa514bf6c74c43e8f9ec58d5e5e4d46f0

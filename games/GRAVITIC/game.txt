@@ -1,0 +1,4 @@
+# Gravitica (2018) (Yusuke Miyauchi) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Gravitica%20(2018)%20(Yusuke%20Miyauchi)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas GRAVITIC.CAS
+sha1 27528599ffc2d45fb8dfa4143b7f0dc277b575c6

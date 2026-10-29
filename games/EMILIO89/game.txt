@@ -1,0 +1,4 @@
+# Emilio Sanchez Vicario Grand Slam (1989)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Emilio%20Sanchez%20Vicario%20Grand%20Slam%20(1989)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas EMILIO89.CAS
+sha1 4819383ee60de4db2fa62dc32a9cbac1782ecb5b

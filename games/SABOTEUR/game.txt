@@ -1,0 +1,4 @@
+# Saboteur 2 (2026)(Clive Townsend)(Port by Thealfest)
+# https://download.file-hunter.com/Games/MSX1/CAS/Saboteur%202%20(2026)(Clive%20Townsend)(Port%20by%20Thealfest).zip
+cas SABOTEUR.CAS
+sha1 c17bfc0d65f03d4e5a50ba552bb4abdcb0628169

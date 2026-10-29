@@ -1,0 +1,4 @@
+# Stop the Express (Hudson) (Aackosoft - Eaglesoft) [RUN'CAS-'] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Stop%20the%20Express%20(Hudson)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas STOP-THE.CAS
+sha1 0e1780603980310722d86d7951ec83c3b812107d

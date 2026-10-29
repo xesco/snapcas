@@ -1,0 +1,4 @@
+# For MSX Special (1985)(Technopolis Soft)
+# https://download.file-hunter.com/Games/MSX1/CAS/For%20MSX%20Special%20(1985)(Technopolis%20Soft).zip
+cas FOR-MSX.CAS
+sha1 81ea6916b986dbe9e88d8e7d130526152e43b776

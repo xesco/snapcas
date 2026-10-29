@@ -1,0 +1,4 @@
+# Mad Mix 2 - En el Castillo de los Fantasmas (1990)(Topo Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Mad%20Mix%202%20-%20En%20el%20Castillo%20de%20los%20Fantasmas%20(1990)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas MAD-MIDE.CAS
+sha1 1a6e95d95020c5daca9ed2bfd47453d2e142c429

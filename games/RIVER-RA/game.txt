@@ -1,0 +1,4 @@
+# River Raid (1984)(Activision)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/River%20Raid%20(1984)(Activision)%5BBLOAD'CAS-'%2CR%5D.zip
+cas RIVER-RA.CAS
+sha1 6a04deb1608fb6b327472a492105d4ba98cac01f

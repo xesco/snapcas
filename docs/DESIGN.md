@@ -31,7 +31,8 @@ in [PLAN.md](PLAN.md).
 | File | Written by | Contents |
 |---|---|---|
 | `machines/<machine>.txt` | A person, once per machine | How to start the machine in `openMSX` |
-| `games/<game>/game.txt` | A person or an LLM | The game's settings |
+| `games/<game>/game.txt` | A person or an LLM | The game's settings that hold on every machine |
+| `games/<game>/<machine>.txt` | A person or an LLM, for a game that needs it | The game's settings that hold only on one machine, named after the machine file with `-` for `/` ([Game file](#game-file)) |
 | `out/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
 | `out/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image |
 | `out/<machine>/<game>/<GAME>.RPL` | `tools/build.py` | The replay |
@@ -82,7 +83,22 @@ boot "DefConfig" space
 `openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
 the `-ext` options sets the slots, and it must match the real machine's. `boot`
 lines pass a cartridge's boot menu, such as the Carnivore2's. The tools read the
-screen with `get_screen`, so such a menu must be in a text mode.
+screen with `get_screen`, so such a menu must be in a text mode. A line that starts
+with `#` is a comment.
+
+Machine files are of three kinds, each in its own place:
+
+| Kind | Where | What it is |
+|---|---|---|
+| A user's machine | `machines/basic/` and `machines/advanced/` | A real machine that the images are made for, given as the command's `<machine>` |
+| A capture variant | Beside its machine, named after it and the cartridge it leaves out, such as `advanced/phc28s-nodisk` | The same machine with one cartridge fewer, for a game whose loader trips over that cartridge. A game's `capture` line names it |
+| A test machine | `machines/test/` | A machine that only the tests use |
+
+A capture variant only takes a cartridge away: it keeps the machine's ROMs and every
+other cartridge in its slot. The image built from its snapshot is still for the
+user's machine and is checked there, so the restorer finds the RAM pages in the
+slots that the snapshot names. Its first line, a comment, says which cartridge it
+leaves out and why.
 
 ## Game file
 
@@ -98,19 +114,19 @@ side2 GAUNTLEB.CAS
 sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d6400b3
 ```
 
-| Key | Value | Default |
-|---|---|---|
-| `cas` | The CAS file of side 1, in the `--cas` folder | |
-| `side2` | The CAS file of side 2 | None |
-| `sha1` | The SHA-1 of `cas`, then that of `side2` | None |
-| `name` | `<GAME>`, up to 8 letters and digits | The folder name in upper case, cut to 8 letters and digits |
-| `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None |
-| `continue` | A key name that the capture tries before space and Return, to continue a load that waits for a key | None |
-| `snapshot` | `at` and a time, at which the capture takes the snapshot: for a game that asks the player to stop the tape, the moment it asks, because `openMSX`'s tape runs on and the tape service serves every later load | Found by the capture |
-| `capture` | A machine file for the capture: the user's machine without a cartridge that the game's loader trips over, with the same ROMs and the other cartridges in the same slots | The command's machine file |
-| `service` | `no` for a game that never reads the rest of its tape, though blocks of it stay unread. A game can read them only at its end, so `no` is for a game that someone has played to its end. Or `at` and an address xxE1h in page 3, where the tape service's part of page 3 goes ([Build](#build)). Or `t0`, for the tape service without a part in page 3 ([Without a part in page 3](#without-a-part-in-page-3)) | Found by the capture, and by `build.py` |
-| `patch` | A place, the old bytes, `>`, the new bytes: `patch page3:215F CD E1 00 > CD E1 FC` | None |
-| `rom` | `keep` for a game that must find the ROM in page 0 at the snapshot's slot: T0 does not replace the ROM, and the game reaches the tape service only through calls patched to the entries in page 3 | T0 replaces the ROM when the restorer's rule allows it |
+| Key | Value | Default | File |
+|---|---|---|---|
+| `cas` | The CAS file of side 1, in the `--cas` folder | | `game.txt` |
+| `side2` | The CAS file of side 2 | None | `game.txt` |
+| `sha1` | The SHA-1 of `cas`, then that of `side2` | None | `game.txt` |
+| `name` | `<GAME>`, up to 8 letters and digits | The folder name in upper case, cut to 8 letters and digits | `game.txt` |
+| `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None | `game.txt` |
+| `continue` | A key name that the capture tries before space and Return, to continue a load that waits for a key | None | `game.txt` |
+| `snapshot` | `at` and a time, at which the capture takes the snapshot: for a game that asks the player to stop the tape, the moment it asks, because `openMSX`'s tape runs on and the tape service serves every later load | Found by the capture | `game.txt` |
+| `capture` | A capture variant of the machine, on which the capture loads the game ([Machine file](#machine-file)) | The command's machine file | The machine's game file |
+| `service` | `no` for a game that never reads the rest of its tape, though blocks of it stay unread. A game can read them only at its end, so `no` is for a game that someone has played to its end. Or `at` and an address xxE1h in page 3, where the tape service's part of page 3 goes ([Build](#build)). Or `t0`, for the tape service without a part in page 3 ([Without a part in page 3](#without-a-part-in-page-3)) | Found by the capture, and by `build.py` | `game.txt`, and `t0` the machine's game file |
+| `patch` | A place, the old bytes, `>`, the new bytes: `patch page3:215F CD E1 00 > CD E1 FC` | None | `game.txt`, and a patch of a slot register's value the machine's game file |
+| `rom` | `keep` for a game that must find the ROM in page 0 at the snapshot's slot: T0 does not replace the ROM, and the game reaches the tape service only through calls patched to the entries in page 3 | T0 replaces the ROM when the restorer's rule allows it | `game.txt` |
 
 A place is a RAM page as `page<n>:<offset>`, which names the RAM page that the
 snapshot selects in page n, 0 to 3, and the offset from that page's start. A place
@@ -118,25 +134,42 @@ can also be on the tape, as `side1:<offset>` or `side2:<offset>`, an offset in t
 CAS file. A patch on the tape changes the tape that the capture loads and that the
 tape service serves, so it also reaches the code that the capture runs. Neither form
 names a slot, so a patch line holds on every machine that the game runs on, unless
-its new bytes are a slot register's value. A game can select its RAM by a fixed
-value: Sootland and Time Out write FCh and FFh to the slot register, for RAM in slot
-3, and crash on the Sanyo PHC-28S. Without Nextor, that machine's BASIC keeps page 3
-in the internal RAM, slot 0, and the RAM cartridge in slot 1 holds pages 0 to 2. A
-patch of these values to 14h and 15h keeps page 3 where BASIC has it and selects
-slot 1 for the other pages, so it holds only on machines with that layout. A patch
-fits only the dump that it was made for, so `capture.py` and `build.py` stop with an
-error when the old bytes differ, or when the game file has `patch` lines and `sha1`
-is missing or differs from a CAS file's SHA-1.
+its new bytes are a slot register's value. A patch fits only the dump that it was
+made for, so `capture.py` and `build.py` stop with an error when the old bytes
+differ, or when the game file has `patch` lines and `sha1` is missing or differs
+from a CAS file's SHA-1.
+
+`game.txt` describes the game and its tape, and holds on every machine. A game's
+folder can also hold a machine's game file: a game file for one machine, named after
+that machine file with `-` in place of `/`, such as `advanced-phc28s.txt` for
+`advanced/phc28s`. The tools read it after `game.txt` when they capture, build or
+check for that machine. Its lines add to those of `game.txt`, and a value that both
+give is the machine's game file's. It holds the lines that depend on where the
+machine's RAM and cartridges are:
+
+| Line | Why it depends on the machine |
+|---|---|
+| `capture` | It names one of the machine's capture variants ([Machine file](#machine-file)) |
+| A patch of a slot register's value | The value names slots. Sootland writes FCh to the slot register, for RAM in slot 3, and crashes on the Sanyo PHC-28S. Without Nextor, that machine's BASIC keeps page 3 in the internal RAM, slot 0, and the RAM cartridge in slot 1 holds pages 0 to 2, so a patch to 14h keeps page 3 there and selects slot 1 for pages 1 and 2 |
+| `service t0` | The mode's conditions depend on which slots hold the game's RAM pages ([Without a part in page 3](#without-a-part-in-page-3)) |
+| A `snapshot` that a real machine needs | Tokyo Nampa Street's snapshot comes after its music only because of the real PHC-28S ([Limits](#limits)) |
 
 ## Shipped files
 
 The repository ships a game file for each game of File-Hunter's MSX CAS collection
-in `games/`, named after its File-Hunter file name, with the `sha1` of its dumps.
-Its `side2` lines pair the Side A and Side B files of a game, its `continue` lines
-come from the key that the capture reports, its `service no` lines from games played
-to their end, and its `patch` lines from `check.py` and from traces of failed loads.
-It also ships these machine files, each checked with `check.py` and a single-load
-game:
+in `games/`, in a folder named after the short name of its side 1 CAS file, such as
+`games/ABADIA/` for `ABADIA.CAS`. The folder name then also names the image. Each
+game file starts with two comments: the game's File-Hunter name, and the link to its
+zip in File-Hunter's MSX1 CAS folder, which a few games lack because the folder does
+not list them. The game file then has the `sha1` of its dumps, which finds a dump
+whatever its file name. Its `side2` lines pair the Side A and Side B files of a
+game, its `continue` lines come from the key that the capture reports, its
+`service no` lines from games played to their end, and its `patch` lines from
+`check.py` and from traces of failed loads. The lines that hold only on the Sanyo
+PHC-28S are in the game's machine's game file, `advanced-phc28s.txt`
+([Game file](#game-file)): 38 games have one, and the other game files hold on any
+machine. It also ships these machine files, each checked with `check.py` and a
+single-load game:
 
 | File | Configuration |
 |---|---|
@@ -146,6 +179,14 @@ game:
 | `advanced/phc28s` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 |
 | `advanced/mfrsd` | An MSX1 with a MegaFlashROM SCC+ SD |
 | `advanced/hbf700p` | Sony HB-F700P: an MSX2 whose slot 0 is expanded |
+
+It also ships two capture variants of the PHC-28S ([Machine file](#machine-file)),
+which the games' `capture` lines name:
+
+| File | Leaves out | Used by |
+|---|---|---|
+| `advanced/phc28s-nodisk` | The Carnivore2, and so Nextor | 20 games that crash when a disk system is present, or that select RAM by fixed slot values |
+| `advanced/phc28s-noslot1` | The RAM cartridge in slot 1 | 10 games whose loader trips over it |
 
 ## Capture
 
@@ -764,6 +805,9 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   ([Without a part in page 3](#without-a-part-in-page-3)).
 - A game that reads the tape with its own code gets no tape service, so it runs only
   if it loads in a single pass.
+- The shipped machine's game files, `advanced-phc28s.txt`, hold only on the Sanyo
+  PHC-28S. On another machine, the 38 games that have one may need a machine's game
+  file of their own for that machine.
 - The replay is a recording: a loader that lets the player act while it loads shows
   only what happened in the capture.
 - A snapshot taken without an interrupt overwrites the 26 bytes below the stack

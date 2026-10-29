@@ -1,0 +1,4 @@
+# Comando Tracer (1989)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Comando%20Tracer%20(1989)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas COMANDES.CAS
+sha1 cd2ed6fd24df267f0e5f97e05a91d50bd28aebf4

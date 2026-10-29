@@ -1,0 +1,4 @@
+# Silicon Dreams I - Snowball v2 (1986)(Level 9 Computing)[a1 - Cracked][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Silicon%20Dreams%20I%20-%20Snowball%20v2%20(1986)(Level%209%20Computing)%5Ba1%20-%20Cracked%5D%5BRUN'CAS-'%5D.zip
+cas SILICON1.CAS
+sha1 4c9abff41b3b961e4a0d9b06e46d13fc404af899

@@ -1,0 +1,4 @@
+# Donkey Kong (1986)(Ocean Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Donkey%20Kong%20(1986)(Ocean%20Software)%5BRUN'CAS-'%5D.zip
+cas DONKECAS.CAS
+sha1 9ea8e95750f3c81ae650cda92192488f22e4756d

@@ -1,0 +1,4 @@
+# Bakerman (2023)(AG Software)[RUN'CAS-'][b]
+# https://download.file-hunter.com/Games/MSX1/CAS/Bakerman%20(2023)(AG%20Software)%5BRUN'CAS-'%5D%5Bb%5D.zip
+cas BAKERMAN.CAS
+sha1 9a5ccab9fbe1137cd2b368859d4bc9f440f5e7a9

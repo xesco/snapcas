@@ -1,0 +1,4 @@
+# Motkonqe (2017) (N.I.)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Motkonqe%20(2017)%20(N.I.)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MOTKONQE.CAS
+sha1 b37386e55705b5016ec198c8bff55e437530dff8

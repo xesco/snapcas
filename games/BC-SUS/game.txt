@@ -1,0 +1,4 @@
+# BC's Quest for Tires II - Grog's Revenge (1985)(US Gold)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/BC's%20Quest%20for%20Tires%20II%20-%20Grog's%20Revenge%20(1985)(US%20Gold)%5BRUN'CAS-'%5D.zip
+cas BC-SUS.CAS
+sha1 db313a21ef971d86a03e690b1d3d1be043ab54ac

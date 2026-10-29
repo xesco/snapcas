@@ -1,0 +1,4 @@
+# Turbo Pack C (1987)(Philips)(es) / 028 - Pucky.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20C%20(1987)(Philips)(es).ZIP
+cas 028-PUCK.CAS
+sha1 e5bc534a9684996cb0e5b42b2b2d49c2f7223a99

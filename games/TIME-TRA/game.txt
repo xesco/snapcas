@@ -1,0 +1,4 @@
+# Time Trax (1986)(Bug-Byte Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Time%20Trax%20(1986)(Bug-Byte%20Software)%5BRUN'CAS-'%5D.zip
+cas TIME-TRA.CAS
+sha1 f529dce0aafc06292750c5cbf8af0ca5926801a2

@@ -1,0 +1,4 @@
+# Super Pac-Man (1982 & 2026)(Namco & Mastropiero)
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20Pac-Man%20(1982%20%26%202026)(Namco%20%26%20Mastropiero).zip
+cas SUPER-PA.CAS
+sha1 80a5380b205557fcdee7ceb22534fe5b94b72b1c

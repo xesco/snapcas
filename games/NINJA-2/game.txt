@@ -1,0 +1,4 @@
+# Ninja 2. Ninja Jaja Maru Kun (1987)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Ninja%202.%20Ninja%20Jaja%20Maru%20Kun%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas NINJA-2.CAS
+sha1 51b411a1962c990b8b43fbc89efbe47ab0529d95

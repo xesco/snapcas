@@ -1,0 +1,4 @@
+# Erik the Viking (1984)(Level 9 Computing)[RUN'CAS']
+# https://download.file-hunter.com/Games/MSX1/CAS/Erik%20the%20Viking%20(1984)(Level%209%20Computing)%5BRUN'CAS'%5D.zip
+cas ERIK-THE.CAS
+sha1 8e82a0b9a5e8b03050ce065b1e9398822a9697d8

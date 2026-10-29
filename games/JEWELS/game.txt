@@ -1,0 +1,4 @@
+# Jewels of Darkness III - Dungeon Adventure v2 (1986)(Level 9 Computing)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Jewels%20of%20Darkness%20III%20-%20Dungeon%20Adventure%20v2%20(1986)(Level%209%20Computing)%5BRUN'CAS-'%5D.zip
+cas JEWELS.CAS
+sha1 e5999e87b3471d3cf1bd79048c325f6f674d5998

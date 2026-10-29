@@ -1,0 +1,4 @@
+# Base de Datos (19xx)(Toshiba)(es)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Base%20de%20Datos%20(19xx)(Toshiba)(es)%5BCLOAD%20%2B%20RUN%5D.zip
+cas BASEXX.CAS
+sha1 aa9e6be410aa589e5f97600cc64415083558198a

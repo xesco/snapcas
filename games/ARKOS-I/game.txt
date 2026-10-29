@@ -1,0 +1,4 @@
+# Arkos I (1988)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Arkos%20I%20(1988)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas ARKOS-I.CAS
+sha1 c2d20101d2fdb268f5aa4942aa33ba61c3f06a74

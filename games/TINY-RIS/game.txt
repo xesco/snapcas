@@ -1,0 +1,4 @@
+# Tiny Rise Out (1983)(ASCII)
+# https://download.file-hunter.com/Games/MSX1/CAS/Tiny%20Rise%20Out%20(1983)(ASCII).zip
+cas TINY-RIS.CAS
+sha1 e3695485f44f4337f9e2b6fb6887d73b20ec0a2e

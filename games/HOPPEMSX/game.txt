@@ -1,0 +1,4 @@
+# Hopper - MSX Compilation 5 (ByteBusters) (Aackosoft - Eaglesoft) [RUN'CAS-'] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Hopper%20-%20MSX%20Compilation%205%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas HOPPEMSX.CAS
+sha1 e0d57da6ca8b6cb4d000151bf97d5f4a4a4d0108

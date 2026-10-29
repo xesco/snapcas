@@ -1,0 +1,5 @@
+# Mystical (1991)(Infogrames)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Mystical%20(1991)(Infogrames)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas MYSTICAL.CAS
+side2 MYSTICAB.CAS
+sha1 f6fe5aa4d16e5126477116b3c00b0b43651ab1c8 5c8af4ce37c6a397c5cc8a15328a5ea2871de83e

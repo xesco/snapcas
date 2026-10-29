@@ -1,0 +1,4 @@
+# Turbo Pack A (1987)(Philips)(es) / 007-Graficos de gestion.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
+cas 007-GRAF.CAS
+sha1 797229eb9f8a7c1e4ad5d73c1f5b02a1c69c8e0c

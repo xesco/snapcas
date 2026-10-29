@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 098-Racer.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 048-RACE.CAS
+sha1 3a00848bdc9a5dca078a8296ccccc633da0b6f9f

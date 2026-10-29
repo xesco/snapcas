@@ -1,0 +1,4 @@
+# W Series 3 (1983) (Hudson Soft)[Side A - Fireball, Akarui Nouen][BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%203%20(1983)%20(Hudson%20Soft)%5BSide%20A%20-%20Fireball%2C%20Akarui%20Nouen%5D%5BBLOAD'CAS-'%2CR%5D.zip
+cas W-SERIEA.CAS
+sha1 08b24777748e02933c0eab80f1e36942b9f28a82

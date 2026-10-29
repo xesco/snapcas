@@ -1,0 +1,4 @@
+# MSXtra - Blagger (1986)[Alligata][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/MSXtra%20-%20Blagger%20(1986)%5BAlligata%5D%5BRUN'CAS-'%5D.zip
+cas MSXTRA.CAS
+sha1 f9bca3741db8eca8186a233c335e9fc510cb57ac

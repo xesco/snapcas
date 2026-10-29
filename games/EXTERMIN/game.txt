@@ -1,0 +1,4 @@
+# Exterminator (1987)(The Bytebusters)
+# https://download.file-hunter.com/Games/MSX1/CAS/Exterminator%20(1987)(The%20Bytebusters).zip
+cas EXTERMIN.CAS
+sha1 d99dbb698f364323f9ec1d49a9a972f6f38edf1e

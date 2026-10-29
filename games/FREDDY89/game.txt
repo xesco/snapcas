@@ -1,0 +1,4 @@
+# Freddy Hardest in South Manhattan (1989)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Freddy%20Hardest%20in%20South%20Manhattan%20(1989)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas FREDDY89.CAS
+sha1 d1437caf35ed7c86a002cd55ca7e26127b4d7d4c

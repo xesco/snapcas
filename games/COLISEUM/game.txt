@@ -1,0 +1,4 @@
+# Coliseum (1988)(Topo Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Coliseum%20(1988)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas COLISEUM.CAS
+sha1 d351e9ee596f9a0a5f03ca12346c8d91a96f7b6d

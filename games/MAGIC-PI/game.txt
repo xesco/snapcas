@@ -1,0 +1,4 @@
+# Magic Pinball (1987)(OMK Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Magic%20Pinball%20(1987)(OMK%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas MAGIC-PI.CAS
+sha1 5e91d6ba3a71a8b636ef423775669d1643cf3b66

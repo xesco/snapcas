@@ -1,0 +1,4 @@
+# AntiAir (2024)(inufuto)
+# https://download.file-hunter.com/Games/MSX1/CAS/AntiAir%20(2024)(inufuto).zip
+cas ANTIAIR.CAS
+sha1 05178a0512272c211c279752bcac966054676fd5

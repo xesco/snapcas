@@ -1,0 +1,4 @@
+# Amaurote (1987)(Mastertronic Added Dimension)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Amaurote%20(1987)(Mastertronic%20Added%20Dimension)%5BRUN'CAS-'%5D.zip
+cas AMAUROTE.CAS
+sha1 c1a92533192c99ee3d77ce41765acd5b6c359e9d

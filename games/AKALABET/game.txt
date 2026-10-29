@@ -1,0 +1,4 @@
+# Akalabeth (1980)(California Pacific)
+# https://download.file-hunter.com/Games/MSX1/CAS/Akalabeth%20(1980)(California%20Pacific).zip
+cas AKALABET.CAS
+sha1 3c18d22c369604ba7ce105302b7311378815a896

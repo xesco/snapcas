@@ -1,0 +1,4 @@
+# Super MSX n.2 (giugno 1987) - cas_2 / super msx 2b.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.2%20(giugno%201987)%20-%20cas_2.zip
+cas SUPERB2.CAS
+sha1 72cae43e00d4757098981d2153a6cc17a9e522f3

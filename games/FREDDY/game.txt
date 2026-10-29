@@ -1,0 +1,4 @@
+# Freddy Hardest Side A[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Freddy%20Hardest%20Side%20A%5BRUN'CAS-'%5D.zip
+cas FREDDY.CAS
+sha1 730ed3d520121557caeab5951d949840c87236f0

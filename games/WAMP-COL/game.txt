@@ -1,0 +1,4 @@
+# Wamp Cola (1988)(Iber Soft)(es)[aka Dracula][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Wamp%20Cola%20(1988)(Iber%20Soft)(es)%5Baka%20Dracula%5D%5BRUN'CAS-'%5D.zip
+cas WAMP-COL.CAS
+sha1 f1e1b07df575b0a5dc6d37129174c11bc0beaadd

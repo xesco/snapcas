@@ -1,0 +1,4 @@
+# 007 - A View to a Kill (1986)(Domark)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/007%20-%20A%20View%20to%20a%20Kill%20(1986)(Domark)%5BRUN'CAS-'%5D.zip
+cas 007-A-VI.CAS
+sha1 de6ffdbf9889ffab5390444fe3213af6cab336fb

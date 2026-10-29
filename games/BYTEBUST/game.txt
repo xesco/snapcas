@@ -1,0 +1,4 @@
+# Bytebusters (1984)(Aackosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Bytebusters%20(1984)(Aackosoft)%5BRUN'CAS-'%5D.zip
+cas BYTEBUST.CAS
+sha1 69039b52648554b35d36bc949efa928c0859153e

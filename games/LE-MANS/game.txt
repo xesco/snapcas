@@ -1,0 +1,4 @@
+# Le Mans (1984)(Electric Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Le%20Mans%20(1984)(Electric%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas LE-MANS.CAS
+sha1 96b828c1c44b58c0d5ea33a7368bda13494af1af

@@ -28,7 +28,7 @@ GAMES = {
     "abadia": "cas ABADIA.CAS\nservice no\n",
     # On the PHC-28S, La Abadia's loader takes the RAM cartridge in slot 1 for
     # an expanded slot and crashes, so the game loads without it.
-    "abadia-phc": "cas ABADIA.CAS\nservice no\ncapture test/phc28s-noslot1\n",
+    "abadia-phc": "cas ABADIA.CAS\nservice no\ncapture advanced/phc28s-noslot1\n",
 }
 
 # machine: (DOS folder, games that pass, games that the restorer stops for

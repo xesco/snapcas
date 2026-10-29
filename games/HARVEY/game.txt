@@ -1,0 +1,4 @@
+# Harvey Smith's Showjumper (1985)(Software Projects)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Harvey%20Smith's%20Showjumper%20(1985)(Software%20Projects)%5BRUN'CAS-'%5D.zip
+cas HARVEY.CAS
+sha1 632326044efb6c5cc91bcfe90aadd1e537f5069c

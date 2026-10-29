@@ -1,0 +1,4 @@
+# Keystone Kapers(1984)(Activision)[a]
+# https://download.file-hunter.com/Games/MSX1/CAS/Keystone%20Kapers(1984)(Activision)%5Ba%5D.zip
+cas KEYSTONA.CAS
+sha1 66eb1d295e9662a58246f9af498600122e345315

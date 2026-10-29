@@ -1,0 +1,4 @@
+# Flappy Birds [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Flappy%20Birds%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas FLAPPY.CAS
+sha1 e0f0d3b67aa14e7a1216ec61aaae04f260813883

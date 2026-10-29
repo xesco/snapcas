@@ -1,0 +1,4 @@
+# Sorcery (1985)(Virgin Games)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Sorcery%20(1985)(Virgin%20Games)%5BRUN'CAS-'%5D.zip
+cas SORCERY.CAS
+sha1 769103431817a9a9c31c815a94b778a9af7a1a11

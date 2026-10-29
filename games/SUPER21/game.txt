@@ -1,0 +1,4 @@
+# Super MSX n.21 (maggio 1989) - cas_21 / super_msx_21_lato_A.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.21%20(maggio%201989)%20-%20cas_21.zip
+cas SUPER21.CAS
+sha1 991bbcd2ccec644d3c1d1095965ee48f7d923d18

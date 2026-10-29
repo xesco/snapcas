@@ -1,0 +1,4 @@
+# Twinlight (2019) (Retrosouls) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Twinlight%20(2019)%20(Retrosouls)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas TWINLIGH.CAS
+sha1 9efbd8f0a19c7f582f94e17cf43825dfaf12460c

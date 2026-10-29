@@ -1,0 +1,4 @@
+# Miyuki The Gambler (1984)(Central Education)(ja){Side A)
+# https://download.file-hunter.com/Games/MSX1/CAS/Miyuki%20The%20Gambler%20(1984)(Central%20Education)(ja)%7BSide%20A).zip
+cas MIYUKIJA.CAS
+sha1 ba4997c096b2bd7dda16ee1964e75449944fe990

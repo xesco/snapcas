@@ -1,0 +1,4 @@
+# Game Pack 1 (Aackosoft - Eaglesoft)[BASIC] / Star Maps - Game Pack 1 (Aackosoft - Eaglesoft) [RUN'CAS-'] [_].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%201%20(Aackosoft%20-%20Eaglesoft)%5BBASIC%5D.zip
+cas STAR-MAP.CAS
+sha1 0a15e2eef1b21cc4a884e53fdfe1d4d9347050b3

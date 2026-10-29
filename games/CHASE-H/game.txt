@@ -1,0 +1,5 @@
+# Chase H.Q. (1988)(Ocean Software)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Chase%20H.Q.%20(1988)(Ocean%20Software)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas CHASE-H.CAS
+side2 CHASEB.CAS
+sha1 dd297879c04c6e6bd2cb2765b0a721d9c9d590ff da2513fbd45940b6ac79236d6ee5bdc3735e62e2

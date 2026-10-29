@@ -1,0 +1,4 @@
+# Discovery (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Discovery%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas DISCOVER.CAS
+sha1 65cd0b42cad09b6aba1cf857b9e64612503bbe87

@@ -1,0 +1,4 @@
+# Memory - C.04 (1985)(Computer Users Club)(nl)[position tape + CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Memory%20-%20C.04%20(1985)(Computer%20Users%20Club)(nl)%5Bposition%20tape%20%2B%20CLOAD%20%2B%20RUN%5D.zip
+cas MEMORY.CAS
+sha1 bbed5547cc0a64b068c90612c4f8af0c182ea075

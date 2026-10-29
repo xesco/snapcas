@@ -1,0 +1,4 @@
+# Jai Alai (Opera Soft, 1991)
+# https://download.file-hunter.com/Games/MSX1/CAS/Jai%20Alai%20(Opera%20Soft%2C%201991).zip
+cas JAI-ALAI.CAS
+sha1 7389a2d9a36029df026383c969d2b1662a093f2c

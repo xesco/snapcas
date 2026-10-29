@@ -1,0 +1,4 @@
+# Jack the Nipper II - In Coconut Capers (1987)(Gremlin Graphics Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Jack%20the%20Nipper%20II%20-%20In%20Coconut%20Capers%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas JACKII.CAS
+sha1 9e1a6b843852da364921879c5a5325c02a7148fc

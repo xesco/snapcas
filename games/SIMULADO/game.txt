@@ -1,0 +1,4 @@
+# Simulador Profesional de Tenis (1990)(Dinamic Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Simulador%20Profesional%20de%20Tenis%20(1990)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas SIMULADO.CAS
+sha1 4318de77c55145eab721fa6e167bba4c9a736cb7

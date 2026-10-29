@@ -1,0 +1,4 @@
+# Cometa Halley (1985)(Sony)(es)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Cometa%20Halley%20(1985)(Sony)(es)%5BCLOAD%20%2B%20RUN%5D.zip
+cas COMETA.CAS
+sha1 cfb750c638acb8ec2698a0aefac59e2bafdeb646

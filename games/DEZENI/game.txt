@@ -1,0 +1,5 @@
+# Dezeni Land (1984)(Hudson Soft)(ja)(Side A)[position tape + BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Dezeni%20Land%20(1984)(Hudson%20Soft)(ja)(Side%20A)%5Bposition%20tape%20%2B%20BLOAD'CAS-'%2CR%5D.zip
+cas DEZENI.CAS
+side2 DEZENIB.CAS
+sha1 ffaa08474ad969e0f64210fa88847f1bde55c942 f9552366d9aa64747cf0e74607d11a968c0b3705

@@ -1,0 +1,4 @@
+# Locke the Superman - Asteroid Kahn  (1984)(Pony Canyon)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Locke%20the%20Superman%20-%20Asteroid%20Kahn%20%20(1984)(Pony%20Canyon)%5BCLOAD%20%2B%20RUN%5D.zip
+cas LOCKE-TH.CAS
+sha1 a09061cd0bba0e95517b0bc71f8954e9881828a5

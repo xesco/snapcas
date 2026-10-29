@@ -1,0 +1,5 @@
+# Relics (1986)(Bothtec)(Side A)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Relics%20(1986)(Bothtec)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
+cas RELICS.CAS
+side2 RELICSB.CAS
+sha1 f6c0a4053f76542afac1fe4b62ad9ed017de154d b2261f24d7086f190ed62a1d022f6f3e2d21bf41

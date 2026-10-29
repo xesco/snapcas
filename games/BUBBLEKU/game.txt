@@ -1,0 +1,4 @@
+# Babbulkund (Bubblekund) 1999 (1984)(Softbank)(ja)
+# https://download.file-hunter.com/Games/MSX1/CAS/Babbulkund%20(Bubblekund)%201999%20(1984)(Softbank)(ja).zip
+cas BUBBLEKU.CAS
+sha1 2ef464645752aab882cc98e378a6b6411f44265a

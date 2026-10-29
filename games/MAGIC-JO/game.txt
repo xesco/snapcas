@@ -1,0 +1,4 @@
+# Magic Johnson's Basketball (1990)(Dro Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Magic%20Johnson's%20Basketball%20(1990)(Dro%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas MAGIC-JO.CAS
+sha1 116e672dc0d004be5e39eee96654bb5d53c993d4

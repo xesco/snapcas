@@ -1,0 +1,4 @@
+# Paises de America (1984)(Sony)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Paises%20de%20America%20(1984)(Sony)(es)%5BRUN'CAS-'%5D.zip
+cas PAISES.CAS
+sha1 ad35bb67d882328186c1582e2f444753739e29f7

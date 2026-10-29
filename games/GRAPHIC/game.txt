@@ -1,0 +1,4 @@
+# Graphic Editor (1984)(HAL Laboratories)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Graphic%20Editor%20(1984)(HAL%20Laboratories)%5BBLOAD'CAS-'%2CR%5D.zip
+cas GRAPHIC.CAS
+sha1 54140b1d28a0f61b0ec8cf9cc988141f098ac69a

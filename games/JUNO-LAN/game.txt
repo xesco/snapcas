@@ -1,0 +1,4 @@
+# Juno Lander (1983)(SIL)[CLOAD+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Juno%20Lander%20(1983)(SIL)%5BCLOAD%2BRUN%5D.zip
+cas JUNO-LAN.CAS
+sha1 4ff15ef835affcf5a14575def424ea6d87d57a13

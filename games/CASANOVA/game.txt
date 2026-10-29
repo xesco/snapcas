@@ -1,0 +1,4 @@
+# Casanova (1989)(Iber Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Casanova%20(1989)(Iber%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas CASANOVA.CAS
+sha1 79c404908c8a60f6e8f9b440325a038b8bb223eb

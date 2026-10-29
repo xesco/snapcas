@@ -1,0 +1,4 @@
+# Oh Shit! (ByteBusters) (Aackosoft - Eaglesoft) [RUN'CAS-'] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Oh%20Shit!%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas OH-SHCAS.CAS
+sha1 221101ba4bcb81533588123a7f47369311307b23

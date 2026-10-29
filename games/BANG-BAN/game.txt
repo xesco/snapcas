@@ -1,0 +1,4 @@
+# Bang! Bang! (1985)(Ample, Mel Software)(JP)(en)[!][BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Bang!%20Bang!%20(1985)(Ample%2C%20Mel%20Software)(JP)(en)%5B!%5D%5BBLOAD'CAS-'%2CR%5D.zip
+cas BANG-BAN.CAS
+sha1 56ccde91e305aae0c2c1dfb9a94adc41030dc9f9

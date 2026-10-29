@@ -1,0 +1,4 @@
+# Beach-Head (1985)(US Gold)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Beach-Head%20(1985)(US%20Gold)%5BRUN'CAS-'%5D.zip
+cas BEACH-HE.CAS
+sha1 500e747261e0c4e44bf5d7f3f94934693c76e595

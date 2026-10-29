@@ -1,0 +1,4 @@
+# Castle Combat (1985)(Spectravideo)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Castle%20Combat%20(1985)(Spectravideo)%5BBLOAD'CAS-'%2CR%5D.zip
+cas CASTLE.CAS
+sha1 1ec3bcddc537a5d18ff2604cef0f60431293794f

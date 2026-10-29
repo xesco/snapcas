@@ -1,0 +1,4 @@
+# Puzzybox (2021)(Gamecast)
+# https://download.file-hunter.com/Games/MSX1/CAS/Puzzybox%20(2021)(Gamecast).zip
+cas PUZZYBOX.CAS
+sha1 23c7acd12d5d978d523d0505b78d2cfaa60b6d6a

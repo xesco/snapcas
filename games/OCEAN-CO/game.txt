@@ -1,0 +1,4 @@
+# Ocean Conqueror (1987)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Ocean%20Conqueror%20(1987)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas OCEAN-CO.CAS
+sha1 67ecd249b567a7ef59f093bafeeb62b21a9cf7d8

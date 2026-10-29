@@ -1,0 +1,4 @@
+# Bootskell (2021)(Inufuto)
+# https://download.file-hunter.com/Games/MSX1/CAS/Bootskell%20(2021)(Inufuto).zip
+cas BOOTSKEL.CAS
+sha1 a4912dc215e9fb471b0a396b1d0146fc6ca07bdb

@@ -1,0 +1,4 @@
+# Turbo Pack C (1987)(Philips)(es) / 010 - Comecocos [Idealogic].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20C%20(1987)(Philips)(es).ZIP
+cas 010-COME.CAS
+sha1 055c28e74c6a1894f448c2ebf3314d07eb38a469

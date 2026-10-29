@@ -1,0 +1,4 @@
+# Midnight Commander (1983)(Microcabin)(JP)[!][CLOAD   RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Midnight%20Commander%20(1983)(Microcabin)(JP)%5B!%5D%5BCLOAD%20%20%20RUN%5D.zip
+cas MIDNIGHT.CAS
+sha1 a71191ac156293a02403fda05ce770439842a050

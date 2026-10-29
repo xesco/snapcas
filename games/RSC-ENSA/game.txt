@@ -1,0 +1,4 @@
+# RSC Ensamblador (19xx)(Manhattan Transfer)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/RSC%20Ensamblador%20(19xx)(Manhattan%20Transfer)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas RSC-ENSA.CAS
+sha1 3dbe0089f1b3fc4de1a86eb3635ad5e481e73c3c

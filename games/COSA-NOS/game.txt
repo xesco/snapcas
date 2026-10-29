@@ -1,0 +1,4 @@
+# Cosa Nostra (1986)(Opera Soft)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Cosa%20Nostra%20(1986)(Opera%20Soft)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas COSA-NOS.CAS
+sha1 d05e9445e150ecc38dedfb915a32a97aa170a426

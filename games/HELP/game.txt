@@ -1,0 +1,4 @@
+# HELP (1983)(Hudson Soft)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/HELP%20(1983)(Hudson%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
+cas HELP.CAS
+sha1 b7e1f2cd7c1eedd7b36b17a514cb64dd48e27113

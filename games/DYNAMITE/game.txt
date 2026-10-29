@@ -1,0 +1,4 @@
+# Dynamite Dan (1986)(Mirrorsoft)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Dynamite%20Dan%20(1986)(Mirrorsoft)%5BBLOAD'CAS-'%2CR%5D.zip
+cas DYNAMITE.CAS
+sha1 75ad6038445c925dd1f0e6edea2ebe7532c9c35e

@@ -1,0 +1,4 @@
+# Vortex Raider (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Vortex%20Raider%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas VORTEX.CAS
+sha1 b4f593bd9d3632023802fc91bcdb62231c7400b1

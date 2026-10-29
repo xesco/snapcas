@@ -1,0 +1,4 @@
+# Enchanted (1989)(Positive)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Enchanted%20(1989)(Positive)(es)%5BRUN'CAS-'%5D.zip
+cas ENCHANTE.CAS
+sha1 7b6a5c5c1c991c832d02e00f5a8b61fa29a4b11a

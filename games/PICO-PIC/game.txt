@@ -1,0 +1,4 @@
+# Pico Pico (1983)(Micro Cabin)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Pico%20Pico%20(1983)(Micro%20Cabin)%5BRUN'CAS-'%5D.zip
+cas PICO-PIC.CAS
+sha1 daa28c00035c4ae8f1912cb7d8160b9d5bc6d22d

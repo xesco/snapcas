@@ -1,0 +1,4 @@
+# Igloo (1985)(Garbi Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Igloo%20(1985)(Garbi%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas IGLOO.CAS
+sha1 772ff512e7a25dcc4c1cfa8a070ac14c4f834577

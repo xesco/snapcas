@@ -1,0 +1,4 @@
+# Mean Streets (19xx)(Kuma Computers)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Mean%20Streets%20(19xx)(Kuma%20Computers)%5BRUN'CAS-'%5D.zip
+cas MEAN-STR.CAS
+sha1 913e34b1515e400d1cba52fea33fce4851be1352

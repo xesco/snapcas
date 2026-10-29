@@ -1,0 +1,4 @@
+# Psychedelia (1984)(Aackosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Psychedelia%20(1984)(Aackosoft)%5BRUN'CAS-'%5D.zip
+cas PSYCHEDE.CAS
+sha1 3ffdc1b82c0a68578622748d964e70c1c736e35a

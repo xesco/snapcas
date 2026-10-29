@@ -1,0 +1,4 @@
+# Chack 'n Pop (1984)(Taito)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Chack%20'n%20Pop%20(1984)(Taito)%5BBLOAD'CAS-'%2CR%5D.zip
+cas CHACK-N.CAS
+sha1 8baab6d2b6132c88a9c8ba381a4ae295c55538e3

@@ -1,0 +1,4 @@
+# Field Master (1985)(Login Soft)[CLOAD+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Field%20Master%20(1985)(Login%20Soft)%5BCLOAD%2BRUN%5D.zip
+cas FIELD-MA.CAS
+sha1 2b1a6ac81218dd03625d4cd1bca8c83cf57b27a9

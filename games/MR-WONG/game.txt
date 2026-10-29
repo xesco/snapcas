@@ -1,0 +1,4 @@
+# Mr. Wong's Loopy Laundry (1984)(Artic Computing)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Mr.%20Wong's%20Loopy%20Laundry%20(1984)(Artic%20Computing)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MR-WONG.CAS
+sha1 578d7333c8573101c74d01e035cc14639e7d58f1

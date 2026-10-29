@@ -1,0 +1,4 @@
+# Stardust (1987)(Topo Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Stardust%20(1987)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas STARDUST.CAS
+sha1 3c1288a4a167d71505405f083a30939a5406e3de

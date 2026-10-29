@@ -1,0 +1,5 @@
+# Gauntlet - The Deeper Dungeons (US Gold) (Side A) [_].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20-%20The%20Deeper%20Dungeons%20(US%20Gold)%20%5B_%5D.zip
+cas GAUNTTHE.CAS
+side2 GAUNTLUS.CAS
+sha1 8a81f5f17b59ece55d9d14b7e300dd4ea3d59508 8b1988c46939b80d3c99e1b18ec59f0ea07d9081

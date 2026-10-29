@@ -1,0 +1,4 @@
+# Bubbler (1987)(Ultimate Play The Game)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Bubbler%20(1987)(Ultimate%20Play%20The%20Game)%5BBLOAD'CAS-'%2CR%5D.zip
+cas BUBBLER.CAS
+sha1 56abd5645c07ac8b11dc5cea4223bfb6fb9eb811

@@ -1,0 +1,4 @@
+# Portopia Serial Murder Case (1985)(Enix)(ja)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Portopia%20Serial%20Murder%20Case%20(1985)(Enix)(ja)%5BCLOAD%20%2B%20RUN%5D.zip
+cas PORTOPIA.CAS
+sha1 737de4aa277d7e970705650730d26e59c9c39945

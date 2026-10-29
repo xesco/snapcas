@@ -1,0 +1,4 @@
+# Last Mission, The (1987)(Opera Soft)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Last%20Mission%2C%20The%20(1987)(Opera%20Soft)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas LAST-MIS.CAS
+sha1 f27ff6241b0663c7fcf0a53a1639063a745834a3

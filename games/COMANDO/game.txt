@@ -1,0 +1,4 @@
+# Comando Quatro (1989)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Comando%20Quatro%20(1989)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas COMANDO.CAS
+sha1 430a46ffbe6375041f6b7a405c4a89e2af98951e

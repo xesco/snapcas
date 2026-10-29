@@ -1,0 +1,4 @@
+# Panel Panic (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Panel%20Panic%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas PANEL-PA.CAS
+sha1 9b018ea8b787b862f1e745c75cf6c646939fbc37

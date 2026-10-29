@@ -1,0 +1,4 @@
+# Eggerland Mystery (Microbyte) (Argentina) [RUN'CAS-'] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Eggerland%20Mystery%20(Microbyte)%20(Argentina)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas EGGERLAN.CAS
+sha1 02ed361bb351e9671065832db4654b2241486999

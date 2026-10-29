@@ -1,0 +1,4 @@
+# Addictaball (1988)(Alligata)(GB)[RUN'CAS-']-FX3-Cursores
+# https://download.file-hunter.com/Games/MSX1/CAS/Addictaball%20(1988)(Alligata)(GB)%5BRUN'CAS-'%5D-FX3-Cursores.zip
+cas ADDICTGB.CAS
+sha1 29dc04afb0561ed5c59994884b2c83797b946a14

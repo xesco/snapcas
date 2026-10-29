@@ -1,0 +1,4 @@
+# Doopm Community [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Doopm%20Community%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas DOOPM-CO.CAS
+sha1 b14bea1639c7659e9105fcba173843078ddfef59

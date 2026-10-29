@@ -1,0 +1,4 @@
+# Super MSX n.18 (gennaio 1989) - cas_18 / SuperMSX18-LatoB.CAS
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.18%20(gennaio%201989)%20-%20cas_18.zip
+cas SUPERMSB.CAS
+sha1 9fa55b37487e2545e40cc56183f5082a65487538

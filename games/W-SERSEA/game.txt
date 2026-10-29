@@ -1,0 +1,4 @@
+# W Series 2 (1983) (Hudson Soft)[Side A - HELP, Sea Bomber][BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%202%20(1983)%20(Hudson%20Soft)%5BSide%20A%20-%20HELP%2C%20Sea%20Bomber%5D%5BBLOAD'CAS-'%2CR%5D.zip
+cas W-SERSEA.CAS
+sha1 b5d7c2a3bb9d2528c88a88f4993e94e6fee816b3

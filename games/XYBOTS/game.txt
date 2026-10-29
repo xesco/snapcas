@@ -1,0 +1,4 @@
+# Xybots (1989)(Domark)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Xybots%20(1989)(Domark)%5BBLOAD'CAS-'%2CR%5D.zip
+cas XYBOTS.CAS
+sha1 a907e009ae8d6b182e4d6b66e83963bce4e2c7d7

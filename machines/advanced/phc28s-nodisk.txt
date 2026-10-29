@@ -1,0 +1,5 @@
+# A capture variant of advanced/phc28s without the Carnivore2, so without Nextor,
+# for a game that crashes when a disk system is present. The image still runs on
+# advanced/phc28s. The capture uses no disk, but a machine file needs this line.
+openmsx -machine Sanyo_PHC-28S -ext ram64k
+disk hda

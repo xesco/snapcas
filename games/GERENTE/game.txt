@@ -1,0 +1,4 @@
+# Gerente, El (1984)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Gerente%2C%20El%20(1984)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas GERENTE.CAS
+sha1 8094d43164f8d46f40cb2cd0010b5bc99b7ac64f

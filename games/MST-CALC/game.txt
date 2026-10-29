@@ -1,0 +1,4 @@
+# MST-Calc (1985)(MST Consultants)[CLOAD+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/MST-Calc%20(1985)(MST%20Consultants)%5BCLOAD%2BRUN%5D.zip
+cas MST-CALC.CAS
+sha1 62fceb223588fe6721c59ba3ee235eba2b82deca

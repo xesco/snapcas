@@ -1,0 +1,4 @@
+# International Karate (1986)(Endurance Games)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/International%20Karate%20(1986)(Endurance%20Games)%5BRUN'CAS-'%5D.zip
+cas INTERNAT.CAS
+sha1 f155bec090bf3960ab70028eb43f360f8657b56d

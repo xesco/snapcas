@@ -1,0 +1,4 @@
+# Maziacs (1985)(DK'Tronics)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Maziacs%20(1985)(DK'Tronics)%5BRUN'CAS-'%5D.zip
+cas MAZIACS.CAS
+sha1 7d57a8f813b78dab77c59afaf08db59cdccc561a

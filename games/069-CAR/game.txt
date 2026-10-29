@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 069-Car Race.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 069-CAR.CAS
+sha1 247f60e684b297d006f70c6be6099cf3b6dc3e4c

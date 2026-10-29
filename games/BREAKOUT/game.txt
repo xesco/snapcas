@@ -1,0 +1,4 @@
+# Breakout(1985)(Toshiba)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Breakout(1985)(Toshiba)%5BRUN'CAS-'%5D.zip
+cas BREAKOUT.CAS
+sha1 0a3439e2103fc88c4585980f9144f9532d357614

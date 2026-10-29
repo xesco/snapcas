@@ -1,0 +1,5 @@
+# Hypsys (1989)(Techno Arts)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Hypsys%20(1989)(Techno%20Arts)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas HYPSYS.CAS
+side2 HYPSYSB.CAS
+sha1 7e0709c09e49a66d1e840615ec451422b39bd9cd 7c3873b5ad1c5ac36adc6a06da637dc21b5ef4cb

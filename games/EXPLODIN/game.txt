@@ -1,0 +1,4 @@
+# Exploding Atoms (1985)(Sanyo)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Exploding%20Atoms%20(1985)(Sanyo)%5BCLOAD%20%2B%20RUN%5D.zip
+cas EXPLODIN.CAS
+sha1 ec220e7e14c20c5a24938f34a03666b0a913a274

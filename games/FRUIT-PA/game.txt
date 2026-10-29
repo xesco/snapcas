@@ -1,0 +1,4 @@
+# Fruit Panic (1984)(Pony Canyon & Philips Spain)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Fruit%20Panic%20(1984)(Pony%20Canyon%20%26%20Philips%20Spain)%5BRUN'CAS-'%5D.zip
+cas FRUIT-PA.CAS
+sha1 6269036751a691d1c7ec22b0fb6ab48f008dd39e

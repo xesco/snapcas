@@ -1,0 +1,4 @@
+# Thexder (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Thexder%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas THEXDER.CAS
+sha1 2d7c4bc3fd2b96de3f6e1c4492d2d274c84fe2a6

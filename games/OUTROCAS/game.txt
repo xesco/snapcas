@@ -1,0 +1,4 @@
+# Outroyd (1985)(Magical Zoo)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Outroyd%20(1985)(Magical%20Zoo)%5BBLOAD'CAS-'%2CR%5D.zip
+cas OUTROCAS.CAS
+sha1 6a8ce24983b51b9f0dce082a0fa334d5b37e1561

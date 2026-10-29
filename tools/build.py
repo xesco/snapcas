@@ -454,7 +454,7 @@ def main():
     folder = (os.path.abspath(args.game) if os.sep in args.game or os.path.isdir(args.game)
               else os.path.join(ROOT, "games", args.game))
     try:
-        game = gamefile.read_game(folder)
+        game = gamefile.read_game(folder, args.machine)
         name = os.path.basename(os.path.normpath(folder))
         out = os.path.join(ROOT, "out", args.machine, name)
         side1, side2 = read_tapes(game, args.cas)

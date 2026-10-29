@@ -1,0 +1,4 @@
+# Floppy el pregunton (19xx)(Manhattan Transfer)(ES)[RUN'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Floppy%20el%20pregunton%20(19xx)(Manhattan%20Transfer)(ES)%5BRUN'CAS-'%2CR%5D.zip
+cas FLOPPY.CAS
+sha1 a1cfa7d846e78f39f212d274fccafdb7debd9aaf

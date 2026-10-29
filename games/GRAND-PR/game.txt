@@ -1,0 +1,4 @@
+# Grand Prix Master (1988)(Dinamic)
+# https://download.file-hunter.com/Games/MSX1/CAS/Grand%20Prix%20Master%20(1988)(Dinamic).zip
+cas GRAND-PR.CAS
+sha1 1d2234ac62c87842c12d6ee0ed6bbda8f9d1e4ba

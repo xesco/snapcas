@@ -1,0 +1,4 @@
+# Speed King (1986)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Speed%20King%20(1986)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas SPEED-KI.CAS
+sha1 263e9fa810db96bc2a665d752c7b216e7972b4e2

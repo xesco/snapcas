@@ -1,0 +1,4 @@
+# Pac-Mania (Grandslam) (Zafiro) / Pac-Mania (Grandslam) (Zafiro) [_] [LOADERFIX].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Pac-Mania%20(Grandslam)%20(Zafiro).zip
+cas PAC-MANR.CAS
+sha1 0735fd5d1bf22da08b674f13eaaa3d66bf39d6a3

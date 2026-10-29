@@ -1,0 +1,5 @@
+# Alien Syndrome (1988)(Dro Soft)(es)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Alien%20Syndrome%20(1988)(Dro%20Soft)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas ALIEN-SY.CAS
+side2 ALIENES.CAS
+sha1 8c2e67520b00316c5ef2aaf1d18e1d396588c2f4 cd8f7d199b9d82487b332f3cf04f01e1f889b43d

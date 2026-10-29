@@ -1,0 +1,4 @@
+# MSXtra - 3D Knockout (1986)[Alligata][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/MSXtra%20-%203D%20Knockout%20(1986)%5BAlligata%5D%5BRUN'CAS-'%5D.zip
+cas MSXTRA3.CAS
+sha1 acdf07679c7baeb92ba01793e0d1d4c62e6598a6

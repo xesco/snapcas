@@ -1,0 +1,4 @@
+# Protector, The (1987)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Protector%2C%20The%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas PROTECTO.CAS
+sha1 2e24e432dabb61ba25580dfe31f67471bb1561e7

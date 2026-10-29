@@ -1,0 +1,4 @@
+# Fupper (1985)(Login Soft)[CLOAD+BLOAD'CAS-'+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Fupper%20(1985)(Login%20Soft)%5BCLOAD%2BBLOAD'CAS-'%2BRUN%5D.zip
+cas FUPPER.CAS
+sha1 477ec911d570f64549f44cebb2a9b489928f2a48

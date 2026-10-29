@@ -1,0 +1,4 @@
+# Fin Pack (1986)(Aackosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Fin%20Pack%20(1986)(Aackosoft)%5BRUN'CAS-'%5D.zip
+cas FIN-PACK.CAS
+sha1 5af30488d1b89922713e2f1d157069e6dff355e1

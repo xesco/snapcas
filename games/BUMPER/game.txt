@@ -1,0 +1,4 @@
+# Bumper Ship Racing (2018) (Uninteresting) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Bumper%20Ship%20Racing%20(2018)%20(Uninteresting)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas BUMPER.CAS
+sha1 0801fa7fad02b98b3166deb0ee8bdac06669f153

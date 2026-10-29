@@ -1,7 +1,9 @@
 """Game files (docs/DESIGN.md, Game file).
 
 A game file holds one setting per line: a key, a space and a value. A line that
-starts with # is a comment, and blank lines are ignored.
+starts with # is a comment, and blank lines are ignored. A machine's game file beside
+game.txt, named after the machine file with - for /, adds the lines that fit only
+that machine.
 """
 import os
 import re
@@ -82,13 +84,24 @@ def number(text, where):
     return value
 
 
-def read_game(folder):
+def machine_file(folder, machine):
+    """The path of a machine's file in a game's folder: advanced/phc28s has
+    advanced-phc28s.txt."""
+    return os.path.join(folder, machine.replace("/", "-") + ".txt")
+
+
+def read_game(folder, machine=None):
+    """The game of folder's game.txt, then of the machine's file there, when
+    machine is given and the file exists."""
     path = os.path.join(folder, "game.txt")
     game = Game(folder)
-    with open(path) as f:
-        lines = f.read().splitlines()
-    for number_, line in enumerate(lines, 1):
-        where = f"{path}:{number_}"
+    with open(path, encoding="utf-8") as f:
+        lines = [(path, n, line) for n, line in enumerate(f.read().splitlines(), 1)]
+    if machine is not None and os.path.exists(machine_file(folder, machine)):
+        with open(machine_file(folder, machine), encoding="utf-8") as f:
+            lines += [(machine_file(folder, machine), n, line) for n, line in enumerate(f.read().splitlines(), 1)]
+    for file, number_, line in lines:
+        where = f"{file}:{number_}"
         if not line.strip() or line.lstrip().startswith("#"):
             continue
         try:

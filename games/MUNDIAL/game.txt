@@ -1,0 +1,5 @@
+# Mundial de Futbol (1990)(Opera Soft)(es)(Side A)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Mundial%20de%20Futbol%20(1990)(Opera%20Soft)(es)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MUNDIAL.CAS
+side2 MUNDIALB.CAS
+sha1 4085a2dc799d983658963dff4ac708fe181497b1 84fa2d77ee0b72a6dc25a4cbc661ed70b7501dd5

@@ -1,3 +1,0 @@
-openmsx -machine Sanyo_PHC-28S -extb Carnivore2
-disk hda
-boot "DefConfig" space

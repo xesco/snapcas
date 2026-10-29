@@ -1,0 +1,4 @@
+# Smash (1984)(Spectravideo)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Smash%20(1984)(Spectravideo)%5BCLOAD%20%2B%20RUN%5D.zip
+cas SMASH.CAS
+sha1 d3783eb9267912188bfa1acf31ca5f90427ee4de

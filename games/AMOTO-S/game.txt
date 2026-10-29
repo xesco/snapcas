@@ -1,0 +1,4 @@
+# Amoto's Puf (1988)(SPE)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Amoto's%20Puf%20(1988)(SPE)(es)%5BRUN'CAS-'%5D.zip
+cas AMOTO-S.CAS
+sha1 3b7b031a08fdcabd7c672187369f556eff39a51f

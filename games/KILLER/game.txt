@@ -1,0 +1,4 @@
+# Killer Station (1983) (Hudson Soft)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Killer%20Station%20(1983)%20(Hudson%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
+cas KILLER.CAS
+sha1 901a4be7370ee6a0a6597b6e5ea07db9e2a17dc0

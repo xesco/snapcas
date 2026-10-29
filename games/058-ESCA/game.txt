@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 058-Escape.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 058-ESCA.CAS
+sha1 feac1f8d43d31cfd9068fd2e231e561ac26a47ca

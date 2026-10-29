@@ -1,0 +1,4 @@
+# Silicon Dreams II - Return to Eden (1984)(Level 9 Computing)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Silicon%20Dreams%20II%20-%20Return%20to%20Eden%20(1984)(Level%209%20Computing)%5BBLOAD'CAS-'%2CR%5D.zip
+cas SILICO84.CAS
+sha1 c6a0ce19d24948d93f8468ad052878ae58022f9f

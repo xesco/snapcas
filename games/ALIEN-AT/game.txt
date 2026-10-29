@@ -1,0 +1,4 @@
+# Alien Attack (2020) (Marcos Daniel Blanco) [1.03] [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Alien%20Attack%20(2020)%20(Marcos%20Daniel%20Blanco)%20%5B1.03%5D%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas ALIEN-AT.CAS
+sha1 e4354fdb3893c88a46b28eaaa3245bab6b0d3e1b

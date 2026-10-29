@@ -1,0 +1,4 @@
+# Magic Tower Adventure (2017)[Timmy] [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Magic%20Tower%20Adventure%20(2017)%5BTimmy%5D%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas MAGIC-TO.CAS
+sha1 ad0801cbc0372280cffe928f835668e3cccfe0e4

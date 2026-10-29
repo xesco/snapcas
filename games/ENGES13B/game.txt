@@ -1,0 +1,4 @@
+# Engesoft msxk-13 / Engesoft MSXK-13 - Lado B.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-13.zip
+cas ENGES13B.CAS
+sha1 cd3b667781e093ab05dd77b57a98be42c9dd935a

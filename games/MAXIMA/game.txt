@@ -1,0 +1,4 @@
+# Maxima (1984)(PSS)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Maxima%20(1984)(PSS)%5BBLOAD'CAS-'%2CR%5D.zip
+cas MAXIMA.CAS
+sha1 284994db1a1938f642fd53bed6e048bc761f042d

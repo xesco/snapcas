@@ -1,0 +1,4 @@
+# Alpha Blaster (1987)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Alpha%20Blaster%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas ALPHA87.CAS
+sha1 d1c99aa88c09fde2994b51a6b8fd3b13ee01a639

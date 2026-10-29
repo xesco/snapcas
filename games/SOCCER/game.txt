@@ -1,0 +1,4 @@
+# Soccer Boss (The Boss) (1987)(Alternative Software[CLOAD+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Soccer%20Boss%20(The%20Boss)%20(1987)(Alternative%20Software%5BCLOAD%2BRUN%5D.zip
+cas SOCCER.CAS
+sha1 93a56c61fb8f45d5afe0c9ecf7045bc2b4941648

@@ -1,0 +1,4 @@
+# Jaws (1989)(Screen 7)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Jaws%20(1989)(Screen%207)%5BRUN'CAS-'%5D.zip
+cas JAWS.CAS
+sha1 c58e4b43d0dfcbe2b177c36d8d3c8d2769169e5d

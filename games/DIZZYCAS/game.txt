@@ -1,0 +1,4 @@
+# Dizzy Balloon (1985)(Pony Canyon & Philips Spain)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Dizzy%20Balloon%20(1985)(Pony%20Canyon%20%26%20Philips%20Spain)%5BRUN'CAS-'%5D.zip
+cas DIZZYCAS.CAS
+sha1 53816ea7540572ff5a5104280acfb3110e537361

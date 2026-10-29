@@ -1,0 +1,4 @@
+# Turbo Pack A (1987)(Philips)(es) / 020-Compra y vende.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
+cas 012-COMP.CAS
+sha1 e85a3e4dc5ef63675de62157f2b00d8bd0013709

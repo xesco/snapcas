@@ -1,0 +1,4 @@
+# Boardello (1985)(Bubblebus Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Boardello%20(1985)(Bubblebus%20Software)%5BRUN'CAS-'%5D.zip
+cas BOARDELL.CAS
+sha1 cfd7c8180c189863f0ba2526b73e98e27f60bcf1

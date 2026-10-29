@@ -1,0 +1,4 @@
+# Slot-Machine (1985)(Creating Soft)
+# https://download.file-hunter.com/Games/MSX1/CAS/Slot-Machine%20(1985)(Creating%20Soft).zip
+cas SLOT-MAC.CAS
+sha1 efc107fd52ddf2c49ae31d3f0eb2c1492eb5ac30

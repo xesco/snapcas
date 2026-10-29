@@ -1,0 +1,5 @@
+# Astro Marine Corps (1989)(Dinamic Software)(es)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Astro%20Marine%20Corps%20(1989)(Dinamic%20Software)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas ASTRO-MA.CAS
+side2 ASTROB.CAS
+sha1 371781cd7dadd51623791c80e17461c88f9efde8 3decc2aa347e90243a9ad3504617479c1d0b399b

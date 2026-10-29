@@ -1,0 +1,4 @@
+# Monopoly (1986)(Leisure Genius)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Monopoly%20(1986)(Leisure%20Genius)%5BRUN'CAS-'%5D.zip
+cas MONOPOLY.CAS
+sha1 0a8443afca77013cdf53aa5b4270987b8a37f9eb

@@ -1,0 +1,5 @@
+# Dragon Ninja (1988)(Imagine Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Dragon%20Ninja%20(1988)(Imagine%20Software)%5BRUN'CAS-'%5D.zip
+cas DRAGON.CAS
+side2 DRAGONB.CAS
+sha1 ad8b46d62f843455514a8c801f7451e992fd7e56 03324599e07f35f8af85d9d33294437cad183d5f

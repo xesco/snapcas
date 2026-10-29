@@ -1,0 +1,4 @@
+# Jack the Nipper (1986)(Gremlin Graphics Software)[a][BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Jack%20the%20Nipper%20(1986)(Gremlin%20Graphics%20Software)%5Ba%5D%5BBLOAD'CAS-'%2CR%5D.zip
+cas JACK86.CAS
+sha1 15522474cc42e61241e3d622318a6f441f2597e2

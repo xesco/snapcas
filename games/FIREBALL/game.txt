@@ -1,0 +1,4 @@
+# Fireball (1983) (Hudson Soft)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Fireball%20(1983)%20(Hudson%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
+cas FIREBALL.CAS
+sha1 ab310b1f6da88cfdbc5358a08878c42c8d9a7307

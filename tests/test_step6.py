@@ -232,7 +232,7 @@ def capture_build_check(name, text, cas_dir):
 SOOTLAND = """cas SOOTLAND.CAS
 side2 SOOTLANB.CAS
 sha1 5ccf9a2463aa3144f3c03c2a23b798ba68d184e4 c2d10d8d5694de81b1192ec7d85aa80a10f89045
-capture test/phc28s-nodisk
+capture advanced/phc28s-nodisk
 patch side1:024E 3E FC D3 A8 > 3E 14 D3 A8
 """
 

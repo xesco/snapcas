@@ -1,0 +1,4 @@
+# M-Droid (19xx)(Blue Ribbon Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/M-Droid%20(19xx)(Blue%20Ribbon%20Software)%5BRUN'CAS-'%5D.zip
+cas M-DROID.CAS
+sha1 784c911a309f5d8b7b06dfc8dcd1beb1cacf314c

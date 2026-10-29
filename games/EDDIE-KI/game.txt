@@ -1,0 +1,4 @@
+# Eddie Kidd Jump Challenge (1985)(Martech Games)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Eddie%20Kidd%20Jump%20Challenge%20(1985)(Martech%20Games)%5BRUN'CAS-'%5D.zip
+cas EDDIE-KI.CAS
+sha1 bebd083f2ee5ea620705b8b85d1088986c859637

@@ -1,0 +1,5 @@
+# Robocop (1988)(Ocean Software)(Side A)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Robocop%20(1988)(Ocean%20Software)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
+cas ROBOCOP.CAS
+side2 ROBOCOPB.CAS
+sha1 5f2188750cb267fe08613651f9830f972e2cfb00 89491b2c101ad6b7ac7231c2ded0ea6075778635

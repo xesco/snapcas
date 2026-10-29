@@ -1,0 +1,4 @@
+# Time and Magik II - Red Moon v2 (1988)(Level 9 Computing)[Protected][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Time%20and%20Magik%20II%20-%20Red%20Moon%20v2%20(1988)(Level%209%20Computing)%5BProtected%5D%5BRUN'CAS-'%5D.zip
+cas TIMEII.CAS
+sha1 09bc993fc39b6544ef7e63021729fbaea72eb55c

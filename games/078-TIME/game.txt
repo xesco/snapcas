@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 078-Time Curb.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 078-TIME.CAS
+sha1 8c3acacd398f7e3a7df49a9d3f2bcbdfcc1bba7e

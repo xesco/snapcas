@@ -1,0 +1,4 @@
+# Light Corridor, The (1990)(Infogrames)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Light%20Corridor%2C%20The%20(1990)(Infogrames)%5BRUN'CAS-'%5D.zip
+cas LIGHT-CO.CAS
+sha1 eef7a6cd1eb463909c16ac908f2657703aa05314

@@ -1,0 +1,4 @@
+# Ship (1989)(Eurosoft)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Ship%20(1989)(Eurosoft)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas SHIP.CAS
+sha1 df838093393c895b9d2b204494cc7fafd75fcf5f

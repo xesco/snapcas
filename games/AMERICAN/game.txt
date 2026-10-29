@@ -1,0 +1,4 @@
+# American Truck - Hi-Speed Scroll Action (1985)(Telenet Japan)(Japan)[CLOAD-RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/American%20Truck%20-%20Hi-Speed%20Scroll%20Action%20(1985)(Telenet%20Japan)(Japan)%5BCLOAD-RUN%5D.zip
+cas AMERICAN.CAS
+sha1 c83d19efcfda32ec5c4ff3e68d1cca1a73eea531

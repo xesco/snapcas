@@ -1,0 +1,4 @@
+# Miyuki Memorial Graphics & Doors (1984)(Kitty Records)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Miyuki%20Memorial%20Graphics%20%26%20Doors%20(1984)(Kitty%20Records)%5BCLOAD%20%2B%20RUN%5D.zip
+cas MIYUKI84.CAS
+sha1 40e04c779f5c6d25e869cd22e44d03eb79e3380f

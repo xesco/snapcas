@@ -1,0 +1,4 @@
+# Dimensional Wars (1984)(SoftBank)
+# https://download.file-hunter.com/Games/MSX1/CAS/Dimensional%20Wars%20(1984)(SoftBank).zip
+cas DIMENSIO.CAS
+sha1 454b30228b771a48885b710db919d710efd4a3b9

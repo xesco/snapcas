@@ -1,0 +1,4 @@
+# Super MSX n.9 (febbraio 1988) - cas_9 / SUPER09A.CAS
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.9%20(febbraio%201988)%20-%20cas_9.zip
+cas SUPER-09.CAS
+sha1 b0a1e73ee6fa9a5fd4691ef8a6b74c14278433e9

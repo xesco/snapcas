@@ -1,0 +1,4 @@
+# Chuckie Egg (1985)(Aackosoft)[BLOAD'CAS-',R]__Chuckie Egg - Compilation Tape 3 (Eaglesoft) [RUN'CAS-'] [_].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Chuckie%20Egg%20-%20Compilation%20Tape%203%20(Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas CHUCKIE3.CAS
+sha1 cd82eb78df63ae6119749d9878484d6630c4835b

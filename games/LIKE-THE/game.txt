@@ -1,0 +1,4 @@
+# Like The Monkey King (1984)(Ample Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Like%20The%20Monkey%20King%20(1984)(Ample%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas LIKE-THE.CAS
+sha1 43c873011513080ae53020be383454b40252ec5a

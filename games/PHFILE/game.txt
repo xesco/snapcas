@@ -1,0 +1,4 @@
+# Phfile (19xx)(Philips)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Phfile%20(19xx)(Philips)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas PHFILE.CAS
+sha1 0541e72cf0ef50516dd01921bca5a92b233b0706

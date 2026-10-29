@@ -1,0 +1,4 @@
+# Cavern of Death (1987)(Dro Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Cavern%20of%20Death%20(1987)(Dro%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas CAVERN.CAS
+sha1 1d1d2dd5a4f40cfefd6d03415d54ded534123565

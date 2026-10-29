@@ -1,0 +1,4 @@
+# Echec (1985)(Loriciels)(en)[Side A - Library)[Fixed & Translated by GDX, MSX1 Only][RUN'CAS-',r]
+# https://download.file-hunter.com/Games/MSX1/CAS/Echec%20(1985)(Loriciels)(en)%5BSide%20A%20-%20Library)%5BFixed%20%26%20Translated%20by%20GDX%2C%20MSX1%20Only%5D%5BRUN'CAS-'%2Cr%5D.zip
+cas ECHECEN.CAS
+sha1 374d0c4920c8c05b901f2da62990d033384d2fd9

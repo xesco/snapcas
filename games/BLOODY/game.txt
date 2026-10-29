@@ -1,0 +1,4 @@
+# Bloody (1987)(P.J. Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Bloody%20(1987)(P.J.%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas BLOODY.CAS
+sha1 d83c9e2bc81003e42facf14347f0bb1a971c8b37

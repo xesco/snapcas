@@ -1,0 +1,4 @@
+# Eagle (1987)(Juliet Software)
+# https://download.file-hunter.com/Games/MSX1/CAS/Eagle%20(1987)(Juliet%20Software).zip
+cas EAGLE.CAS
+sha1 60d399e76ef07ddaba4ab74d630f332e0d0257be

@@ -1,0 +1,4 @@
+# Superbowl (1985)(Budgie Budget Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Superbowl%20(1985)(Budgie%20Budget%20Software)%5BRUN'CAS-'%5D.zip
+cas SUPERBOW.CAS
+sha1 9e09c86d189f14c52bddfde4a227daa35402fdd6

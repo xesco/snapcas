@@ -1,0 +1,4 @@
+# Space Walk (1985)(Mastertronic)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Space%20Walk%20(1985)(Mastertronic)%5BBLOAD'CAS-'%2CR%5D.zip
+cas SPACE-WA.CAS
+sha1 afc931283f793b48f4cf36d6dc68565f1e6dafbf

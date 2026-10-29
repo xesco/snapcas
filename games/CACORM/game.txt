@@ -1,0 +1,4 @@
+# Cacorm (2022)(Inufuto)
+# https://download.file-hunter.com/Games/MSX1/CAS/Cacorm%20(2022)(Inufuto).zip
+cas CACORM.CAS
+sha1 ea23ce68739c5cca6499cb766eb6495f08b5f3dd

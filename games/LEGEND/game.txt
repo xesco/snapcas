@@ -1,0 +1,4 @@
+# Legend of White and Black - Ringo Tensei Hen - Tape 1 Side A (1986)(Soft Studio WING)
+# https://download.file-hunter.com/Games/MSX1/CAS/Legend%20of%20White%20and%20Black%20-%20Ringo%20Tensei%20Hen%20-%20Tape%201%20Side%20A%20(1986)(Soft%20Studio%20WING).zip
+cas LEGEND.CAS
+sha1 cef1b108e98b80d7bef34d1abe7c9800ed0f7f3f

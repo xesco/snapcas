@@ -1,0 +1,4 @@
+# Motorista Sideral, El (1986)(Anaya Multimedia)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Motorista%20Sideral%2C%20El%20(1986)(Anaya%20Multimedia)(es)%5BRUN'CAS-'%5D.zip
+cas MOTORIST.CAS
+sha1 6d9fd52ba562cd11a252c74c5c037273c08e013f

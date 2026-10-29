@@ -1,0 +1,4 @@
+# Maths Invaders (1985)(Aackosoft)[a][RUN'CAS-']__Maths Invaders - Compilation Tape 3 (Eaglesoft) [RUN'CAS-'] [_].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Maths%20Invaders%20-%20Compilation%20Tape%203%20(Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas MATHSA.CAS
+sha1 2ae7076a78263bcce7778d938febea3b3e564075

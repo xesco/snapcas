@@ -1,0 +1,4 @@
+# Miyuki Memorial Graphics (1984)(Kitty Records)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Miyuki%20Memorial%20Graphics%20(1984)(Kitty%20Records)%5BCLOAD%20%2B%20RUN%5D.zip
+cas MIYUKRUN.CAS
+sha1 27c3be9a2e1d7ce93ea6d04e531c7656db767960

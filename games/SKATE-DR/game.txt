@@ -1,0 +1,4 @@
+# Skate Dragon (1986)(Idealogic)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Skate%20Dragon%20(1986)(Idealogic)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas SKATE-DR.CAS
+sha1 c5633ffe4a8698100c612e977382531ad86d34b1

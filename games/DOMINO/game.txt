@@ -1,0 +1,4 @@
+# Domino (1985)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Domino%20(1985)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas DOMINO.CAS
+sha1 ff38b545bf72ce274f2a6a11bc6daa34eee965d8

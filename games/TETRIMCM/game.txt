@@ -1,0 +1,4 @@
+# Tetris (MirrorSoft) (MCM) [RUN'CAS-'] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Tetris%20(MirrorSoft)%20(MCM)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas TETRIMCM.CAS
+sha1 d7e59abaf04b809b3cb95d0873c4b80ecbd78564

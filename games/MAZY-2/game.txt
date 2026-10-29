@@ -1,0 +1,4 @@
+# Mazy 2 (2025)(inufuto)
+# https://download.file-hunter.com/Games/MSX1/CAS/Mazy%202%20(2025)(inufuto).zip
+cas MAZY-2.CAS
+sha1 f35232203b712dcadcd690aecb64ed7c97471350

@@ -1,0 +1,4 @@
+# Wreck, The (1984)(Electric Software)
+# https://download.file-hunter.com/Games/MSX1/CAS/Wreck%2C%20The%20(1984)(Electric%20Software).zip
+cas WRECK-TH.CAS
+sha1 9ecd023430f6856873f2acf372cbd19659740862

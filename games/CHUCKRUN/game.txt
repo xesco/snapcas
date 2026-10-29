@@ -1,0 +1,4 @@
+# Chuckie Egg - Compilation Tape 3 (Eaglesoft) [RUN'CAS-'] [_].cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Chuckie%20Egg%20-%20Compilation%20Tape%203%20(Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas CHUCKRUN.CAS
+sha1 671aaaecbd28c973263dc745965f7c1f28dd1947

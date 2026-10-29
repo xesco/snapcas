@@ -1,0 +1,4 @@
+# Comecocos (19xx)(Idealogic)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Comecocos%20(19xx)(Idealogic)(es)%5BRUN'CAS-'%5D.zip
+cas COMECOCO.CAS
+sha1 055c28e74c6a1894f448c2ebf3314d07eb38a469

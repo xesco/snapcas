@@ -1,0 +1,4 @@
+# Fun Math for Elementary School Year 4 Vol 2 (1984)(Stratford Computer Center Corporation)
+# https://download.file-hunter.com/Games/MSX1/CAS/Fun%20Math%20for%20Elementary%20School%20Year%204%20Vol%202%20(1984)(Stratford%20Computer%20Center%20Corporation).zip
+cas FUN-MATH.CAS
+sha1 d749106105c79f501e07fbec59026fdbc2b939cc

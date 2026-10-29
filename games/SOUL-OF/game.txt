@@ -1,0 +1,4 @@
+# Soul of a Robot (1987)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Soul%20of%20a%20Robot%20(1987)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas SOUL-OF.CAS
+sha1 b1159df6d6829149c11302e44cc8bd1df158057d

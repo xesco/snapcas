@@ -1,0 +1,4 @@
+# Cracky (2023)(Inufuto)
+# https://download.file-hunter.com/Games/MSX1/CAS/Cracky%20(2023)(Inufuto).zip
+cas CRACKY.CAS
+sha1 cf3ad1874dada69a169e8b8c1127647e40dae609

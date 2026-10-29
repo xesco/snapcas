@@ -1,0 +1,4 @@
+# Turbo Pack A (1987)(Philips)(es) / 047-Gusanoco.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
+cas 047-GUSA.CAS
+sha1 b57cb3bb95721c24da32f8c141faca04d389b375

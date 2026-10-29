@@ -1,0 +1,4 @@
+# Smack Wacker (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Smack%20Wacker%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas SMACK-WA.CAS
+sha1 876aff85f0488586e6c229f5bdf86defd47ab38d

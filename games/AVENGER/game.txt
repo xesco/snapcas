@@ -1,0 +1,4 @@
+# Avenger (1986)(Erbe Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Avenger%20(1986)(Erbe%20Software)%5BRUN'CAS-'%5D.zip
+cas AVENGER.CAS
+sha1 2aea5d5292376490f6084d29dc2f01031cd2ef68

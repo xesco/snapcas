@@ -1,0 +1,4 @@
+# Pink Panther (1988)(Dro Soft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Pink%20Panther%20(1988)(Dro%20Soft)%5BRUN'CAS-'%5D.zip
+cas PINK-PAN.CAS
+sha1 7dfbc7ca8a3ad970d40923ba10595ad5dfbe070a

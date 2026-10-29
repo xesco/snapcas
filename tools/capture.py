@@ -83,7 +83,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        game = gamefile.read_game(game_folder(args.game))
+        game = gamefile.read_game(game_folder(args.game), args.machine)
         machine = msx.read_machine(os.path.join(ROOT, "machines", (game.capture or args.machine) + ".txt"))
     except (OSError, gamefile.GameFileError, msx.MachineError) as e:
         print(f"capture.py: {e}", file=sys.stderr)

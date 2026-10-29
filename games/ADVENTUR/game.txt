@@ -1,0 +1,4 @@
+# Adventure Quest - Text Only (1983)(Level 9 Computing)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Adventure%20Quest%20-%20Text%20Only%20(1983)(Level%209%20Computing)%5BRUN'CAS-'%5D.zip
+cas ADVENTUR.CAS
+sha1 56029b506253db2c6386dc26a3419c54e1c85908

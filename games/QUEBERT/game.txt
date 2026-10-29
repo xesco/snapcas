@@ -1,0 +1,4 @@
+# Quebert (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Quebert%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas QUEBERT.CAS
+sha1 fc1e3f4d731a569cb341a6dae625f676b5f2a3b4

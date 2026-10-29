@@ -1,0 +1,4 @@
+# 007 Agente Especial (1985)(Erbe Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/007%20Agente%20Especial%20(1985)(Erbe%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas 007-AGEN.CAS
+sha1 b863b3d2e35236681958a72161eee0d21c434dec

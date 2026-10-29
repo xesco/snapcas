@@ -1,0 +1,4 @@
+# Lucky Luke (1985)(Javier Laguna García)(es)
+# https://download.file-hunter.com/Games/MSX1/CAS/Lucky%20Luke%20(1985)(Javier%20Laguna%20Garc%C3%ADa)(es).zip
+cas LUCKY-LU.CAS
+sha1 7ceb79d29f7c9254dbef7e4b0b9f0a10f6330db9

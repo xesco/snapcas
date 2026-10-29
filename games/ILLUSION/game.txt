@@ -1,0 +1,4 @@
+# Illusions (1985)(Nice Ideas)(fr)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Illusions%20(1985)(Nice%20Ideas)(fr)%5BCLOAD%20%2B%20RUN%5D.zip
+cas ILLUSION.CAS
+sha1 d984db1cc14822ba2cc807906a237f3fdfcba546

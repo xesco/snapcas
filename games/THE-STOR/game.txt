@@ -1,0 +1,4 @@
+# The Storekeeper [RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/The%20Storekeeper%20%5BRUN'CAS-'%5D.zip
+cas THE-STOR.CAS
+sha1 1aa91ce217c082c21985c30c215a72d8cc0576c1

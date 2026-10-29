@@ -1,0 +1,4 @@
+# Blackjack (1985)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Blackjack%20(1985)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas BLACKJAC.CAS
+sha1 25412f5045bef736faffc0b44e6e12a768d3dd1b

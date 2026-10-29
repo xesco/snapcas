@@ -1,0 +1,5 @@
+# An Adventure Of The Blue Universe (1985)(Leben Pro IO)(ja)[Side A][CLOAD+RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/An%20Adventure%20Of%20The%20Blue%20Universe%20(1985)(Leben%20Pro%20IO)(ja)%5BSide%20A%5D%5BCLOAD%2BRUN%5D.zip
+cas AN-ADVEN.CAS
+side2 AN-ADVEB.CAS
+sha1 a32b5a43a02dae170c3c675f7b13a7fd75912786 4f564af99a3147ebc80a0949728c7c22e07c259b

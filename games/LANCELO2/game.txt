@@ -1,0 +1,4 @@
+# Lancelot - Part 2 (1988)(Level 9 Computing)(RUN'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Lancelot%20-%20Part%202%20(1988)(Level%209%20Computing)(RUN'CAS-'%2CR%5D.zip
+cas LANCELO2.CAS
+sha1 df1c1334dcad4a80fbfc6c581820989ce54f4c86

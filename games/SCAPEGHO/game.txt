@@ -1,0 +1,4 @@
+# Scapeghost - Part 1 (1989)(Level 9 Computing)[RUN'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Scapeghost%20-%20Part%201%20(1989)(Level%209%20Computing)%5BRUN'CAS-'%2CR%5D.zip
+cas SCAPEGHO.CAS
+sha1 fd4b912f341d2b9a079e61be4f81ade4e229ac57

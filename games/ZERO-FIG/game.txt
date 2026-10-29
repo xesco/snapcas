@@ -1,0 +1,4 @@
+# Zero Fighter (1984)(Hudson Soft)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Zero%20Fighter%20(1984)(Hudson%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
+cas ZERO-FIG.CAS
+sha1 1a92558603614b4a0f4493374cdbba8b28b711a8

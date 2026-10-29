@@ -1,0 +1,4 @@
+# Vampire(1987)(Codemasters)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Vampire(1987)(Codemasters)%5BRUN'CAS-'%5D.zip
+cas VAMPIR87.CAS
+sha1 9e75047936399e04f1d6bb519674e593996243b9

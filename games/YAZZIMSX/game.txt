@@ -1,0 +1,4 @@
+# Yazzie MSX Remix (2020) (Retrosouls) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Yazzie%20MSX%20Remix%20(2020)%20(Retrosouls)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas YAZZIMSX.CAS
+sha1 e77d30144a7b6755852b50e7f8c1846efc4442ae

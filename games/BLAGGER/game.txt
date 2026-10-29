@@ -1,0 +1,4 @@
+# Blagger Enhanced [BLOAD'CAS',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Blagger%20Enhanced%20%5BBLOAD'CAS'%2CR%5D.zip
+cas BLAGGER.CAS
+sha1 5312c8ca67b1cf233cadf2a3ef1c9f33aec0a721

@@ -1,0 +1,5 @@
+# Brian Jacks Superstar Challenge (1985)(Martech Games)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Brian%20Jacks%20Superstar%20Challenge%20(1985)(Martech%20Games)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas BRIAN-JA.CAS
+side2 BRIANB.CAS
+sha1 faff717af7b0c8fdfd204027a361ca947fcf5eed 5c65580d285f0ab63273210124b2f2e8e6cae1d4

@@ -1,0 +1,4 @@
+# Calculator New (1985)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Calculator%20New%20(1985)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas CALCULAT.CAS
+sha1 b5f361fa3a8533178c5261cc8e62fb64ebe88494

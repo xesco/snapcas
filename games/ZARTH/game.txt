@@ -1,0 +1,5 @@
+# Zarth (1985)(Enix)(ja)(Side A)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Zarth%20(1985)(Enix)(ja)(Side%20A)%5BCLOAD%20%2B%20RUN%5D.zip
+cas ZARTH.CAS
+side2 ZARTHB.CAS
+sha1 687fea7d67eb3c2ad06934d1147506c2807f6cce 573efe8205427bff21cedd295bdf20b53daaf7af

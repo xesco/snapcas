@@ -1,0 +1,4 @@
+# Starquake (1986)(Bubblebus Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Starquake%20(1986)(Bubblebus%20Software)%5BRUN'CAS-'%5D.zip
+cas STARQUAK.CAS
+sha1 48e3be393dba573df7f6d5725616b56c80729806

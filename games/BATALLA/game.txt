@@ -1,0 +1,4 @@
+# Batalla Espacial (19xx)(Grupo de Trabajo Software)(es)[aka Valkyr][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Batalla%20Espacial%20(19xx)(Grupo%20de%20Trabajo%20Software)(es)%5Baka%20Valkyr%5D%5BRUN'CAS-'%5D.zip
+cas BATALLA.CAS
+sha1 aa9a457f101888ab82cca4ca9f606fd4678848ed

@@ -1,0 +1,4 @@
+# Buster Block (1985)(Kuma Computers)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Buster%20Block%20(1985)(Kuma%20Computers)%5BRUN'CAS-'%5D.zip
+cas BUSTER.CAS
+sha1 f7d14b6cd01e55b52eccb230d376f9430d08cc81

@@ -1,0 +1,4 @@
+# Speedboat Racer (1987)(Methodic Solutions)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Speedboat%20Racer%20(1987)(Methodic%20Solutions)%5BRUN'CAS-'%5D.zip
+cas SPEEDBOA.CAS
+sha1 b480e7302ff1e4ebfb0084eadefe7f555d80d3d8

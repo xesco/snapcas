@@ -1,0 +1,4 @@
+# Choy-Lee-Fut Kung-Fu Warrior (1990)(Positive)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Choy-Lee-Fut%20Kung-Fu%20Warrior%20(1990)(Positive)(es)%5BRUN'CAS-'%5D.zip
+cas CHOY-LEE.CAS
+sha1 b1148fc083561ad70f2500a0ee46e82fc241a3e5

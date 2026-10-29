@@ -1,0 +1,4 @@
+# Gremlins 2 - La Nueva Generacion (1990)(Topo Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Gremlins%202%20-%20La%20Nueva%20Generacion%20(1990)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas GREMLINS.CAS
+sha1 3cafdec089655c9596d0c1d133736fdb38d1cdff

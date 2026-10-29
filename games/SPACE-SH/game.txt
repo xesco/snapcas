@@ -1,0 +1,4 @@
+# Space Shuttle - A Journey into Space (1986)(Activision)[b][BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Space%20Shuttle%20-%20A%20Journey%20into%20Space%20(1986)(Activision)%5Bb%5D%5BBLOAD'CAS-'%2CR%5D.zip
+cas SPACE-SH.CAS
+sha1 63db0ef0251d26b57c7e0d864c5bfda5400c8f48

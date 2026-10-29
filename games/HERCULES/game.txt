@@ -1,0 +1,4 @@
+# Hercules - Slayer of the Damned (1988)(Gremlin Graphics Software)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Hercules%20-%20Slayer%20of%20the%20Damned%20(1988)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
+cas HERCULES.CAS
+sha1 aae41f40aac191e6f994cbe25ca5d1e0233cdcd9

@@ -1,0 +1,4 @@
+# GOAL Complete (2019) (G.G.G. Software) [CLOAD + RUN + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/GOAL%20Complete%20(2019)%20(G.G.G.%20Software)%20%5BCLOAD%20%2B%20RUN%20%2B%20RUN%5D.zip
+cas GOAL-COM.CAS
+sha1 2f8989f8bf394455e3d9648d4f2fd48134a84588

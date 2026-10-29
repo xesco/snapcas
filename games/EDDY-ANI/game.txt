@@ -1,0 +1,4 @@
+# Eddy - Animation Editor (1984)(Hal Laboratory)
+# https://download.file-hunter.com/Games/MSX1/CAS/Eddy%20-%20Animation%20Editor%20(1984)(Hal%20Laboratory).zip
+cas EDDY-ANI.CAS
+sha1 667dc38f43aee93b6629df318b129adf137c5dbe

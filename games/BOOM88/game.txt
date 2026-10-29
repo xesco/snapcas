@@ -1,0 +1,4 @@
+# Boom (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Boom%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas BOOM88.CAS
+sha1 7c4f15e9df42c1c3d56fbe727b97d4d4a363a706

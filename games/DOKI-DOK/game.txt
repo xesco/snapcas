@@ -1,0 +1,4 @@
+# Doki Doki Penguinland (1985)(Sega)(Bitgame Release)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Doki%20Doki%20Penguinland%20(1985)(Sega)(Bitgame%20Release)%5BBLOAD'CAS-'%2CR%5D.zip
+cas DOKI-DOK.CAS
+sha1 6407ff1ed4e48d8ea940f8b9d3dcfe00c2abdf02

@@ -1,0 +1,4 @@
+# Jet Fighter (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Jet%20Fighter%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas JET-FIGH.CAS
+sha1 375def5503ed0fb0ee95f29c5037e3a6e9c09cb3

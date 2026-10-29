@@ -1,0 +1,4 @@
+# Sea Hunter (1985)(Spectravideo)
+# https://download.file-hunter.com/Games/MSX1/CAS/Sea%20Hunter%20(1985)(Spectravideo).zip
+cas SEA-HUNT.CAS
+sha1 15bb84661955216d7554d207bbae0d6f1d4f7410

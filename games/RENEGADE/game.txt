@@ -1,0 +1,4 @@
+# Renegade III - The Final Chapter (1989)(Imagine Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Renegade%20III%20-%20The%20Final%20Chapter%20(1989)(Imagine%20Software)%5BRUN'CAS-'%5D.zip
+cas RENEGADE.CAS
+sha1 610e5d3220b2ce1793a02ca556e4508073ee3caa

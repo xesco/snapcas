@@ -1,0 +1,4 @@
+# Contract Bridge (1984)(Alligata Software)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Contract%20Bridge%20(1984)(Alligata%20Software)%5BRUN'CAS-'%5D.zip
+cas CONTRACT.CAS
+sha1 7692f0b7dcdb952f2dfe1408b053db39e42c0f6e

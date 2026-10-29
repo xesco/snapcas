@@ -1,0 +1,4 @@
+# Vicious Viper (1985)(Sanyo)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Vicious%20Viper%20(1985)(Sanyo)%5BCLOAD%20%2B%20RUN%5D.zip
+cas VICIOUS.CAS
+sha1 6eebb156caca93df23e791d38727cae29934b7d8

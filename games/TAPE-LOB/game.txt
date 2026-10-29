@@ -1,0 +1,4 @@
+# Tape Login MSX Game Book (1985)(Login Soft)(Full Side B).cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Tape%20Login%20MSX%20Game%20Book%20(1985)(Login%20Soft)(Full%20Side%20B).zip
+cas TAPE-LOB.CAS
+sha1 e626c5a493a6728865cc20a773a07941514bfb4e

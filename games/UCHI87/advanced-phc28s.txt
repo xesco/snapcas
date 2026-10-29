@@ -1,0 +1,5 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+# The game selects RAM in slot 3. With Nextor, the PHC-28S has BASIC's pages 2
+# and 3 in the Carnivore2's mapper, slot 2, and the RAM cartridge in slot 1.
+patch side1:2012 3E F0 D3 A8 > 3E A0 D3 A8
+patch side1:2017 3E FC D3 A8 > 3E A4 D3 A8

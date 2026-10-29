@@ -1,0 +1,4 @@
+# Death Valley Gold Rush (1985)(Kuma Computers)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Death%20Valley%20Gold%20Rush%20(1985)(Kuma%20Computers)%5BCLOAD%20%2B%20RUN%5D.zip
+cas DEATH-VA.CAS
+sha1 6100023f3b6fe48dab7af4b61d59166b0df66d7f

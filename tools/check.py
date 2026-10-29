@@ -93,7 +93,7 @@ def main():
     folder = (os.path.abspath(args.game) if os.sep in args.game or os.path.isdir(args.game)
               else os.path.join(ROOT, "games", args.game))
     try:
-        game = gamefile.read_game(folder)
+        game = gamefile.read_game(folder, args.machine)
         machine = msx.read_machine(os.path.join(ROOT, "machines", args.machine + ".txt"))
         dos = sorted(glob.glob(os.path.join(args.dos, "*")))
         if not dos:

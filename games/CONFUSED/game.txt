@@ -1,0 +1,4 @@
+# Confused (1986)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Confused%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas CONFUSED.CAS
+sha1 b65d763cdba516d6966533db85a99ff104aa5c29

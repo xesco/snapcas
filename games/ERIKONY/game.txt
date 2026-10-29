@@ -1,0 +1,4 @@
+# Erik the Viking Text Ony (1984)(Level 9 Computing)[RUN'CAS']
+# https://download.file-hunter.com/Games/MSX1/CAS/Erik%20the%20Viking%20Text%20Ony%20(1984)(Level%209%20Computing)%5BRUN'CAS'%5D.zip
+cas ERIKONY.CAS
+sha1 e2e01b49c1f66890bc6b53358fab096200295025

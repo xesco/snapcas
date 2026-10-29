@@ -1,0 +1,4 @@
+# Turbo Pack B (1987)(Philips)(es) / 052-Editor de caracteres.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
+cas 052-EDIT.CAS
+sha1 694944473b1acd48dd96bc30d38a711de29eebad

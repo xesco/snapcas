@@ -1,0 +1,4 @@
+# Ninjya Kage (1984)(Hudson Soft)
+# https://download.file-hunter.com/Games/MSX1/CAS/Ninjya%20Kage%20(1984)(Hudson%20Soft).zip
+cas NINJYA.CAS
+sha1 b0c7e9baf65081e34e6dbbb4ee7f98a78037f4c2

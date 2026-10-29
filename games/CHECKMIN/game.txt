@@ -1,0 +1,4 @@
+# Checkmate! First Moves in Chess (1985)(Toshiba-EMI)[needs 64k in slot 2][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Checkmate!%20First%20Moves%20in%20Chess%20(1985)(Toshiba-EMI)%5Bneeds%2064k%20in%20slot%202%5D%5BRUN'CAS-'%5D.zip
+cas CHECKMIN.CAS
+sha1 0bce6c2647cb8a3991df89d7fe5e5959dcaa1006

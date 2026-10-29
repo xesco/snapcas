@@ -1,0 +1,4 @@
+# Arkos II (1988)(Zigurat Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Arkos%20II%20(1988)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas ARKOS-II.CAS
+sha1 f4eee4bf3ce2e5db61566618622781e36bd48990

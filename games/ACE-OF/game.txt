@@ -1,0 +1,4 @@
+# Ace of Aces (1986)(US Gold)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Ace%20of%20Aces%20(1986)(US%20Gold)%5BRUN'CAS-'%5D.zip
+cas ACE-OF.CAS
+sha1 a4fa723fa613c88fe5ac7bd23b58028f708f9fe1

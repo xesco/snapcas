@@ -1,0 +1,4 @@
+# Bomberman [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Bomberman%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas BOMBERMA.CAS
+sha1 88c5e70252f124caf2132ecb4314d3e285f45eb4

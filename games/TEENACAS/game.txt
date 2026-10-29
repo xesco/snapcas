@@ -1,0 +1,4 @@
+# Teenage Mutant Hero Turtles (1990)(Image Works)[passworded][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Teenage%20Mutant%20Hero%20Turtles%20(1990)(Image%20Works)%5Bpassworded%5D%5BRUN'CAS-'%5D.zip
+cas TEENACAS.CAS
+sha1 8ac173faad6e9ce19613faf8f81fd6e57e27572c

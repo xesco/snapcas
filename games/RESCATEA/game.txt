@@ -1,0 +1,5 @@
+# Rescate en el Golfo (1990)(Opera Soft)(es)(Side A)[passworded][BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Rescate%20en%20el%20Golfo%20(1990)(Opera%20Soft)(es)(Side%20A)%5Bpassworded%5D%5BBLOAD'CAS-'%2CR%5D.zip
+cas RESCATEA.CAS
+side2 RESCAT90.CAS
+sha1 96cb989b1d0c21f37842612a0f062cdfb95ee51b 762d942dbed0666dc7742520262d581e7bd1e019

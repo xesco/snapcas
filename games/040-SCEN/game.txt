@@ -1,0 +1,4 @@
+# Turbo Pack C (1987)(Philips)(es) / 040 - Scentipede.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20C%20(1987)(Philips)(es).ZIP
+cas 040-SCEN.CAS
+sha1 1f5e59a6008ab116769329b540564e780ef4a935

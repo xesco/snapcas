@@ -1,0 +1,5 @@
+# Aventura Espacial, La (1990)(Aventuras AD)(es)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Aventura%20Espacial%2C%20La%20(1990)(Aventuras%20AD)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas AVENTURA.CAS
+side2 AVENTURB.CAS
+sha1 a32ef4c8fbe6a51dc716521f359595b5bc1dfa72 3f6e2c9a382a76370d1f25dc495189dc24f149f9

@@ -1,0 +1,4 @@
+# Compra y Vende (1985)(Idealogic)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Compra%20y%20Vende%20(1985)(Idealogic)(es)%5BRUN'CAS-'%5D.zip
+cas COMPRA.CAS
+sha1 e85a3e4dc5ef63675de62157f2b00d8bd0013709

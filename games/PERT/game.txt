@@ -1,0 +1,4 @@
+# PERT (1986)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/PERT%20(1986)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas PERT.CAS
+sha1 a79e22af6974d37745d27fe6df28b131e171735d

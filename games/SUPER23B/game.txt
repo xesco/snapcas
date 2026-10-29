@@ -1,0 +1,4 @@
+# Super MSX n.23 (settembre 1989) - cas_23 / super_msx_23_lato_B.CAS
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.23%20(settembre%201989)%20-%20cas_23.zip
+cas SUPER23B.CAS
+sha1 cca9e481111050c59842beac90e47d91fd6c0219

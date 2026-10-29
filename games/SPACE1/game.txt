@@ -1,0 +1,4 @@
+# Space Busters - Compilation Tape 1 (ByteBusters) (Aackosoft - Eaglesoft) [RUN'CAS-'] [_]
+# https://download.file-hunter.com/Games/MSX1/CAS/Space%20Busters%20-%20Compilation%20Tape%201%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
+cas SPACE1.CAS
+sha1 b8dca991cb1cc8af6640a725f8346cd465637dad

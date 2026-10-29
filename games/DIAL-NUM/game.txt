@@ -1,0 +1,4 @@
+# Dial Number (1985)(Nippon Columbia)
+# https://download.file-hunter.com/Games/MSX1/CAS/Dial%20Number%20(1985)(Nippon%20Columbia).zip
+cas DIAL-NUM.CAS
+sha1 6d20c3ff904959b8abe48bee26a968f99c274719

@@ -1,0 +1,4 @@
+# Colossal Adventure  - B-Version - Text Only (1984)(Level 9 Computing)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Colossal%20Adventure%20%20-%20B-Version%20-%20Text%20Only%20(1984)(Level%209%20Computing)%5BRUN'CAS-'%5D.zip
+cas COLOSSAB.CAS
+sha1 4bcd4878f7af8dd5fc574b26bfbb11db6606b9c1

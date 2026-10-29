@@ -1,0 +1,4 @@
+# Knight Orc - Part 1 - Loosed Orc (1987)(Level 9 Computing)[a3 - Cracked][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Orc%20-%20Part%201%20-%20Loosed%20Orc%20(1987)(Level%209%20Computing)%5Ba3%20-%20Cracked%5D%5BRUN'CAS-'%5D.zip
+cas KNIGHT9.CAS
+sha1 3c7474bdaa34486af5d6f9dedde2b332fa311808

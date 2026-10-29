@@ -1,0 +1,4 @@
+# Oushou (King) (1984)(Microcabin)(ja)
+# https://download.file-hunter.com/Games/MSX1/CAS/Oushou%20(King)%20(1984)(Microcabin)(ja).zip
+cas OUSHOU.CAS
+sha1 6eb4a7d87be9a4910ed2da7d1c5a49321c017c46

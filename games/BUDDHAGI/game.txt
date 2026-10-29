@@ -1,0 +1,4 @@
+# Buddhagillie (2018) (GW's Workshop) [BLOAD'CAS-',r]
+# https://download.file-hunter.com/Games/MSX1/CAS/Buddhagillie%20(2018)%20(GW's%20Workshop)%20%5BBLOAD'CAS-'%2Cr%5D.zip
+cas BUDDHAGI.CAS
+sha1 ab17b3999deba3010898b1ffb45d98c5d91de12f

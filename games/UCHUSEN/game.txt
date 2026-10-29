@@ -1,0 +1,4 @@
+# Uchusen Gamma - Usebox.net (2019)
+# https://download.file-hunter.com/Games/MSX1/CAS/Uchusen%20Gamma%20-%20Usebox.net%20(2019).zip
+cas UCHUSEN.CAS
+sha1 d4f9b27ebfa823be7b63b4bc069ede344063b308

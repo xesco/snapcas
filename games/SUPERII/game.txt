@@ -1,0 +1,4 @@
+# Super Boy II  [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20Boy%20II%20%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas SUPERII.CAS
+sha1 836e9b78641a4de1a4beebac5330b3ff13c4c58d

@@ -1,0 +1,4 @@
+# 007 - The Living Daylights (1987)(Domark)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/007%20-%20The%20Living%20Daylights%20(1987)(Domark)%5BRUN'CAS-'%5D.zip
+cas 007-THE.CAS
+sha1 3519d4ee95a44ccb0b063df622ba9bb269703a6b

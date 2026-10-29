@@ -1,0 +1,4 @@
+# Poogaboo (1991)(Opera Soft)(es)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Poogaboo%20(1991)(Opera%20Soft)(es)%5BBLOAD'CAS-'%2CR%5D.zip
+cas POOGABOO.CAS
+sha1 4c1be248fd4943ca2173761f38ad82f0880b1bd4

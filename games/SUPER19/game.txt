@@ -1,0 +1,4 @@
+# Super MSX n.19 (febbraio 1989) - cas_19 / super msx 19 lato A.cas
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.19%20(febbraio%201989)%20-%20cas_19.zip
+cas SUPER19.CAS
+sha1 73b877417e260dab4595e3c05db4c72102e98601

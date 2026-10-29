@@ -1,0 +1,4 @@
+# Linez (2018) [Wim Dewijngaert] [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Linez%20(2018)%20%5BWim%20Dewijngaert%5D%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas LINEZ.CAS
+sha1 d29df48d49323e8d9dab5ff3baf330ba9c14c84c

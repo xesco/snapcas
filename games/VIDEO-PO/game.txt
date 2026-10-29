@@ -1,0 +1,4 @@
+# Video Poker (1986)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Video%20Poker%20(1986)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas VIDEO-PO.CAS
+sha1 e615984a4142a4b6c8267ef211a7cde56c8a654d

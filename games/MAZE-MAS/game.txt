@@ -1,0 +1,4 @@
+# Maze Master (1988)(Eurosoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Maze%20Master%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
+cas MAZE-MAS.CAS
+sha1 f0a0fc3448aa51be9335e6c1736109d12021f48a

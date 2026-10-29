@@ -1,0 +1,4 @@
+# Mega Chess (1988)(Iber Soft)(es)[aka Super Chess][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Mega%20Chess%20(1988)(Iber%20Soft)(es)%5Baka%20Super%20Chess%5D%5BRUN'CAS-'%5D.zip
+cas MEGA-CHE.CAS
+sha1 f1fac9b70c08e09ed6c0874bcf169df84a5fcf42

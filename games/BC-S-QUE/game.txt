@@ -1,0 +1,4 @@
+# BC's Quest for Tires II - Grog's Revenge (1987)(Eaglesoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/BC's%20Quest%20for%20Tires%20II%20-%20Grog's%20Revenge%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
+cas BC-S-QUE.CAS
+sha1 7abf37bef9e78bddd9ab6d5a996c17e4c7276195

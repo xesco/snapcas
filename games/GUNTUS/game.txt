@@ -1,0 +1,4 @@
+# Guntus (2022)(inufuto)
+# https://download.file-hunter.com/Games/MSX1/CAS/Guntus%20(2022)(inufuto).zip
+cas GUNTUS.CAS
+sha1 e34aa5616c284fb28de3003ec727c62f33b2bc7a

@@ -1,0 +1,4 @@
+# Risky Holding (1986)(DIMensionNEW)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Risky%20Holding%20(1986)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
+cas RISKY-HO.CAS
+sha1 24f6138bba63dde11455d9e563f471a7f9ee73a4

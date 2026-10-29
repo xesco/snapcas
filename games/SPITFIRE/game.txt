@@ -1,0 +1,4 @@
+# Spitfire '40 (1986)(Mirrorsoft)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Spitfire%20'40%20(1986)(Mirrorsoft)%5BRUN'CAS-'%5D.zip
+cas SPITFIRE.CAS
+sha1 e13be44ba161ea93a915246f356da40acf599b39

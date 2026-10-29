@@ -1,0 +1,4 @@
+# Super MSX n.5 (ottobre 1987) - cas_5 / SUPER05A.CAS
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.5%20(ottobre%201987)%20-%20cas_5.zip
+cas SUPER-05.CAS
+sha1 25f7d994142c3cfc1bef67cd8201324eb872f916

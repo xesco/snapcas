@@ -1,0 +1,5 @@
+# Thunder Blade (1988)(US Gold)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Thunder%20Blade%20(1988)(US%20Gold)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas THUNDER.CAS
+side2 THUNDERB.CAS
+sha1 ccf0b3752f5958a1dd7d8e7848ecb7ff5199b2e8 d84e7dcdb4ec35d66853b769b4bf206257df6c68

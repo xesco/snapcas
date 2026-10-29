@@ -1,0 +1,4 @@
+# Tenebra (2023)(Haplo)
+# https://download.file-hunter.com/Games/MSX1/CAS/Tenebra%20(2023)(Haplo).zip
+cas TENEBRA.CAS
+sha1 7733308b9fafeb61ad22423d9eece27b1a70c46b

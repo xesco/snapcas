@@ -1,0 +1,5 @@
+# Altered Beast (1988)(Activision)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Altered%20Beast%20(1988)(Activision)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas ALTERED.CAS
+side2 ALTEREDB.CAS
+sha1 e6395fd22537b15d796e28f9586cd50bcdfe460a 862b84ff291fbb89240eaeebfa0dd4e68d623907

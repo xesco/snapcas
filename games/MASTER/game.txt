@@ -1,0 +1,4 @@
+# Master Chess (1987)(Mastertronic)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Master%20Chess%20(1987)(Mastertronic)%5BRUN'CAS-'%5D.zip
+cas MASTER.CAS
+sha1 b9c56a824149e2d2220cf71d17d9dfb69c27b8a4

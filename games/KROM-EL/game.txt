@@ -1,0 +1,4 @@
+# Krom - El Guerrero Invencible (1989)(OMK Software)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Krom%20-%20El%20Guerrero%20Invencible%20(1989)(OMK%20Software)(es)%5BRUN'CAS-'%5D.zip
+cas KROM-EL.CAS
+sha1 96f884a35251723087aba8b3a8c58a7f013f5c10

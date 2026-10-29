@@ -1,0 +1,4 @@
+# Anexo 01, El Algoritmo [En] (2018) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Anexo%2001%2C%20El%20Algoritmo%20%5BEn%5D%20(2018)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas ANEXO-01.CAS
+sha1 51f31d8b74049d8f9435691194d6f939e56d176d

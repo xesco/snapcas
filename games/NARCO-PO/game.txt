@@ -1,0 +1,5 @@
+# Narco Police (1990)(Dinamic Software)(Side A)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Narco%20Police%20(1990)(Dinamic%20Software)(Side%20A)%5BRUN'CAS-'%5D.zip
+cas NARCO-PO.CAS
+side2 NARCOB.CAS
+sha1 f40c9eccb54fd7620632d7d4246eaa795795f549 5191f88504806282d21620b1d409d46d841aa291

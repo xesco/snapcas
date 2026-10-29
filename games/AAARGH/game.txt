@@ -1,0 +1,4 @@
+# Aaargh! (1989)(Dro Soft)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Aaargh!%20(1989)(Dro%20Soft)(es)%5BRUN'CAS-'%5D.zip
+cas AAARGH.CAS
+sha1 a04b93d5a2be443e03c2d9fa53e993410f866e6d

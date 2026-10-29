@@ -1,0 +1,4 @@
+# Beamrider (1984)(Activision)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Beamrider%20(1984)(Activision)%5BBLOAD'CAS-'%2CR%5D.zip
+cas BEAMRIDE.CAS
+sha1 a19beaa72d3afd306f05c5c8d0b11263f8166b64

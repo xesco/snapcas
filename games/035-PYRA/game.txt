@@ -1,0 +1,4 @@
+# Turbo Pack C (1987)(Philips)(es) / 035 - Pyramid (Jojosoft).CAS
+# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20C%20(1987)(Philips)(es).ZIP
+cas 035-PYRA.CAS
+sha1 f3d4312c181f4f368a008cd53b86b4b0c434816f

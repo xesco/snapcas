@@ -1,0 +1,4 @@
+# Starbuster (1988)(Methodic Solutions)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Starbuster%20(1988)(Methodic%20Solutions)%5BRUN'CAS-'%5D.zip
+cas STARBUST.CAS
+sha1 0419e8de859558c5c42907d138dc348be1e8a715

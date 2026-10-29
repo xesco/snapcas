@@ -1,0 +1,4 @@
+# Ulises (1989)(Opera Soft)[BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Ulises%20(1989)(Opera%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
+cas ULISES.CAS
+sha1 36eb15b86c717abf10768753402df288a6975e6a

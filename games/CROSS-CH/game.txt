@@ -1,0 +1,4 @@
+# Cross Chase (2018) (Fabrizio Caruso) [BLOAD'CAS-',R]
+# https://download.file-hunter.com/Games/MSX1/CAS/Cross%20Chase%20(2018)%20(Fabrizio%20Caruso)%20%5BBLOAD'CAS-'%2CR%5D.zip
+cas CROSS-CH.CAS
+sha1 6749ad5e27cbf31244cf882f4fbbe0e88c77f55d
