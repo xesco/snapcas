@@ -1,0 +1,5 @@
+# Philips NMS 8245, an MSX2 with a 128 KB mapper, with a 512 KB memory mapper
+# cartridge and a Sunrise IDE interface under Nextor. Nextor takes the larger
+# mapper, which leaves room for the images' segments.
+openmsx -machine Philips_NMS_8245 -ext ram512k -ext SunriseIDE_Nextor
+disk hda

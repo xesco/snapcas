@@ -65,8 +65,9 @@ files, 2 when `openMSX` fails or a wait times out, and 3 when a check fails.
 
 ## Machine file
 
-A machine file holds one `openmsx` line, one `disk` line and any number of `boot`
-lines, as in this example for a Sanyo PHC-28S with a RAM cartridge and a Carnivore2:
+A machine file holds one `openmsx` line, one `disk` line, any number of `boot` lines
+and at most one `dos` line, as in this example for a Sanyo PHC-28S with a RAM
+cartridge and a Carnivore2:
 
 ```
 openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2
@@ -79,6 +80,7 @@ boot "DefConfig" space
 | `openmsx` | The `openMSX` arguments that reproduce the machine |
 | `disk` | The `openMSX` command that inserts `check.py`'s disk image, such as `hda` for an IDE interface or `diska` for a floppy drive |
 | `boot` | A text on the screen during boot and the key to press when it appears. Each key has its own line, matched in order. A menu can show its text before it reads the keyboard, so the key is pressed again each second while the text stays, up to 10 times |
+| `dos` | For a machine that boots MSX-DOS from a disk of its own, as the MegaFlashROM SCC+ SD boots from the ROM disk in its flash: DOS's prompt, such as `A:\>`, and the drive letter of `check.py`'s disk. When the prompt appears, the capture types `BASIC`, because it loads the game from BASIC, and the check types that drive and `AUTOEXEC` |
 
 `openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
 the `-ext` options sets the slots, and it must match the real machine's. `boot`
@@ -175,9 +177,9 @@ single-load game:
 |---|---|
 | `basic/vg8020` | Philips VG-8020: an MSX1 with 64 KB and a Carnivore2 |
 | `basic/nms8250` | Philips NMS 8250: an MSX2 with its own mapper and a floppy drive, under MSX-DOS 2 |
-| `basic/msx2ide` | An MSX2 with a Sunrise IDE interface, under Nextor |
+| `basic/msx2ide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. Its own 128 KB leave Nextor too few free segments |
 | `advanced/phc28s` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 |
-| `advanced/mfrsd` | An MSX1 with a MegaFlashROM SCC+ SD |
+| `advanced/mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup, which boots MSX-DOS from the ROM disk in its flash, with the check's disk in SD card slot 1 as drive B: |
 | `advanced/hbf700p` | Sony HB-F700P: an MSX2 whose slot 0 is expanded |
 
 It also ships two capture variants of the PHC-28S ([Machine file](#machine-file)),

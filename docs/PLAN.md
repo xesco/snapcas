@@ -19,12 +19,13 @@ files from two folders that the user names, because `snapcas` cannot ship them.
 | Nextor | `NEXTOR.SYS` 2.11 and `COMMAND2.COM` 2.44 from Nextor 2.1.0's `tools.zip`, downloaded by the Makefile into `out/dl/nextor/`, checked by SHA-256 |
 | `DOS_DIR` | Make variable: a folder with `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`), by default `dos/`, which git ignores |
 
-The test machines are the six shipped machine files and two machine files that only
-the tests use, in `machines/test/`. Each one boots the DOS of its row:
+The test machines are the six shipped machines and two machine files that only the
+tests use, in `machines/test/`. Each one boots the DOS of its row:
 
 | Machine file | DOS | Why |
 |---|---|---|
-| `advanced/phc28s`, `basic/vg8020`, `basic/msx2ide`, `advanced/mfrsd` | Nextor | Shipped |
+| `advanced/phc28s`, `basic/vg8020`, `basic/msx2ide` | Nextor | Shipped |
+| `advanced/mfrsd` | Nextor 2.10, from the ROM disk in the cartridge's flash | Shipped |
 | `basic/nms8250`, `advanced/hbf700p` | `DOS_DIR/msxdos2/`, with the `msxdos2` cartridge in the machine file | Shipped |
 | `test/nms8250-dos1` | `DOS_DIR/msxdos1/`, from the NMS 8250's own disk ROM | No shipped machine runs MSX-DOS 1 |
 | `test/nms8250-512k` | `DOS_DIR/msxdos2/` | An NMS 8250 whose single mapper holds 512 KB, because 128 KB cannot hold Moonwalker's 236 KB tape |
@@ -201,12 +202,12 @@ load as in step 5, and check:
 
 ## Step 9: shipped files
 
-This step writes the last two machine files, `basic/msx2ide` and `advanced/mfrsd`
-([Shipped files](DESIGN.md#shipped-files)), and the game files for the collection,
-by running the capture over `CAS_DIR` on `advanced/phc28s`. The tests check a
-single-load game on each of the six shipped machine files, then capture, build and
-check every game file on `advanced/phc28s` and `basic/vg8020`, and write a report of
-passes and failures.
+This step writes the last two machine files, `basic/msx2ide` and `advanced/mfrsd`,
+with the machine file's `dos` line that the second needs, and the game files for the
+collection, by running the capture over `CAS_DIR` on `advanced/phc28s`
+([Shipped files](DESIGN.md#shipped-files)). The tests check a single-load game on
+each of the six shipped machines, then capture, build and check every game file on
+`advanced/phc28s` and `basic/vg8020`, and write a report of passes and failures.
 
 ## Step 10: real hardware
 

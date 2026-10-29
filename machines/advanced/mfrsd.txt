@@ -1,0 +1,7 @@
+# Sony HB-75P, an MSX1 with 64 KB, with a MegaFlashROM SCC+ SD in openMSX's
+# stock setup: it boots MSX-DOS from the ROM disk in its flash, as drive A:, and
+# its memory mapper and Nextor serve the images. The disk goes in its first SD
+# card slot, drive B:.
+openmsx -machine Sony_HB-75P -ext MegaFlashROM_SCC+_SD
+disk hda
+dos "A:\>" B

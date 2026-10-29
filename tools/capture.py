@@ -57,6 +57,8 @@ def settings(game, machine, cas_path, data, snap):
         "snap": msx.tcl_word(snap),
         "boot": tcl_list("{" + msx.tcl_word(text) + " " + msx.tcl_word(msx.press(key)) + "}"
                          for text, key in machine.boot),
+        # On a machine that boots DOS from its own disk, BASIC comes from DOS.
+        "afterboot": "{" + msx.at_prompt(machine, "BASIC", "wait_ok") + "}",
         "cas": msx.tcl_word(cas_path),
         "cmd": msx.tcl_word(command),
         "cload": "1" if command == "CLOAD" else "0",

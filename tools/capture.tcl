@@ -110,6 +110,8 @@ proc mapper_size {page} {
 # capture.py sets these before the procedures:
 #   ::S(snap)     the snapshot folder
 #   ::S(boot)     the boot steps, for boot (tools/msx.py)
+#   ::S(afterboot) what follows them: wait_ok, after BASIC typed at DOS's prompt
+#                 on a machine that boots DOS from its own disk
 #   ::S(cas)      the CAS file of side 1
 #   ::S(cmd)      the load command; ::S(cload) is 1 for CLOAD, then RUN
 #   ::S(headers)  the offsets of side 1's headers
@@ -211,7 +213,7 @@ proc step1 {} {
     debug set_watchpoint write_io 0xA0 {} {set ::st(psgsel) $::wp_last_value}
     set ::booted 0
     later 120 { if {!$::booted} { fail "BASIC's Ok did not appear within 120 seconds" } }
-    boot $::S(boot) { wait_ok }
+    boot $::S(boot) $::S(afterboot)
 }
 # The disk system can still be busy just after BASIC's Ok (a load that
 # starts 5 seconds after the Carnivore2's boot behaves differently from one that

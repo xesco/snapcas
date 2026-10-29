@@ -129,7 +129,11 @@ def main():
         check = f.read()
     script = (settings(state, snap, image, report, check_dir, state_name, game.patches)
               + procedures + check
-              + "\nboot {" + msx.boot_steps(machine) + "} start_check\n")
+              + "\nboot {" + msx.boot_steps(machine) + "} "
+              # On a machine that boots DOS from its own disk, the check's disk
+              # is another drive, where AUTOEXEC.BAT runs SNAPCAS.
+              + "{" + (msx.at_prompt(machine, f"{machine.dos[1]}:\rAUTOEXEC", "start_check")
+                       if machine.dos else "start_check") + "}\n")
     try:
         msx.run([*machine.args, f"-{machine.disk}", os.path.abspath(disk)], script, timeout=TIMEOUT)
     except Exception as e:

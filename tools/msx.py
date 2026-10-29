@@ -6,6 +6,7 @@ drive openMSX with a Tcl script that it runs with the throttle, the renderer and
 the sound off, and read results from files that the script writes.
 """
 import os
+import re
 import shlex
 import subprocess
 import tempfile
@@ -31,15 +32,16 @@ class MachineError(Exception):
 
 
 class Machine:
-    def __init__(self, path, args, disk, boot):
+    def __init__(self, path, args, disk, boot, dos):
         self.path = path
         self.args = args  # openMSX arguments, without the program name
         self.disk = disk  # command that inserts a disk image, such as hda
         self.boot = boot  # [(text, key)], matched in order
+        self.dos = dos    # (prompt, drive) when DOS boots from the machine's own disk
 
 
 def read_machine(path):
-    args, disk, boot = None, None, []
+    args, disk, boot, dos = None, None, [], None
     with open(path) as f:
         for number, line in enumerate(f, 1):
             words = shlex.split(line, comments=True)
@@ -52,11 +54,13 @@ def read_machine(path):
                 disk = words[1]
             elif words[0] == "boot" and len(words) == 3 and words[2] in KEYS:
                 boot.append((words[1], words[2]))
+            elif words[0] == "dos" and dos is None and len(words) == 3 and re.fullmatch(r"[A-H]", words[2]):
+                dos = (words[1], words[2])
             else:
                 raise MachineError(f"{where}: cannot read this line")
     if args is None or disk is None:
         raise MachineError(f"{path}: needs one openmsx line and one disk line")
-    return Machine(path, args, disk, boot)
+    return Machine(path, args, disk, boot, dos)
 
 
 def tcl_word(text):
@@ -100,7 +104,30 @@ proc boot {steps done {tries 0}} {
     error "boot: the key for '$text' did not take effect"
   }
 }
+# at_prompt waits for DOS's prompt, then types a text once, because the prompt
+# stays on the screen, and runs the command done. The prompt and the text come
+# as hex, so that they need no quoting.
+proc at_prompt {prompt hex done {tries 0}} {
+  set text [binary format H* $prompt]
+  if {[string first $text [screen]] >= 0} {
+    type [binary format H* $hex]
+    eval $done
+  } elseif {$tries < 240} {
+    after time 0.5 [list at_prompt $prompt $hex $done [expr {$tries + 1}]]
+  } else {
+    error "at_prompt: '$text' did not appear within 120 seconds"
+  }
+}
 """
+
+
+def at_prompt(machine, typed, done):
+    """Tcl that, on a machine that boots DOS from its own disk, waits for
+    DOS's prompt and types typed and Return, then runs done."""
+    if machine.dos is None:
+        return done
+    hexed = (typed + "\r").encode("latin-1").hex()
+    return f"at_prompt {machine.dos[0].encode('latin-1').hex()} {hexed} {tcl_word(done)}"
 
 
 def boot_steps(machine):
