@@ -55,29 +55,31 @@ c_tapin:
         ret c                   ; CTRL+STOP
 ; Returns in A the byte at the tape position, and advances the position.
 next_byte:
+        ld hl,(D_POS+1)
+        add hl,hl
+        add hl,hl
+        ld e,h
+        ld d,0                  ; the segment's number in D_SEGS: position / 4000h
+        ld hl,D_SEGS
+        add hl,de
+        ld b,(hl)               ; the byte's segment
         ld hl,(D_POS)
-        ld a,(D_POS+2)
-        add a,a
-        add a,a
-        ld c,a
-        ld a,h
-        rlca
-        rlca
-        and 3
-        or c                    ; the segment's number in D_SEGS
-        ld e,a
-        ld d,0
         ld a,h
         and 3Fh
-        ld h,a                  ; the byte's offset in its segment
-        ex de,hl
-        ld bc,D_SEGS
-        add hl,bc
-        ld b,(hl)               ; the byte's segment
+        ld d,a
+        ld e,l                  ; the byte's offset in its segment
         if T0MODE
-        ; Through the borrowed page: D_PAGE holds its mapper register's
-        ; port, its first address's high byte, and the game's segment there.
+        ; Through the borrowed page: D_PAGE holds the slot register's mask and
+        ; bits that select DOS's mapper there, its mapper register's port, its
+        ; first address's high byte, and the game's segment there.
         ld hl,D_PAGE
+        in a,(0A8h)
+        push af
+        and (hl)
+        inc hl
+        or (hl)
+        out (0A8h),a
+        inc hl
         ld c,(hl)
         inc hl
         ld a,(hl)
@@ -89,6 +91,8 @@ next_byte:
         out (c),b
         ld e,(hl)
         out (c),a
+        pop af
+        out (0A8h),a
         else
         ; Through the reader in page 3, in page 0.
         ex de,hl
@@ -187,7 +191,8 @@ wrap:
         call on_side1
         ld a,0
         jr c,.side
-        call one_side
+        ld a,(D_TWO)            ; 0 when the tape has no side 2
+        or a
         jr z,side_a             ; past side 1's end without a side 2
         ld hl,D_POS
         ld de,D_TOTAL
@@ -202,21 +207,10 @@ wrap:
         ld e,SIDE_B
         jp mark
 
-; Returns Z when the tape has no side 2.
-one_side:
-        ld a,(D_TWO)
-        or a
-        ret
-
-set_pos:
-        ld de,D_POS
-        ld bc,3
-        ldir
-        ret
-
 ; CODE: side 2's start, or side 1's without a side 2. GRAPH: side 1's start.
 side_b:
-        call one_side
+        ld a,(D_TWO)
+        or a
         jr z,side_a
 .two:
         ld hl,D_S1END
@@ -231,7 +225,9 @@ to_side:
         ld a,d
         ld (D_SIDE),a
         push de
-        call set_pos
+        ld de,D_POS
+        ld bc,3
+        ldir
         pop de
         jp mark
 

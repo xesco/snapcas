@@ -114,11 +114,17 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 
 A place is a RAM page as `page<n>:<offset>`, which names the RAM page that the
 snapshot selects in page n, 0 to 3, and the offset from that page's start. A place
-can also be on the tape, as `side1:<offset>` or `side2:<offset>`. Neither form names
-a slot, so a patch line holds on every machine that the game runs on. A patch fits
-only the dump that it was made for, so `build.py` stops with an error when the old
-bytes differ, or when the game file has `patch` lines and `sha1` is missing or
-differs from a CAS file's SHA-1.
+can also be on the tape, as `side1:<offset>` or `side2:<offset>`, an offset in the
+CAS file. A patch on the tape changes the tape that the capture loads and that the
+tape service serves, so it also reaches the code that the capture runs. Neither form
+names a slot, so a patch line holds on every machine that the game runs on, unless
+its new bytes are a slot register's value. A game can select its RAM by a fixed
+value: Sootland and Time Out write FCh and FFh to the slot register, for RAM in slot
+3, and crash on the Sanyo PHC-28S, whose RAM cartridge is in slot 1. A patch of
+these values to 54h and 55h, slot 1, holds only on machines with RAM in slot 1. A
+patch fits only the dump that it was made for, so `capture.py` and `build.py` stop
+with an error when the old bytes differ, or when the game file has `patch` lines and
+`sha1` is missing or differs from a CAS file's SHA-1.
 
 ## Shipped files
 
@@ -164,8 +170,9 @@ or step 5 restarts more than 20 times. It performs the following steps:
    writes zeros from FCC9h to FD88h, `SLTATR` and `SLTWRK`, so that no extension ROM
    claims them and the tape service can use them. It then types `CLEAR200,&HF380`,
    which sets `HIMEM` to a cassette machine's F380h.
-3. Inserts the CAS file of side 1 into the cassette player, notes the slots selected
-   in each page, and types the load command for the first header's type
+3. Inserts the CAS file of side 1, with the game file's `side1` patches written into
+   a copy in `snap/`, into the cassette player, notes the slots selected in each
+   page, and types the load command for the first header's type
    ([CAS data](#cas-data)): `BLOAD"CAS:",R`, `CLOAD`, or `RUN"CAS:"`. After `CLOAD`,
    it types `RUN` when the motor has stopped for 1 second. Side 2 is never inserted.
    The replay's recording starts just before the command is typed
@@ -248,6 +255,7 @@ overwrites a segment changes nothing it keeps:
 | `vram.bin` | The `physical VRAM` debuggable: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938 |
 | `state.txt` | One `name value` per line, values in hexadecimal, as below |
 | `replay.log` | The VDP, PSG and cassette writes of the load, for the replay ([Replay](#replay)) |
+| `side1.cas` | Side 1 with the game file's `side1` patches, when it has any: the tape that the capture loads |
 | `log.txt` | The logged events and the capture's decisions, in time order: each stop of the load with the screen's text, the key that continued it, each mapper's size, and how the snapshot was taken. Its last line names the `continue` key that worked |
 
 | `state.txt` names | Source in `openMSX` |
@@ -359,9 +367,13 @@ and until step 4 it can stop with a message and return to DOS:
      does not describe this machine.
    - A VRAM block is read into page 2 and written to the VDP through ports 98h and
      99h and register 14, with interrupts off and the display blanked by writing
-     register 1 with `RG1SAV`'s value and bit 6 clear. A block of zeros is written
-     without a read. DOS's text mode has no planar layout, so the bytes go to VRAM
-     as stored.
+     register 1 with `RG1SAV`'s value, bit 6 clear and bit 7 from the snapshot's
+     value. That bit makes the VDP map VRAM as the game does: bit 7 of a TMS9918's
+     register 1 chooses its 4 KB or 16 KB mapping (TMS9918A data book, register 1).
+     The other bits stay DOS's, because a game's bit 5 of 0 turns off the VDP's
+     interrupt, and DOS needs that interrupt between the blocks. A block of zeros is
+     written without a read. DOS's text mode has no planar layout, so the bytes go
+     to VRAM as stored.
    - A service segment or a RAM page of DOS's mapper is read into its segment
      through page 1 or 2.
 
@@ -524,19 +536,20 @@ the three switches:
 |---|---|
 | The entry code selects T0 in page 0 | The game reaches T0 by slot. T0 stays in mapper register FCh for good, so page 0 shows T0 whenever the game selects DOS's mapper there, and T0's jump table, from 00E1h to 00F3h, is the only set of entries |
 | The trampoline selects the code segment | The routines run in T0: they, the tape position, the table of the tape's segments and the flash's data take the 360 bytes from 19DDh to 1B44h, which an assertion in `src/service.asm` checks. `src/tape.inc` holds the routines, which `service.asm` assembles in the code segment and in T0, and `build.py` points T0's jump table at T0's copy |
-| The reader selects the tape's segments in page 0 | `TAPIN` reads through page 2 or page 1: the first that is a page of a mapper at the snapshot and does not hold the stack, which `build.py` chooses. It selects the byte's segment there through FEh or FDh, reads the byte, and selects the snapshot's segment there again, with interrupts off |
+| The reader selects the tape's segments in page 0 | `TAPIN` reads through page 2 or page 1, which `build.py` chooses: the first that does not hold the stack and is a page of a mapper at the snapshot, or else the first that does not hold the stack. With interrupts off, it selects DOS's mapper's slot in that page through the slot register and the byte's segment through FEh or FDh, reads the byte, and writes back the slot register and the snapshot's segment. A game whose RAM is in a slot without a mapper, as Doki Doki Penguinland's is on the Sanyo PHC-28S, can so lend its page |
 
 The tape takes at most 16 segments, 256 KB, and starts at the first tape segment.
 `TAPIOF` and `TAPOOF` enable interrupts, as the BIOS's do. The keys and the flash
 work as in the default mode.
 
-A game can use the mode only when these hold at the snapshot, and `build.py` stops
-with an error otherwise:
+A game can use the mode only when these hold at the snapshot. Otherwise `build.py`
+stops with an error, or the restorer with a message for the last condition:
 
 | Condition | Why |
 |---|---|
 | No RAM page kept for page 0 is in DOS's mapper | T0 takes the game's mapper register FCh for good |
-| Page 2 or page 1 is a page of DOS's mapper and does not hold the stack, and the game keeps that page's segment from then on | `TAPIN` borrows that page to read the tape |
+| Page 2 or page 1 does not hold the stack, and when the page is in DOS's mapper, the game keeps its segment there from then on | `TAPIN` borrows that page to read the tape |
+| When DOS's mapper's slot is expanded, the snapshot's subslot register of that slot selects the mapper in the borrowed page | The slot register alone then selects the mapper there. The restorer checks this, because only it knows DOS's mapper's slot |
 
 Code that calls the tape with the ROM selected in page 0 reaches the ROM, not T0, so
 the scan only lists its findings in this mode, and the game file sends that code to
@@ -549,10 +562,10 @@ whose own page 0 RAM is in DOS's mapper, as Moonwalker's is on an NMS 8250, cann
 use the mode.
 
 The restorer allocates T0 and the tape's segments as in the default mode, writes the
-table of the tape's segments into T0, and sets mapper register FCh to T0's segment,
-with DOS's mapper's subslot in the page 0 bits of its slot's subslot register and of
-`SLTTBL`. It writes nothing into the game's page 3. Bit 1 of the image's flags marks
-the mode ([Image](#image)).
+table of the tape's segments and DOS's mapper's slot for the borrowed page into T0,
+and sets mapper register FCh to T0's segment, with DOS's mapper's subslot in the
+page 0 bits of its slot's subslot register and of `SLTTBL`. It writes nothing into
+the game's page 3. Bit 1 of the image's flags marks the mode ([Image](#image)).
 
 ### Tape speed and sound
 
@@ -760,7 +773,7 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 8 | `SNAPCAS2` |
+| 0 | 8 | `SNAPCAS3`, which changes when the image's format changes |
 | 8 | 2 | CRC-16 of the main ROM's 32 KB |
 | 10 | 2 | CRC-16 of the sub-ROM's 16 KB, or 0 on an MSX1 |
 | 12 | 1 | Number of records |
@@ -775,7 +788,9 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 | 44 | 4 | Subslot registers of slots 0 to 3, 0 when not expanded |
 | 48 | 4 | Mapper registers FCh to FFh |
 | 52 | 2 | Tail address |
-| 54 | 10 | Zero |
+| 54 | 1 | The snapshot's VDP register 1 |
+| 55 | 1 | Without a part in page 3, the page that `TAPIN` borrows, 1 or 2, otherwise 0 |
+| 56 | 8 | Zero |
 | 64 | 4 per record | Record table |
 | 64 + 4 × records | 2 per port write | Port writes: port, value |
 

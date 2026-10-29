@@ -106,7 +106,7 @@ class Images(unittest.TestCase):
         for game, (image, state, snap) in self.images.items():
             with self.subTest(game=game):
                 h, rom, subrom, table, _ = self.header(image)
-                self.assertEqual(h[:8], b"SNAPCAS2")
+                self.assertEqual(h[:8], build.MAGIC)
                 with open(os.path.join(snap, "rom.bin"), "rb") as f:
                     self.assertEqual(rom, build.crc16(f.read()))
                 if os.path.exists(os.path.join(snap, "subrom.bin")):

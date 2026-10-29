@@ -49,6 +49,8 @@ H_A8    equ HDR+43
 H_SUB   equ HDR+44
 H_MAP   equ HDR+48
 H_TAIL  equ HDR+52
+H_VDP1  equ HDR+54      ; the snapshot's VDP register 1
+H_BORROW equ HDR+55     ; the page that TAPIN borrows without a part in page 3
 H_TABLE equ HDR+64
 T_MAPPER equ 1          ; record types
 T_RAM    equ 2
@@ -476,6 +478,32 @@ check_records:
         rrca
         ld de,t_t0page0
         jp c,stop_name
+        ; TAPIN selects DOS's mapper in the borrowed page by the slot register
+        ; alone, so the subslot register of DOS's mapper's slot must select
+        ; the mapper there.
+        ld a,(dos_slot)
+        bit 7,a
+        jr z,.subslot
+        and 3
+        ld e,a
+        ld d,0
+        ld hl,H_SUB
+        add hl,de
+        ld a,(H_BORROW)
+        ld b,a
+        ld a,(hl)
+.borrowed:
+        rrca
+        rrca
+        djnz .borrowed
+        ld c,a
+        ld a,(dos_slot)
+        rrca
+        rrca
+        xor c
+        and 3
+        ld de,t_t0sub
+        jp nz,stop_name
         jr .subslot
 .rom:
         ld a,(p0)
@@ -1045,8 +1073,16 @@ vram_block:
         ldir
 .write:
         di
+        ; DOS's register 1 with bit 7 from the snapshot's, so that the VDP maps
+        ; VRAM as the game does: bit 7 chooses a TMS9918's 4 KB or 16 KB
+        ; mapping (TMS9918A data book, register 1). DOS's bit 5 keeps the
+        ; VDP's interrupt, which DOS needs between the blocks.
+        ld a,(H_VDP1)
+        and 80h
+        ld b,a
         ld a,(RG1SAV)
-        and 0BFh                ; bit 6 clear: the display blanked
+        and 3Fh                 ; bit 6 clear: the display blanked
+        or b
         out (99h),a
         ld a,81h
         out (99h),a
@@ -1094,6 +1130,17 @@ dos_page:
         ld a,(svc_segs)
         cp (iy)
         jr nz,.back
+        ; DOS's mapper's slot in the borrowed page's bits of the slot
+        ; register, for TAPIN.
+        ld a,(H_BORROW)
+        ld b,a
+        ld a,(dos_slot)
+        and 3
+.slot:
+        add a,a
+        add a,a
+        djnz .slot
+        ld (8000h+(T_PAGE & 3FFFh)+1),a
         ld de,8000h+(T_SEGS & 3FFFh)
         ld bc,T_SEGS_MAX
         jr .table
@@ -1503,11 +1550,12 @@ t_free:     db " free mapper segments, and DOS has $"
 t_crlf:     db 13,10,"$"
 t_page0:    db ": a page 0 is in another subslot of DOS's mapper's slot",13,10,"$"
 t_t0page0:  db ": service t0 needs page 0 outside DOS's mapper",13,10,"$"
+t_t0sub:    db ": service t0 needs DOS's mapper's subslot in the borrowed page",13,10,"$"
 t_read:     db ": cannot be read",13,10,"$"
 t_notram:   db ": slot "
 t_slot_n:   db "0 page "
 t_page_n:   db "0 is not RAM: the machine file does not describe this machine",13,10,"$"
-t_mark:     db "SNAPCAS2"
+t_mark:     db "SNAPCAS3"
 
 fcb:        db 0                ; drive, from the argument
             ds 8," "            ; name, from the argument

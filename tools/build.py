@@ -21,10 +21,10 @@ sys.path.insert(0, HERE)
 import gamefile  # noqa: E402
 import scan  # noqa: E402
 
-SERVICE_VERSION = 5
+SERVICE_VERSION = 6
 PAGE = 16384
 HEADER_SIZE = 4096
-MAGIC = b"SNAPCAS2"
+MAGIC = b"SNAPCAS3"
 TAIL_SIZE = 26
 FLAG_ROM_KEEP = 1  # header byte 14, bit 0: T0 does not replace the ROM
 FLAG_T0 = 2  # bit 1: the tape service without a part in page 3
@@ -214,15 +214,21 @@ def service_page(state, pages, length, wanted=None):
 
 
 def borrowed_page(state, pages):
-    """For the mode without a part in page 3: page 2 or page 1, whichever is a
-    page of a mapper at the snapshot and does not hold the stack, as the
-    mapper register's port, the page's first address's high byte and the
-    game's segment there (DESIGN.md, Without a part in page 3)."""
-    for page in (2, 1):
-        found = selected_page(state, pages, page)
-        if found is not None and found.seg is not None and num(state, "sp") >> 14 != page:
-            return bytes([0xFC + page, page * 0x40, found.seg])
-    raise BuildError("service t0 needs page 1 or page 2 in a mapper, and not holding the stack, at the snapshot")
+    """For the mode without a part in page 3: the page that TAPIN borrows, and
+    T0's data for it: the slot register's mask for the page, the restorer's
+    byte, the mapper register's port, the page's first address's high byte and
+    the game's segment there. The page is page 2 or page 1, the first that
+    does not hold the stack and is in a mapper at the snapshot, or else the
+    first that does not hold the stack (DESIGN.md, Without a part in page 3)."""
+    free = [page for page in (2, 1) if num(state, "sp") >> 14 != page]
+    mapped = [page for page in free if getattr(selected_page(state, pages, page), "seg", None) is not None]
+    page = (mapped + free)[0]
+    found = selected_page(state, pages, page)
+    register = "f" + "cdef"[page]
+    if state[register] == "-":
+        raise BuildError("service t0 needs a mapper at the snapshot")
+    seg = found.seg if found is not None and found.seg is not None else num(state, register)
+    return page, bytes([~(3 << 2 * page) & 0xFF, 0, 0xFC + page, page * 0x40, seg])
 
 
 def service_segments(snap, parts, side1, side2, pages, state, tail_address, page, t0_mode):
@@ -249,7 +255,7 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
         t0[TAPE_CODE:TAPE_CODE + len(t0m)] = t0m
         for n, target in enumerate(targets[:7]):
             t0[0xE1 + 3 * n:0xE4 + 3 * n] = bytes([0xC3]) + struct.pack("<H", target)
-        t0[t_page:t_page + 3] = borrowed_page(state, pages)
+        t0[t_page:t_page + 5] = borrowed_page(state, pages)[1]
         start, data = 0, t0
         tape = bytearray(side1 + side2)
     else:
@@ -393,6 +399,8 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
     struct.pack_into("<HHBB", header, 8, rom, subrom, len(records), len(writes))
     header[14] = (FLAG_ROM_KEEP if rom_keep else 0) | (FLAG_T0 if t0_mode and service else 0)
     header[15] = page
+    header[54] = num(state, "vdp1")
+    header[55] = borrowed_page(state, pages)[0] if t0_mode and service else 0
     struct.pack_into("<12H", header, 16, *[num(state, r) for r in
                      "af bc de hl af2 bc2 de2 hl2 ix iy sp pc".split()])
     header[40] = num(state, "i")
@@ -418,6 +426,23 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
     return bytes(header), data, report, scanned
 
 
+def read_tapes(game, cas_dir):
+    """The CAS data of side 1 and side 2, b"" without a side 2. A patch fits
+    only the dumps that it was made for, so with patch lines the CAS files
+    must match the game file's sha1 lines."""
+    side2 = b""
+    with open(os.path.join(cas_dir, game.cas), "rb") as f:
+        side1 = f.read()
+    if game.side2:
+        with open(os.path.join(cas_dir, game.side2), "rb") as f:
+            side2 = f.read()
+    if game.patches:
+        dumps = [side1] + ([side2] if game.side2 else [])
+        if [hashlib.sha1(d).hexdigest() for d in dumps] != game.sha1:
+            raise BuildError(f"{game.folder}/game.txt: patch lines need sha1 lines that match the CAS files")
+    return side1, side2
+
+
 def main():
     parser = argparse.ArgumentParser(description="Write a game's image from its snapshot.")
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
@@ -433,17 +458,7 @@ def main():
         game = gamefile.read_game(folder)
         name = os.path.basename(os.path.normpath(folder))
         out = os.path.join(ROOT, "out", args.machine, name)
-        side2 = b""
-        with open(os.path.join(args.cas, game.cas), "rb") as f:
-            side1 = f.read()
-        if game.side2:
-            with open(os.path.join(args.cas, game.side2), "rb") as f:
-                side2 = f.read()
-        if game.patches:
-            # A patch fits only the dumps that it was made for.
-            dumps = [side1] + ([side2] if game.side2 else [])
-            if [hashlib.sha1(d).hexdigest() for d in dumps] != game.sha1:
-                raise BuildError(f"{folder}/game.txt: patch lines need sha1 lines that match the CAS files")
+        side1, side2 = read_tapes(game, args.cas)
         header, data, report, scanned = build(os.path.join(out, "snap"), args.service, side1, side2,
                                      game.patches, game.rom_keep, game.service_page, game.service_t0)
     except (OSError, gamefile.GameFileError, BuildError) as e:

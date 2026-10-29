@@ -21,6 +21,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
+import build  # noqa: E402
 import cas  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
@@ -87,11 +88,17 @@ def main():
         return 1
     cas_path = os.path.abspath(os.path.join(args.cas, game.cas))
     try:
-        with open(cas_path, "rb") as f:
-            data = f.read()
+        data = bytearray(build.read_tapes(game, args.cas)[0])
+        for patch in game.patches:
+            if patch.page == "side1":
+                build.apply_patch(patch, data, f"side1:{patch.offset:X}")
     except OSError as e:
-        print(f"capture.py: {cas_path}: {e.strerror}", file=sys.stderr)
+        print(f"capture.py: {e.filename}: {e.strerror}", file=sys.stderr)
         return 1
+    except build.BuildError as e:
+        print(f"capture.py: {e}", file=sys.stderr)
+        return 1
+    data = bytes(data)
     if cas.load_command(data) is None:
         print(f"capture.py: {cas_path}: the first block is not a binary file, a BASIC "
               "program or an ASCII program", file=sys.stderr)
@@ -101,6 +108,11 @@ def main():
     snap = os.path.join(ROOT, "out", args.machine, name, "snap")
     shutil.rmtree(snap, ignore_errors=True)
     os.makedirs(snap)
+    if any(patch.page == "side1" for patch in game.patches):
+        # The tape that the capture loads, with the side1 patches.
+        cas_path = os.path.join(snap, "side1.cas")
+        with open(cas_path, "wb") as f:
+            f.write(data)
     with open(os.path.join(HERE, "capture.tcl")) as f:
         procedures = f.read()
     script = settings(game, machine, cas_path, data, snap) + procedures + "\nstep1\n"
