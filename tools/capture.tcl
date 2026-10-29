@@ -117,6 +117,9 @@ proc mapper_size {page} {
 #   ::S(headers)  the offsets of side 1's headers
 #   ::S(needed)   the end of the last block that the load must read
 #   ::S(side2)    1 when the game file has side2
+#   ::S(side2cas) side 2's CAS file, or "" without a side 2
+#   ::S(s1len)    side 1's length, padded to a multiple of 8: side 2's start
+#   ::S(headers2) the positions of side 2's headers, from side 1's start
 #   ::S(nosvc)    1 when the game file has service no
 #   ::S(keys)     [list time tcl] pairs, times from the load command
 #   ::S(lastkey)  the last keys time
@@ -203,12 +206,30 @@ proc on_tapion {} {
         set ::tapion_st [array get ::st]
     }
     incr ::st(tapion)
+    # A TAPION call at side 1's end, with a side 2: the player turns the tape
+    # over, so side 2 goes in, at its start.
+    if {$::S(side2cas) ne "" && !$::st(side2in) && [at_end]} {
+        cassetteplayer insert $::S(side2cas)
+        set ::st(side2in) 1
+        set ::st(pos) $::S(s1len)
+        logev "side 2 inserted"
+    }
     set next ""
-    foreach h $::S(headers) { if {$h >= $::st(pos)} { set next $h; break } }
+    foreach h [concat $::S(headers) $::S(headers2)] { if {$h >= $::st(pos)} { set next $h; break } }
     set ::st(pos) [expr {$next eq "" ? $::st(pos) : $next + 8}]
     logev "TAPION, tape position $::st(pos)"
 }
 proc on_tapin {} { incr ::st(tapin); incr ::st(pos) }
+# A game that reads on with TAPIN past side 1's end, with the motor on, waits
+# for side 2: the player turns the tape over, so side 2 goes in, and the read
+# goes on after side 2's first header.
+proc turn_over {} {
+    if {$::S(side2cas) eq "" || $::st(side2in) || ![motor_on] || ![at_end]} { return }
+    cassetteplayer insert $::S(side2cas)
+    set ::st(side2in) 1
+    set ::st(pos) [expr {[lindex $::S(headers2) 0] + 8}]
+    logev "side 2 inserted"
+}
 
 # A CAS file pads each block to a multiple of 8 bytes, so a block counts as
 # read when at most 7 bytes of it are left.
@@ -258,6 +279,7 @@ proc step3 {} {
     set ::st(sel) {}
     set ::st(log) {}
     set ::st(pos) 0
+    set ::st(side2in) 0
     set ::st(tapion) 0
     set ::st(tapin) 0
     set ::st(ran) 0
@@ -280,10 +302,14 @@ proc step3 {} {
     if {$::S(snapat) ne ""} {
         later $::S(snapat) step6
         if {$::S(cload)} { set ::since ""; run_after_cload }
+        if {$::S(side2cas) ne ""} { watch_turn }
     } else {
         start_wait
     }
 }
+
+# With snapshot at, side 2 still goes in when side 1 runs out.
+proc watch_turn {} { turn_over; later 0.1 watch_turn }
 
 # With snapshot at, no wait decides anything, but a CLOAD still needs its RUN:
 # typed as poll types it, when the motor has run and stopped for 1 second.
@@ -334,6 +360,7 @@ proc note_motor {} {
 proc poll {} {
     tick 0.1
     note_motor
+    turn_over
     if {[motor_on] && ![at_end]} {
         set ::st(on_seen) 1
         set ::since ""

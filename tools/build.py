@@ -18,10 +18,11 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
+import cas  # noqa: E402
 import gamefile  # noqa: E402
 import scan  # noqa: E402
 
-SERVICE_VERSION = 7
+SERVICE_VERSION = 9
 PAGE = 16384
 HEADER_SIZE = 4096
 MAGIC = b"SNAPCAS3"
@@ -245,7 +246,8 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
     if p3 is None:
         raise BuildError(f"{snap}: page 3 is not a RAM page that the snapshot keeps")
 
-    side1 = side1 + bytes(-len(side1) % 8)
+    side1_end = len(side1)
+    side1 = side1 + bytes((cas.side2_start(len(side1)) if side2 else len(side1) + (-len(side1) % 8)) - len(side1))
     if t0_mode:
         # T0 holds the routines and their data, and the jump table's entries
         # from 00E1h to 00F3h go to them.
@@ -277,6 +279,11 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
     side = 1 if side2 and pos >= start + len(side1) else 0
     struct.pack_into("<HBBBHBBB", data, base, border, 5 if pal else 6, vdp7, side, screen, vdp1,
                      0, 1 if side2 else 0)
+    if not t0_mode:
+        # C_S1REAL, after C_SAVE: side 1's end without its padding, which the
+        # tape does not have, when side 2 follows it.
+        real = start + (side1_end if side2 else len(side1))
+        data[base + 13:base + 16] = real.to_bytes(3, "little")
     tape += bytes(-len(tape) % PAGE)
     if len(tape) // PAGE > segs_max:
         raise BuildError(f"the tape needs {len(tape) // PAGE} segments, more than {segs_max}")

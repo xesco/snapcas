@@ -1,0 +1,4 @@
+# Star Runner (1986)(Manhattan Transfer)(es)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Star%20Runner%20(1986)(Manhattan%20Transfer)(es)%5BRUN'CAS-'%5D.zip
+cas STAR-RUN.CAS
+sha1 afd17e2e657ebe0440f2de5d7ec8d4bb47a1622b

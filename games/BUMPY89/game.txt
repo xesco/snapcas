@@ -1,0 +1,4 @@
+# Bumpy (1989)(Loriciels)[a][RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Bumpy%20(1989)(Loriciels)%5Ba%5D%5BRUN'CAS-'%5D.zip
+cas BUMPY89.CAS
+sha1 77b5208662d5356dcafec046be1818a62e6f2392

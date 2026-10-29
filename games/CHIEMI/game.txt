@@ -1,4 +1,0 @@
-# Chiemi Hori Strawberry Puzzle (1984)(Pony Canyon)(ja)[b]
-# https://download.file-hunter.com/Games/MSX1/CAS/Chiemi%20Hori%20Strawberry%20Puzzle%20(1984)(Pony%20Canyon)(ja)%5Bb%5D.zip
-cas CHIEMI.CAS
-sha1 f0b323fbb14334fe18848e0d7a5dc1ba7344cf1d

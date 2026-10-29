@@ -244,19 +244,24 @@ class PatchedTape(unittest.TestCase):
     def setUpClass(cls):
         os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
         cls.report = capture_build_check("patched-sootland", SOOTLAND, CAS_DIR)
-        cls.values = {}
-        if cls.report.startswith("point 1: pass"):
-            test_step5.PLAYS["patched-sootland"] = ("patched-sootland", ["space"] * 3, 90, {})
-            cls.values = test_step5.play("patched-sootland")
+        snap = os.path.join(ROOT, "out", MACHINE, "patched-sootland", "snap")
+        with open(os.path.join(snap, "log.txt")) as f:
+            cls.log = f.read()
+        with open(os.path.join(snap, "state.txt")) as f:
+            cls.state = dict(line.split(" ", 1) for line in f.read().splitlines())
 
     def test_the_capture_loads_the_patched_tape(self):
         with open(os.path.join(ROOT, "out", MACHINE, "patched-sootland", "snap", "side1.cas"), "rb") as f:
             self.assertEqual(f.read()[0x24E:0x252], bytes.fromhex("3E 14 D3 A8"))
 
-    def test_the_game_reads_side_2_through_the_tape_service(self):
+    def test_the_capture_turns_the_tape_over(self):
+        # The game reads on past side 1's end, so side 2 goes in, and the
+        # tape position goes on in side 2 (DESIGN.md, Capture, step 4).
         self.assertTrue(self.report.startswith("point 1: pass"), self.report)
-        self.assertGreater(self.values["pos"], self.values["pos0"], self.values)
-        self.assertGreaterEqual(self.values["pos0"], self.values["s1end"], self.values)
+        self.assertIn("side 2 inserted", self.log)
+        with open(os.path.join(CAS_DIR, "SOOTLAND.CAS"), "rb") as f:
+            side2_start = cas.side2_start(len(f.read()))
+        self.assertGreater(int(self.state["tapepos"], 16), side2_start)
 
 
 def borrow_symbols():

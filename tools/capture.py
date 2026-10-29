@@ -49,7 +49,7 @@ def game_folder(game):
     return os.path.join(ROOT, "games", game)
 
 
-def settings(game, machine, cas_path, data, snap):
+def settings(game, machine, cas_path, data, snap, side2_path=None, side2=b""):
     keys = [(t, key_tcl(kind, value)) for t, kind, value in game.keys]
     tries = ([game.continue_key] if game.continue_key else []) + ["space", "return"]
     command = cas.load_command(data)
@@ -65,6 +65,11 @@ def settings(game, machine, cas_path, data, snap):
         "headers": tcl_list(str(h) for h in cas.headers(data)),
         "needed": str(cas.needed_end(data)),
         "side2": "1" if game.side2 else "0",
+        # Side 2 follows side 1, padded to a multiple of 8 bytes, as in the
+        # tape service's positions.
+        "side2cas": "{}" if side2_path is None else msx.tcl_word(side2_path),
+        "s1len": str(cas.side2_start(len(data))),
+        "headers2": tcl_list(str(h + cas.side2_start(len(data))) for h in cas.headers(side2)),
         "nosvc": "1" if game.service_no else "0",
         "keys": tcl_list(f"{t} {msx.tcl_word(tcl)}" for t, tcl in keys),
         "lastkey": str(max([t for t, _ in keys], default=0)),
@@ -92,17 +97,17 @@ def main():
         return 1
     cas_path = os.path.abspath(os.path.join(args.cas, game.cas))
     try:
-        data = bytearray(build.read_tapes(game, args.cas)[0])
+        data, side2 = (bytearray(d) for d in build.read_tapes(game, args.cas))
         for patch in game.patches:
-            if patch.page == "side1":
-                build.apply_patch(patch, data, f"side1:{patch.offset:X}")
+            if patch.page in ("side1", "side2"):
+                build.apply_patch(patch, data if patch.page == "side1" else side2, f"{patch.page}:{patch.offset:X}")
     except OSError as e:
         print(f"capture.py: {e.filename}: {e.strerror}", file=sys.stderr)
         return 1
     except build.BuildError as e:
         print(f"capture.py: {e}", file=sys.stderr)
         return 1
-    data = bytes(data)
+    data, side2 = bytes(data), bytes(side2)
     if cas.load_command(data) is None:
         print(f"capture.py: {cas_path}: the first block is not a binary file, a BASIC "
               "program or an ASCII program", file=sys.stderr)
@@ -117,9 +122,16 @@ def main():
         cas_path = os.path.join(snap, "side1.cas")
         with open(cas_path, "wb") as f:
             f.write(data)
+    side2_path = None
+    if game.side2:
+        # Side 2, with the side2 patches, for the capture to insert when the
+        # game reads past side 1's end.
+        side2_path = os.path.join(snap, "side2.cas")
+        with open(side2_path, "wb") as f:
+            f.write(side2)
     with open(os.path.join(HERE, "capture.tcl")) as f:
         procedures = f.read()
-    script = settings(game, machine, cas_path, data, snap) + procedures + "\nstep1\n"
+    script = settings(game, machine, cas_path, data, snap, side2_path, side2) + procedures + "\nstep1\n"
     try:
         msx.run(machine.args, script, timeout=TIMEOUT)
     except Exception as e:

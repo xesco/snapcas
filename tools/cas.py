@@ -15,6 +15,13 @@ LOAD_COMMANDS = {
 }
 
 
+def side2_start(side1_length):
+    """Side 2's position after side 1 in the tape service: side 1 padded to
+    a multiple of 8 bytes, by at least 1 byte, where TAPIN turns the tape over
+    (DESIGN.md, Tape service)."""
+    return side1_length + (-side1_length % 8 or 8)
+
+
 def headers(data):
     """The offsets of the headers, at multiples of 8."""
     return [o for o in range(0, len(data) - 7, 8) if data[o:o + 8] == HEADER]

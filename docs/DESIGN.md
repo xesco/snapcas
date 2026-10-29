@@ -166,13 +166,15 @@ zip in File-Hunter's MSX1 CAS folder, which a few games lack because the folder 
 not list them. The game file then has the `sha1` of its dumps, which finds a dump
 whatever its file name. A side B, a later tape of a set or an expansion, which the
 collection's `SIDES.TXT` lists, needs a tape before it, so it has no game file of
-its own. Its `side2` lines pair the Side A and Side B files of a game, its
-`continue` lines come from the key that the capture reports, its `service no` lines
-from games played to their end, and its `patch` lines from `check.py` and from
-traces of failed loads. The lines that hold only on the Sanyo PHC-28S are in the
-game's machine's game file, `advanced-phc28s.txt` ([Game file](#game-file)): 38
-games have one, and the other game files hold on any machine. It also ships these
-machine files, each checked with `check.py` and a single-load game:
+its own. A dump that File-Hunter marks `[b]`, a bad dump, has no game file either,
+and a game with a better dump uses that one. Its `side2` lines pair the Side A and
+Side B files of a game, its `continue` lines come from the key that the capture
+reports, its `service no` lines from games played to their end, and its `patch`
+lines from `check.py` and from traces of failed loads. The lines that hold only on
+the Sanyo PHC-28S are in the game's machine's game file, `advanced-phc28s.txt`
+([Game file](#game-file)): 38 games have one, and the other game files hold on any
+machine. It also ships these machine files, each checked with `check.py` and a
+single-load game:
 
 | File | Configuration |
 |---|---|
@@ -220,9 +222,11 @@ or step 5 restarts more than 20 times. It performs the following steps:
    a copy in `snap/`, into the cassette player, notes the slots selected in each
    page, and types the load command for the first header's type
    ([CAS data](#cas-data)): `BLOAD"CAS:",R`, `CLOAD`, or `RUN"CAS:"`. After `CLOAD`,
-   it types `RUN` when the motor has stopped for 1 second. Side 2 is never inserted.
-   The replay's recording starts just before the command is typed
-   ([Replay](#replay)).
+   it types `RUN` when the motor has stopped for 1 second. When the game file has
+   `side2` and the game reads past side 1's end, by a `TAPION` call at its end or
+   with the motor on there, the capture inserts side 2 at its start, as a player
+   turns the tape over, and the tape position goes on in side 2. The replay's
+   recording starts just before the command is typed ([Replay](#replay)).
 4. Presses the `keys`, and logs these events with their times:
    - The tape position, kept as the tape service would keep it, from breakpoints at
      the addresses that the jump table entries 00E1h and 00E4h jump to, `TAPION` and
@@ -473,7 +477,7 @@ The tape service keeps the tape in service segments, and has these parts:
 |---|---|---|
 | T0 | A service segment | The BIOS's page 0 with the service's stubs from 19DDh to 1B44h |
 | Code segment | A service segment | The routines, the tape position and the table of the tape's segments, then the start of the tape |
-| Tape data | The code segment, then the other service segments | Side 1, padded with zeros to a multiple of 8 bytes, then side 2 |
+| Tape data | The code segment, then the other service segments | Side 1, padded with zeros to a multiple of 8 bytes, by at least 1 byte when side 2 follows, then side 2 |
 | Entries | FCE1h to FCF5h, in `SLTATR`, unless the part moved ([Build](#build)) | One for each entry of the BIOS's tape jump table, from 00E1h to 00F5h, for code that goes around T0 |
 | Entry code | `SLTWRK`, after its data at FCF6h to FCFAh | Selects T0 in page 0, calls the routine, and selects the game's page 0 again |
 | Trampoline | `SLTWRK` | Selects the code segment in page 0, calls a routine there, and selects T0 again |
@@ -530,7 +534,9 @@ segments after it. The code segment's fields are these:
 | 0061h | 1 | The snapshot's VDP register 1 |
 | 0062h | 1 | The tape speed, filled in by the restorer: 0 for the fast load, 1 for 1200 baud, 2 for 2400 baud |
 | 0063h | 1 | 1 when the tape has a side 2, set by `build.py` |
-| 0064h | | The routines, then the tape |
+| 0064h | 3 | The tape position while `TAPIN` looks for a header |
+| 0067h | 3 | Side 1's end before its padding, set by `build.py` when the tape has a side 2, otherwise side 1's end |
+| 006Ah | | The routines, then the tape |
 
 `TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's
 segment and B the code segment, the reader selects the byte's segment in page 0,
@@ -560,6 +566,8 @@ on these events. The routines read the keyboard matrix through the PPI.
 | Event | New position |
 |---|---|
 | `TAPION` or `TAPIN` reads past side 1's end | Side 2's start, as when the player turns the tape over, or side 1's start when there is no side 2 |
+| `TAPIN` reads in side 1's padding before side 2 | Side 2's start, and `TAPIN` returns FFh: the padding is not on the tape, and the read that waits while the player turns the tape over returns FFh in `openMSX`, which Saint Dragon's loader expects |
+| `TAPIN` reads at a multiple of 8 where a CAS header is | The byte after the header, because a header is a tone on the tape, which `TAPIN` waits through, as when a game reads on into the next block or side |
 | `TAPION` or `TAPIN` reads past side 2's end | Side 2's start, as after a rewind |
 | `TAPION` is called while GRAPH is held | Side 1's start |
 | `TAPION` is called while CODE is held | Side 2's start, or side 1's start when there is no side 2 |
@@ -817,6 +825,9 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   ([Without a part in page 3](#without-a-part-in-page-3)).
 - A game that reads the tape with its own code gets no tape service, so it runs only
   if it loads in a single pass.
+- Without a part in page 3, T0 has no room for `TAPIN`'s skip of a header and of
+  side 1's padding, so a game that reads on with `TAPIN` into the next block or side
+  gets the header's bytes in that mode.
 - The shipped machine's game files, `advanced-phc28s.txt`, hold only on the Sanyo
   PHC-28S. On another machine, the 38 games that have one may need a machine's game
   file of their own for that machine.

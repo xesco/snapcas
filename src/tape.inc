@@ -53,6 +53,56 @@ c_tapin:
         di
         call keys
         ret c                   ; CTRL+STOP
+        if !T0MODE
+        ; build.py pads side 1 before side 2, and the padding is not on the
+        ; tape. The TAPIN that reaches it is the one that waits while the
+        ; tape is turned over, and it returns FFh, as the BIOS's does in
+        ; openMSX when side 2 goes in: the next TAPIN reads side 2.
+        ld hl,D_POS
+        ld de,D_S1REAL
+        call lt24
+        jr c,.aligned
+        ld hl,D_POS
+        ld de,D_S1END
+        call lt24
+        jr nc,.aligned
+        ld hl,D_S1END
+        ld de,D_POS
+        ld bc,3
+        ldir
+        ld a,0FFh
+        or a
+        ret
+.aligned:
+        ; A block's header is a tone on a real tape, which TAPIN waits through,
+        ; so a header at a multiple of 8 is skipped, as when a game reads on
+        ; into the next block or past side 1's end.
+        ld a,(D_POS)
+        and 7
+        jr nz,next_byte
+        ld hl,D_POS
+        ld de,D_SAVE
+        ld bc,3
+        ldir
+        ld hl,D_HEADER
+        ld b,8
+.header:
+        push bc
+        push hl
+        call next_byte
+        pop hl
+        pop bc
+        cp (hl)
+        jr nz,.data
+        inc hl
+        djnz .header
+        jr next_byte            ; the byte after the header
+.data:
+        ld hl,D_SAVE
+        ld de,D_POS
+        ld bc,3
+        ldir
+        endif
 ; Returns in A the byte at the tape position, and advances the position.
 next_byte:
         ld hl,(D_POS+1)

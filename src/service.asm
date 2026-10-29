@@ -7,7 +7,7 @@
 
         include "service.inc"
 
-VERSION equ 7
+VERSION equ 9
 
         org 0
 
@@ -204,6 +204,8 @@ header: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h
         ds SEGS_MAX,0
         assert $ = C_BORDER
         ds 10,0                 ; C_BORDER to C_TWO
+        assert $ = C_SAVE
+        ds 6,0                  ; C_SAVE and C_S1REAL
 
 T0MODE  equ 0
 D_POS   equ C_POS
@@ -219,6 +221,8 @@ D_SIDE  equ C_SIDE
 D_SCREEN equ C_SCREEN
 D_VDP1  equ C_VDP1
 D_TWO   equ C_TWO
+D_SAVE  equ C_SAVE
+D_S1REAL equ C_S1REAL
         include "tape.inc"
 
         ds (8-($ & 7)) & 7,0    ; the tape starts at a multiple of 8
