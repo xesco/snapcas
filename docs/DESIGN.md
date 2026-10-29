@@ -120,11 +120,13 @@ tape service serves, so it also reaches the code that the capture runs. Neither 
 names a slot, so a patch line holds on every machine that the game runs on, unless
 its new bytes are a slot register's value. A game can select its RAM by a fixed
 value: Sootland and Time Out write FCh and FFh to the slot register, for RAM in slot
-3, and crash on the Sanyo PHC-28S, whose RAM cartridge is in slot 1. A patch of
-these values to 54h and 55h, slot 1, holds only on machines with RAM in slot 1. A
-patch fits only the dump that it was made for, so `capture.py` and `build.py` stop
-with an error when the old bytes differ, or when the game file has `patch` lines and
-`sha1` is missing or differs from a CAS file's SHA-1.
+3, and crash on the Sanyo PHC-28S. Without Nextor, that machine's BASIC keeps page 3
+in the internal RAM, slot 0, and the RAM cartridge in slot 1 holds pages 0 to 2. A
+patch of these values to 14h and 15h keeps page 3 where BASIC has it and selects
+slot 1 for the other pages, so it holds only on machines with that layout. A patch
+fits only the dump that it was made for, so `capture.py` and `build.py` stop with an
+error when the old bytes differ, or when the game file has `patch` lines and `sha1`
+is missing or differs from a CAS file's SHA-1.
 
 ## Shipped files
 
