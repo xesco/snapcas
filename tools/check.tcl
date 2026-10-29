@@ -20,10 +20,25 @@ proc write_report {} {
 proc start_check {} {
     # EXPTBL, read while the system area is still DOS's.
     set ::exptbl [lmap ps {0 1 2 3} {debug read memory [expr {0xFCC1 + $ps}]}]
-    set jp [expr {$::C(tail) + 16}]
+    # RAMAD3 at F344h: DOS's mapper's slot ID, read when SNAPCAS.COM starts,
+    # after DOS has set it.
+    set ::dosslot 0
+    lassign $::C(com) b0 b1 b2
+    debug set_bp 0x0100 "\[debug read memory 0x100\] == $b0 && \[debug read memory 0x101\] == $b1 && \[debug read memory 0x102\] == $b2" { set ::dosslot [debug read memory 0xF344] }
+    set jp [expr {$::C(tail) + 21}]
     set ::reached 0
-    debug set_bp $jp "\[debug read ioports 0xA8\] == $::C(a8)" { if {!$::reached} { set ::reached 1; safe_check } }
-    after time 120 { if {!$::reached} { lappend ::diffs "the tail's jump did not run within 120 seconds"; write_report; exit } }
+    # The slot register alone can match DOS's own, so the breakpoint also
+    # needs the jump to the snapshot's program counter.
+    set target [expr {$::C(tail) + 22}]
+    debug set_bp $jp "\[debug read ioports 0xA8\] == $::C(a8) && \[debug read memory $target\] == [expr {$::C(pc) & 0xFF}] && \[debug read memory [expr {$target + 1}]\] == [expr {$::C(pc) >> 8}]" { if {!$::reached} { set ::reached 1; safe_check } }
+    after time 120 {
+        if {!$::reached} {
+            lappend ::diffs "the tail's jump did not run within 120 seconds"
+            lappend ::diffs "screen: [string trim [regsub -all {\s+} [screen] { }]]"
+            write_report
+            exit
+        }
+    }
 }
 
 proc safe_check {} {
@@ -48,7 +63,7 @@ proc compare {} {
     foreach {r v} $::C(regs) {
         if {[reg $r] != $v} { note "register $r is [format %04X [reg $r]], expected [format %04X $v]" }
     }
-    set target [expr {[debug read memory [expr {$::C(tail) + 17}]] | ([debug read memory [expr {$::C(tail) + 18}]] << 8)}]
+    set target [expr {[debug read memory [expr {$::C(tail) + 22}]] | ([debug read memory [expr {$::C(tail) + 23}]] << 8)}]
     if {$target != $::C(pc)} { note "the tail jumps to [format %04X $target], expected [format %04X $::C(pc)]" }
     foreach {r name} {I i IM im} {
         if {[reg $r] != [scan $::K($name) %x]} { note "$r is [reg $r], expected $::K($name)" }
@@ -57,8 +72,18 @@ proc compare {} {
     set a8 [debug read ioports 0xA8]
     if {$a8 != [scan $::K(a8) %x]} { note "the slot register is [hex2 $a8], expected $::K(a8)" }
     if {[debug read ioports 0xAA] != [scan $::K(ppic) %x]} { note "PPI port C is [hex2 [debug read ioports 0xAA]], expected $::K(ppic)" }
+    # When the worker's page does not select DOS's mapper's slot at the
+    # snapshot, that page's bits of the slot's subslot register can differ
+    # (DESIGN.md, Restorer, step 1).
+    set wpage [expr {[debug read memory [expr {$::C(tail) + 3}]] - 0xFC}]
+    set mps [expr {$::dosslot & 3}]
     foreach ps {0 1 2 3} {
-        if {$::K(sub$ps) ne "-" && [subslot_reg $ps] != [scan $::K(sub$ps) %x]} {
+        if {$::K(sub$ps) eq "-"} { continue }
+        set mask 0xFF
+        if {$ps == $mps && (([scan $::K(a8) %x] >> (2 * $wpage)) & 3) != $mps} {
+            set mask [expr {~(3 << (2 * $wpage)) & 0xFF}]
+        }
+        if {([subslot_reg $ps] & $mask) != ([scan $::K(sub$ps) %x] & $mask)} {
             note "slot $ps's subslot register is [hex2 [subslot_reg $ps]], expected $::K(sub$ps)"
         }
     }
@@ -108,7 +133,7 @@ proc compare {} {
         set have [with_slot $ps $ss $page { read_page $page }]
         set base [expr {$page * 0x4000}]
         set skip {}
-        if {$page == ($::C(tail) >> 14)} { lappend skip [expr {$::C(tail) - $base}] [expr {$::C(tail) - $base + 20}] }
+        if {$page == ($::C(tail) >> 14)} { lappend skip [expr {$::C(tail) - $base}] [expr {$::C(tail) - $base + 25}] }
         if {$page == 3} { lappend skip [expr {0xFCC9 - $base}] [expr {0xFD88 - $base}] }
         if {$page == 3 && $ss ne "x"} { lappend skip 0x3FFF 0x3FFF }
         set at [first_difference $have $want $skip]

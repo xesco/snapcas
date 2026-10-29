@@ -25,6 +25,7 @@ class Game:
         self.continue_key = None
         self.snapshot_at = None
         self.service_no = False  # service no: the game never reads the rest
+        self.capture = None      # the machine file for the capture, if not the user's
         self.patches = []     # [(place, old, new)]
 
 
@@ -57,7 +58,7 @@ def read_game(folder):
         except ValueError as e:
             raise GameFileError(f"{where}: {e}")
         key, args = words[0], words[1:]
-        if key in ("cas", "side2", "name", "continue", "service") and len(args) != 1:
+        if key in ("cas", "side2", "name", "continue", "service", "capture") and len(args) != 1:
             raise GameFileError(f"{where}: {key} takes one value")
         if key == "cas":
             game.cas = args[0]
@@ -90,6 +91,8 @@ def read_game(folder):
             if args[0] != "no":
                 raise GameFileError(f"{where}: service takes no")
             game.service_no = True
+        elif key == "capture":
+            game.capture = args[0]
         elif key == "patch":
             game.patches.append((where, line))
         else:

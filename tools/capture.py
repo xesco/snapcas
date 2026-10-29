@@ -6,7 +6,9 @@ Usage: capture.py <game> <machine> --cas <dir>
 
 <game> is a folder below games/, or the path of a folder, that holds
 game.txt. <machine> is a path below machines/ without .txt. <dir> holds the
-CAS files. The snapshot goes to out/<machine>/<game>/snap/.
+CAS files. The snapshot goes to out/<machine>/<game>/snap/. A game file's
+capture line names another machine file to load the game on: the user's
+machine without a cartridge that the game's loader trips over.
 
 Exit status: 0 on success, 1 for an error in the input files, 2 when openMSX
 fails or a wait times out.
@@ -79,7 +81,7 @@ def main():
 
     try:
         game = gamefile.read_game(game_folder(args.game))
-        machine = msx.read_machine(os.path.join(ROOT, "machines", args.machine + ".txt"))
+        machine = msx.read_machine(os.path.join(ROOT, "machines", (game.capture or args.machine) + ".txt"))
     except (OSError, gamefile.GameFileError, msx.MachineError) as e:
         print(f"capture.py: {e}", file=sys.stderr)
         return 1

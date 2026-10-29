@@ -4,7 +4,7 @@
 Usage: build.py <game> <machine> --cas <dir> [--service <file>]
 
 <game> and <machine> are as for capture.py. The image goes to
-out/<machine>/<game>/<GAME>.IMG, with scan.txt beside it. --service names the
+out/<machine>/<game>/<GAME>.SNP, with scan.txt beside it. --service names the
 SERVICE.BIN to use, by default bin/SERVICE.BIN.
 
 Exit status: 0 on success, 1 for an error in the input files.
@@ -19,11 +19,11 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import gamefile  # noqa: E402
 
-SERVICE_VERSION = 1
+SERVICE_VERSION = 2
 PAGE = 16384
 HEADER_SIZE = 4096
-MAGIC = b"SNAPCAS1"
-TAIL_SIZE = 21
+MAGIC = b"SNAPCAS2"
+TAIL_SIZE = 26
 
 # Record types (DESIGN.md, Image).
 RAM_IN_MAPPER, RAM, SERVICE_SEGMENT, VRAM, VRAM_ZEROS = 1, 2, 3, 4, 5
@@ -108,18 +108,18 @@ def place_tail(state, pages, tail):
     address = (sp - TAIL_SIZE) & 0xFFFF
     end = address + TAIL_SIZE - 1
     if end > 0xFFFE or address >> 14 != end >> 14:
-        raise BuildError(f"the 21 bytes below SP {sp:04X} cross a page boundary or include FFFFh")
+        raise BuildError(f"the {TAIL_SIZE} bytes below SP {sp:04X} cross a page boundary or include FFFFh")
     page = address >> 14
     ps, ss = selected(state, page)
     target = [p for p in pages if (p.ps, p.ss, p.page) == (ps, ss, page)]
     if not target:
-        raise BuildError(f"the 21 bytes below SP {sp:04X} are not in a RAM page that the snapshot keeps")
+        raise BuildError(f"the {TAIL_SIZE} bytes below SP {sp:04X} are not in a RAM page that the snapshot keeps")
     code = bytearray(tail)
-    struct.pack_into("<H", code, 9, address + 19)
-    struct.pack_into("<H", code, 13, sp)
-    code[15] = 0xFB if num(state, "iff") & 1 else 0x00
-    struct.pack_into("<H", code, 17, num(state, "pc"))
-    struct.pack_into("<H", code, 19, num(state, "af"))
+    struct.pack_into("<H", code, 14, address + 24)
+    struct.pack_into("<H", code, 18, sp)
+    code[20] = 0xFB if num(state, "iff") & 1 else 0x00
+    struct.pack_into("<H", code, 22, num(state, "pc"))
+    struct.pack_into("<H", code, 24, num(state, "af"))
     offset = address & 0x3FFF
     target[0].data[offset:offset + TAIL_SIZE] = code
     return address
@@ -248,7 +248,7 @@ def main():
     except (OSError, gamefile.GameFileError, BuildError) as e:
         print(f"build.py: {e}", file=sys.stderr)
         return 1
-    image = os.path.join(out, f"{game.name}.IMG")
+    image = os.path.join(out, f"{game.name}.SNP")
     with open(image, "wb") as f:
         f.write(header)
         for chunk in data:

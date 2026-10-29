@@ -1,13 +1,15 @@
 # snapcas build and tests (docs/PLAN.md).
 #
-#   make        build bin/SNAPCAS.COM and bin/SERVICE.BIN
+#   make        print this help
+#   make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN
 #   make test   run the tests in openMSX
 #   make try    start openMSX as advanced/phc28s, with SNAPCAS.COM and the images
 #               in out/try/ on its disk: MACHINE= and FILES= change them
 #
-# The tests read the CAS files from CAS_DIR, by default tapes/, a folder that git
-# ignores because snapcas cannot ship CAS files. The tests that need them are
-# skipped when the folder does not exist.
+# The tests read the CAS files from CAS_DIR, by default tapes/, and MSX-DOS's
+# system files from DOS_DIR, by default dos/, with msxdos1/ and msxdos2/: git
+# ignores both, because snapcas cannot ship them. The tests that need them are
+# skipped when the folders do not exist.
 #
 # The Makefile downloads its tools into out/, each pinned by version and SHA-256:
 # the sjasmplus assembler's source, which it builds, and Nextor's NEXTOR.SYS and
@@ -18,12 +20,21 @@
 SJASMPLUS_VERSION := 1.24.0
 SYSTEMROMS ?= $(HOME)/.openMSX/share/systemroms
 CAS_DIR ?= tapes
+DOS_DIR ?= dos
 
 OUT       := out
 DL        := $(OUT)/dl
 SJASMPLUS := $(OUT)/tools/sjasmplus
 NEXTOR    := $(DL)/nextor
 EMU_HOME  := $(OUT)/openmsx-home
+
+help:
+	@echo "make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN"
+	@echo "make test   run the tests in openMSX: CAS_DIR=, by default tapes/, holds the"
+	@echo "            CAS files, and DOS_DIR=, by default dos/, MSX-DOS's system files"
+	@echo "make try    start openMSX as advanced/phc28s with SNAPCAS.COM and the images"
+	@echo "            in out/try/ on its disk: MACHINE= and FILES= change them"
+	@echo "make clean  remove the built files and the test output"
 
 all: bin/SNAPCAS.COM bin/SERVICE.BIN
 
@@ -54,11 +65,11 @@ $(EMU_HOME)/share/systemroms:
 	ln -sfn $(SYSTEMROMS) $@
 
 test: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
-	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) \
+	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I -m unittest discover -s tests -v
 
 MACHINE ?= advanced/phc28s
-FILES ?= bin/SNAPCAS.COM $(wildcard $(OUT)/try/*.IMG)
+FILES ?= bin/SNAPCAS.COM $(wildcard $(OUT)/try/*.SNP)
 
 try: bin/SNAPCAS.COM $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) python3 -I tools/run.py $(MACHINE) --dos $(NEXTOR) $(FILES)
@@ -66,4 +77,4 @@ try: bin/SNAPCAS.COM $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/sha
 clean:
 	rm -rf bin $(OUT)/test
 
-.PHONY: all test try clean
+.PHONY: help all test try clean

@@ -18,9 +18,9 @@ in [PLAN.md](PLAN.md).
 | Segment | A 16 KB block of a memory mapper, selected into a page by the mapper registers at ports FCh to FFh |
 | DOS's mapper | The mapper that holds DOS's four pages on the real machine |
 | DOS's segments | The segments in pages 0 to 3 when the restorer starts |
-| Image | `<GAME>.IMG`, the snapshot in the restorer's format ([Formats](#formats)) |
+| Image | `<GAME>.SNP`, the snapshot in the restorer's format ([Formats](#formats)) |
 | Worker | The part of the restorer that runs in page 1 or 2 while it changes the other pages |
-| Tail | The restore's last code: 21 bytes written below the game's stack pointer |
+| Tail | The restore's last code: 26 bytes written below the game's stack pointer |
 | T0 | A RAM copy of the BIOS's page 0 whose tape routines are the tape service's ([Tape service](#tape-service)) |
 | Service segment | A segment that holds T0 or tape data |
 
@@ -31,7 +31,7 @@ in [PLAN.md](PLAN.md).
 | `machines/<machine>.txt` | A person, once per machine | How to start the machine in `openMSX` |
 | `games/<game>/game.txt` | A person or an LLM | The game's settings |
 | `out/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
-| `out/<machine>/<game>/<GAME>.IMG` | `tools/build.py` | The image |
+| `out/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image |
 | `out/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
 | `out/<machine>/<game>/check/` | `tools/check.py` | The check's report and savestates |
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
@@ -48,7 +48,7 @@ four commands, in this order:
 3. `tools/check.py <game> <machine> --dos <dir>` runs the restorer in `openMSX` and
    verifies the restore ([Check](#check)). `<dir>` holds the user's DOS system
    files.
-4. The user copies `SNAPCAS.COM` and `<GAME>.IMG` to a disk of the real machine and
+4. The user copies `SNAPCAS.COM` and `<GAME>.SNP` to a disk of the real machine and
    runs `SNAPCAS <GAME>`.
 
 The tools are Python 3 programs that require only Python 3 and `openMSX` 22.0, so
@@ -101,6 +101,7 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 | `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None |
 | `continue` | A key name that the capture tries before space and Return, to continue a load that waits for a key | None |
 | `snapshot` | `at` and a time, at which the capture takes the snapshot | Found by the capture |
+| `capture` | A machine file for the capture: the user's machine without a cartridge that the game's loader trips over, with the same ROMs and the other cartridges in the same slots | The command's machine file |
 | `service` | `no` for a game that never reads the rest of its tape, though blocks of it stay unread. A game can read them only at its end, so `no` is for a game that someone has played to its end | Found by the capture |
 | `patch` | A place, the old bytes, `>`, the new bytes: `patch 1-x-3:0D31 CD E1 00 > CD E1 FC` | None |
 
@@ -131,12 +132,13 @@ game:
 
 ## Capture
 
-`tools/capture.py` runs `openmsx` with the machine file's arguments and a Tcl script
-made from the game file, with the throttle, the renderer and the sound off. All
-times are emulated seconds, counted across the rewinds of step 5. The script writes
-the snapshot to `snap/`, or `snap/error.txt` when a `boot` text or BASIC's `Ok` does
-not appear within 120 seconds, the load runs for more than 3,600 seconds, or step 5
-restarts more than 20 times. It performs the following steps:
+`tools/capture.py` runs `openmsx` with the machine file's arguments, or those of the
+game file's `capture` machine, and a Tcl script made from the game file, with the
+throttle, the renderer and the sound off. All times are emulated seconds, counted
+across the rewinds of step 5. The script writes the snapshot to `snap/`, or
+`snap/error.txt` when a `boot` text or BASIC's `Ok` does not appear within 120
+seconds, the load runs for more than 3,600 seconds, or step 5 restarts more than 20
+times. It performs the following steps:
 
 1. Starts a write watchpoint on port A0h, which keeps the PSG register selected
    last, boots the machine with no disk, presses the `boot` keys, and waits for
@@ -258,7 +260,7 @@ overwrites a segment changes nothing it keeps:
   zeros, and each RAM page, once for a segment that two pages select.
 - Turns the PSG, PPI and VDP state into a list of port writes, in the order that the
   restorer performs them ([Port writes](#port-writes)).
-- Writes the tail, from `SERVICE.BIN`, into the 21 bytes below the stack pointer. At
+- Writes the tail, from `SERVICE.BIN`, into the 26 bytes below the stack pointer. At
   an interrupt's entry these bytes are free, because the handler that runs next
   pushes onto them. It stops with an error when they cross a page boundary, include
   FFFFh, or are not in a RAM page that the snapshot keeps.
@@ -285,16 +287,23 @@ DOS's segments with `GET_P0` to `GET_P3`. Under MSX-DOS 1, it writes the mapper
 registers, and DOS's segments are 3, 2, 1 and 0. It performs the following steps,
 and until step 4 it can stop with a message and return to DOS:
 
-1. Opens `<GAME>.IMG`, whose name DOS has placed in the FCB at 005Ch, with the
-   extension set to IMG. Without a name, it prints its usage. It reads the image's
+1. Opens `<GAME>.SNP`, whose name DOS has placed in the FCB at 005Ch, with the
+   extension set to SNP. Without a name, it prints its usage. It reads the image's
    first 4,096 bytes with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`, and
    checks:
    - That `RAMAD0` to `RAMAD3` name one slot, DOS's mapper.
    - That the CRC-16 of the main ROM and of the sub-ROM equal the image's. The
      worker reads them in page 2, with pages 0 and 1 selecting the ROM.
-   - That page 1 or page 2 can hold the worker at the end: a page other than the
-     tail's whose bits, when DOS's mapper is in an expanded slot, select DOS's
-     mapper's subslot in the snapshot's subslot register of that slot.
+   - That page 1 or page 2, other than the tail's page, can hold the worker at the
+     end. When DOS's mapper is in an expanded slot, the worker must keep the
+     mapper's subslot in its page while it writes that slot's subslot register. The
+     restorer takes the first of these:
+     - A page whose bits in the snapshot's subslot register of the slot already
+       select the mapper's subslot.
+     - When the snapshot's page 3 selects the slot, either page. The tail then
+       writes the slot's true subslot register at FFFFh.
+     - A page that does not select the slot at the snapshot. That page's bits of the
+       register then differ until the BIOS writes them again from `SLTTBL`.
    - With the tape service, that no RAM page kept for page 0 is in DOS's mapper's
      primary slot with another subslot.
    - That each record's segment is within DOS's mapper's size.
@@ -356,9 +365,10 @@ and until step 4 it can stop with a message and return to DOS:
    registers of the three other pages, and the slot register with its own page still
    selecting DOS's mapper. It loads every register except AF and SP, sets I and the
    interrupt mode, and jumps to the tail.
-7. The tail writes the worker's page's mapper register and the slot register, loads
-   AF and SP, enables interrupts when IFF1 is set, and jumps to the program counter.
-   The R register is not restored.
+7. The tail writes the worker's page's mapper register, the slot register and, when
+   step 1 chose it, the subslot register of DOS's mapper's slot, loads AF and SP,
+   enables interrupts when IFF1 is set, and jumps to the program counter. The R
+   register is not restored.
 
 ## Tape service
 
@@ -445,12 +455,15 @@ the image and an `AUTOEXEC.BAT` that runs `SNAPCAS <GAME>`. The folder holds
 and `COMMAND.COM`, which `snapcas` cannot ship. `check.py` boots the machine with
 that disk and the `boot` keys, and writes its report to `check/report.txt`:
 
-1. A breakpoint at the tail's last instruction, which must fire within 120 seconds,
-   compares the machine with the snapshot: the kept RAM pages, the stored VRAM
-   blocks and the registers must be equal. The exceptions are the tail's bytes,
-   FCC9h to FD88h, FFFFh in an expanded slot, the patched bytes, R, PSG register 7's
-   bits 7 and 6, and the values that restorer step 3 changes for the tape service. A
-   difference or a timeout fails the check.
+1. A breakpoint at the tail's last instruction, while the slot register and the
+   jump's target are the snapshot's, compares the machine with the snapshot. It must
+   fire within 120 seconds, and the report then holds the screen's text, which shows
+   a message of the restorer: the kept RAM pages, the stored VRAM blocks and the
+   registers must be equal. The exceptions are the tail's bytes, FCC9h to FD88h,
+   FFFFh in an expanded slot, the patched bytes, R, PSG register 7's bits 7 and 6,
+   the bits of the worker's page in the subslot register of DOS's mapper's slot when
+   that page does not select the slot, and the values that restorer step 3 changes
+   for the tape service. A difference or a timeout fails the check.
 2. The game runs for 60 seconds, saved with `savestate` every 10 seconds as
    `check/10s.oms` to `check/60s.oms`, and a breakpoint on each scan finding in a
    kept RAM page reports which findings the game executes. `openMSX` loads such a
@@ -472,6 +485,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | ROM checksums checked by the restorer | A snapshot runs only on the ROMs it was taken with, and `build.py` can build T0 from `rom.bin` |
 | Port writes, T0 and the tail made by `build.py` | The restorer copies records and fills in only the values that depend on the real machine |
 | One restorer for every image | The user updates one program, and DOS passes it the image's name |
+| A game file can name the machine for the capture | On the Sanyo PHC-28S, La Abadia del Crimen's loader takes the RAM cartridge in slot 1 for an expanded slot and crashes, but loads without it. Its image then runs with the cartridge in place, because the game never selects slot 1 again |
 | Tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register. Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave the ROM there at the snapshot: Moonwalker and Time Out |
 | Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games. Of those games, 20 build stubs that T0 alone does not intercept |
@@ -489,7 +503,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 - A game with the tape service runs only if it leaves FCC9h to FD88h unused.
 - A game that reads the tape with its own code gets no tape service, so it runs only
   if it loads in a single pass.
-- A snapshot taken without an interrupt overwrites the 21 bytes below the stack
+- A snapshot taken without an interrupt overwrites the 26 bytes below the stack
   pointer with the tail.
 
 ## Formats
@@ -503,7 +517,7 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 8 | `SNAPCAS1` |
+| 0 | 8 | `SNAPCAS2` |
 | 8 | 2 | CRC-16 of the main ROM's 32 KB |
 | 10 | 2 | CRC-16 of the sub-ROM's 16 KB, or 0 on an MSX1 |
 | 12 | 1 | Number of records |
@@ -537,12 +551,14 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 | 2 | `D3 nn` | `OUT (nn),A`: FDh or FEh, filled in by the restorer |
 | 4 | `3E nn` | `LD A,nn`: the slot register, filled in by the restorer |
 | 6 | `D3 A8` | `OUT (0A8h),A` |
-| 8 | `31 nn nn` | `LD SP,nnnn`: the tail's address plus 19 |
-| 11 | `F1` | `POP AF` |
-| 12 | `31 nn nn` | `LD SP,nnnn`: the snapshot's SP |
-| 15 | `FB` or `00` | `EI` when IFF1 is set, otherwise `NOP` |
-| 16 | `C3 nn nn` | `JP nnnn`: the snapshot's PC |
-| 19 | 2 bytes | AF |
+| 8 | `3E nn` | `LD A,nn`: the subslot register of DOS's mapper's slot, filled in by the restorer when the tail writes it |
+| 10 | `32 FF FF` or `00 00 00` | `LD (0FFFFh),A` when the tail writes that register, otherwise three `NOP`s |
+| 13 | `31 nn nn` | `LD SP,nnnn`: the tail's address plus 24 |
+| 16 | `F1` | `POP AF` |
+| 17 | `31 nn nn` | `LD SP,nnnn`: the snapshot's SP |
+| 20 | `FB` or `00` | `EI` when IFF1 is set, otherwise `NOP` |
+| 21 | `C3 nn nn` | `JP nnnn`: the snapshot's PC |
+| 24 | 2 bytes | AF |
 
 ### Port writes
 
@@ -568,7 +584,7 @@ that it names:
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 1 | Version: 1. `build.py` stops with an error on any other |
+| 0 | 1 | Version: 2. `build.py` stops with an error on any other |
 | 1 | 1 | Number of parts |
 | 2 | 4 per part | Each part's offset and length in the file, 2 bytes each |
 

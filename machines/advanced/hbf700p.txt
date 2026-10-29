@@ -1,0 +1,2 @@
+openmsx -machine Sony_HB-F700P -ext msxdos2
+disk diska

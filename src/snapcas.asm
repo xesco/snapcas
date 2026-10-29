@@ -1,6 +1,6 @@
 ; SNAPCAS.COM, the snapcas restorer (docs/DESIGN.md, Restorer).
 ;
-; SNAPCAS <GAME> restores <GAME>.IMG, the snapshot of a cassette game, and
+; SNAPCAS <GAME> restores <GAME>.SNP, the snapshot of a cassette game, and
 ; starts the game. This version restores images without the tape service.
 ;
 ; It runs under MSX-DOS 1, MSX-DOS 2 and Nextor. Its code and its data stay
@@ -63,7 +63,7 @@ start:
         ld de,t_usage
         jp z,stop_message
         ; Copy the drive and the name into our own FCB, which already holds
-        ; the extension IMG. The FCB at 005Ch cannot be used as it is: its
+        ; the extension SNP. The FCB at 005Ch cannot be used as it is: its
         ; random record field overlaps the command line at 0080h.
         ld hl,DOSFCB
         ld de,fcb
@@ -178,9 +178,9 @@ find_dos:
 .dos1:
         ; MSX-DOS 1 runs in segments 3, 2, 1 and 0, as the MSX2 BIOS and
         ; Nextor set them, and gives no count of the mapper's segments.
-        ld hl,0003h
+        ld hl,0203h             ; dos_seg0 3, dos_seg1 2
         ld (dos_seg0),hl
-        ld hl,0001h
+        ld hl,0001h             ; dos_seg2 1, dos_seg3 0
         ld (dos_seg2),hl
         ld hl,dos1_put_p2
         ld (put_p2+1),hl
@@ -287,57 +287,116 @@ check_roms:
 
 ; ---- Step 1: the worker's page at the end ----
 
-; The tail's page cannot hold the worker, and, when DOS's mapper is in an
-; expanded slot, the worker's page must keep DOS's mapper's subslot in the
-; snapshot's subslot register of that slot.
+; The worker runs at the end in page 1 or 2, a page other than the tail's,
+; selecting DOS's mapper. When that mapper is in an expanded slot, the worker
+; must keep the mapper's subslot in its page while it writes the slot's
+; subslot register. It takes, in this order:
+; 1. a page whose bits in the snapshot's subslot register of that slot already
+;    select DOS's mapper's subslot;
+; 2. when the snapshot's page 3 selects DOS's mapper's slot, any page: the tail
+;    writes the slot's true subslot register at FFFFh;
+; 3. a page that does not select DOS's mapper's slot at the snapshot: only that
+;    page's bits of the slot's subslot register differ from the snapshot's, and
+;    the BIOS writes them again from SLTTBL when it next selects a subslot of
+;    the slot.
 find_worker_page:
         ld a,(H_TAIL+1)
         rlca
         rlca
         and 3
         ld (tail_page),a
-        ld b,1
-.try:
-        ld a,(tail_page)
-        cp b
-        jr z,.next
         ld a,(dos_slot)
-        bit 7,a
-        jr z,.found
         and 3
+        ld (m_ps),a
         ld e,a
         ld d,0
         ld hl,H_SUB
         add hl,de
-        ld a,(hl)               ; the snapshot's subslot register of the slot
-        ld c,b
-.shift:
-        dec c
-        jr z,.got
-        rrca
-        rrca
-        jr .shift
-.got:
-        rrca
-        rrca
-        and 3                   ; page B's subslot
-        ld c,a
+        ld a,(hl)
+        ld (m_sub),a            ; the snapshot's subslot register of the slot
         ld a,(dos_slot)
         rrca
         rrca
-        and 3                   ; DOS's mapper's subslot
+        and 3
+        ld (m_ss),a
+        xor a
+        ld (worker_mode),a
+        ld b,1
+.exact:
+        call other_than_tail
+        jr z,.exact_next
+        ld a,(dos_slot)
+        bit 7,a
+        jr z,.found
+        ld a,(m_sub)
+        call bits_of_page
+        ld c,a
+        ld a,(m_ss)
         cp c
         jr z,.found
-.next:
+.exact_next:
         inc b
         ld a,b
         cp 3
-        jr nz,.try
+        jr nz,.exact
+        ld a,(H_A8)
+        rlca
+        rlca
+        and 3
+        ld c,a
+        ld a,(m_ps)
+        cp c
+        jr nz,.latent
+        ld a,1                  ; 2: the tail writes the subslot register
+        ld (worker_mode),a
+        ld b,1
+        call other_than_tail
+        jr nz,.found
+        inc b
+        jr .found
+.latent:
+        ld a,2                  ; 3: a page outside DOS's mapper's slot
+        ld (worker_mode),a
+        ld b,1
+.page:
+        call other_than_tail
+        jr z,.page_next
+        ld a,(H_A8)
+        call bits_of_page
+        ld c,a
+        ld a,(m_ps)
+        cp c
+        jr nz,.found
+.page_next:
+        inc b
+        ld a,b
+        cp 3
+        jr nz,.page
         ld de,t_noworker
         jp stop_name
 .found:
         ld a,b
         ld (worker_page),a
+        ret
+
+; Returns NZ when page B is not the tail's.
+other_than_tail:
+        ld a,(tail_page)
+        cp b
+        ret
+
+; Returns in A page B's 2 bits of the register value in A.
+bits_of_page:
+        ld c,b
+        inc c
+.shift:
+        dec c
+        jr z,.done
+        rrca
+        rrca
+        jr .shift
+.done:
+        and 3
         ret
 
 ; ---- Step 1: the records ----
@@ -938,6 +997,21 @@ fill_tail:
         inc hl
         ld a,(H_A8)
         ld (hl),a               ; offset 5: the slot register
+        ld a,(worker_mode)
+        cp 1
+        ret nz
+        inc hl
+        inc hl
+        inc hl
+        inc hl
+        ld a,(m_sub)
+        ld (hl),a               ; offset 9: the subslot register of DOS's mapper
+        inc hl
+        ld (hl),32h             ; offset 10: LD (0FFFFh),A
+        inc hl
+        ld (hl),0FFh
+        inc hl
+        ld (hl),0FFh
         ret
 
 ; Returns in A the slot ID that the snapshot selects in page B.
@@ -1076,6 +1150,32 @@ switch:
         inc iy
         djnz .slots
         pop ix
+        ; Unless page 1 of find_worker_page holds, the worker writes DOS's
+        ; mapper's slot's subslot register with the mapper's subslot in its
+        ; own page.
+        ld a,(worker_mode)
+        or a
+        jr z,.subslot
+        ld a,(worker_page)
+        ld b,a
+        ld a,(m_ss)
+        call page_bits
+        ld e,a
+        ld a,(m_sub)
+        and d
+        or e
+        push af
+        push ix
+        pop hl
+        ld de,F_SUB
+        add hl,de
+        ld a,(m_ps)
+        ld e,a
+        ld d,0
+        add hl,de
+        pop af
+        ld (hl),a
+.subslot:
         ld a,(H_A8)
         rlca
         rlca
@@ -1143,7 +1243,7 @@ stop_message:
         jp BDOS
 
 ; Prints the image's name: the FCB's name without its trailing spaces, then
-; ".IMG".
+; ".SNP".
 name:
         ld hl,fcb+1
         ld b,8
@@ -1168,8 +1268,8 @@ name:
         include "slots.inc"
 
 t_usage:    db "Usage: SNAPCAS <game>",13,10
-            db "Restores <game>.IMG, a snapcas image.",13,10,"$"
-t_ext:      db ".IMG$"
+            db "Restores <game>.SNP, a snapcas image.",13,10,"$"
+t_ext:      db ".SNP$"
 t_notfound: db " not found",13,10,"$"
 t_notimage: db " is not a snapcas image",13,10,"$"
 t_onemapper: db ": DOS's pages are not in one memory mapper",13,10,"$"
@@ -1185,11 +1285,11 @@ t_read:     db ": cannot be read",13,10,"$"
 t_notram:   db ": slot "
 t_slot_n:   db "0 page "
 t_page_n:   db "0 is not RAM: the machine file does not describe this machine",13,10,"$"
-t_mark:     db "SNAPCAS1"
+t_mark:     db "SNAPCAS2"
 
 fcb:        db 0                ; drive, from the argument
             ds 8," "            ; name, from the argument
-            db "IMG"
+            db "SNP"
             ds FCB_SIZE-12,0
 
 dos2:       db 0
@@ -1203,6 +1303,10 @@ dos_seg3:   db 0
 saved4:     ds 4
 tail_page:  db 0
 worker_page: db 0
+worker_mode: db 0               ; 0, 1 or 2: the rule of find_worker_page
+m_ps:       db 0                ; DOS's mapper's primary slot
+m_ss:       db 0                ; and subslot
+m_sub:      db 0                ; the snapshot's subslot register of that slot
 worker_seg: db 0
 free_count: db 0
 hold_count: db 0

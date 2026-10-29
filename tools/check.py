@@ -36,7 +36,10 @@ def settings(state, snap, image, report, check_dir, state_name):
     names = "af bc de hl af2 bc2 de2 hl2 ix iy sp".split()
     values = " ".join(f"{n.upper()} {int(state[n], 16)}" for n in names)
     keep = {k: v for k, v in state.items()}
+    with open(os.path.join(ROOT, "bin", "SNAPCAS.COM"), "rb") as f:
+        com = f.read(3)
     s = {
+        "com": "{" + " ".join(str(b) for b in com) + "}",
         "report": msx.tcl_word(report),
         "snap": msx.tcl_word(snap),
         "dir": msx.tcl_word(check_dir),
@@ -68,7 +71,7 @@ def main():
         name = os.path.basename(os.path.normpath(folder))
         out = os.path.join(ROOT, "out", args.machine, name)
         snap = os.path.join(out, "snap")
-        image = os.path.join(out, f"{game.name}.IMG")
+        image = os.path.join(out, f"{game.name}.SNP")
         state = build.read_state(snap)
         if not os.path.exists(image):
             raise OSError(f"{image}: no image; run build.py first")

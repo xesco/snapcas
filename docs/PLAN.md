@@ -17,7 +17,7 @@ files from two folders that the user names, because `snapcas` cannot ship them.
 | Python | Python 3, standard library only |
 | `CAS_DIR` | Make variable: the folder of the user's CAS files, by default `tapes/`, which git ignores |
 | Nextor | `NEXTOR.SYS` 2.11 and `COMMAND2.COM` 2.44 from Nextor 2.1.0's `tools.zip`, downloaded by the Makefile into `out/dl/nextor/`, checked by SHA-256 |
-| `DOS_DIR` | Make variable: a folder with `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`) |
+| `DOS_DIR` | Make variable: a folder with `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`), by default `dos/`, which git ignores |
 
 The test machines are the six shipped machine files and two machine files that only
 the tests use, in `machines/test/`. Each one boots the DOS of its row:
@@ -57,11 +57,11 @@ adds:
 - `tools/msx.py`, which reads a machine file, starts `openMSX` with a Tcl script,
   presses the `boot` keys, and makes, with `diskmanipulator`, a disk image of the
   kind that the machine file's `disk` command takes.
-- A first `SNAPCAS.COM` that opens `<GAME>.IMG`, prints its usage without a name,
+- A first `SNAPCAS.COM` that opens `<GAME>.SNP`, prints its usage without a name,
   and prints an error when the file is missing or is not an image.
 
 The test boots `advanced/phc28s` with a disk of Nextor's files, `SNAPCAS.COM` and
-two bad images: `SHORT.IMG` of 3 bytes and `BAD.IMG`, which starts with `SNAPCAS2`.
+two bad images: `SHORT.SNP` of 3 bytes and `BAD.SNP`, which starts with `SNAPCAS9`.
 It runs `SNAPCAS`, then `SNAPCAS` with `NONE`, `SHORT` and `BAD`, and reads the
 usage and the three errors from the screen with `get_screen`. It proves the
 assembler, the disk image, the boot keys and the screen reading.
@@ -100,8 +100,19 @@ tests. The tests capture, build and check each single-load file of the corpus, f
 on `advanced/phc28s`, then on `basic/vg8020`, `basic/nms8250`, `advanced/hbf700p`
 and `test/nms8250-dos1`. Check point 1 must pass on each machine, except where the
 restorer stops because DOS leaves too few free segments: the test then checks that
-the restorer's message names the segments needed and free. The screenshots stay in
+the restorer's message names the segments needed and free. The savestates stay in
 `check/` for the user to look at.
+
+The results of the step:
+
+| Machine | Passes point 1 | Other results |
+|---|---|---|
+| `advanced/phc28s`, `basic/vg8020` | Freddy Hardest, Fernando, Moonrider, El Caldero Magico | La Abadia crashes during its load when a Carnivore2 is present |
+| `basic/nms8250` | El Caldero Magico | MSX-DOS 2 leaves 2 free segments of the 8 in 128 KB, so the restorer stops for the other games, naming the segments needed and free |
+| `advanced/hbf700p` | Moonrider, El Caldero Magico, La Abadia | `FREDDY.CAS` and `FERNANDO.CAS` do not load to their end in `openMSX` |
+| `test/nms8250-dos1` | All five | |
+
+The test leaves out the games that fail in `openMSX` itself.
 
 ## Step 5: tape service
 
@@ -144,3 +155,4 @@ same files, to compare.
 | Date | Machine | Images | Result |
 |---|---|---|---|
 | 2026-10-29 | Sanyo PHC-28S, Sony HBM-64 in slot 1, Carnivore2 in slot 2, Nextor 2.1 | `FREDDY.IMG`, `FERNANDO.IMG`, `MOONRIDE.IMG`, `CALDERO.IMG`, from step 4 | All four games run |
+| 2026-10-29 | The same | `ABADIA.SNP`, captured with `capture test/phc28s-noslot1` | La Abadia del Crimen runs, with the RAM cartridge in slot 1 |

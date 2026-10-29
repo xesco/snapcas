@@ -91,7 +91,7 @@ class Images(unittest.TestCase):
             if result.returncode != 0:
                 raise AssertionError(f"{game}: {result.stderr}")
             name = build.gamefile.default_name(game)
-            with open(os.path.join(ROOT, "out", machine, game, f"{name}.IMG"), "rb") as f:
+            with open(os.path.join(ROOT, "out", machine, game, f"{name}.SNP"), "rb") as f:
                 cls.images[game] = (f.read(), build.read_state(snap), snap)
 
     def header(self, image):
@@ -106,7 +106,7 @@ class Images(unittest.TestCase):
         for game, (image, state, snap) in self.images.items():
             with self.subTest(game=game):
                 h, rom, subrom, table, _ = self.header(image)
-                self.assertEqual(h[:8], b"SNAPCAS1")
+                self.assertEqual(h[:8], b"SNAPCAS2")
                 with open(os.path.join(snap, "rom.bin"), "rb") as f:
                     self.assertEqual(rom, build.crc16(f.read()))
                 if os.path.exists(os.path.join(snap, "subrom.bin")):
@@ -156,16 +156,16 @@ class Images(unittest.TestCase):
                 h, _, _, table, _ = self.header(image)
                 tail = struct.unpack_from("<H", h, 52)[0]
                 sp, pc, af = (int(state[n], 16) for n in ("sp", "pc", "af"))
-                self.assertEqual(tail, sp - 21)
+                self.assertEqual(tail, sp - 26)
                 page = tail >> 14
                 ps, ss = build.selected(state, page)
                 slot = ps if ss is None else 0x80 | (ss << 2) | ps
                 n = [i for i, r in enumerate(table) if r[0] in (1, 2) and r[1] == slot and r[2] == page][0]
                 data = image[4096 + 16384 * n:4096 + 16384 * (n + 1)]
-                code = data[tail & 0x3FFF:(tail & 0x3FFF) + 21]
+                code = data[tail & 0x3FFF:(tail & 0x3FFF) + 26]
                 ei = 0xFB if int(state["iff"], 16) & 1 else 0x00
-                expected = (bytes([0x3E, 0, 0xD3, 0, 0x3E, 0, 0xD3, 0xA8, 0x31])
-                            + struct.pack("<H", tail + 19) + bytes([0xF1, 0x31])
+                expected = (bytes([0x3E, 0, 0xD3, 0, 0x3E, 0, 0xD3, 0xA8, 0x3E, 0, 0, 0, 0, 0x31])
+                            + struct.pack("<H", tail + 24) + bytes([0xF1, 0x31])
                             + struct.pack("<H", sp) + bytes([ei, 0xC3])
                             + struct.pack("<H", pc) + struct.pack("<H", af))
                 self.assertEqual(code, expected)
