@@ -7,18 +7,20 @@
 
         include "service.inc"
 
-VERSION equ 4
+VERSION equ 5
 
         org 0
 
         db VERSION
-        db 6                    ; number of parts
+        db 8                    ; number of parts
         dw tail, tail_end-tail          ; part 0: the tail
         dw t0_start, t0_end-t0_start    ; part 1: T0's stubs, for 19DDh
         dw p3_start, p3_end-p3_start    ; part 2: page 3, for E_ENTRY
         dw code_start, code_end-code_start  ; part 3: the code segment
         dw fields, fields_end-fields    ; part 4: places for build.py
-        dw relocs, 0                    ; part 5: the bytes that move with page 3,
+        dw t0m_start, t0m_end-t0m_start ; part 5: T0 without a part in page 3
+        dw t0m_fields, t0m_fields_end-t0m_fields  ; part 6: its places
+        dw relocs, 0                    ; part 7: the bytes that move with page 3,
                                         ; which tools/relocs.py appends
 
 ; The tail (DESIGN.md, Tail): the restore's last code, written below the game's
@@ -201,252 +203,23 @@ header: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h
         assert $ = C_SEGS
         ds SEGS_MAX,0
         assert $ = C_BORDER
-        ds 8,0                  ; C_BORDER to C_VDP1
+        ds 10,0                 ; C_BORDER to C_TWO
 
-; The colours of the flash after GRAPH and CODE, and when the position changes
-; side or goes back to a side's start by itself.
-SIDE_A  equ 3                   ; light green
-SIDE_B  equ 9                   ; light red
-
-c_tapion:
-        call keys
-        ret c                   ; CTRL+STOP
-        push bc
-        bit 2,c
-        call z,side_a           ; GRAPH
-        pop bc
-        bit 4,c
-        call z,side_b           ; CODE
-        ; Find the next header at a multiple of 8 bytes.
-.search:
-        call keys
-        ret c
-        ld hl,C_POS
-        ld a,(hl)
-        add a,7
-        jr nc,.low
-        inc hl                  ; the carry into the upper bytes
-        inc (hl)
-        jr nz,.up
-        inc hl
-        inc (hl)
-.up:
-        ld hl,C_POS
-.low:
-        and 0F8h
-        ld (hl),a
-        call wrap
-        ld hl,header
-        ld b,8
-.compare:
-        push bc
-        push hl
-        call next_byte
-        pop hl
-        pop bc
-        cp (hl)
-        jr nz,.search
-        inc hl
-        djnz .compare
-        or a
-        ret
-
-c_tapin:
-        call keys
-        ret c                   ; CTRL+STOP
-; Returns in A the byte at the tape position, and advances the position.
-next_byte:
-        ld hl,(C_POS)
-        ld a,(C_POS+2)
-        add a,a
-        add a,a
-        ld c,a
-        ld a,h
-        rlca
-        rlca
-        and 3
-        or c                    ; the segment's number in C_SEGS
-        ld e,a
-        ld d,0
-        push hl
-        ld hl,C_SEGS
-        add hl,de
-        ld d,(hl)
-        pop hl
-        ld a,h
-        and 3Fh
-        ld h,a
-        ld a,(C_SEGS)
-        ld b,a
-        ld c,0FCh
-        call reader
-        push de
-        ld hl,C_POS
-        inc (hl)
-        jr nz,.wrap
-        inc hl
-        inc (hl)
-        jr nz,.wrap
-        inc hl
-        inc (hl)
-.wrap:
-        call wrap
-        pop de
-        ld a,e
-        or a
-        ret
-
-; Flashes the screen in the border colour E for 0.1 second, counted by the
-; VDP's frame flag in status register 0: it blanks the display, which then
-; shows only the border. It then writes the game's registers 7 and 1 again.
-; The VDP's registers cannot be read, so C_BORDER and C_SCREEN point to the
-; game's values: RG7SAV and RG1SAV, or C_VDP7 and C_VDP1 for a game that does
-; not keep them (DESIGN.md, Tape service).
-mark:
-        in a,(99h)              ; also resets the VDP's register latch
-        ld hl,(C_SCREEN)
-        ld a,(hl)
-        push af
-        and 0BFh                ; bit 6 clear: the display blanked
-        ld d,81h
-        call vdp
-        ld hl,(C_BORDER)
-        ld a,(hl)
-        push af
-        and 0F0h                ; the text colour of screen 0
-        or e
-        ld d,87h
-        call vdp
-        ld a,(C_FRAMES)
-        ld b,a
-.frame:
-        in a,(99h)
-        rlca
-        jr nc,.frame
-        djnz .frame
-        pop af
-        ld d,87h
-        call vdp
-        pop af
-        ld d,81h
-; Writes A to the VDP register that D selects, as 80h plus its number.
-vdp:
-        out (99h),a
-        ld a,d
-        out (99h),a
-        ret
-
-; Returns rows 6 in C and 7 in A of the keyboard matrix, read through the PPI,
-; and carry when CTRL+STOP is held.
-keys:
-        ld a,6
-        call row
-        ld c,a                  ; SHIFT CTRL GRAPH CAPS CODE ...
-        ld a,7
-        call row                ; ... STOP BS SELECT RETURN
-        bit 1,c
-        ret nz
-        bit 4,a
-        ret nz
-        scf
-        ret
-row:
-        ld b,a
-        in a,(0AAh)
-        and 0F0h
-        or b
-        out (0AAh),a
-        in a,(0A9h)
-        or a
-        ret
-
-; After the position changed: at or past side 1's end without a side 2, side 1's
-; start; at or past side 2's end, side 2's start. TAPION's rounding can pass
-; a side's end, so the tests are not for equality. Side 2 starts at side 1's
-; end, so a read that reaches it changes only C_SIDE. Each change shows the
-; side's border colour.
-wrap:
-        call on_side1
-        ld a,0
-        jr c,.side
-        call one_side
-        jr z,side_a             ; past side 1's end without a side 2
-        ld hl,C_POS
-        ld de,C_TOTAL
-        call lt24
-        jr nc,side_b.two        ; past side 2's end
-        ld a,1
-.side:
-        ld hl,C_SIDE
-        cp (hl)
-        ret z
-        ld (hl),a               ; side 1's end reached: side 2
-        ld e,SIDE_B
-        jp mark
-
-; Returns Z when the tape has no side 2.
-one_side:
-        ld hl,C_S1END
-        ld de,C_TOTAL
-        jp eq24
-
-set_pos:
-        ld de,C_POS
-        ld bc,3
-        ldir
-        ret
-
-; CODE: side 2's start, or side 1's without a side 2. GRAPH: side 1's start.
-side_b:
-        call one_side
-        jr z,side_a
-.two:
-        ld hl,C_S1END
-        ld de,1*256+SIDE_B
-        jr to_side
-side_a:
-        ld hl,C_START
-        ld de,0*256+SIDE_A
-; Moves the tape position to the 3 bytes at HL, which are on side 1 for D = 0
-; and on side 2 for D = 1, and shows the border colour E.
-to_side:
-        ld a,d
-        ld (C_SIDE),a
-        push de
-        call set_pos
-        pop de
-        jp mark
-
-; Returns carry when the tape position is on side 1.
-on_side1:
-        ld hl,C_POS
-        ld de,C_S1END
-; Returns carry when the 3 bytes at HL are below those at DE: (HL) minus (DE),
-; byte by byte with the borrow.
-lt24:
-        or a
-        ld b,3
-.byte:
-        ld a,(de)
-        ld c,a
-        ld a,(hl)
-        sbc a,c
-        inc hl
-        inc de
-        djnz .byte
-        ret
-
-; Returns Z when the 3 bytes at HL equal those at DE.
-eq24:
-        ld b,3
-.byte:
-        ld a,(de)
-        cp (hl)
-        ret nz
-        inc hl
-        inc de
-        djnz .byte
-        ret
+T0MODE  equ 0
+D_POS   equ C_POS
+D_S1END equ C_S1END
+D_TOTAL equ C_TOTAL
+D_START equ C_START
+D_HEADER equ header
+D_SEGS  equ C_SEGS
+D_BORDER equ C_BORDER
+D_FRAMES equ C_FRAMES
+D_VDP7  equ C_VDP7
+D_SIDE  equ C_SIDE
+D_SCREEN equ C_SCREEN
+D_VDP1  equ C_VDP1
+D_TWO   equ C_TWO
+        include "tape.inc"
 
         ds (8-($ & 7)) & 7,0    ; the tape starts at a multiple of 8
         ent
@@ -457,6 +230,63 @@ code_end:
 fields:
         dw t_stmotr, C_POS, SEGS_MAX, E_FC, C_BORDER
 fields_end:
+
+; ---- T0 without a part in page 3, from 19DDh to 1B44h ----
+;
+; T0's routines and data, for a game whose page 3 has no room for the service
+; (DESIGN.md, Without a part in page 3). The game reaches T0 through DOS's
+; mapper in page 0, where mapper register FCh holds T0, and build.py points the
+; jump table's entries from 00E1h to 00F3h at the routines here.
+
+t0m_start:
+        module t0m
+        disp T_POS
+        ds 12,0                 ; T_POS, T_S1END, T_TOTAL, T_START
+        assert $ = T_HEADER
+header: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h
+        assert $ = T_SEGS
+        ds T_SEGS_MAX,0
+        assert $ = T_PAGE
+        ds 3,0
+        assert $ = T_BORDER
+        ds 10,0                 ; as C_BORDER to C_TWO
+
+T0MODE  equ 1
+D_POS   equ T_POS
+D_S1END equ T_S1END
+D_TOTAL equ T_TOTAL
+D_START equ T_START
+D_HEADER equ T_HEADER
+D_SEGS  equ T_SEGS
+D_PAGE  equ T_PAGE
+D_BORDER equ T_BORDER
+D_FRAMES equ T_BORDER+2
+D_VDP7  equ T_BORDER+3
+D_SIDE  equ T_BORDER+4
+D_SCREEN equ T_BORDER+5
+D_VDP1  equ T_BORDER+7
+D_TWO   equ T_BORDER+9
+
+tapiof:                         ; TAPIOF and TAPOOF, as the BIOS's
+        ei
+stmotr:                         ; STMOTR
+        ret
+tapoon:                         ; TAPOON and TAPOUT: the tape cannot be written
+        scf
+        ret
+        include "tape.inc"
+        assert $ <= 1B45h       ; within the BIOS's tape code
+        ds 1B45h-$,0
+        ent
+        endmodule
+t0m_end:
+
+; For build.py: the jump table's targets from 00E1h to 00F3h, in its order
+; TAPION, TAPIN, TAPIOF, TAPOON, TAPOUT, TAPOOF, STMOTR, then T0's data.
+t0m_fields:
+        dw t0m.c_tapion, t0m.c_tapin, t0m.tapiof, t0m.tapoon, t0m.tapoon, t0m.tapiof, t0m.stmotr
+        dw T_POS, T_PAGE, T_BORDER, T_SEGS_MAX
+t0m_fields_end:
 
 ; tools/relocs.py appends here the offsets of the bytes that differ when
 ; P3_PAGE is FBh: the high bytes of the addresses in the page 3 part.

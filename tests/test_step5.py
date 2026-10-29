@@ -69,7 +69,17 @@ def service_symbol(name):
 
 
 def play_script(name, out):
-    game, inputs, seconds, counts = PLAYS[name]
+    game, inputs, seconds, counts = PLAYS[name][:4]
+    # Without a part in page 3, T0 holds the data and the routines.
+    t0 = len(PLAYS[name]) > 4 and PLAYS[name][4]
+    if t0:
+        fields = {k: service_symbol(f"T_{k.upper()}") & 0x3FFF for k in ("pos", "s1end", "total", "start", "header")}
+        in_t0 = f"[debug read_block memory {service_symbol('T_HEADER')} 8] eq [binary format H* 1FA6DEBACC137D74]"
+        entries = {"tapion": (service_symbol("t0m.c_tapion"), in_t0), "tapin": (service_symbol("t0m.c_tapin"), in_t0)}
+    else:
+        fields = {k: service_symbol(f"C_{k.upper()}") for k in ("pos", "s1end", "total", "start")}
+        fields["header"] = service_symbol("header")
+        entries = {"tapion": (0x1A63, ""), "tapin": (0x1ABC, "")}
     presses = []
     for n, name in enumerate(inputs):
         if name == "fire":
@@ -84,24 +94,24 @@ def play_script(name, out):
             action = msx.press(name, 0.5)
         presses.append(f"after time {2 + 4 * n} {{{action}}}")
     state = os.path.join(ROOT, "out", MACHINE, game, "check", "10s")
-    bps = "\n".join(f'set ::n({name}) 0\ndebug set_bp {address} {{}} {{incr ::n({name})}}'
-                    for name, address in {"tapion": 0x1A63, "tapin": 0x1ABC, **counts}.items())
+    bps = "\n".join(f'set ::n({name}) 0\ndebug set_bp {address} {{{condition}}} {{incr ::n({name})}}'
+                    for name, (address, condition) in {**entries, **{k: (a, "") for k, a in counts.items()}}.items())
     joy = "\n".join(f"debug set_bp {a} {{}} fire" for a in JOYSTICK_READS)
     return f"""
 loadstate {msx.tcl_word(state)}
 after time {seconds + 60} exit
 proc base {{}} {{
     for {{set a 0}} {{$a < [debug size "{MAPPER_RAM}"]}} {{incr a 16384}} {{
-        if {{[debug read_block "{MAPPER_RAM}" [expr {{$a + {service_symbol("header")}}}] 8] eq [binary format H* 1FA6DEBACC137D74]}} {{ return $a }}
+        if {{[debug read_block "{MAPPER_RAM}" [expr {{$a + {fields["header"]}}}] 8] eq [binary format H* 1FA6DEBACC137D74]}} {{ return $a }}
     }}
-    error "no code segment"
+    error "no code segment or T0"
 }}
 proc word3 {{offset}} {{
     binary scan [debug read_block "{MAPPER_RAM}" [expr {{$::base + $offset}}] 3] cu3 b
     expr {{[lindex $b 0] | ([lindex $b 1] << 8) | ([lindex $b 2] << 16)}}
 }}
 set ::base [base]
-set ::pos0 [word3 {service_symbol("C_POS")}]
+set ::pos0 [word3 {fields["pos"]}]
 set ::fire 0
 proc fire {{}} {{
     if {{$::fire && ([debug read {{PSG regs}} 15] & 0x40) == 0}} {{ reg AF [expr {{[reg AF] & ~0x1000}}] }}
@@ -110,12 +120,14 @@ proc fire {{}} {{
 {joy}
 # The flash's colours, from E at the start of mark in the code segment.
 set ::colours {{}}
-debug set_bp {service_symbol("mark")} {{[debug read {{MSX Memory Mapper I/O}} 0] == [debug read memory {service_symbol("E_CODE")}]}} {{ lappend ::colours [expr {{[reg DE] & 255}}] }}
+if {{!{int(bool(t0))}}} {{
+    debug set_bp {service_symbol("mark")} {{[debug read {{MSX Memory Mapper I/O}} 0] == [debug read memory {service_symbol("E_CODE")}]}} {{ lappend ::colours [expr {{[reg DE] & 255}}] }}
+}}
 {chr(10).join(presses)}
 after time {seconds} {{
     set f [open {msx.tcl_word(out)} w]
     puts $f "pos0 $::pos0"
-    foreach {{name offset}} {{pos {service_symbol("C_POS")} s1end {service_symbol("C_S1END")} total {service_symbol("C_TOTAL")} start {service_symbol("C_START")}}} {{ puts $f "$name [word3 $offset]" }}
+    foreach {{name offset}} {{pos {fields["pos"]} s1end {fields["s1end"]} total {fields["total"]} start {fields["start"]}}} {{ puts $f "$name [word3 $offset]" }}
     foreach name [array names ::n] {{ puts $f "$name $::n($name)" }}
     foreach c {{3 9}} {{ puts $f "colour$c [llength [lsearch -all $::colours $c]]" }}
     close $f

@@ -460,7 +460,8 @@ segments after it. The code segment's fields are these:
 | 005Fh | 2 | The address of the game's value of VDP register 1: `RG1SAV`, F3E0h, when it equals the snapshot's register 1, otherwise 0061h |
 | 0061h | 1 | The snapshot's VDP register 1 |
 | 0062h | 1 | The tape speed, filled in by the restorer: 0 for the fast load, 1 for 1200 baud, 2 for 2400 baud |
-| 0063h | | The routines, then the tape |
+| 0063h | 1 | 1 when the tape has a side 2, set by `build.py` |
+| 0064h | | The routines, then the tape |
 
 `TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's
 segment and B the code segment, the reader selects the byte's segment in page 0,
@@ -522,8 +523,8 @@ the three switches:
 | Switch | Without a part in page 3 |
 |---|---|
 | The entry code selects T0 in page 0 | The game reaches T0 by slot. T0 stays in mapper register FCh for good, so page 0 shows T0 whenever the game selects DOS's mapper there, and T0's jump table, from 00E1h to 00F3h, is the only set of entries |
-| The trampoline selects the code segment | The routines run in T0: they, the tape position, the table of the tape's segments and the marker's data take the 360 bytes from 19DDh to 1B44h, which an assertion in `src/service.asm` checks |
-| The reader selects the tape's segments in page 0 | `TAPIN` reads through page 1 or page 2, whichever selects DOS's mapper at the call and does not hold the stack. It selects the byte's segment there through FDh or FEh, reads the byte, and selects the game's segment again, with interrupts off |
+| The trampoline selects the code segment | The routines run in T0: they, the tape position, the table of the tape's segments and the flash's data take the 360 bytes from 19DDh to 1B44h, which an assertion in `src/service.asm` checks. `src/tape.inc` holds the routines, which `service.asm` assembles in the code segment and in T0, and `build.py` points T0's jump table at T0's copy |
+| The reader selects the tape's segments in page 0 | `TAPIN` reads through page 2 or page 1: the first that is a page of a mapper at the snapshot and does not hold the stack, which `build.py` chooses. It selects the byte's segment there through FEh or FDh, reads the byte, and selects the snapshot's segment there again, with interrupts off |
 
 The tape takes at most 16 segments, 256 KB, and starts at the first tape segment.
 `TAPIOF` and `TAPOOF` enable interrupts, as the BIOS's do. The keys and the flash
@@ -535,16 +536,17 @@ with an error otherwise:
 | Condition | Why |
 |---|---|
 | No RAM page kept for page 0 is in DOS's mapper | T0 takes the game's mapper register FCh for good |
-| Page 1 or page 2 selects DOS's mapper | `TAPIN` borrows that page to read the tape |
+| Page 2 or page 1 is a page of DOS's mapper and does not hold the stack, and the game keeps that page's segment from then on | `TAPIN` borrows that page to read the tape |
 
 Code that calls the tape with the ROM selected in page 0 reaches the ROM, not T0, so
 the scan only lists its findings in this mode, and the game file sends that code to
-T0 with `patch` lines that make it select DOS's mapper in page 0. Moonwalker's stub
-computes the slot register as `AND H` with a mask from its caller. `XOR H` and a
-mask of 03h select slot 2, DOS's mapper on the Sanyo PHC-28S, in place of slot 0
-(*to verify*: each caller's mask). A game that writes FCh itself loses T0, and a
-game whose own page 0 RAM is in DOS's mapper, as Moonwalker's is on an NMS 8250,
-cannot use the mode.
+T0 with `patch` lines that make it select DOS's mapper in page 0. Moonwalker's
+loader computes the value that its stub writes to the slot register as
+`AND H / LD L,A`, the slot register with page 0's bits cleared, for slot 0. On the
+Sanyo PHC-28S the game keeps the slot register at A5h, so `LD L,0A6h` in their place
+selects slot 2, DOS's mapper. A game that writes FCh itself loses T0, and a game
+whose own page 0 RAM is in DOS's mapper, as Moonwalker's is on an NMS 8250, cannot
+use the mode.
 
 The restorer allocates T0 and the tape's segments as in the default mode, writes the
 table of the tape's segments into T0, and sets mapper register FCh to T0's segment,
@@ -826,7 +828,7 @@ that it names:
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 1 | Version: 4. `build.py` stops with an error on any other |
+| 0 | 1 | Version: 5. `build.py` stops with an error on any other |
 | 1 | 1 | Number of parts |
 | 2 | 4 per part | Each part's offset and length in the file, 2 bytes each |
 
@@ -840,11 +842,13 @@ The parts hold the code that `build.py` places, with the operands and the data t
 | 2 | The service's part of page 3, for FCE1h to FD88h |
 | 3 | The code segment's data and routines, from 0000h, up to the tape's start |
 | 4 | The addresses of `STMOTR`'s stub, of the tape position in the code segment, of the byte at FCF9h and of the marker's data in the code segment, with the most segments that the code segment and the tape can use, 2 bytes each |
-| 5 | The offsets in the file of the bytes that move with the part of page 3, 2 bytes each: the high bytes of the addresses in that part |
+| 5 | T0's routines and data without a part in page 3, for 19DDh to 1B44h ([Without a part in page 3](#without-a-part-in-page-3)) |
+| 6 | The addresses of T0's routines for the jump table's entries from 00E1h to 00F3h, in their order, then of T0's tape position, borrowed page and flash's data, and the most segments of the tape, 2 bytes each |
+| 7 | The offsets in the file of the bytes that move with the part of page 3, 2 bytes each: the high bytes of the addresses in that part |
 
 The Makefile assembles `src/service.asm` twice, with the part of page 3 at FCE1h and
-at FBE1h, one page lower, and `tools/relocs.py` lists the bytes that differ as part
-5. They differ by exactly 1, and the assembly at FCE1h is the file.
+at FBE1h, one page lower, and `tools/relocs.py` lists the bytes that differ as the
+last part. They differ by exactly 1, and the assembly at FCE1h is the file.
 
 ### Replay stream
 

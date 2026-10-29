@@ -137,6 +137,16 @@ class Corpus(unittest.TestCase):
                     self.assertIn(line + "\n", text)
 
 
+# Moonwalker, with the tape service in T0 (DESIGN.md, Without a part in page
+# 3): its game file, and the inputs from the intro to the main game's load.
+MOONWALKER = """cas MOONWALK.CAS
+sha1 1787776aeef9420ebb35c3ecb879a7c9a556a512
+snapshot at 135
+service t0
+patch page0:38CD A4 6F > 2E A6
+"""
+
+
 def play(cas):
     """Captures, builds and checks a file, then plays it to its next load, and
     returns the check's report and the play's values."""
@@ -169,6 +179,34 @@ class Stubs(unittest.TestCase):
                 # TAPION, and the position moves past its value at the snapshot.
                 self.assertGreater(values["tapion"], 0, values)
                 self.assertGreater(values["pos"], values["pos0"], values)
+
+
+@unittest.skipUnless(os.path.isfile(os.path.join(CAS_DIR, "MOONWALK.CAS")), "CAS_DIR holds no MOONWALK.CAS")
+class WithoutAPartInPage3(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        folder = os.path.join(WORK, "games", "t0-moonwalk")
+        os.makedirs(folder, exist_ok=True)
+        with open(os.path.join(folder, "game.txt"), "w") as f:
+            f.write(MOONWALKER)
+        cls.error = None
+        for step in ("capture.py", "build.py"):
+            result = test_step4.tool(step, folder, MACHINE, "--cas", CAS_DIR)
+            if result.returncode != 0:
+                cls.error = f"{step}: {result.stderr.strip()}"
+                return
+        cls.report = test_step4.tool("check.py", folder, MACHINE, "--dos", test_step4.NEXTOR).stdout
+        test_step5.PLAYS["t0-moonwalk"] = ("t0-moonwalk", ["space"] * 3, 120, {}, True)
+        cls.values = test_step5.play("t0-moonwalk") if cls.report.startswith("point 1: pass") else {}
+
+    def test_moonwalker_loads_its_main_game_through_t0(self):
+        self.assertIsNone(self.error)
+        self.assertTrue(self.report.startswith("point 1: pass"), self.report)
+        # From the intro to the end of the main game's 22 KB block, as in a
+        # load from the tape.
+        self.assertGreater(self.values["tapion"], 0, self.values)
+        self.assertEqual(self.values["pos"], 60418, self.values)
 
 
 if __name__ == "__main__":

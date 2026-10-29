@@ -39,10 +39,11 @@ def selected_name(state, page):
 def patched_bytes(state, snap, patches, page):
     """The RAM pages' bytes that the patch lines and the scan change, as
     ps-ss-page, first and last offset. The scan's patches point to the entries
-    at page's E1h."""
+    at page's E1h, and page is 0 without a part in page 3, where the scan
+    patches nothing."""
     ranges = ["{}-{}-{} {} {}".format(*selected_name(state, p.page), p.page, p.offset, p.offset + len(p.old) - 1)
               for p in patches if p.page not in ("side1", "side2")]
-    if state["service"] == "1":
+    if state["service"] == "1" and page:
         for name in sorted(os.listdir(os.path.join(snap, "ram"))):
             with open(os.path.join(snap, "ram", name), "rb") as f:
                 findings = scan.find(f.read(), page)

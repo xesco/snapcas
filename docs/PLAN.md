@@ -150,6 +150,7 @@ The step also takes the tests that need the scan:
 | `TOUR-91.CAS` | `advanced/phc28s` | That the game's stub reaches the tape service at its next load |
 | `MAD-MIDE.CAS` | `advanced/phc28s` | The same |
 | `DESPERAD.CAS` | `advanced/phc28s` | The same, for a loader that selects the ROM in page 0 itself, with `IN A,(0A8h) / AND 0FCh / OR 00h / OUT (0A8h),A` |
+| `MOONWALK.CAS` | `advanced/phc28s` | With `service t0`, its snapshot in the intro and a `patch` line that makes its loader select DOS's mapper: that the main game loads through T0, to the end of its 22 KB block ([Without a part in page 3](DESIGN.md#without-a-part-in-page-3)) |
 
 ## Step 7: replay
 
@@ -219,15 +220,4 @@ same files, to compare.
 | 2026-10-29 | The same | `ABADIA.SNP`, captured with `capture test/phc28s-noslot1` | La Abadia del Crimen runs, with the RAM cartridge in slot 1 |
 | 2026-10-29 | The same | `KNIGHTMA.SNP`, with `snapshot at 130`, and the 31 images of the step 4 batch | All run |
 | 2026-10-29 | The same | `GAUNTLET.SNP`, with `GAUNTLEB.CAS` as side 2, from step 5 | The main game and its levels load from the tape service, side 2 included, and the side's colour shows at the turn-over |
-
-## Not in these steps
-
-Moonwalker moves out of step 6. It reads its tape through `TAPION` and `TAPIN`, from
-a stub at FC9Ah that its loader builds for each call. At its prompts to stop the
-tape, `openMSX`'s tape runs on and the game loses its next block, so its game file
-takes the snapshot at 135 seconds, in its intro after the first blocks, and the main
-game and the levels load through the tape service. The main game then loads its code
-into FCC9h to FD88h, over the service's part of page 3, and no 168 bytes of its page
-3 stay free through the game. It waits for the tape service without a part in page 3
-([Without a part in page 3](DESIGN.md#without-a-part-in-page-3)), which needs a step
-of its own. The machine file `test/nms8250-512k` stays for it.
+| 2026-10-29 | The same | `MOONWALK.SNP`, with `service t0`, from step 6 | The game loads through T0 and plays. The loading messages show a few wrong pixels, likely VRAM writes that come faster than the VDP accepts, because the tape service returns a byte much sooner than a tape; step 8's `/T1200` is to confirm it |

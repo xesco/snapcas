@@ -26,6 +26,7 @@ class Game:
         self.snapshot_at = None
         self.service_no = False  # service no: the game never reads the rest
         self.service_page = None  # service at xxE1: the page of the service's page 3 part
+        self.service_t0 = False   # service t0: the tape service without a part in page 3
         self.capture = None      # the machine file for the capture, if not the user's
         self.rom_keep = False    # rom keep: page 0 keeps the ROM, and T0 does not replace it
         self.patches = []     # [Patch]
@@ -129,8 +130,10 @@ def read_game(folder):
                 game.service_no = True
             elif len(args) == 2 and args[0] == "at" and re.fullmatch(r"[C-Fc-f][0-9A-Fa-f][Ee]1", args[1]):
                 game.service_page = int(args[1][:2], 16)
+            elif args == ["t0"]:
+                game.service_t0 = True
             else:
-                raise GameFileError(f"{where}: service takes no, or at and an address xxE1 in page 3")
+                raise GameFileError(f"{where}: service takes no, at and an address xxE1 in page 3, or t0")
         elif key == "capture":
             game.capture = args[0]
         elif key == "rom":

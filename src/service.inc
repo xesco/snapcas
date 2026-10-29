@@ -30,3 +30,20 @@ C_VDP7    equ 005Dh     ; build.py: the snapshot's VDP register 7
 C_SIDE    equ 005Eh     ; build.py: 0 while the position is on side 1, 1 on side 2
 C_SCREEN  equ 005Fh     ; build.py: where the game's VDP register 1 is, 2 bytes
 C_VDP1    equ 0061h     ; build.py: the snapshot's VDP register 1
+C_SPEED   equ 0062h     ; the tape speed (DESIGN.md, Tape speed and sound), 0
+C_TWO     equ 0063h     ; build.py: 1 when the tape has a side 2
+
+; T0 in the mode without a part in page 3 (DESIGN.md, Without a part in page 3):
+; its data, then its routines, from 19DDh to 1B44h.
+T_POS     equ 19DDh     ; build.py: the tape position at the snapshot, 3 bytes
+T_S1END   equ 19E0h     ; build.py: side 1's end, 3 bytes
+T_TOTAL   equ 19E3h     ; build.py: side 2's end, 3 bytes
+T_START   equ 19E6h     ; side 1's start, 0, 3 bytes
+T_HEADER  equ 19E9h     ; the CAS header, 8 bytes
+T_SEGS    equ 19F1h     ; restorer: the tape's segments
+T_SEGS_MAX equ 16       ; so the tape holds up to 256 KB
+T_PAGE    equ 1A01h     ; build.py: the borrowed page's mapper register port,
+                        ; its first address's high byte, the game's segment
+T_BORDER  equ 1A04h     ; build.py: the flash's data, the tape speed and the
+                        ; side 2 byte, as from C_BORDER to C_TWO
+

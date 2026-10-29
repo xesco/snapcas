@@ -467,6 +467,18 @@ check_records:
         bit 1,a
         ld de,t_page0
         jp nz,stop_name
+        ; Without a part in page 3, T0 takes mapper register FCh for good, so
+        ; no RAM page for page 0 may be in DOS's mapper.
+        ld a,(H_FLAGS)
+        bit 1,a
+        jr z,.rom
+        ld a,(p0)
+        rrca
+        ld de,t_t0page0
+        jp c,stop_name
+        jr .subslot
+.rom:
+        ld a,(p0)
         ; T0 replaces the ROM when page 0 selects it, no RAM page for page 0
         ; is in DOS's mapper, and the game file has no rom keep: page 0 then
         ; selects DOS's mapper.
@@ -639,8 +651,10 @@ allocate:
 .worker:
         call take_free
         ld (worker_seg),a
-        ld a,(t0_rom)
-        or a
+        ld a,(H_FLAGS)          ; bit 1: without a part in page 3
+        and 2
+        ld hl,t0_rom
+        or (hl)
         ret z
         ld a,(svc_segs)
         ld (H_MAP),a            ; T0 in page 0
@@ -1074,12 +1088,23 @@ dos_page:
         call fill
         jr .back
 .service:
+        ld a,(H_FLAGS)          ; bit 1: the table is in T0, not the code segment
+        and 2
+        jr z,.code
+        ld a,(svc_segs)
+        cp (iy)
+        jr nz,.back
+        ld de,8000h+(T_SEGS & 3FFFh)
+        ld bc,T_SEGS_MAX
+        jr .table
+.code:
         ld a,(svc_segs+1)
         cp (iy)
         jr nz,.back
-        ld hl,svc_segs+1
         ld de,8000h+C_SEGS
         ld bc,SEGS_MAX
+.table:
+        ld hl,svc_segs+1
         ldir
 .back:
         ld a,(dos_seg2)
@@ -1121,6 +1146,9 @@ fill:
         cp (ix+1)
         ret nz
         push hl
+        ld a,(H_FLAGS)          ; bit 1: no part in page 3, only SLTTBL
+        and 2
+        jr nz,.slttbl
         ld a,(H_P3)             ; the page of the service's page 3 part
         sub 0C0h
         ld d,a
@@ -1474,6 +1502,7 @@ t_needs:    db ": needs $"
 t_free:     db " free mapper segments, and DOS has $"
 t_crlf:     db 13,10,"$"
 t_page0:    db ": a page 0 is in another subslot of DOS's mapper's slot",13,10,"$"
+t_t0page0:  db ": service t0 needs page 0 outside DOS's mapper",13,10,"$"
 t_read:     db ": cannot be read",13,10,"$"
 t_notram:   db ": slot "
 t_slot_n:   db "0 page "
