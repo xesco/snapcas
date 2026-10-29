@@ -90,5 +90,43 @@ class Machines(unittest.TestCase):
                 self.assertTrue(report.startswith("point 1: pass"), report)
 
 
+# The collection's CAS files, for the run over every game file, which takes
+# hours: make collection sets it.
+COLLECTION_DIR = os.environ.get("COLLECTION_DIR")
+COLLECTION_MACHINES = ("advanced/phc28s", "basic/vg8020")
+
+
+def collection_game(item):
+    """Captures, builds and checks one game file on one machine, and returns
+    the first line of the check's report or the failed step's error."""
+    machine, name = item
+    folder = os.path.join(GAMES, name)
+    for step in ("capture.py", "build.py"):
+        result = test_step4.tool(step, folder, machine, "--cas", COLLECTION_DIR)
+        if result.returncode != 0:
+            return (result.stderr.strip().splitlines() or [f"{step} failed"])[-1]
+    result = test_step4.tool("check.py", folder, machine, "--dos", SHIPPED[machine])
+    return (result.stdout.strip().splitlines() or [result.stderr.strip()])[0]
+
+
+@unittest.skipUnless(COLLECTION_DIR and os.path.isdir(COLLECTION_DIR), "COLLECTION_DIR names no folder")
+class Collection(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.makedirs(WORK, exist_ok=True)
+        items = [(machine, name) for machine in COLLECTION_MACHINES for name in sorted(os.listdir(GAMES))]
+        cls.results = {}
+        with open(os.path.join(WORK, "collection.txt"), "w") as report, \
+                concurrent.futures.ThreadPoolExecutor(8) as pool:
+            for item, result in zip(items, pool.map(collection_game, items)):
+                cls.results[item] = result
+                report.write(f"{item[0]}\t{item[1]}\t{result}\n")
+                report.flush()
+
+    def test_every_game_file_gets_a_result_on_each_machine(self):
+        self.assertEqual(len(self.results), len(COLLECTION_MACHINES) * len(os.listdir(GAMES)))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -25,6 +25,7 @@ OPENMSX_BIN := $(dir $(realpath $(shell command -v openmsx)))
 OPENMSX_SHARE ?= $(firstword $(wildcard $(OPENMSX_BIN)../openMSX.app/Contents/Resources/share \
                    $(OPENMSX_BIN)../Resources/share /usr/share/openmsx /usr/local/share/openmsx))
 CAS_DIR ?= tapes
+COLLECTION_DIR ?= $(CAS_DIR)/collection
 DOS_DIR ?= dos
 
 OUT       := out
@@ -37,6 +38,9 @@ help:
 	@echo "make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN"
 	@echo "make test   run the tests in openMSX: CAS_DIR=, by default tapes/, holds the"
 	@echo "            CAS files, and DOS_DIR=, by default dos/, MSX-DOS's system files"
+	@echo "make collection  capture, build and check every game file of games/ on"
+	@echo "            advanced/phc28s and basic/vg8020, with the CAS files of"
+	@echo "            COLLECTION_DIR, by default CAS_DIR/collection: takes hours"
 	@echo "make try    start openMSX as advanced/phc28s with SNAPCAS.COM and the images"
 	@echo "            in out/try/ on its disk: MACHINE= and FILES= change them"
 	@echo "make clean  remove the built files and the test output"
@@ -91,6 +95,12 @@ test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(N
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I -m unittest discover -s tests -v
 
+# The run over every shipped game file (docs/PLAN.md, step 9), apart from make
+# test because it takes hours.
+collection: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
+	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
+	  COLLECTION_DIR=$(abspath $(COLLECTION_DIR)) python3 -I -m unittest discover -s tests -p test_step9.py -k Collection -v
+
 MACHINE ?= advanced/phc28s
 FILES ?= bin/SNAPCAS.COM $(wildcard $(OUT)/try/*.SNP)
 
@@ -100,4 +110,4 @@ try: bin/SNAPCAS.COM $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/sha
 clean:
 	rm -rf bin $(OUT)/test
 
-.PHONY: help all test try clean
+.PHONY: help all test collection try clean
