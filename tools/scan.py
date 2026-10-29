@@ -25,7 +25,7 @@ PATTERNS = [
     # cassette signal and whose other bits are a joystick (MSX Red Book, PSG).
     ("reader of PSG register 14, the cassette signal or a joystick", re.compile(rb"\x3E\x0E\xD3\xA0\xDB\xA2"), None),
 ]
-ENTRY_PAGE = 0xFC
+ENTRY_PAGE = 0xFC  # the page of the entries, FCE1h to FCF3h, by default
 
 
 class Finding:
@@ -46,8 +46,9 @@ class Finding:
         return f"{text}  {self.what}"
 
 
-def find(data):
-    """The findings in data, by offset."""
+def find(data, page=ENTRY_PAGE):
+    """The findings in data, by offset, with patches for entries at page's
+    E1h."""
     findings = []
     for what, pattern, patch_at in PATTERNS:
         for match in pattern.finditer(data):
@@ -55,7 +56,7 @@ def find(data):
             new = None
             if patch_at is not None:
                 new = bytearray(old)
-                new[patch_at] = ENTRY_PAGE
+                new[patch_at] = page
                 new = bytes(new)
             findings.append(Finding(what, match.start(), old, new))
     return sorted(findings, key=lambda f: f.offset)

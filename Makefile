@@ -47,10 +47,13 @@ bin/SNAPCAS.COM: src/snapcas.asm src/service.inc $(SJASMPLUS)
 	mkdir -p bin
 	$(SJASMPLUS) --nologo --raw=$@ $<
 
-# out/service.sym gives the tests the service's addresses.
-bin/SERVICE.BIN: src/service.asm src/service.inc $(SJASMPLUS)
+# out/service.sym gives the tests the service's addresses. The second
+# assembly, with the page 3 part one page lower, shows which bytes move with it.
+bin/SERVICE.BIN: src/service.asm src/service.inc tools/relocs.py $(SJASMPLUS)
 	mkdir -p bin $(OUT)
-	$(SJASMPLUS) --nologo --raw=$@ --sym=$(OUT)/service.sym $<
+	$(SJASMPLUS) --nologo --raw=$(OUT)/service-fc.bin --sym=$(OUT)/service.sym $<
+	$(SJASMPLUS) --nologo -DP3_PAGE=0FBh --raw=$(OUT)/service-fb.bin $<
+	python3 -I tools/relocs.py $(OUT)/service-fc.bin $(OUT)/service-fb.bin $@
 
 $(SJASMPLUS): $(DL)/sjasmplus-$(SJASMPLUS_VERSION)-src.tar.xz
 	rm -rf $(OUT)/tools/src

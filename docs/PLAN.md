@@ -222,11 +222,12 @@ same files, to compare.
 
 ## Not in these steps
 
-Moonwalker moves out of step 6. It reads its blocks with its own reader of the
-cassette signal, at 3A36h of its page 0 RAM, which selects PSG register 14, and it
-calls `TAPION` only to find each header. The tape service cannot serve that reader,
-so the game needs a `patch` line that sends the reader to `TAPIN`. The capture also
-misjudges it: the game reads the whole tape without `TAPIN`, so the tape position
-stops at 197,952 of 236,833 bytes while `openMSX`'s player is at the tape's end, and
-the game then waits inside the BIOS's `TAPION`, where no snapshot can be taken. The
-machine file `test/nms8250-512k` stays for it.
+Moonwalker moves out of step 6. It reads its tape through `TAPION` and `TAPIN`, from
+a stub at FC9Ah that its loader builds for each call. At its prompts to stop the
+tape, `openMSX`'s tape runs on and the game loses its next block, so its game file
+takes the snapshot at 135 seconds, in its intro after the first blocks, and the main
+game and the levels load through the tape service. The main game then loads its code
+into FCC9h to FD88h, over the service's part of page 3, and no 168 bytes of its page
+3 stay free through the game. It waits for the tape service without a part in page 3
+([Without a part in page 3](DESIGN.md#without-a-part-in-page-3)), which needs a step
+of its own. The machine file `test/nms8250-512k` stays for it.

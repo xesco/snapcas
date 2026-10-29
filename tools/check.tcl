@@ -127,8 +127,9 @@ proc compare {} {
     set have [debug read_block "physical VRAM" 0 [string length $want]]
     if {$have ne $want} { note "VRAM differs at [format %05X [first_difference $have $want]]" }
 
-    # The RAM pages, except the tail's bytes, FCC9h to FD88h, FFFFh in an
-    # expanded slot, the patched bytes, and with the tape service SLTTBL.
+    # The RAM pages, except the tail's bytes, FCC9h to FD88h, the service's
+    # page 3 part when it moved, FFFFh in an expanded slot, the patched bytes,
+    # and with the tape service SLTTBL.
     foreach path [lsort [glob -nocomplain [file join $::C(snap) ram *.bin]]] {
         lassign [split [file rootname [file tail $path]] -] ps ss page seg
         set f [open $path rb]
@@ -139,6 +140,7 @@ proc compare {} {
         set skip {}
         if {$page == ($::C(tail) >> 14)} { lappend skip [expr {$::C(tail) - $base}] [expr {$::C(tail) - $base + 25}] }
         if {$page == 3} { lappend skip [expr {0xFCC9 - $base}] [expr {0xFD88 - $base}] }
+        foreach {from to} $::C(p3) { if {$page == 3} { lappend skip [expr {$from - $base}] [expr {$to - $base}] } }
         if {$page == 3 && $::C(service)} { lappend skip [expr {0xFCC5 - $base}] [expr {0xFCC8 - $base}] }
         if {$page == 3 && $ss ne "x"} { lappend skip 0x3FFF 0x3FFF }
         foreach {at from to} $::C(patched) { if {$at eq "$ps-$ss-$page"} { lappend skip $from $to } }

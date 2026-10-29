@@ -110,7 +110,7 @@ proc fire {{}} {{
 {joy}
 # The flash's colours, from E at the start of mark in the code segment.
 set ::colours {{}}
-debug set_bp {service_symbol("mark")} {{[debug read {{MSX Memory Mapper I/O}} 0] == [debug read memory 0xFCEC]}} {{ lappend ::colours [expr {{[reg DE] & 255}}] }}
+debug set_bp {service_symbol("mark")} {{[debug read {{MSX Memory Mapper I/O}} 0] == [debug read memory {service_symbol("E_CODE")}]}} {{ lappend ::colours [expr {{[reg DE] & 255}}] }}
 {chr(10).join(presses)}
 after time {seconds} {{
     set f [open {msx.tcl_word(out)} w]

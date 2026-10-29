@@ -36,17 +36,18 @@ def selected_name(state, page):
     return ps, "x" if ss is None else ss
 
 
-def patched_bytes(state, snap, patches):
+def patched_bytes(state, snap, patches, page):
     """The RAM pages' bytes that the patch lines and the scan change, as
-    ps-ss-page, first and last offset."""
+    ps-ss-page, first and last offset. The scan's patches point to the entries
+    at page's E1h."""
     ranges = ["{}-{}-{} {} {}".format(*selected_name(state, p.page), p.page, p.offset, p.offset + len(p.old) - 1)
               for p in patches if p.page not in ("side1", "side2")]
     if state["service"] == "1":
         for name in sorted(os.listdir(os.path.join(snap, "ram"))):
             with open(os.path.join(snap, "ram", name), "rb") as f:
-                findings = scan.find(f.read())
-            ps, ss, page, _ = name[:-4].split("-")
-            ranges += [f"{ps}-{ss}-{page} {f.offset} {f.offset + len(f.old) - 1}"
+                findings = scan.find(f.read(), page)
+            ps, ss, ram_page, _ = name[:-4].split("-")
+            ranges += [f"{ps}-{ss}-{ram_page} {f.offset} {f.offset + len(f.old) - 1}"
                        for f in findings if f.new is not None]
     return ranges
 
@@ -73,7 +74,10 @@ def settings(state, snap, image, report, check_dir, state_name, patches):
         "regs": "{" + values + "}",
         "pc": str(int(state["pc"], 16)),
         "kv": "{" + " ".join(f"{k} {v}" for k, v in keep.items()) + "}",
-        "patched": "{" + " ".join(patched_bytes(state, snap, patches)) + "}",
+        "patched": "{" + " ".join(patched_bytes(state, snap, patches, header[15])) + "}",
+        # The service's page 3 part, when build.py moved it from FCE1h.
+        "p3": "{}" if header[15] in (0, build.DEFAULT_PAGE) else
+              f"{{{header[15] * 256 + 0xE1} {(header[15] + 1) * 256 + 0x88}}}",
     }
     return "".join(f"set ::C({k}) {v}\n" for k, v in s.items())
 

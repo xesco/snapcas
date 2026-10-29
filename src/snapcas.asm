@@ -41,6 +41,7 @@ H_SUBROM equ HDR+10
 H_RECS  equ HDR+12
 H_WRITES equ HDR+13
 H_FLAGS equ HDR+14      ; bit 0: T0 does not replace the ROM
+H_P3    equ HDR+15      ; the page of the service's page 3 part, as xxE1h
 H_REGS  equ HDR+16      ; AF, BC, DE, HL, AF', BC', DE', HL', IX, IY, SP, PC
 H_I     equ HDR+40
 H_IM    equ HDR+41
@@ -1120,7 +1121,10 @@ fill:
         cp (ix+1)
         ret nz
         push hl
-        ld de,E_SLOT-0C000h
+        ld a,(H_P3)             ; the page of the service's page 3 part
+        sub 0C0h
+        ld d,a
+        ld e,E_SLOT & 0FFh
         add hl,de
         ld a,(dos_slot)
         ld (hl),a

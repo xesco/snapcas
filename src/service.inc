@@ -1,15 +1,21 @@
 ; The tape service's fixed places (docs/DESIGN.md, Tape service), for
 ; service.asm and the restorer.
 
-; Page 3, from FCE1h in SLTATR to the end of SLTWRK at FD88h.
-E_ENTRY   equ 0FCE1h    ; JPs to the entry code: TAPION, TAPIN, TAPIOF
-E_SLOT    equ 0FCEAh    ; restorer: DOS's mapper's slot ID
-E_T0      equ 0FCEBh    ; restorer: T0's segment
-E_CODE    equ 0FCECh    ; restorer: the code segment
-E_FC      equ 0FCEDh    ; build.py: the game's mapper register FCh; restorer:
-                        ; T0's segment when T0 replaces the ROM
-E_INSIDE  equ 0FCEEh    ; 1 while the entry code runs
-E_STACK   equ 0FD89h    ; the entry code's stack top, the end of SLTWRK
+; The service's part of page 3, by default from FCE1h in SLTATR to the end of
+; SLTWRK at FD88h. The Makefile also assembles it with P3_PAGE at FBh, so that
+; build.py can move it to another page for a game that uses that area.
+        ifndef P3_PAGE
+P3_PAGE   equ 0FCh
+        endif
+E_ENTRY   equ P3_PAGE*256+0E1h  ; the entries: TAPION, TAPIN, TAPIOF, TAPOON,
+                                ; TAPOUT, TAPOOF, STMOTR
+E_SLOT    equ P3_PAGE*256+0F6h  ; restorer: DOS's mapper's slot ID
+E_T0      equ P3_PAGE*256+0F7h  ; restorer: T0's segment
+E_CODE    equ P3_PAGE*256+0F8h  ; restorer: the code segment
+E_FC      equ P3_PAGE*256+0F9h  ; build.py: the game's mapper register FCh;
+                                ; restorer: T0's segment when T0 replaces the ROM
+E_INSIDE  equ P3_PAGE*256+0FAh  ; 1 while the entry code runs
+E_STACK   equ P3_PAGE*256+189h  ; the entry code's stack top
 
 ; The code segment, which runs in page 0. The tape follows its code.
 C_POS     equ 0006h     ; build.py: the tape position at the snapshot, 3 bytes

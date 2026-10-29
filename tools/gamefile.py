@@ -25,6 +25,7 @@ class Game:
         self.continue_key = None
         self.snapshot_at = None
         self.service_no = False  # service no: the game never reads the rest
+        self.service_page = None  # service at xxE1: the page of the service's page 3 part
         self.capture = None      # the machine file for the capture, if not the user's
         self.rom_keep = False    # rom keep: page 0 keeps the ROM, and T0 does not replace it
         self.patches = []     # [Patch]
@@ -94,7 +95,7 @@ def read_game(folder):
         except ValueError as e:
             raise GameFileError(f"{where}: {e}")
         key, args = words[0], words[1:]
-        if key in ("cas", "side2", "name", "continue", "service", "capture", "rom") and len(args) != 1:
+        if key in ("cas", "side2", "name", "continue", "capture", "rom") and len(args) != 1:
             raise GameFileError(f"{where}: {key} takes one value")
         if key == "cas":
             game.cas = args[0]
@@ -124,9 +125,12 @@ def read_game(folder):
                 raise GameFileError(f"{where}: snapshot takes at and a time")
             game.snapshot_at = number(args[1], where)
         elif key == "service":
-            if args[0] != "no":
-                raise GameFileError(f"{where}: service takes no")
-            game.service_no = True
+            if args == ["no"]:
+                game.service_no = True
+            elif len(args) == 2 and args[0] == "at" and re.fullmatch(r"[C-Fc-f][0-9A-Fa-f][Ee]1", args[1]):
+                game.service_page = int(args[1][:2], 16)
+            else:
+                raise GameFileError(f"{where}: service takes no, or at and an address xxE1 in page 3")
         elif key == "capture":
             game.capture = args[0]
         elif key == "rom":

@@ -7,17 +7,19 @@
 
         include "service.inc"
 
-VERSION equ 3
+VERSION equ 4
 
         org 0
 
         db VERSION
-        db 5                    ; number of parts
+        db 6                    ; number of parts
         dw tail, tail_end-tail          ; part 0: the tail
         dw t0_start, t0_end-t0_start    ; part 1: T0's stubs, for 19DDh
-        dw p3_start, p3_end-p3_start    ; part 2: page 3, for FCE1h
+        dw p3_start, p3_end-p3_start    ; part 2: page 3, for E_ENTRY
         dw code_start, code_end-code_start  ; part 3: the code segment
         dw fields, fields_end-fields    ; part 4: places for build.py
+        dw relocs, 0                    ; part 5: the bytes that move with page 3,
+                                        ; which tools/relocs.py appends
 
 ; The tail (DESIGN.md, Tail): the restore's last code, written below the game's
 ; stack pointer. It selects the game's memory in the worker's page and the slot
@@ -51,8 +53,7 @@ t0_start:
         disp 19DDh
 
 t_tapoof:                       ; 19DDh, TAPOOF
-        ei
-        ret
+        jr t_tapiof
 t_stmotr:                       ; STMOTR, through the jump at 00F3h
         ret
         ds 19E9h-$,0
@@ -84,35 +85,44 @@ t_tapin:                        ; 1ABCh, TAPIN
         ent
 t0_end:
 
-; ---- Page 3, from FCE1h in SLTATR to the end of SLTWRK at FD88h ----
+; ---- Page 3, from E_ENTRY to E_STACK, by default FCE1h to FD88h ----
 
 p3_start:
         disp E_ENTRY
-        jp e_tapion
-        jp e_tapin
-        jp e_tapiof
+; The entries, one for each entry of the BIOS's tape jump table from 00E1h to
+; 00F3h, with the same low bytes: TAPION, TAPIN, TAPIOF, TAPOON, TAPOUT,
+; TAPOOF and STMOTR (MSX Red Book, chapter 4). A game that changes the low
+; byte of a call reaches the matching entry.
+        rept 7
+        call e_entry
+        endr
         assert $ = E_SLOT
         db 0,0,0,0,0            ; E_SLOT, E_T0, E_CODE, E_FC, E_INSIDE
-; The entries for code that goes around T0. The BIOS's routines take nothing
-; in A, so A carries the jump table entry.
-e_tapion:
-        ld a,0E1h
-        jr e_call
-e_tapin:
-        ld a,0E4h
-        jr e_call
-e_tapiof:                       ; interrupts on after it, as the BIOS's
-        call .call
-        ei
-        ret
-.call:
-        ld a,0E7h
 
-; Selects DOS's mapper and T0 in page 0, calls T0's routine through the jump
-; table, and selects the game's page 0 again, with mapper register FCh at E_FC.
+; From an entry: the entry's low byte, which is its jump table entry's, from
+; the return address, with the game's HL kept and its A, STMOTR's argument,
+; passed on.
+e_entry:
+        ld (e_arg),a
+        ex (sp),hl
+        ld a,l
+        pop hl
+        sub 3
+; Selects DOS's mapper and T0 in page 0, calls T0's jump table entry A, and
+; selects the game's page 0 again, with mapper register FCh at E_FC. After
+; TAPIOF and TAPOOF it enables interrupts, as the BIOS's do.
 e_call:
         di
         ld (.call+1),a
+        cp 0E7h
+        jr z,.ei
+        cp 0F0h
+.ei:
+        ld a,0                  ; NOP
+        jr nz,.keep
+        ld a,0FBh               ; EI
+.keep:
+        ld (.end),a
         ld (e_sp),sp
         ld sp,E_STACK
         ld a,1
@@ -127,6 +137,7 @@ e_call:
         out (0A8h),a
         ld a,(E_T0)
         out (0FCh),a
+        ld a,(e_arg)
 .call:
         call 0
         push af
@@ -138,6 +149,8 @@ e_call:
         ld (E_INSIDE),a
         pop af
         ld sp,(e_sp)
+.end:
+        nop                     ; EI after TAPIOF and TAPOOF
         ret
 
 ; Called from T0 with A a routine's offset in the code segment: selects the
@@ -165,6 +178,7 @@ reader:
 
 e_sp:   dw 0
 e_a8:   db 0
+e_arg:  db 0
         assert $ <= E_STACK-24  ; the stack, for T0 and the code segment
         ds E_STACK-$,0
         ent
@@ -443,3 +457,7 @@ code_end:
 fields:
         dw t_stmotr, C_POS, SEGS_MAX, E_FC, C_BORDER
 fields_end:
+
+; tools/relocs.py appends here the offsets of the bytes that differ when
+; P3_PAGE is FBh: the high bytes of the addresses in the page 3 part.
+relocs:

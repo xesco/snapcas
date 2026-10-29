@@ -353,14 +353,13 @@ proc try_next {} {
     rewind
     eval $tcl
     set ::tried_at [now]
-    set ::tried_pos $::st(pos)
-    watch_load $name
+    watch_motor $name
 }
-# A key continues the load when the tape position moves: a game can switch the
-# motor on at a key without reading the tape.
-proc watch_load {name} {
+# A key continues the load when the motor starts, unless the tape is at its
+# end, where a game can start the motor and read nothing.
+proc watch_motor {name} {
     tick 0.1
-    if {$::st(pos) != $::tried_pos} {
+    if {[motor_on] && ![at_end]} {
         decide "continue $name"
         lappend ::st(continue) $name
         if {[incr ::restarts] > 20} { fail "step 5 restarted more than 20 times" }
@@ -368,7 +367,7 @@ proc watch_load {name} {
         return
     }
     if {[now] - $::tried_at >= 10} { try_next; return }
-    later 0.1 [list watch_load $name]
+    later 0.1 [list watch_motor $name]
 }
 
 # 6. The snapshot, at the entry of the next interrupt that the CPU accepts
