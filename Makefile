@@ -42,9 +42,10 @@ bin/SNAPCAS.COM: src/snapcas.asm src/service.inc $(SJASMPLUS)
 	mkdir -p bin
 	$(SJASMPLUS) --nologo --raw=$@ $<
 
+# out/service.sym gives the tests the service's addresses.
 bin/SERVICE.BIN: src/service.asm src/service.inc $(SJASMPLUS)
-	mkdir -p bin
-	$(SJASMPLUS) --nologo --raw=$@ $<
+	mkdir -p bin $(OUT)
+	$(SJASMPLUS) --nologo --raw=$@ --sym=$(OUT)/service.sym $<
 
 $(SJASMPLUS): $(DL)/sjasmplus-$(SJASMPLUS_VERSION)-src.tar.xz
 	rm -rf $(OUT)/tools/src

@@ -4,7 +4,7 @@ PHC-28S.
 Each game is captured, built and checked, then played from the check's
 savestate at 10 seconds with the inputs that reach its next load. The play
 reads the tape position in the code segment, which it finds in DOS's mapper by
-the CAS header at offset 12h.
+its CAS header. The addresses in the service come from out/service.sym.
 """
 import os
 import sys
@@ -59,6 +59,17 @@ PLAYS = {
 JOYSTICK_READS = (0x1112, 0xB3FD)
 
 
+def service_symbol(name):
+    """A label's address in SERVICE.BIN, from the symbols that make writes
+    with it."""
+    with open(os.path.join(ROOT, "out", "service.sym")) as f:
+        for line in f:
+            label, _, value = line.partition(": EQU ")
+            if label == name:
+                return int(value, 16)
+    raise KeyError(f"out/service.sym has no {name}: run make")
+
+
 def play_script(name, out):
     game, inputs, seconds, counts = PLAYS[name]
     presses = []
@@ -83,7 +94,7 @@ loadstate {msx.tcl_word(state)}
 after time {seconds + 60} exit
 proc base {{}} {{
     for {{set a 0}} {{$a < [debug size "{MAPPER_RAM}"]}} {{incr a 16384}} {{
-        if {{[debug read_block "{MAPPER_RAM}" [expr {{$a + 0x12}}] 8] eq [binary format H* 1FA6DEBACC137D74]}} {{ return $a }}
+        if {{[debug read_block "{MAPPER_RAM}" [expr {{$a + {service_symbol("header")}}}] 8] eq [binary format H* 1FA6DEBACC137D74]}} {{ return $a }}
     }}
     error "no code segment"
 }}
@@ -92,23 +103,21 @@ proc word3 {{offset}} {{
     expr {{[lindex $b 0] | ([lindex $b 1] << 8) | ([lindex $b 2] << 16)}}
 }}
 set ::base [base]
-set ::pos0 [word3 6]
+set ::pos0 [word3 {service_symbol("C_POS")}]
 set ::fire 0
 proc fire {{}} {{
     if {{$::fire && ([debug read {{PSG regs}} 15] & 0x40) == 0}} {{ reg AF [expr {{[reg AF] & ~0x1000}}] }}
 }}
 {bps}
 {joy}
-# The border marker's colours, from E at the start of mark in the code
-# segment: IN A,(99h) / LD HL,(005Ah).
+# The flash's colours, from E at the start of mark in the code segment.
 set ::colours {{}}
-set mark [string first [binary format H* DB992A5A00] [debug read_block "{MAPPER_RAM}" $::base 0x400]]
-debug set_bp $mark {{[debug read {{MSX Memory Mapper I/O}} 0] == [debug read memory 0xFCEC]}} {{ lappend ::colours [expr {{[reg DE] & 255}}] }}
+debug set_bp {service_symbol("mark")} {{[debug read {{MSX Memory Mapper I/O}} 0] == [debug read memory 0xFCEC]}} {{ lappend ::colours [expr {{[reg DE] & 255}}] }}
 {chr(10).join(presses)}
 after time {seconds} {{
     set f [open {msx.tcl_word(out)} w]
     puts $f "pos0 $::pos0"
-    foreach {{name offset}} {{pos 6 s1end 9 total 12 start 15}} {{ puts $f "$name [word3 $offset]" }}
+    foreach {{name offset}} {{pos {service_symbol("C_POS")} s1end {service_symbol("C_S1END")} total {service_symbol("C_TOTAL")} start {service_symbol("C_START")}}} {{ puts $f "$name [word3 $offset]" }}
     foreach name [array names ::n] {{ puts $f "$name $::n($name)" }}
     foreach c {{3 9}} {{ puts $f "colour$c [llength [lsearch -all $::colours $c]]" }}
     close $f
@@ -127,7 +136,7 @@ def play(name):
     disk = os.path.join(ROOT, "out", MACHINE, game, "check", "disk.dsk")
     msx.run([*machine.args, f"-{machine.disk}", disk], play_script(name, out), timeout=600)
     if not os.path.exists(out):
-        return {}
+        raise AssertionError(f"{name}: openMSX stopped before the play's report")
     with open(out) as f:
         return {k: int(v) for k, v in (line.split() for line in f)}
 
@@ -171,6 +180,7 @@ class Step5(unittest.TestCase):
         self.assertEqual(values.get("tapion"), 2, values)
         self.assertEqual(values.get("tapin"), 272, values)
         self.assertEqual(values["pos"], values["start"] + 7560)
+        self.assertEqual((values.get("colour3"), values.get("colour9")), (0, 0), values)
 
     def test_gauntlet_loads_its_main_game_then_a_level_from_side_2(self):
         values = self.plays["gauntlet"]
@@ -182,6 +192,8 @@ class Step5(unittest.TestCase):
         self.assertGreater(values["pos"], values["s1end"], values)
         self.assertLess(values["pos"], values["total"], values)
         self.assertEqual(values.get("level"), 1, values)
+        # The turn-over to side 2 shows light red.
+        self.assertEqual((values.get("colour3"), values.get("colour9")), (0, 1), values)
 
     def test_graph_and_code_show_their_border_colours(self):
         values = self.plays["gauntlet-keys"]

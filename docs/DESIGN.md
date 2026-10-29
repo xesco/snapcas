@@ -53,7 +53,9 @@ four commands, in this order:
    files.
 4. The user copies `SNAPCAS.COM` and `<GAME>.SNP` to a disk of the real machine and
    runs `SNAPCAS <GAME>`. With `<GAME>.RPL` beside them, `SNAPCAS <GAME> /R` first
-   shows the load as it happened in the capture.
+   shows the load as it happened in the capture. With `/T1200` or `/T2400`, a game
+   with the tape service loads at that speed, with the sound of the tape
+   ([Tape speed and sound](#tape-speed-and-sound)).
 
 The tools are Python 3 programs that require only Python 3 and `openMSX` 22.0, so
 they run on macOS, Linux and Windows. They print errors on standard error, naming
@@ -166,6 +168,8 @@ times. It performs the following steps:
    in each page, and types the load command for the first header's type
    ([CAS data](#cas-data)): `BLOAD"CAS:",R`, `CLOAD`, or `RUN"CAS:"`. After `CLOAD`,
    it types `RUN` when the motor has stopped for 1 second. Side 2 is never inserted.
+   The replay's recording starts just before the command is typed
+   ([Replay](#replay)).
 4. Presses the `keys`, and logs these events with their times:
    - The tape position, kept as the tape service would keep it, from breakpoints at
      the addresses that the jump table entries 00E1h and 00E4h jump to, `TAPION` and
@@ -356,7 +360,8 @@ and until step 4 it can stop with a message and return to DOS:
    - In the tail: the worker's page's mapper register and its value, and the slot
      register ([Tail](#tail)).
    - With the tape service, in the code segment at 001Ah: the code segment, then
-     the other tape segments.
+     the other tape segments, and at 0062h: 1 for `/T1200`, 2 for `/T2400`, with
+     `/R` alone the replay's speed, or otherwise 0.
    - With the tape service, in the game's page 3 at FCEAh: DOS's mapper's slot ID,
      T0's segment and the code segment.
    - With the tape service, when DOS's mapper is in an expanded slot, DOS's mapper's
@@ -439,9 +444,13 @@ segments after it. The code segment's fields are these:
 | 0012h | 8 | The CAS header |
 | 001Ah | 64 | The code segment, then the other tape segments, filled in by the restorer |
 | 005Ah | 2 | The address of the game's value of VDP register 7: `RG7SAV`, F3E6h, when it equals the snapshot's register 7, otherwise 005Dh |
-| 005Ch | 1 | The frames in 3 seconds: 150 when bit 7 of the ROM's byte 002Bh is set, for 50 Hz, otherwise 180 |
+| 005Ch | 1 | The frames in 0.1 second: 5 when bit 7 of the ROM's byte 002Bh is set, for 50 Hz, otherwise 6 |
 | 005Dh | 1 | The snapshot's VDP register 7 |
-| 005Eh | | The routines, then the tape |
+| 005Eh | 1 | The side that the tape position is on: 0 for side 1, 1 for side 2, set by `build.py` from the position at the snapshot |
+| 005Fh | 2 | The address of the game's value of VDP register 1: `RG1SAV`, F3E0h, when it equals the snapshot's register 1, otherwise 0061h |
+| 0061h | 1 | The snapshot's VDP register 1 |
+| 0062h | 1 | The tape speed, filled in by the restorer: 0 for the fast load, 1 for 1200 baud, 2 for 2400 baud |
+| 0063h | | The routines, then the tape |
 
 `TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's segment
 and B the code segment, the reader selects the byte's segment in page 0, reads the
@@ -469,16 +478,57 @@ on these events. The routines read the keyboard matrix through the PPI.
 | `TAPION` is called while GRAPH is held | Side 1's start |
 | `TAPION` is called while CODE is held | Side 2's start, or side 1's start when there is no side 2 |
 
-After GRAPH or CODE, `TAPION` shows the outcome in the border for 3 seconds, then
-writes the game's border back and searches for the next header. It counts the
-frames by the frame flag in the VDP's status register 0. The VDP's registers cannot
-be read, so `TAPION` takes the game's border from the address at 005Ah in the code
+The service shows the side that the position moves to with one flash of the side's
+colour over the whole screen for 0.1 second, after GRAPH or CODE, and when a read
+reaches side 2 or goes back to a side's start. It sets the border colour and blanks
+the display, which then shows only the border, because the border alone is thin and
+many screens crop it. Side 2 starts at side 1's end, so a read that reaches side 2
+changes only the side at 005Eh, and that change shows the flash. The service counts
+the frames by the frame flag in the VDP's status register 0, then writes the game's
+VDP registers 7 and 1 back and goes on. The VDP's registers cannot be read, so the
+service takes the game's values from the addresses at 005Ah and 005Fh in the code
 segment. The colours are these:
 
 | Outcome | Border |
 |---|---|
 | Side 1's start | Light green, 3 |
 | Side 2's start | Light red, 9 |
+
+### Tape speed and sound
+
+By default the tape service returns each byte as soon as the game asks for it, so a
+load takes a moment. For the experience of a real tape, `SNAPCAS <GAME> /T1200` or
+`/T2400` makes a game load at that speed, with the tape's sound. The restorer writes
+the speed at 0062h in the code segment, and the service then works as a tape at that
+speed:
+
+- `TAPIN` plays each byte that it returns as the tape holds it, on the keyclick bit,
+  PPI port C bit 7, which the MSX sends to its sound output: a start bit 0, the 8
+  data bits from bit 0 up, and 2 stop bits 1 (MSX Red Book, chapter 4).
+- `TAPION` plays the leader tone before each header that it finds, as long as the
+  BIOS's `TAPOON` writes it: the long one before a block that starts with a file
+  type's 10 bytes ([CAS data](#cas-data)), the short one before the others.
+- `TAPION` starts the motor and `TAPIOF` stops it, and `STMOTR` switches it, as the
+  BIOS's routines do, through the motor relay, PPI port C bit 4. So the relay clicks
+  when the tape starts and stops.
+
+Each bit is one or two cycles of a square wave:
+
+| Speed | Bit 0 | Bit 1 | A byte's 11 bits |
+|---|---|---|---|
+| 1200 baud | One cycle of 1200 Hz | Two cycles of 2400 Hz | 9.2ms |
+| 2400 baud | One cycle of 2400 Hz | Two cycles of 4800 Hz | 4.6ms |
+
+The sound is the wait, so a byte takes as long as on the tape, plus the game's own
+code between two bytes. The service writes the keyclick bit back to its value before
+the byte. The keys and the flash work as at the fast speed.
+
+`/T1200` and `/T2400` act only through the tape service, so they change nothing for
+a game without it, and the restorer then says so before the restore. Such a game loaded
+completely before the snapshot, and the experience of its load comes from the
+replay, which plays the load at the capture's speed with the sound of a tape
+([Replay](#replay)). The two combine: with `/R /T1200`, the replay shows the first
+load, and the game's later loads come from the tape service at 1200 baud.
 
 ### Scan
 
@@ -505,15 +555,18 @@ call's 3 bytes can also be data, where the patch changes one byte.
 
 ## Replay
 
-The replay shows the load on the real machine as it happened in the capture: the
-loading screens being drawn, their music, the game's own pauses and its waits for a
-key, and the cassette motor's relay. Nothing of the loader runs again: the replay is
+The replay shows the load on the real machine as it happened in the capture: BASIC's
+screen with the load command being typed, the loading screens being drawn, their
+music, the game's own pauses and its waits for a key, and the cassette motor's
+relay. Nothing of the loader runs again: the replay is
 a recording, played before the restore, so it works for every game whose capture
 works. It is optional, in its own file, `<GAME>.RPL`, and runs only with `/R`.
 
-The capture records it from the load command to the snapshot, in `snap/replay.log`,
-one line per write: the frame, the port and the value. A frame is one VDP interrupt
-period of the machine, 1/50 or 1/60 of a second. It logs:
+The capture records it from just before it types the load command to the snapshot,
+in `snap/replay.log`. The log starts with the VDP's state at that moment: VRAM, the
+registers and, on a V9938, the palette. Then it holds one line per write: the
+frame, the port and the value. A frame is one VDP interrupt period of the machine,
+1/50 or 1/60 of a second. It logs:
 
 - Each write to the VDP's ports 98h to 9Bh and the PSG's ports A0h and A1h, from
   write watchpoints.
@@ -522,6 +575,7 @@ period of the machine, 1/50 or 1/60 of a second. It logs:
   row bits.
 - Each wait that a key continued ([Capture](#capture), step 5), as the frames of the
   wait's first 30 seconds, kept aside before the rewind, and the key.
+- The frame of the load command's RETURN.
 
 A rewind truncates the log to its length at the saved moment, as it puts back the
 rest of the logged state.
@@ -531,7 +585,16 @@ and compresses it in chunks with the LZ4 block format. The restorer, after step 
 plays the stream with interrupts off while it writes and on while it waits for the
 next frame:
 
-- It reads `<GAME>.RPL` one chunk at a time, with its own FCB, between frames.
+- It writes the first state with the display blanked, so the screen shows BASIC as
+  it was in the capture. It then types the command as the capture did, and at the
+  command's RETURN it waits until the player presses RETURN, as on a cassette
+  machine.
+- Before it plays, it reads `<GAME>.RPL` with its own FCB into the segments of DOS's
+  mapper that step 2 leaves free, 16 KB each, and then plays from RAM. A DOS read
+  during the replay would stop the frames and the sound, longest on a floppy disk.
+  When the file needs more segments than are free, it fills them, and as it plays
+  it reads the next chunks ahead into the segments that it has played, at frames
+  in which the motor bit is off, when a tape is silent too.
 - It writes VRAM no faster than one byte every 29 cycles, 8 µs, which an MSX1 VDP
   needs during the display.
 - At a wait, it plays the wait's frames in a loop until a key is pressed.
@@ -542,6 +605,13 @@ next frame:
 
 When the replay ends, VRAM, the VDP's registers and the PSG's registers hold their
 values at the snapshot, and the restore goes on with step 3.
+
+A game with the tape service then loads the rest of its tape during play. So that
+the whole session loads at one speed, `/R` alone also sets the tape service to the
+capture's speed ([Tape speed and sound](#tape-speed-and-sound)). `build.py` finds
+that speed, 1200 or 2400 baud, from the times of the `TAPIN` calls in the capture's
+log and writes it in the replay's header. `/T1200` or `/T2400` with `/R` sets the
+speed instead.
 
 ## Check
 
@@ -589,6 +659,9 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register. Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave the ROM there at the snapshot: Moonwalker and Time Out |
 | `rom keep` in the game file, not a rule of the restorer | T0 in page 0 serves a BASIC program, whose tape calls are in the ROM and cannot be patched, but it changes the slot register's page 0 bits. Gauntlet's RAM search adds the slot that it finds to those bits, expecting the ROM's slot 0, and selects an empty slot |
 | Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games. Of those games, 20 build stubs that T0 alone does not intercept |
+| The replay read into RAM before it plays | A disk read stops the frames and the tape's sound, and a compressed replay holds a few tens of KB, which fit in a few free segments |
+| The replay starts at BASIC's screen, before the load command | The player sees the command typed and presses RETURN, as on a cassette machine, and the screen is the capture's, so it fits the machine |
+| The tape speed as an option of `SNAPCAS`, fast by default | The player chooses at each run between a quick load and the experience of the tape, and the image stays the same |
 | Rewind the capture with `savestate` and `loadstate` | `openMSX`'s `reverse goto` replays the input recorded after its target, while each key try must start from the saved moment with no other input |
 | A tape with both sides, a wrap, and fixed keys for each side's start | In 41 of those 51 games the unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
 | GRAPH for side 1's start and CODE for side 2's | GRAPH and CODE alone type no character, BASIC ignores them, and games rarely read them, while STOP pauses a BASIC program, the function keys type text, and many games use SELECT in their menus. On a Japanese MSX, CODE's key is KANA, which also switches the kana lock |
@@ -704,8 +777,9 @@ that `build.py` and the restorer fill in set to 0:
 
 ### Replay stream
 
-`<GAME>.RPL` starts with `SNAPRPL1`, a byte with the frame rate, 50 or 60, and a
-2-byte count of chunks. Each chunk is a 2-byte compressed length and an LZ4 block
+`<GAME>.RPL` starts with `SNAPRPL1`, a byte with the frame rate, 50 or 60, a byte
+with the capture's tape speed, 1 for 1200 baud and 2 for 2400 baud, and a 2-byte
+count of chunks. Each chunk is a 2-byte compressed length and an LZ4 block
 that decompresses to at most 16,384 bytes. The decompressed stream is a sequence of
 commands:
 
@@ -717,9 +791,11 @@ commands:
 | VRAM bytes | `03 n` and n bytes | Write n bytes, 1 to 255, to port 98h |
 | Wait's start | `04` | The frames of a wait for a key start here |
 | Wait's end | `05` | Play the frames since `04` again until a key is pressed |
+| RETURN | `06` | Wait until the player presses RETURN, at the load command's RETURN |
 | End | `FF` | The replay ends |
 
-A `02 A0h` write and the `02 A1h` write after it are written together, with
+The stream starts with the first state, as port writes and VRAM bytes. A `02 A0h`
+write and the `02 A1h` write after it are written together, with
 interrupts off, so that the BIOS's interrupt handler, which selects PSG registers 14
 and 15 for the joysticks, cannot come between them.
 

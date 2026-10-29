@@ -175,7 +175,7 @@ STMOTR = 0x00F3
 # The game's page 3 that must be zero at the snapshot, and where the service's
 # page 3 part goes.
 P3_FREE, P3_END, P3_START = 0xFCC9, 0xFD88, 0xFCE1
-RG7SAV = 0xF3E6  # the BIOS's copy of VDP register 7
+RG1SAV, RG7SAV = 0xF3E0, 0xF3E6  # the BIOS's copies of VDP registers 1 and 7
 
 
 def service_segments(snap, parts, side1, side2, pages, state, tail_address):
@@ -198,15 +198,19 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address):
     pos = start + num(state, "tapepos")
     for n, value in enumerate((pos, start + len(side1), len(tape), start)):
         tape[c_pos + 3 * n:c_pos + 3 * n + 3] = value.to_bytes(3, "little")
-    # The marker restores the border from RG7SAV when the game keeps it, and
-    # otherwise from the snapshot's value. It counts 3 seconds of frames, at
-    # the rate of bit 7 of the ROM's byte 002Bh: 50 Hz when set.
+    # The flash restores VDP registers 7 and 1 from RG7SAV and RG1SAV when
+    # the game keeps them, and otherwise from the snapshot's values. It counts
+    # 0.1 second of frames, at the rate of bit 7 of the ROM's byte 002Bh: 50
+    # Hz when set.
+    pal = t0[0x2B] & 0x80
     p3 = selected_page(state, pages, 3)
     if p3 is None:
         raise BuildError(f"{snap}: page 3 is not a RAM page that the snapshot keeps")
-    vdp7 = num(state, "vdp7")
+    vdp7, vdp1 = num(state, "vdp7"), num(state, "vdp1")
     border = RG7SAV if p3.data[RG7SAV & 0x3FFF] == vdp7 else c_border + 3
-    struct.pack_into("<HBB", tape, c_border, border, 150 if t0[0x2B] & 0x80 else 180, vdp7)
+    screen = RG1SAV if p3.data[RG1SAV & 0x3FFF] == vdp1 else c_border + 7
+    side = 1 if side2 and pos >= start + len(side1) else 0
+    struct.pack_into("<HBBBHB", tape, c_border, border, 5 if pal else 6, vdp7, side, screen, vdp1)
     tape += bytes(-len(tape) % PAGE)
     if len(tape) // PAGE > segs_max:
         raise BuildError(f"the tape needs {len(tape) // PAGE} segments, more than {segs_max}")

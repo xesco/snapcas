@@ -187,9 +187,10 @@ header: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h
         assert $ = C_SEGS
         ds SEGS_MAX,0
         assert $ = C_BORDER
-        ds 4,0                  ; C_BORDER, C_FRAMES, C_VDP7
+        ds 8,0                  ; C_BORDER to C_VDP1
 
-; The border colours that show for 3 seconds after GRAPH and CODE.
+; The colours of the flash after GRAPH and CODE, and when the position changes
+; side or goes back to a side's start by itself.
 SIDE_A  equ 3                   ; light green
 SIDE_B  equ 9                   ; light red
 
@@ -281,18 +282,27 @@ next_byte:
         or a
         ret
 
-; Shows the border colour E for 3 seconds, counted by the VDP's frame flag in
-; status register 0, then the game's border again. The VDP's registers cannot
-; be read, so C_BORDER points to the game's value of register 7: RG7SAV, or
-; C_VDP7 for a game that does not keep RG7SAV (DESIGN.md, Tape service).
+; Flashes the screen in the border colour E for 0.1 second, counted by the
+; VDP's frame flag in status register 0: it blanks the display, which then
+; shows only the border. It then writes the game's registers 7 and 1 again.
+; The VDP's registers cannot be read, so C_BORDER and C_SCREEN point to the
+; game's values: RG7SAV and RG1SAV, or C_VDP7 and C_VDP1 for a game that does
+; not keep them (DESIGN.md, Tape service).
 mark:
         in a,(99h)              ; also resets the VDP's register latch
+        ld hl,(C_SCREEN)
+        ld a,(hl)
+        push af
+        and 0BFh                ; bit 6 clear: the display blanked
+        ld d,81h
+        call vdp
         ld hl,(C_BORDER)
         ld a,(hl)
         push af
         and 0F0h                ; the text colour of screen 0
         or e
-        call reg7
+        ld d,87h
+        call vdp
         ld a,(C_FRAMES)
         ld b,a
 .frame:
@@ -301,10 +311,14 @@ mark:
         jr nc,.frame
         djnz .frame
         pop af
-; Writes A to VDP register 7.
-reg7:
+        ld d,87h
+        call vdp
+        pop af
+        ld d,81h
+; Writes A to the VDP register that D selects, as 80h plus its number.
+vdp:
         out (99h),a
-        ld a,87h
+        ld a,d
         out (99h),a
         ret
 
@@ -334,20 +348,34 @@ row:
 
 ; After the position changed: at or past side 1's end without a side 2, side 1's
 ; start; at or past side 2's end, side 2's start. TAPION's rounding can pass
-; a side's end, so the tests are not for equality.
+; a side's end, so the tests are not for equality. Side 2 starts at side 1's
+; end, so a read that reaches it changes only C_SIDE. Each change shows the
+; side's border colour.
 wrap:
         call on_side1
-        ret c
-        ld hl,C_S1END
-        ld de,C_TOTAL
-        call eq24
-        ld hl,C_START
-        jr z,set_pos            ; no side 2
+        ld a,0
+        jr c,.side
+        call one_side
+        jr z,side_a             ; past side 1's end without a side 2
         ld hl,C_POS
         ld de,C_TOTAL
         call lt24
-        ret c                   ; on side 2
+        jr nc,side_b.two        ; past side 2's end
+        ld a,1
+.side:
+        ld hl,C_SIDE
+        cp (hl)
+        ret z
+        ld (hl),a               ; side 1's end reached: side 2
+        ld e,SIDE_B
+        jp mark
+
+; Returns Z when the tape has no side 2.
+one_side:
         ld hl,C_S1END
+        ld de,C_TOTAL
+        jp eq24
+
 set_pos:
         ld de,C_POS
         ld bc,3
@@ -355,19 +383,21 @@ set_pos:
         ret
 
 ; CODE: side 2's start, or side 1's without a side 2. GRAPH: side 1's start.
-; Each shows its side's border colour.
 side_b:
-        ld hl,C_S1END
-        ld de,C_TOTAL
-        call eq24
+        call one_side
         jr z,side_a
+.two:
         ld hl,C_S1END
-        ld e,SIDE_B
-        jr side
+        ld de,1*256+SIDE_B
+        jr to_side
 side_a:
         ld hl,C_START
-        ld e,SIDE_A
-side:
+        ld de,0*256+SIDE_A
+; Moves the tape position to the 3 bytes at HL, which are on side 1 for D = 0
+; and on side 2 for D = 1, and shows the border colour E.
+to_side:
+        ld a,d
+        ld (C_SIDE),a
         push de
         call set_pos
         pop de

@@ -19,5 +19,8 @@ C_START   equ 000Fh     ; build.py: side 1's start, 3 bytes
 C_SEGS    equ 001Ah     ; restorer: the code segment, then the next tape segments
 SEGS_MAX  equ 64        ; so the tape service holds up to 1 MB
 C_BORDER  equ 005Ah     ; build.py: where the game's VDP register 7 is, 2 bytes
-C_FRAMES  equ 005Ch     ; build.py: the frames in 3 seconds
+C_FRAMES  equ 005Ch     ; build.py: the frames in 0.1 second
 C_VDP7    equ 005Dh     ; build.py: the snapshot's VDP register 7
+C_SIDE    equ 005Eh     ; build.py: 0 while the position is on side 1, 1 on side 2
+C_SCREEN  equ 005Fh     ; build.py: where the game's VDP register 1 is, 2 bytes
+C_VDP1    equ 0061h     ; build.py: the snapshot's VDP register 1

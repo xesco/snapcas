@@ -161,11 +161,37 @@ This step adds the replay ([Replay](DESIGN.md#replay)): the recording in
   `advanced/phc28s`.
 - That a wait for a key holds the replay until a key is pressed, with `ABADIA.CAS`
   on `basic/nms8250`.
+- That Moonrider's replay at `/R` takes the capture's time within 5%, and at `/R2`
+  half of it, and that it makes no DOS call while it plays, from a breakpoint at
+  0005h, when the file fits in the free segments.
+- That with fewer free segments than the file needs, the replay reads its other
+  chunks only at frames in which the motor bit is off.
+- That the replay toggles the keyclick bit only while the motor bit is on, at 1200 Hz
+  for a 0 bit and 2400 Hz for a 1 bit, from write watchpoints on ports AAh and ABh.
+- That Moonrider's replay starts with VRAM and the VDP's registers as they were just
+  before the capture typed the load command, types the command, and waits at its
+  RETURN until RETURN is pressed.
 
 The step also reports the size of each `.RPL` file of the corpus, compressed and
 not, to judge the compression.
 
-## Step 8: shipped files
+## Step 8: tape speed and sound
+
+This step adds `/T1200` and `/T2400` to `SNAPCAS.COM` and the tape's speed and sound
+to the service ([Tape speed and sound](DESIGN.md#tape-speed-and-sound)). The tests
+restore Gauntlet on `advanced/phc28s` with each option, play it to the main game's
+load as in step 5, and check:
+
+- That the main game's 34,341 bytes take 11 bits each at the chosen speed, within
+  5%, and that the load without an option stays as fast as in step 5.
+- That the keyclick bit toggles twice for each 0 bit and four times for each 1 bit
+  of a block, from a write watchpoint on port AAh, and has its value before the
+  load at the end.
+- That the motor bit of port AAh is on during the load and off after it.
+- That with `/R` alone the tape service runs at the speed in Gauntlet's replay
+  header, and with `/R /T2400` at 2400 baud.
+
+## Step 9: shipped files
 
 This step writes the last two machine files, `basic/msx2ide` and `advanced/mfrsd`
 ([Shipped files](DESIGN.md#shipped-files)), and the game files for the collection,
@@ -174,7 +200,7 @@ single-load game on each of the six shipped machine files, then capture, build a
 check every game file on `advanced/phc28s` and `basic/vg8020`, and write a report of
 passes and failures.
 
-## Step 9: real hardware
+## Step 10: real hardware
 
 The user runs the corpus on the Sanyo PHC-28S with the Sony HBM-64 in slot 1 and the
 Carnivore2 in slot 2, and the results go in this page, with the machine and
