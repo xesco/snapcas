@@ -438,7 +438,10 @@ segments after it. The code segment's fields are these:
 | 000Fh | 3 | Side 1's start |
 | 0012h | 8 | The CAS header |
 | 001Ah | 64 | The code segment, then the other tape segments, filled in by the restorer |
-| 005Ah | | The routines, then the tape |
+| 005Ah | 2 | The address of the game's value of VDP register 7: `RG7SAV`, F3E6h, when it equals the snapshot's register 7, otherwise 005Dh |
+| 005Ch | 1 | The frames in 3 seconds: 150 when bit 7 of the ROM's byte 002Bh is set, for 50 Hz, otherwise 180 |
+| 005Dh | 1 | The snapshot's VDP register 7 |
+| 005Eh | | The routines, then the tape |
 
 `TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's segment
 and B the code segment, the reader selects the byte's segment in page 0, reads the
@@ -463,8 +466,19 @@ on these events. The routines read the keyboard matrix through the PPI.
 |---|---|
 | `TAPION` or `TAPIN` reads past side 1's end | Side 2's start, as when the player turns the tape over, or side 1's start when there is no side 2 |
 | `TAPION` or `TAPIN` reads past side 2's end | Side 2's start, as after a rewind |
-| `TAPION` is called while GRAPH is held | The start of the current side |
-| `TAPION` is called while SELECT is held | The start of the other side |
+| `TAPION` is called while GRAPH is held | Side 1's start |
+| `TAPION` is called while CODE is held | Side 2's start, or side 1's start when there is no side 2 |
+
+After GRAPH or CODE, `TAPION` shows the outcome in the border for 3 seconds, then
+writes the game's border back and searches for the next header. It counts the
+frames by the frame flag in the VDP's status register 0. The VDP's registers cannot
+be read, so `TAPION` takes the game's border from the address at 005Ah in the code
+segment. The colours are these:
+
+| Outcome | Border |
+|---|---|
+| Side 1's start | Light green, 3 |
+| Side 2's start | Light red, 9 |
 
 ### Scan
 
@@ -576,8 +590,8 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | `rom keep` in the game file, not a rule of the restorer | T0 in page 0 serves a BASIC program, whose tape calls are in the ROM and cannot be patched, but it changes the slot register's page 0 bits. Gauntlet's RAM search adds the slot that it finds to those bits, expecting the ROM's slot 0, and selects an empty slot |
 | Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games. Of those games, 20 build stubs that T0 alone does not intercept |
 | Rewind the capture with `savestate` and `loadstate` | `openMSX`'s `reverse goto` replays the input recorded after its target, while each key try must start from the saved moment with no other input |
-| A tape with both sides, a wrap, and fixed rewind and flip keys | In 41 of those 51 games the unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
-| GRAPH as the rewind key, SELECT as the flip key | GRAPH alone types no character and BASIC ignores it, while STOP pauses a BASIC program and the function keys type text. SELECT only puts one character in the key buffer |
+| A tape with both sides, a wrap, and fixed keys for each side's start | In 41 of those 51 games the unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
+| GRAPH for side 1's start and CODE for side 2's | GRAPH and CODE alone type no character, BASIC ignores them, and games rarely read them, while STOP pauses a BASIC program, the function keys type text, and many games use SELECT in their menus. On a Japanese MSX, CODE's key is KANA, which also switches the kana lock |
 
 ## Limits
 
@@ -686,7 +700,7 @@ that `build.py` and the restorer fill in set to 0:
 | 1 | T0's stubs, for 19DDh to 1B44h ([Tape service](#tape-service)) |
 | 2 | The service's part of page 3, for FCE1h to FD88h |
 | 3 | The code segment's data and routines, from 0000h, up to the tape's start |
-| 4 | The addresses of `STMOTR`'s stub, of the tape position in the code segment and of the byte at FCEDh, with the most segments that the code segment and the tape can use, 2 bytes each |
+| 4 | The addresses of `STMOTR`'s stub, of the tape position in the code segment, of the byte at FCEDh and of the marker's data in the code segment, with the most segments that the code segment and the tape can use, 2 bytes each |
 
 ### Replay stream
 

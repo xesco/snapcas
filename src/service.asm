@@ -186,16 +186,22 @@ code_start:
 header: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h
         assert $ = C_SEGS
         ds SEGS_MAX,0
+        assert $ = C_BORDER
+        ds 4,0                  ; C_BORDER, C_FRAMES, C_VDP7
+
+; The border colours that show for 3 seconds after GRAPH and CODE.
+SIDE_A  equ 3                   ; light green
+SIDE_B  equ 9                   ; light red
 
 c_tapion:
         call keys
         ret c                   ; CTRL+STOP
-        push af
+        push bc
         bit 2,c
-        call z,rewind           ; GRAPH: the start of the current side
-        pop af
-        bit 6,a
-        call z,flip             ; SELECT: the start of the other side
+        call z,side_a           ; GRAPH
+        pop bc
+        bit 4,c
+        call z,side_b           ; CODE
         ; Find the next header at a multiple of 8 bytes.
 .search:
         call keys
@@ -275,12 +281,39 @@ next_byte:
         or a
         ret
 
+; Shows the border colour E for 3 seconds, counted by the VDP's frame flag in
+; status register 0, then the game's border again. The VDP's registers cannot
+; be read, so C_BORDER points to the game's value of register 7: RG7SAV, or
+; C_VDP7 for a game that does not keep RG7SAV (DESIGN.md, Tape service).
+mark:
+        in a,(99h)              ; also resets the VDP's register latch
+        ld hl,(C_BORDER)
+        ld a,(hl)
+        push af
+        and 0F0h                ; the text colour of screen 0
+        or e
+        call reg7
+        ld a,(C_FRAMES)
+        ld b,a
+.frame:
+        in a,(99h)
+        rlca
+        jr nc,.frame
+        djnz .frame
+        pop af
+; Writes A to VDP register 7.
+reg7:
+        out (99h),a
+        ld a,87h
+        out (99h),a
+        ret
+
 ; Returns rows 6 in C and 7 in A of the keyboard matrix, read through the PPI,
 ; and carry when CTRL+STOP is held.
 keys:
         ld a,6
         call row
-        ld c,a                  ; SHIFT CTRL GRAPH ...
+        ld c,a                  ; SHIFT CTRL GRAPH CAPS CODE ...
         ld a,7
         call row                ; ... STOP BS SELECT RETURN
         bit 1,c
@@ -308,7 +341,8 @@ wrap:
         ld hl,C_S1END
         ld de,C_TOTAL
         call eq24
-        jr z,to_start           ; no side 2
+        ld hl,C_START
+        jr z,set_pos            ; no side 2
         ld hl,C_POS
         ld de,C_TOTAL
         call lt24
@@ -320,24 +354,24 @@ set_pos:
         ldir
         ret
 
-; GRAPH: the start of the current side. SELECT: the start of the other side,
-; or of side 1 without a side 2.
-rewind:
-        call on_side1
-        jr c,to_start
-to_s1end:
-        ld hl,C_S1END
-        jr set_pos
-flip:
-        call on_side1
-        jr nc,to_start
+; CODE: side 2's start, or side 1's without a side 2. GRAPH: side 1's start.
+; Each shows its side's border colour.
+side_b:
         ld hl,C_S1END
         ld de,C_TOTAL
         call eq24
-        jr nz,to_s1end
-to_start:
+        jr z,side_a
+        ld hl,C_S1END
+        ld e,SIDE_B
+        jr side
+side_a:
         ld hl,C_START
-        jr set_pos
+        ld e,SIDE_A
+side:
+        push de
+        call set_pos
+        pop de
+        jp mark
 
 ; Returns carry when the tape position is on side 1.
 on_side1:
@@ -375,7 +409,7 @@ eq24:
 code_end:
 
 ; For build.py: STMOTR's address, the code segment's data, the tape's most
-; segments, and E_FC.
+; segments, E_FC, and the marker's data.
 fields:
-        dw t_stmotr, C_POS, SEGS_MAX, E_FC
+        dw t_stmotr, C_POS, SEGS_MAX, E_FC, C_BORDER
 fields_end:

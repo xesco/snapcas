@@ -175,6 +175,7 @@ STMOTR = 0x00F3
 # The game's page 3 that must be zero at the snapshot, and where the service's
 # page 3 part goes.
 P3_FREE, P3_END, P3_START = 0xFCC9, 0xFD88, 0xFCE1
+RG7SAV = 0xF3E6  # the BIOS's copy of VDP register 7
 
 
 def service_segments(snap, parts, side1, side2, pages, state, tail_address):
@@ -182,7 +183,7 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address):
     the service's page 3 part into the game's page 3 (DESIGN.md, Tape
     service)."""
     _, stubs, page3, code, fields = parts
-    stmotr, c_pos, segs_max, e_fc = struct.unpack("<4H", fields)
+    stmotr, c_pos, segs_max, e_fc, c_border = struct.unpack("<5H", fields)
     with open(os.path.join(snap, "rom.bin"), "rb") as f:
         t0 = bytearray(f.read(PAGE))
     for entry, target in TAPE_ENTRIES.items():
@@ -197,13 +198,19 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address):
     pos = start + num(state, "tapepos")
     for n, value in enumerate((pos, start + len(side1), len(tape), start)):
         tape[c_pos + 3 * n:c_pos + 3 * n + 3] = value.to_bytes(3, "little")
+    # The marker restores the border from RG7SAV when the game keeps it, and
+    # otherwise from the snapshot's value. It counts 3 seconds of frames, at
+    # the rate of bit 7 of the ROM's byte 002Bh: 50 Hz when set.
+    p3 = selected_page(state, pages, 3)
+    if p3 is None:
+        raise BuildError(f"{snap}: page 3 is not a RAM page that the snapshot keeps")
+    vdp7 = num(state, "vdp7")
+    border = RG7SAV if p3.data[RG7SAV & 0x3FFF] == vdp7 else c_border + 3
+    struct.pack_into("<HBB", tape, c_border, border, 150 if t0[0x2B] & 0x80 else 180, vdp7)
     tape += bytes(-len(tape) % PAGE)
     if len(tape) // PAGE > segs_max:
         raise BuildError(f"the tape needs {len(tape) // PAGE} segments, more than {segs_max}")
 
-    p3 = selected_page(state, pages, 3)
-    if p3 is None:
-        raise BuildError(f"{snap}: page 3 is not a RAM page that the snapshot keeps")
     low, high = P3_FREE & 0x3FFF, P3_END & 0x3FFF
     if any(p3.data[low:high + 1]):
         raise BuildError(f"{snap}: FCC9h to FD88h are not zero, so the tape service has no room")

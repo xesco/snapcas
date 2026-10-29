@@ -40,27 +40,33 @@ rom keep
 """,
 }
 
-# game: (inputs, 4 seconds apart, seconds of play, breakpoints to count). An
-# input is a key name, a digit, or fire, the joystick's button, which the play gives by
+# play: (game, inputs 4 seconds apart, seconds of play, breakpoints to count).
+# An input is a key name, a digit, keys joined by +, which are held for 3
+# seconds with space in them for 0.5, or fire, the joystick's button, which the play gives by
 # clearing bit 4 of A after the game reads PSG register 14 for port 1. The
 # game reads it in the BIOS's RDPSG, at 1112h, or in its own code.
 PLAYS = {
     # The instructions, the menu's theme 1 and RETURN, then the data tape.
-    "computad": (["space", "space", "1", "return", "space"], 50, {}),
+    "computad": ("computad", ["space", "space", "1", "return", "space"], 50, {}),
     # The intro, the players and the character, then the side 2 prompt.
     # 958Bh jumps to the level that the level loader read.
-    "gauntlet": (["space"] * 4 + ["fire"] * 15 + ["space"] * 8, 180,
+    "gauntlet": ("gauntlet", ["space"] * 4 + ["fire"] * 15 + ["space"] * 8, 180,
                  {"level": 0x958B, "joy": 0xB3FD}),
+    # The same, with GRAPH and CODE held at the side 2 prompt.
+    "gauntlet-keys": ("gauntlet", ["space"] * 4 + ["fire"] * 15 + ["graph+code+space"] * 2, 180,
+                      {"level": 0x958B}),
 }
 JOYSTICK_READS = (0x1112, 0xB3FD)
 
 
-def play_script(game, out):
-    inputs, seconds, counts = PLAYS[game]
+def play_script(name, out):
+    game, inputs, seconds, counts = PLAYS[name]
     presses = []
     for n, name in enumerate(inputs):
         if name == "fire":
             action = "set ::fire 1; after time 0.3 {set ::fire 0}"
+        elif "+" in name:
+            action = "; ".join(msx.press(key, 0.5 if key == "space" else 3) for key in name.split("+"))
         elif name.isdigit():
             # The digits are not key names, because their place depends on the
             # layout. 1 is row 0, bit 1, on this machine.
@@ -93,26 +99,33 @@ proc fire {{}} {{
 }}
 {bps}
 {joy}
+# The border marker's colours, from E at the start of mark in the code
+# segment: IN A,(99h) / LD HL,(005Ah).
+set ::colours {{}}
+set mark [string first [binary format H* DB992A5A00] [debug read_block "{MAPPER_RAM}" $::base 0x400]]
+debug set_bp $mark {{[debug read {{MSX Memory Mapper I/O}} 0] == [debug read memory 0xFCEC]}} {{ lappend ::colours [expr {{[reg DE] & 255}}] }}
 {chr(10).join(presses)}
 after time {seconds} {{
     set f [open {msx.tcl_word(out)} w]
     puts $f "pos0 $::pos0"
     foreach {{name offset}} {{pos 6 s1end 9 total 12 start 15}} {{ puts $f "$name [word3 $offset]" }}
     foreach name [array names ::n] {{ puts $f "$name $::n($name)" }}
+    foreach c {{3 9}} {{ puts $f "colour$c [llength [lsearch -all $::colours $c]]" }}
     close $f
     exit
 }}
 """
 
 
-def play(game):
+def play(name):
     """Plays a restored game and returns its tape values and counts."""
-    out = os.path.join(WORK, f"{game}-play.txt")
+    game = PLAYS[name][0]
+    out = os.path.join(WORK, f"{name}-play.txt")
     if os.path.exists(out):
         os.remove(out)
     machine = msx.read_machine(os.path.join(ROOT, "machines", MACHINE + ".txt"))
     disk = os.path.join(ROOT, "out", MACHINE, game, "check", "disk.dsk")
-    msx.run([*machine.args, f"-{machine.disk}", disk], play_script(game, out), timeout=600)
+    msx.run([*machine.args, f"-{machine.disk}", disk], play_script(name, out), timeout=600)
     if not os.path.exists(out):
         return {}
     with open(out) as f:
@@ -120,8 +133,8 @@ def play(game):
 
 
 def run(game):
-    """Captures, builds, checks and plays a game, and returns (the check's
-    report or the failed step's error, state.txt, the play's values)."""
+    """Captures, builds and checks a game, and returns the check's report or
+    the failed step's error, and state.txt."""
     folder = os.path.join(WORK, "games", game)
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, "game.txt"), "w") as f:
@@ -129,11 +142,11 @@ def run(game):
     for step, args in (("capture.py", ["--cas", CAS_DIR]), ("build.py", ["--cas", CAS_DIR])):
         result = test_step4.tool(step, folder, MACHINE, *args)
         if result.returncode != 0:
-            return f"{step}: {result.stderr.strip()}", {}, {}
+            return f"{step}: {result.stderr.strip()}", {}
     report = test_step4.tool("check.py", folder, MACHINE, "--dos", test_step4.NEXTOR).stdout
     with open(os.path.join(ROOT, "out", MACHINE, game, "snap", "state.txt")) as f:
         state = dict(line.split(" ", 1) for line in f.read().splitlines())
-    return report, state, play(game) if report.startswith("point 1: pass") else {}
+    return report, state
 
 
 @unittest.skipUnless(os.path.isdir(CAS_DIR), "CAS_DIR names no folder of CAS files")
@@ -142,15 +155,17 @@ class Step5(unittest.TestCase):
     def setUpClass(cls):
         os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
         cls.results = {game: run(game) for game in GAMES}
+        cls.plays = {name: play(name) if cls.results[PLAYS[name][0]][0].startswith("point 1: pass") else {}
+                     for name in PLAYS}
 
     def test_check_point_1_passes_with_the_service(self):
-        for game, (report, state, _) in self.results.items():
+        for game, (report, state) in self.results.items():
             with self.subTest(game=game):
                 self.assertTrue(report.startswith("point 1: pass"), report)
                 self.assertEqual(state["service"], "1")
 
     def test_computad_loads_theme_1(self):
-        values = self.results["computad"][2]
+        values = self.plays["computad"]
         # Theme 1's two blocks: a 16-byte name and 256 bytes, which end at
         # offset 7,560 of the CAS file.
         self.assertEqual(values.get("tapion"), 2, values)
@@ -158,7 +173,7 @@ class Step5(unittest.TestCase):
         self.assertEqual(values["pos"], values["start"] + 7560)
 
     def test_gauntlet_loads_its_main_game_then_a_level_from_side_2(self):
-        values = self.results["gauntlet"][2]
+        values = self.plays["gauntlet"]
         self.assertGreater(values.get("joy", 0), 0, values)
         # Side 1 ends at 58,101 bytes, padded to 58,104, and side 2 adds
         # 95,157.
@@ -167,6 +182,15 @@ class Step5(unittest.TestCase):
         self.assertGreater(values["pos"], values["s1end"], values)
         self.assertLess(values["pos"], values["total"], values)
         self.assertEqual(values.get("level"), 1, values)
+
+    def test_graph_and_code_show_their_border_colours(self):
+        values = self.plays["gauntlet-keys"]
+        # One TAPION reads both keys: GRAPH, light green, side 1's start, then
+        # CODE, light red, side 2's start, where the level loads from.
+        self.assertEqual(values.get("colour3"), 1, values)
+        self.assertEqual(values.get("colour9"), 1, values)
+        self.assertEqual(values.get("level"), 1, values)
+        self.assertGreater(values["pos"], values["s1end"], values)
 
 
 if __name__ == "__main__":
