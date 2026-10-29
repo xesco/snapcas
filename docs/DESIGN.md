@@ -144,10 +144,10 @@ game:
 `tools/capture.py` runs `openmsx` with the machine file's arguments, or those of the
 game file's `capture` machine, and a Tcl script made from the game file, with the
 throttle, the renderer and the sound off. All times are emulated seconds, counted
-across the rewinds of step 5. The script writes the snapshot to `snap/`, or
-`snap/error.txt` when a `boot` text or BASIC's `Ok` does not appear within 120
-seconds, the load runs for more than 3,600 seconds, or step 5 restarts more than 20
-times. It performs the following steps:
+across the rewinds of step 5. The script writes the snapshot to `snap/`, with its
+log in `snap/log.txt`, or the log and `snap/error.txt` when a `boot` text or BASIC's
+`Ok` does not appear within 120 seconds, the load runs for more than 3,600 seconds,
+or step 5 restarts more than 20 times. It performs the following steps:
 
 1. Starts a write watchpoint on port A0h, which keeps the PSG register selected
    last, boots the machine with no disk, presses the `boot` keys, and waits for
@@ -191,8 +191,9 @@ times. It performs the following steps:
      of 8 bytes, so a block counts as read when at most 7 bytes of it are left.
    - Otherwise it tries the game file's `continue` key, then space, then Return,
      each from the saved moment and held for 0.5 seconds, because a loader can read
-     the keyboard rarely. If the motor starts within 10 seconds of a key, the load
-     was waiting for that key: the capture logs the key and restarts step 5. If no
+     the keyboard rarely. If the tape position moves within 10 seconds of a key, the
+     load was waiting for that key, because a game can also start the motor at a key
+     without reading the tape: the capture logs the key and restarts step 5. If no
      key starts it, the rest is loaded during play, and it goes to step 6 from the
      saved moment.
 
@@ -359,9 +360,9 @@ and until step 4 it can stop with a message and return to DOS:
    the records and in the registers that step 6 writes:
    - In the tail: the worker's page's mapper register and its value, and the slot
      register ([Tail](#tail)).
-   - With the tape service, in the code segment at 001Ah: the code segment, then
-     the other tape segments, and at 0062h: 1 for `/T1200`, 2 for `/T2400`, with
-     `/R` alone the replay's speed, or otherwise 0.
+   - With the tape service, in the code segment at 001Ah: the code segment, then the
+     other tape segments, and at 0062h: 1 for `/T1200`, 2 for `/T2400`, with `/R`
+     alone the replay's speed, or otherwise 0.
    - With the tape service, in the game's page 3 at FCEAh: DOS's mapper's slot ID,
      T0's segment and the code segment.
    - With the tape service, when DOS's mapper is in an expanded slot, DOS's mapper's
@@ -452,11 +453,11 @@ segments after it. The code segment's fields are these:
 | 0062h | 1 | The tape speed, filled in by the restorer: 0 for the fast load, 1 for 1200 baud, 2 for 2400 baud |
 | 0063h | | The routines, then the tape |
 
-`TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's segment
-and B the code segment, the reader selects the byte's segment in page 0, reads the
-byte at HL into E, and selects the code segment again. The entry code disables
-interrupts, switches to its own stack in `SLTWRK`, selects DOS's mapper and T0 in
-page 0, calls the routine, and selects the game's page 0 and stack again, with
+`TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's
+segment and B the code segment, the reader selects the byte's segment in page 0,
+reads the byte at HL into E, and selects the code segment again. The entry code
+disables interrupts, switches to its own stack in `SLTWRK`, selects DOS's mapper and
+T0 in page 0, calls the routine, and selects the game's page 0 and stack again, with
 mapper register FCh set to the value at FCEDh. It returns with interrupts off,
 except after `TAPIOF`. The entry code keeps its data before its code:
 
@@ -524,8 +525,8 @@ code between two bytes. The service writes the keyclick bit back to its value be
 the byte. The keys and the flash work as at the fast speed.
 
 `/T1200` and `/T2400` act only through the tape service, so they change nothing for
-a game without it, and the restorer then says so before the restore. Such a game loaded
-completely before the snapshot, and the experience of its load comes from the
+a game without it, and the restorer then says so before the restore. Such a game
+loaded completely before the snapshot, and the experience of its load comes from the
 replay, which plays the load at the capture's speed with the sound of a tape
 ([Replay](#replay)). The two combine: with `/R /T1200`, the replay shows the first
 load, and the game's later loads come from the tape service at 1200 baud.
@@ -534,16 +535,21 @@ load, and the game's later loads come from the tape service at 1200 baud.
 
 With the tape service, `build.py` scans the snapshot's RAM pages and the unread
 blocks of both sides for code that reaches the tape without going through T0, and
-lists each finding in `scan.txt`. It patches the findings in the RAM pages. In an
-unread block it only lists them, for `patch` lines, because a loader usually checks
-a block against a sum stored at the block's end, and each loader computes that sum
-in its own way. The scan looks for this code:
+lists each finding in `scan.txt`, in a `patch` line's form, so that a finding in an
+unread block can be copied into the game file. A RAM page that the snapshot does not
+select in its page is named by its file in `ram/`. The scan runs after the game
+file's `patch` lines, and it patches the findings in the RAM pages. In an unread
+block it only lists them, for `patch` lines, because a loader usually checks a block
+against a sum stored at the block's end, and each loader computes that sum in its
+own way. The scan looks for this code:
 
 | Code | Bytes | Patch |
 |---|---|---|
 | A stub built with `TAPION`'s entry: `LD DE,00E1h / PUSH DE / LD DE,CDD9h / PUSH DE`, or the same with HL | `11 E1 00 D5 11 D9 CD D5`, or `21 E1 00 E5 21 D9 CD E5` | `E1 00` becomes `E1 FC` |
 | A call of a tape routine: `CALL 00E1h`, `CALL 00E4h` or `CALL 00E7h` | `CD E1 00`, `CD E4 00` or `CD E7 00` | The call's `00` becomes `FC` |
+| An entry in HL before a call: `LD HL,00E1h` or `LD HL,00E4h`, then `CALL`, to a routine of the game's that selects the ROM in page 0 and jumps to HL | `21 E1 00 CD` or `21 E4 00 CD` | The `00` becomes `FC` |
 | A reader of the cassette signal: `IN A,(0A2h)`, then within 4 bytes `RLA`, `RLCA`, `BIT 7,A` or `AND 80h` | `DB A2`, then `17`, `07`, `CB 7F` or `E6 80` | None: listed, for a `patch` line that sends its callers to the service |
+| A reader of PSG register 14, whose bit 7 is the cassette signal and whose other bits are a joystick: `LD A,0Eh / OUT (0A0h),A / IN A,(0A2h)` | `3E 0E D3 A0 DB A2` | None: listed, as above, and also found in joystick code |
 
 The stub stores `TAPION`'s address in RAM, and the game later changes its low byte
 to E4h for `TAPIN`, so the entries keep the BIOS's low bytes. A patched call goes to
@@ -558,15 +564,15 @@ call's 3 bytes can also be data, where the patch changes one byte.
 The replay shows the load on the real machine as it happened in the capture: BASIC's
 screen with the load command being typed, the loading screens being drawn, their
 music, the game's own pauses and its waits for a key, and the cassette motor's
-relay. Nothing of the loader runs again: the replay is
-a recording, played before the restore, so it works for every game whose capture
-works. It is optional, in its own file, `<GAME>.RPL`, and runs only with `/R`.
+relay. Nothing of the loader runs again: the replay is a recording, played before
+the restore, so it works for every game whose capture works. It is optional, in its
+own file, `<GAME>.RPL`, and runs only with `/R`.
 
 The capture records it from just before it types the load command to the snapshot,
 in `snap/replay.log`. The log starts with the VDP's state at that moment: VRAM, the
-registers and, on a V9938, the palette. Then it holds one line per write: the
-frame, the port and the value. A frame is one VDP interrupt period of the machine,
-1/50 or 1/60 of a second. It logs:
+registers and, on a V9938, the palette. Then it holds one line per write: the frame,
+the port and the value. A frame is one VDP interrupt period of the machine, 1/50 or
+1/60 of a second. It logs:
 
 - Each write to the VDP's ports 98h to 9Bh and the PSG's ports A0h and A1h, from
   write watchpoints.
@@ -592,9 +598,9 @@ next frame:
 - Before it plays, it reads `<GAME>.RPL` with its own FCB into the segments of DOS's
   mapper that step 2 leaves free, 16 KB each, and then plays from RAM. A DOS read
   during the replay would stop the frames and the sound, longest on a floppy disk.
-  When the file needs more segments than are free, it fills them, and as it plays
-  it reads the next chunks ahead into the segments that it has played, at frames
-  in which the motor bit is off, when a tape is silent too.
+  When the file needs more segments than are free, it fills them, and as it plays it
+  reads the next chunks ahead into the segments that it has played, at frames in
+  which the motor bit is off, when a tape is silent too.
 - It writes VRAM no faster than one byte every 29 cycles, 8 µs, which an MSX1 VDP
   needs during the display.
 - At a wait, it plays the wait's frames in a loop until a key is pressed.
@@ -764,8 +770,8 @@ that it names:
 | 1 | 1 | Number of parts |
 | 2 | 4 per part | Each part's offset and length in the file, 2 bytes each |
 
-The parts hold the code that `build.py` places, with the operands and the data
-that `build.py` and the restorer fill in set to 0:
+The parts hold the code that `build.py` places, with the operands and the data that
+`build.py` and the restorer fill in set to 0:
 
 | Part | What it holds |
 |---|---|
@@ -779,8 +785,8 @@ that `build.py` and the restorer fill in set to 0:
 
 `<GAME>.RPL` starts with `SNAPRPL1`, a byte with the frame rate, 50 or 60, a byte
 with the capture's tape speed, 1 for 1200 baud and 2 for 2400 baud, and a 2-byte
-count of chunks. Each chunk is a 2-byte compressed length and an LZ4 block
-that decompresses to at most 16,384 bytes. The decompressed stream is a sequence of
+count of chunks. Each chunk is a 2-byte compressed length and an LZ4 block that
+decompresses to at most 16,384 bytes. The decompressed stream is a sequence of
 commands:
 
 | Command | Bytes | Meaning |
@@ -795,9 +801,9 @@ commands:
 | End | `FF` | The replay ends |
 
 The stream starts with the first state, as port writes and VRAM bytes. A `02 A0h`
-write and the `02 A1h` write after it are written together, with
-interrupts off, so that the BIOS's interrupt handler, which selects PSG registers 14
-and 15 for the joysticks, cannot come between them.
+write and the `02 A1h` write after it are written together, with interrupts off, so
+that the BIOS's interrupt handler, which selects PSG registers 14 and 15 for the
+joysticks, cannot come between them.
 
 ### CAS data
 

@@ -26,11 +26,9 @@ GAMES = {
     "gauntlet": """cas GAUNTLET.CAS
 side2 GAUNTLEB.CAS
 sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d6400b3
-# The loader selects the ROM in page 0 from a copy of the slot register.
-patch page3:215F CD E1 00 > CD E1 FC
-patch page3:21AB CD E4 00 > CD E4 FC
-# The main game, loaded at 4400h, selects the ROM in page 0 for its level
-# loads too. Its block ends with a 16-bit sum of its bytes, so the 1F8h that
+# The loaders select the ROM in page 0 from a copy of the slot register. The
+# scan patches the one in RAM. The main game's, loaded at 4400h, is in an
+# unread block, which ends with a 16-bit sum of its bytes, so the 1F8h that
 # the two patches add goes into the sum.
 patch side1:AE88 CD E1 00 > CD E1 FC
 patch side1:AED4 CD E4 00 > CD E4 FC

@@ -24,6 +24,7 @@ sys.path.insert(0, HERE)
 import build  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
+import scan  # noqa: E402
 
 TIMEOUT = 600  # real seconds for one check
 
@@ -33,6 +34,21 @@ def selected_name(state, page):
     snapshot selects in a page."""
     ps, ss = build.selected(state, page)
     return ps, "x" if ss is None else ss
+
+
+def patched_bytes(state, snap, patches):
+    """The RAM pages' bytes that the patch lines and the scan change, as
+    ps-ss-page, first and last offset."""
+    ranges = ["{}-{}-{} {} {}".format(*selected_name(state, p.page), p.page, p.offset, p.offset + len(p.old) - 1)
+              for p in patches if p.page not in ("side1", "side2")]
+    if state["service"] == "1":
+        for name in sorted(os.listdir(os.path.join(snap, "ram"))):
+            with open(os.path.join(snap, "ram", name), "rb") as f:
+                findings = scan.find(f.read())
+            ps, ss, page, _ = name[:-4].split("-")
+            ranges += [f"{ps}-{ss}-{page} {f.offset} {f.offset + len(f.old) - 1}"
+                       for f in findings if f.new is not None]
+    return ranges
 
 
 def settings(state, snap, image, report, check_dir, state_name, patches):
@@ -57,10 +73,7 @@ def settings(state, snap, image, report, check_dir, state_name, patches):
         "regs": "{" + values + "}",
         "pc": str(int(state["pc"], 16)),
         "kv": "{" + " ".join(f"{k} {v}" for k, v in keep.items()) + "}",
-        # The RAM pages' patched bytes, as ps-ss-page, first and last offset.
-        "patched": "{" + " ".join(
-            "{}-{}-{} {} {}".format(*selected_name(state, p.page), p.page, p.offset, p.offset + len(p.old) - 1)
-            for p in patches if p.page not in ("side1", "side2")) + "}",
+        "patched": "{" + " ".join(patched_bytes(state, snap, patches)) + "}",
     }
     return "".join(f"set ::C({k}) {v}\n" for k, v in s.items())
 

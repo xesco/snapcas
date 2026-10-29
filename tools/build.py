@@ -19,6 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import gamefile  # noqa: E402
+import scan  # noqa: E402
 
 SERVICE_VERSION = 3
 PAGE = 16384
@@ -234,10 +235,28 @@ def apply_patch(patch, data, place):
     data[patch.offset:end] = patch.new
 
 
+def scan_snapshot(state, pages, side1, side2):
+    """Patches the scan's findings in the RAM pages, and returns scan.txt's
+    text, with the findings in the unread blocks: side 1 from the tape
+    position, and side 2 (DESIGN.md, Scan)."""
+    ram = []
+    for p in pages:
+        findings = scan.find(p.data)
+        scan.patch(p.data, findings)
+        if p is selected_page(state, pages, p.page):
+            place = f"page{p.page}"
+        else:
+            place = "ram " + "-".join("x" if v is None else str(v) for v in (p.ps, p.ss, p.page, p.seg))
+        ram.append((place, findings))
+    unread = num(state, "tapepos")
+    tape = [("side1", [f for f in scan.find(side1) if f.offset >= unread]), ("side2", scan.find(side2))]
+    return scan.report(ram, tape)
+
+
 def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False):
-    """Returns (header and tables, the records' data, a report). side1 and
-    side2 are the CAS data for the tape service, and rom_keep keeps T0 from
-    replacing the ROM."""
+    """Returns (header and tables, the records' data, a report, scan.txt's
+    text). side1 and side2 are the CAS data for the tape service, and rom_keep
+    keeps T0 from replacing the ROM."""
     state = read_state(snap)
     sides = {"side1": bytearray(side1), "side2": bytearray(side2)}
     for patch in patches:
@@ -260,6 +279,9 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False):
             if found is None:
                 raise BuildError(f"{patch.where}: page {patch.page} is not a RAM page that the snapshot keeps")
             apply_patch(patch, found.data, f"{patch.page * 0x4000 + patch.offset:04X}")
+    scanned = "No tape service, so no scan.\n"
+    if state["service"] == "1":
+        scanned = scan_snapshot(state, pages, side1, side2)
     tail_address = place_tail(state, pages, tail)
     service = []
     if state["service"] == "1":
@@ -320,7 +342,7 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False):
     mapper = sum(1 for r in records if r[0] in (RAM_IN_MAPPER, SERVICE_SEGMENT))
     report = (f"{len(records)} records, {len(writes)} port writes, "
               f"up to {mapper + 1} free mapper segments")
-    return bytes(header), data, report
+    return bytes(header), data, report, scanned
 
 
 def main():
@@ -349,7 +371,7 @@ def main():
             dumps = [side1] + ([side2] if game.side2 else [])
             if [hashlib.sha1(d).hexdigest() for d in dumps] != game.sha1:
                 raise BuildError(f"{folder}/game.txt: patch lines need sha1 lines that match the CAS files")
-        header, data, report = build(os.path.join(out, "snap"), args.service, side1, side2,
+        header, data, report, scanned = build(os.path.join(out, "snap"), args.service, side1, side2,
                                      game.patches, game.rom_keep)
     except (OSError, gamefile.GameFileError, BuildError) as e:
         print(f"build.py: {e}", file=sys.stderr)
@@ -360,8 +382,7 @@ def main():
         for chunk in data:
             f.write(chunk)
     with open(os.path.join(out, "scan.txt"), "w") as f:
-        f.write("No scan in this version.\n" if read_state(os.path.join(out, "snap"))["service"] == "1"
-                else "No tape service, so no scan.\n")
+        f.write(scanned)
     print(f"{game.name}: {image}: {report}")
     return 0
 

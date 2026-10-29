@@ -29,8 +29,9 @@ the tests use, in `machines/test/`. Each one boots the DOS of its row:
 | `test/nms8250-dos1` | `DOS_DIR/msxdos1/`, from the NMS 8250's own disk ROM | No shipped machine runs MSX-DOS 1 |
 | `test/nms8250-512k` | `DOS_DIR/msxdos2/` | An NMS 8250 whose single mapper holds 512 KB, because 128 KB cannot hold Moonwalker's 236 KB tape |
 
-`test/nms8250-512k` uses a machine configuration that the tests install in a private
-`openMSX` home, named by `OPENMSX_HOME`, with links to the user's system ROMs.
+`test/nms8250-512k` uses a machine configuration that the Makefile makes from
+`openMSX`'s own NMS 8250, with its mapper at 512 KB, in a private `openMSX` home,
+named by `OPENMSX_HOME`, with links to the user's system ROMs.
 
 The corpus is a fixed set of CAS files from File-Hunter's collection, one or more
 for each case that the design lists:
@@ -133,18 +134,21 @@ game loads to side 1's end and that a level loads from side 2.
 
 ## Step 6: scan
 
-This step adds the scan and its patches ([Scan](DESIGN.md#scan)). The test reruns
-the corpus search of the design's decisions over `CAS_DIR`, runs `build.py` on each
-multi-load file that it finds, and checks that the stub findings in `scan.txt` cover
-the 20 games with stubs. It then runs `check.py` on those games and records which
-findings each one executes.
+This step adds the scan and its patches ([Scan](DESIGN.md#scan)). Python unit tests
+check each of the scan's patterns on bytes made for it. The corpus test captures
+each file of `CAS_DIR` on `advanced/phc28s`, with a side 2 file as the side 2 of its
+game, builds the files that need the tape service, and writes every `scan.txt` into
+one report. It checks the findings that have been confirmed by hand: for Gauntlet,
+the calls of `TAPION` and `TAPIN` at E15Fh and E1ABh in page 3, patched, and at
+AE88h and AED4h of side 1, listed. A game's findings join the check when they are
+confirmed.
 
 The step also takes the tests that need the scan:
 
 | File | Machine | What the test checks |
 |---|---|---|
 | `TOUR-91.CAS` | `advanced/phc28s` | That the game's stub reaches the tape service at its next load |
-| `MOONWALK.CAS` | `test/nms8250-512k`, a new machine file with its machine configuration | The same, and that T0 stays out of page 0 |
+| `MAD-MIDE.CAS` | `advanced/phc28s` | The same |
 | `DESPERAD.CAS` | `advanced/phc28s` | The same, for a loader that selects the ROM in page 0 itself, with `IN A,(0A8h) / AND 0FCh / OR 00h / OUT (0A8h),A` |
 
 ## Step 7: replay
@@ -166,8 +170,9 @@ This step adds the replay ([Replay](DESIGN.md#replay)): the recording in
   0005h, when the file fits in the free segments.
 - That with fewer free segments than the file needs, the replay reads its other
   chunks only at frames in which the motor bit is off.
-- That the replay toggles the keyclick bit only while the motor bit is on, at 1200 Hz
-  for a 0 bit and 2400 Hz for a 1 bit, from write watchpoints on ports AAh and ABh.
+- That the replay toggles the keyclick bit only while the motor bit is on, at 1200
+  Hz for a 0 bit and 2400 Hz for a 1 bit, from write watchpoints on ports AAh and
+  ABh.
 - That Moonrider's replay starts with VRAM and the VDP's registers as they were just
   before the capture typed the load command, types the command, and waits at its
   RETURN until RETURN is pressed.
@@ -185,8 +190,8 @@ load as in step 5, and check:
 - That the main game's 34,341 bytes take 11 bits each at the chosen speed, within
   5%, and that the load without an option stays as fast as in step 5.
 - That the keyclick bit toggles twice for each 0 bit and four times for each 1 bit
-  of a block, from a write watchpoint on port AAh, and has its value before the
-  load at the end.
+  of a block, from a write watchpoint on port AAh, and has its value before the load
+  at the end.
 - That the motor bit of port AAh is on during the load and off after it.
 - That with `/R` alone the tape service runs at the speed in Gauntlet's replay
   header, and with `/R /T2400` at 2400 baud.
@@ -210,5 +215,18 @@ same files, to compare.
 
 | Date | Machine | Images | Result |
 |---|---|---|---|
-| 2026-10-29 | Sanyo PHC-28S, Sony HBM-64 in slot 1, Carnivore2 in slot 2, Nextor 2.1 | `FREDDY.IMG`, `FERNANDO.IMG`, `MOONRIDE.IMG`, `CALDERO.IMG`, from step 4 | All four games run |
+| 2026-10-29 | Sanyo PHC-28S, Sony HBM-64 in slot 1, Carnivore2 in slot 2, Nextor 2.1 | `FREDDY.SNP`, `FERNANDO.SNP`, `MOONRIDE.SNP`, `CALDERO.SNP`, from step 4 | All four games run |
 | 2026-10-29 | The same | `ABADIA.SNP`, captured with `capture test/phc28s-noslot1` | La Abadia del Crimen runs, with the RAM cartridge in slot 1 |
+| 2026-10-29 | The same | `KNIGHTMA.SNP`, with `snapshot at 130`, and the 31 images of the step 4 batch | All run |
+| 2026-10-29 | The same | `GAUNTLET.SNP`, with `GAUNTLEB.CAS` as side 2, from step 5 | The main game and its levels load from the tape service, side 2 included, and the side's colour shows at the turn-over |
+
+## Not in these steps
+
+Moonwalker moves out of step 6. It reads its blocks with its own reader of the
+cassette signal, at 3A36h of its page 0 RAM, which selects PSG register 14, and it
+calls `TAPION` only to find each header. The tape service cannot serve that reader,
+so the game needs a `patch` line that sends the reader to `TAPIN`. The capture also
+misjudges it: the game reads the whole tape without `TAPIN`, so the tape position
+stops at 197,952 of 236,833 bytes while `openMSX`'s player is at the tape's end, and
+the game then waits inside the BIOS's `TAPION`, where no snapshot can be taken. The
+machine file `test/nms8250-512k` stays for it.

@@ -135,6 +135,7 @@ proc fail {msg} {
     set f [open [file join $::S(snap) error.txt] w]
     puts $f "capture: $msg"
     close $f
+    catch write_log
     quit
 }
 proc safe {body} { if {[catch {uplevel #0 $body} e]} { fail $e } }
@@ -335,7 +336,7 @@ proc rewind {} {
 
 proc wait_ended {} {
     rewind
-    decide "load stopped at tape position $::st(pos), screen: [screen_lines]"
+    decide "load stopped at tape position $::st(pos), the cassette player at [format %.1f [cassetteplayer getpos]] of [format %.1f [cassetteplayer getlength]] seconds, screen: [screen_lines]"
     if {[side1_read]} { step6; return }
     set ::trying $::S(tries)
     try_next
@@ -352,11 +353,14 @@ proc try_next {} {
     rewind
     eval $tcl
     set ::tried_at [now]
-    watch_motor $name
+    set ::tried_pos $::st(pos)
+    watch_load $name
 }
-proc watch_motor {name} {
+# A key continues the load when the tape position moves: a game can switch the
+# motor on at a key without reading the tape.
+proc watch_load {name} {
     tick 0.1
-    if {[motor_on]} {
+    if {$::st(pos) != $::tried_pos} {
         decide "continue $name"
         lappend ::st(continue) $name
         if {[incr ::restarts] > 20} { fail "step 5 restarted more than 20 times" }
@@ -364,7 +368,7 @@ proc watch_motor {name} {
         return
     }
     if {[now] - $::tried_at >= 10} { try_next; return }
-    later 0.1 [list watch_motor $name]
+    later 0.1 [list watch_load $name]
 }
 
 # 6. The snapshot, at the entry of the next interrupt that the CPU accepts
@@ -512,11 +516,16 @@ proc take_snapshot {} {
     set f [open [file join $::S(snap) state.txt] w]
     puts $f [join $state \n]
     close $f
+    write_log
+    quit
+}
+
+# log.txt, also after a failure.
+proc write_log {} {
     set f [open [file join $::S(snap) log.txt] w]
     foreach e [lsort -real -index 0 [concat $::st(log) $::decisions]] {
         puts $f "[format %.2f [lindex $e 0]] [lindex $e 1]"
     }
     if {[info exists ::st(continue)]} { puts $f "continue [lindex $::st(continue) 0]" }
     close $f
-    quit
 }

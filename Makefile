@@ -19,6 +19,11 @@
 
 SJASMPLUS_VERSION := 1.24.0
 SYSTEMROMS ?= $(HOME)/.openMSX/share/systemroms
+# openMSX's own share folder: in its app beside the program on macOS, as
+# Homebrew installs it, or in /usr/share.
+OPENMSX_BIN := $(dir $(realpath $(shell command -v openmsx)))
+OPENMSX_SHARE ?= $(firstword $(wildcard $(OPENMSX_BIN)../openMSX.app/Contents/Resources/share \
+                   $(OPENMSX_BIN)../Resources/share /usr/share/openmsx /usr/local/share/openmsx))
 CAS_DIR ?= tapes
 DOS_DIR ?= dos
 
@@ -65,7 +70,16 @@ $(EMU_HOME)/share/systemroms:
 	mkdir -p $(EMU_HOME)/share
 	ln -sfn $(SYSTEMROMS) $@
 
-test: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
+# test/nms8250-512k: openMSX's NMS 8250 with its mapper at 512 KB, which
+# Moonwalker's 236 KB tape needs.
+NMS8250_512K := $(EMU_HOME)/share/machines/Philips_NMS_8250_512k.xml
+$(NMS8250_512K):
+	mkdir -p $(dir $@)
+	sed 's|<size>128</size>|<size>512</size>|' $(OPENMSX_SHARE)/machines/Philips_NMS_8250.xml > $@.tmp
+	grep -q '<size>512</size>' $@.tmp
+	mv $@.tmp $@
+
+test: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(NMS8250_512K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I -m unittest discover -s tests -v
 
