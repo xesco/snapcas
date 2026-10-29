@@ -38,11 +38,11 @@ help:
 
 all: bin/SNAPCAS.COM bin/SERVICE.BIN
 
-bin/SNAPCAS.COM: src/snapcas.asm $(SJASMPLUS)
+bin/SNAPCAS.COM: src/snapcas.asm src/service.inc $(SJASMPLUS)
 	mkdir -p bin
 	$(SJASMPLUS) --nologo --raw=$@ $<
 
-bin/SERVICE.BIN: src/service.asm $(SJASMPLUS)
+bin/SERVICE.BIN: src/service.asm src/service.inc $(SJASMPLUS)
 	mkdir -p bin
 	$(SJASMPLUS) --nologo --raw=$@ $<
 

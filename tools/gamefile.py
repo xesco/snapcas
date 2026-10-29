@@ -26,12 +26,48 @@ class Game:
         self.snapshot_at = None
         self.service_no = False  # service no: the game never reads the rest
         self.capture = None      # the machine file for the capture, if not the user's
-        self.patches = []     # [(place, old, new)]
+        self.rom_keep = False    # rom keep: page 0 keeps the ROM, and T0 does not replace it
+        self.patches = []     # [Patch]
+
+
+class Patch:
+    """A patch line: its place, as the page, 0 to 3, whose selected RAM page
+    it patches, or as "side1" or "side2", and the offset, the old bytes and the
+    new bytes."""
+
+    def __init__(self, where, page, offset, old, new):
+        self.where = where
+        self.page = page
+        self.offset = offset
+        self.old = old
+        self.new = new
 
 
 def default_name(folder_name):
     """<GAME>: the folder name in upper case, cut to 8 letters and digits."""
     return re.sub(r"[^A-Z0-9]", "", folder_name.upper())[:8]
+
+
+def read_patch(args, where):
+    """A patch line's values: a place, the old bytes, >, the new bytes."""
+    usage = f"{where}: patch takes a place, the old bytes, > and as many new bytes"
+    if ">" not in args:
+        raise GameFileError(usage)
+    split = args.index(">")
+    place, old, new = args[0], args[1:split], args[split + 1:]
+    if not old or len(old) != len(new) or not all(re.fullmatch(r"[0-9A-Fa-f]{2}", b) for b in old + new):
+        raise GameFileError(usage)
+    ram = re.fullmatch(r"page([0-3]):([0-9A-Fa-f]{1,4})", place)
+    tape = re.fullmatch(r"(side[12]):([0-9A-Fa-f]{1,6})", place)
+    if ram:
+        page, offset = int(ram.group(1)), ram.group(2)
+        if int(offset, 16) + len(old) > 0x4000:
+            raise GameFileError(f"{where}: the patch goes past the page's end")
+    elif tape:
+        page, offset = tape.groups()
+    else:
+        raise GameFileError(f"{where}: {place} is not a place: page<n>:<offset>, side1:<offset> or side2:<offset>")
+    return Patch(where, page, int(offset, 16), bytes.fromhex("".join(old)), bytes.fromhex("".join(new)))
 
 
 def number(text, where):
@@ -58,7 +94,7 @@ def read_game(folder):
         except ValueError as e:
             raise GameFileError(f"{where}: {e}")
         key, args = words[0], words[1:]
-        if key in ("cas", "side2", "name", "continue", "service", "capture") and len(args) != 1:
+        if key in ("cas", "side2", "name", "continue", "service", "capture", "rom") and len(args) != 1:
             raise GameFileError(f"{where}: {key} takes one value")
         if key == "cas":
             game.cas = args[0]
@@ -93,8 +129,12 @@ def read_game(folder):
             game.service_no = True
         elif key == "capture":
             game.capture = args[0]
+        elif key == "rom":
+            if args[0] != "keep":
+                raise GameFileError(f"{where}: rom takes keep")
+            game.rom_keep = True
         elif key == "patch":
-            game.patches.append((where, line))
+            game.patches.append(read_patch(args, where))
         else:
             raise GameFileError(f"{where}: unknown key {key}")
     if game.cas is None:

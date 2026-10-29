@@ -1,7 +1,7 @@
 ; SNAPCAS.COM, the snapcas restorer (docs/DESIGN.md, Restorer).
 ;
 ; SNAPCAS <GAME> restores <GAME>.SNP, the snapshot of a cassette game, and
-; starts the game. This version restores images without the tape service.
+; starts the game.
 ;
 ; It runs under MSX-DOS 1, MSX-DOS 2 and Nextor. Its code and its data stay
 ; below 4000h, in page 0, so that pages 1 and 2 are free for its buffers and its
@@ -31,6 +31,7 @@ RG1SAV  equ 0F3E0h      ; the last value written to VDP register 1
 EXBRSA  equ 0FAF8h      ; the sub-ROM's slot ID, 0 on an MSX1
 JIFFY   equ 0FC9Eh      ; counts the VDP's interrupts
 EXPTBL  equ 0FCC1h      ; the main ROM's slot ID, then one byte per slot
+SLTTBL  equ 0FCC5h      ; the subslot register of each slot
 EXTBIO  equ 0FFCAh      ; MSX-DOS 2's extended BIOS
 
 ; The image (DESIGN.md, Image).
@@ -39,6 +40,7 @@ H_ROM   equ HDR+8
 H_SUBROM equ HDR+10
 H_RECS  equ HDR+12
 H_WRITES equ HDR+13
+H_FLAGS equ HDR+14      ; bit 0: T0 does not replace the ROM
 H_REGS  equ HDR+16      ; AF, BC, DE, HL, AF', BC', DE', HL', IX, IY, SP, PC
 H_I     equ HDR+40
 H_IM    equ HDR+41
@@ -54,6 +56,8 @@ T_VRAM   equ 4
 T_ZEROS  equ 5
 
 STACK   equ 4000h
+
+        include "service.inc"
 
         org 0100h
 
@@ -98,8 +102,8 @@ start:
 
         call find_dos
         call check_roms
-        call find_worker_page
         call check_records
+        call find_worker_page
         call allocate
         call read_records
         call wait_motor
@@ -401,8 +405,9 @@ bits_of_page:
 
 ; ---- Step 1: the records ----
 
-; Each record's segment must be within DOS's mapper's size, and this version
-; restores no tape service.
+; Each record's segment must be within DOS's mapper's size. With the tape
+; service, no RAM page for page 0 may be in another subslot of DOS's mapper's
+; slot, and the snapshot changes so that the game finds T0 in page 0.
 check_records:
         ld a,(H_RECS)
         or a
@@ -412,8 +417,31 @@ check_records:
 .record:
         ld a,(ix)
         cp T_SERVICE
-        ld de,t_service
-        jp z,stop_name
+        jr nz,.ram
+        ld (service),a
+        jr .next
+.ram:
+        cp T_RAM+1
+        jr nc,.next
+        ld a,(ix+2)
+        or a
+        jr nz,.size
+        ; A page 0 in DOS's mapper sets bit 0 of p0, in another subslot of its
+        ; slot bit 1.
+        ld a,(dos_slot)
+        cp (ix+1)
+        ld c,1
+        jr z,.p0
+        xor (ix+1)
+        and 3
+        jr nz,.size
+        ld c,2
+.p0:
+        ld a,(p0)
+        or c
+        ld (p0),a
+.size:
+        ld a,(ix)
         cp T_MAPPER
         jr nz,.next
         ld a,(dos_slot)
@@ -431,6 +459,61 @@ check_records:
         ld de,4
         add ix,de
         djnz .record
+        ld a,(service)
+        or a
+        ret z
+        ld a,(p0)
+        bit 1,a
+        ld de,t_page0
+        jp nz,stop_name
+        ; T0 replaces the ROM when page 0 selects it, no RAM page for page 0
+        ; is in DOS's mapper, and the game file has no rom keep: page 0 then
+        ; selects DOS's mapper.
+        rrca
+        jr c,.subslot
+        ld a,(H_FLAGS)
+        rrca
+        jr c,.subslot
+        ld b,0
+        call selected_slot
+        ld hl,EXPTBL
+        cp (hl)
+        jr nz,.subslot
+        ld a,1
+        ld (t0_rom),a
+        ld a,(dos_slot)
+        and 3
+        ld c,a
+        ld a,(H_A8)
+        and 0FCh
+        or c
+        ld (H_A8),a
+.subslot:
+        ; DOS's mapper's subslot in page 0, so that the entry code finds T0
+        ; by the slot register alone.
+        ld a,(dos_slot)
+        bit 7,a
+        ret z
+        and 3
+        ld e,a
+        ld d,0
+        ld hl,H_SUB
+        add hl,de
+        call subslot_bits
+        ld (hl),a
+        ret
+
+; Returns in A the value at HL with its page 0 bits set to DOS's mapper's
+; subslot.
+subslot_bits:
+        ld a,(dos_slot)
+        rrca
+        rrca
+        and 3
+        ld c,a
+        ld a,(hl)
+        and 0FCh
+        or c
         ret
 
 ; ---- Step 2: the segments ----
@@ -533,14 +616,38 @@ allocate:
         ld de,4
         add ix,de
         djnz .hold
+        ; Each service segment, in order, gets one too.
+        ld a,(H_RECS)
+        ld b,a
+        ld ix,H_TABLE
+        ld iy,dest
+        ld hl,svc_segs
+.service:
+        ld a,(ix)
+        cp T_SERVICE
+        jr nz,.snext
+        call take_free
+        ld (iy),a
+        ld (hl),a
+        inc hl
+.snext:
+        inc iy
+        ld de,4
+        add ix,de
+        djnz .service
 .worker:
         call take_free
         ld (worker_seg),a
+        ld a,(t0_rom)
+        or a
+        ret z
+        ld a,(svc_segs)
+        ld (H_MAP),a            ; T0 in page 0
         ret
 
 ; Counts the free segments that the image needs: one for each record of DOS's
-; mapper that does not go into DOS's segment in page 1 or 2, and one for the
-; worker. Stops, naming the segments needed and free, when there are too few.
+; mapper that does not go into DOS's segment in page 1 or 2, one for each
+; service segment, and one for the worker. Stops, naming the segments needed and free, when there are too few.
 count_needs:
         ld c,1
         ld a,(H_RECS)
@@ -549,6 +656,9 @@ count_needs:
         ld b,a
         ld ix,H_TABLE
 .record:
+        ld a,(ix)
+        cp T_SERVICE
+        jr z,.need
         call dos_record
         jr nz,.next
         ld a,(ix+3)
@@ -558,6 +668,7 @@ count_needs:
         inc hl
         cp (hl)
         jr z,.next
+.need:
         inc c
 .next:
         ld de,4
@@ -663,16 +774,20 @@ take_free:
 ; ---- Step 3: the records ----
 
 ; Reads the records in this order: RAM pages of other slots than DOS's
-; mapper, VRAM blocks, then RAM pages of DOS's mapper.
+; mapper, VRAM blocks, service segments, then RAM pages of DOS's mapper.
 read_records:
         ld a,1
+.pass:
+        push af
         call each_record
-        ld a,2
-        call each_record
-        ld a,3
-        jp each_record
+        pop af
+        inc a
+        cp 5
+        jr nz,.pass
+        ret
 
-; Places each record of pass A: 1, other slots; 2, VRAM; 3, DOS's mapper.
+; Places each record of pass A: 1, other slots; 2, VRAM; 3, service segments;
+; 4, DOS's mapper.
 each_record:
         ld (pass),a
         ld a,(H_RECS)
@@ -688,7 +803,14 @@ each_record:
         ld a,(pass)
         cp 2
         jr z,.vram
-        jr nc,.dos
+        jr c,.one
+        cp 3
+        jr nz,.dos
+        ld a,(ix)
+        cp T_SERVICE
+        call z,dos_page
+        jr .next
+.one:
         ld a,(ix)
         cp T_RAM
         jr z,.other
@@ -779,7 +901,7 @@ other_page:
         ld (buffer),hl
         call read_this
         ld hl,(buffer)
-        call fill_tail
+        call fill
         ld a,(ix+2)
         or a
         jr nz,.restorer
@@ -936,14 +1058,29 @@ vram_block:
         ei
         ret
 
-; A RAM page of DOS's mapper, read into its segment through page 2.
+; A RAM page of DOS's mapper or a service segment, read into its segment
+; through page 2. The code segment gets the table of its own and the tape's
+; segments.
 dos_page:
         ld a,(iy)
         call select_p2
         ld hl,8000h
         call read_this
         ld hl,8000h
-        call fill_tail
+        ld a,(ix)
+        cp T_SERVICE
+        jr z,.service
+        call fill
+        jr .back
+.service:
+        ld a,(svc_segs+1)
+        cp (iy)
+        jr nz,.back
+        ld hl,svc_segs+1
+        ld de,8000h+C_SEGS
+        ld bc,SEGS_MAX
+        ldir
+.back:
         ld a,(dos_seg2)
 select_p2:
         push ix
@@ -959,6 +1096,58 @@ read_this:
         ret z
         ld de,t_read
         jp stop_name
+
+; Fills in the values that depend on this machine in the record at IX, which
+; is at HL.
+fill:
+        push hl
+        call fill_tail
+        pop hl
+; With the tape service, when the record at IX is the game's page 3: DOS's
+; mapper's slot ID, T0's segment and the code segment, T0's segment for
+; mapper register FCh when T0 replaces the ROM, and DOS's mapper's subslot in
+; the page 0 bits of SLTTBL.
+        ld a,(service)
+        or a
+        ret z
+        ld a,(ix+2)
+        cp 3
+        ret nz
+        ld b,a
+        push hl
+        call selected_slot
+        pop hl
+        cp (ix+1)
+        ret nz
+        push hl
+        ld de,E_SLOT-0C000h
+        add hl,de
+        ld a,(dos_slot)
+        ld (hl),a
+        inc hl
+        ex de,hl
+        ld hl,svc_segs
+        ldi                     ; E_T0
+        ldi                     ; E_CODE
+        ld a,(t0_rom)
+        or a
+        jr z,.slttbl
+        dec hl
+        dec hl
+        ldi                     ; E_FC
+.slttbl:
+        pop hl
+        ld a,(dos_slot)
+        bit 7,a
+        ret z
+        and 3
+        ld de,SLTTBL-0C000h
+        add a,e
+        ld e,a
+        add hl,de
+        call subslot_bits
+        ld (hl),a
+        ret
 
 ; When the record at IX holds the tail, fills in the values that depend on
 ; this machine (DESIGN.md, Tail): the worker's page's mapper register and its
@@ -1280,7 +1469,7 @@ t_segments: db ": DOS has too few free mapper segments",13,10,"$"
 t_needs:    db ": needs $"
 t_free:     db " free mapper segments, and DOS has $"
 t_crlf:     db 13,10,"$"
-t_service:  db ": needs the tape service, which this version does not restore",13,10,"$"
+t_page0:    db ": a page 0 is in another subslot of DOS's mapper's slot",13,10,"$"
 t_read:     db ": cannot be read",13,10,"$"
 t_notram:   db ": slot "
 t_slot_n:   db "0 page "
@@ -1308,6 +1497,10 @@ m_ps:       db 0                ; DOS's mapper's primary slot
 m_ss:       db 0                ; and subslot
 m_sub:      db 0                ; the snapshot's subslot register of that slot
 worker_seg: db 0
+service:    db 0                ; nonzero with the tape service
+p0:         db 0                ; the RAM pages for page 0, as in check_records
+t0_rom:     db 0                ; 1 when T0 replaces the ROM
+svc_segs:   ds SEGS_MAX+1       ; T0's segment, the code segment, the tape's
 free_count: db 0
 hold_count: db 0
 hold_next:  dw holds

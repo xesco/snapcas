@@ -117,15 +117,19 @@ The test leaves out the games that fail in `openMSX` itself.
 ## Step 5: tape service
 
 This step adds the tape service to `src/service.asm`, `build.py` and `SNAPCAS.COM`
-([Tape service](DESIGN.md#tape-service)), and the machine file `test/nms8250-512k`
-with its machine configuration. The tests capture, build and check `COMPUTAD.CAS`,
-`TOUR-91.CAS` and `GAUNTLET.CAS` on `advanced/phc28s`, and `MOONWALK.CAS` on
-`test/nms8250-512k`, and check that `service` is 1 in each `state.txt`. Each test's
-Tcl script then gives the inputs that reach the game's next load, and checks in T0
-that the tape position moves past its value at the snapshot. For Gauntlet, the
-script sets the joystick's value in register A after `IN A,(0A2h)`, because
-`openMSX` cannot press a joystick from a script. For Moonwalker, the test also
-checks that T0 stays out of page 0.
+([Tape service](DESIGN.md#tape-service)), and the game file's `patch` lines to
+`build.py` ([Game file](DESIGN.md#game-file)), which the scan of step 6 builds on.
+The tests capture, build and check two files on `advanced/phc28s`: `COMPUTAD.CAS`,
+and `GAUNTLET.CAS` with `GAUNTLEB.CAS` as side 2. Each test checks that `service` is
+1 in `state.txt`. For Computad, the Tcl script then presses space, space, 1, RETURN
+and space, which load the first theme, and checks that the tape position in the code
+segment moves to the theme's end. Gauntlet's loaders select the ROM in page 0 from
+their own copy of the slot register, so its game file has `patch` lines for their
+tape calls and for the sum at the end of the main game's block. Its menus read the
+joystick, which `openMSX` cannot press from a script, so the Tcl script clears the
+button's bit in register A after the game reads PSG register 14. The script then
+plays through the intro and the menus to the side 2 prompt, and checks that the main
+game loads to side 1's end and that a level loads from side 2.
 
 ## Step 6: scan
 
@@ -134,6 +138,14 @@ the corpus search of the design's decisions over `CAS_DIR`, runs `build.py` on e
 multi-load file that it finds, and checks that the stub findings in `scan.txt` cover
 the 20 games with stubs. It then runs `check.py` on those games and records which
 findings each one executes.
+
+The step also takes the tests that need the scan:
+
+| File | Machine | What the test checks |
+|---|---|---|
+| `TOUR-91.CAS` | `advanced/phc28s` | That the game's stub reaches the tape service at its next load |
+| `MOONWALK.CAS` | `test/nms8250-512k`, a new machine file with its machine configuration | The same, and that T0 stays out of page 0 |
+| `DESPERAD.CAS` | `advanced/phc28s` | The same, for a loader that selects the ROM in page 0 itself, with `IN A,(0A8h) / AND 0FCh / OR 00h / OUT (0A8h),A` |
 
 ## Step 7: replay
 

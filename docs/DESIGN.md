@@ -21,8 +21,9 @@ in [PLAN.md](PLAN.md).
 | Image | `<GAME>.SNP`, the snapshot in the restorer's format ([Formats](#formats)) |
 | Worker | The part of the restorer that runs in page 1 or 2 while it changes the other pages |
 | Tail | The restore's last code: 26 bytes written below the game's stack pointer |
-| T0 | A RAM copy of the BIOS's page 0 whose tape routines are the tape service's ([Tape service](#tape-service)) |
-| Service segment | A segment that holds T0 or tape data |
+| T0 | A RAM copy of the BIOS's page 0 whose tape routines call the tape service's ([Tape service](#tape-service)) |
+| Code segment | The segment that holds the tape service's routines, then the start of the tape |
+| Service segment | A segment that holds T0, the code segment, or the rest of the tape |
 | Replay | `<GAME>.RPL`, a recording of the load's screen and sound that the restorer can play before the restore ([Replay](#replay)) |
 
 ## Files and commands
@@ -106,13 +107,16 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 | `snapshot` | `at` and a time, at which the capture takes the snapshot | Found by the capture |
 | `capture` | A machine file for the capture: the user's machine without a cartridge that the game's loader trips over, with the same ROMs and the other cartridges in the same slots | The command's machine file |
 | `service` | `no` for a game that never reads the rest of its tape, though blocks of it stay unread. A game can read them only at its end, so `no` is for a game that someone has played to its end | Found by the capture |
-| `patch` | A place, the old bytes, `>`, the new bytes: `patch 1-x-3:0D31 CD E1 00 > CD E1 FC` | None |
+| `patch` | A place, the old bytes, `>`, the new bytes: `patch page3:215F CD E1 00 > CD E1 FC` | None |
+| `rom` | `keep` for a game that must find the ROM in page 0 at the snapshot's slot: T0 does not replace the ROM, and the game reaches the tape service only through calls patched to the entries in page 3 | T0 replaces the ROM when the restorer's rule allows it |
 
-A place is a RAM page as `<ps>-<ss>-<page>:<offset>`, with the offset from the
-page's start, or the tape as `side1:<offset>` or `side2:<offset>`. A patch fits only
-the dump that it was made for, so `build.py` stops with an error when the old bytes
-differ, or when the game file has `patch` lines and `sha1` is missing or differs
-from a CAS file's SHA-1.
+A place is a RAM page as `page<n>:<offset>`, which names the RAM page that the
+snapshot selects in page n, 0 to 3, and the offset from that page's start. A place
+can also be on the tape, as `side1:<offset>` or `side2:<offset>`. Neither form names
+a slot, so a patch line holds on every machine that the game runs on. A patch fits
+only the dump that it was made for, so `build.py` stops with an error when the old
+bytes differ, or when the game file has `patch` lines and `sha1` is missing or
+differs from a CAS file's SHA-1.
 
 ## Shipped files
 
@@ -268,12 +272,13 @@ overwrites a segment changes nothing it keeps:
   an interrupt's entry these bytes are free, because the handler that runs next
   pushes onto them. It stops with an error when they cross a page boundary, include
   FFFFh, or are not in a RAM page that the snapshot keeps.
-- With the tape service, builds T0 and the tape segments from `rom.bin`, the CAS
-  files and `SERVICE.BIN`, writes the entries, the entry code and the reader into
-  the game's page 3, with the snapshot's value of mapper register FCh at FD0Bh, runs
-  the scan, and applies the scan's patches and the `patch` lines
+- With the tape service, builds T0, the code segment and the other tape segments
+  from `rom.bin`, the CAS files and `SERVICE.BIN`, writes the service's part of page
+  3 into the game's page 3, with the snapshot's value of mapper register FCh at
+  FCEDh, runs the scan, and applies the scan's patches and the `patch` lines
   ([Tape service](#tape-service)). It stops with an error when FCC9h to FD88h are
-  not zero at the snapshot, or the tape needs more than 64 segments.
+  not zero at the snapshot or hold the tail, or when the code segment and the tape
+  need more than 64 segments.
 - Prints the most mapper segments that the image can require.
 
 It stops with an error when the version byte of `SERVICE.BIN` is not the one it
@@ -350,16 +355,17 @@ and until step 4 it can stop with a message and return to DOS:
    the records and in the registers that step 6 writes:
    - In the tail: the worker's page's mapper register and its value, and the slot
      register ([Tail](#tail)).
-   - With the tape service, in T0 at 1B04h: T0's segment, then the tape segments.
-   - With the tape service, in the game's page 3 at FD09h: DOS's mapper's slot ID,
-     and at FD0Ah: T0's segment.
+   - With the tape service, in the code segment at 001Ah: the code segment, then
+     the other tape segments.
+   - With the tape service, in the game's page 3 at FCEAh: DOS's mapper's slot ID,
+     T0's segment and the code segment.
    - With the tape service, when DOS's mapper is in an expanded slot, DOS's mapper's
      subslot in the page 0 bits of that slot's subslot register, and in `SLTTBL` in
      the game's page 3, so that the entry code can select T0.
-   - With the tape service, when the snapshot's page 0 selects the main ROM and no
-     RAM page kept for page 0 is in DOS's mapper, T0 replaces the ROM: page 0's slot
-     becomes DOS's mapper, and mapper register FCh and the byte at FD0Bh become T0's
-     segment.
+   - With the tape service, T0 replaces the ROM when the snapshot's page 0 selects
+     the main ROM, no RAM page kept for page 0 is in DOS's mapper, and the game file
+     has no `rom keep` line. Page 0's slot then becomes DOS's mapper, and mapper
+     register FCh and the byte at FCEDh become T0's segment.
 4. Waits until `JIFFY` has advanced by 180, so that a floppy drive's motor stops,
    then disables interrupts. From this point on, it calls neither DOS nor the BIOS.
 5. Performs the port writes.
@@ -381,10 +387,12 @@ The tape service keeps the tape in service segments, and has these parts:
 
 | Part | Location | Function |
 |---|---|---|
-| T0 | A service segment | The BIOS's page 0 with the service's routines from 19DDh to 1B44h |
-| Tape data | Service segments | Side 1, padded with zeros to a multiple of 8 bytes, then side 2 |
+| T0 | A service segment | The BIOS's page 0 with the service's stubs from 19DDh to 1B44h |
+| Code segment | A service segment | The routines, the tape position and the table of the tape's segments, then the start of the tape |
+| Tape data | The code segment, then the other service segments | Side 1, padded with zeros to a multiple of 8 bytes, then side 2 |
 | Entries | FCE1h, FCE4h, FCE7h, in `SLTATR` | Jumps to `TAPION`, `TAPIN` and `TAPIOF` for code that goes around T0 |
-| Entry code | `SLTWRK`, from FD0Ch, after its data at FD09h to FD0Bh | Selects T0 in page 0, calls the routine, and selects the game's page 0 again |
+| Entry code | `SLTWRK`, after its data at FCEAh to FCEEh | Selects T0 in page 0, calls the routine, and selects the game's page 0 again |
+| Trampoline | `SLTWRK` | Selects the code segment in page 0, calls a routine there, and selects T0 again |
 | Reader | `SLTWRK` | `OUT (C),D / LD E,(HL) / OUT (C),B / RET`: reads a tape byte |
 
 `build.py` builds T0 from `rom.bin`, so it first checks that each jump table entry
@@ -401,12 +409,12 @@ ensures that the real ROM equals `rom.bin`.
 | 00F0h | `TAPOOF` | 19DDh, the start of the tape code |
 | 0018h | `OUTDO` | 1B45h, the first byte after the tape code |
 
-The service's routines, their data, the tape position and, from 1B04h, the table of
-T0's segment and up to 64 tape segments fill the 360 bytes from 19DDh to 1B44h.
-`build.py` also points the jump table entry 00F3h, `STMOTR`, at its routine, because
-the BIOS's code, at 1384h on an MSX1 and 1387h on an MSX2, is outside that range.
-The routines behave as the BIOS's: carry is clear on success and set when CTRL+STOP
-is held.
+T0's stubs keep these addresses and leave the rest of the 360 bytes from 19DDh to
+1B44h free. `build.py` also points the jump table entry 00F3h, `STMOTR`, at its
+stub, because the BIOS's code, at 1384h on an MSX1 and 1387h on an MSX2, is outside
+that range. The stubs of `TAPION` and `TAPIN` call the code segment's routines
+through the trampoline, which is in page 3 because it changes page 0. The routines
+behave as the BIOS's: carry is clear on success and set when CTRL+STOP is held.
 
 | Routine | What it does |
 |---|---|
@@ -416,12 +424,37 @@ is held.
 | `TAPOON`, `TAPOUT` | Return with carry set: the tape cannot be written |
 | `STMOTR` | Returns |
 
-`TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's tape
-segment and B T0's segment, the reader selects the tape segment in page 0, reads the
-byte at HL into E, and selects T0 again. The entry code disables interrupts,
-switches to its own stack in `SLTWRK`, selects DOS's mapper and T0 in page 0, calls
-the routine, and selects the game's page 0 and stack again, with mapper register FCh
-set to the value at FD0Bh. It returns with interrupts off, except after `TAPIOF`.
+The code segment holds the service's data, its routines and then the tape, which
+starts at a multiple of 8 bytes. The tape position and the sides' starts and ends
+count bytes from the code segment's start, across the code segment and the tape
+segments after it. The code segment's fields are these:
+
+| Offset | Size | Field |
+|---|---|---|
+| 0000h | 6 | Jumps to `TAPION` and `TAPIN` |
+| 0006h | 3 | The tape position |
+| 0009h | 3 | Side 1's end, which is side 2's start |
+| 000Ch | 3 | Side 2's end, equal to side 1's end without a side 2 |
+| 000Fh | 3 | Side 1's start |
+| 0012h | 8 | The CAS header |
+| 001Ah | 64 | The code segment, then the other tape segments, filled in by the restorer |
+| 005Ah | | The routines, then the tape |
+
+`TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's segment
+and B the code segment, the reader selects the byte's segment in page 0, reads the
+byte at HL into E, and selects the code segment again. The entry code disables
+interrupts, switches to its own stack in `SLTWRK`, selects DOS's mapper and T0 in
+page 0, calls the routine, and selects the game's page 0 and stack again, with
+mapper register FCh set to the value at FCEDh. It returns with interrupts off,
+except after `TAPIOF`. The entry code keeps its data before its code:
+
+| Address | Value |
+|---|---|
+| FCEAh | DOS's mapper's slot ID, filled in by the restorer |
+| FCEBh | T0's segment, filled in by the restorer |
+| FCECh | The code segment, filled in by the restorer |
+| FCEDh | The game's mapper register FCh, from `build.py`, or T0's segment when T0 replaces the ROM |
+| FCEEh | 1 while the entry code runs, so that T0's `TAPIOF` leaves interrupts off |
 
 The tape position starts where the game stopped reading at the snapshot, and moves
 on these events. The routines read the keyboard matrix through the PPI.
@@ -436,19 +469,25 @@ on these events. The routines read the keyboard matrix through the PPI.
 ### Scan
 
 With the tape service, `build.py` scans the snapshot's RAM pages and the unread
-blocks of both sides for code that reaches the tape without going through T0,
-applies the patches, and lists each finding and patch in `scan.txt`:
+blocks of both sides for code that reaches the tape without going through T0, and
+lists each finding in `scan.txt`. It patches the findings in the RAM pages. In an
+unread block it only lists them, for `patch` lines, because a loader usually checks
+a block against a sum stored at the block's end, and each loader computes that sum
+in its own way. The scan looks for this code:
 
 | Code | Bytes | Patch |
 |---|---|---|
 | A stub built with `TAPION`'s entry: `LD DE,00E1h / PUSH DE / LD DE,CDD9h / PUSH DE`, or the same with HL | `11 E1 00 D5 11 D9 CD D5`, or `21 E1 00 E5 21 D9 CD E5` | `E1 00` becomes `E1 FC` |
-| A tape call after the ROM is selected in page 0: `IN A,(0A8h) / AND 0F0h / OUT (0A8h),A`, then `CALL 00E1h` or `CALL 00E4h` within 16 bytes | `DB A8 E6 F0 D3 A8`, then `CD E1 00` or `CD E4 00` | The call's `00` becomes `FC` |
+| A call of a tape routine: `CALL 00E1h`, `CALL 00E4h` or `CALL 00E7h` | `CD E1 00`, `CD E4 00` or `CD E7 00` | The call's `00` becomes `FC` |
 | A reader of the cassette signal: `IN A,(0A2h)`, then within 4 bytes `RLA`, `RLCA`, `BIT 7,A` or `AND 80h` | `DB A2`, then `17`, `07`, `CB 7F` or `E6 80` | None: listed, for a `patch` line that sends its callers to the service |
 
 The stub stores `TAPION`'s address in RAM, and the game later changes its low byte
-to E4h for `TAPIN`, so the entries keep the BIOS's low bytes. A stub that pushes
-00EAh, `TAPOON`, writes the tape, and the scan leaves it alone. A patch in code that
-ran only during the load is harmless.
+to E4h for `TAPIN`, so the entries keep the BIOS's low bytes. A patched call goes to
+an entry in page 3, which selects T0 in page 0 whatever page 0 holds. So the patch
+also serves a loader that selects the ROM in page 0 itself, from its own copy of the
+slot register. A stub that pushes 00EAh, `TAPOON`, writes the tape, and the scan
+leaves it alone. A patch in code that ran only during the load is harmless, but a
+call's 3 bytes can also be data, where the patch changes one byte.
 
 ## Replay
 
@@ -534,6 +573,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | Replay a recording of the load, not the load | Loading again on the real machine, through the tape service from the start, brings back what the snapshot avoids: loaders that go around T0 through their own slot code, loaders that use the page 0 RAM where T0 is, and loaders that trip over the machine's slots |
 | Tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register. Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave the ROM there at the snapshot: Moonwalker and Time Out |
+| `rom keep` in the game file, not a rule of the restorer | T0 in page 0 serves a BASIC program, whose tape calls are in the ROM and cannot be patched, but it changes the slot register's page 0 bits. Gauntlet's RAM search adds the slot that it finds to those bits, expecting the ROM's slot 0, and selects an empty slot |
 | Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games. Of those games, 20 build stubs that T0 alone does not intercept |
 | Rewind the capture with `savestate` and `loadstate` | `openMSX`'s `reverse goto` replays the input recorded after its target, while each key try must start from the saved moment with no other input |
 | A tape with both sides, a wrap, and fixed rewind and flip keys | In 41 of those 51 games the unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
@@ -570,7 +610,8 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 | 10 | 2 | CRC-16 of the sub-ROM's 16 KB, or 0 on an MSX1 |
 | 12 | 1 | Number of records |
 | 13 | 1 | Number of port writes |
-| 14 | 2 | Zero |
+| 14 | 1 | Flags: bit 0 set for `rom keep` ([Game file](#game-file)) |
+| 15 | 1 | Zero |
 | 16 | 24 | AF, BC, DE, HL, AF', BC', DE', HL', IX, IY, SP, PC |
 | 40 | 1 | I |
 | 41 | 1 | Interrupt mode |
@@ -632,12 +673,20 @@ that it names:
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 1 | Version: 2. `build.py` stops with an error on any other |
+| 0 | 1 | Version: 3. `build.py` stops with an error on any other |
 | 1 | 1 | Number of parts |
 | 2 | 4 per part | Each part's offset and length in the file, 2 bytes each |
 
-Part 0 is the tail ([Tail](#tail)), with the operands that `build.py` and the
-restorer fill in set to 0.
+The parts hold the code that `build.py` places, with the operands and the data
+that `build.py` and the restorer fill in set to 0:
+
+| Part | What it holds |
+|---|---|
+| 0 | The tail ([Tail](#tail)) |
+| 1 | T0's stubs, for 19DDh to 1B44h ([Tape service](#tape-service)) |
+| 2 | The service's part of page 3, for FCE1h to FD88h |
+| 3 | The code segment's data and routines, from 0000h, up to the tape's start |
+| 4 | The addresses of `STMOTR`'s stub, of the tape position in the code segment and of the byte at FCEDh, with the most segments that the code segment and the tape can use, 2 bytes each |
 
 ### Replay stream
 

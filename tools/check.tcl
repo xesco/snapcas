@@ -25,12 +25,16 @@ proc start_check {} {
     set ::dosslot 0
     lassign $::C(com) b0 b1 b2
     debug set_bp 0x0100 "\[debug read memory 0x100\] == $b0 && \[debug read memory 0x101\] == $b1 && \[debug read memory 0x102\] == $b2" { set ::dosslot [debug read memory 0xF344] }
+    # With the tape service, page 0's bits of the slot register, of DOS's
+    # mapper's subslot register, and of SLTTBL, and mapper register FCh, can
+    # select T0 (DESIGN.md, Restorer, step 3).
+    set ::p0mask [expr {$::C(service) ? 0xFC : 0xFF}]
     set jp [expr {$::C(tail) + 21}]
     set ::reached 0
     # The slot register alone can match DOS's own, so the breakpoint also
     # needs the jump to the snapshot's program counter.
     set target [expr {$::C(tail) + 22}]
-    debug set_bp $jp "\[debug read ioports 0xA8\] == $::C(a8) && \[debug read memory $target\] == [expr {$::C(pc) & 0xFF}] && \[debug read memory [expr {$target + 1}]\] == [expr {$::C(pc) >> 8}]" { if {!$::reached} { set ::reached 1; safe_check } }
+    debug set_bp $jp "(\[debug read ioports 0xA8\] & $::p0mask) == ($::C(a8) & $::p0mask) && \[debug read memory $target\] == [expr {$::C(pc) & 0xFF}] && \[debug read memory [expr {$target + 1}]\] == [expr {$::C(pc) >> 8}]" { if {!$::reached} { set ::reached 1; safe_check } }
     after time 120 {
         if {!$::reached} {
             lappend ::diffs "the tail's jump did not run within 120 seconds"
@@ -70,7 +74,7 @@ proc compare {} {
     }
     if {([reg IFF] & 1) != ([scan $::K(iff) %x] & 1)} { note "IFF1 is [expr {[reg IFF] & 1}], expected $::K(iff)" }
     set a8 [debug read ioports 0xA8]
-    if {$a8 != [scan $::K(a8) %x]} { note "the slot register is [hex2 $a8], expected $::K(a8)" }
+    if {($a8 & $::p0mask) != ([scan $::K(a8) %x] & $::p0mask)} { note "the slot register is [hex2 $a8], expected $::K(a8)" }
     if {[debug read ioports 0xAA] != [scan $::K(ppic) %x]} { note "PPI port C is [hex2 [debug read ioports 0xAA]], expected $::K(ppic)" }
     # When the worker's page does not select DOS's mapper's slot at the
     # snapshot, that page's bits of the slot's subslot register can differ
@@ -79,9 +83,9 @@ proc compare {} {
     set mps [expr {$::dosslot & 3}]
     foreach ps {0 1 2 3} {
         if {$::K(sub$ps) eq "-"} { continue }
-        set mask 0xFF
+        set mask [expr {$ps == $mps ? $::p0mask : 0xFF}]
         if {$ps == $mps && (([scan $::K(a8) %x] >> (2 * $wpage)) & 3) != $mps} {
-            set mask [expr {~(3 << (2 * $wpage)) & 0xFF}]
+            set mask [expr {$mask & ~(3 << (2 * $wpage))}]
         }
         if {([subslot_reg $ps] & $mask) != ([scan $::K(sub$ps) %x] & $mask)} {
             note "slot $ps's subslot register is [hex2 [subslot_reg $ps]], expected $::K(sub$ps)"
@@ -89,7 +93,7 @@ proc compare {} {
     }
     if {"MSX Memory Mapper I/O" in [debug list]} {
         foreach p {0 1 2 3} r {fc fd fe ff} {
-            if {$::K($r) ne "-" && [debug read {MSX Memory Mapper I/O} $p] != [scan $::K($r) %x]} {
+            if {$::K($r) ne "-" && !($p == 0 && $::C(service)) && [debug read {MSX Memory Mapper I/O} $p] != [scan $::K($r) %x]} {
                 note "mapper register $r is [hex2 [debug read {MSX Memory Mapper I/O} $p]], expected $::K($r)"
             }
         }
@@ -123,8 +127,8 @@ proc compare {} {
     set have [debug read_block "physical VRAM" 0 [string length $want]]
     if {$have ne $want} { note "VRAM differs at [format %05X [first_difference $have $want]]" }
 
-    # The RAM pages, except the tail's bytes, FCC9h to FD88h and FFFFh in an
-    # expanded slot.
+    # The RAM pages, except the tail's bytes, FCC9h to FD88h, FFFFh in an
+    # expanded slot, the patched bytes, and with the tape service SLTTBL.
     foreach path [lsort [glob -nocomplain [file join $::C(snap) ram *.bin]]] {
         lassign [split [file rootname [file tail $path]] -] ps ss page seg
         set f [open $path rb]
@@ -135,7 +139,9 @@ proc compare {} {
         set skip {}
         if {$page == ($::C(tail) >> 14)} { lappend skip [expr {$::C(tail) - $base}] [expr {$::C(tail) - $base + 25}] }
         if {$page == 3} { lappend skip [expr {0xFCC9 - $base}] [expr {0xFD88 - $base}] }
+        if {$page == 3 && $::C(service)} { lappend skip [expr {0xFCC5 - $base}] [expr {0xFCC8 - $base}] }
         if {$page == 3 && $ss ne "x"} { lappend skip 0x3FFF 0x3FFF }
+        foreach {at from to} $::C(patched) { if {$at eq "$ps-$ss-$page"} { lappend skip $from $to } }
         set at [first_difference $have $want $skip]
         if {$at >= 0} { note "RAM $ps-$ss-$page differs at [format %04X [expr {$base + $at}]]" }
     }

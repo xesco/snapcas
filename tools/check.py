@@ -28,7 +28,14 @@ import msx  # noqa: E402
 TIMEOUT = 600  # real seconds for one check
 
 
-def settings(state, snap, image, report, check_dir, state_name):
+def selected_name(state, page):
+    """The primary slot and subslot, as ram/ file names write them, that the
+    snapshot selects in a page."""
+    ps, ss = build.selected(state, page)
+    return ps, "x" if ss is None else ss
+
+
+def settings(state, snap, image, report, check_dir, state_name, patches):
     """Tcl variables for check.tcl."""
     with open(image, "rb") as f:
         header = f.read(4096)
@@ -46,9 +53,14 @@ def settings(state, snap, image, report, check_dir, state_name):
         "state": state_name,
         "tail": str(tail),
         "a8": str(header[43]),
+        "service": "1" if any(header[64 + 4 * n] == build.SERVICE_SEGMENT for n in range(header[12])) else "0",
         "regs": "{" + values + "}",
         "pc": str(int(state["pc"], 16)),
         "kv": "{" + " ".join(f"{k} {v}" for k, v in keep.items()) + "}",
+        # The RAM pages' patched bytes, as ps-ss-page, first and last offset.
+        "patched": "{" + " ".join(
+            "{}-{}-{} {} {}".format(*selected_name(state, p.page), p.page, p.offset, p.offset + len(p.old) - 1)
+            for p in patches if p.page not in ("side1", "side2")) + "}",
     }
     return "".join(f"set ::C({k}) {v}\n" for k, v in s.items())
 
@@ -97,7 +109,7 @@ def main():
         procedures = f.read()
     with open(os.path.join(HERE, "check.tcl")) as f:
         check = f.read()
-    script = (settings(state, snap, image, report, check_dir, state_name)
+    script = (settings(state, snap, image, report, check_dir, state_name, game.patches)
               + procedures + check
               + "\nboot {" + msx.boot_steps(machine) + "} start_check\n")
     try:
