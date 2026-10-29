@@ -94,7 +94,7 @@ start:
         jp nz,stop_name
         ld hl,HDR
         ld de,t_mark
-        ld b,8
+        ld b,7
 .mark:
         ld a,(de)
         cp (hl)
@@ -102,6 +102,12 @@ start:
         inc hl
         inc de
         djnz .mark
+        ; The mark's last character is the format's number: another number
+        ; means an image for another version of SNAPCAS.COM.
+        ld a,(de)
+        cp (hl)
+        ld de,t_version
+        jp nz,stop_name
 
         call find_dos
         call check_roms
@@ -1539,6 +1545,7 @@ t_usage:    db "Usage: SNAPCAS <game>",13,10
 t_ext:      db ".SNP$"
 t_notfound: db " not found",13,10,"$"
 t_notimage: db " is not a snapcas image",13,10,"$"
+t_version:  db ": made for another version of SNAPCAS.COM",13,10,"$"
 t_onemapper: db ": DOS's pages are not in one memory mapper",13,10,"$"
 t_roms:     db ": made for another machine: its ROMs differ from this one's",13,10,"$"
 t_noworker: db ": no page 1 or 2 can hold the restorer's worker at the end",13,10,"$"

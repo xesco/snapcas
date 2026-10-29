@@ -268,9 +268,29 @@ proc step3 {} {
     schedule_keys
     if {$::S(snapat) ne ""} {
         later $::S(snapat) step6
+        if {$::S(cload)} { set ::since ""; run_after_cload }
     } else {
         start_wait
     }
+}
+
+# With snapshot at, no wait decides anything, but a CLOAD still needs its RUN:
+# typed as poll types it, when the motor has run and stopped for 1 second.
+proc run_after_cload {} {
+    note_motor
+    if {[motor_on]} {
+        set ::st(on_seen) 1
+        set ::since ""
+    } elseif {$::st(on_seen)} {
+        if {$::since eq ""} { set ::since [now] }
+        if {[now] - $::since >= 1} {
+            set ::st(ran) 1
+            type "RUN\r"
+            logev "typed RUN"
+            return
+        }
+    }
+    later 0.1 run_after_cload
 }
 
 # 4. The keys, each at its time from the load command; those still to come

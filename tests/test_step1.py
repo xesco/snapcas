@@ -17,10 +17,13 @@ class Step1(unittest.TestCase):
         os.makedirs(WORK, exist_ok=True)
         autoexec = os.path.join(WORK, "AUTOEXEC.BAT")
         with open(autoexec, "w", newline="") as f:
-            f.write("SNAPCAS\r\nSNAPCAS NONE\r\nSNAPCAS SHORT\r\nSNAPCAS BAD\r\n")
+            f.write("SNAPCAS\r\nSNAPCAS NONE\r\nSNAPCAS SHORT\r\nSNAPCAS BAD\r\nSNAPCAS OLD\r\n")
         bad = os.path.join(WORK, "BAD.SNP")
         with open(bad, "wb") as f:
-            f.write(b"SNAPCAS9" + bytes(4088))
+            f.write(b"SNAPDISK" + bytes(4088))
+        old = os.path.join(WORK, "OLD.SNP")
+        with open(old, "wb") as f:
+            f.write(b"SNAPCAS2" + bytes(4088))
         short = os.path.join(WORK, "SHORT.SNP")
         with open(short, "wb") as f:
             f.write(b"SNA")
@@ -28,16 +31,18 @@ class Step1(unittest.TestCase):
         msx.make_disk(disk, [os.path.join(NEXTOR, "NEXTOR.SYS"),
                              os.path.join(NEXTOR, "COMMAND2.COM"),
                              os.path.join(ROOT, "bin", "SNAPCAS.COM"),
-                             autoexec, bad, short])
+                             autoexec, bad, old, short])
         machine = msx.read_machine(
             os.path.join(ROOT, "machines", "advanced", "phc28s.txt"))
-        screen = msx.screen_after(machine, disk, "BAD.SNP is not",
+        screen = msx.screen_after(machine, disk, "OLD.SNP: made",
                                   os.path.join(WORK, "screen.txt"))
         self.assertIn("Usage: SNAPCAS <game>", screen)
         self.assertIn("Restores <game>.SNP, a snapcas image.", screen)
         self.assertIn("NONE.SNP not found", screen)
         self.assertIn("SHORT.SNP is not a snapcas image", screen)
         self.assertIn("BAD.SNP is not a snapcas image", screen)
+        # The message wraps at the screen's width.
+        self.assertIn("OLD.SNP: made for another version of SNAPCAS.COM", " ".join(screen.split()))
 
 
 if __name__ == "__main__":

@@ -324,6 +324,9 @@ and until step 4 it can stop with a message and return to DOS:
    extension set to SNP. Without a name, it prints its usage. It reads the image's
    first 4,096 bytes with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`, and
    checks:
+   - That the image starts with `SNAPCAS` and the format's number of this
+     `SNAPCAS.COM` ([Image](#image)). An image with another number gets a message
+     that it was made for another version of `SNAPCAS.COM`.
    - That `RAMAD0` to `RAMAD3` name one slot, DOS's mapper.
    - That the CRC-16 of the main ROM and of the sub-ROM equal the image's. The
      worker reads them in page 2, with pages 0 and 1 selecting the ROM.
@@ -754,15 +757,22 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 - DOS's four pages must be in one memory mapper, with enough free segments for the
   image's holding and service segments and the worker. A game with a long tape needs
   a large mapper: Moonwalker's 236 KB tape does not fit in an NMS 8250's 128 KB.
-- A game with the tape service runs only if its page 3 keeps 168 bytes from an
-  address xxE1h free for the service's part of page 3, at the snapshot and in every
-  later load ([Build](#build)).
+- A game with the tape service needs one of two things. Either its page 3 keeps 168
+  bytes from an address xxE1h free for the service's part of page 3, at the snapshot
+  and in every later load ([Build](#build)). Or the game file has `service t0` and
+  the game meets that mode's conditions
+  ([Without a part in page 3](#without-a-part-in-page-3)).
 - A game that reads the tape with its own code gets no tape service, so it runs only
   if it loads in a single pass.
 - The replay is a recording: a loader that lets the player act while it loads shows
   only what happened in the capture.
 - A snapshot taken without an interrupt overwrites the 26 bytes below the stack
   pointer with the tail.
+- Music that BASIC's `PLAY` statement is still playing at the snapshot does not
+  resume on a real Sanyo PHC-28S, though it does in `openMSX`, and the cause is not
+  known. Tokyo Nampa Street then waits for its music to end and never does. Its game
+  file's `snapshot at` comes after the music, and with it the game runs on the real
+  machine.
 
 ## Formats
 
