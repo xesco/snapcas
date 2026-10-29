@@ -98,7 +98,10 @@ proc compare {} {
             }
         }
     }
+    # Register 14 is an input on an MSX, the joystick lines and the cassette
+    # signal at the moment it is read, so the restore cannot set it.
     for {set r 0} {$r < 16} {incr r} {
+        if {$r == 14} continue
         set v [debug read {PSG regs} $r]
         set e [scan $::K(psg$r) %x]
         if {$r == 7} { set v [expr {$v & 0x3F}]; set e [expr {$e & 0x3F}] }

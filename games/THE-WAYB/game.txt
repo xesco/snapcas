@@ -1,4 +1,0 @@
-# The Way Of The Tiger (忍者タイガー) (1986)(Tomo Soft International)(Tape 2 Side B - Samurai Sword Fighting).CAS
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Way%20Of%20The%20Tiger%20(%E5%BF%8D%E8%80%85%E3%82%BF%E3%82%A4%E3%82%AC%E3%83%BC)%20(1986)(Tomo%20Soft%20International)(Tape%202%20Side%20B%20-%20Samurai%20Sword%20Fighting).zip
-cas THE-WAYB.CAS
-sha1 8b16302112eea9bb5874d9a5a34c875d7b951860

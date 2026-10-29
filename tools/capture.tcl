@@ -131,8 +131,11 @@ proc mapper_size {page} {
 
 proc quit {} {
     catch { delete_savestate $::S(state) }
+    catch { delete_savestate $::S(state)-tapion }
+    catch { delete_savestate $::S(state)-tapion-saved }
     exit
 }
+proc savestate_file {name} { file join $::env(OPENMSX_HOME) savestates $name.oms }
 proc fail {msg} {
     set f [open [file join $::S(snap) error.txt] w]
     puts $f "capture: $msg"
@@ -192,7 +195,13 @@ proc on_ffff {value} {
     }
 }
 
+# Each TAPION call's entry is saved, with ::st, as a moment for the snapshot
+# when it would otherwise come inside the BIOS's tape routines (step 6).
 proc on_tapion {} {
+    if {!$::S(nosvc)} {
+        savestate $::S(state)-tapion
+        set ::tapion_st [array get ::st]
+    }
     incr ::st(tapion)
     set next ""
     foreach h $::S(headers) { if {$h >= $::st(pos)} { set next $h; break } }
@@ -341,6 +350,12 @@ proc poll {} {
             savestate $::S(state)
             set ::saved 1
             set ::saved_st [array get ::st]
+            # The last TAPION entry as at this moment, for a rewind to it.
+            unset -nocomplain ::saved_tapion_st
+            if {[info exists ::tapion_st]} {
+                file copy -force [savestate_file $::S(state)-tapion] [savestate_file $::S(state)-tapion-saved]
+                set ::saved_tapion_st $::tapion_st
+            }
         } elseif {$off >= 30 && [now] - $::t0 >= $::S(lastkey)} {
             wait_ended
             return
@@ -350,6 +365,13 @@ proc poll {} {
 }
 
 proc rewind {} {
+    # The last TAPION entry is the one at the rewind's moment: one saved
+    # after it is not in the new run.
+    unset -nocomplain ::tapion_st
+    if {[info exists ::saved_tapion_st]} {
+        file copy -force [savestate_file $::S(state)-tapion-saved] [savestate_file $::S(state)-tapion]
+        set ::tapion_st $::saved_tapion_st
+    }
     loadstate $::S(state)
     array unset ::st
     array set ::st $::saved_st
@@ -442,11 +464,39 @@ proc fallback2 {} {
         [debug read memory [expr {($pc - 1) & 0xFFFF}]] == 0x76} {
         fail "the CPU is halted with no interrupt, at [format %04X $pc]"
     }
-    if {$::st(service) && [rom0] && $pc >= 0x19DD && $pc <= 0x1B44} {
-        fail "the program counter is in the BIOS's tape code, at [format %04X $pc]"
+    if {$::st(service) && [in_tape_code $pc]} {
+        # T0 replaces that code, so the snapshot goes back to the last TAPION
+        # call's entry, where the call has not run: at its jump table entry,
+        # the restored game reaches the tape service.
+        if {![info exists ::tapion_st]} {
+            fail "the CPU is in the BIOS's tape code, at [format %04X $pc], with no TAPION call saved"
+        }
+        set service $::st(service)
+        loadstate $::S(state)-tapion
+        array unset ::st
+        array set ::st $::tapion_st
+        set ::st(service) $service
+        decide "snapshot at the last TAPION call's entry, because the CPU is in the BIOS's tape code"
+        take_snapshot 0x00E1
+        return
     }
     decide "snapshot without an interrupt"
     take_snapshot
+}
+# The CPU is in the BIOS's tape code, 19DDh to 1B44h, or in a routine of page
+# 0's ROM that it calls, such as BREAKX, when one of the 8 words on top of the
+# stack is an address there.
+proc in_tape_code {pc} {
+    if {![rom0]} { return 0 }
+    if {$pc >= 0x19DD && $pc <= 0x1B44} { return 1 }
+    if {$pc >= 0x4000} { return 0 }
+    set sp [reg SP]
+    for {set n 0} {$n < 8} {incr n} {
+        set a [expr {($sp + 2 * $n) & 0xFFFF}]
+        set w [expr {[debug read memory $a] | ([debug read memory [expr {($a + 1) & 0xFFFF}]] << 8)}]
+        if {$w >= 0x19DD && $w <= 0x1B44} { return 1 }
+    }
+    return 0
 }
 
 proc hex {width value} { format %0${width}X $value }
@@ -456,10 +506,13 @@ proc write_file {name data} {
     close $f
 }
 
-proc take_snapshot {} {
+# pc, when given, takes the program counter's place: a TAPION call's jump
+# table entry.
+proc take_snapshot {{pc {}}} {
     set state {}
     foreach r {AF BC DE HL AF2 BC2 DE2 HL2 IX IY SP PC} {
-        lappend state "[string tolower $r] [hex 4 [reg $r]]"
+        set v [expr {$r eq "PC" && $pc ne "" ? $pc : [reg $r]}]
+        lappend state "[string tolower $r] [hex 4 $v]"
     }
     lappend state "i [hex 2 [reg I]]" "im [hex 1 [reg IM]]" "iff [hex 1 [expr {[reg IFF] & 1}]]"
     set a8 [debug read ioports 0xA8]

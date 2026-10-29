@@ -1,4 +1,0 @@
-# sanyo wavy 10 lightpen graphics_side b.CAS
-# https://download.file-hunter.com/Games/MSX1/CAS/sanyo%20wavy%2010%20lightpen%20graphics_side%20b.zip
-cas SANYOB.CAS
-sha1 45a254be32167d2722a50355b673ea39cde74892

@@ -1,4 +1,0 @@
-# Enjoy Triangle v3 tape 1 side B - The Mysterious Concert.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Enjoy%20Triangle%20volume%203%20(1986)(BAIT-AL-HIKMA)(ja)%5Bcas%5D.zip
-cas ENJOYTHE.CAS
-sha1 2f29f94873dfb144161118bfd6f0e2a608d6e4a4

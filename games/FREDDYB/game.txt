@@ -1,4 +1,0 @@
-# Freddy Hardest Side B[RUN'CAS-'].cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Freddy%20Hardest%20Side%20B%5BRUN'CAS-'%5D.zip
-cas FREDDYB.CAS
-sha1 2d01e1d0f6c7f525fa36c5cd5c8d917c67c0e35e

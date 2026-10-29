@@ -1,4 +1,0 @@
-# The Way Of The Tiger (1986)(Gremlin Graphics Software)(GB)(Tape 2 of 2 Side B - Samurai Sword Fighting).cas
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Way%20Of%20The%20Tiger%20(1986)(Gremlin%20Graphics%20Software)(GB)(Tape%202%20of%202%20Side%20B%20-%20Samurai%20Sword%20Fighting).zip
-cas THE-WAOF.CAS
-sha1 8b16302112eea9bb5874d9a5a34c875d7b951860

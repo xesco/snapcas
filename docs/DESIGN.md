@@ -164,14 +164,15 @@ in `games/`, in a folder named after the short name of its side 1 CAS file, such
 game file starts with two comments: the game's File-Hunter name, and the link to its
 zip in File-Hunter's MSX1 CAS folder, which a few games lack because the folder does
 not list them. The game file then has the `sha1` of its dumps, which finds a dump
-whatever its file name. Its `side2` lines pair the Side A and Side B files of a
-game, its `continue` lines come from the key that the capture reports, its
-`service no` lines from games played to their end, and its `patch` lines from
-`check.py` and from traces of failed loads. The lines that hold only on the Sanyo
-PHC-28S are in the game's machine's game file, `advanced-phc28s.txt`
-([Game file](#game-file)): 38 games have one, and the other game files hold on any
-machine. It also ships these machine files, each checked with `check.py` and a
-single-load game:
+whatever its file name. A side B, a later tape of a set or an expansion, which the
+collection's `SIDES.TXT` lists, needs a tape before it, so it has no game file of
+its own. Its `side2` lines pair the Side A and Side B files of a game, its
+`continue` lines come from the key that the capture reports, its `service no` lines
+from games played to their end, and its `patch` lines from `check.py` and from
+traces of failed loads. The lines that hold only on the Sanyo PHC-28S are in the
+game's machine's game file, `advanced-phc28s.txt` ([Game file](#game-file)): 38
+games have one, and the other game files hold on any machine. It also ships these
+machine files, each checked with `check.py` and a single-load game:
 
 | File | Configuration |
 |---|---|
@@ -259,9 +260,17 @@ or step 5 restarts more than 20 times. It performs the following steps:
    in mode 2, takes the snapshot there: the return address is pushed and interrupts
    are off. When no such interrupt comes within 1 second, it takes the snapshot
    where the CPU is. It stops with an error when the CPU is then halted, which
-   `openMSX` shows as a program counter just after a HALT (76h) that does not move,
-   or when the game gets the tape service and the program counter is in the main
-   ROM's 19DDh to 1B44h.
+   `openMSX` shows as a program counter just after a HALT (76h) that does not move.
+   When the game gets the tape service and the CPU is in the BIOS's tape code, T0
+   replaces that code, so the snapshot goes back to the last `TAPION` call's entry,
+   with the program counter at its jump table entry, 00E1h. The call has not run
+   there, so the restored game makes it to the tape service. Saint Dragon reads its
+   tape with interrupts off, and Thunder Blade waits in `TAPION` for side 2, so
+   their snapshots come this way. The CPU is in the tape code when the main ROM is
+   in page 0 and the program counter is in 19DDh to 1B44h, or is below 4000h with
+   one of the 8 words on top of the stack in that range, as in `BREAKX`, which the
+   tape code calls. The capture saves the machine at each `TAPION` call's entry for
+   this, and a rewind of step 5 puts back the entry saved with its moment.
 
 The game gets the tape service when the `TAPION` and `TAPIN` breakpoints fired and
 either side 1 is not read or the game file has `side2`, unless the game file has
@@ -755,10 +764,11 @@ that disk and the `boot` keys, and writes its report to `check/report.txt`:
    a message of the restorer: the kept RAM pages, the stored VRAM blocks and the
    registers must be equal. The exceptions are the tail's bytes, FCC9h to FD88h, the
    tape service's part of page 3 when it moved, FFFFh in an expanded slot, the
-   patched bytes, R, PSG register 7's bits 7 and 6, the bits of the worker's page in
-   the subslot register of DOS's mapper's slot when that page does not select the
-   slot, and the values that restorer step 3 changes for the tape service. A
-   difference or a timeout fails the check.
+   patched bytes, R, PSG register 7's bits 7 and 6, PSG register 14, an input whose
+   value is the joystick lines and the cassette signal, the bits of the worker's
+   page in the subslot register of DOS's mapper's slot when that page does not
+   select the slot, and the values that restorer step 3 changes for the tape
+   service. A difference or a timeout fails the check.
 2. The game runs for 60 seconds, saved with `savestate` every 10 seconds as
    `check/10s.oms` to `check/60s.oms`, and a breakpoint on each scan finding in a
    kept RAM page reports which findings the game executes. `openMSX` loads such a
