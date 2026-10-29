@@ -138,4 +138,9 @@ passes and failures.
 The user runs the corpus on the Sanyo PHC-28S with the Sony HBM-64 in slot 1 and the
 Carnivore2 in slot 2, and the results go in this page, with the machine and
 cartridges named. A failure that `openMSX` does not show goes in the design's limits
-until it is understood.
+until it is understood. `make try` starts `openMSX` with the same machine and the
+same files, to compare.
+
+| Date | Machine | Images | Result |
+|---|---|---|---|
+| 2026-10-29 | Sanyo PHC-28S, Sony HBM-64 in slot 1, Carnivore2 in slot 2, Nextor 2.1 | `FREDDY.IMG`, `FERNANDO.IMG`, `MOONRIDE.IMG`, `CALDERO.IMG`, from step 4 | All four games run |

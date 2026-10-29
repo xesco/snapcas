@@ -128,6 +128,7 @@ def make_disk(image, files):
     files. Nextor reads such a device from its first sector, and MSX-DOS 1 and
     MSX-DOS 2 read it as a floppy disk."""
     image = os.path.abspath(image)
+    os.makedirs(os.path.dirname(image), exist_ok=True)
     if os.path.exists(image):
         os.unlink(image)
     result = image + ".txt"
@@ -136,10 +137,12 @@ def make_disk(image, files):
     lines += [f"diskmanipulator import virtual_drive {tcl_word(os.path.abspath(p))}"
               for p in files]
     lines += ["virtual_drive eject"]
-    script = (f"set f [open {tcl_word(result)} w]\n"
-              "if {[catch {\n" + "\n".join(lines) + "\n} e]} { puts $f $e }\n"
-              "close $f; exit\n")
+    script = ("if {[catch {\n" + "\n".join(lines) + "\n} e]} { set error $e } else { set error {} }\n"
+              f"catch {{ set f [open {tcl_word(result)} w]; puts $f $error; close $f }}\n"
+              "exit\n")
     run(["-machine", DISK_MACHINE], script, timeout=60)
+    if not os.path.exists(result):
+        raise RuntimeError(f"{image}: openMSX did not write the disk image")
     with open(result) as f:
         error = f.read().strip()
     os.unlink(result)

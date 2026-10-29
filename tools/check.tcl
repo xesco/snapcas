@@ -1,0 +1,132 @@
+# The check (docs/DESIGN.md, Check), after capture.tcl's procedures, which it
+# uses to read memory through the CPU's view. tools/check.py sets ::C.
+
+array set ::K $::C(kv)
+set ::diffs {}
+
+proc note {msg} { if {[llength $::diffs] < 40} { lappend ::diffs $msg } }
+
+proc write_report {} {
+    set f [open $::C(report) w]
+    if {[llength $::diffs] == 0} {
+        puts $f "point 1: pass"
+    } else {
+        puts $f "point 1: fail"
+        foreach d $::diffs { puts $f "  $d" }
+    }
+    close $f
+}
+
+proc start_check {} {
+    # EXPTBL, read while the system area is still DOS's.
+    set ::exptbl [lmap ps {0 1 2 3} {debug read memory [expr {0xFCC1 + $ps}]}]
+    set jp [expr {$::C(tail) + 16}]
+    set ::reached 0
+    debug set_bp $jp "\[debug read ioports 0xA8\] == $::C(a8)" { if {!$::reached} { set ::reached 1; safe_check } }
+    after time 120 { if {!$::reached} { lappend ::diffs "the tail's jump did not run within 120 seconds"; write_report; exit } }
+}
+
+proc safe_check {} {
+    if {[catch compare e]} { lappend ::diffs "check: $e" }
+    write_report
+    set ::n 0
+    after time 10 point2
+}
+
+# Point 2: the game runs for 60 seconds, saved every 10 seconds.
+proc point2 {} {
+    incr ::n
+    savestate "$::C(state)-[expr {$::n * 10}]s"
+    if {$::n < 6} { after time 10 point2 } else { exit }
+}
+
+proc hex2 {v} { format %02X $v }
+
+proc compare {} {
+    # The registers, at the tail's jump: AF and SP are the snapshot's, and the
+    # jump goes to its PC.
+    foreach {r v} $::C(regs) {
+        if {[reg $r] != $v} { note "register $r is [format %04X [reg $r]], expected [format %04X $v]" }
+    }
+    set target [expr {[debug read memory [expr {$::C(tail) + 17}]] | ([debug read memory [expr {$::C(tail) + 18}]] << 8)}]
+    if {$target != $::C(pc)} { note "the tail jumps to [format %04X $target], expected [format %04X $::C(pc)]" }
+    foreach {r name} {I i IM im} {
+        if {[reg $r] != [scan $::K($name) %x]} { note "$r is [reg $r], expected $::K($name)" }
+    }
+    if {([reg IFF] & 1) != ([scan $::K(iff) %x] & 1)} { note "IFF1 is [expr {[reg IFF] & 1}], expected $::K(iff)" }
+    set a8 [debug read ioports 0xA8]
+    if {$a8 != [scan $::K(a8) %x]} { note "the slot register is [hex2 $a8], expected $::K(a8)" }
+    if {[debug read ioports 0xAA] != [scan $::K(ppic) %x]} { note "PPI port C is [hex2 [debug read ioports 0xAA]], expected $::K(ppic)" }
+    foreach ps {0 1 2 3} {
+        if {$::K(sub$ps) ne "-" && [subslot_reg $ps] != [scan $::K(sub$ps) %x]} {
+            note "slot $ps's subslot register is [hex2 [subslot_reg $ps]], expected $::K(sub$ps)"
+        }
+    }
+    if {"MSX Memory Mapper I/O" in [debug list]} {
+        foreach p {0 1 2 3} r {fc fd fe ff} {
+            if {$::K($r) ne "-" && [debug read {MSX Memory Mapper I/O} $p] != [scan $::K($r) %x]} {
+                note "mapper register $r is [hex2 [debug read {MSX Memory Mapper I/O} $p]], expected $::K($r)"
+            }
+        }
+    }
+    for {set r 0} {$r < 16} {incr r} {
+        set v [debug read {PSG regs} $r]
+        set e [scan $::K(psg$r) %x]
+        if {$r == 7} { set v [expr {$v & 0x3F}]; set e [expr {$e & 0x3F}] }
+        if {$v != $e} { note "PSG register $r is [hex2 $v], expected $::K(psg$r)" }
+    }
+    set v9938 [v9938]
+    set regs [expr {$v9938 ? [concat [lrange {0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23} 0 end] {32 33 34 35 36 37 38 39 40 41 42 43 44 45}] : {0 1 2 3 4 5 6 7}}]
+    foreach r $regs {
+        if {[debug read {VDP regs} $r] != [scan $::K(vdp$r) %x]} { note "VDP register $r is [hex2 [debug read {VDP regs} $r]], expected $::K(vdp$r)" }
+    }
+    if {$v9938} {
+        for {set c 0} {$c < 16} {incr c} {
+            set v "[hex2 [debug read {VDP palette} [expr {2 * $c}]]][hex2 [debug read {VDP palette} [expr {2 * $c + 1}]]]"
+            if {$v ne $::K(pal$c)} { note "palette entry $c is $v, expected $::K(pal$c)" }
+        }
+    }
+    set ptr [expr {[debug read {VRAM pointer} 0] | (([debug read {VRAM pointer} 1] & 0x3F) << 8)}]
+    if {$v9938} { set ptr [expr {$ptr | (([debug read {VDP regs} 14] & 7) << 14)}] }
+    if {$ptr != [scan $::K(vramptr) %x]} { note "the VRAM pointer is [format %05X $ptr], expected $::K(vramptr)" }
+    if {[debug read {VRAM access status} 0] != $::K(vramwrite)} { note "the VRAM access is [debug read {VRAM access status} 0], expected $::K(vramwrite)" }
+
+    # VRAM.
+    set f [open [file join $::C(snap) vram.bin] rb]
+    set want [read $f]
+    close $f
+    set have [debug read_block "physical VRAM" 0 [string length $want]]
+    if {$have ne $want} { note "VRAM differs at [format %05X [first_difference $have $want]]" }
+
+    # The RAM pages, except the tail's bytes, FCC9h to FD88h and FFFFh in an
+    # expanded slot.
+    foreach path [lsort [glob -nocomplain [file join $::C(snap) ram *.bin]]] {
+        lassign [split [file rootname [file tail $path]] -] ps ss page seg
+        set f [open $path rb]
+        set want [read $f]
+        close $f
+        set have [with_slot $ps $ss $page { read_page $page }]
+        set base [expr {$page * 0x4000}]
+        set skip {}
+        if {$page == ($::C(tail) >> 14)} { lappend skip [expr {$::C(tail) - $base}] [expr {$::C(tail) - $base + 20}] }
+        if {$page == 3} { lappend skip [expr {0xFCC9 - $base}] [expr {0xFD88 - $base}] }
+        if {$page == 3 && $ss ne "x"} { lappend skip 0x3FFF 0x3FFF }
+        set at [first_difference $have $want $skip]
+        if {$at >= 0} { note "RAM $ps-$ss-$page differs at [format %04X [expr {$base + $at}]]" }
+    }
+}
+
+# The first offset at which a and b differ, outside the ranges in skip, or -1.
+proc first_difference {a b {skip {}}} {
+    binary scan $a cu* la
+    binary scan $b cu* lb
+    set n [llength $la]
+    for {set i 0} {$i < $n} {incr i} {
+        if {[lindex $la $i] != [lindex $lb $i]} {
+            set skipped 0
+            foreach {from to} $skip { if {$i >= $from && $i <= $to} { set skipped 1 } }
+            if {!$skipped} { return $i }
+        }
+    }
+    return -1
+}

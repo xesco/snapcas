@@ -2,6 +2,8 @@
 #
 #   make        build bin/SNAPCAS.COM and bin/SERVICE.BIN
 #   make test   run the tests in openMSX
+#   make try    start openMSX as advanced/phc28s, with SNAPCAS.COM and the images
+#               in out/try/ on its disk: MACHINE= and FILES= change them
 #
 # The tests read the CAS files from CAS_DIR, by default tapes/, a folder that git
 # ignores because snapcas cannot ship CAS files. The tests that need them are
@@ -55,7 +57,13 @@ test: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.CO
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) \
 	  python3 -I -m unittest discover -s tests -v
 
+MACHINE ?= advanced/phc28s
+FILES ?= bin/SNAPCAS.COM $(wildcard $(OUT)/try/*.IMG)
+
+try: bin/SNAPCAS.COM $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
+	OPENMSX_HOME=$(abspath $(EMU_HOME)) python3 -I tools/run.py $(MACHINE) --dos $(NEXTOR) $(FILES)
+
 clean:
 	rm -rf bin $(OUT)/test
 
-.PHONY: all test clean
+.PHONY: all test try clean

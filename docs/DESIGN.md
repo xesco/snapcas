@@ -33,7 +33,7 @@ in [PLAN.md](PLAN.md).
 | `out/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
 | `out/<machine>/<game>/<GAME>.IMG` | `tools/build.py` | The image |
 | `out/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
-| `out/<machine>/<game>/check/` | `tools/check.py` | Screenshots and the check's report |
+| `out/<machine>/<game>/check/` | `tools/check.py` | The check's report and savestates |
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
 | `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm` ([SERVICE.BIN](#servicebin)) |
 
@@ -275,12 +275,15 @@ expects.
 
 ## Restorer
 
-`SNAPCAS.COM` runs under MSX-DOS 1, MSX-DOS 2 or Nextor. Its code and stack stay
-below 4000h, and it holds the worker twice, assembled to run in pages 1 and 2. Under
-MSX-DOS 2 and Nextor, it selects segments in pages 1 and 2 with `PUT_P1` and
-`PUT_P2`, and learns DOS's segments with `GET_P0` to `GET_P3`. Under MSX-DOS 1, it
-writes the mapper registers, and DOS's segments are 3, 2, 1 and 0. It performs the
-following steps, and until step 4 it can stop with a message and return to DOS:
+`SNAPCAS.COM` runs under MSX-DOS 1, MSX-DOS 2 or Nextor. Its code and data stay
+below 4000h, and it holds the worker twice, assembled to run in pages 1 and 2. It
+keeps DOS's stack, in page 3, because MSX-DOS 2's mapper routines page the DOS
+kernel into page 0. It uses a stack in page 0 only while it selects another slot in
+page 3, and the worker keeps its own stack in its own page. Under MSX-DOS 2 and
+Nextor, it selects segments in pages 1 and 2 with `PUT_P1` and `PUT_P2`, and learns
+DOS's segments with `GET_P0` to `GET_P3`. Under MSX-DOS 1, it writes the mapper
+registers, and DOS's segments are 3, 2, 1 and 0. It performs the following steps,
+and until step 4 it can stop with a message and return to DOS:
 
 1. Opens `<GAME>.IMG`, whose name DOS has placed in the FCB at 005Ch, with the
    extension set to IMG. Without a name, it prints its usage. It reads the image's
@@ -448,9 +451,11 @@ that disk and the `boot` keys, and writes its report to `check/report.txt`:
    FCC9h to FD88h, FFFFh in an expanded slot, the patched bytes, R, PSG register 7's
    bits 7 and 6, and the values that restorer step 3 changes for the tape service. A
    difference or a timeout fails the check.
-2. The game runs for 60 seconds, with a screenshot every 10 seconds in `check/`, and
-   a breakpoint on each scan finding in a kept RAM page reports which findings the
-   game executes. This point only reports.
+2. The game runs for 60 seconds, saved with `savestate` every 10 seconds as
+   `check/10s.oms` to `check/60s.oms`, and a breakpoint on each scan finding in a
+   kept RAM page reports which findings the game executes. `openMSX` loads such a
+   savestate to show the screen, because it takes screenshots only with a renderer.
+   This point only reports.
 
 Code that a game builds only when the player reaches a level is not visible to the
 scan or to the check. It appears as a hang during play, and a trace of that load in
