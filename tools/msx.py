@@ -25,6 +25,9 @@ for _row, _names in (
 # openMSX ships C-BIOS, so a run that only writes a disk image needs no system
 # ROMs.
 DISK_MACHINE = "C-BIOS_MSX1"
+# Real seconds for that run, which takes a few seconds, or a few minutes while
+# the collection runs many openMSX at once.
+DISK_TIMEOUT = 300
 
 
 class MachineError(Exception):
@@ -167,7 +170,10 @@ def make_disk(image, files):
     script = ("if {[catch {\n" + "\n".join(lines) + "\n} e]} { set error $e } else { set error {} }\n"
               f"catch {{ set f [open {tcl_word(result)} w]; puts $f $error; close $f }}\n"
               "exit\n")
-    run(["-machine", DISK_MACHINE], script, timeout=60)
+    try:
+        run(["-machine", DISK_MACHINE], script, timeout=DISK_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"{image}: openMSX did not write the disk image within {DISK_TIMEOUT} seconds")
     if not os.path.exists(result):
         raise RuntimeError(f"{image}: openMSX did not write the disk image")
     with open(result) as f:
