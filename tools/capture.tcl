@@ -220,11 +220,13 @@ proc on_tapion {} {
     logev "TAPION, tape position $::st(pos)"
 }
 proc on_tapin {} { incr ::st(tapin); incr ::st(pos) }
-# A game that reads on with TAPIN past side 1's end, with the motor on, waits
-# for side 2: the player turns the tape over, so side 2 goes in, and the read
-# goes on after side 2's first header.
+# A game that reads on past side 1's end, with the motor on and the CPU waiting
+# in the BIOS's tape code, waits for side 2: the player turns the tape over, so
+# side 2 goes in, and the read goes on after side 2's first header. A motor
+# that a game only switches, with no read, does not turn the tape over.
 proc turn_over {} {
     if {$::S(side2cas) eq "" || $::st(side2in) || ![motor_on] || ![at_end]} { return }
+    if {![in_tape_code [reg PC]]} { return }
     cassetteplayer insert $::S(side2cas)
     set ::st(side2in) 1
     set ::st(pos) [expr {[lindex $::S(headers2) 0] + 8}]
