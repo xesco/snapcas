@@ -56,7 +56,8 @@ four commands, in this order:
    runs `SNAPCAS <GAME>`. With `<GAME>.RPL` beside them, `SNAPCAS <GAME> /R` first
    shows the load as it happened in the capture. With `/T1200` or `/T2400`, a game
    with the tape service loads at that speed, with the sound of the tape
-   ([Tape speed and sound](#tape-speed-and-sound)).
+   ([Tape speed and sound](#tape-speed-and-sound)). With `/M`, the tape moves only
+   when the player presses a key ([The manual tape](#the-manual-tape)).
 
 `tools/snapcas.py <game> <machine> --cas <dir> [--dos <dir>]` makes the image in one
 command: it runs steps 1 and 2, and step 3 when `--dos` is given. When the build or
@@ -514,8 +515,8 @@ and until step 4 it can stop with a message and return to DOS:
    - In the tail: the worker's page's mapper register and its value, and the slot
      register ([Tail](#tail)).
    - With the tape service, in the code segment at 001Ah: the code segment, then the
-     other tape segments, and at 0062h: 1 for `/T1200`, 2 for `/T2400`, with `/R`
-     alone the replay's speed, or otherwise 0.
+     other tape segments, at 0062h: 1 for `/T1200`, 2 for `/T2400`, with `/R` alone
+     the replay's speed, or otherwise 0, and at 006Ah: 1 for `/M`, or otherwise 0.
    - With the tape service, in the game's page 3 at FCF6h: DOS's mapper's slot ID,
      T0's segment and the code segment.
    - With the tape service, when DOS's mapper is in an expanded slot, DOS's mapper's
@@ -579,9 +580,10 @@ behave as the BIOS's: carry is clear on success and set when CTRL+STOP is held.
 |---|---|
 | `TAPION` | Disables interrupts and moves the tape position past the next CAS header at a multiple of 8 bytes |
 | `TAPIN` | Disables interrupts, returns the byte at the tape position in A, and advances the position |
-| `TAPIOF`, `TAPOOF` | Enable interrupts and return |
+| `TAPIOF` | Stops the manual tape ([The manual tape](#the-manual-tape)), enables interrupts and returns |
+| `TAPOOF` | Enables interrupts and returns |
 | `TAPOON`, `TAPOUT` | Return with carry set: the tape cannot be written |
-| `STMOTR` | Returns |
+| `STMOTR` | Stops the manual tape when A is not 1, and returns |
 
 The code segment holds the service's data, its routines and then the tape, which
 starts at a multiple of 8 bytes. The tape position and the sides' starts and ends
@@ -607,7 +609,8 @@ segments after it. The code segment's fields are these:
 | 0063h | 1 | 1 when the tape has a side 2, set by `build.py` |
 | 0064h | 3 | The tape position while `TAPIN` looks for a header |
 | 0067h | 3 | Side 1's end before its padding, set by `build.py` when the tape has a side 2, otherwise side 1's end |
-| 006Ah | | The routines, then the tape |
+| 006Ah | 1 | The tape's mode, filled in by the restorer: 1 for the manual tape of `/M`, 0 for the automatic tape |
+| 006Bh | | The routines, then the tape |
 
 `TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's
 segment and B the code segment, the reader selects the byte's segment in page 0,
@@ -630,34 +633,73 @@ keeps its data before its code:
 | FCF8h | The code segment, filled in by the restorer |
 | FCF9h | The game's mapper register FCh, from `build.py`, or T0's segment when T0 replaces the ROM |
 | FCFAh | 1 while the entry code runs, so that T0's `TAPIOF` and `TAPOOF` leave interrupts off |
+| FCFBh | 1 while the manual tape is stopped ([The manual tape](#the-manual-tape)): set by `build.py` when the motor is off at the snapshot, by `TAPIOF` and `STMOTR`, and when a read reaches a side's end |
 
 The tape position starts where the game stopped reading at the snapshot, and moves
 on these events. The routines read the keyboard matrix through the PPI.
 
-| Event | New position |
-|---|---|
-| `TAPION` or `TAPIN` reads past side 1's end | Side 2's start, as when the player turns the tape over, or side 1's start when there is no side 2 |
-| `TAPIN` reads in side 1's padding before side 2 | Side 2's start, and `TAPIN` returns FFh: the padding is not on the tape, and the read that waits while the player turns the tape over returns FFh in `openMSX`, which Saint Dragon's loader expects |
-| `TAPIN` reads at a multiple of 8 where a CAS header is | The byte after the header, because a header is a tone on the tape, which `TAPIN` waits through, as when a game reads on into the next block or side |
-| `TAPION` or `TAPIN` reads past side 2's end | Side 2's start, as after a rewind |
-| `TAPION` is called while GRAPH is held | Side 1's start |
-| `TAPION` is called while CODE is held | Side 2's start, or side 1's start when there is no side 2 |
+| Event | Automatic tape, the default | Manual tape, with `/M` |
+|---|---|---|
+| `TAPION` or `TAPIN` reads past side 1's end | Side 2's start, as when the player turns the tape over, or side 1's start when there is no side 2 | The tape stops at that end and waits for the player's key ([The manual tape](#the-manual-tape)) |
+| `TAPIN` reads in side 1's padding before side 2 | Side 2's start, and `TAPIN` returns FFh: the padding is not on the tape, and the read that waits while the player turns the tape over returns FFh in `openMSX`, which Saint Dragon's loader expects | The tape stops at side 1's end. After RETURN, the position is side 2's start and `TAPIN` returns FFh |
+| `TAPIN` reads at a multiple of 8 where a CAS header is | The byte after the header, because a header is a tone on the tape, which `TAPIN` waits through, as when a game reads on into the next block or side | The same |
+| `TAPION` or `TAPIN` reads past side 2's end | Side 2's start, as after a rewind | The tape stops at that end and waits for the player's key |
+| `TAPION` or `TAPIN` is called while the tape is stopped | The automatic tape never stops | The tape waits for the player's key |
+| `TAPION` is called while GRAPH is held | Side 1's start | Side 1's start, at any read that waits |
+| `TAPION` is called while CODE is held | Side 2's start, or side 1's start when there is no side 2 | The same, at any read that waits |
 
 The service shows the side that the position moves to with one flash of the side's
-colour over the whole screen for 0.1 second, after GRAPH or CODE, and when a read
-reaches side 2 or goes back to a side's start. It sets the border colour and blanks
-the display, which then shows only the border, because the border alone is thin and
-many screens crop it. Side 2 starts at side 1's end, so a read that reaches side 2
-changes only the side at 005Eh, and that change shows the flash. The service counts
-the frames by the frame flag in the VDP's status register 0, then writes the game's
-VDP registers 7 and 1 back and goes on. The VDP's registers cannot be read, so the
-service takes the game's values from the addresses at 005Ah and 005Fh in the code
-segment. The colours are these:
+colour over the whole screen for 0.1 second, after GRAPH or CODE, when the automatic
+tape reaches side 2 or goes back to a side's start, and when the manual tape goes on
+at side 2's start after RETURN. It sets the border colour and blanks the display,
+which then shows only the border, because the border alone is thin and many screens
+crop it. Side 2 starts at side 1's end, so a read that reaches side 2 changes only
+the side at 005Eh, and that change shows the flash. The service counts the frames by
+the frame flag in the VDP's status register 0, then writes the game's VDP registers
+7 and 1 back and goes on. The VDP's registers cannot be read, so the service takes
+the game's values from the addresses at 005Ah and 005Fh in the code segment. The
+colours are these:
 
 | Outcome | Border |
 |---|---|
 | Side 1's start | Light green, 3 |
 | Side 2's start | Light red, 9 |
+
+### The manual tape
+
+By default the tape is automatic: it turns over and rewinds by itself, and the
+player needs no key. With `/M`, the tape service moves the tape only when the player
+asks, as a real tape moves only after the player presses PLAY, so the player follows
+what the game says on the screen. With `/R` and `/T1200`, it completes the
+experience of a real tape: the replay shows the first load, and each later load
+plays at tape speed after the player's key. The manual tape stops in these cases,
+and the byte at FCFBh records it:
+
+- The game stops the motor, with `TAPIOF`, or with `STMOTR` and A other than 1.
+- A read reaches side 1's end or side 2's end.
+- The motor is off at the snapshot, which `build.py` reads from PPI port C bit 4.
+
+While the motor runs, between the blocks of one load, the tape plays on and no read
+waits. A read that finds the tape stopped waits for one of these keys, which it
+reads in the keyboard matrix through the PPI:
+
+| Key | The tape |
+|---|---|
+| RETURN | Plays on from where it stopped. At side 1's end with a side 2, it goes on at side 2's start, as when the player turns the tape over. At side 2's end, or at side 1's end without a side 2, it waits on, because the tape holds nothing more |
+| GRAPH | Goes to side 1's start, as after a rewind |
+| CODE | Goes to side 2's start, or to side 1's start when there is no side 2 |
+| CTRL+STOP | The routine returns with carry set, as the BIOS's does, and the tape stays stopped |
+
+A key that is held when the read starts acts at once. So one press can answer both a
+game's own prompt and the tape: for "rewind the tape and press a key", the player
+presses CODE as the game's key and holds it until the game reads. The read goes on
+only when the key is released, so the game does not read it. 4x4 Off-Road Racing
+asks the player to stop the tape and press space: the tape has stopped by itself,
+because the game stops the motor (*to verify*), and at its next load the player
+presses RETURN to play on, or GRAPH or CODE to rewind.
+
+In the mode without a part in page 3, the tape's mode and the byte that records the
+stop are in T0, after the flash's data.
 
 ### Without a part in page 3
 
@@ -887,7 +929,9 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | The tape speed as an option of `SNAPCAS`, fast by default | The player chooses at each run between a quick load and the experience of the tape, and the image stays the same |
 | Rewind the capture with `savestate` and `loadstate` | `openMSX`'s `reverse goto` replays the input recorded after its target, while each key try must start from the saved moment with no other input |
 | A tape with both sides, a wrap, and fixed keys for each side's start | In 41 of those 51 games the unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
+| An automatic tape by default, and a manual one with `/M` | The automatic tape needs nothing from the player, and that is how most players want it. The manual tape follows what the game tells the player, as 4x4 Off-Road Racing does when it asks to stop the tape and later to rewind it, and with `/T1200` it avoids the wrap's reading of the rest of a side at tape speed |
 | GRAPH for side 1's start and CODE for side 2's | GRAPH and CODE alone type no character, BASIC ignores them, and games rarely read them, while STOP pauses a BASIC program, the function keys type text, and many games use SELECT in their menus. On a Japanese MSX, CODE's key is KANA, which also switches the kana lock |
+| RETURN to play on, and a read that goes on only when the key is released | RETURN is the key that a player presses without thinking. Games read it, so the service waits for its release, and the game, which does not run while the service waits, never sees it |
 
 ## Limits
 
@@ -910,6 +954,9 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 - The shipped machine's game files, `advanced-phc28s.txt` and `basic-vg8020.txt`,
   hold only on their machine. On another machine, the games that have one may need a
   machine's game file of their own for that machine.
+- With `/M`, a game that stops the motor between two loads without a message on the
+  screen still waits for RETURN, and the player sees no reason for the wait
+  ([The manual tape](#the-manual-tape)).
 - A slot value that the code of neither form in [Slot patches](#slot-patches) sets
   gets no slot patch. The capture only logs its write, for a `patch` line by hand.
 - The replay is a recording: a loader that lets the player act while it loads shows
