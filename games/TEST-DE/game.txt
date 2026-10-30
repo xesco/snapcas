@@ -2,3 +2,4 @@
 # https://download.file-hunter.com/Games/MSX1/CAS/Test%20de%20Adaptacion%20(1984)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
 cas TEST-DE.CAS
 sha1 3a0ba37bff460e3651f7dff96b9b2a524d53df7b
+name TESTADAP

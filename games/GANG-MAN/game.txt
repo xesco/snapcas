@@ -2,3 +2,4 @@
 # https://download.file-hunter.com/Games/MSX1/CAS/Gang%20Man%20(1988)(Armati%20Software)%5BRUN'CAS-'%5D.zip
 cas GANG-MAN.CAS
 sha1 2a9343bc6724cbc05183c6940c104a3285d542b7
+name GANGMANA
