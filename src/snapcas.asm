@@ -40,7 +40,7 @@ H_ROM   equ HDR+8
 H_SUBROM equ HDR+10
 H_RECS  equ HDR+12
 H_WRITES equ HDR+13
-H_FLAGS equ HDR+14      ; bit 0: T0 does not replace the ROM
+H_FLAGS equ HDR+14      ; bit 0: T0 does not replace the ROM, bit 1: T0 mode
 H_P3    equ HDR+15      ; the page of the service's page 3 part, as xxE1h
 H_REGS  equ HDR+16      ; AF, BC, DE, HL, AF', BC', DE', HL', IX, IY, SP, PC
 H_I     equ HDR+40
@@ -70,6 +70,33 @@ start:
         cp " "
         ld de,t_usage
         jp z,stop_message
+        ; /M in the command line, its length at 0080h and its text after it,
+        ; asks for the manual tape (DESIGN.md, The manual tape). It is read
+        ; first, before a DOS call can use 0080h.
+        ld hl,0080h
+        ld b,(hl)
+.option:
+        ld a,b
+        or a
+        jr z,.options
+        inc hl
+        dec b
+        ld a,(hl)
+        cp "/"
+        jr nz,.option
+        ld a,b
+        or a
+        jr z,.options
+        inc hl
+        dec b
+        ld a,(hl)
+        and 0DFh                ; upper case
+        cp "M"
+        jr nz,.option
+        ld a,1
+        ld (manual),a
+        jr .option
+.options:
         ; Copy the drive and the name into our own FCB, which already holds
         ; the extension SNP. The FCB at 005Ch cannot be used as it is: its
         ; random record field overlaps the command line at 0080h.
@@ -113,6 +140,7 @@ start:
         call find_dos
         call check_roms
         call check_records
+        call manual_note
         call find_worker_page
         call allocate
         call read_records
@@ -775,6 +803,24 @@ print:
         pop ix
         ret
 
+; The manual tape needs the tape service with its part in page 3, because T0
+; has no room for its code. Otherwise /M says that the tape stays automatic,
+; and the restore goes on.
+manual_note:
+        ld a,(manual)
+        or a
+        ret z
+        ld a,(service)
+        or a
+        jr z,.note
+        ld a,(H_FLAGS)
+        and 2                   ; bit 1: without a part in page 3
+        ret z
+.note:
+        call name
+        ld de,t_manual
+        jp print
+
 ; Prints A in decimal, without leading zeros.
 print_dec:
         ld hl,digits
@@ -1179,6 +1225,8 @@ dos_page:
         ld a,(svc_segs+1)
         cp (iy)
         jr nz,.back
+        ld a,(manual)
+        ld (8000h+C_MODE),a
         ld de,8000h+C_SEGS
         ld bc,SEGS_MAX
 .table:
@@ -1566,8 +1614,12 @@ name:
 
         include "slots.inc"
 
-t_usage:    db "Usage: SNAPCAS <game>",13,10
-            db "Restores <game>.SNP, a snapcas image.",13,10,"$"
+t_usage:    db "Usage: SNAPCAS <game> [/M]",13,10
+            db "Restores <game>.SNP, a snapcas image.",13,10
+            db "/M: the tape moves only with RETURN,",13,10
+            db "GRAPH or CODE.",13,10,"$"
+t_manual:   db ": /M does not work with this image,",13,10
+            db "so the tape stays automatic",13,10,"$"
 t_ext:      db ".SNP$"
 t_notfound: db " not found",13,10,"$"
 t_notimage: db " is not a snapcas image",13,10,"$"
@@ -1587,7 +1639,7 @@ t_read:     db ": cannot be read",13,10,"$"
 t_notram:   db ": slot "
 t_slot_n:   db "0 page "
 t_page_n:   db "0 is not RAM: the machine file does not describe this machine",13,10,"$"
-t_mark:     db "SNAPCAS3"
+t_mark:     db "SNAPCAS4"
 
 fcb:        db 0                ; drive, from the argument
             ds 8," "            ; name, from the argument
@@ -1613,6 +1665,7 @@ worker_seg: db 0
 service:    db 0                ; nonzero with the tape service
 p0:         db 0                ; the RAM pages for page 0, as in check_records
 t0_rom:     db 0                ; 1 when T0 replaces the ROM
+manual:     db 0                ; 1 with /M
 svc_segs:   ds SEGS_MAX+1       ; T0's segment, the code segment, the tape's
 free_count: db 0
 hold_count: db 0

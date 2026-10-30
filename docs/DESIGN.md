@@ -551,7 +551,7 @@ The tape service keeps the tape in service segments, and has these parts:
 | Code segment | A service segment | The routines, the tape position and the table of the tape's segments, then the start of the tape |
 | Tape data | The code segment, then the other service segments | Side 1, padded with zeros to a multiple of 8 bytes, by at least 1 byte when side 2 follows, then side 2 |
 | Entries | FCE1h to FCF5h, in `SLTATR`, unless the part moved ([Build](#build)) | One for each entry of the BIOS's tape jump table, from 00E1h to 00F5h, for code that goes around T0 |
-| Entry code | `SLTWRK`, after its data at FCF6h to FCFAh | Selects T0 in page 0, calls the routine, and selects the game's page 0 again |
+| Entry code | `SLTWRK`, after its data at FCF6h to FCFBh | Selects T0 in page 0, calls the routine, and selects the game's page 0 again |
 | Trampoline | `SLTWRK` | Selects the code segment in page 0, calls a routine there, and selects T0 again |
 | Reader | `SLTWRK` | `OUT (C),D / LD E,(HL) / OUT (C),B / RET`: reads a tape byte |
 
@@ -698,8 +698,9 @@ asks the player to stop the tape and press space: the tape has stopped by itself
 because the game stops the motor (*to verify*), and at its next load the player
 presses RETURN to play on, or GRAPH or CODE to rewind.
 
-In the mode without a part in page 3, the tape's mode and the byte that records the
-stop are in T0, after the flash's data.
+The manual tape's code takes 141 bytes more than T0's 360, so in the mode without a
+part in page 3 the tape stays automatic. With `/M`, `SNAPCAS` then says so before
+the restore, as it does for a game without the tape service, and goes on.
 
 ### Without a part in page 3
 
@@ -954,6 +955,8 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 - The shipped machine's game files, `advanced-phc28s.txt` and `basic-vg8020.txt`,
   hold only on their machine. On another machine, the games that have one may need a
   machine's game file of their own for that machine.
+- A game in the mode without a part in page 3 has only the automatic tape, because
+  T0 has no room for the manual tape ([The manual tape](#the-manual-tape)).
 - With `/M`, a game that stops the motor between two loads without a message on the
   screen still waits for RETURN, and the player sees no reason for the wait
   ([The manual tape](#the-manual-tape)).
@@ -980,7 +983,7 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 8 | `SNAPCAS3`, which changes when the image's format changes |
+| 0 | 8 | `SNAPCAS4`, which changes when the image's format changes |
 | 8 | 2 | CRC-16 of the main ROM's 32 KB |
 | 10 | 2 | CRC-16 of the sub-ROM's 16 KB, or 0 on an MSX1 |
 | 12 | 1 | Number of records |

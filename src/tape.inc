@@ -17,6 +17,11 @@ c_tapion:
         di
         call keys
         ret c                   ; CTRL+STOP
+        if !T0MODE
+        ld a,(D_MODE)
+        or a
+        jr nz,.search           ; the manual tape: next_byte waits for its keys
+        endif
         push bc
         bit 2,c
         call z,side_a           ; GRAPH
@@ -70,6 +75,14 @@ c_tapin:
         ld de,D_POS
         ld bc,3
         ldir
+        ; The manual tape stops at side 1's end, and the read waits there.
+        ld a,(D_MODE)
+        or a
+        jr z,.ff
+        call stop
+        call wait
+        ret c
+.ff:
         ld a,0FFh
         or a
         ret
@@ -103,8 +116,16 @@ c_tapin:
         ld bc,3
         ldir
         endif
-; Returns in A the byte at the tape position, and advances the position.
+; Returns in A the byte at the tape position, and advances the position. The
+; manual tape, when stopped, first waits for the player's key, and returns
+; carry for CTRL+STOP without a byte.
 next_byte:
+        if !T0MODE
+        ld a,(D_STOP)
+        or a
+        call nz,wait
+        ret c
+        endif
         ld hl,(D_POS+1)
         add hl,hl
         add hl,hl
@@ -244,6 +265,11 @@ wrap:
         call on_side1
         ld a,0
         jr c,.side
+        if !T0MODE
+        ld a,(D_MODE)
+        or a
+        jp nz,wrap_manual
+        endif
         ld a,(D_TWO)            ; 0 when the tape has no side 2
         or a
         jr z,side_a             ; past side 1's end without a side 2
@@ -304,3 +330,74 @@ lt24:
         djnz .byte
         ret
 
+        if !T0MODE
+; The manual tape stops at the last side's end, and at side 1's end until
+; RETURN goes on to side 2 (DESIGN.md, The manual tape).
+wrap_manual:
+        ld de,D_TOTAL
+        call on_side1.pos
+        jr nc,stop              ; at or past the tape's end
+        ld a,(D_SIDE)
+        or a
+        ret nz                  ; on side 2
+stop:
+        ld a,1
+        ld (D_STOP),a
+        ret
+
+; The stopped manual tape: waits for RETURN, GRAPH or CODE, held already or
+; pressed, then for its release, so that the game does not read it, and plays
+; on. Returns carry at once for CTRL+STOP, with the tape still stopped. The
+; automatic tape returns at once.
+wait:
+        ld a,(D_MODE)
+        or a
+        ret z
+.key:
+        call keys
+        ret c                   ; CTRL+STOP
+        bit 2,c
+        jr z,.graph
+        bit 4,c
+        jr z,.code
+        bit 7,a                 ; RETURN
+        jr nz,.key
+        ld de,D_TOTAL
+        call on_side1.pos
+        jr nc,.key              ; the tape holds nothing more
+        call release
+        ; At side 1's end with a side 2, RETURN goes on at side 2's start, as
+        ; when the tape is turned over.
+        call on_side1
+        jr c,.play
+        ld hl,D_SIDE
+        ld a,(hl)
+        or a
+        jr nz,.play
+        inc (hl)
+        ld e,SIDE_B
+        call mark
+        jr .play
+.graph:
+        call release
+        call side_a
+        jr .play
+.code:
+        call release
+        call side_b
+.play:
+        xor a
+        ld (D_STOP),a
+        ret
+
+; Waits until RETURN, GRAPH and CODE are all released.
+release:
+        call keys
+        bit 2,c
+        jr z,release
+        bit 4,c
+        jr z,release
+        bit 7,a
+        jr z,release
+        ret
+        endif

@@ -7,7 +7,7 @@
 
         include "service.inc"
 
-VERSION equ 9
+VERSION equ 11
 
         org 0
 
@@ -55,16 +55,12 @@ t0_start:
         disp 19DDh
 
 t_tapoof:                       ; 19DDh, TAPOOF
-        jr t_tapiof
+        jr tapoof
 t_stmotr:                       ; STMOTR, through the jump at 00F3h
-        ret
+        jr stmotr
         ds 19E9h-$,0
 t_tapiof:                       ; 19E9h, TAPIOF
-        ld a,(E_INSIDE)         ; the entry code enables interrupts itself
-        or a
-        ret nz
-        ei
-        ret
+        jr tapiof
         ds 19F1h-$,0
 t_tapoon:                       ; 19F1h, TAPOON: the tape cannot be written
         scf
@@ -72,6 +68,24 @@ t_tapoon:                       ; 19F1h, TAPOON: the tape cannot be written
         ds 1A19h-$,0
 t_tapout:                       ; 1A19h, TAPOUT: the tape cannot be written
         scf
+        ret
+; STMOTR and TAPIOF stop the manual tape, which waits for the player's key at
+; the next read (DESIGN.md, The manual tape). STMOTR with A = 1 starts the
+; motor and leaves it. The automatic tape ignores E_STOP.
+stmotr:
+        cp 1
+        ret z
+        ld a,1
+        ld (E_STOP),a
+        ret
+tapiof:
+        ld a,1
+        ld (E_STOP),a
+tapoof:
+        ld a,(E_INSIDE)         ; the entry code enables interrupts itself
+        or a
+        ret nz
+        ei
         ret
         ds 1A63h-$,0
 t_tapion:                       ; 1A63h, TAPION
@@ -99,7 +113,7 @@ p3_start:
         call e_entry
         endr
         assert $ = E_SLOT
-        db 0,0,0,0,0            ; E_SLOT, E_T0, E_CODE, E_FC, E_INSIDE
+        db 0,0,0,0,0,0          ; E_SLOT, E_T0, E_CODE, E_FC, E_INSIDE, E_STOP
 
 ; From an entry: the entry's low byte, which is its jump table entry's, from
 ; the return address, with the game's HL kept and its A, STMOTR's argument,
@@ -206,6 +220,8 @@ header: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h
         ds 10,0                 ; C_BORDER to C_TWO
         assert $ = C_SAVE
         ds 6,0                  ; C_SAVE and C_S1REAL
+        assert $ = C_MODE
+        db 0
 
 T0MODE  equ 0
 D_POS   equ C_POS
@@ -223,9 +239,11 @@ D_VDP1  equ C_VDP1
 D_TWO   equ C_TWO
 D_SAVE  equ C_SAVE
 D_S1REAL equ C_S1REAL
+D_MODE  equ C_MODE
+D_STOP  equ E_STOP
         include "tape.inc"
 
-        ds (8-($ & 7)) & 7,0    ; the tape starts at a multiple of 8
+        align 8,0               ; the tape starts at a multiple of 8
         ent
 code_end:
 
@@ -271,7 +289,10 @@ D_SCREEN equ T_BORDER+5
 D_VDP1  equ T_BORDER+7
 D_TWO   equ T_BORDER+9
 
+; T0 has no room for the manual tape, so the tape is automatic in this mode
+; (DESIGN.md, The manual tape).
 tapiof:                         ; TAPIOF and TAPOOF, as the BIOS's
+tapoof:
         ei
 stmotr:                         ; STMOTR
         ret
@@ -288,7 +309,7 @@ t0m_end:
 ; For build.py: the jump table's targets from 00E1h to 00F3h, in its order
 ; TAPION, TAPIN, TAPIOF, TAPOON, TAPOUT, TAPOOF, STMOTR, then T0's data.
 t0m_fields:
-        dw t0m.c_tapion, t0m.c_tapin, t0m.tapiof, t0m.tapoon, t0m.tapoon, t0m.tapiof, t0m.stmotr
+        dw t0m.c_tapion, t0m.c_tapin, t0m.tapiof, t0m.tapoon, t0m.tapoon, t0m.tapoof, t0m.stmotr
         dw T_POS, T_PAGE, T_BORDER, T_SEGS_MAX
 t0m_fields_end:
 

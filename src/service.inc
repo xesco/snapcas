@@ -15,6 +15,8 @@ E_CODE    equ P3_PAGE*256+0F8h  ; restorer: the code segment
 E_FC      equ P3_PAGE*256+0F9h  ; build.py: the game's mapper register FCh;
                                 ; restorer: T0's segment when T0 replaces the ROM
 E_INSIDE  equ P3_PAGE*256+0FAh  ; 1 while the entry code runs
+E_STOP    equ P3_PAGE*256+0FBh  ; 1 while the manual tape is stopped; build.py:
+                                ; 1 when the motor is off at the snapshot
 E_STACK   equ P3_PAGE*256+189h  ; the entry code's stack top
 
 ; The code segment, which runs in page 0. The tape follows its code.
@@ -35,6 +37,8 @@ C_TWO     equ 0063h     ; build.py: 1 when the tape has a side 2
 C_SAVE    equ 0064h     ; TAPIN's position while it looks for a header, 3 bytes
 C_S1REAL  equ 0067h     ; build.py: side 1's end before its padding to a
                         ; multiple of 8, with a side 2, otherwise C_S1END's
+C_MODE    equ 006Ah     ; restorer: 1 for the manual tape of /M, 0 for the
+                        ; automatic tape (DESIGN.md, The manual tape)
 
 ; T0 in the mode without a part in page 3 (DESIGN.md, Without a part in page 3):
 ; its data, then its routines, from 19DDh to 1B44h.
@@ -52,4 +56,3 @@ T_PAGE    equ 1A01h     ; the game's slot register while TAPIN borrows a page,
                         ; address's high byte, the game's segment there
 T_BORDER  equ 1A07h     ; build.py: the flash's data, the tape speed and the
                         ; side 2 byte, as from C_BORDER to C_TWO
-

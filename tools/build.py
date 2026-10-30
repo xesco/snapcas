@@ -22,10 +22,10 @@ import cas  # noqa: E402
 import gamefile  # noqa: E402
 import scan  # noqa: E402
 
-SERVICE_VERSION = 9
+SERVICE_VERSION = 11
 PAGE = 16384
 HEADER_SIZE = 4096
-MAGIC = b"SNAPCAS3"
+MAGIC = b"SNAPCAS4"
 TAIL_SIZE = 26
 FLAG_ROM_KEEP = 1  # header byte 14, bit 0: T0 does not replace the ROM
 FLAG_T0 = 2  # bit 1: the tape service without a part in page 3
@@ -294,6 +294,9 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
             raise BuildError(f"the tail at {tail_address:04X}h overlaps {first:04X}h to {last:04X}h")
         block = bytearray(page3)
         block[e_fc - start] = num(state, "fc")
+        # E_STOP, after E_FC and E_INSIDE: the manual tape starts stopped when
+        # the motor, PPI port C bit 4 (0 = on), is off at the snapshot.
+        block[e_fc + 2 - start] = (num(state, "ppic") >> 4) & 1
         p3.data[start & 0x3FFF:(start & 0x3FFF) + len(block)] = block
     return [bytes(t0)] + [bytes(tape[n:n + PAGE]) for n in range(0, len(tape), PAGE)]
 
