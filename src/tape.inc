@@ -8,18 +8,19 @@
 ;; TAPION and TAPIN behave as the BIOS's: carry clear on success, set when
 ;; CTRL+STOP is held, and they run with interrupts off, as the BIOS's do.
 
-; The colours of the flash after GRAPH and CODE, and when the position changes
-; side or goes back to a side's start by itself.
+; The colours of the flash after GRAPH, CODE and RETURN, and when the position
+; changes side or goes back to a side's start by itself.
 SIDE_A  equ 3                   ; light green
 SIDE_B  equ 9                   ; light red
+PLAY    equ 11                  ; light yellow, after RETURN on the manual tape
 
 c_tapion:
         di
         call keys
         ret c                   ; CTRL+STOP
         if !T0MODE
-        ld a,(D_MODE)
-        or a
+        ld hl,.search
+        call manual
         jr nz,.search           ; the manual tape: next_byte waits for its keys
         endif
         push bc
@@ -59,6 +60,9 @@ c_tapin:
         call keys
         ret c                   ; CTRL+STOP
         if !T0MODE
+        ld hl,.again
+        call manual
+.again:
         ; build.py pads side 1 before side 2, and the padding is not on the
         ; tape. The TAPIN that reaches it is the one that waits while the
         ; tape is turned over, and it returns FFh, as the BIOS's does in
@@ -345,10 +349,23 @@ stop:
         ld (D_STOP),a
         ret
 
+; For the manual tape: keeps HL, where the read starts, and the read's stack
+; pointer, so that wait can start the read again. Returns NZ for the manual
+; tape and Z for the automatic tape.
+manual:
+        ld a,(D_MODE)
+        or a
+        ret z
+        ld (again),hl
+        pop hl
+        ld (again_sp),sp
+        jp (hl)
+
 ; The stopped manual tape: waits for RETURN, GRAPH or CODE, held already or
-; pressed, then for its release, so that the game does not read it, and plays
-; on. Returns carry at once for CTRL+STOP, with the tape still stopped. The
-; automatic tape returns at once.
+; pressed, then for its release, so that the game does not read it. After
+; RETURN it plays on. After GRAPH or CODE the read starts again at the new
+; place, as after a rewind. Returns carry at once for CTRL+STOP, with the tape
+; still stopped. The automatic tape returns at once.
 wait:
         ld a,(D_MODE)
         or a
@@ -369,22 +386,29 @@ wait:
         ; At side 1's end with a side 2, RETURN goes on at side 2's start, as
         ; when the tape is turned over.
         call on_side1
-        jr c,.play
+        jr c,.flash
         ld hl,D_SIDE
         ld a,(hl)
         or a
-        jr nz,.play
+        jr nz,.flash
         inc (hl)
-        ld e,SIDE_B
+.flash:
+        ld e,PLAY
         call mark
         jr .play
 .graph:
         call release
         call side_a
-        jr .play
+        jr .again
 .code:
         call release
         call side_b
+.again:
+        xor a
+        ld (D_STOP),a
+        ld sp,(again_sp)
+        ld hl,(again)
+        jp (hl)
 .play:
         xor a
         ld (D_STOP),a
@@ -400,4 +424,7 @@ release:
         bit 7,a
         jr z,release
         ret
+
+again:  dw 0                    ; where the read starts again
+again_sp: dw 0                  ; the read's stack pointer
         endif

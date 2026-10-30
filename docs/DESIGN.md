@@ -648,22 +648,24 @@ on these events. The routines read the keyboard matrix through the PPI.
 | `TAPION` is called while GRAPH is held | Side 1's start | Side 1's start, at any read that waits |
 | `TAPION` is called while CODE is held | Side 2's start, or side 1's start when there is no side 2 | The same, at any read that waits |
 
-The service shows the side that the position moves to with one flash of the side's
-colour over the whole screen for 0.1 second, after GRAPH or CODE, when the automatic
-tape reaches side 2 or goes back to a side's start, and when the manual tape goes on
-at side 2's start after RETURN. It sets the border colour and blanks the display,
-which then shows only the border, because the border alone is thin and many screens
-crop it. Side 2 starts at side 1's end, so a read that reaches side 2 changes only
-the side at 005Eh, and that change shows the flash. The service counts the frames by
-the frame flag in the VDP's status register 0, then writes the game's VDP registers
-7 and 1 back and goes on. The VDP's registers cannot be read, so the service takes
-the game's values from the addresses at 005Ah and 005Fh in the code segment. The
-colours are these:
+The service shows a move of the tape with one flash of a colour over the whole
+screen for 0.1 second. GRAPH and CODE, and the automatic tape when it reaches side 2
+or goes back to a side's start, flash the colour of the side that the position moves
+to. RETURN on the manual tape flashes its own colour when the tape plays on, also
+when RETURN turns the tape over to side 2. The flash sets the border colour and
+blanks the display, which then shows only the border, because the border alone is
+thin and many screens crop it. Side 2 starts at side 1's end, so a read that reaches
+side 2 changes only the side at 005Eh, and that change shows the flash. The service
+counts the frames by the frame flag in the VDP's status register 0, then writes the
+game's VDP registers 7 and 1 back and goes on. The VDP's registers cannot be read,
+so the service takes the game's values from the addresses at 005Ah and 005Fh in the
+code segment. The colours are these:
 
 | Outcome | Border |
 |---|---|
 | Side 1's start | Light green, 3 |
 | Side 2's start | Light red, 9 |
+| RETURN plays on | Light yellow, 11 |
 
 ### The manual tape
 
@@ -690,12 +692,16 @@ reads in the keyboard matrix through the PPI:
 | CODE | Goes to side 2's start, or to side 1's start when there is no side 2 |
 | CTRL+STOP | The routine returns with carry set, as the BIOS's does, and the tape stays stopped |
 
+After GRAPH or CODE, the read that waited starts again at the new place, as a read
+does after a real rewind. So `TAPION` looks for a header from there, and `TAPIN`
+skips the header there and returns the byte after it.
+
 A key that is held when the read starts acts at once. So one press can answer both a
 game's own prompt and the tape: for "rewind the tape and press a key", the player
 presses CODE as the game's key and holds it until the game reads. The read goes on
 only when the key is released, so the game does not read it. 4x4 Off-Road Racing
 asks the player to stop the tape and press space: the tape has stopped by itself,
-because the game stops the motor (*to verify*), and at its next load the player
+because the game stops the motor, as openMSX shows, and at its next load the player
 presses RETURN to play on, or GRAPH or CODE to rewind.
 
 The manual tape's code takes 141 bytes more than T0's 360, so in the mode without a
