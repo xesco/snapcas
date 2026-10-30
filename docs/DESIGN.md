@@ -189,8 +189,9 @@ these machine files, each checked with `check.py` and a single-load game:
 | File | Configuration |
 |---|---|
 | `basic/vg8020` | Philips VG-8020: an MSX1 with 64 KB and a Carnivore2 |
-| `basic/nms8250` | Philips NMS 8250: an MSX2 with a 512 KB RAM cartridge and a floppy drive, under MSX-DOS 2. Its own 128 KB leave MSX-DOS 2 too few free segments |
+| `basic/nms8250` | Philips NMS 8250: an MSX2 with its own 128 KB and a floppy drive, and a Carnivore2 under Nextor, for the cartridge with a mapper and a disk interface that most MSX2 owners use |
 | `basic/msx2ide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. Its own 128 KB leave Nextor too few free segments |
+| `basic/picoverse` | Philips VG-8020 with a Sunrise IDE interface under Nextor and a 192 KB memory mapper, as the PicoVerse cartridge has them. `openMSX` has no PicoVerse, so these two cartridges stand in for it, and the Makefile makes the 192 KB mapper from `openMSX`'s 512 KB one |
 | `advanced/phc28s` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 |
 | `advanced/mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup, which boots MSX-DOS from the ROM disk in its flash, with the check's disk in SD card slot 1 as drive B: |
 | `advanced/hbf700p` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. Its own mapper holds 256 KB |

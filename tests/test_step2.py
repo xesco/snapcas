@@ -22,7 +22,7 @@ GAMES = {
     "fernando": ("FERNANDO.CAS", "advanced/phc28s"),
     "moonrider": ("022-MOON.CAS", "advanced/phc28s"),
     "caldero": ("CALDERO.CAS", "advanced/phc28s"),
-    "abadia": ("ABADIA.CAS", "basic/nms8250"),
+    "abadia": ("ABADIA.CAS", "test/nms8250-128k"),
 }
 
 # The names of state.txt (DESIGN.md, Snapshot files).

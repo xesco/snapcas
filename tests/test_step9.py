@@ -18,7 +18,8 @@ WORK = os.path.join(ROOT, "out", "test", "step9")
 # The shipped machines and the DOS that each boots (PLAN.md, Test setup).
 SHIPPED = {machine: test_step4.MACHINES[machine][0]
            for machine in ("advanced/phc28s", "basic/vg8020", "basic/nms8250", "advanced/hbf700p")}
-SHIPPED.update({"basic/msx2ide": test_step4.NEXTOR, "advanced/mfrsd": test_step4.NEXTOR})
+SHIPPED.update({"basic/msx2ide": test_step4.NEXTOR, "advanced/mfrsd": test_step4.NEXTOR,
+                "basic/picoverse": test_step4.NEXTOR})
 # A single-load game that fits each of them, the NMS 8250's 128 KB included.
 SINGLE = "CALDERO.CAS"
 
@@ -108,7 +109,10 @@ class OneCommand(unittest.TestCase):
 # The collection's CAS files, for the run over every game file, which takes
 # hours: make collection sets it.
 COLLECTION_DIR = os.environ.get("COLLECTION_DIR")
-COLLECTION_MACHINES = ("advanced/phc28s", "basic/vg8020")
+# The machines of the run, which COLLECTION_MACHINES can name, and the folder
+# of their reports, one per machine.
+COLLECTION_MACHINES = tuple(os.environ.get("COLLECTION_MACHINES", "advanced/phc28s basic/vg8020").split())
+REPORTS = os.path.join(WORK, "collection")
 
 
 def collection_game(item):
@@ -129,15 +133,16 @@ class Collection(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
-        os.makedirs(WORK, exist_ok=True)
-        items = [(machine, name) for machine in COLLECTION_MACHINES for name in sorted(os.listdir(GAMES))]
         cls.results = {}
-        with open(os.path.join(WORK, "collection.txt"), "w") as report, \
-                concurrent.futures.ThreadPoolExecutor(8) as pool:
-            for item, result in zip(items, pool.map(collection_game, items)):
-                cls.results[item] = result
-                report.write(f"{item[0]}\t{item[1]}\t{result}\n")
-                report.flush()
+        for machine in COLLECTION_MACHINES:
+            path = os.path.join(REPORTS, machine + ".txt")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            items = [(machine, name) for name in sorted(os.listdir(GAMES))]
+            with open(path, "w") as report, concurrent.futures.ThreadPoolExecutor(8) as pool:
+                for item, result in zip(items, pool.map(collection_game, items)):
+                    cls.results[item] = result
+                    report.write(f"{item[1]}\t{result}\n")
+                    report.flush()
 
     def test_every_game_file_gets_a_result_on_each_machine(self):
         self.assertEqual(len(self.results), len(COLLECTION_MACHINES) * len(os.listdir(GAMES)))

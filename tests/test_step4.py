@@ -39,8 +39,7 @@ GAMES = {
 MACHINES = {
     "advanced/phc28s": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero", "abadia-phc"}, set()),
     "basic/vg8020": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero"}, set()),
-    "basic/nms8250": (os.path.join(DOS_DIR, "msxdos2"), {"freddy", "fernando", "moonrider", "caldero", "abadia"},
-                      set()),
+    "basic/nms8250": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero"}, set()),
     "advanced/hbf700p": (os.path.join(DOS_DIR, "msxdos2"), {"moonrider", "caldero", "abadia-hbf"}, set()),
     "test/nms8250-128k": (os.path.join(DOS_DIR, "msxdos2"), {"caldero"},
                           {"freddy", "fernando", "moonrider", "abadia"}),

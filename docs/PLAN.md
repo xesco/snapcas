@@ -19,16 +19,19 @@ files from two folders that the user names, because `snapcas` cannot ship them.
 | Nextor | `NEXTOR.SYS` 2.11 and `COMMAND2.COM` 2.44 from Nextor 2.1.0's `tools.zip`, downloaded by the Makefile into `out/dl/nextor/`, checked by SHA-256 |
 | `DOS_DIR` | Make variable: a folder with `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`), by default `dos/`, which git ignores |
 
-The test machines are the six shipped machines and two machine files that only the
-tests use, in `machines/test/`. Each one boots the DOS of its row:
+The test machines are the seven shipped machines and three machine files that only
+the tests use, in `machines/test/`. The shipped machines have a mapper of at least
+512 KB, apart from `basic/picoverse`, so that the tests show the games and not a
+shortage of free segments. Each one boots the DOS of its row:
 
 | Machine file | DOS | Why |
 |---|---|---|
-| `advanced/phc28s`, `basic/vg8020`, `basic/msx2ide` | Nextor | Shipped |
+| `advanced/phc28s`, `basic/vg8020`, `basic/nms8250`, `basic/msx2ide`, `basic/picoverse` | Nextor | Shipped |
 | `advanced/mfrsd` | Nextor 2.10, from the ROM disk in the cartridge's flash | Shipped |
-| `basic/nms8250`, `advanced/hbf700p` | `DOS_DIR/msxdos2/`, with the `msxdos2` cartridge in the machine file | Shipped |
+| `advanced/hbf700p` | `DOS_DIR/msxdos2/`, with the `msxdos2` cartridge in the machine file | Shipped |
 | `test/nms8250-dos1` | `DOS_DIR/msxdos1/`, from the NMS 8250's own disk ROM | No shipped machine runs MSX-DOS 1 |
 | `test/nms8250-512k` | `DOS_DIR/msxdos2/` | An NMS 8250 whose single mapper holds 512 KB, because 128 KB cannot hold Moonwalker's 236 KB tape |
+| `test/nms8250-128k` | `DOS_DIR/msxdos2/` | The NMS 8250 with only its own 128 KB, for the restorer's message when DOS has too few free segments |
 
 `test/nms8250-512k` uses a machine configuration that the Makefile makes from
 `openMSX`'s own NMS 8250, with its mapper at 512 KB, in a private `openMSX` home,
@@ -206,7 +209,7 @@ This step writes the last two machine files, `basic/msx2ide` and `advanced/mfrsd
 with the machine file's `dos` line that the second needs, and the game files for the
 collection, by running the capture over `CAS_DIR` on `advanced/phc28s`
 ([Shipped files](DESIGN.md#shipped-files)). The tests check a single-load game on
-each of the six shipped machines, then capture, build and check every game file on
+each of the seven shipped machines, then capture, build and check every game file on
 `advanced/phc28s` and `basic/vg8020`, and write a report of passes and failures.
 
 ## Step 10: automatic fixes
@@ -220,8 +223,8 @@ without a part in page 3 when page 3 has no room
 ([Files and commands](DESIGN.md#files-and-commands)). The tests check each fix on a
 game that needed it by hand, without its line: Sootland and Finders Keepers for the
 slot patches, Chase H.Q. for the mode, and La Abadia del Crimen for the variants.
-The collection then runs on all six shipped machines, and the report lists the game
-files that a machine still needs.
+The collection then runs on all seven shipped machines, and the report lists the
+game files that a machine still needs.
 
 ## Step 11: real hardware
 

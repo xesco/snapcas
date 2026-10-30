@@ -26,6 +26,7 @@ OPENMSX_SHARE ?= $(firstword $(wildcard $(OPENMSX_BIN)../openMSX.app/Contents/Re
                    $(OPENMSX_BIN)../Resources/share /usr/share/openmsx /usr/local/share/openmsx))
 CAS_DIR ?= tapes
 COLLECTION_DIR ?= $(CAS_DIR)/collection
+COLLECTION_MACHINES ?= advanced/phc28s basic/vg8020
 DOS_DIR ?= dos
 
 OUT       := out
@@ -39,8 +40,9 @@ help:
 	@echo "make test   run the tests in openMSX: CAS_DIR=, by default tapes/, holds the"
 	@echo "            CAS files, and DOS_DIR=, by default dos/, MSX-DOS's system files"
 	@echo "make collection  capture, build and check every game file of games/ on"
-	@echo "            advanced/phc28s and basic/vg8020, with the CAS files of"
-	@echo "            COLLECTION_DIR, by default CAS_DIR/collection: takes hours"
+	@echo "            COLLECTION_MACHINES, by default advanced/phc28s and basic/vg8020,"
+	@echo "            with the CAS files of COLLECTION_DIR, by default CAS_DIR/collection,"
+	@echo "            into out/test/step9/collection/<machine>.txt: takes hours"
 	@echo "make try    start openMSX as advanced/phc28s with SNAPCAS.COM and the images"
 	@echo "            in out/try/ on its disk: MACHINE= and FILES= change them"
 	@echo "make clean  remove the built files and the test output"
@@ -91,15 +93,24 @@ $(NMS8250_512K):
 	grep -q '<size>512</size>' $@.tmp
 	mv $@.tmp $@
 
-test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(NMS8250_512K)
+# basic/picoverse: a 192 KB memory mapper cartridge, the PicoVerse's mapper.
+RAM192K := $(EMU_HOME)/share/extensions/ram192k.xml
+$(RAM192K):
+	mkdir -p $(dir $@)
+	sed 's|<size>512</size>|<size>192</size>|; s|512 kB|192 kB|g; s|512k|192k|g' $(OPENMSX_SHARE)/extensions/ram512k.xml > $@.tmp
+	grep -q '<size>192</size>' $@.tmp
+	mv $@.tmp $@
+
+test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(NMS8250_512K) $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I -m unittest discover -s tests -v
 
 # The run over every shipped game file (docs/PLAN.md, step 9), apart from make
 # test because it takes hours.
-collection: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
+collection: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
-	  COLLECTION_DIR=$(abspath $(COLLECTION_DIR)) python3 -I -m unittest discover -s tests -p test_step9.py -k Collection -v
+	  COLLECTION_DIR=$(abspath $(COLLECTION_DIR)) COLLECTION_MACHINES="$(COLLECTION_MACHINES)" \
+	  python3 -I -m unittest discover -s tests -p test_step9.py -k Collection -v
 
 MACHINE ?= advanced/phc28s
 FILES ?= bin/SNAPCAS.COM $(wildcard $(OUT)/try/*.SNP)
