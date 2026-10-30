@@ -1,0 +1,4 @@
+# A capture variant of advanced/hbf700p without the RAM cartridge in slot 1, for a
+# game whose loader trips over it. The image still runs on advanced/hbf700p.
+openmsx -machine Sony_HB-F700P -ext msxdos2
+disk diska

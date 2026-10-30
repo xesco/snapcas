@@ -1,2 +1,5 @@
-openmsx -machine Philips_NMS_8250 -ext msxdos2
+# Philips NMS 8250, an MSX2 with a 128 KB mapper and a floppy drive, with a 512 KB
+# memory mapper cartridge, under MSX-DOS 2. MSX-DOS 2 takes the larger mapper, which
+# leaves room for the images' segments.
+openmsx -machine Philips_NMS_8250 -ext ram512k -ext msxdos2
 disk diska

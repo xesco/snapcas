@@ -1,0 +1,6 @@
+# The Philips NMS 8250 with only its own 128 KB mapper, under MSX-DOS 2, for the
+# restorer's message when DOS has too few free segments. The shipped machines
+# have a mapper of 512 KB or more, so that the tests show the games, not a
+# shortage of segments.
+openmsx -machine Philips_NMS_8250 -ext msxdos2
+disk diska

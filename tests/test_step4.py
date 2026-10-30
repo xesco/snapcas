@@ -29,6 +29,8 @@ GAMES = {
     # On the PHC-28S, La Abadia's loader takes the RAM cartridge in slot 1 for
     # an expanded slot and crashes, so the game loads without it.
     "abadia-phc": "cas ABADIA.CAS\nservice no\ncapture advanced/phc28s-noslot1\n",
+    # On the HB-F700P it crashes with the RAM cartridge in either slot.
+    "abadia-hbf": "cas ABADIA.CAS\nservice no\ncapture advanced/hbf700p-noram\n",
 }
 
 # machine: (DOS folder, games that pass, games that the restorer stops for
@@ -37,9 +39,11 @@ GAMES = {
 MACHINES = {
     "advanced/phc28s": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero", "abadia-phc"}, set()),
     "basic/vg8020": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero"}, set()),
-    "basic/nms8250": (os.path.join(DOS_DIR, "msxdos2"), {"caldero"},
-                      {"freddy", "fernando", "moonrider", "abadia"}),
-    "advanced/hbf700p": (os.path.join(DOS_DIR, "msxdos2"), {"moonrider", "caldero", "abadia"}, set()),
+    "basic/nms8250": (os.path.join(DOS_DIR, "msxdos2"), {"freddy", "fernando", "moonrider", "caldero", "abadia"},
+                      set()),
+    "advanced/hbf700p": (os.path.join(DOS_DIR, "msxdos2"), {"moonrider", "caldero", "abadia-hbf"}, set()),
+    "test/nms8250-128k": (os.path.join(DOS_DIR, "msxdos2"), {"caldero"},
+                          {"freddy", "fernando", "moonrider", "abadia"}),
     "test/nms8250-dos1": (os.path.join(DOS_DIR, "msxdos1"),
                           {"freddy", "fernando", "moonrider", "caldero", "abadia"}, set()),
 }

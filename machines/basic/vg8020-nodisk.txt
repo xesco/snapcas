@@ -1,0 +1,6 @@
+# A capture variant of basic/vg8020 without the Carnivore2, so without Nextor,
+# for a game whose loader finds the Carnivore2's RAM in slot 1 before the
+# internal RAM in slot 3. The image still runs on basic/vg8020. The capture uses
+# no disk, but a machine file needs this line.
+openmsx -machine Philips_VG_8020
+disk hda

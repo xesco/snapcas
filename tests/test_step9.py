@@ -90,6 +90,21 @@ class Machines(unittest.TestCase):
                 self.assertTrue(report.startswith("point 1: pass"), report)
 
 
+@unittest.skipUnless(os.path.isfile(os.path.join(test_step4.CAS_DIR, SINGLE)), f"CAS_DIR holds no {SINGLE}")
+class OneCommand(unittest.TestCase):
+    def test_snapcas_py_makes_and_checks_the_image(self):
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        folder = os.path.join(WORK, "games", "one-command")
+        os.makedirs(folder, exist_ok=True)
+        with open(os.path.join(folder, "game.txt"), "w") as f:
+            f.write(f"cas {SINGLE}\n")
+        result = test_step4.tool("snapcas.py", folder, "advanced/phc28s", "--cas", test_step4.CAS_DIR,
+                                 "--dos", test_step4.NEXTOR)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("point 1: pass", result.stdout)
+        self.assertTrue(os.path.isfile(os.path.join(ROOT, "out", "advanced/phc28s", "one-command", "ONECOMMA.SNP")))
+
+
 # The collection's CAS files, for the run over every game file, which takes
 # hours: make collection sets it.
 COLLECTION_DIR = os.environ.get("COLLECTION_DIR")

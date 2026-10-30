@@ -225,8 +225,8 @@ def borrowed_page(state, pages):
     page = (mapped + [2])[0]
     found = selected_page(state, pages, page)
     register = "f" + "cdef"[page]
-    if state[register] == "-":
-        raise BuildError("service t0 needs a mapper at the snapshot")
+    # Without a mapper at the snapshot, as in a capture variant without the
+    # Carnivore2, the segment written back is 0, which only DOS's mapper sees.
     seg = found.seg if found is not None and found.seg is not None else num(state, register)
     return page, bytes([0, ~(3 << 2 * page) & 0xFF, 0, 0xFC + page, page * 0x40, seg])
 
@@ -415,6 +415,8 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
     header[43] = num(state, "a8")
     for ps in range(4):
         header[44 + ps] = num(state, f"sub{ps}")
+        if state[f"sub{ps}"] == "-":
+            header[56] |= 1 << ps
     for n, reg in enumerate("fc fd fe ff".split()):
         header[48 + n] = num(state, reg)
     struct.pack_into("<H", header, 52, tail_address)

@@ -209,7 +209,21 @@ collection, by running the capture over `CAS_DIR` on `advanced/phc28s`
 each of the six shipped machines, then capture, build and check every game file on
 `advanced/phc28s` and `basic/vg8020`, and write a report of passes and failures.
 
-## Step 10: real hardware
+## Step 10: automatic fixes
+
+This step makes the fixes that the game files hold by hand automatic, so that a new
+machine needs as few game files of its own as possible. It adds the slot patches of
+the capture and of the scan ([Slot patches](DESIGN.md#slot-patches)), the mode
+without a part in page 3 when page 3 has no room
+([Without a part in page 3](DESIGN.md#without-a-part-in-page-3)), and the tries of
+`tools/snapcas.py` on the capture variants
+([Files and commands](DESIGN.md#files-and-commands)). The tests check each fix on a
+game that needed it by hand, without its line: Sootland and Finders Keepers for the
+slot patches, Chase H.Q. for the mode, and La Abadia del Crimen for the variants.
+The collection then runs on all six shipped machines, and the report lists the game
+files that a machine still needs.
+
+## Step 11: real hardware
 
 The user runs the corpus on the Sanyo PHC-28S with the Sony HBM-64 in slot 1 and the
 Carnivore2 in slot 2, and the results go in this page, with the machine and

@@ -51,6 +51,7 @@ H_MAP   equ HDR+48
 H_TAIL  equ HDR+52
 H_VDP1  equ HDR+54      ; the snapshot's VDP register 1
 H_BORROW equ HDR+55     ; the page that TAPIN borrows without a part in page 3
+H_NOEXP equ HDR+56      ; bit n: the capture's slot n was not expanded
 H_TABLE equ HDR+64
 T_MAPPER equ 1          ; record types
 T_RAM    equ 2
@@ -495,6 +496,31 @@ check_records:
         ld d,0
         ld hl,H_SUB
         add hl,de
+        ; A slot that the capture did not have expanded: the game never wrote
+        ; its subslot register, so the borrowed page gets the mapper's subslot.
+        ld a,(H_NOEXP)
+        ld b,e
+        inc b
+.noexp:
+        rrca
+        djnz .noexp
+        jr nc,.check
+        push hl
+        ld a,(H_BORROW)
+        ld b,a
+        ld a,(dos_slot)
+        rrca
+        rrca
+        and 3
+        call page_bits
+        pop hl
+        ld e,a
+        ld a,(hl)
+        and d
+        or e
+        ld (hl),a
+        jr .rom
+.check:
         ld a,(H_BORROW)
         ld b,a
         ld a,(hl)

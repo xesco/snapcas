@@ -1,0 +1,7 @@
+# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
+capture basic/vg8020-nodisk
+# The game selects RAM in slot 2 through WSLREG. The VG-8020 has its RAM in slot 3.
+patch side1:1B37 3E A8 CD 3B 01 > 3E FC CD 3B 01
+patch side1:1B47 3E A0 CD 3B 01 > 3E F0 CD 3B 01
+patch side1:402E 3E A8 CD 3B 01 > 3E FC CD 3B 01
+patch side1:5280 3E A0 CD 3B 01 > 3E F0 CD 3B 01

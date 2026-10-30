@@ -1,0 +1,15 @@
+# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
+capture basic/vg8020-nodisk
+# The game selects RAM in slot 2. The VG-8020 has its RAM in slot 3.
+patch side1:FDF 3E AA D3 A8 > 3E FF D3 A8
+patch side1:FEE 3E A0 D3 A8 > 3E F0 D3 A8
+patch side1:FF5 3E AA D3 A8 > 3E FF D3 A8
+patch side1:1004 3E A0 D3 A8 > 3E F0 D3 A8
+patch side1:C477 3E AA D3 A8 > 3E FF D3 A8
+patch side1:C742 3E A8 D3 A8 > 3E FC D3 A8
+patch side1:C864 3E A0 D3 A8 > 3E F0 D3 A8
+patch side1:C9F1 3E A8 D3 A8 > 3E FC D3 A8
+patch side1:C9F8 3E AA D3 A8 > 3E FF D3 A8
+patch side1:D1BB 3E AA D3 A8 > 3E FF D3 A8
+patch side1:D1C5 3E A0 D3 A8 > 3E F0 D3 A8
+patch side1:F82B 3E A0 D3 A8 > 3E F0 D3 A8
