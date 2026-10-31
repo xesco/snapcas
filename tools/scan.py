@@ -32,6 +32,18 @@ ENTRY_PAGE = 0xFC  # the page of the entries, FCE1h to FCF3h, by default
 # a fixed slot register value (DESIGN.md, Slot patches).
 SLOT_CODE = re.compile(rb"\x3E(.)(?:\xD3\xA8|\xCD\x3B\x01)", re.S)
 SLOT_VALUE = "fixed slot value"
+# The opcodes of the instructions with a one-byte and with a two-byte operand.
+# A 3Eh after one can be its operand, as in Knight Orc's LD A,(EF3Eh) / OUT
+# (0A8h),A (DESIGN.md, Slot patches).
+OPERAND_1 = bytes.fromhex("06 0E 16 1E 26 2E 36 3E C6 CE D6 DE E6 EE F6 FE D3 DB 10 18 20 28 30 38")
+OPERAND_2 = bytes.fromhex("01 11 21 31 22 2A 32 3A C2 C3 C4 CA CC CD D2 D4 DA DC E2 E4 EA EC F2 F4 FA FC")
+
+
+def in_operand(data, offset):
+    """Whether the byte at offset in data can be an operand of the instruction
+    before it."""
+    return ((offset >= 1 and data[offset - 1] in OPERAND_1 + OPERAND_2)
+            or (offset >= 2 and data[offset - 2] in OPERAND_2))
 
 
 class Finding:
@@ -80,7 +92,7 @@ def find(data, page=ENTRY_PAGE, slots=None, tape=True):
     for match in SLOT_CODE.finditer(data) if slots else ():
         value = match.group(1)[0]
         fixed = slot_fix(value, slots)
-        if fixed != value:
+        if fixed != value and not in_operand(data, match.start()):
             old = match.group()
             findings.append(Finding(SLOT_VALUE, match.start(), old, old[:1] + bytes([fixed]) + old[2:]))
     return sorted(findings, key=lambda f: f.offset)

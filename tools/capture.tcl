@@ -273,18 +273,34 @@ proc read_with {a8 address n} {
     return $bytes
 }
 
+# The opcodes of the instructions with a one-byte and with a two-byte operand,
+# as scan.py's OPERAND_1 and OPERAND_2 (DESIGN.md, Slot patches).
+set ::operand1 [lmap b {06 0E 16 1E 26 2E 36 3E C6 CE D6 DE E6 EE F6 FE D3 DB 10 18 20 28 30 38} {expr 0x$b}]
+set ::operand2 [lmap b {01 11 21 31 22 2A 32 3A C2 C3 C4 CA CC CD D2 D4 DA DC E2 E4 EA EC F2 F4 FA FC} {expr 0x$b}]
+
+# Whether the byte at address, read with the slot register at a8, can be an
+# operand of the instruction before it.
+proc in_operand {a8 address} {
+    binary scan [read_with $a8 [expr {$address - 2}] 2] cu2 bytes
+    lassign $bytes two one
+    expr {$one in $::operand1 || $one in $::operand2 || $two in $::operand2}
+}
+
 # The code that wrote value to the slot register, read with the slot register
 # before the write, as {address length}, or "" when it is not one of the two
 # forms: LD A,n / OUT (0A8h),A, whose OUT is at PC, or LD A,n / CALL 013Bh,
-# whose OUT is in the main ROM and whose return address is on the stack.
+# whose OUT is in the main ROM and whose return address is on the stack. Code
+# whose 3Eh can be an operand of the instruction before it is neither.
 proc slot_code {value before} {
     set pc [reg pc]
-    if {[read_with $before [expr {$pc - 2}] 4] eq [binary format c4 [list 0x3E $value 0xD3 0xA8]]} {
+    if {[read_with $before [expr {$pc - 2}] 4] eq [binary format c4 [list 0x3E $value 0xD3 0xA8]]
+        && ![in_operand $before [expr {$pc - 2}]]} {
         return [list [expr {($pc - 2) & 0xFFFF}] 4]
     }
     if {$pc < 0x4000 && ($before & 3) == ([exptbl 0] & 3)} {
         binary scan [read_with $before [reg sp] 2] su ret
-        if {[read_with $before [expr {$ret - 5}] 5] eq [binary format c5 [list 0x3E $value 0xCD 0x3B 0x01]]} {
+        if {[read_with $before [expr {$ret - 5}] 5] eq [binary format c5 [list 0x3E $value 0xCD 0x3B 0x01]]
+            && ![in_operand $before [expr {$ret - 5}]]} {
             return [list [expr {($ret - 5) & 0xFFFF}] 5]
         }
     }

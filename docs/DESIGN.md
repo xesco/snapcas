@@ -380,6 +380,20 @@ The watch and the scan know two forms of the code that sets a fixed value:
 | `LD A,n / OUT (0A8h),A` | `3E n D3 A8` | Its last byte is the last byte of the write's `OUT` |
 | `LD A,n / CALL 013Bh`, a call of the BIOS's `WSLREG`, which writes A to the slot register | `3E n CD 3B 01` | When the write's `OUT` is in the main ROM, its last byte is the byte before the return address on top of the stack. The capture reads that address in the slot that page 3 selected before the write, because the write can change page 3. Finders Keepers selects RAM in slot 2 this way |
 
+The bytes of a form can also be the end of a longer instruction. Knight Orc reads
+its slot values from RAM with `LD A,(EF3Eh) / OUT (0A8h),A`, `3A 3E EF D3 A8`, whose
+last four bytes are the first form with n = EFh. A patch of that n changes the
+address, so the game reads a wrong value and hangs. So the watch and the scan skip
+code whose `3E` can be an operand:
+
+| Byte | Opcodes |
+|---|---|
+| The byte before `3E` | Those of an instruction with a one-byte operand: `06 0E 16 1E 26 2E 36 3E C6 CE D6 DE E6 EE F6 FE D3 DB 10 18 20 28 30 38`, or with a two-byte operand, as below |
+| The second byte before `3E` | Those of an instruction with a two-byte operand: `01 11 21 31 22 2A 32 3A C2 C3 C4 CA CC CD D2 D4 DA DC E2 E4 EA EC F2 F4 FA FC` |
+
+A real `LD A,n` after an operand that has the value of such an opcode is skipped as
+well, and needs a `patch` line by hand.
+
 ### Snapshot files
 
 | File | Contents |

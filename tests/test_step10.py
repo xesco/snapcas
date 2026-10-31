@@ -8,6 +8,8 @@ import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import scan  # noqa: E402
 import test_step4  # noqa: E402
 
 COLLECTION = os.environ.get("COLLECTION_DIR", os.path.join(test_step4.CAS_DIR, "collection"))
@@ -43,6 +45,15 @@ def read(folder, machine, name):
 
 
 class SlotPatches(unittest.TestCase):
+    def test_the_scan_skips_a_3eh_that_can_be_an_operand(self):
+        # The PHC-28S's slot map: slot 3 holds nothing in any page.
+        slots = {0: ({3}, 2), 1: ({3}, 1), 2: ({0, 3}, 2), 3: ({3}, 2)}
+        # Knight Orc's LD A,(EF3Eh) / OUT (0A8h),A, and the same after CALL.
+        for code in ("3A 3E EF D3 A8", "CD 3E EF D3 A8", "3A 00 3E EF D3 A8"):
+            self.assertEqual(scan.find(bytes.fromhex(code), slots=slots, tape=False), [], code)
+        found = scan.find(bytes.fromhex("F5 3E EF D3 A8"), slots=slots, tape=False)
+        self.assertEqual([(f.offset, f.new) for f in found], [(1, bytes.fromhex("3E A6 D3 A8"))])
+
     @unittest.skipUnless(has("SOOTLAND.CAS"), "COLLECTION_DIR holds no SOOTLAND.CAS")
     def test_the_capture_patches_sootlands_slot_value(self):
         folder = game("SOOTLAND", "advanced/phc28s", ["capture advanced/phc28s-nodisk"])
