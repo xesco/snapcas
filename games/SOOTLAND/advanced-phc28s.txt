@@ -3,7 +3,3 @@
 # The capture runs without the Carnivore2, so without a disk system, because the
 # game crashes when one is present.
 capture advanced/phc28s-nodisk
-
-# LD A,0FCh / OUT (0A8h),A selects slot 3 in pages 1 to 3. The patch selects
-# slot 1 in pages 1 and 2, and slot 0 in page 3 there.
-patch side1:024E 3E FC D3 A8 > 3E 14 D3 A8

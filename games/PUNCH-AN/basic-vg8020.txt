@@ -3,20 +3,3 @@
 # The capture runs without the Carnivore2, whose RAM in slot 1 the game's loader
 # finds before the internal RAM in slot 3.
 capture basic/vg8020-nodisk
-
-# The game selects RAM in slot 2. The VG-8020 has its RAM in slot 3.
-# LD A,0A0h / OUT (0A8h),A selects slot 2 in pages 2 and 3. The patch selects
-# slot 3 there.
-patch side1:147 3E A0 D3 A8 > 3E F0 D3 A8
-
-# LD A,0AAh / OUT (0A8h),A selects slot 2 in pages 0 to 3. The patch selects
-# slot 3 there.
-patch side1:163 3E AA D3 A8 > 3E FF D3 A8
-
-# LD A,0A0h / OUT (0A8h),A selects slot 2 in pages 2 and 3. The patch selects
-# slot 3 there.
-patch side1:172 3E A0 D3 A8 > 3E F0 D3 A8
-
-# LD A,0AAh / OUT (0A8h),A selects slot 2 in pages 0 to 3. The patch selects
-# slot 3 there.
-patch side1:18B 3E AA D3 A8 > 3E FF D3 A8

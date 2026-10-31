@@ -1020,7 +1020,9 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   not run.
 - DOS's four pages must be in one memory mapper, with enough free segments for the
   image's holding and service segments and the worker. A game with a long tape needs
-  a large mapper: Moonwalker's 236 KB tape does not fit in an NMS 8250's 128 KB.
+  a large mapper: Moonwalker's 236 KB tape does not fit in an NMS 8250's 128 KB. The
+  PicoVerse's 192 KB mapper leaves Nextor 5 free segments, and 191 games need 6 to
+  32 for their tapes.
 - A game with the tape service needs one of two things. Either its page 3 keeps 168
   bytes from an address xxE1h free for the service's part of page 3, at the snapshot
   and in every later load ([Build](#build)). Or the game meets the conditions of the
@@ -1042,10 +1044,22 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   ([The manual tape](#the-manual-tape)).
 - A slot value that the code of neither form in [Slot patches](#slot-patches) sets
   gets no slot patch. The capture only logs its write, for a `patch` line by hand.
+- A slot patch replaces only a field that names a slot that holds nothing, and with
+  the slot that the slot map gives, so a game that needs another slot keeps its
+  `patch` lines by hand. Doki Doki Penguinland selects the RAM cartridge, slot 1, in
+  page 3, where the Sanyo PHC-28S without Nextor keeps its internal RAM. On the NMS
+  8250, BASIC's subslot register of slot 3 does not select RAM in pages 0 and 1 at
+  step 3, so the slot map has no slot for those pages, and Checkmate! and Finders
+  Keepers keep their lines there.
 - The replay is a recording: a loader that lets the player act while it loads shows
   only what happened in the capture.
 - A snapshot taken without an interrupt overwrites the 26 bytes below the stack
   pointer with the tail.
+- The tail needs 26 bytes below the stack pointer, in a RAM page that the snapshot
+  keeps, or else 26 bytes below the start of the stack pointer's page. A game whose
+  stack pointer is below 26, as Breakout's 0004h is on the MFRSD machine, or whose
+  bytes there are not in a kept RAM page, gets no image: `build.py` stops
+  ([Tail](#tail)).
 - Music that BASIC's `PLAY` statement is still playing at the snapshot does not
   resume on a real Sanyo PHC-28S, though it does in `openMSX`, and the cause is not
   known. Tokyo Nampa Street then waits for its music to end and never does. Its game

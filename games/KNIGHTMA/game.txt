@@ -3,6 +3,8 @@
 cas KNIGHTMA.CAS
 sha1 f8d4faacc697318ad0514e86726a8bd843599f9f
 
-# The capture takes its snapshot at 130 seconds instead of its own moment. The
-# reason is not recorded (*to verify*).
+# The capture takes its snapshot at 130 seconds instead of its own moment, 120
+# seconds, right after the last BLOAD. In openMSX the game also starts from the
+# snapshot at 120 seconds, so the line may not be needed. The image with it ran
+# on the PHC-28S (*to verify* on the PHC-28S without it).
 snapshot at 130

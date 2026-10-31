@@ -3,20 +3,3 @@
 # The capture runs without the Carnivore2, whose RAM in slot 1 the game's loader
 # finds before the internal RAM in slot 3.
 capture basic/vg8020-nodisk
-
-# The game selects RAM in slot 2 through WSLREG. The VG-8020 has its RAM in slot
-# 3. LD A,0A8h / CALL 013Bh, WSLREG, selects slot 2 in pages 1 to 3. The patch
-# selects slot 3 there.
-patch side1:1B37 3E A8 CD 3B 01 > 3E FC CD 3B 01
-
-# LD A,0A0h / CALL 013Bh, WSLREG, selects slot 2 in pages 2 and 3. The patch
-# selects slot 3 there.
-patch side1:1B47 3E A0 CD 3B 01 > 3E F0 CD 3B 01
-
-# LD A,0A8h / CALL 013Bh, WSLREG, selects slot 2 in pages 1 to 3. The patch
-# selects slot 3 there.
-patch side1:402E 3E A8 CD 3B 01 > 3E FC CD 3B 01
-
-# LD A,0A0h / CALL 013Bh, WSLREG, selects slot 2 in pages 2 and 3. The patch
-# selects slot 3 there.
-patch side1:5280 3E A0 CD 3B 01 > 3E F0 CD 3B 01

@@ -3,6 +3,8 @@
 cas MOONWALK.CAS
 sha1 1787776aeef9420ebb35c3ecb879a7c9a556a512
 
-# The capture takes its snapshot at 135 seconds instead of its own moment. The
-# reason is not recorded (*to verify*).
+# The capture takes its snapshot at 135 seconds, in the loader, before the main
+# game loads. At its own moment, the tape's end, the capture takes the snapshot
+# at 778 seconds in the BIOS's tape code with the ROM in page 0, so the PHC-28S
+# file's patch of the loader's stub in page 0 has no RAM page to patch.
 snapshot at 135
