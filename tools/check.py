@@ -40,13 +40,17 @@ def patched_bytes(state, snap, patches, page):
     """The RAM pages' bytes that the patch lines and the scan change, as
     ps-ss-page, first and last offset. The scan's patches point to the entries
     at page's E1h, and page is 0 without a part in page 3, where the scan
-    patches nothing."""
+    patches only fixed slot values."""
     ranges = ["{}-{}-{} {} {}".format(*selected_name(state, p.page), p.page, p.offset, p.offset + len(p.old) - 1)
               for p in patches if p.page not in ("side1", "side2")]
-    if state["service"] == "1" and page:
+    # The scan's fixed slot values on every image, and its tape findings with
+    # a part in page 3.
+    slots = build.read_slots(snap)
+    tape = state["service"] == "1" and page
+    if tape or slots:
         for name in sorted(os.listdir(os.path.join(snap, "ram"))):
             with open(os.path.join(snap, "ram", name), "rb") as f:
-                findings = scan.find(f.read(), page)
+                findings = scan.find(f.read(), page or scan.ENTRY_PAGE, slots, bool(tape))
             ps, ss, ram_page, _ = name[:-4].split("-")
             ranges += [f"{ps}-{ss}-{ram_page} {f.offset} {f.offset + len(f.old) - 1}"
                        for f in findings if f.new is not None]

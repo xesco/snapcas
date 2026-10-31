@@ -49,14 +49,36 @@ This example makes Gauntlet for a Sanyo PHC-28S.
 
 ## Tape keys
 
-These keys work when a game reads the tape. Hold the key down when the game asks you
-to press play.
+The tape works by itself. These keys work when a game reads the tape. Hold the key
+down when the game asks you to press play.
 
 | Key | What it does |
 |---|---|
 | GRAPH | Goes back to the start of side A. The screen flashes green |
 | CODE | Goes to the start of side B. The screen flashes red |
 | CTRL+STOP | Stops the tape |
+
+### Work the tape yourself
+
+Type `/M` after the game's name to work the tape yourself, as on a real tape player:
+
+```
+SNAPCAS GAUNTLET /M
+```
+
+The tape then stops when the game stops it, and at the end of each side. When the
+game reads the tape again, the tape waits for one of these keys:
+
+| Key | What it does |
+|---|---|
+| RETURN | Plays on. At the end of side A, it goes on with side B. The screen flashes yellow |
+| GRAPH | Goes back to the start of side A, and plays. The screen flashes green |
+| CODE | Goes to the start of side B, and plays. The screen flashes red |
+| CTRL+STOP | Stops the tape |
+
+When a game says "rewind the tape and press a key", press the game's key first. Then
+press GRAPH or CODE to wind the tape back. With a few games, `/M` does not work.
+`SNAPCAS` then says so, and the tape works by itself.
 
 ## Folders
 

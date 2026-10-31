@@ -127,24 +127,40 @@ proc compare {} {
     set f [open [file join $::C(snap) vram.bin] rb]
     set want [read $f]
     close $f
+    # With VR set, as the capture reads it (capture.tcl, physical_vram).
+    set r8 [debug read {VDP regs} 8]
+    if {$v9938} { debug write {VDP regs} 8 [expr {$r8 | 8}] }
     set have [debug read_block "physical VRAM" 0 [string length $want]]
+    debug write {VDP regs} 8 $r8
     if {$have ne $want} { note "VRAM differs at [format %05X [first_difference $have $want]]" }
 
     # The RAM pages, except the tail's bytes, FCC9h to FD88h, the service's
     # page 3 part when it moved, FFFFh in an expanded slot, the patched bytes,
     # and with the tape service SLTTBL.
-    foreach path [lsort [glob -nocomplain [file join $::C(snap) ram *.bin]]] {
+    # A mapper's segment that the game also selects in page 3, or in the tail's
+    # page, holds those bytes too, at the same offsets.
+    set paths [lsort [glob -nocomplain [file join $::C(snap) ram *.bin]]]
+    set p3seg ""; set tailseg ""
+    foreach path $paths {
+        lassign [split [file rootname [file tail $path]] -] ps ss page seg
+        if {$seg eq "x"} continue
+        if {$page == 3} { set p3seg "$ps-$ss-$seg" }
+        if {$page == ($::C(tail) >> 14)} { set tailseg "$ps-$ss-$seg" }
+    }
+    foreach path $paths {
         lassign [split [file rootname [file tail $path]] -] ps ss page seg
         set f [open $path rb]
         set want [read $f]
         close $f
         set have [with_slot $ps $ss $page { read_page $page }]
         set base [expr {$page * 0x4000}]
+        set as3 [expr {$page == 3 || ($seg ne "x" && "$ps-$ss-$seg" eq $p3seg)}]
+        set astail [expr {$page == ($::C(tail) >> 14) || ($seg ne "x" && "$ps-$ss-$seg" eq $tailseg)}]
         set skip {}
-        if {$page == ($::C(tail) >> 14)} { lappend skip [expr {$::C(tail) - $base}] [expr {$::C(tail) - $base + 25}] }
-        if {$page == 3} { lappend skip [expr {0xFCC9 - $base}] [expr {0xFD88 - $base}] }
-        foreach {from to} $::C(p3) { if {$page == 3} { lappend skip [expr {$from - $base}] [expr {$to - $base}] } }
-        if {$page == 3 && $::C(service)} { lappend skip [expr {0xFCC5 - $base}] [expr {0xFCC8 - $base}] }
+        if {$astail} { lappend skip [expr {$::C(tail) & 0x3FFF}] [expr {($::C(tail) & 0x3FFF) + 25}] }
+        if {$as3} { lappend skip [expr {0xFCC9 - 0xC000}] [expr {0xFD88 - 0xC000}] }
+        foreach {from to} $::C(p3) { if {$as3} { lappend skip [expr {$from - 0xC000}] [expr {$to - 0xC000}] } }
+        if {$as3 && $::C(service)} { lappend skip [expr {0xFCC5 - 0xC000}] [expr {0xFCC8 - 0xC000}] }
         if {$page == 3 && $ss ne "x"} { lappend skip 0x3FFF 0x3FFF }
         foreach {at from to} $::C(patched) { if {$at eq "$ps-$ss-$page"} { lappend skip $from $to } }
         set at [first_difference $have $want $skip]

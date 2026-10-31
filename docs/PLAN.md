@@ -102,19 +102,20 @@ wrong.
 This step writes `SNAPCAS.COM` without the tape service, restorer steps 1 to 7
 ([Restorer](DESIGN.md#restorer)), `tools/check.py`, and the machine files of its
 tests. The tests capture, build and check each single-load file of the corpus, first
-on `advanced/phc28s`, then on `basic/vg8020`, `basic/nms8250`, `advanced/hbf700p`
-and `test/nms8250-dos1`. Check point 1 must pass on each machine, except where the
-restorer stops because DOS leaves too few free segments: the test then checks that
-the restorer's message names the segments needed and free. The savestates stay in
-`check/` for the user to look at.
+on `advanced/phc28s`, then on `basic/vg8020`, `basic/nms8250`, `advanced/hbf700p`,
+`test/nms8250-128k` and `test/nms8250-dos1`. Check point 1 must pass on each
+machine, except where the restorer stops because DOS leaves too few free segments:
+the test then checks that the restorer's message names the segments needed and free.
+The savestates stay in `check/` for the user to look at.
 
 The results of the step:
 
 | Machine | Passes point 1 | Other results |
 |---|---|---|
 | `advanced/phc28s`, `basic/vg8020` | Freddy Hardest, Fernando, Moonrider, El Caldero Magico | La Abadia crashes during its load when a Carnivore2 is present |
-| `basic/nms8250` | El Caldero Magico | MSX-DOS 2 leaves 2 free segments of the 8 in 128 KB, so the restorer stops for the other games, naming the segments needed and free |
+| `basic/nms8250` | Freddy Hardest, Fernando, Moonrider, El Caldero Magico | The Carnivore2's mapper under Nextor has room for every game |
 | `advanced/hbf700p` | Moonrider, El Caldero Magico, La Abadia | `FREDDY.CAS` and `FERNANDO.CAS` do not load to their end in `openMSX` |
+| `test/nms8250-128k` | El Caldero Magico | MSX-DOS 2 leaves 2 free segments of the 8 in 128 KB, so the restorer stops for the other games, naming the segments needed and free |
 | `test/nms8250-dos1` | All five | |
 
 The test leaves out the games that fail in `openMSX` itself.

@@ -198,6 +198,155 @@ proc on_ffff {value} {
     }
 }
 
+# ---- Slot patches (DESIGN.md, Slot patches) ----
+
+# The slot map, at step 3: for each page, the primary slots that hold nothing
+# there and the slot that replaces them in a slot register value, or -1. A
+# slot holds nothing in a page when it is not expanded, does not hold RAM there,
+# and its first 256 bytes there read FFh. An expanded slot holds RAM in a page
+# when the subslot that its register selects there holds RAM.
+proc slot_map {} {
+    set a8 [debug read ioports 0xA8]
+    set ffs [string repeat "\xff" 256]
+    foreach page {0 1 2 3} {
+        set empty {}
+        set ram {}
+        foreach ps {0 1 2 3} {
+            if {$::st(sub$ps) >= 0} {
+                set ss [expr {($::st(sub$ps) >> (2 * $page)) & 3}]
+                if {[with_slot $ps $ss $page { is_ram $page }]} { lappend ram $ps }
+            } elseif {[with_slot $ps x $page { is_ram $page }]} {
+                lappend ram $ps
+            } elseif {[with_slot $ps x $page { debug read_block memory [expr {$page * 0x4000}] 256 }] eq $ffs} {
+                lappend empty $ps
+            }
+        }
+        set basic [expr {($a8 >> (2 * $page)) & 3}]
+        set page2 [expr {($a8 >> 4) & 3}]
+        if {$page >= 2} {
+            set with $basic
+        } elseif {![llength $ram]} {
+            set with -1
+        } elseif {$page2 in $ram} {
+            set with $page2
+        } else {
+            set with [lindex [lsort -integer $ram] 0]
+        }
+        set ::slots($page) [list $empty $with]
+    }
+    set f [open [file join $::S(snap) slots.txt] w]
+    puts $f "# For each page: the primary slots that hold nothing there, and the slot"
+    puts $f "# that replaces them in a slot register value, or -1 (DESIGN.md, Slot patches)."
+    foreach page {0 1 2 3} {
+        lassign $::slots($page) empty with
+        puts $f "page $page empty [expr {[llength $empty] ? [join $empty ,] : "-"}] with $with"
+    }
+    close $f
+}
+
+# The slot register value with each field that names a slot that holds nothing
+# replaced, where its page has a replacement.
+proc slot_fix {value} {
+    foreach page {0 1 2 3} {
+        lassign $::slots($page) empty with
+        set shift [expr {2 * $page}]
+        if {(($value >> $shift) & 3) in $empty && $with >= 0} {
+            set value [expr {($value & ~(3 << $shift) & 0xFF) | ($with << $shift)}]
+        }
+    }
+    return $value
+}
+
+proc names_nothing {value} {
+    foreach page {0 1 2 3} {
+        if {(($value >> (2 * $page)) & 3) in [lindex $::slots($page) 0]} { return 1 }
+    }
+    return 0
+}
+
+# n bytes at address, read with the slot register at a8.
+proc read_with {a8 address n} {
+    set now [debug read ioports 0xA8]
+    debug write ioports 0xA8 $a8
+    set bytes [debug read_block memory [expr {$address & 0xFFFF}] $n]
+    debug write ioports 0xA8 $now
+    return $bytes
+}
+
+# The code that wrote value to the slot register, read with the slot register
+# before the write, as {address length}, or "" when it is not one of the two
+# forms: LD A,n / OUT (0A8h),A, whose OUT is at PC, or LD A,n / CALL 013Bh,
+# whose OUT is in the main ROM and whose return address is on the stack.
+proc slot_code {value before} {
+    set pc [reg pc]
+    if {[read_with $before [expr {$pc - 2}] 4] eq [binary format c4 [list 0x3E $value 0xD3 0xA8]]} {
+        return [list [expr {($pc - 2) & 0xFFFF}] 4]
+    }
+    if {$pc < 0x4000 && ($before & 3) == ([exptbl 0] & 3)} {
+        binary scan [read_with $before [reg sp] 2] su ret
+        if {[read_with $before [expr {$ret - 5}] 5] eq [binary format c5 [list 0x3E $value 0xCD 0x3B 0x01]]} {
+            return [list [expr {($ret - 5) & 0xFFFF}] 5]
+        }
+    }
+    return ""
+}
+
+# Each place of bytes in the CAS files, as {side offset}.
+proc cas_find {bytes} {
+    set found {}
+    foreach side {1 2} data [list $::cas1 $::cas2] {
+        set i 0
+        while {[set j [string first $bytes $data $i]] >= 0} {
+            lappend found [list $side $j]
+            set i [expr {$j + 1}]
+        }
+    }
+    return $found
+}
+
+# Step 4's watch on the slot register. A value that names a slot that holds
+# nothing is logged. When its code is one of the two forms, and the code with
+# the 8 bytes before it, or else after it, occurs once in the CAS files, the
+# capture writes the patch to newpatch.txt and stops, and capture.py runs it
+# again.
+proc on_a8 {value} {
+    set before $::st(a8)
+    set ::st(a8) $value
+    note_selection $value
+    if {![names_nothing $value]} return
+    set new [slot_fix $value]
+    set code [slot_code $value $before]
+    if {$code ne "" && $new != $value} {
+        lassign $code address length
+        # The code with the 8 bytes before it, or else after it, for a loader
+        # that copies a routine without the bytes before it.
+        set found [cas_find [read_with $before [expr {$address - 8}] [expr {$length + 8}]]]
+        set at 8
+        if {[llength $found] != 1} {
+            set found [cas_find [read_with $before $address [expr {$length + 8}]]]
+            set at 0
+        }
+        if {[llength $found] == 1} {
+            lassign [lindex $found 0] side offset
+            set offset [expr {$offset + $at}]
+            set old [read_with $before $address $length]
+            binary scan $old cu* bytes
+            set patched [lreplace $bytes 1 1 $new]
+            set f [open [file join $::S(snap) newpatch.txt] w]
+            puts $f [format "patch side%d:%X %s > %s" $side $offset \
+                [join [lmap b $bytes {format %02X $b}]] [join [lmap b $patched {format %02X $b}]]]
+            close $f
+            decide "the slot register write of [hex 2 $value] at [hex 4 $address] names a slot that holds nothing: patched to [hex 2 $new]"
+            catch write_log
+            quit
+        }
+    }
+    if {[incr ::slot_logs] <= 16} {
+        decide "the slot register write of [hex 2 $value] at PC [hex 4 [reg pc]] names a slot that holds nothing, for a patch line"
+    }
+}
+set ::slot_logs 0
+
 # Each TAPION call's entry is saved, with ::st, as a moment for the snapshot
 # when it would otherwise come inside the BIOS's tape routines (step 6).
 proc on_tapion {} {
@@ -286,14 +435,18 @@ proc step3 {} {
     set ::st(tapin) 0
     set ::st(ran) 0
     set ::st(on_seen) 0
-    note_selection [debug read ioports 0xA8]
+    set ::st(a8) [debug read ioports 0xA8]
+    note_selection $::st(a8)
+    slot_map
+    set ::cas1 [read_binary $::S(cas)]
+    set ::cas2 [expr {$::S(side2cas) eq "" ? "" : [read_binary $::S(side2cas)]}]
     # TAPION and TAPIN: the addresses that the jump table entries 00E1h and
     # 00E4h jump to.
     set tapion [expr {[debug read memory 0xE2] | ([debug read memory 0xE3] << 8)}]
     set tapin [expr {[debug read memory 0xE5] | ([debug read memory 0xE6] << 8)}]
     debug set_bp $tapion {[rom0]} {safe on_tapion}
     debug set_bp $tapin {[rom0]} {safe on_tapin}
-    debug set_watchpoint write_io 0xA8 {} {safe {note_selection $::wp_last_value}}
+    debug set_watchpoint write_io 0xA8 {} {safe {on_a8 $::wp_last_value}}
     debug set_watchpoint write_mem 0xFFFF {} {safe {on_ffff $::wp_last_value}}
     cassetteplayer insert $::S(cas)
     set ::t0 [now]
@@ -446,6 +599,20 @@ proc watch_motor {name} {
 # 6. The snapshot, at the entry of the next interrupt that the CPU accepts
 #    while no VDP command runs and both VDP latches are empty.
 proc v9938 {} { expr {[debug size "physical VRAM"] > 0x4000} }
+
+# VRAM's cells. openMSX shows a V9938's VRAM through the addressing of
+# register 8's bit 3, VR, which a game can clear (DESIGN.md, Snapshot files),
+# and the restorer writes the cells with VR set, so VR is set for the read.
+proc physical_vram {} {
+    set size [debug size "physical VRAM"]
+    if {$size <= 0x4000} { return [debug read_block "physical VRAM" 0 $size] }
+    set r8 [debug read {VDP regs} 8]
+    debug write {VDP regs} 8 [expr {$r8 | 8}]
+    set v [debug read_block "physical VRAM" 0 $size]
+    debug write {VDP regs} 8 $r8
+    return $v
+}
+
 proc vdp_quiet {} {
     if {[debug read "VDP register latch status" 0] != 0} { return 0 }
     if {[v9938]} {
@@ -529,6 +696,12 @@ proc in_tape_code {pc} {
 }
 
 proc hex {width value} { format %0${width}X $value }
+proc read_binary {path} {
+    set f [open $path rb]
+    set data [read $f]
+    close $f
+    return $data
+}
 proc write_file {name data} {
     set f [open [file join $::S(snap) $name] wb]
     puts -nonewline $f $data
@@ -594,7 +767,7 @@ proc take_snapshot {{pc {}}} {
         set ss [expr {$id & 0x80 ? ($id >> 2) & 3 : "x"}]
         write_file subrom.bin [with_slot [expr {$id & 3}] $ss 0 { read_page 0 }]
     }
-    write_file vram.bin [debug read_block "physical VRAM" 0 [debug size "physical VRAM"]]
+    write_file vram.bin [physical_vram]
 
     set ram {}
     dict for {key bytes} $data {

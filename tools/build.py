@@ -116,8 +116,12 @@ def selected(state, page):
 
 
 def selected_page(state, pages, page):
-    """The kept RAM page that the snapshot selects in a page, or None."""
-    found = [p for p in pages if p.key() == (*selected(state, page), page)]
+    """The kept RAM page that the snapshot selects in a page, or None. A mapper's
+    page is found by its segment, which a game can select in two pages."""
+    slot = selected(state, page)
+    seg = num(state, "f" + "cdef"[page])
+    found = [p for p in pages if (p.ps, p.ss) == slot and p.seg == seg]
+    found += [p for p in pages if p.key() == (*slot, page) and p.seg is None]
     return found[0] if found else None
 
 
@@ -126,6 +130,9 @@ def place_tail(state, pages, tail):
     its address."""
     sp = num(state, "sp")
     address = (sp - TAIL_SIZE) & 0xFFFF
+    if sp >= TAIL_SIZE and address >> 14 != (sp - 1) >> 14:
+        # Across a page boundary: the 26 bytes below it, as free.
+        address = (sp & 0xC000) - TAIL_SIZE
     end = address + TAIL_SIZE - 1
     if end > 0xFFFE or address >> 14 != end >> 14:
         raise BuildError(f"the {TAIL_SIZE} bytes below SP {sp:04X} cross a page boundary or include FFFFh")
@@ -310,26 +317,57 @@ def apply_patch(patch, data, place):
     data[patch.offset:end] = patch.new
 
 
-def scan_snapshot(state, pages, side1, side2, page, patch=True):
+def read_slots(snap):
+    """snap/slots.txt, the capture's slot map: for each page, the primary slots
+    that hold nothing there and the slot that replaces them, or -1. None for a
+    snapshot without it (DESIGN.md, Slot patches)."""
+    path = os.path.join(snap, "slots.txt")
+    if not os.path.exists(path):
+        return None
+    slots = {}
+    with open(path) as f:
+        for line in f:
+            if line.strip() and not line.startswith("#"):
+                _, page, _, empty, _, with_ = line.split()
+                slots[int(page)] = (set() if empty == "-" else {int(v) for v in empty.split(",")}, int(with_))
+    return slots
+
+
+def capture_patches(snap):
+    """The capture's slot patches of the tape, in snap/patches.txt."""
+    path = os.path.join(snap, "patches.txt")
+    if not os.path.exists(path):
+        return []
+    with open(path) as f:
+        return [gamefile.read_patch(line.split()[1:], path) for line in f if line.startswith("patch ")]
+
+
+def scan_snapshot(state, pages, side1, side2, page, slots, tape=True, patch=True):
     """Patches the scan's findings in the RAM pages, for the entries at page's
     E1h, and returns scan.txt's text, with the findings in the unread blocks:
-    side 1 from the tape position, and side 2 (DESIGN.md, Scan)."""
+    side 1 from the tape position, and side 2 (DESIGN.md, Scan). Without tape,
+    it looks only for fixed slot values, and without patch, it patches only
+    those."""
     ram = []
     for p in pages:
-        findings = scan.find(p.data, page)
-        if patch:
-            scan.patch(p.data, findings)
+        findings = scan.find(p.data, page, slots, tape)
+        scan.patch(p.data, [f for f in findings if patch or f.what == scan.SLOT_VALUE])
         if p is selected_page(state, pages, p.page):
             place = f"page{p.page}"
         else:
             place = "ram " + "-".join("x" if v is None else str(v) for v in (p.ps, p.ss, p.page, p.seg))
         ram.append((place, findings))
-    unread = num(state, "tapepos")
-    tape = [("side1", [f for f in scan.find(side1, page) if f.offset >= unread]),
-            ("side2", scan.find(side2, page))]
-    text = scan.report(ram, tape)
-    if not patch:
-        text = "# The tape service has no part in page 3, so nothing is patched.\n" + text
+    unread_blocks = []
+    if tape:
+        # Without the tape service, no block is read after the snapshot.
+        unread = num(state, "tapepos")
+        unread_blocks = [("side1", [f for f in scan.find(side1, page, slots) if f.offset >= unread]),
+                         ("side2", scan.find(side2, page, slots))]
+    text = scan.report(ram, unread_blocks)
+    if not tape:
+        text = "# Without the tape service, the scan looks only for fixed slot values.\n" + text
+    elif not patch:
+        text = "# The tape service has no part in page 3, so only fixed slot values are patched.\n" + text
     if page != DEFAULT_PAGE:
         text = f"# The tape service's part of page 3 is at {page:02X}E1h: the game uses FCC9h to FD88h.\n" + text
     return text
@@ -341,6 +379,8 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
     text). side1 and side2 are the CAS data for the tape service, and rom_keep
     keeps T0 from replacing the ROM."""
     state = read_state(snap)
+    patches = list(patches) + capture_patches(snap)
+    slots = read_slots(snap)
     sides = {"side1": bytearray(side1), "side2": bytearray(side2)}
     for patch in patches:
         if patch.page in sides:
@@ -362,7 +402,8 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
             if found is None:
                 raise BuildError(f"{patch.where}: page {patch.page} is not a RAM page that the snapshot keeps")
             apply_patch(patch, found.data, f"{patch.page * 0x4000 + patch.offset:04X}")
-    scanned = "No tape service, so no scan.\n"
+    if state["service"] != "1":
+        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, tape=False)
     page = 0
     if state["service"] == "1" and not t0_mode:
         # Without room in page 3, the mode without a part in page 3.
@@ -370,10 +411,10 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
         t0_mode = page is None
     if state["service"] == "1" and t0_mode:
         page = 0
-        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, patch=False)
+        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, patch=False)
     elif state["service"] == "1":
         parts = read_service(service_path, page)
-        scanned = scan_snapshot(state, pages, side1, side2, page)
+        scanned = scan_snapshot(state, pages, side1, side2, page, slots)
     tail_address = place_tail(state, pages, tail)
     service = []
     if state["service"] == "1":

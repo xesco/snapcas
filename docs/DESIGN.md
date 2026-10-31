@@ -60,13 +60,15 @@ four commands, in this order:
    when the player presses a key ([The manual tape](#the-manual-tape)).
 
 `tools/snapcas.py <game> <machine> --cas <dir> [--dos <dir>]` makes the image in one
-command: it runs steps 1 and 2, and step 3 when `--dos` is given. When the build or
-the check fails, and the game file names no `capture` machine, it runs these steps
-again on each capture variant of the machine, in the order of their names
-([Machine file](#machine-file)). It keeps the first image that passes, and prints
-the `capture` line that made it, for the machine's game file. Otherwise it stops at
-the first step that fails, with that step's exit status. `capture.py`'s
-`--capture <variant>` names the variant, in place of the game file's `capture` line.
+command: it runs steps 1 and 2, and step 3 when `--dos` is given. When a step fails
+and the game file names no `capture` machine, it runs these steps again on each
+capture variant of the machine, in the order of their names
+([Machine file](#machine-file)). A failed capture counts too, because a loader that
+trips over a cartridge can crash during the capture. It keeps the first image that
+passes, and prints the `capture` line that made it, for the machine's game file.
+Otherwise it makes the image of the game file's own lines again, and exits with the
+status of the first step that failed. `capture.py`'s `--capture <variant>` names the
+variant, in place of the game file's `capture` line.
 
 The tools are Python 3 programs that require only Python 3 and `openMSX` 22.0, so
 they run on macOS, Linux and Windows. They print errors on standard error, naming
@@ -103,7 +105,7 @@ Machine files are of three kinds, each in its own place:
 | Kind | Where | What it is |
 |---|---|---|
 | A user's machine | `machines/basic/` and `machines/advanced/` | A real machine that the images are made for, given as the command's `<machine>` |
-| A capture variant | Beside its machine, named after it and the cartridge it leaves out, such as `advanced/phc28s-nodisk` | The same machine with one cartridge fewer, for a game whose loader trips over that cartridge. A game's `capture` line names it |
+| A capture variant | Beside its machine, named after it and the cartridge it leaves out, such as `advanced/phc28s-nodisk` | The same machine with one cartridge fewer, for a game whose loader trips over that cartridge, or whose image needs fewer free mapper segments when the game runs in the machine's own RAM. A game's `capture` line names it |
 | A test machine | `machines/test/` | A machine that only the tests use |
 
 A capture variant only takes a cartridge away: it keeps the machine's ROMs and every
@@ -186,10 +188,11 @@ reports, its `service no` lines from games played to their end, and its `patch`
 lines from `check.py` and from traces of failed loads. The lines that hold only on
 one machine are in the game's machine's game file ([Game file](#game-file)): 36
 games have one for the Sanyo PHC-28S, `advanced-phc28s.txt`, 68 for the Philips
-VG-8020, `basic-vg8020.txt`, 46 for the Philips NMS 8250, `basic-nms8250.txt`, and 9
-for the Sony HB-F700P, `advanced-hbf700p.txt`. The other game files hold on any
-machine. It also ships these machine files, each checked with `check.py` and a
-single-load game:
+VG-8020, `basic-vg8020.txt`, 46 for the Philips NMS 8250, `basic-nms8250.txt`, 9 for
+the Sony HB-F700P, `advanced-hbf700p.txt`, and 51 for the PicoVerse-like
+`basic/picoverse`, `basic-picoverse.txt`. The other game files hold on any machine.
+It also ships these machine files, each checked with `check.py` and a single-load
+game:
 
 | File | Configuration |
 |---|---|
@@ -210,6 +213,7 @@ games' `capture` lines name:
 | `advanced/phc28s-noslot1` | The RAM cartridge in slot 1 | 10 games whose loader trips over it |
 | `basic/vg8020-nodisk` | The Carnivore2, and so Nextor | 67 games that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
 | `basic/nms8250-nocarnivore2` | The Carnivore2, and so Nextor | 46 games that fail in a capture with the Carnivore2 in slot 1 |
+| `basic/picoverse-nomapper` | The PicoVerse-like cartridge, and so its mapper and Nextor | 51 games whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go straight to their slot, without holding segments |
 | `advanced/hbf700p-noram` | The RAM cartridge in slot 1 | La Abadia del Crimen in the tests, which crashes with the cartridge in either slot, and 9 games of the collection |
 
 ## Capture
@@ -332,8 +336,8 @@ crashes on the Sanyo PHC-28S, whose slot 3 holds nothing. The capture finds such
 writes itself and patches each value to the slots that hold the machine's RAM, so
 that no game file needs a line for them. It does this in four parts:
 
-1. At step 2, after BASIC's `Ok`, the capture tests each page of each primary slot,
-   and of each subslot of an expanded slot, and writes the slot map,
+1. At step 3, before it types the load command, the capture tests each page of each
+   primary slot, and of each subslot of an expanded slot, and writes the slot map,
    `snap/slots.txt`. A page holds RAM by the test of [RAM](#ram). A page holds
    nothing when it does not hold RAM and its first 256 bytes all read FFh.
 2. A value's field for a page names a slot. When that slot holds nothing in the
@@ -347,10 +351,12 @@ that no game file needs a line for them. It does this in four parts:
    map. A value whose field names a slot that holds nothing makes the capture log
    the write, the address of its `OUT` and the new value. When the code that set the
    value is one of the forms in the second table below, and its bytes with the 8
-   bytes before them occur once in a CAS file, the capture stops. `capture.py` then
-   adds a patch of n on the tape to `snap/patches.txt` and runs the capture again
-   from step 1, up to 16 times. Otherwise the capture goes on, and the logged write
-   is for a `patch` line by hand.
+   bytes before them, or else with the 8 bytes after them, occur once in a CAS file,
+   the capture stops. The bytes after them serve a loader that copies a routine to
+   RAM without the bytes before it, as Sootland's does. `capture.py` then adds a
+   patch of n on the tape to `snap/patches.txt` and runs the capture again from step
+   1, up to 16 times. Otherwise the capture goes on, and the logged write is for a
+   `patch` line by hand.
 4. The build's scan ([Scan](#scan)) looks for the same code with such a value in the
    snapshot's RAM pages and in the tape's unread blocks, for code that runs only
    while the game is played.
@@ -381,7 +387,7 @@ The watch and the scan know two forms of the code that sets a fixed value:
 | `ram/<ps>-<ss>-<page>-<seg>.bin` | 16 KB for each RAM page kept, by primary slot, subslot (`x` when not expanded), page and segment (`x` when not in a mapper) |
 | `rom.bin` | 32 KB: pages 0 and 1 of the main ROM, from the slot that `EXPTBL` names |
 | `subrom.bin` | 16 KB on an MSX2: the sub-ROM, from the slot that `EXBRSA` names |
-| `vram.bin` | The `physical VRAM` debuggable: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938 |
+| `vram.bin` | The `physical VRAM` debuggable: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938. With a V9938, the capture reads it with bit 3 of register 8, VR, set for the read, because `openMSX` shows it through VR's addressing: a game that clears VR, as Boulder Dash does with an MSX1 write to register 8, would otherwise give a view that the restorer's linear writes do not reproduce |
 | `state.txt` | One `name value` per line, values in hexadecimal, as below |
 | `replay.log` | The VDP, PSG and cassette writes of the load, for the replay ([Replay](#replay)) |
 | `side1.cas` | Side 1 with the game file's `side1` patches and those of `patches.txt`, when there are any: the tape that the capture loads |
@@ -413,8 +419,13 @@ The watch and the scan know two forms of the code that sets a fixed value:
   restorer performs them ([Port writes](#port-writes)).
 - Writes the tail, from `SERVICE.BIN`, into the 26 bytes below the stack pointer. At
   an interrupt's entry these bytes are free, because the handler that runs next
-  pushes onto them. It stops with an error when they cross a page boundary, include
-  FFFFh, or are not in a RAM page that the snapshot keeps.
+  pushes onto them. When they cross a page boundary, the tail goes into the 26 bytes
+  below that boundary instead, which are further below the stack pointer and as
+  free. It stops with an error when the bytes go below 0000h, include FFFFh, or are
+  not in a RAM page that the snapshot keeps.
+- Finds the RAM page that the snapshot selects in a page by its slot, and in a
+  memory mapper also by the segment that the page's mapper register selects, because
+  a game can select one segment in two pages, as Double Dragon does.
 - Applies the patches of `snap/patches.txt` to the tape, and runs the scan's search
   for slot values on every image ([Slot patches](#slot-patches)).
 - With the tape service, builds T0, the code segment and the other tape segments

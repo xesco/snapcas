@@ -28,6 +28,11 @@ PATTERNS = [
 ]
 ENTRY_PAGE = 0xFC  # the page of the entries, FCE1h to FCF3h, by default
 
+# LD A,n / OUT (0A8h),A, and LD A,n / CALL 013Bh, a call of the BIOS's WSLREG:
+# a fixed slot register value (DESIGN.md, Slot patches).
+SLOT_CODE = re.compile(rb"\x3E(.)(?:\xD3\xA8|\xCD\x3B\x01)", re.S)
+SLOT_VALUE = "fixed slot value"
+
 
 class Finding:
     """Code found at an offset: what it is, its bytes, and the patched bytes,
@@ -47,11 +52,23 @@ class Finding:
         return f"{text}  {self.what}"
 
 
-def find(data, page=ENTRY_PAGE):
-    """The findings in data, by offset, with patches for entries at page's
-    E1h."""
+def slot_fix(value, slots):
+    """The slot register value with each field that names a slot that holds
+    nothing replaced, where slots, the capture's slot map, has a replacement
+    for its page."""
+    for page, (empty, with_) in slots.items():
+        shift = 2 * page
+        if (value >> shift) & 3 in empty and with_ >= 0:
+            value = (value & ~(3 << shift) & 0xFF) | (with_ << shift)
+    return value
+
+
+def find(data, page=ENTRY_PAGE, slots=None, tape=True):
+    """The findings in data, by offset: with tape, the tape's, with patches for
+    entries at page's E1h, and with slots, the capture's slot map, the fixed
+    slot values that name a slot that holds nothing."""
     findings = []
-    for what, pattern, patch_at in PATTERNS:
+    for what, pattern, patch_at in PATTERNS if tape else ():
         for match in pattern.finditer(data):
             old = match.group()
             new = None
@@ -60,6 +77,12 @@ def find(data, page=ENTRY_PAGE):
                 new[patch_at] = page
                 new = bytes(new)
             findings.append(Finding(what, match.start(), old, new))
+    for match in SLOT_CODE.finditer(data) if slots else ():
+        value = match.group(1)[0]
+        fixed = slot_fix(value, slots)
+        if fixed != value:
+            old = match.group()
+            findings.append(Finding(SLOT_VALUE, match.start(), old, old[:1] + bytes([fixed]) + old[2:]))
     return sorted(findings, key=lambda f: f.offset)
 
 
