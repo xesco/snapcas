@@ -1,0 +1,21 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# Side B's load writes nearly all of page 3, and then the game keeps its
+# variables at FCE1h to FCE4h, where the service's entries are, so the whole
+# service goes into T0.
+service t0
+
+# The loader's stub computes the slot register's value as AND H / LD L,A, page
+# 0's bits cleared, for slot 0. The game keeps the slot register at 95h, so
+# LD L,96h selects slot 2, DOS's mapper, where T0 is. These are the stub's
+# copies in page 0.
+patch page0:012D A4 6F > 2E 96
+
+patch page0:01F3 A4 6F > 2E 96
+
+patch page0:36FA A4 6F > 2E 96
+
+# The stub's copies in page 3.
+patch page3:21BE A4 6F > 2E 96
+
+patch page3:2284 A4 6F > 2E 96

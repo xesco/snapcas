@@ -245,6 +245,7 @@ same files, to compare.
 | 2026-10-31 | The same | `KNIGHT1.SNP`, from step 10 | Knight Orc hung after its first letter, because the scan had patched the `3E EF` of the address in `LD A,(EF3Eh)`. It plays since the scan skips a `3E` that can be an operand ([Slot patches](DESIGN.md#slot-patches)) |
 | 2026-10-31 | The same | `GHOSTBUS.SNP`, from step 10 | Ghostbusters II loads, and its menu starts with SPACE, or with the fire button of a joystick in port 2. The menu reads PSG register 14 without selecting a port, and the BIOS's interrupt routine leaves port 2 selected on this machine, so a load from tape behaves the same |
 | 2026-10-31 | The same | `NAVYMOV.SNP`, from step 10 | Navy Moves plays with the keyboard. With 2-JOYSTICK, the jet-ski jumped by itself and did not obey, as with the plain tape in `openMSX`. Two `patch` lines in `games/NAVY-MOV/game.txt` fix the game: its joystick controls now point at the joystick's row, and a sound effect no longer clears bit 7 of PSG register 7. The joystick then works in port 1, the only port that the game reads |
+| 2026-10-31 | The same | `ALTERED.SNP`, from step 10 | Altered Beast hung with a yellow screen after side B's load: the game keeps its variables at FCE1h to FCE4h, where the service's entries are. With `service t0` and five `patch` lines in `games/ALTERED/advanced-phc28s.txt`, which send its loader's stub to T0, side B loads and the game plays. The wait of about 25 seconds before the prompt to turn the tape over is the game's own, as with the plain tape in `openMSX` |
 
 ## Step 12: the tools' code
 
