@@ -3,3 +3,18 @@
 cas NAVY-MOV.CAS
 side2 NAVY-MOB.CAS
 sha1 652d1683e7e3995dcf8194177c9fe81a350937d3 35d36df6ab58a1e8f6683dd9ec55956e8b7229a9
+
+# The joystick's controls point at the game's variables at 4114h to 4116h, so
+# the diver moves by himself. The game reads a control as a bit of a keyboard
+# row at 4104h, the row in bits 3 to 7 and the bit in bits 0 to 2. Its joystick
+# routine at D56Ah builds row 9 from port 1: bit 4 left, 5 up, 6 down, 7 right
+# and 0 fire. This patch points the controls, right, left, up, down and fire,
+# at those bits.
+patch page2:0C13 81 82 88 84 90 > 4F 4C 4D 4E 48
+
+# A sound effect writes 1Bh to PSG register 7 from its list at EEA4h. Bit 7
+# clear makes I/O port B an input, so register 15 no longer selects joystick
+# port 1, and the joystick reads port 2 until the next sound sets the register
+# again. 9Bh keeps the mixer's bits, with bit 7 set and bit 6 clear, as the MSX
+# needs.
+patch page3:2EAA 07 1B > 07 9B
