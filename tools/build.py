@@ -192,7 +192,8 @@ RG1SAV, RG7SAV = 0xF3E0, 0xF3E6  # the BIOS's copies of VDP registers 1 and 7
 def service_page(state, pages, length, wanted=None):
     """The page of the service's page 3 part, which starts at E1h of it: the
     game file's, FCh when FCC9h to FD88h are zero, or else the highest page
-    below the BIOS's work area whose bytes there are zero (DESIGN.md, Build)."""
+    below the BIOS's work area whose bytes there are zero, or None when no part
+    has room (DESIGN.md, Build)."""
     p3 = selected_page(state, pages, 3)
     if p3 is None:
         raise BuildError("page 3 is not a RAM page that the snapshot keeps")
@@ -211,7 +212,7 @@ def service_page(state, pages, length, wanted=None):
     for page in range(LAST_OTHER_PAGE, 0xBF, -1):
         if free(*span(page)):
             return page
-    raise BuildError("FCC9h to FD88h are not zero, and no other part of page 3 has room for the tape service")
+    return None
 
 
 def borrowed_page(state, pages):
@@ -363,10 +364,14 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
             apply_patch(patch, found.data, f"{patch.page * 0x4000 + patch.offset:04X}")
     scanned = "No tape service, so no scan.\n"
     page = 0
+    if state["service"] == "1" and not t0_mode:
+        # Without room in page 3, the mode without a part in page 3.
+        page = service_page(state, pages, len(parts[2]), wanted_page)
+        t0_mode = page is None
     if state["service"] == "1" and t0_mode:
+        page = 0
         scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, patch=False)
     elif state["service"] == "1":
-        page = service_page(state, pages, len(parts[2]), wanted_page)
         parts = read_service(service_path, page)
         scanned = scan_snapshot(state, pages, side1, side2, page)
     tail_address = place_tail(state, pages, tail)

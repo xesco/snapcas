@@ -117,10 +117,12 @@ them without a list.
 ## Game file
 
 A game file holds one setting per line: a key, a space and a value. A line that
-starts with `#` is a comment, and blank lines are ignored. Times are decimal
-emulated seconds from the moment the load command is typed. Addresses and bytes are
-hexadecimal. Only `cas` is required. This example is for Gauntlet, which loads its
-levels from the tape's second side:
+starts with `#` is a comment, and blank lines are ignored. In the shipped game
+files, each line after `cas`, `side2`, `sha1` and `name` has its own comment above
+it, which says why the line is there, and a blank line before the comment. Times are
+decimal emulated seconds from the moment the load command is typed. Addresses and
+bytes are hexadecimal. Only `cas` is required. This example is for Gauntlet, which
+loads its levels from the tape's second side:
 
 ```
 cas GAUNTLET.CAS
@@ -182,10 +184,12 @@ and a game with a better dump uses that one. Its `side2` lines pair the Side A a
 Side B files of a game, its `continue` lines come from the key that the capture
 reports, its `service no` lines from games played to their end, and its `patch`
 lines from `check.py` and from traces of failed loads. The lines that hold only on
-one machine are in the game's machine's game file ([Game file](#game-file)): 43
-games have one for the Sanyo PHC-28S, `advanced-phc28s.txt`, and 69 for the Philips
-VG-8020, `basic-vg8020.txt`. The other game files hold on any machine. It also ships
-these machine files, each checked with `check.py` and a single-load game:
+one machine are in the game's machine's game file ([Game file](#game-file)): 36
+games have one for the Sanyo PHC-28S, `advanced-phc28s.txt`, 68 for the Philips
+VG-8020, `basic-vg8020.txt`, 46 for the Philips NMS 8250, `basic-nms8250.txt`, and 9
+for the Sony HB-F700P, `advanced-hbf700p.txt`. The other game files hold on any
+machine. It also ships these machine files, each checked with `check.py` and a
+single-load game:
 
 | File | Configuration |
 |---|---|
@@ -205,7 +209,8 @@ games' `capture` lines name:
 | `advanced/phc28s-nodisk` | The Carnivore2, and so Nextor | 20 games that crash when a disk system is present, or that select RAM by fixed slot values |
 | `advanced/phc28s-noslot1` | The RAM cartridge in slot 1 | 10 games whose loader trips over it |
 | `basic/vg8020-nodisk` | The Carnivore2, and so Nextor | 67 games that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
-| `advanced/hbf700p-noram` | The RAM cartridge in slot 1 | La Abadia del Crimen in the tests, which crashes with the cartridge in either slot |
+| `basic/nms8250-nocarnivore2` | The Carnivore2, and so Nextor | 46 games that fail in a capture with the Carnivore2 in slot 1 |
+| `advanced/hbf700p-noram` | The RAM cartridge in slot 1 | La Abadia del Crimen in the tests, which crashes with the cartridge in either slot, and 9 games of the collection |
 
 ## Capture
 
@@ -678,6 +683,10 @@ plays at tape speed after the player's key. The manual tape stops in these cases
 and the byte at FCFBh records it:
 
 - The game stops the motor, with `TAPIOF`, or with `STMOTR` and A other than 1.
+- `TAPION` finds the motor off in PPI port C bit 4, because the game stopped it
+  without the service: through the BIOS in ROM, as Gauntlet calls `STMOTR` with
+  `rom keep`, or with its own write to the port. `TAPION` then starts the motor, as
+  the BIOS's does.
 - A read reaches side 1's end or side 2's end.
 - The motor is off at the snapshot, which `build.py` reads from PPI port C bit 4.
 
@@ -806,7 +815,7 @@ own way. The scan looks for this code:
 | Code | Bytes | Patch |
 |---|---|---|
 | A stub built with `TAPION`'s entry: `LD DE,00E1h / PUSH DE / LD DE,CDD9h / PUSH DE`, or the same with HL | `11 E1 00 D5 11 D9 CD D5`, or `21 E1 00 E5 21 D9 CD E5` | `E1 00` becomes `E1 FC` |
-| A call of a tape routine: `CALL 00E1h`, `CALL 00E4h` or `CALL 00E7h` | `CD E1 00`, `CD E4 00` or `CD E7 00` | The call's `00` becomes `FC` |
+| A call of a tape routine: `CALL 00E1h`, `CALL 00E4h`, `CALL 00E7h` or `CALL 00F3h`, `STMOTR`, which the manual tape needs for Gauntlet's stops ([The manual tape](#the-manual-tape)) | `CD E1 00`, `CD E4 00`, `CD E7 00` or `CD F3 00` | The call's `00` becomes `FC` |
 | An entry in HL before a call: `LD HL,00E1h` or `LD HL,00E4h`, then `CALL`, to a routine of the game's that selects the ROM in page 0 and jumps to HL | `21 E1 00 CD` or `21 E4 00 CD` | The `00` becomes `FC` |
 | A reader of the cassette signal: `IN A,(0A2h)`, then within 4 bytes `RLA`, `RLCA`, `BIT 7,A` or `AND 80h` | `DB A2`, then `17`, `07`, `CB 7F` or `E6 80` | None: listed, for a `patch` line that sends its callers to the service |
 | A reader of PSG register 14, whose bit 7 is the cassette signal and whose other bits are a joystick: `LD A,0Eh / OUT (0A0h),A / IN A,(0A2h)` | `3E 0E D3 A0 DB A2` | None: listed, as above, and also found in joystick code |

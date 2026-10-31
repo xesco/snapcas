@@ -3,12 +3,23 @@
 cas GAUNTLET.CAS
 side2 GAUNTLEB.CAS
 sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d6400b3
-# The loaders select the ROM in page 0 from a copy of the slot register. The
-# scan patches the one in RAM. The main game's, loaded at 4400h, is in an
-# unread block, which ends with a 16-bit sum of its bytes, so the 1F8h that
-# the two patches add goes into the sum.
+
+# The main game's TAPION call goes to the service's entry. The loaders select
+# the ROM in page 0 from a copy of the slot register, and the scan patches the
+# first loader's calls in RAM. The main game's loader, loaded at 4400h, is in an
+# unread block, so these lines patch it there.
 patch side1:AE88 CD E1 00 > CD E1 FC
+
+# The main game's STMOTR call goes to the service's entry. It stops the motor
+# between the levels, which the manual tape needs to see.
+patch side1:AECE CD F3 00 > CD F3 FC
+
+# The main game's TAPIN call goes to the service's entry.
 patch side1:AED4 CD E4 00 > CD E4 FC
-patch side1:E2F3 45 F0 > 3D F2
+
+# The block ends with a 16-bit sum of its bytes, and the 2F4h that the three
+# patches add goes into it.
+patch side1:E2F3 45 F0 > 39 F3
+
 # Its RAM search adds page 0's RAM slot to the slot register's page 0 bits.
 rom keep

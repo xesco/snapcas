@@ -15,6 +15,7 @@ PATTERNS = [
     ("call of TAPION", re.compile(rb"\xCD\xE1\x00"), 2),
     ("call of TAPIN", re.compile(rb"\xCD\xE4\x00"), 2),
     ("call of TAPIOF", re.compile(rb"\xCD\xE7\x00"), 2),
+    ("call of STMOTR", re.compile(rb"\xCD\xF3\x00"), 2),
     # LD HL,00E1h or 00E4h, then CALL: a routine of the game's that selects the
     # ROM in page 0 and jumps to the entry in HL.
     ("entry of TAPION in HL", re.compile(rb"\x21\xE1\x00\xCD"), 2),

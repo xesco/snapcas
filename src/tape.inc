@@ -21,7 +21,19 @@ c_tapion:
         if !T0MODE
         ld hl,.search
         call manual
-        jr nz,.search           ; the manual tape: next_byte waits for its keys
+        jr z,.auto
+        ; The manual tape: next_byte waits for the keys when it is stopped. A
+        ; game that stopped the motor without the service, through the BIOS in
+        ; ROM or with its own write, left PPI port C bit 4 set, and the tape
+        ; stops too. TAPION starts the motor, as the BIOS's does.
+        in a,(0AAh)
+        bit 4,a
+        jr z,.search
+        res 4,a
+        out (0AAh),a
+        call stop
+        jr .search
+.auto:
         endif
         push bc
         bit 2,c

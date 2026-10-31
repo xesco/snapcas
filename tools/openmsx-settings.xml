@@ -1,0 +1,10 @@
+<!DOCTYPE settings SYSTEM 'settings.dtd'>
+<!-- The settings of the automated openMSX runs, which tools/msx.py loads. Without
+     a sound device, openMSX does not open an audio session, which macOS aborts
+     when several runs start at once. openMSX does not write the file back. -->
+<settings>
+  <settings>
+    <setting id="sound_driver">null</setting>
+    <setting id="save_settings_on_exit">false</setting>
+  </settings>
+</settings>

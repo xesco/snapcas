@@ -138,6 +138,11 @@ def boot_steps(machine):
                     for text, key in machine.boot)
 
 
+# Settings without a sound device: macOS aborts openMSX in its audio session when
+# several runs start at once.
+SETTINGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "openmsx-settings.xml")
+
+
 def run(args, script, timeout):
     """Runs openMSX with the given arguments and Tcl script text."""
     with tempfile.NamedTemporaryFile("w", suffix=".tcl", delete=False) as f:
@@ -145,7 +150,7 @@ def run(args, script, timeout):
         path = f.name
     try:
         subprocess.run(
-            ["openmsx", *args, "-script", path,
+            ["openmsx", *args, "-setting", SETTINGS, "-script", path,
              "-command", "set renderer none; set throttle off; set mute on"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             timeout=timeout, check=False)
