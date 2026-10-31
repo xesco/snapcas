@@ -11,6 +11,9 @@ import shlex
 import subprocess
 import tempfile
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+MACHINES = os.path.join(os.path.dirname(HERE), "machines")
+
 # The special keys of the MSX keyboard matrix, rows 6 to 8 (DESIGN.md, Key
 # names): name -> (row, bit).
 KEYS = {}
@@ -41,6 +44,11 @@ class Machine:
         self.disk = disk  # command that inserts a disk image, such as hda
         self.boot = boot  # [(text, key)], matched in order
         self.dos = dos    # (prompt, drive) when DOS boots from the machine's own disk
+
+
+def machine_path(machine):
+    """The machine file of a machine, a path below machines/ without .txt."""
+    return os.path.join(MACHINES, machine + ".txt")
 
 
 def read_machine(path):
@@ -80,48 +88,10 @@ def press(key, hold=0.1):
     return f"keymatrixdown {row} {mask}; after time {hold} [list keymatrixup {row} {mask}]"
 
 
-# Procedures that every script gets. screen returns the text screen without
-# its null characters, or nothing in a graphics mode, which get_screen cannot
-# read. boot waits for each boot text in turn and presses its
-# key, then runs the command done. A menu can show its text before it reads the
-# keyboard, so boot presses the key again each second while the text is still
-# on the screen, up to 10 times.
-PRELUDE = """
-proc screen {} {
-  if {[catch {get_screen} text]} { return "" }
-  string map [list \\0 ""] $text
-}
-proc boot {steps done {tries 0}} {
-  if {[llength $steps] == 0} { eval $done; return }
-  lassign [lindex $steps 0] text key
-  if {[string first $text [screen]] < 0} {
-    if {$tries > 0} {
-      after time 0.5 [list boot [lrange $steps 1 end] $done]
-    } else {
-      after time 0.5 [list boot $steps $done]
-    }
-  } elseif {$tries < 10} {
-    eval $key
-    after time 1 [list boot $steps $done [expr {$tries + 1}]]
-  } else {
-    error "boot: the key for '$text' did not take effect"
-  }
-}
-# at_prompt waits for DOS's prompt, then types a text once, because the prompt
-# stays on the screen, and runs the command done. The prompt and the text come
-# as hex, so that they need no quoting.
-proc at_prompt {prompt hex done {tries 0}} {
-  set text [binary format H* $prompt]
-  if {[string first $text [screen]] >= 0} {
-    type [binary format H* $hex]
-    eval $done
-  } elseif {$tries < 240} {
-    after time 0.5 [list at_prompt $prompt $hex $done [expr {$tries + 1}]]
-  } else {
-    error "at_prompt: '$text' did not appear within 120 seconds"
-  }
-}
-"""
+def tcl(name):
+    """The text of a Tcl file below tools/, such as tcl/capture.tcl."""
+    with open(os.path.join(HERE, name)) as f:
+        return f.read()
 
 
 def at_prompt(machine, typed, done):
@@ -140,13 +110,13 @@ def boot_steps(machine):
 
 # Settings without a sound device: macOS aborts openMSX in its audio session when
 # several runs start at once.
-SETTINGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "openmsx-settings.xml")
+SETTINGS = os.path.join(HERE, "openmsx-settings.xml")
 
 
 def run(args, script, timeout):
     """Runs openMSX with the given arguments and Tcl script text."""
     with tempfile.NamedTemporaryFile("w", suffix=".tcl", delete=False) as f:
-        f.write(PRELUDE + script)
+        f.write(tcl("tcl/prelude.tcl") + script)
         path = f.name
     try:
         subprocess.run(

@@ -19,12 +19,12 @@ import shutil
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import build  # noqa: E402
 import cas  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
+import patches  # noqa: E402
 
 # Real seconds that one capture may take: the load's 3600 emulated seconds
 # run much faster with the throttle off.
@@ -43,12 +43,6 @@ def key_tcl(kind, value):
     # The text as hex, so that the command needs no quoting inside the keys
     # list's braces.
     return f"type [binary format H* {value.encode('latin-1').hex()}]"
-
-
-def game_folder(game):
-    if os.sep in game or os.path.isdir(game):
-        return os.path.abspath(game)
-    return os.path.join(ROOT, "games", game)
 
 
 def settings(game, machine, cas_path, data, snap, side2_path=None, side2=b""):
@@ -130,8 +124,8 @@ def main():
     args = parser.parse_args()
 
     try:
-        game = gamefile.read_game(game_folder(args.game), args.machine)
-        machine = msx.read_machine(os.path.join(ROOT, "machines", (args.capture or game.capture or args.machine) + ".txt"))
+        game = gamefile.read_game(gamefile.game_folder(args.game), args.machine)
+        machine = msx.read_machine(msx.machine_path(args.capture or game.capture or args.machine))
     except (OSError, gamefile.GameFileError, msx.MachineError) as e:
         print(f"capture.py: {e}", file=sys.stderr)
         return 1
@@ -153,10 +147,9 @@ def main():
               "program or an ASCII program", file=sys.stderr)
         return 1
 
-    name = os.path.basename(os.path.normpath(game.folder))
-    snap = os.path.join(ROOT, "out", args.machine, name, "snap")
-    with open(os.path.join(HERE, "capture.tcl")) as f:
-        procedures = f.read()
+    snap = os.path.join(gamefile.out_folder(args.machine, game.folder), "snap")
+    procedures = (patches.slots.tcl_settings() + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/capture.tcl")
+                  + msx.tcl("patches/slots.tcl"))
     # The slot patches that the capture finds (DESIGN.md, Slot patches): each
     # one stops the capture, which runs again on the patched tape.
     found = []

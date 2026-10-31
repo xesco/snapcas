@@ -11,6 +11,8 @@ import shlex
 
 from msx import KEYS
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 class GameFileError(Exception):
     """A game file that cannot be read."""
@@ -82,6 +84,18 @@ def number(text, where):
     if value < 0:
         raise GameFileError(f"{where}: the time {text} is negative")
     return value
+
+
+def game_folder(game):
+    """The folder of a game: a folder below games/, or a folder's path."""
+    if os.sep in game or os.path.isdir(game):
+        return os.path.abspath(game)
+    return os.path.join(ROOT, "games", game)
+
+
+def out_folder(machine, folder):
+    """The output folder, out/<machine>/<game>/, of the game in folder."""
+    return os.path.join(ROOT, "out", machine, os.path.basename(os.path.normpath(folder)))
 
 
 def machine_file(folder, machine):

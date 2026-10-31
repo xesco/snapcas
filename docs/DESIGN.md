@@ -75,6 +75,46 @@ they run on macOS, Linux and Windows. They print errors on standard error, namin
 the file and the problem, and exit with 0 on success, 1 for an error in the input
 files, 2 when `openMSX` fails or a wait times out, and 3 when a check fails.
 
+### The tools' code
+
+The commands share their code through modules, and the Tcl that runs inside
+`openMSX` is in files of its own:
+
+| File | Holds |
+|---|---|
+| `tools/gamefile.py` | Reads game files. Finds a game's folder from a name below `games/` or from a path, and the game's output folder, `out/<machine>/<game>/` |
+| `tools/msx.py` | Reads machine files and finds one from its name. Starts `openMSX` with a Tcl script, and makes disk images |
+| `tools/cas.py` | Reads CAS files |
+| `tools/patches/` | The automatic patches, one file for each kind, as below |
+| `tools/tcl/prelude.tcl` | The procedures that every `openMSX` run gets: reading the screen, passing the boot menu, and typing at DOS's prompt |
+| `tools/tcl/memory.tcl` | The procedures that the capture and the check share: the CPU's view of memory with a slot selected, the tests of RAM and of a mapper, and the read of VRAM |
+| `tools/tcl/capture.tcl` | The capture's steps ([Capture](#capture)) |
+| `tools/tcl/check.tcl` | The check ([Check](#check)) |
+| `tools/relocs.py` | The offsets that `build.py` changes to move `SERVICE.BIN`'s page 3 part ([SERVICE.BIN](#servicebin)) |
+| `tools/fetch.py`, `tools/run.py` | The download of the test setup's files, and the `openMSX` run of `make try` |
+
+An automatic patch is a change that the tools make to a game without a line in its
+game file. Each kind of automatic patch is one file in `tools/patches/`:
+
+| File | Kind |
+|---|---|
+| `tape.py` | The calls, stubs and entries of the tape routines, sent to the entries in page 3, and the readers of the cassette signal, which are only listed ([Scan](#scan)) |
+| `slots.py` | The fixed slot values that name a slot that holds nothing, the slot map, and the capture's patches of the tape ([Slot patches](#slot-patches)) |
+| `slots.tcl` | The capture's watch on the slot register ([Slot patches](#slot-patches)) |
+
+The Python file of each kind has a function, `find(data, context)`, that returns the
+kind's findings in data. A finding is the code found, its offset, what it is, and
+its patched bytes, and `tools/patches/finding.py` defines it. The context holds the
+page of the entries, the slot map, and whether the image has the tape service.
+`tools/patches/__init__.py` lists the kinds in the order that the scan runs them,
+and holds the two things that all kinds share: the patch of the bytes and the text
+of `scan.txt`. So a new kind is a new file and a line in that list. A kind that also
+works in the capture has a Tcl file of the same name, which `capture.py` loads after
+`capture.tcl`. Data that both files of a kind need, such as the opcodes of
+[Slot patches](#slot-patches), is in the Python file only, and `capture.py` writes
+it into the Tcl settings. A game file's `patch` lines are not automatic patches, and
+the build applies them ([Game file](#game-file)).
+
 ## Machine file
 
 A machine file holds one `openmsx` line, one `disk` line, any number of `boot` lines

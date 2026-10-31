@@ -27,7 +27,7 @@ def main():
     parser.add_argument("files", nargs="+", help="the files to put on the disk")
     args = parser.parse_args()
     try:
-        machine = msx.read_machine(os.path.join(ROOT, "machines", args.machine + ".txt"))
+        machine = msx.read_machine(msx.machine_path(args.machine))
     except (OSError, msx.MachineError) as e:
         print(f"run.py: {e}", file=sys.stderr)
         return 1

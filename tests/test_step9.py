@@ -9,6 +9,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 import gamefile  # noqa: E402
+import msx  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step4  # noqa: E402
 
@@ -60,7 +61,7 @@ class ShippedGameFiles(unittest.TestCase):
                 if file.endswith(".txt") and file != "game.txt":
                     with self.subTest(game=name, file=file):
                         machine = file[:-4].replace("-", "/", 1)
-                        self.assertTrue(os.path.isfile(os.path.join(ROOT, "machines", machine + ".txt")))
+                        self.assertTrue(os.path.isfile(msx.machine_path(machine)))
 
 
 def single_load(machine):

@@ -142,7 +142,7 @@ def play(name):
     out = os.path.join(WORK, f"{name}-play.txt")
     if os.path.exists(out):
         os.remove(out)
-    machine = msx.read_machine(os.path.join(ROOT, "machines", MACHINE + ".txt"))
+    machine = msx.read_machine(msx.machine_path(MACHINE))
     disk = os.path.join(ROOT, "out", MACHINE, game, "check", "disk.dsk")
     msx.run([*machine.args, f"-{machine.disk}", disk], play_script(name, out), timeout=600)
     if not os.path.exists(out):

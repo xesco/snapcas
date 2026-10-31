@@ -1,4 +1,4 @@
-# The check (docs/DESIGN.md, Check), after capture.tcl's procedures, which it
+# The check (docs/DESIGN.md, Check), after memory.tcl's procedures, which it
 # uses to read memory through the CPU's view. tools/check.py sets ::C.
 
 array set ::K $::C(kv)
@@ -127,11 +127,8 @@ proc compare {} {
     set f [open [file join $::C(snap) vram.bin] rb]
     set want [read $f]
     close $f
-    # With VR set, as the capture reads it (capture.tcl, physical_vram).
-    set r8 [debug read {VDP regs} 8]
-    if {$v9938} { debug write {VDP regs} 8 [expr {$r8 | 8}] }
-    set have [debug read_block "physical VRAM" 0 [string length $want]]
-    debug write {VDP regs} 8 $r8
+    # With VR set, as the capture reads it.
+    set have [physical_vram]
     if {$have ne $want} { note "VRAM differs at [format %05X [first_difference $have $want]]" }
 
     # The RAM pages, except the tail's bytes, FCC9h to FD88h, the service's

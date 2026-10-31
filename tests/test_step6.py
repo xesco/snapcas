@@ -12,7 +12,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 import cas  # noqa: E402
-import scan  # noqa: E402
+import patches  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step4  # noqa: E402
 import test_step5  # noqa: E402
@@ -50,7 +50,7 @@ PLAYS = {
 
 
 def found(data):
-    return [(f.what, f.offset, f.new) for f in scan.find(bytes.fromhex(data))]
+    return [(f.what, f.offset, f.new) for f in patches.find(bytes.fromhex(data))]
 
 
 class Patterns(unittest.TestCase):
@@ -87,12 +87,12 @@ class Patterns(unittest.TestCase):
 
     def test_patch_writes_only_the_patched_findings(self):
         data = bytearray.fromhex("CD E1 00 DB A2 07")
-        scan.patch(data, scan.find(bytes(data)))
+        patches.patch(data, patches.find(bytes(data)))
         self.assertEqual(data, bytearray.fromhex("CD E1 FC DB A2 07"))
 
     def test_report_lines_are_patch_lines(self):
-        text = scan.report([("page3", scan.find(bytes.fromhex("00 CD E4 00")))],
-                           [("side1", scan.find(bytes.fromhex("DB A2 07")))])
+        text = patches.report([("page3", patches.find(bytes.fromhex("00 CD E4 00")))],
+                           [("side1", patches.find(bytes.fromhex("DB A2 07")))])
         self.assertIn("page3:0001 CD E4 00 > CD E4 FC  call of TAPIN\n", text)
         self.assertIn("side1:0000 DB A2 07  reader of the cassette signal\n", text)
 

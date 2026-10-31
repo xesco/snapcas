@@ -9,7 +9,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
-import scan  # noqa: E402
+import patches  # noqa: E402
 import test_step4  # noqa: E402
 
 COLLECTION = os.environ.get("COLLECTION_DIR", os.path.join(test_step4.CAS_DIR, "collection"))
@@ -50,8 +50,8 @@ class SlotPatches(unittest.TestCase):
         slots = {0: ({3}, 2), 1: ({3}, 1), 2: ({0, 3}, 2), 3: ({3}, 2)}
         # Knight Orc's LD A,(EF3Eh) / OUT (0A8h),A, and the same after CALL.
         for code in ("3A 3E EF D3 A8", "CD 3E EF D3 A8", "3A 00 3E EF D3 A8"):
-            self.assertEqual(scan.find(bytes.fromhex(code), slots=slots, tape=False), [], code)
-        found = scan.find(bytes.fromhex("F5 3E EF D3 A8"), slots=slots, tape=False)
+            self.assertEqual(patches.find(bytes.fromhex(code), patches.Context(slots=slots, tape=False)), [], code)
+        found = patches.find(bytes.fromhex("F5 3E EF D3 A8"), patches.Context(slots=slots, tape=False))
         self.assertEqual([(f.offset, f.new) for f in found], [(1, bytes.fromhex("3E A6 D3 A8"))])
 
     @unittest.skipUnless(has("SOOTLAND.CAS"), "COLLECTION_DIR holds no SOOTLAND.CAS")

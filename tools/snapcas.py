@@ -19,10 +19,9 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
-import capture  # noqa: E402
 import gamefile  # noqa: E402
+import msx  # noqa: E402
 
 
 def step(name, *args):
@@ -46,8 +45,8 @@ def steps(args, variant=None):
 def variants(machine):
     """The capture variants of a machine: the machine files beside it whose
     names start with its name and -, in the order of their names."""
-    files = glob.glob(os.path.join(ROOT, "machines", machine + "-*.txt"))
-    return sorted(os.path.relpath(f, os.path.join(ROOT, "machines"))[:-4] for f in files)
+    files = glob.glob(msx.machine_path(machine + "-*"))
+    return sorted(os.path.relpath(f, msx.MACHINES)[:-4] for f in files)
 
 
 def main():
@@ -62,7 +61,7 @@ def main():
     if status == 0:
         return 0
     try:
-        game = gamefile.read_game(capture.game_folder(args.game), args.machine)
+        game = gamefile.read_game(gamefile.game_folder(args.game), args.machine)
     except (OSError, gamefile.GameFileError) as e:
         print(f"snapcas.py: {e}", file=sys.stderr)
         return 1

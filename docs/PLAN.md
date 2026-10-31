@@ -242,3 +242,19 @@ same files, to compare.
 | 2026-10-29 | The same | `KNIGHTMA.SNP`, with `snapshot at 130`, and the 31 images of the step 4 batch | All run |
 | 2026-10-29 | The same | `GAUNTLET.SNP`, with `GAUNTLEB.CAS` as side 2, from step 5 | The main game and its levels load from the tape service, side 2 included, and the side's colour shows at the turn-over |
 | 2026-10-29 | The same | `MOONWALK.SNP`, with `service t0`, from step 6 | The game loads through T0 and plays. The loading messages show a few wrong pixels, likely VRAM writes that come faster than the VDP accepts, because the tape service returns a byte much sooner than a tape; step 8's `/T1200` is to confirm it |
+| 2026-10-31 | The same | `KNIGHT1.SNP`, from step 10 | Knight Orc hung after its first letter, because the scan had patched the `3E EF` of the address in `LD A,(EF3Eh)`. It plays since the scan skips a `3E` that can be an operand ([Slot patches](DESIGN.md#slot-patches)) |
+| 2026-10-31 | The same | `GHOSTBUS.SNP`, from step 10 | Ghostbusters II loads, and its menu starts with SPACE, or with the fire button of a joystick in port 2. The menu reads PSG register 14 without selecting a port, and the BIOS's interrupt routine leaves port 2 selected on this machine, so a load from tape behaves the same |
+| 2026-10-31 | The same | `NAVYMOV.SNP`, from step 10 | Navy Moves plays with the keyboard. With 2-JOYSTICK, the jet-ski jumped by itself and did not obey, as with the plain tape in `openMSX`. Two `patch` lines in `games/NAVY-MOV/game.txt` fix the game: its joystick controls now point at the joystick's row, and a sound effect no longer clears bit 7 of PSG register 7. The joystick then works in port 1, the only port that the game reads |
+
+## Step 12: the tools' code
+
+This step moves the tools' code into the files of
+[The tools' code](DESIGN.md#the-tools-code), and does not change what the tools do.
+It splits `build()` and `service_segments()` into the build's steps. The proof is
+that the outputs stay the same, byte for byte:
+
+| Test | What it proves |
+|---|---|
+| Every snapshot of `out/` on the seven shipped machines, built again | The images and `scan.txt` files are the same as before the step |
+| The collection on `advanced/phc28s` and `basic/vg8020` | The snapshots are the same as before the step, and every check passes |
+| `make test` | The steps' tests pass |

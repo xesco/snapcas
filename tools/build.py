@@ -20,7 +20,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import cas  # noqa: E402
 import gamefile  # noqa: E402
-import scan  # noqa: E402
+import patches  # noqa: E402
 
 SERVICE_VERSION = 11
 PAGE = 16384
@@ -239,17 +239,61 @@ def borrowed_page(state, pages):
     return page, bytes([0, ~(3 << 2 * page) & 0xFF, 0, 0xFC + page, page * 0x40, seg])
 
 
+def tape_rom(snap):
+    """T0's start: page 0 of the main ROM, whose jump table entries must go to
+    the BIOS's tape routines that the service replaces."""
+    with open(os.path.join(snap, "rom.bin"), "rb") as f:
+        t0 = bytearray(f.read(PAGE))
+    for entry, target in TAPE_ENTRIES.items():
+        if t0[entry] != 0xC3 or struct.unpack_from("<H", t0, entry + 1)[0] != target:
+            raise BuildError(f"{snap}/rom.bin: the jump at {entry:04X}h does not go to {target:04X}h")
+    return t0
+
+
+def write_positions(data, at, start, pos, side1, side2):
+    """The tape's position, side 1's end, side 2's end and the tape's start,
+    3 bytes each, at offset at of data. The tape starts at offset start of
+    the service's tape, and side1 and side2 are lengths."""
+    for n, value in enumerate((pos, start + side1, start + side1 + side2, start)):
+        data[at + 3 * n:at + 3 * n + 3] = value.to_bytes(3, "little")
+
+
+def write_flash(data, base, t0, p3, state, side, two_sides):
+    """The flash's data at offset base of data, and the side that the tape is
+    on. The flash restores VDP registers 7 and 1 from RG7SAV and RG1SAV when
+    the game keeps them, and otherwise from the snapshot's values. It counts
+    0.1 second of frames, at the rate of bit 7 of the ROM's byte 002Bh: 50 Hz
+    when set."""
+    pal = t0[0x2B] & 0x80
+    vdp7, vdp1 = num(state, "vdp7"), num(state, "vdp1")
+    border = RG7SAV if p3.data[RG7SAV & 0x3FFF] == vdp7 else base + 3
+    screen = RG1SAV if p3.data[RG1SAV & 0x3FFF] == vdp1 else base + 7
+    struct.pack_into("<HBBBHBBB", data, base, border, 5 if pal else 6, vdp7, side, screen, vdp1,
+                     0, 1 if two_sides else 0)
+
+
+def write_page3_part(p3, page3, page, tail_address, e_fc, state):
+    """The service's part of page 3, at page's E1h of the game's page 3 p3,
+    with E_FC and E_STOP filled in."""
+    start = page * 256 + 0xE1
+    first, last = (P3_FREE, P3_END) if page == DEFAULT_PAGE else (start, start + len(page3) - 1)
+    if tail_address <= last and tail_address + TAIL_SIZE > first:
+        raise BuildError(f"the tail at {tail_address:04X}h overlaps {first:04X}h to {last:04X}h")
+    block = bytearray(page3)
+    block[e_fc - start] = num(state, "fc")
+    # E_STOP, after E_FC and E_INSIDE: the manual tape starts stopped when
+    # the motor, PPI port C bit 4 (0 = on), is off at the snapshot.
+    block[e_fc + 2 - start] = (num(state, "ppic") >> 4) & 1
+    p3.data[start & 0x3FFF:(start & 0x3FFF) + len(block)] = block
+
+
 def service_segments(snap, parts, side1, side2, pages, state, tail_address, page, t0_mode):
     """T0, then the code segment and the tape, or only the tape without a part
     in page 3, as 16 KB blocks, after writing the service's part of page 3
     into the game's page 3 at page's E1h (DESIGN.md, Tape service)."""
     _, stubs, page3, code, fields, t0m, t0m_fields = parts[:7]
     stmotr, c_pos, segs_max, e_fc, c_border = struct.unpack("<5H", fields)
-    with open(os.path.join(snap, "rom.bin"), "rb") as f:
-        t0 = bytearray(f.read(PAGE))
-    for entry, target in TAPE_ENTRIES.items():
-        if t0[entry] != 0xC3 or struct.unpack_from("<H", t0, entry + 1)[0] != target:
-            raise BuildError(f"{snap}/rom.bin: the jump at {entry:04X}h does not go to {target:04X}h")
+    t0 = tape_rom(snap)
     p3 = selected_page(state, pages, 3)
     if p3 is None:
         raise BuildError(f"{snap}: page 3 is not a RAM page that the snapshot keeps")
@@ -274,19 +318,9 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
         tape = bytearray(code) + side1 + side2
         data = tape
     pos = start + num(state, "tapepos")
-    for n, value in enumerate((pos, start + len(side1), start + len(side1) + len(side2), start)):
-        data[t_pos + 3 * n:t_pos + 3 * n + 3] = value.to_bytes(3, "little")
-    # The flash restores VDP registers 7 and 1 from RG7SAV and RG1SAV when
-    # the game keeps them, and otherwise from the snapshot's values. It counts
-    # 0.1 second of frames, at the rate of bit 7 of the ROM's byte 002Bh: 50
-    # Hz when set.
-    pal = t0[0x2B] & 0x80
-    vdp7, vdp1 = num(state, "vdp7"), num(state, "vdp1")
-    border = RG7SAV if p3.data[RG7SAV & 0x3FFF] == vdp7 else base + 3
-    screen = RG1SAV if p3.data[RG1SAV & 0x3FFF] == vdp1 else base + 7
+    write_positions(data, t_pos, start, pos, len(side1), len(side2))
     side = 1 if side2 and pos >= start + len(side1) else 0
-    struct.pack_into("<HBBBHBBB", data, base, border, 5 if pal else 6, vdp7, side, screen, vdp1,
-                     0, 1 if side2 else 0)
+    write_flash(data, base, t0, p3, state, side, bool(side2))
     if not t0_mode:
         # C_S1REAL, after C_SAVE: side 1's end without its padding, which the
         # tape does not have, when side 2 follows it.
@@ -296,16 +330,7 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
     if len(tape) // PAGE > segs_max:
         raise BuildError(f"the tape needs {len(tape) // PAGE} segments, more than {segs_max}")
     if not t0_mode:
-        start = page * 256 + 0xE1
-        first, last = (P3_FREE, P3_END) if page == DEFAULT_PAGE else (start, start + len(page3) - 1)
-        if tail_address <= last and tail_address + TAIL_SIZE > first:
-            raise BuildError(f"the tail at {tail_address:04X}h overlaps {first:04X}h to {last:04X}h")
-        block = bytearray(page3)
-        block[e_fc - start] = num(state, "fc")
-        # E_STOP, after E_FC and E_INSIDE: the manual tape starts stopped when
-        # the motor, PPI port C bit 4 (0 = on), is off at the snapshot.
-        block[e_fc + 2 - start] = (num(state, "ppic") >> 4) & 1
-        p3.data[start & 0x3FFF:(start & 0x3FFF) + len(block)] = block
+        write_page3_part(p3, page3, page, tail_address, e_fc, state)
     return [bytes(t0)] + [bytes(tape[n:n + PAGE]) for n in range(0, len(tape), PAGE)]
 
 
@@ -317,31 +342,6 @@ def apply_patch(patch, data, place):
     data[patch.offset:end] = patch.new
 
 
-def read_slots(snap):
-    """snap/slots.txt, the capture's slot map: for each page, the primary slots
-    that hold nothing there and the slot that replaces them, or -1. None for a
-    snapshot without it (DESIGN.md, Slot patches)."""
-    path = os.path.join(snap, "slots.txt")
-    if not os.path.exists(path):
-        return None
-    slots = {}
-    with open(path) as f:
-        for line in f:
-            if line.strip() and not line.startswith("#"):
-                _, page, _, empty, _, with_ = line.split()
-                slots[int(page)] = (set() if empty == "-" else {int(v) for v in empty.split(",")}, int(with_))
-    return slots
-
-
-def capture_patches(snap):
-    """The capture's slot patches of the tape, in snap/patches.txt."""
-    path = os.path.join(snap, "patches.txt")
-    if not os.path.exists(path):
-        return []
-    with open(path) as f:
-        return [gamefile.read_patch(line.split()[1:], path) for line in f if line.startswith("patch ")]
-
-
 def scan_snapshot(state, pages, side1, side2, page, slots, tape=True, patch=True):
     """Patches the scan's findings in the RAM pages, for the entries at page's
     E1h, and returns scan.txt's text, with the findings in the unread blocks:
@@ -350,8 +350,8 @@ def scan_snapshot(state, pages, side1, side2, page, slots, tape=True, patch=True
     those."""
     ram = []
     for p in pages:
-        findings = scan.find(p.data, page, slots, tape)
-        scan.patch(p.data, [f for f in findings if patch or f.what == scan.SLOT_VALUE])
+        findings = patches.find(p.data, patches.Context(page, slots, tape))
+        patches.patch(p.data, [f for f in findings if patch or f.what == patches.slots.SLOT_VALUE])
         if p is selected_page(state, pages, p.page):
             place = f"page{p.page}"
         else:
@@ -361,9 +361,10 @@ def scan_snapshot(state, pages, side1, side2, page, slots, tape=True, patch=True
     if tape:
         # Without the tape service, no block is read after the snapshot.
         unread = num(state, "tapepos")
-        unread_blocks = [("side1", [f for f in scan.find(side1, page, slots) if f.offset >= unread]),
-                         ("side2", scan.find(side2, page, slots))]
-    text = scan.report(ram, unread_blocks)
+        context = patches.Context(page, slots)
+        unread_blocks = [("side1", [f for f in patches.find(side1, context) if f.offset >= unread]),
+                         ("side2", patches.find(side2, context))]
+    text = patches.report(ram, unread_blocks)
     if not tape:
         text = "# Without the tape service, the scan looks only for fixed slot values.\n" + text
     elif not patch:
@@ -373,22 +374,18 @@ def scan_snapshot(state, pages, side1, side2, page, slots, tape=True, patch=True
     return text
 
 
-def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, wanted_page=None,
-          t0_mode=False):
-    """Returns (header and tables, the records' data, a report, scan.txt's
-    text). side1 and side2 are the CAS data for the tape service, and rom_keep
-    keeps T0 from replacing the ROM."""
-    state = read_state(snap)
-    patches = list(patches) + capture_patches(snap)
-    slots = read_slots(snap)
+def patch_sides(patch_lines, side1, side2):
+    """Side 1 and side 2 with the side1 and side2 patch lines applied."""
     sides = {"side1": bytearray(side1), "side2": bytearray(side2)}
-    for patch in patches:
+    for patch in patch_lines:
         if patch.page in sides:
             apply_patch(patch, sides[patch.page], f"{patch.page}:{patch.offset:X}")
-    side1, side2 = bytes(sides["side1"]), bytes(sides["side2"])
-    parts = read_service(service_path)
-    tail = parts[0]
+    return bytes(sides["side1"]), bytes(sides["side2"])
 
+
+def read_pages(snap):
+    """The RAM pages of snap/ram/, each mapper segment and each page outside a
+    mapper once."""
     pages, seen = [], set()
     for name in sorted(os.listdir(os.path.join(snap, "ram"))):
         page = Page(snap, name)
@@ -396,30 +393,36 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
         if key not in seen:
             seen.add(key)
             pages.append(page)
-    for patch in patches:
-        if patch.page not in sides:
+    return pages
+
+
+def patch_pages(patch_lines, state, pages):
+    """Applies the patch lines of pages 0 to 3 to the RAM pages that the
+    snapshot selects there."""
+    for patch in patch_lines:
+        if patch.page not in ("side1", "side2"):
             found = selected_page(state, pages, patch.page)
             if found is None:
                 raise BuildError(f"{patch.where}: page {patch.page} is not a RAM page that the snapshot keeps")
             apply_patch(patch, found.data, f"{patch.page * 0x4000 + patch.offset:04X}")
-    if state["service"] != "1":
-        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, tape=False)
-    page = 0
-    if state["service"] == "1" and not t0_mode:
-        # Without room in page 3, the mode without a part in page 3.
-        page = service_page(state, pages, len(parts[2]), wanted_page)
-        t0_mode = page is None
-    if state["service"] == "1" and t0_mode:
-        page = 0
-        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, patch=False)
-    elif state["service"] == "1":
-        parts = read_service(service_path, page)
-        scanned = scan_snapshot(state, pages, side1, side2, page, slots)
-    tail_address = place_tail(state, pages, tail)
-    service = []
-    if state["service"] == "1":
-        service = service_segments(snap, parts, side1, side2, pages, state, tail_address, page, t0_mode)
 
+
+def service_mode(state, pages, length, wanted_page, t0_mode):
+    """The page of the service's page 3 part, 0 without one, and whether the
+    image has the mode without a part in page 3: by the game file, or when
+    page 3 has no room for the part's length."""
+    if state["service"] != "1":
+        return 0, t0_mode
+    if not t0_mode:
+        page = service_page(state, pages, length, wanted_page)
+        if page is not None:
+            return page, False
+    return 0, True
+
+
+def records_and_data(snap, pages, service):
+    """The image's records and their data: the RAM pages, VRAM in 16 KB
+    blocks, and the service's segments. Also whether VRAM is a V9938's."""
     records, data = [], []
     for p in pages:
         kind = RAM_IN_MAPPER if p.seg is not None else RAM
@@ -437,10 +440,11 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
     for segment in service:
         records.append(bytes([SERVICE_SEGMENT, 0, 0, 0]))
         data.append(segment)
-    writes = port_writes(state, len(vram) > PAGE)
-    if len(records) > 255 or len(writes) > 255:
-        raise BuildError(f"{snap}: too many records or port writes for the image")
+    return records, data, len(vram) > PAGE
 
+
+def image_header(snap, state, records, writes, flags, page, borrowed, tail_address):
+    """The image's header and tables (DESIGN.md, Image)."""
     with open(os.path.join(snap, "rom.bin"), "rb") as f:
         rom = crc16(f.read())
     subrom_path = os.path.join(snap, "subrom.bin")
@@ -452,10 +456,10 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
     header = bytearray(HEADER_SIZE)
     header[0:8] = MAGIC
     struct.pack_into("<HHBB", header, 8, rom, subrom, len(records), len(writes))
-    header[14] = (FLAG_ROM_KEEP if rom_keep else 0) | (FLAG_T0 if t0_mode and service else 0)
+    header[14] = flags
     header[15] = page
     header[54] = num(state, "vdp1")
-    header[55] = borrowed_page(state, pages)[0] if t0_mode and service else 0
+    header[55] = borrowed
     struct.pack_into("<12H", header, 16, *[num(state, r) for r in
                      "af bc de hl af2 bc2 de2 hl2 ix iy sp pc".split()])
     header[40] = num(state, "i")
@@ -476,11 +480,48 @@ def build(snap, service_path, side1=b"", side2=b"", patches=(), rom_keep=False, 
     for port, value in writes:
         header[offset:offset + 2] = bytes([port, value])
         offset += 2
+    return bytes(header)
+
+
+def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=False, wanted_page=None,
+          t0_mode=False):
+    """Returns (header and tables, the records' data, a report, scan.txt's
+    text). side1 and side2 are the CAS data for the tape service, patch_lines
+    the game file's patches, and rom_keep keeps T0 from replacing the ROM."""
+    state = read_state(snap)
+    patch_lines = list(patch_lines) + patches.slots.capture_patches(snap)
+    slots = patches.slots.read_slots(snap)
+    side1, side2 = patch_sides(patch_lines, side1, side2)
+    parts = read_service(service_path)
+    tail = parts[0]
+    pages = read_pages(snap)
+    patch_pages(patch_lines, state, pages)
+
+    if state["service"] != "1":
+        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, tape=False)
+    page, t0_mode = service_mode(state, pages, len(parts[2]), wanted_page, t0_mode)
+    if state["service"] == "1" and t0_mode:
+        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, patch=False)
+    elif state["service"] == "1":
+        parts = read_service(service_path, page)
+        scanned = scan_snapshot(state, pages, side1, side2, page, slots)
+    tail_address = place_tail(state, pages, tail)
+    service = []
+    if state["service"] == "1":
+        service = service_segments(snap, parts, side1, side2, pages, state, tail_address, page, t0_mode)
+
+    records, data, v9938 = records_and_data(snap, pages, service)
+    writes = port_writes(state, v9938)
+    if len(records) > 255 or len(writes) > 255:
+        raise BuildError(f"{snap}: too many records or port writes for the image")
+    flags = (FLAG_ROM_KEEP if rom_keep else 0) | (FLAG_T0 if t0_mode and service else 0)
+    borrowed = borrowed_page(state, pages)[0] if t0_mode and service else 0
+    header = image_header(snap, state, records, writes, flags, page, borrowed, tail_address)
 
     mapper = sum(1 for r in records if r[0] in (RAM_IN_MAPPER, SERVICE_SEGMENT))
     report = (f"{len(records)} records, {len(writes)} port writes, "
               f"up to {mapper + 1} free mapper segments")
-    return bytes(header), data, report, scanned
+    return header, data, report, scanned
 
 
 def read_tapes(game, cas_dir):
@@ -509,12 +550,10 @@ def main():
                         help="the SERVICE.BIN to use")
     args = parser.parse_args()
 
-    folder = (os.path.abspath(args.game) if os.sep in args.game or os.path.isdir(args.game)
-              else os.path.join(ROOT, "games", args.game))
+    folder = gamefile.game_folder(args.game)
     try:
         game = gamefile.read_game(folder, args.machine)
-        name = os.path.basename(os.path.normpath(folder))
-        out = os.path.join(ROOT, "out", args.machine, name)
+        out = gamefile.out_folder(args.machine, folder)
         side1, side2 = read_tapes(game, args.cas)
         header, data, report, scanned = build(os.path.join(out, "snap"), args.service, side1, side2,
                                      game.patches, game.rom_keep, game.service_page, game.service_t0)
