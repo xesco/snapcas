@@ -2,4 +2,7 @@
 # https://download.file-hunter.com/Games/MSX1/CAS/Abadia%20del%20Crimen%2C%20La%20(1988)(Opera%20Soft)(es)%5BBLOAD'CAS-'%2CR%5D.zip
 cas ABADIA.CAS
 sha1 41fbf187b38519ae3d93e5ab50c88f593d559dca
+
+# The game was played to its end with no load after the snapshot, so the image
+# needs no tape service.
 service no

@@ -1,0 +1,5 @@
+# Lines for the Sony HB-F700P with a RAM cartridge in slot 1.
+
+# The capture runs without the RAM cartridge in slot 1, which the game's loader
+# trips over.
+capture advanced/hbf700p-noram

@@ -3,6 +3,7 @@
 cas SAINT-DR.CAS
 side2 SAINTB.CAS
 sha1 8915d6adae4a5dc25af14150b9a34099235ecc84 f19e8bbc84e1d62597503b1ed71ceddfc3cbafb9
+
 # At side 1's end the game reads on into side 2, then asks for side 2 to be
 # rewound: the snapshot comes at that message, and CODE then rewinds side 2.
 snapshot at 260

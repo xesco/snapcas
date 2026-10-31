@@ -2,4 +2,7 @@
 # https://download.file-hunter.com/Games/MSX1/CAS/Knightmare%5BBLOAD'CAS-'%2CR%5D.zip
 cas KNIGHTMA.CAS
 sha1 f8d4faacc697318ad0514e86726a8bd843599f9f
+
+# The capture takes its snapshot at 130 seconds instead of its own moment. The
+# reason is not recorded (*to verify*).
 snapshot at 130

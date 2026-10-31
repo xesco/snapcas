@@ -1,3 +1,10 @@
 # Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The main game loads its code into FCC9h to FD88h, and no 168 bytes of page 3
+# stay free from one load to the next, so the whole service goes into T0.
 service t0
+
+# The loader's stub computes the slot register's value as AND H / LD L,A, page
+# 0's bits cleared, for slot 0. The game keeps the slot register at A5h, so
+# LD L,0A6h selects slot 2, DOS's mapper, where T0 is.
 patch page0:38CD A4 6F > 2E A6

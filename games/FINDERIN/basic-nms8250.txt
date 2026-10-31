@@ -1,6 +1,22 @@
 # Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2, because the game fails in a capture
+# with it in slot 1.
 capture basic/nms8250-nocarnivore2
+
+# The game selects RAM in slot 2. The NMS 8250 has its RAM in slot 3.
+# LD A,0A8h / CALL 013Bh, WSLREG, selects slot 2 in pages 1 to 3. The patch
+# selects slot 3 there.
 patch side1:1B37 3E A8 CD 3B 01 > 3E FC CD 3B 01
+
+# LD A,0A0h / CALL 013Bh, WSLREG, selects slot 2 in pages 2 and 3. The patch
+# selects slot 3 there.
 patch side1:1B47 3E A0 CD 3B 01 > 3E F0 CD 3B 01
+
+# LD A,0A8h / CALL 013Bh, WSLREG, selects slot 2 in pages 1 to 3. The patch
+# selects slot 3 there.
 patch side1:402E 3E A8 CD 3B 01 > 3E FC CD 3B 01
+
+# LD A,0A0h / CALL 013Bh, WSLREG, selects slot 2 in pages 2 and 3. The patch
+# selects slot 3 there.
 patch side1:5280 3E A0 CD 3B 01 > 3E F0 CD 3B 01

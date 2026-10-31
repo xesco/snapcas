@@ -1,3 +1,5 @@
 # Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The capture runs without the RAM cartridge in slot 1, which the game's loader
+# trips over.
 capture advanced/phc28s-noslot1
-service t0
