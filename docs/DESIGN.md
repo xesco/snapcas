@@ -45,9 +45,10 @@ The `bin/` files are built with sjasmplus 1.24.0 and shipped. `<machine>` is a p
 below `machines/` without `.txt`, such as `basic/vg8020`. Each game is processed by
 four commands, in this order:
 
-1. `tools/capture.py <game> <machine> --cas <dir>` loads the game in `openMSX` and
-   saves the snapshot ([Capture](#capture)). `<dir>` holds the user's CAS files.
-2. `tools/build.py <game> <machine> --cas <dir>` writes the image and `scan.txt`
+1. `tools/capture.py <game> <machine> --tapes <dir>` loads the game in `openMSX` and
+   saves the snapshot ([Capture](#capture)). `<dir>` holds the user's tape files,
+   CAS or TSX ([Tape files](#tape-files)).
+2. `tools/build.py <game> <machine> --tapes <dir>` writes the image and `scan.txt`
    ([Build](#build)), and prints `<GAME>`.
 3. `tools/check.py <game> <machine> --dos <dir>` runs the restorer in `openMSX` and
    verifies the restore ([Check](#check)). `<dir>` holds the user's DOS system
@@ -59,10 +60,10 @@ four commands, in this order:
    ([Tape speed and sound](#tape-speed-and-sound)). With `/M`, the tape moves only
    when the player presses a key ([The manual tape](#the-manual-tape)).
 
-`tools/snapcas.py <game> <machine> --cas <dir> [--dos <dir>]` makes the image in one
-command: it runs steps 1 and 2, and step 3 when `--dos` is given. When a step fails
-and the game file names no `capture` machine, it runs these steps again on each
-capture variant of the machine, in the order of their names
+`tools/snapcas.py <game> <machine> --tapes <dir> [--dos <dir>]` makes the image in
+one command: it runs steps 1 and 2, and step 3 when `--dos` is given. When a step
+fails and the game file names no `capture` machine, it runs these steps again on
+each capture variant of the machine, in the order of their names
 ([Machine file](#machine-file)). A failed capture counts too, because a loader that
 trips over a cartridge can crash during the capture. It keeps the first image that
 passes, and prints the `capture` line that made it, for the machine's game file.
@@ -178,8 +179,10 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 
 | Key | Value | Default | File |
 |---|---|---|---|
-| `cas` | The CAS file of side 1, in the `--cas` folder | | `game.txt` |
-| `side2` | The CAS file of side 2 | None | `game.txt` |
+| `cas` | The CAS file of side 1, in the `--tapes` folder. A game file has `cas` or `tsx` | | `game.txt` |
+| `tsx` | The TSX file of side 1, in the `--tapes` folder ([Tape files](#tape-files)) | | `game.txt` |
+| `side2` | The file of side 2, in side 1's format | None | `game.txt` |
+| `load` | The load command, for a tape whose first block is not standard ([Tape files](#tape-files)) | From the first block's type | `game.txt` |
 | `sha1` | The SHA-1 of `cas`, then that of `side2` | None | `game.txt` |
 | `name` | `<GAME>`, up to 8 letters and digits | The folder name in upper case, cut to 8 letters and digits | `game.txt` |
 | `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None | `game.txt` |
@@ -259,6 +262,57 @@ games' `capture` lines name:
 | `basic/nms8250-nocarnivore2` | The Carnivore2, and so Nextor | 46 games that fail in a capture with the Carnivore2 in slot 1 |
 | `basic/picoverse-nomapper` | The PicoVerse-like cartridge, and so its mapper and Nextor | 51 games whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go straight to their slot, without holding segments |
 | `advanced/hbf700p-noram` | The RAM cartridge in slot 1 | 8 games of the collection, Sootland among them, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch ([The RAM search patch](#the-ram-search-patch)) |
+
+## Tape files
+
+`snapcas` reads two formats of tape file, CAS and TSX. A CAS file holds only blocks
+in the format that the BIOS's tape routines read, so a tape whose loader reads its
+own format, as a turbo loader does, has no CAS file. A TSX file holds any MSX tape,
+the turbo loaders' blocks included ([TSX data](#tsx-data)). In a collection of 2354
+TSX files, 327 hold blocks that a CAS file cannot hold. Of the first 125 of them,
+123 played to their end in `openMSX` on the Sanyo PHC-28S, 3 of them with a reset.
+
+Each format has its own reader, and no other code reads a tape file. A reader turns
+a file into the tape model, which the capture, the build, the patches and the check
+use:
+
+| File | Holds |
+|---|---|
+| `tools/cas.py` | The reader of CAS files ([CAS data](#cas-data)) |
+| `tools/tsx.py` | The reader of TSX files ([TSX data](#tsx-data)) |
+| `tools/tape.py` | The tape model, and the choice of the reader by the file's extension |
+
+The tape model is the file's blocks in tape order, and each block has these fields:
+
+| Field | What it is |
+|---|---|
+| Kind | Standard: a block that the BIOS's `TAPION` and `TAPIN` read. Non-standard: a block in any other format, such as a turbo loader's |
+| Data | The block's bytes |
+| Offset | The offset of the data's first byte in the file |
+| Time | The seconds at which `openMSX`'s cassette player reaches the block and leaves it, from a TSX file's pulses. A CAS file holds only standard blocks, which the capture follows by `TAPIN`, so its blocks have no time |
+
+`openMSX` plays the file itself, in either format, so the game loads as from its
+real tape. The rest works on the model:
+
+1. The load command comes from the type in the first block's 10 bytes: D0h, D3h or
+   EAh ([CAS data](#cas-data)). A tape whose first block is not standard needs the
+   game file's `load` line.
+2. The tape position is an offset in the tape service's tape: the standard blocks,
+   each after the 8-byte header `1F A6 DE BA CC 13 7D 74` at an offset that is a
+   multiple of 8. A CAS file has that layout, so its positions stay its offsets. The
+   capture follows standard blocks by the `TAPION` and `TAPIN` breakpoints, as for a
+   CAS file, and non-standard blocks by the player's time: a block is read when
+   `cassetteplayer getpos` passes its end.
+3. A patch's place, `side1:` or `side2:` and an offset, is an offset in the tape
+   file, of either format, because both formats keep a block's bytes as they are.
+   The capture's watches search the files' bytes in the same way
+   ([Slot patches](#slot-patches)). A patch in a block whose loader checks a sum
+   must fix the sum, as it must in a CAS file.
+4. The build writes the standard blocks after the snapshot's position into the tape
+   service's tape. A non-standard block after that position is one that the game
+   reads with its own loader during play, which the tape service cannot serve, so
+   the build stops with an error that names the block, unless the game file has
+   `service no`.
 
 ## Capture
 
@@ -1053,6 +1107,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 
 | Decision | Reason |
 |---|---|
+| One reader for each tape format, and a format-neutral tape model for the rest of the code | A TSX file holds the turbo blocks that a CAS file cannot, so converting it to CAS would lose the games that need TSX. Teaching each tool both formats would mix them in every tool, while the model keeps each format in one file ([Tape files](#tape-files)) |
 | Restore a snapshot | The game's loader runs once, in `openMSX`, so its slot code, stubs and checks need no changes on the real machine |
 | Capture on a copy of the user's machine, with the disk system's hooks and work area removed | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
 | Snapshot at an interrupt's entry | The CPU's state is complete, interrupts are off, and the bytes below the stack pointer are free for the tail |
@@ -1078,6 +1133,10 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 
 ## Limits
 
+- A game that reads a non-standard block of its TSX file after the snapshot, such as
+  a turbo loader's next level, gets no image unless its game file has `service no`,
+  because the tape service serves only standard blocks. The build's error names the
+  block ([Tape files](#tape-files)).
 - A game that uses more mapper segments than the four mapped at the snapshot does
   not run.
 - DOS's four pages must be in one memory mapper, with enough free segments for the
@@ -1269,6 +1328,33 @@ holds 10 bytes of its type and a 6-byte name: D0h for a binary file loaded with
 `BLOAD"CAS:",R`, D3h for a BASIC program loaded with `CLOAD`, and EAh for an ASCII
 program loaded with `RUN"CAS:"`. The capture stops with an error when the first
 block has none of these types. The tape position is an offset in this data.
+
+### TSX data
+
+A TSX file is a TZX file, the tape format of the ZX Spectrum, with a block of its
+own for MSX, 4Bh (the makeTSX project's tutorial,
+github.com/nataliapc/makeTSX/wiki). It starts with `ZXTape!`, 1Ah and a 2-byte
+version, and then holds blocks, each an ID byte and its body. The blocks that hold
+bytes are 10h, 11h, 14h, 15h, 19h and 4Bh. The others hold pauses, pulses, text or
+groups, and no bytes (TZX format 1.20, worldofspectrum.net/TZXformat.html). Block
+4Bh's body holds these fields:
+
+| Offset | Size | Field |
+|---|---|---|
+| 00h | 4 | The body's length after this field |
+| 04h | 2 | The pause after the block, in milliseconds |
+| 06h | 2 | The length of a pilot pulse, in T-states |
+| 08h | 2 | The number of pilot pulses: 30720 for a header's long tone at 1200 baud, 7680 for a data block's short one |
+| 0Ah | 2 | The length of a pulse of a 0 bit, in T-states |
+| 0Ch | 2 | The length of a pulse of a 1 bit, in T-states |
+| 0Eh | 1 | The pulses of a 0 bit in the high 4 bits, and of a 1 bit in the low 4 |
+| 0Fh | 1 | The start bits, their value, the stop bits, their value and the bit order: 54h for 1 start bit 0, 2 stop bits 1 and bit 0 first |
+| 10h | | The bytes |
+
+A 4Bh block with the BIOS's format, 54h at 0Fh and the pulses of 1200 or 2400 baud,
+is a standard block. Any other block that holds bytes is a non-standard block. Of
+the 2354 TSX files above, 2027 hold only standard blocks, and their bytes are those
+of the collection's CAS files for the 792 tapes that both hold.
 
 ### Key names
 

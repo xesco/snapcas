@@ -303,3 +303,20 @@ game file of its own, and Mot's demo has its own as well.
 | Mot on `basic/vg8020` | A machine whose RAM for page 3 is in the slot that the loader finds gets no patch |
 | Made in Spain on `advanced/phc28s` | Each copy of the search on a tape is patched |
 | Sootland's variant test on `advanced/hbf700p` | Replaces La Abadia del Crimen's, whose load the patch fixes there |
+
+## Step 15: TSX tape files
+
+This step adds the reader of TSX files and the tape model, and moves the code that
+reads CAS files behind the model ([Tape files](DESIGN.md#tape-files)). The tools'
+`--cas` folder becomes `--tapes`, because it holds both formats, and the game file
+gets the keys `tsx` and `load`. The tests use TSX files from the collection that the
+TSX experiment loaded, each chosen for a case of the design:
+
+| Test | What it proves |
+|---|---|
+| A TSX file with only standard blocks, whose CAS file is in the collection | The tape model of both formats gives the same snapshot and the same image |
+| Two single-load TSX files with turbo blocks | A turbo loader loads in the capture, and the image passes the check |
+| A TSX file whose first block is a turbo block, with `load` in its game file | The load command comes from the game file |
+| A TSX file that reads a turbo block after the snapshot | The build stops with an error that names the block |
+| A patch line at an offset in a TSX file | The capture loads the patched file |
+| The collection on `advanced/phc28s` and `basic/vg8020` | The CAS game files keep their results behind the model |
