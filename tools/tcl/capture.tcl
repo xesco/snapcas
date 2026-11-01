@@ -179,7 +179,7 @@ proc step2 {} {
 
 # 3. Insert side 1, note the slots, type the load command.
 proc on_reset {} {
-    fail "the game reset the machine [format %.2f [expr {[now] - $::t0}]] seconds after the load command"
+    decide "the game reset the machine [format %.2f [expr {[now] - $::t0}]] seconds after the load command"
 }
 proc step3 {} {
     foreach ps {0 1 2 3} {

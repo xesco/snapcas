@@ -359,11 +359,17 @@ or step 5 restarts more than 20 times. It performs the following steps:
    - Each start and stop of the cassette motor.
    - The start of the BIOS's reset routine, where 0000h's `DI / JP` jumps, while
      page 0 selects the main ROM. A loader can also jump there itself, as Alien 8's
-     does. The capture then stops with an error, because the loader has crashed or
-     rebooted the machine, and a snapshot would only replay the reboot. On the
-     PHC-28S, 30 collection tapes made such snapshots before this rule, most of them
-     through the loader that [The RAM search patch](#the-ram-search-patch) now
-     fixes.
+     does. The capture logs the reset and goes on, because a loader can reset the
+     machine on purpose: a loader that copies a ROM game into RAM resets it, and the
+     BIOS's search for cartridges at the reset finds the copy and starts it. The
+     Goonies's snapshot is taken during that start, and the restored machine
+     finishes it. A loader that crashes into a reset makes an image of a reboot,
+     which writes the tape service's part of page 3, so the check's point 2 fails
+     ([Check](#check)): 30 collection tapes on the PHC-28S did, most of them through
+     the loader that [The RAM search patch](#the-ram-search-patch) now fixes. The
+     capture stopped at every reset for a time, which failed 37 game files on the
+     PHC-28S, among them The Goonies, KONAMI and KNIGHTMA, whose images pass the
+     check and show the game.
 5. Polls bit 4 of PPI port C, the cassette motor (0 = on), every 0.1 seconds. When
    the motor has been off, or the player has been at the tape's end
    (`cassetteplayer getpos` at least `getlength` minus 0.01), for 1 second, it saves
