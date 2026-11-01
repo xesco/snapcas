@@ -1,5 +1,6 @@
 """Step 3 (docs/PLAN.md): the image, from the snapshots of step 2, checked
 against the design's tables (DESIGN.md, Formats)."""
+import concurrent.futures
 import os
 import struct
 import subprocess
@@ -23,10 +24,17 @@ GAMES = {
 }
 
 
+def folder_name(game):
+    """The game's folder name: the test's own, because make test runs the steps'
+    tests at once, and the tools' output folder for a machine is named after
+    it."""
+    return "s3-" + game
+
+
 def run_build(game, machine, *extra):
     return subprocess.run(
         [sys.executable, "-I", os.path.join(ROOT, "tools", "build.py"),
-         os.path.join(WORK, "games", game), machine, "--cas", test_step2.CAS_DIR, *extra],
+         os.path.join(WORK, "games", folder_name(game)), machine, "--cas", test_step2.CAS_DIR, *extra],
         capture_output=True, text=True)
 
 
@@ -78,20 +86,24 @@ class Images(unittest.TestCase):
     def setUpClass(cls):
         cls.images = {}
         for game, (cas, machine) in GAMES.items():
-            games = os.path.join(WORK, "games", game)
+            games = os.path.join(WORK, "games", folder_name(game))
             os.makedirs(games, exist_ok=True)
             with open(os.path.join(games, "game.txt"), "w") as f:
                 f.write(f"cas {cas}\n")
-            snap = os.path.join(ROOT, "out", machine, game, "snap")
-            if not os.path.exists(os.path.join(snap, "state.txt")):
-                subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "capture.py"),
-                                games, machine, "--cas", test_step2.CAS_DIR], check=True,
-                               capture_output=True)
+
+        def capture(game):
+            subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "capture.py"),
+                            os.path.join(WORK, "games", folder_name(game)), GAMES[game][1],
+                            "--cas", test_step2.CAS_DIR], check=True, capture_output=True)
+        with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
+            list(pool.map(capture, GAMES))
+        for game, (cas, machine) in GAMES.items():
+            snap = os.path.join(ROOT, "out", machine, folder_name(game), "snap")
             result = run_build(game, machine)
             if result.returncode != 0:
                 raise AssertionError(f"{game}: {result.stderr}")
-            name = build.gamefile.default_name(game)
-            with open(os.path.join(ROOT, "out", machine, game, f"{name}.SNP"), "rb") as f:
+            name = build.gamefile.default_name(folder_name(game))
+            with open(os.path.join(ROOT, "out", machine, folder_name(game), f"{name}.SNP"), "rb") as f:
                 cls.images[game] = (f.read(), build.read_state(snap), snap)
 
     def header(self, image):

@@ -103,7 +103,7 @@ $(RAM192K):
 
 test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(NMS8250_512K) $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
-	  python3 -I -m unittest discover -s tests -v
+	  python3 -I tests/run.py
 
 # The run over every shipped game file (docs/PLAN.md, step 9), apart from make
 # test because it takes hours.

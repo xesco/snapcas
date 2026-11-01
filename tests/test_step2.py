@@ -39,9 +39,16 @@ V9938 = ([f"vdp{n}" for n in range(24)] + [f"vdp{n}" for n in range(32, 46)]
 PHC_RAM = {"0-x-3"} | {f"1-x-{p}" for p in range(4)} | {f"2-2-{p}" for p in range(4)}
 
 
+def folder_name(game):
+    """The game's folder name: the test's own, because make test runs the steps'
+    tests at once, and the tools' output folder for a machine is named after
+    it."""
+    return "s2-" + game
+
+
 def capture(game, folder=None):
     cas, machine = GAMES[game]
-    games = os.path.join(WORK, "games", game)
+    games = os.path.join(WORK, "games", folder_name(game))
     os.makedirs(games, exist_ok=True)
     with open(os.path.join(games, "game.txt"), "w") as f:
         f.write(f"cas {cas}\n")
@@ -51,7 +58,7 @@ def capture(game, folder=None):
     result = subprocess.run(
         [sys.executable, "-I", os.path.join(ROOT, "tools", "capture.py"), games, machine,
          "--cas", CAS_DIR], capture_output=True, text=True)
-    snap = os.path.join(ROOT, "out", machine, game, "snap")
+    snap = os.path.join(ROOT, "out", machine, folder_name(game), "snap")
     if folder and result.returncode == 0:
         shutil.rmtree(folder, ignore_errors=True)
         shutil.copytree(snap, folder)

@@ -57,7 +57,9 @@ def tool(name, *args):
 def restore(game, machine):
     """Captures, builds and checks a game on a machine, and returns the
     check's report, or the error of the step that failed."""
-    folder = os.path.join(WORK, "games", game)
+    # The test's own folder name, because make test runs the steps' tests at
+    # once, and the tools' output folder for a machine is named after it.
+    folder = os.path.join(WORK, "games", "s4-" + game)
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, "game.txt"), "w") as f:
         f.write(GAMES[game])

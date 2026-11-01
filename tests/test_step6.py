@@ -97,14 +97,16 @@ class Patterns(unittest.TestCase):
         self.assertIn("side1:0000 DB A2 07  reader of the cassette signal\n", text)
 
 
-def folder_name(cas):
-    return "scan-" + re.sub(r"[^a-z0-9]", "", os.path.splitext(cas)[0].lower())
+def folder_name(cas, prefix="scan-"):
+    """The file's folder name, with a prefix of the class's own, because make
+    test runs the classes at once."""
+    return prefix + re.sub(r"[^a-z0-9]", "", os.path.splitext(cas)[0].lower())
 
 
-def scan_file(cas):
+def scan_file(cas, prefix="scan-"):
     """Captures and builds a file of CAS_DIR, and returns its scan.txt, or
     None when it needs no tape service, or the failed step's error."""
-    name = folder_name(cas)
+    name = folder_name(cas, prefix)
     folder = os.path.join(WORK, "games", name)
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, "game.txt"), "w") as f:
@@ -153,10 +155,10 @@ patch page0:38CD A4 6F > 2E A6
 def play(cas):
     """Captures, builds and checks a file, then plays it to its next load, and
     returns the check's report and the play's values."""
-    error = scan_file(cas)
+    error = scan_file(cas, "play-")
     if error is not None and not error.startswith("#"):
         return error, {}
-    name = folder_name(cas)
+    name = folder_name(cas, "play-")
     report = test_step4.tool("check.py", os.path.join(WORK, "games", name), MACHINE,
                              "--dos", test_step4.NEXTOR).stdout
     if not report.startswith("point 1: pass"):

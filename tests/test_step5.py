@@ -6,6 +6,7 @@ savestate at 10 seconds with the inputs that reach its next load. The play
 reads the tape position in the code segment, which it finds in DOS's mapper by
 its CAS header. The addresses in the service come from out/service.sym.
 """
+import concurrent.futures
 import os
 import sys
 import unittest
@@ -173,9 +174,12 @@ class Step5(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
-        cls.results = {game: run(game) for game in GAMES}
-        cls.plays = {name: play(name) if cls.results[PLAYS[name][0]][0].startswith("point 1: pass") else {}
-                     for name in PLAYS}
+        with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
+            cls.results = dict(zip(GAMES, pool.map(run, GAMES)))
+        names = [name for name in PLAYS if cls.results[PLAYS[name][0]][0].startswith("point 1: pass")]
+        with concurrent.futures.ThreadPoolExecutor(max(len(names), 1)) as pool:
+            played = dict(zip(names, pool.map(play, names)))
+        cls.plays = {name: played.get(name, {}) for name in PLAYS}
 
     def test_check_point_1_passes_with_the_service(self):
         for game, (report, state) in self.results.items():
