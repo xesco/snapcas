@@ -112,7 +112,7 @@ The results of the step:
 
 | Machine | Passes point 1 | Other results |
 |---|---|---|
-| `advanced/phc28s`, `basic/vg8020` | Freddy Hardest, Fernando, Moonrider, El Caldero Magico | La Abadia crashes during its load when a Carnivore2 is present |
+| `advanced/phc28s`, `basic/vg8020` | Freddy Hardest, Fernando, Moonrider, El Caldero Magico | La Abadia crashes during its load when a Carnivore2 is present, until the RAM search patch ([Step 14](#step-14-the-ram-search-patch)) |
 | `basic/nms8250` | Freddy Hardest, Fernando, Moonrider, El Caldero Magico | The Carnivore2's mapper under Nextor has room for every game |
 | `advanced/hbf700p` | Moonrider, El Caldero Magico, La Abadia | `FREDDY.CAS` and `FERNANDO.CAS` do not load to their end in `openMSX` |
 | `test/nms8250-128k` | El Caldero Magico | MSX-DOS 2 leaves 2 free segments of the 8 in 128 KB, so the restorer stops for the other games, naming the segments needed and free |

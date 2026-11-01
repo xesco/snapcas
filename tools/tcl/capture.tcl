@@ -178,6 +178,9 @@ proc step2 {} {
 }
 
 # 3. Insert side 1, note the slots, type the load command.
+proc on_reset {} {
+    fail "the game reset the machine [format %.2f [expr {[now] - $::t0}]] seconds after the load command"
+}
 proc step3 {} {
     foreach ps {0 1 2 3} {
         set ::st(sub$ps) [expr {[expanded $ps] ? [subslot_reg $ps] : -1}]
@@ -199,6 +202,11 @@ proc step3 {} {
     set tapin [expr {[debug read memory 0xE5] | ([debug read memory 0xE6] << 8)}]
     debug set_bp $tapion {[rom0]} {safe on_tapion}
     debug set_bp $tapin {[rom0]} {safe on_tapin}
+    # The BIOS's reset routine, where 0000h's DI / JP jumps: a loader that has
+    # crashed or rebooted the machine can also jump there itself (DESIGN.md,
+    # Capture, step 4).
+    set reset [expr {[debug read memory 2] | ([debug read memory 3] << 8)}]
+    debug set_bp $reset {[rom0]} {safe on_reset}
     debug set_watchpoint write_io 0xA8 {} {safe {on_a8 $::wp_last_value}}
     debug set_watchpoint write_mem 0xFFFF {} {safe {on_ffff $::wp_last_value}}
     cassetteplayer insert $::S(cas)

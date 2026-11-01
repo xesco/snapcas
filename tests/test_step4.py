@@ -26,8 +26,9 @@ GAMES = {
     "moonrider": "cas 022-MOON.CAS\n",
     "caldero": "cas CALDERO.CAS\n",
     "abadia": "cas ABADIA.CAS\nservice no\n",
-    # On the PHC-28S, La Abadia's loader takes the RAM cartridge in slot 1 for
-    # an expanded slot and crashes, so the game loads without it.
+    # On the PHC-28S, La Abadia's loader took the RAM cartridge in slot 1 for an
+    # expanded slot and crashed, so the game loaded without it. The RAM search
+    # patch fixes that now, and these two test the capture line.
     "abadia-phc": "cas ABADIA.CAS\nservice no\ncapture advanced/phc28s-noslot1\n",
     # On the HB-F700P it crashes with the RAM cartridge in either slot.
     "abadia-hbf": "cas ABADIA.CAS\nservice no\ncapture advanced/hbf700p-noram\n",

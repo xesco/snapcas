@@ -303,6 +303,13 @@ or step 5 restarts more than 20 times. It performs the following steps:
      and on FFFFh, and each write to port A8h that selects a slot that holds nothing
      ([Slot patches](#slot-patches)).
    - Each start and stop of the cassette motor.
+   - The start of the BIOS's reset routine, where 0000h's `DI / JP` jumps, while
+     page 0 selects the main ROM. A loader can also jump there itself, as Alien 8's
+     does. The capture then stops with an error, because the loader has crashed or
+     rebooted the machine, and a snapshot would only replay the reboot. On the
+     PHC-28S, 30 collection tapes made such snapshots before this rule, most of them
+     through the loader that [The RAM search patch](#the-ram-search-patch) now
+     fixes.
 5. Polls bit 4 of PPI port C, the cassette motor (0 = on), every 0.1 seconds. When
    the motor has been off, or the player has been at the tape's end
    (`cassetteplayer getpos` at least `getlength` minus 0.01), for 1 second, it saves
@@ -1048,7 +1055,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | ROM checksums checked by the restorer | A snapshot runs only on the ROMs it was taken with, and `build.py` can build T0 from `rom.bin` |
 | Port writes, T0 and the tail made by `build.py` | The restorer copies records and fills in only the values that depend on the real machine |
 | One restorer for every image | The user updates one program, and DOS passes it the image's name |
-| A game file can name the machine for the capture | On the Sanyo PHC-28S, La Abadia del Crimen's loader takes the RAM cartridge in slot 1 for an expanded slot and crashes, but loads without it. Its image then runs with the cartridge in place, because the game never selects slot 1 again |
+| A game file can name the machine for the capture | On the Sanyo PHC-28S, La Abadia del Crimen's loader took the RAM cartridge in slot 1 for an expanded slot and crashed, but loaded without it, until the RAM search patch fixed its load ([The RAM search patch](#the-ram-search-patch)). Its image ran with the cartridge in place, because the game never selects slot 1 again. Sootland's loader still trips over the HB-F700P's RAM cartridge |
 | Replay a recording of the load, not the load | Loading again on the real machine, through the tape service from the start, brings back what the snapshot avoids: loaders that go around T0 through their own slot code, loaders that use the page 0 RAM where T0 is, and loaders that trip over the machine's slots |
 | Tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register. Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave the ROM there at the snapshot: Moonwalker and Time Out |
