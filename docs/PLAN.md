@@ -227,7 +227,10 @@ are not failures of `snapcas`, so `tests/openmsx-failures.txt` lists them, with 
 machine, the game file's folder and what fails, to try again at the end. The run's
 test passes when every game file that fails is in that list, and it names the
 others. A listed game file that passes is only noted, for its line to go, because an
-`openMSX` failure can come and go.
+`openMSX` failure can come and go. A patch line can still make such a game work
+later. The game files that load in a plain `openMSX` but fail with `snapcas` are its
+own failures, to fix, and `tests/snapcas-failures.txt` lists them in the same form.
+The test does not pass them, so they show until they are fixed.
 
 ## Step 10: automatic fixes
 
