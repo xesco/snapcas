@@ -27,6 +27,8 @@ OPENMSX_SHARE ?= $(firstword $(wildcard $(OPENMSX_BIN)../openMSX.app/Contents/Re
 CAS_DIR ?= tapes
 COLLECTION_DIR ?= $(CAS_DIR)/collection
 COLLECTION_MACHINES ?= advanced/phc28s basic/vg8020
+COLLECTION_WORKERS ?= 11
+COLLECTION_FULL ?=
 DOS_DIR ?= dos
 
 OUT       := out
@@ -42,7 +44,10 @@ help:
 	@echo "make collection  capture, build and check every game file of games/ on"
 	@echo "            COLLECTION_MACHINES, by default advanced/phc28s and basic/vg8020,"
 	@echo "            with the CAS files of COLLECTION_DIR, by default CAS_DIR/collection,"
-	@echo "            into out/test/step9/collection/<machine>.txt: takes hours"
+	@echo "            into out/test/step9/collection/<machine>.txt: takes hours. A game"
+	@echo "            file whose inputs and the code are unchanged keeps its last result,"
+	@echo "            unless COLLECTION_FULL=1. COLLECTION_WORKERS=, by default 11, runs"
+	@echo "            that many at once"
 	@echo "make try    start openMSX as advanced/phc28s with SNAPCAS.COM and the images"
 	@echo "            in out/try/ on its disk: MACHINE= and FILES= change them"
 	@echo "make clean  remove the built files and the test output"
@@ -110,6 +115,7 @@ test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(N
 collection: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  COLLECTION_DIR=$(abspath $(COLLECTION_DIR)) COLLECTION_MACHINES="$(COLLECTION_MACHINES)" \
+	  COLLECTION_WORKERS=$(COLLECTION_WORKERS) COLLECTION_FULL=$(COLLECTION_FULL) \
 	  python3 -I -m unittest discover -s tests -p test_step9.py -k Collection -v
 
 MACHINE ?= advanced/phc28s

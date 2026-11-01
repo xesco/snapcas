@@ -213,6 +213,14 @@ collection, by running the capture over `CAS_DIR` on `advanced/phc28s`
 each of the seven shipped machines, then capture, build and check every game file on
 `advanced/phc28s` and `basic/vg8020`, and write a report of passes and failures.
 
+That run, `make collection`, takes hours, so it keeps a cache beside each machine's
+report: each game file's result, with a hash of its inputs. The inputs are the
+game's folder, its CAS files, the machine files that it runs on, and `bin/` and
+`tools/`. A game file whose hash is unchanged keeps its result, so a run after a fix
+to game files reruns only those, and a change to the code reruns all.
+`COLLECTION_FULL=1` reruns every game file. The run does 11 at once, because the
+efficiency cores of the Mac where it runs count as well.
+
 ## Step 10: automatic fixes
 
 This step makes the fixes that the game files hold by hand automatic, so that a new

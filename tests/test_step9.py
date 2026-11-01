@@ -1,6 +1,7 @@
 """Step 9 (docs/PLAN.md): the shipped game files, and a game's file for one
 machine beside its game.txt (DESIGN.md, Game file and Shipped files)."""
 import concurrent.futures
+import hashlib
 import os
 import sys
 import tempfile
@@ -114,6 +115,59 @@ COLLECTION_DIR = os.environ.get("COLLECTION_DIR")
 # of their reports, one per machine.
 COLLECTION_MACHINES = tuple(os.environ.get("COLLECTION_MACHINES", "advanced/phc28s basic/vg8020").split())
 REPORTS = os.path.join(WORK, "collection")
+# The runs at once: openMSX keeps about one core busy, and the machine's
+# efficiency cores count as well.
+COLLECTION_WORKERS = int(os.environ.get("COLLECTION_WORKERS", "11"))
+# Set to 1, the run gives every game file a new result. Otherwise a game file
+# on a machine keeps its last result while its inputs are unchanged.
+COLLECTION_FULL = os.environ.get("COLLECTION_FULL") == "1"
+
+
+def file_hash(h, path):
+    h.update(path.encode() + b"\0")
+    with open(path, "rb") as f:
+        h.update(f.read())
+
+
+def tools_hash():
+    """The hash of the code that every result depends on: bin/ and tools/."""
+    h = hashlib.sha1()
+    for top in ("bin", "tools"):
+        for folder, dirs, files in sorted(os.walk(os.path.join(ROOT, top))):
+            dirs.sort()
+            for name in sorted(files):
+                if not name.endswith(".pyc"):
+                    file_hash(h, os.path.join(folder, name))
+    return h.hexdigest()
+
+
+def inputs_hash(machine, name, tools):
+    """The hash of a game file's inputs on a machine: the game's folder, its
+    CAS files, the machine files that it runs on, and tools, the hash of the
+    code."""
+    h = hashlib.sha1(tools.encode())
+    folder = os.path.join(GAMES, name)
+    for f in sorted(os.listdir(folder)):
+        file_hash(h, os.path.join(folder, f))
+    try:
+        game = gamefile.read_game(folder, machine)
+    except gamefile.GameFileError:
+        return h.hexdigest()
+    for cas in (game.cas, game.side2):
+        if cas and os.path.isfile(os.path.join(COLLECTION_DIR, cas)):
+            file_hash(h, os.path.join(COLLECTION_DIR, cas))
+    for m in sorted({machine, game.capture or machine}):
+        file_hash(h, msx.machine_path(m))
+    return h.hexdigest()
+
+
+def read_cache(path):
+    """A machine's last results, by game file: (inputs' hash, result)."""
+    if COLLECTION_FULL or not os.path.exists(path):
+        return {}
+    with open(path) as f:
+        return {name: (h, result) for name, h, result in
+                (line.rstrip("\n").split("\t", 2) for line in f if line.count("\t") >= 2)}
 
 
 def collection_game(item):
@@ -140,15 +194,29 @@ class Collection(unittest.TestCase):
     def setUpClass(cls):
         os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
         cls.results = {}
+        tools = tools_hash()
         for machine in COLLECTION_MACHINES:
             path = os.path.join(REPORTS, machine + ".txt")
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            items = [(machine, name) for name in sorted(os.listdir(GAMES))]
-            with open(path, "w") as report, concurrent.futures.ThreadPoolExecutor(8) as pool:
-                for item, result in zip(items, pool.map(collection_game, items)):
-                    cls.results[item] = result
-                    report.write(f"{item[1]}\t{result}\n")
-                    report.flush()
+            # The cache holds each game file's inputs' hash beside its result.
+            cache = read_cache(path + ".cache")
+            hashes = {name: inputs_hash(machine, name, tools) for name in sorted(os.listdir(GAMES))}
+            todo = [(machine, name) for name, h in hashes.items()
+                    if name not in cache or cache[name][0] != h]
+            print(f"{machine}: {len(hashes) - len(todo)} unchanged, {len(todo)} to run",
+                  file=sys.stderr, flush=True)
+            with concurrent.futures.ThreadPoolExecutor(COLLECTION_WORKERS) as pool:
+                for item, result in zip(todo, pool.map(collection_game, todo)):
+                    cache[item[1]] = (hashes[item[1]], result)
+                    # Each result goes to the cache at once, so that a run
+                    # that stops keeps what it has done.
+                    with open(path + ".cache", "a") as f:
+                        f.write(f"{item[1]}\t{hashes[item[1]]}\t{result}\n")
+            with open(path, "w") as report, open(path + ".cache", "w") as f:
+                for name, h in hashes.items():
+                    cls.results[(machine, name)] = cache[name][1]
+                    report.write(f"{name}\t{cache[name][1]}\n")
+                    f.write(f"{name}\t{h}\t{cache[name][1]}\n")
 
     def test_every_game_file_gets_a_result_on_each_machine(self):
         self.assertEqual(len(self.results), len(COLLECTION_MACHINES) * len(os.listdir(GAMES)))
