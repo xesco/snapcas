@@ -85,7 +85,7 @@ The commands share their code through modules, and the Tcl that runs inside
 |---|---|
 | `tools/gamefile.py` | Reads game files. Finds a game's folder from a name below `games/` or from a path, and the game's output folder, `out/<machine>/<game>/` |
 | `tools/msx.py` | Reads machine files and finds one from its name. Starts `openMSX` with a Tcl script, and makes disk images |
-| `tools/cas.py`, `tools/tape.py` | The reader of CAS files, and the tape model and the tape service's tape, which the rest of the code uses ([Tape files](#tape-files)) |
+| `tools/cas.py`, `tools/tsx.py`, `tools/tape.py` | The readers of CAS and TSX files, and the tape model and the tape service's tape, which the rest of the code uses ([Tape files](#tape-files)) |
 | `tools/patches/` | The automatic patches, one file for each kind, as below |
 | `tools/tcl/prelude.tcl` | The procedures that every `openMSX` run gets: reading the screen, passing the boot menu, and typing at DOS's prompt |
 | `tools/tcl/memory.tcl` | The procedures that the capture and the check share: the CPU's view of memory with a slot selected, the tests of RAM and of a mapper, and the read of VRAM |
@@ -1334,10 +1334,14 @@ block has none of these types. The tape position is an offset in this data.
 A TSX file is a TZX file, the tape format of the ZX Spectrum, with a block of its
 own for MSX, 4Bh (the makeTSX project's tutorial,
 github.com/nataliapc/makeTSX/wiki). It starts with `ZXTape!`, 1Ah and a 2-byte
-version, and then holds blocks, each an ID byte and its body. The blocks that hold
-bytes are 10h, 11h, 14h, 15h, 19h and 4Bh. The others hold pauses, pulses, text or
-groups, and no bytes (TZX format 1.20, worldofspectrum.net/TZXformat.html). Block
-4Bh's body holds these fields:
+version, and then holds blocks, each an ID byte and its body (TZX format 1.20,
+worldofspectrum.net/TZXformat.html). `tools/tsx.py` reads the 12 blocks that the
+2354 files use, and stops with an error at any other: 10h, 11h and 4Bh hold bytes,
+15h a recording of the signal, 12h, 13h and 20h pulses and pauses, and 21h, 22h,
+30h, 32h and 35h groups and text. It counts each block's pulses and pauses in
+T-states of 3.5 MHz, the TZX format's clock, for the block's time, and the times end
+where `openMSX` ends the tape, within 0.01 seconds. Block 4Bh's body holds these
+fields:
 
 | Offset | Size | Field |
 |---|---|---|
@@ -1351,10 +1355,16 @@ groups, and no bytes (TZX format 1.20, worldofspectrum.net/TZXformat.html). Bloc
 | 0Fh | 1 | The start bits, their value, the stop bits, their value and the bit order: 54h for 1 start bit 0, 2 stop bits 1 and bit 0 first |
 | 10h | | The bytes |
 
-A 4Bh block with the BIOS's format, 54h at 0Fh and the pulses of 1200 or 2400 baud,
-is a standard block. Any other block that holds bytes is a non-standard block. Of
-the 2354 TSX files above, 2027 hold only standard blocks, and their bytes are those
-of the collection's CAS files for the 792 tapes that both hold.
+A 4Bh block in the BIOS's format is a standard block: 24h at 0Eh, 1 start bit 0, 2
+or more stop bits 1 and bit 0 first at 0Fh, a 1 bit's pulse half a 0 bit's, and a 0
+bit's pulse from that of 2400 baud less 15% to that of 1200 baud plus 15%. TAPION
+measures the header's tone to set its timing, so it reads the tapes that were
+recorded between the two speeds, and TAPIN waits for each start bit, so it reads
+After Burner's side B, whose blocks have 3 stop bits. *To verify:* that TAPION reads
+a block recorded between 1200 and 2400 baud, which part 3 of step 15 tests in the
+capture. Any other block that holds bytes is a non-standard block. Of the 2354 TSX
+files above, 2027 hold only standard blocks, and their bytes are those of the
+collection's CAS files for the 792 tapes that both hold.
 
 ### Key names
 

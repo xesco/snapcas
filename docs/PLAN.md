@@ -310,7 +310,9 @@ This step adds the reader of TSX files and the tape model, and moves the code th
 reads CAS files behind the model ([Tape files](DESIGN.md#tape-files)). The tools'
 `--cas` folder becomes `--tapes`, because it holds both formats, and the game file
 gets the keys `tsx` and `load`. The tests use TSX files from the collection that the
-TSX experiment loaded, each chosen for a case of the design:
+TSX experiment loaded, each chosen for a case of the design, from the `tsx/` folder
+of `CAS_DIR`. Part 2, the reader, checks the times of the blocks against `openMSX`'s
+length of the tape:
 
 | Test | What it proves |
 |---|---|

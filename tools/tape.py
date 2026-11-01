@@ -9,12 +9,13 @@ import collections
 import os
 
 import cas
+import tsx
 
 # A block: whether the BIOS's TAPION and TAPIN read it, its bytes, their offset
 # in the file, and the player's seconds at its start and end, or None.
 Block = collections.namedtuple("Block", "standard data offset start end")
 
-READERS = {".cas": cas.read}
+READERS = {".cas": cas.read, ".tsx": tsx.read}
 
 HEADER = bytes.fromhex("1FA6DEBACC137D74")
 
@@ -37,7 +38,10 @@ def read(name, data):
     reader = READERS.get(os.path.splitext(name)[1].lower())
     if reader is None:
         raise TapeError(f"{name}: not a CAS or TSX file")
-    return [Block(*fields) for fields in reader(data)]
+    try:
+        return [Block(*fields) for fields in reader(data)]
+    except tsx.TsxError as e:
+        raise TapeError(f"{name}: {e}")
 
 
 def service(blocks):
