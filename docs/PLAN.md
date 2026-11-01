@@ -232,6 +232,10 @@ later. The game files that load in a plain `openMSX` but fail with `snapcas` are
 own failures, to fix, and `tests/snapcas-failures.txt` lists them in the same form.
 The test does not pass them, so they show until they are fixed.
 
+From 1 November 2026 the work focuses on two machines: `advanced/phc28s`, the user's
+own, and `basic/vg8020`, the plain MSX1. On the other five the collection's failures
+go into the two lists only, and no more is done there until later.
+
 ## Step 10: automatic fixes
 
 This step makes the fixes that the game files hold by hand automatic, so that a new
