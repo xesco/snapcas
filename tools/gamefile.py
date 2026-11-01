@@ -21,8 +21,9 @@ class GameFileError(Exception):
 class Game:
     def __init__(self, folder):
         self.folder = folder
-        self.cas = None
+        self.tape = None      # side 1's tape file, from cas or tsx
         self.side2 = None
+        self.load = None      # the load command, for a tape whose first block is not standard
         self.sha1 = []
         self.name = default_name(os.path.basename(os.path.normpath(folder)))
         self.keys = []        # [(time, kind, value)], kind "key" or "text"
@@ -123,10 +124,16 @@ def read_game(folder, machine=None):
         except ValueError as e:
             raise GameFileError(f"{where}: {e}")
         key, args = words[0], words[1:]
-        if key in ("cas", "side2", "name", "continue", "capture", "rom") and len(args) != 1:
+        if key in ("cas", "tsx", "side2", "load", "name", "continue", "capture", "rom") and len(args) != 1:
             raise GameFileError(f"{where}: {key} takes one value")
-        if key == "cas":
-            game.cas = args[0]
+        if key in ("cas", "tsx"):
+            if game.tape is not None:
+                raise GameFileError(f"{where}: a game file has one cas or tsx line")
+            if os.path.splitext(args[0])[1].lower() != "." + key:
+                raise GameFileError(f"{where}: {key} takes a .{key.upper()} file")
+            game.tape = args[0]
+        elif key == "load":
+            game.load = args[0]
         elif key == "side2":
             game.side2 = args[0]
         elif key == "sha1":
@@ -171,6 +178,8 @@ def read_game(folder, machine=None):
             game.patches.append(read_patch(args, where))
         else:
             raise GameFileError(f"{where}: unknown key {key}")
-    if game.cas is None:
-        raise GameFileError(f"{path}: needs a cas line")
+    if game.tape is None:
+        raise GameFileError(f"{path}: needs a cas or tsx line")
+    if game.side2 and os.path.splitext(game.side2)[1].lower() != os.path.splitext(game.tape)[1].lower():
+        raise GameFileError(f"{path}: side2 takes a file of side 1's format")
     return game

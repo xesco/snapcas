@@ -342,15 +342,15 @@ def apply_patch(patch, data, place):
     data[patch.offset:end] = patch.new
 
 
-def scan_snapshot(state, pages, side1, side2, page, slots, tape=True, patch=True):
+def scan_snapshot(state, pages, side1, side2, page, slots, with_tape=True, patch=True, blocks=((), ())):
     """Patches the scan's findings in the RAM pages, for the entries at page's
     E1h, and returns scan.txt's text, with the findings in the unread blocks:
-    side 1 from the tape position, and side 2 (DESIGN.md, Scan). Without tape,
-    it looks only for fixed slot values, and without patch, it patches only
-    those."""
+    side 1 from the tape position, and side 2 (DESIGN.md, Scan), at their
+    offsets in the tape files of blocks. Without with_tape, it looks only for
+    fixed slot values, and without patch, it patches only those."""
     ram = []
     for p in pages:
-        findings = patches.find(p.data, patches.Context(page, slots, tape))
+        findings = patches.find(p.data, patches.Context(page, slots, with_tape))
         patches.patch(p.data, [f for f in findings if patch or f.what == patches.slots.SLOT_VALUE])
         if p is selected_page(state, pages, p.page):
             place = f"page{p.page}"
@@ -358,14 +358,20 @@ def scan_snapshot(state, pages, side1, side2, page, slots, tape=True, patch=True
             place = "ram " + "-".join("x" if v is None else str(v) for v in (p.ps, p.ss, p.page, p.seg))
         ram.append((place, findings))
     unread_blocks = []
-    if tape:
+    if with_tape:
         # Without the tape service, no block is read after the snapshot.
         unread = num(state, "tapepos")
         context = patches.Context(page, slots)
-        unread_blocks = [("side1", [f for f in patches.find(side1, context) if f.offset >= unread]),
-                         ("side2", patches.find(side2, context))]
+        found = [[f for f in patches.find(side1, context) if f.offset >= unread], patches.find(side2, context)]
+        # A patch line's offset is an offset in the tape file (DESIGN.md, Tape
+        # files): a CAS file's offsets are the tape service's.
+        for side, side_blocks in zip(found, blocks):
+            for f in side:
+                f.offset = tape.file_offset(side_blocks, f.offset)
+        unread_blocks = [(place, [f for f in side if f.offset is not None])
+                         for place, side in zip(("side1", "side2"), found)]
     text = patches.report(ram, unread_blocks)
-    if not tape:
+    if not with_tape:
         text = "# Without the tape service, the scan looks only for fixed slot values.\n" + text
     elif not patch:
         text = "# The tape service has no part in page 3, so only fixed slot values are patched.\n" + text
@@ -483,32 +489,51 @@ def image_header(snap, state, records, writes, flags, page, borrowed, tail_addre
     return bytes(header)
 
 
+def check_unread(state, blocks, names, service_no):
+    """Stops when a non-standard block follows the snapshot: the game reads it
+    with its own loader, which the tape service cannot serve, unless the game
+    file has service no (DESIGN.md, Tape files)."""
+    if service_no or not any(not b.standard and b.data for side in blocks for b in side):
+        return
+    if "tapetime" not in state:
+        raise BuildError("the snapshot has no tapetime: capture the game again")
+    seconds, side = float(state["tapetime"]), int(state["tapeside"])
+    late = [(names[0], b) for b in tape.unread(blocks[0], seconds if side == 1 else float("inf"))]
+    late += [(names[1], b) for b in tape.unread(blocks[1], seconds if side == 2 else -1)]
+    if late:
+        name, b = late[0]
+        raise BuildError(f"{name}: the non-standard block at {b.offset:X}h, {b.start:.1f} seconds into "
+                         "the tape, comes after the snapshot, and the tape service cannot serve it. "
+                         "The game file needs service no if the game never reads it")
+
+
 def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=False, wanted_page=None,
-          t0_mode=False, names=("side1.cas", "side2.cas")):
+          t0_mode=False, names=("side1.cas", "side2.cas"), service_no=False):
     """Returns (header and tables, the records' data, a report, scan.txt's
     text). side1 and side2 are the tape files' bytes, and names their files'
-    names, patch_lines the game file's patches, and rom_keep keeps T0 from
-    replacing the ROM."""
+    names, patch_lines the game file's patches, rom_keep keeps T0 from
+    replacing the ROM, and service_no is the game file's service no."""
     state = read_state(snap)
     patch_lines = list(patch_lines) + patches.slots.capture_patches(snap)
     slots = patches.slots.read_slots(snap)
     side1, side2 = patch_sides(patch_lines, side1, side2)
     # The tape service's tapes of the patched files (DESIGN.md, Tape files).
-    side1 = tape.service(tape.read(names[0], side1)) if side1 else b""
-    side2 = tape.service(tape.read(names[1], side2)) if side2 else b""
+    blocks = (tape.read(names[0], side1) if side1 else [], tape.read(names[1], side2) if side2 else [])
+    check_unread(state, blocks, names, service_no)
+    side1, side2 = tape.service(blocks[0]), tape.service(blocks[1])
     parts = read_service(service_path)
     tail = parts[0]
     pages = read_pages(snap)
     patch_pages(patch_lines, state, pages)
 
     if state["service"] != "1":
-        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, tape=False)
+        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, with_tape=False)
     page, t0_mode = service_mode(state, pages, len(parts[2]), wanted_page, t0_mode)
     if state["service"] == "1" and t0_mode:
-        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, patch=False)
+        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, patch=False, blocks=blocks)
     elif state["service"] == "1":
         parts = read_service(service_path, page)
-        scanned = scan_snapshot(state, pages, side1, side2, page, slots)
+        scanned = scan_snapshot(state, pages, side1, side2, page, slots, blocks=blocks)
     tail_address = place_tail(state, pages, tail)
     service = []
     if state["service"] == "1":
@@ -533,7 +558,7 @@ def read_tapes(game, cas_dir):
     only the dumps that it was made for, so with patch lines the CAS files
     must match the game file's sha1 lines."""
     side2 = b""
-    with open(os.path.join(cas_dir, game.cas), "rb") as f:
+    with open(os.path.join(cas_dir, game.tape), "rb") as f:
         side1 = f.read()
     if game.side2:
         with open(os.path.join(cas_dir, game.side2), "rb") as f:
@@ -561,7 +586,7 @@ def main():
         side1, side2 = read_tapes(game, args.cas)
         header, data, report, scanned = build(os.path.join(out, "snap"), args.service, side1, side2,
                                      game.patches, game.rom_keep, game.service_page, game.service_t0,
-                                     (game.cas, game.side2 or ""))
+                                     (game.tape, game.side2 or ""), game.service_no)
     except (OSError, gamefile.GameFileError, BuildError, tape.TapeError) as e:
         print(f"build.py: {e}", file=sys.stderr)
         return 1

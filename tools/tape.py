@@ -98,3 +98,24 @@ def needed_end(tape):
             end = stop
         seen.add(body)
     return end
+
+
+def file_offset(blocks, offset):
+    """The offset in the tape file of a byte at offset in the tape service's
+    tape of the blocks, or None for a byte of a header or of the padding."""
+    at = 0
+    for block in blocks:
+        if block.standard:
+            start = at + (-at % 8) + 8
+            if start <= offset < start + len(block.data):
+                return block.offset + offset - start
+            at = start + len(block.data)
+    return None
+
+
+def unread(blocks, seconds):
+    """The non-standard blocks that hold bytes and end after seconds into
+    the tape: the game reads them after the snapshot with its own loader, which
+    the tape service cannot serve (DESIGN.md, Tape files). A block counts as
+    read when the player has passed its end, with 0.1 seconds to spare."""
+    return [b for b in blocks if not b.standard and b.data and b.end > seconds + 0.1]

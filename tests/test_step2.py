@@ -29,7 +29,7 @@ GAMES = {
 NAMES = ([r for r in "af bc de hl af2 bc2 de2 hl2 ix iy sp pc i im iff a8 ppic".split()]
          + [f"sub{n}" for n in range(4)] + ["fc", "fd", "fe", "ff"]
          + [f"psg{n}" for n in range(16)] + ["psgsel", "vramptr", "vramwrite",
-                                             "tapepos", "service"])
+                                             "tapepos", "service", "tapetime", "tapeside"])
 MSX1_VDP = [f"vdp{n}" for n in range(8)]
 V9938 = ([f"vdp{n}" for n in range(24)] + [f"vdp{n}" for n in range(32, 46)]
          + [f"pal{n}" for n in range(16)])

@@ -493,6 +493,9 @@ proc take_snapshot {{pc {}}} {
     }
     lappend state "psgsel [hex 2 $::st(psgsel)]"
     lappend state "tapepos [hex 6 $::st(pos)]" "service $::st(service)"
+    # The player's position and side, for the non-standard blocks that the
+    # game has read by its own loader (DESIGN.md, Tape files).
+    lappend state "tapetime [format %.2f [cassetteplayer getpos]]" "tapeside [expr {$::st(side2in) ? 2 : 1}]"
 
     # The pages selected at the snapshot count as selected during the load.
     note_selection $a8

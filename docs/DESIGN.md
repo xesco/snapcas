@@ -182,7 +182,7 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 | `cas` | The CAS file of side 1, in the `--tapes` folder. A game file has `cas` or `tsx` | | `game.txt` |
 | `tsx` | The TSX file of side 1, in the `--tapes` folder ([Tape files](#tape-files)) | | `game.txt` |
 | `side2` | The file of side 2, in side 1's format | None | `game.txt` |
-| `load` | The load command, for a tape whose first block is not standard ([Tape files](#tape-files)) | From the first block's type | `game.txt` |
+| `load` | The load command, for a tape whose first block is not standard, quoted: `load 'RUN"CAS:"'` ([Tape files](#tape-files)) | From the first block's type | `game.txt` |
 | `sha1` | The SHA-1 of `cas`, then that of `side2` | None | `game.txt` |
 | `name` | `<GAME>`, up to 8 letters and digits | The folder name in upper case, cut to 8 letters and digits | `game.txt` |
 | `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None | `game.txt` |
@@ -562,6 +562,7 @@ selects.
 | `vramwrite` | `VRAM access status`: 1 after a write setup, 0 after a read setup |
 | `psg0` to `psg15`, `psgsel` | `PSG regs`, and the port A0h watchpoint |
 | `tapepos`, `service` | The tape position in side 1, and 1 when the game gets the tape service |
+| `tapetime`, `tapeside` | The player's position in seconds and its side, 1 or 2, for the non-standard blocks that the game has read ([Tape files](#tape-files)) |
 
 ## Build
 

@@ -45,14 +45,26 @@ def key_tcl(kind, value):
     return f"type [binary format H* {value.encode('latin-1').hex()}]"
 
 
+def load_command(game, data):
+    """The load command: the game file's load line, or else the type of the
+    first block of the tape file's bytes, which must be a standard block then
+    (DESIGN.md, Tape files). None when neither gives one."""
+    if game.load:
+        return game.load
+    blocks = tape.read(game.tape, data)
+    if blocks and not blocks[0].standard:
+        return None
+    return tape.load_command(tape.service(blocks))
+
+
 def settings(game, machine, cas_path, data, snap, side2_path=None, side2=b""):
     """The Tcl settings. data and side2 are the tape files' bytes, of which
     the capture uses the tape service's tapes (DESIGN.md, Tape files)."""
     keys = [(t, key_tcl(kind, value)) for t, kind, value in game.keys]
     tries = ([game.continue_key] if game.continue_key else []) + ["space", "return"]
-    data = tape.service(tape.read(game.cas, data))
+    command = load_command(game, data)
+    data = tape.service(tape.read(game.tape, data))
     side2 = tape.service(tape.read(game.side2, side2)) if game.side2 else b""
-    command = tape.load_command(data)
     s = {
         "snap": msx.tcl_word(snap),
         "boot": tcl_list("{" + msx.tcl_word(text) + " " + msx.tcl_word(msx.press(key)) + "}"
@@ -92,7 +104,7 @@ def capture_once(game, machine, cas_path, data, side2, snap, procedures, found):
     os.makedirs(snap)
     if found or any(patch.page == "side1" for patch in game.patches):
         # The tape that the capture loads, with the side1 patches.
-        cas_path = os.path.join(snap, "side1" + os.path.splitext(game.cas)[1].lower())
+        cas_path = os.path.join(snap, "side1" + os.path.splitext(game.tape)[1].lower())
         with open(cas_path, "wb") as f:
             f.write(data)
     side2_path = None
@@ -133,7 +145,7 @@ def main():
     except (OSError, gamefile.GameFileError, msx.MachineError) as e:
         print(f"capture.py: {e}", file=sys.stderr)
         return 1
-    cas_path = os.path.abspath(os.path.join(args.cas, game.cas))
+    cas_path = os.path.abspath(os.path.join(args.cas, game.tape))
     try:
         data, side2 = (bytearray(d) for d in build.read_tapes(game, args.cas))
         for patch in game.patches:
@@ -147,11 +159,16 @@ def main():
         return 1
     data, side2 = bytes(data), bytes(side2)
     try:
-        command = tape.load_command(tape.service(tape.read(game.cas, data)))
+        command = load_command(game, data)
+        first = tape.read(game.tape, data)[:1]
         if game.side2:
             tape.read(game.side2, side2)
     except tape.TapeError as e:
         print(f"capture.py: {e}", file=sys.stderr)
+        return 1
+    if command is None and first and not first[0].standard:
+        print(f"capture.py: {cas_path}: the first block is a non-standard block, so the game "
+              "file needs a load line", file=sys.stderr)
         return 1
     if command is None:
         print(f"capture.py: {cas_path}: the first block is not a binary file, a BASIC "

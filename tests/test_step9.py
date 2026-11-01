@@ -153,7 +153,7 @@ def inputs_hash(machine, name, tools):
         game = gamefile.read_game(folder, machine)
     except gamefile.GameFileError:
         return h.hexdigest()
-    for cas in (game.cas, game.side2):
+    for cas in (game.tape, game.side2):
         if cas and os.path.isfile(os.path.join(COLLECTION_DIR, cas)):
             file_hash(h, os.path.join(COLLECTION_DIR, cas))
     for m in sorted({machine, game.capture or machine}):
