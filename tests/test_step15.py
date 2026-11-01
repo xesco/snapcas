@@ -177,6 +177,8 @@ GAMES = {
     "s15-4x4offro": (["tsx 4X4OFFRO.TSX"], TSX_DIR),
     "s15-lazerbyk": (["tsx LAZERBYK.TSX"], TSX_DIR),
     "s15-edgy": (["cas 035-EDGY.CAS"], COLLECTION),
+    # Standard blocks recorded at about 1660 baud, between the two speeds.
+    "s15-picopico": (["tsx PICOPICO.TSX"], TSX_DIR),
     # The "I" of "Instructions", at offset 3EAh of the file, which the game
     # loads to 82E0h.
     "s15-patched": (["tsx LAZERBYK.TSX", "sha1 d6f9fd9dd69bdbd2cb9c426240fb6053d6f6af53",
@@ -184,7 +186,8 @@ GAMES = {
 }
 
 
-@unittest.skipUnless(all(os.path.isfile(os.path.join(TSX_DIR, n)) for n in ("LICENCE.TSX", "4X4OFFRO.TSX", "LAZERBYK.TSX"))
+@unittest.skipUnless(all(os.path.isfile(os.path.join(TSX_DIR, n))
+                         for n in ("LICENCE.TSX", "4X4OFFRO.TSX", "LAZERBYK.TSX", "PICOPICO.TSX"))
                      and os.path.isfile(os.path.join(COLLECTION, "035-EDGY.CAS")), "CAS_DIR lacks the TSX games' files")
 class Games(unittest.TestCase):
     @classmethod
@@ -206,6 +209,13 @@ class Games(unittest.TestCase):
                 with open(os.path.join(TSX_DIR, GAMES[name][0][0].split()[1]), "rb") as f:
                     blocks = tape.read("GAME.TSX", f.read())
                 self.assertEqual(tape.unread(blocks, float(state["tapetime"])), [])
+
+    def test_tapion_reads_standard_blocks_recorded_between_the_speeds(self):
+        self.assertTrue(self.results["s15-picopico"][1].startswith("point 1: pass"), self.results["s15-picopico"][1])
+        with open(os.path.join(TSX_DIR, "PICOPICO.TSX"), "rb") as f:
+            service = tape.service(tape.read("PICOPICO.TSX", f.read()))
+        state = build.read_state(self.snap("s15-picopico"))
+        self.assertGreaterEqual(build.num(state, "tapepos"), tape.needed_end(service) - 7)
 
     def test_a_patch_line_patches_the_tsx_file_that_the_capture_loads(self):
         self.assertTrue(self.results["s15-patched"][1].startswith("point 1: pass"), self.results["s15-patched"][1])

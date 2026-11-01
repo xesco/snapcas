@@ -317,6 +317,7 @@ length of the tape:
 | Test | What it proves |
 |---|---|
 | A TSX file with only standard blocks, whose CAS file is in the collection | The two files load the same game: its RAM page is the same, though the TSX file keeps the original tape's timing |
+| A TSX file of standard blocks recorded at about 1660 baud | TAPION reads a tape recorded between 1200 and 2400 baud |
 | Two single-load TSX files with turbo blocks | A turbo loader loads its whole tape in the capture, and the image passes the check |
 | A tape of TSX bytes whose first block is a turbo block, with and without `load` | The load command comes from the game file, and without it the capture stops |
 | A tape of TSX bytes with a turbo block after the snapshot's time | The build stops with an error that names the block, unless the game file has `service no` |

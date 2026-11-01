@@ -1361,11 +1361,11 @@ or more stop bits 1 and bit 0 first at 0Fh, a 1 bit's pulse half a 0 bit's, and 
 bit's pulse from that of 2400 baud less 15% to that of 1200 baud plus 15%. TAPION
 measures the header's tone to set its timing, so it reads the tapes that were
 recorded between the two speeds, and TAPIN waits for each start bit, so it reads
-After Burner's side B, whose blocks have 3 stop bits. *To verify:* that TAPION reads
-a block recorded between 1200 and 2400 baud, which part 3 of step 15 tests in the
-capture. Any other block that holds bytes is a non-standard block. Of the 2354 TSX
-files above, 2027 hold only standard blocks, and their bytes are those of the
-collection's CAS files for the 792 tapes that both hold.
+After Burner's side B, whose blocks have 3 stop bits. Pico Pico's tape, recorded at
+about 1660 baud, loads through TAPION to its end in the capture. Any other block
+that holds bytes is a non-standard block. Of the 2354 TSX files above, 2027 hold
+only standard blocks, and their bytes are those of the collection's CAS files for
+the 792 tapes that both hold.
 
 ### Key names
 
