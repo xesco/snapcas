@@ -223,24 +223,26 @@ machine's RAM and cartridges are:
 
 The repository ships a game file for each game of File-Hunter's MSX CAS collection
 in `games/`, in a folder named after the short name of its side 1 CAS file, such as
-`games/ABADIA/` for `ABADIA.CAS`. The folder name then also names the image. Each
-game file starts with two comments: the game's File-Hunter name, and the link to its
-zip in File-Hunter's MSX1 CAS folder, which a few games lack because the folder does
-not list them. The game file then has the `sha1` of its dumps, which finds a dump
-whatever its file name. A side B, a later tape of a set or an expansion, which the
-collection's `SIDES.TXT` lists, needs a tape before it, so it has no game file of
-its own. A dump that File-Hunter marks `[b]`, a bad dump, has no game file either,
-and a game with a better dump uses that one. Its `side2` lines pair the Side A and
-Side B files of a game, its `continue` lines come from the key that the capture
-reports, its `service no` lines from games played to their end, and its `patch`
-lines from `check.py` and from traces of failed loads. The lines that hold only on
-one machine are in the game's machine's game file ([Game file](#game-file)): 36
-games have one for the Sanyo PHC-28S, `advanced-phc28s.txt`, 68 for the Philips
-VG-8020, `basic-vg8020.txt`, 46 for the Philips NMS 8250, `basic-nms8250.txt`, 9 for
-the Sony HB-F700P, `advanced-hbf700p.txt`, and 51 for the PicoVerse-like
-`basic/picoverse`, `basic-picoverse.txt`. The other game files hold on any machine.
-It also ships these machine files, each checked with `check.py` and a single-load
-game:
+`games/ABADIA/` for `ABADIA.CAS`. The folder name then also names the image. A
+compilation's programs are the exception: each has a game file of its own, in a
+folder named after the program's game
+([A game later on the tape](#a-game-later-on-the-tape)). Each game file starts with
+two comments: the game's File-Hunter name, and the link to its zip in File-Hunter's
+MSX1 CAS folder, which a few games lack because the folder does not list them. The
+game file then has the `sha1` of its dumps, which finds a dump whatever its file
+name. A side B, a later tape of a set or an expansion, which the collection's
+`SIDES.TXT` lists, needs a tape before it, so it has no game file of its own. A dump
+that File-Hunter marks `[b]`, a bad dump, has no game file either, and a game with a
+better dump uses that one. Its `side2` lines pair the Side A and Side B files of a
+game, its `continue` lines come from the key that the capture reports, its
+`service no` lines from games played to their end, and its `patch` lines from
+`check.py` and from traces of failed loads. The lines that hold only on one machine
+are in the game's machine's game file ([Game file](#game-file)): 36 games have one
+for the Sanyo PHC-28S, `advanced-phc28s.txt`, 68 for the Philips VG-8020,
+`basic-vg8020.txt`, 46 for the Philips NMS 8250, `basic-nms8250.txt`, 9 for the Sony
+HB-F700P, `advanced-hbf700p.txt`, and 51 for the PicoVerse-like `basic/picoverse`,
+`basic-picoverse.txt`. The other game files hold on any machine. It also ships these
+machine files, each checked with `check.py` and a single-load game:
 
 | File | Configuration |
 |---|---|
@@ -337,6 +339,26 @@ file's `start` line names the later program's first file, and the load starts th
    at that block's start.
 4. The load command comes from the named file's type, unless the game file has
    `load`. The capture stops with an error when side 1 has no file with that name.
+
+The shipped files give each program of a compilation a game file of its own, so that
+each image is named after its game and not after the tape, which holds more than one
+game:
+
+| Program | Its game file |
+|---|---|
+| The tape's first program | `cas` and `sha1`, without `start`. A magazine's intro belongs to it, because the intro loads that program itself |
+| A later program | `cas`, `sha1` and `start` |
+| A program that File-Hunter also has as a dump of its own | None: the game file of that dump is the game's, as for Exerion on Engesoft's MSXK-06 |
+
+Each program's folder is named after its game, as `games/ATHLETIC/` is for Athletic
+Land, the second program on Engesoft's MSXK-06 side A. The game file's first comment
+names the game, the compilation and the program's place on it, and the second
+comment links the compilation's zip. A loader's file name, such as ATLET, seldom
+gives the title, so the title comes from a list of the tape's contents. Each program
+has its own machine's game files, because each program has its own loader. Athletic
+Land's capture runs without the disk system only on the Sanyo PHC-28S, and Kung-Fu
+Master's, before it on the tape, on the PHC-28S and on the Philips VG-8020. A
+program that is not a game also has a game file, as De Demo's programs have.
 
 ## Capture
 
@@ -1139,6 +1161,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | Decision | Reason |
 |---|---|
 | One reader for each tape format, and a format-neutral tape model for the rest of the code | A TSX file holds the turbo blocks that a CAS file cannot, so converting it to CAS would lose the games that need TSX. Teaching each tool both formats would mix them in every tool, while the model keeps each format in one file ([Tape files](#tape-files)) |
+| A game file for each program of a compilation, named after its game | A player looks for a game by its name, and an image named after the tape holds only the tape's first program. One game file for the tape, with a line for each program, would keep the tape's `cas` and `sha1` lines in one place, but it needs game files with sections and changes to every tool and to the collection's cache, to save two lines for each program ([A game later on the tape](#a-game-later-on-the-tape)) |
 | Restore a snapshot | The game's loader runs once, in `openMSX`, so its slot code, stubs and checks need no changes on the real machine |
 | Capture on a copy of the user's machine, with the disk system's hooks and work area removed | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
 | Snapshot at an interrupt's entry | The CPU's state is complete, interrupts are off, and the bytes below the stack pointer are free for the tail |
