@@ -1,4 +1,7 @@
 # Made in Spain - 5 Estrellas (1985)(Zigurat Software)(es)[RUN'CAS-']
 # https://download.file-hunter.com/Games/MSX1/CAS/Made%20in%20Spain%20-%205%20Estrellas%20(1985)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
+# Not a game: the sound presentation of Zigurat's 5 Estrellas compilation. It
+# shows its title and waits for a key, then plays a 42 KB recording through
+# the key click output, CHGSND, and repeats it until a reset.
 cas MADE-IN.CAS
 sha1 0a207531745d3936267514a77988fbf31a488f9f
