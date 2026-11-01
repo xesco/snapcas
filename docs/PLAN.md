@@ -273,6 +273,7 @@ place of point 1's line:
 | Test | What it proves |
 |---|---|
 | Gauntlet's check on `advanced/phc28s` | The service's own writes to the part, during the game's tape calls, do not count |
+| 7 Card Stud's check on `advanced/phc28s` | The game's writes after the service has read the tape to its end do not count |
 | The collection on `advanced/phc28s` and `basic/vg8020` | The games whose first 60 seconds write the part are listed, for a game file's `service t0` |
 
 On those two machines, the guard listed 53 game files. Most of them were not games

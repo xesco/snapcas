@@ -67,13 +67,30 @@ proc point2 {} {
 # register and, in a mapper, its segment in register FFh. The service's code in
 # page 0 also runs without a call through the part, when the game calls T0's
 # jump table itself, so a write from page 0 does not count while page 0 selects
-# DOS's mapper with another segment than the snapshot's.
+# DOS's mapper with another segment than the snapshot's. A write after the
+# service has read the tape to its end does not count.
 set ::part_writes {}
 proc in_service_segment {} {
     set ps [expr {$::dosslot & 3}]
     if {([debug read ioports 0xA8] & 3) != $ps} { return 0 }
     if {($::dosslot & 0x80) && ([subslot_reg $ps] & 3) != (($::dosslot >> 2) & 3)} { return 0 }
     expr {[debug read {MSX Memory Mapper I/O} 0] != [scan $::K(fc) %x]}
+}
+# Whether the service has read the tape to its end: at most 7 bytes, a block's
+# padding, between C_POS and C_TOTAL in the code segment, whose number E_CODE
+# holds, 2 bytes before E_INSIDE (src/service.inc, src/service.asm). The code
+# segment is read in page 1 of DOS's mapper, through port FDh.
+proc tape_read {} {
+    set code [debug read memory [expr {[lindex $::C(part) 2] - 2}]]
+    set ps [expr {$::dosslot & 3}]
+    set ss [expr {$::dosslot & 0x80 ? ($::dosslot >> 2) & 3 : "x"}]
+    set fd [debug read {MSX Memory Mapper I/O} 1]
+    debug write ioports 0xFD $code
+    binary scan [with_slot $ps $ss 1 { debug read_block memory 0x4006 9 }] cu* b
+    debug write ioports 0xFD $fd
+    set pos [expr {[lindex $b 0] | ([lindex $b 1] << 8) | ([lindex $b 2] << 16)}]
+    set total [expr {[lindex $b 6] | ([lindex $b 7] << 8) | ([lindex $b 8] << 16)}]
+    expr {$total - $pos <= 7}
 }
 proc watch_part {} {
     if {[llength $::C(part)] == 0} return
@@ -88,6 +105,7 @@ proc part_write {} {
     if {([debug read ioports 0xA8] >> 6) != ($::C(a8) >> 6)} return
     if {$segment >= 0 && [debug read {MSX Memory Mapper I/O} 3] != $segment} return
     if {$pc < 0x4000 && [in_service_segment]} return
+    if {[tape_read]} return
     set address [format %04X $::wp_last_address]
     if {![dict exists $::part_writes $address] && [dict size $::part_writes] < 40} {
         dict set ::part_writes $address [format %04X $pc]

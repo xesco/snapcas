@@ -1031,7 +1031,12 @@ that disk and the `boot` keys, and writes its report to `check/report.txt`:
    service sets them on each call before it reads them. A watchpoint on the part's
    other addresses notes each write that the game makes there: from code outside the
    part, while `E_INSIDE` is 0, so outside a call of the service, and while the slot
-   register and mapper register FFh select the snapshot's page 3. The report then
+   register and mapper register FFh select the snapshot's page 3. A write after the
+   service has read the tape to its end does not count either, because nothing calls
+   the service then: the check reads the service's tape position, `C_POS`, and the
+   tape's end, `C_TOTAL`, from the code segment that `E_CODE` names, and the tape is
+   read when at most 7 bytes are left, a block's padding. 7 Card Stud reads its last
+   block through the service and then keeps its variables at FD00h. The report then
    adds `point 2: fail` and the writes, or else `point 2: pass`, and a failed point
    2 fails the check. Altered Beast, after loading its side B, writes its variables
    over the service's entries at FCE1h, and its next call of the tape hangs, so a

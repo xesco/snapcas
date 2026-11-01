@@ -1,0 +1,5 @@
+# Titanic (1988)(Topo Soft)(es)(Side B)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Titanic%20(1988)(Topo%20Soft)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
+# Part 2. Side A, part 1, is in games/TITANIC.
+cas TITANICB.CAS
+sha1 8fb00ef76b712f93351cf0e5e8a373c2c312faca
