@@ -15,7 +15,7 @@ files from two folders that the user names, because `snapcas` cannot ship them.
 | Assembler | sjasmplus 1.24.0, downloaded and built by the Makefile, checked by SHA-256 |
 | Emulator | `openMSX` 22.0, on the path, with the system ROMs of the test machines and of the `msxdos2` cartridge |
 | Python | Python 3, standard library only |
-| `CAS_DIR` | Make variable: the folder of the user's CAS files, by default `tapes/`, which git ignores |
+| `CAS_DIR` | Make variable: the folder of the user's tape files, by default `tapes/`, which git ignores. Its `tsx/` folder holds the TSX files of step 15 |
 | Nextor | `NEXTOR.SYS` 2.11 and `COMMAND2.COM` 2.44 from Nextor 2.1.0's `tools.zip`, downloaded by the Makefile into `out/dl/nextor/`, checked by SHA-256 |
 | `DOS_DIR` | Make variable: a folder with `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`), by default `dos/`, which git ignores |
 

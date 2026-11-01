@@ -9,12 +9,12 @@
 #   ::S(boot)     the boot steps, for boot (tools/msx.py)
 #   ::S(afterboot) what follows them: wait_ok, after BASIC typed at DOS's prompt
 #                 on a machine that boots DOS from its own disk
-#   ::S(cas)      the CAS file of side 1
+#   ::S(tape)     the tape file of side 1, CAS or TSX
 #   ::S(cmd)      the load command; ::S(cload) is 1 for CLOAD, then RUN
 #   ::S(headers)  the offsets of side 1's headers
 #   ::S(needed)   the end of the last block that the load must read
 #   ::S(side2)    1 when the game file has side2
-#   ::S(side2cas) side 2's CAS file, or "" without a side 2
+#   ::S(side2tape) side 2's tape file, or "" without a side 2
 #   ::S(s1len)    side 1's length, padded to a multiple of 8: side 2's start
 #   ::S(headers2) the positions of side 2's headers, from side 1's start
 #   ::S(nosvc)    1 when the game file has service no
@@ -112,8 +112,8 @@ proc on_tapion {} {
     incr ::st(tapion)
     # A TAPION call at side 1's end, with a side 2: the player turns the tape
     # over, so side 2 goes in, at its start.
-    if {$::S(side2cas) ne "" && !$::st(side2in) && [at_end]} {
-        cassetteplayer insert $::S(side2cas)
+    if {$::S(side2tape) ne "" && !$::st(side2in) && [at_end]} {
+        cassetteplayer insert $::S(side2tape)
         set ::st(side2in) 1
         set ::st(pos) $::S(s1len)
         logev "side 2 inserted"
@@ -129,9 +129,9 @@ proc on_tapin {} { incr ::st(tapin); incr ::st(pos) }
 # side 2 goes in, and the read goes on after side 2's first header. A motor
 # that a game only switches, with no read, does not turn the tape over.
 proc turn_over {} {
-    if {$::S(side2cas) eq "" || $::st(side2in) || ![motor_on] || ![at_end]} { return }
+    if {$::S(side2tape) eq "" || $::st(side2in) || ![motor_on] || ![at_end]} { return }
     if {![in_tape_code [reg PC]]} { return }
-    cassetteplayer insert $::S(side2cas)
+    cassetteplayer insert $::S(side2tape)
     set ::st(side2in) 1
     set ::st(pos) [expr {[lindex $::S(headers2) 0] + 8}]
     logev "side 2 inserted"
@@ -209,7 +209,7 @@ proc step3 {} {
     debug set_bp $reset {[rom0]} {safe on_reset}
     debug set_watchpoint write_io 0xA8 {} {safe {on_a8 $::wp_last_value}}
     debug set_watchpoint write_mem 0xFFFF {} {safe {on_ffff $::wp_last_value}}
-    cassetteplayer insert $::S(cas)
+    cassetteplayer insert $::S(tape)
     set ::t0 [now]
     set ::restarts 0
     type "$::S(cmd)\r"
@@ -218,7 +218,7 @@ proc step3 {} {
     if {$::S(snapat) ne ""} {
         later $::S(snapat) step6
         if {$::S(cload)} { set ::since ""; run_after_cload }
-        if {$::S(side2cas) ne ""} { watch_turn }
+        if {$::S(side2tape) ne ""} { watch_turn }
     } else {
         start_wait
     }

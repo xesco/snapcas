@@ -6,7 +6,7 @@
 #   make try    start openMSX as advanced/phc28s, with SNAPCAS.COM and the images
 #               in out/try/ on its disk: MACHINE= and FILES= change them
 #
-# The tests read the CAS files from CAS_DIR, by default tapes/, and MSX-DOS's
+# The tests read the tape files from CAS_DIR, by default tapes/, and MSX-DOS's
 # system files from DOS_DIR, by default dos/, with msxdos1/ and msxdos2/: git
 # ignores both, because snapcas cannot ship them. The tests that need them are
 # skipped when the folders do not exist.
@@ -40,7 +40,8 @@ EMU_HOME  := $(OUT)/openmsx-home
 help:
 	@echo "make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN"
 	@echo "make test   run the tests in openMSX: CAS_DIR=, by default tapes/, holds the"
-	@echo "            CAS files, and DOS_DIR=, by default dos/, MSX-DOS's system files"
+	@echo "            tape files, the TSX files in tsx/, and DOS_DIR=, by default dos/,"
+	@echo "            MSX-DOS's system files"
 	@echo "make collection  capture, build and check every game file of games/ on"
 	@echo "            COLLECTION_MACHINES, by default advanced/phc28s and basic/vg8020,"
 	@echo "            with the CAS files of COLLECTION_DIR, by default CAS_DIR/collection,"

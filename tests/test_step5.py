@@ -159,7 +159,7 @@ def run(game):
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, "game.txt"), "w") as f:
         f.write(GAMES[game])
-    for step, args in (("capture.py", ["--cas", CAS_DIR]), ("build.py", ["--cas", CAS_DIR])):
+    for step, args in (("capture.py", ["--tapes", CAS_DIR]), ("build.py", ["--tapes", CAS_DIR])):
         result = test_step4.tool(step, folder, MACHINE, *args)
         if result.returncode != 0:
             return f"{step}: {result.stderr.strip()}", {}

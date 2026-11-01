@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Write a game's image from its snapshot (docs/DESIGN.md, Build).
 
-Usage: build.py <game> <machine> --cas <dir> [--service <file>]
+Usage: build.py <game> <machine> --tapes <dir> [--service <file>]
 
 <game> and <machine> are as for capture.py. The image goes to
 out/<machine>/<game>/<GAME>.SNP, with scan.txt beside it. --service names the
@@ -553,15 +553,15 @@ def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=Fal
     return header, data, report, scanned
 
 
-def read_tapes(game, cas_dir):
+def read_tapes(game, tapes_dir):
     """The bytes of side 1's and side 2's tape files, b"" without a side 2. A patch fits
     only the dumps that it was made for, so with patch lines the CAS files
     must match the game file's sha1 lines."""
     side2 = b""
-    with open(os.path.join(cas_dir, game.tape), "rb") as f:
+    with open(os.path.join(tapes_dir, game.tape), "rb") as f:
         side1 = f.read()
     if game.side2:
-        with open(os.path.join(cas_dir, game.side2), "rb") as f:
+        with open(os.path.join(tapes_dir, game.side2), "rb") as f:
             side2 = f.read()
     if game.patches:
         dumps = [side1] + ([side2] if game.side2 else [])
@@ -574,7 +574,7 @@ def main():
     parser = argparse.ArgumentParser(description="Write a game's image from its snapshot.")
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
     parser.add_argument("machine", help="a machine file's path below machines/, without .txt")
-    parser.add_argument("--cas", required=True, help="the folder that holds the CAS files")
+    parser.add_argument("--tapes", required=True, help="the folder that holds the tape files, CAS or TSX")
     parser.add_argument("--service", default=os.path.join(ROOT, "bin", "SERVICE.BIN"),
                         help="the SERVICE.BIN to use")
     args = parser.parse_args()
@@ -583,7 +583,7 @@ def main():
     try:
         game = gamefile.read_game(folder, args.machine)
         out = gamefile.out_folder(args.machine, folder)
-        side1, side2 = read_tapes(game, args.cas)
+        side1, side2 = read_tapes(game, args.tapes)
         header, data, report, scanned = build(os.path.join(out, "snap"), args.service, side1, side2,
                                      game.patches, game.rom_keep, game.service_page, game.service_t0,
                                      (game.tape, game.side2 or ""), game.service_no)

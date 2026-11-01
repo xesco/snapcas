@@ -73,7 +73,7 @@ def single_load(machine):
     with open(os.path.join(folder, "game.txt"), "w") as f:
         f.write(f"cas {SINGLE}\n")
     for step in ("capture.py", "build.py"):
-        result = test_step4.tool(step, folder, machine, "--cas", test_step4.CAS_DIR)
+        result = test_step4.tool(step, folder, machine, "--tapes", test_step4.CAS_DIR)
         if result.returncode != 0:
             return f"{step}: {result.stderr.strip()}"
     return test_step4.tool("check.py", folder, machine, "--dos", SHIPPED[machine]).stdout
@@ -101,7 +101,7 @@ class OneCommand(unittest.TestCase):
         os.makedirs(folder, exist_ok=True)
         with open(os.path.join(folder, "game.txt"), "w") as f:
             f.write(f"cas {SINGLE}\n")
-        result = test_step4.tool("snapcas.py", folder, "advanced/phc28s", "--cas", test_step4.CAS_DIR,
+        result = test_step4.tool("snapcas.py", folder, "advanced/phc28s", "--tapes", test_step4.CAS_DIR,
                                  "--dos", test_step4.NEXTOR)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("point 1: pass", result.stdout)
@@ -177,7 +177,7 @@ def collection_game(item):
     machine, name = item
     folder = os.path.join(GAMES, name)
     for step in ("capture.py", "build.py"):
-        result = test_step4.tool(step, folder, machine, "--cas", COLLECTION_DIR)
+        result = test_step4.tool(step, folder, machine, "--tapes", COLLECTION_DIR)
         if result.returncode != 0:
             return (result.stderr.strip().splitlines() or [f"{step} failed"])[-1]
     result = test_step4.tool("check.py", folder, machine, "--dos", SHIPPED[machine])

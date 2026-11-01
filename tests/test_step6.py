@@ -112,7 +112,7 @@ def scan_file(cas, prefix="scan-"):
     with open(os.path.join(folder, "game.txt"), "w") as f:
         f.write(f"cas {cas}\n" + (f"side2 {SIDE2[cas]}\n" if cas in SIDE2 else ""))
     for step in ("capture.py", "build.py"):
-        result = test_step4.tool(step, folder, MACHINE, "--cas", CAS_DIR)
+        result = test_step4.tool(step, folder, MACHINE, "--tapes", CAS_DIR)
         if result.returncode != 0:
             return f"{step}: {result.stderr.strip()}"
     with open(os.path.join(ROOT, "out", MACHINE, name, "scan.txt")) as f:
@@ -197,7 +197,7 @@ class WithoutAPartInPage3(unittest.TestCase):
             f.write(MOONWALKER)
         cls.error = None
         for step in ("capture.py", "build.py"):
-            result = test_step4.tool(step, folder, MACHINE, "--cas", CAS_DIR)
+            result = test_step4.tool(step, folder, MACHINE, "--tapes", CAS_DIR)
             if result.returncode != 0:
                 cls.error = f"{step}: {result.stderr.strip()}"
                 return
@@ -222,7 +222,7 @@ def capture_build_check(name, text, cas_dir):
     with open(os.path.join(folder, "game.txt"), "w") as f:
         f.write(text)
     for step in ("capture.py", "build.py"):
-        result = test_step4.tool(step, folder, MACHINE, "--cas", cas_dir)
+        result = test_step4.tool(step, folder, MACHINE, "--tapes", cas_dir)
         if result.returncode != 0:
             return f"{step}: {result.stderr.strip()}"
     return test_step4.tool("check.py", folder, MACHINE, "--dos", test_step4.NEXTOR).stdout

@@ -15,7 +15,7 @@ proc ramsearch_watch {value before} {
     if {$pc < 0xC000 || (($value ^ $before) & 0xC0) == 0} return
     set next [expr {($pc + 2) & 0xFFFF}]
     if {[read_with $value $next 4] eq [read_with $before $next 4]} return
-    set found [cas_find $::ramsearch]
+    set found [tape_find $::ramsearch]
     if {[llength $found]} {
         set f [open [file join $::S(snap) newpatch.txt] w]
         foreach place $found {

@@ -5,8 +5,8 @@
 # Step 3's part: the slot map, and the CAS files that a patch must occur in.
 proc slot_start {} {
     slot_map
-    set ::cas1 [read_binary $::S(cas)]
-    set ::cas2 [expr {$::S(side2cas) eq "" ? "" : [read_binary $::S(side2cas)]}]
+    set ::tape1 [read_binary $::S(tape)]
+    set ::tape2 [expr {$::S(side2tape) eq "" ? "" : [read_binary $::S(side2tape)]}]
 }
 
 # The slot map, at step 3: for each page, the primary slots that hold nothing
@@ -103,9 +103,9 @@ proc slot_code {value before} {
 }
 
 # Each place of bytes in the CAS files, as {side offset}.
-proc cas_find {bytes} {
+proc tape_find {bytes} {
     set found {}
-    foreach side {1 2} data [list $::cas1 $::cas2] {
+    foreach side {1 2} data [list $::tape1 $::tape2] {
         set i 0
         while {[set j [string first $bytes $data $i]] >= 0} {
             lappend found [list $side $j]
@@ -128,10 +128,10 @@ proc slot_watch {value before} {
         lassign $code address length
         # The code with the 8 bytes before it, or else after it, for a loader
         # that copies a routine without the bytes before it.
-        set found [cas_find [read_with $before [expr {$address - 8}] [expr {$length + 8}]]]
+        set found [tape_find [read_with $before [expr {$address - 8}] [expr {$length + 8}]]]
         set at 8
         if {[llength $found] != 1} {
-            set found [cas_find [read_with $before $address [expr {$length + 8}]]]
+            set found [tape_find [read_with $before $address [expr {$length + 8}]]]
             set at 0
         }
         if {[llength $found] == 1} {

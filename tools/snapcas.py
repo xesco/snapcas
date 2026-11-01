@@ -2,9 +2,9 @@
 """Make a game's snapcas image in one command: capture, build and, with --dos,
 check (docs/DESIGN.md, Files and commands).
 
-Usage: snapcas.py <game> <machine> --cas <dir> [--dos <dir>]
+Usage: snapcas.py <game> <machine> --tapes <dir> [--dos <dir>]
 
-<game>, <machine> and --cas are as for capture.py, and --dos as for check.py.
+<game>, <machine> and --tapes are as for capture.py, and --dos as for check.py.
 The image goes to out/<machine>/<game>/<GAME>.SNP. When a step fails and the
 game file names no capture machine, the steps run again on each capture
 variant of the machine, and the first that passes gives the capture line for
@@ -33,7 +33,7 @@ def steps(args, variant=None):
     """Captures, builds and, with --dos, checks the image, and returns the exit
     status of the first step that fails, or 0."""
     extra = ["--capture", variant] if variant else []
-    for name, options in (("capture.py", ["--cas", args.cas, *extra]), ("build.py", ["--cas", args.cas])):
+    for name, options in (("capture.py", ["--tapes", args.tapes, *extra]), ("build.py", ["--tapes", args.tapes])):
         status = step(name, args.game, args.machine, *options)
         if status != 0:
             return status
@@ -53,7 +53,7 @@ def main():
     parser = argparse.ArgumentParser(description="Make a game's snapcas image: capture, build and check.")
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
     parser.add_argument("machine", help="a machine file's path below machines/, without .txt")
-    parser.add_argument("--cas", required=True, help="the folder that holds the CAS files")
+    parser.add_argument("--tapes", required=True, help="the folder that holds the tape files, CAS or TSX")
     parser.add_argument("--dos", help="the folder that holds the DOS system files, to check the image in openMSX")
     args = parser.parse_args()
 

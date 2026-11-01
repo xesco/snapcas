@@ -57,7 +57,7 @@ def capture(game, folder=None):
             f.write("service no\n")
     result = subprocess.run(
         [sys.executable, "-I", os.path.join(ROOT, "tools", "capture.py"), games, machine,
-         "--cas", CAS_DIR], capture_output=True, text=True)
+         "--tapes", CAS_DIR], capture_output=True, text=True)
     snap = os.path.join(ROOT, "out", machine, folder_name(game), "snap")
     if folder and result.returncode == 0:
         shutil.rmtree(folder, ignore_errors=True)

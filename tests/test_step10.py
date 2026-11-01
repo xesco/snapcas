@@ -36,7 +36,7 @@ def game(key, name, machine, lines):
 
 def make(folder, machine):
     """snapcas.py on the game: capture, build and check."""
-    return test_step4.tool("snapcas.py", folder, machine, "--cas", COLLECTION,
+    return test_step4.tool("snapcas.py", folder, machine, "--tapes", COLLECTION,
                            "--dos", test_step4.MACHINES[machine][0])
 
 

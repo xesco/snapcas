@@ -3,9 +3,11 @@
 `snapcas` lets you play MSX tape games on your real MSX, from a disk instead of a
 tape.
 
-You give it a game's CAS file. A CAS file is a tape, saved as a file on your
-computer. `snapcas` turns it into a `.SNP` file. The `.SNP` file holds the game at
-the moment it is ready to play. You copy it to your MSX, and the game starts.
+You give it a game's tape file, a CAS file or a TSX file. Both are a tape, saved as
+a file on your computer. A TSX file also holds the fast loaders of some games, which
+a CAS file cannot. `snapcas` turns the tape file into a `.SNP` file. The `.SNP` file
+holds the game at the moment it is ready to play. You copy it to your MSX, and the
+game starts.
 
 ## What snapcas can do
 
@@ -17,14 +19,14 @@ the moment it is ready to play. You copy it to your MSX, and the game starts.
   example to load the next level. `snapcas` keeps the rest of the tape in the `.SNP`
   file. It stops and goes on where the game wants. It turns the tape over to side B
   by itself. You can also wind it back with a key ([Tape keys](#tape-keys)).
-- **Know 1,314 games.** The `games/` folder has a file for each game. The file tells
+- **Know 1,322 games.** The `games/` folder has a file for each game. The file tells
   `snapcas` how to make the game's `.SNP` file, and where to download the game.
 
 ## What you need
 
 - An MSX with a memory mapper and a disk system, such as MSX-DOS or Nextor.
 - A computer with Python 3 and the emulator `openMSX`.
-- The game's CAS file.
+- The game's CAS or TSX file.
 
 ## Get started
 
@@ -37,7 +39,7 @@ This example makes Gauntlet for a Sanyo PHC-28S.
 3. Make the `.SNP` file:
 
    ```
-   python3 tools/snapcas.py GAUNTLET advanced/phc28s --cas ~/tapes
+   python3 tools/snapcas.py GAUNTLET advanced/phc28s --tapes ~/tapes
    ```
 
    You get `out/advanced/phc28s/GAUNTLET/GAUNTLET.SNP`.

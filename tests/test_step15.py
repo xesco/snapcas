@@ -164,7 +164,7 @@ def restore(name, lines, tapes):
     with open(os.path.join(folder, "game.txt"), "w") as f:
         f.writelines(line + "\n" for line in lines)
     for step in ("capture.py", "build.py"):
-        result = test_step4.tool(step, folder, MACHINE, "--cas", tapes)
+        result = test_step4.tool(step, folder, MACHINE, "--tapes", tapes)
         if result.returncode != 0:
             return folder, f"{step}: {result.stderr.strip()}"
     return folder, test_step4.tool("check.py", folder, MACHINE, "--dos", test_step4.NEXTOR).stdout
@@ -177,6 +177,10 @@ GAMES = {
     "s15-4x4offro": (["tsx 4X4OFFRO.TSX"], TSX_DIR),
     "s15-lazerbyk": (["tsx LAZERBYK.TSX"], TSX_DIR),
     "s15-edgy": (["cas 035-EDGY.CAS"], COLLECTION),
+    # The "I" of "Instructions", at offset 3EAh of the file, which the game
+    # loads to 82E0h.
+    "s15-patched": (["tsx LAZERBYK.TSX", "sha1 d6f9fd9dd69bdbd2cb9c426240fb6053d6f6af53",
+                     "patch side1:3EA 49 6E 73 > 69 6E 73"], TSX_DIR),
 }
 
 
@@ -202,6 +206,13 @@ class Games(unittest.TestCase):
                 with open(os.path.join(TSX_DIR, GAMES[name][0][0].split()[1]), "rb") as f:
                     blocks = tape.read("GAME.TSX", f.read())
                 self.assertEqual(tape.unread(blocks, float(state["tapetime"])), [])
+
+    def test_a_patch_line_patches_the_tsx_file_that_the_capture_loads(self):
+        self.assertTrue(self.results["s15-patched"][1].startswith("point 1: pass"), self.results["s15-patched"][1])
+        with open(os.path.join(self.snap("s15-patched"), "side1.tsx"), "rb") as f:
+            self.assertEqual(f.read()[0x3EA:0x3ED], b"ins")
+        with open(os.path.join(self.snap("s15-patched"), "ram", "2-2-2-1.bin"), "rb") as f:
+            self.assertEqual(f.read()[0x2E0:0x2EC], b"instructions")
 
     def test_a_tsx_file_and_its_cas_file_load_the_same_game(self):
         for name in ("s15-lazerbyk", "s15-edgy"):

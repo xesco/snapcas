@@ -34,7 +34,7 @@ def folder_name(game):
 def run_build(game, machine, *extra):
     return subprocess.run(
         [sys.executable, "-I", os.path.join(ROOT, "tools", "build.py"),
-         os.path.join(WORK, "games", folder_name(game)), machine, "--cas", test_step2.CAS_DIR, *extra],
+         os.path.join(WORK, "games", folder_name(game)), machine, "--tapes", test_step2.CAS_DIR, *extra],
         capture_output=True, text=True)
 
 
@@ -94,7 +94,7 @@ class Images(unittest.TestCase):
         def capture(game):
             subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "capture.py"),
                             os.path.join(WORK, "games", folder_name(game)), GAMES[game][1],
-                            "--cas", test_step2.CAS_DIR], check=True, capture_output=True)
+                            "--tapes", test_step2.CAS_DIR], check=True, capture_output=True)
         with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
             list(pool.map(capture, GAMES))
         for game, (cas, machine) in GAMES.items():

@@ -2,7 +2,7 @@
 """Load a cassette game in openMSX and save its snapshot (docs/DESIGN.md,
 Capture).
 
-Usage: capture.py <game> <machine> --cas <dir> [--capture <variant>]
+Usage: capture.py <game> <machine> --tapes <dir> [--capture <variant>]
 
 <game> is a folder below games/, or the path of a folder, that holds
 game.txt. <machine> is a path below machines/ without .txt. <dir> holds the
@@ -57,7 +57,7 @@ def load_command(game, data):
     return tape.load_command(tape.service(blocks))
 
 
-def settings(game, machine, cas_path, data, snap, side2_path=None, side2=b""):
+def settings(game, machine, tape_path, data, snap, side2_path=None, side2=b""):
     """The Tcl settings. data and side2 are the tape files' bytes, of which
     the capture uses the tape service's tapes (DESIGN.md, Tape files)."""
     keys = [(t, key_tcl(kind, value)) for t, kind, value in game.keys]
@@ -71,7 +71,7 @@ def settings(game, machine, cas_path, data, snap, side2_path=None, side2=b""):
                          for text, key in machine.boot),
         # On a machine that boots DOS from its own disk, BASIC comes from DOS.
         "afterboot": "{" + msx.at_prompt(machine, "BASIC", "wait_ok") + "}",
-        "cas": msx.tcl_word(cas_path),
+        "tape": msx.tcl_word(tape_path),
         "cmd": msx.tcl_word(command),
         "cload": "1" if command == "CLOAD" else "0",
         "headers": tcl_list(str(h) for h in tape.headers(data)),
@@ -79,7 +79,7 @@ def settings(game, machine, cas_path, data, snap, side2_path=None, side2=b""):
         "side2": "1" if game.side2 else "0",
         # Side 2 follows side 1, padded to a multiple of 8 bytes, as in the
         # tape service's positions.
-        "side2cas": "{}" if side2_path is None else msx.tcl_word(side2_path),
+        "side2tape": "{}" if side2_path is None else msx.tcl_word(side2_path),
         "s1len": str(tape.side2_start(len(data))),
         "headers2": tcl_list(str(h + tape.side2_start(len(data))) for h in tape.headers(side2)),
         "nosvc": "1" if game.service_no else "0",
@@ -94,7 +94,7 @@ def settings(game, machine, cas_path, data, snap, side2_path=None, side2=b""):
     return "".join(f"set ::S({k}) {v}\n" for k, v in s.items())
 
 
-def capture_once(game, machine, cas_path, data, side2, snap, procedures, found):
+def capture_once(game, machine, tape_path, data, side2, snap, procedures, found):
     """Runs the capture once, with the slot patches found so far on the tape.
     Returns "" for a snapshot, "patch" for a new slot patch, or the error."""
     data, side2 = bytearray(data), bytearray(side2)
@@ -104,8 +104,8 @@ def capture_once(game, machine, cas_path, data, side2, snap, procedures, found):
     os.makedirs(snap)
     if found or any(patch.page == "side1" for patch in game.patches):
         # The tape that the capture loads, with the side1 patches.
-        cas_path = os.path.join(snap, "side1" + os.path.splitext(game.tape)[1].lower())
-        with open(cas_path, "wb") as f:
+        tape_path = os.path.join(snap, "side1" + os.path.splitext(game.tape)[1].lower())
+        with open(tape_path, "wb") as f:
             f.write(data)
     side2_path = None
     if game.side2:
@@ -114,7 +114,7 @@ def capture_once(game, machine, cas_path, data, side2, snap, procedures, found):
         side2_path = os.path.join(snap, "side2" + os.path.splitext(game.side2)[1].lower())
         with open(side2_path, "wb") as f:
             f.write(side2)
-    script = settings(game, machine, cas_path, bytes(data), snap, side2_path, bytes(side2)) + procedures + "\nstep1\n"
+    script = settings(game, machine, tape_path, bytes(data), snap, side2_path, bytes(side2)) + procedures + "\nstep1\n"
     try:
         msx.run(machine.args, script, timeout=TIMEOUT)
     except Exception as e:
@@ -134,7 +134,7 @@ def main():
     parser = argparse.ArgumentParser(description="Load a cassette game in openMSX and save its snapshot.")
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
     parser.add_argument("machine", help="a machine file's path below machines/, without .txt")
-    parser.add_argument("--cas", required=True, help="the folder that holds the CAS files")
+    parser.add_argument("--tapes", required=True, help="the folder that holds the tape files, CAS or TSX")
     parser.add_argument("--capture", help="a capture variant of the machine to load the game on, in place of "
                         "the game file's capture line")
     args = parser.parse_args()
@@ -145,9 +145,9 @@ def main():
     except (OSError, gamefile.GameFileError, msx.MachineError) as e:
         print(f"capture.py: {e}", file=sys.stderr)
         return 1
-    cas_path = os.path.abspath(os.path.join(args.cas, game.tape))
+    tape_path = os.path.abspath(os.path.join(args.tapes, game.tape))
     try:
-        data, side2 = (bytearray(d) for d in build.read_tapes(game, args.cas))
+        data, side2 = (bytearray(d) for d in build.read_tapes(game, args.tapes))
         for patch in game.patches:
             if patch.page in ("side1", "side2"):
                 build.apply_patch(patch, data if patch.page == "side1" else side2, f"{patch.page}:{patch.offset:X}")
@@ -167,11 +167,11 @@ def main():
         print(f"capture.py: {e}", file=sys.stderr)
         return 1
     if command is None and first and not first[0].standard:
-        print(f"capture.py: {cas_path}: the first block is a non-standard block, so the game "
+        print(f"capture.py: {tape_path}: the first block is a non-standard block, so the game "
               "file needs a load line", file=sys.stderr)
         return 1
     if command is None:
-        print(f"capture.py: {cas_path}: the first block is not a binary file, a BASIC "
+        print(f"capture.py: {tape_path}: the first block is not a binary file, a BASIC "
               "program or an ASCII program", file=sys.stderr)
         return 1
 
@@ -184,7 +184,7 @@ def main():
     # patched tape.
     found = []
     for run in range(MAX_SLOT_PATCHES + 1):
-        result = capture_once(game, machine, cas_path, data, side2, snap, procedures, found)
+        result = capture_once(game, machine, tape_path, data, side2, snap, procedures, found)
         if result != "patch":
             break
         # One line for a slot patch, one for each copy of the RAM search.
