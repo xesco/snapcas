@@ -24,6 +24,7 @@ class Game:
         self.tape = None      # side 1's tape file, from cas or tsx
         self.side2 = None
         self.load = None      # the load command, for a tape whose first block is not standard
+        self.start = None     # the name of the file on side 1 where the load starts
         self.sha1 = []
         self.name = default_name(os.path.basename(os.path.normpath(folder)))
         self.keys = []        # [(time, kind, value)], kind "key" or "text"
@@ -124,7 +125,7 @@ def read_game(folder, machine=None):
         except ValueError as e:
             raise GameFileError(f"{where}: {e}")
         key, args = words[0], words[1:]
-        if key in ("cas", "tsx", "side2", "load", "name", "continue", "capture", "rom") and len(args) != 1:
+        if key in ("cas", "tsx", "side2", "load", "start", "name", "continue", "capture", "rom") and len(args) != 1:
             raise GameFileError(f"{where}: {key} takes one value")
         if key in ("cas", "tsx"):
             if game.tape is not None:
@@ -134,6 +135,8 @@ def read_game(folder, machine=None):
             game.tape = args[0]
         elif key == "load":
             game.load = args[0]
+        elif key == "start":
+            game.start = args[0]
         elif key == "side2":
             game.side2 = args[0]
         elif key == "sha1":

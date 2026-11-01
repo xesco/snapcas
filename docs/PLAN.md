@@ -337,4 +337,6 @@ length of the tape:
 | A tape of TSX bytes whose first block is a turbo block, with and without `load` | The load command comes from the game file, and without it the capture stops |
 | A tape of TSX bytes with a turbo block after the snapshot's time | The build stops with an error that names the block, unless the game file has `service no` |
 | A patch line at an offset in a TSX file | The capture loads the patched file |
+| A CAS file whose block headers are off the grid of 8 bytes | The reader finds each block, as `openMSX` does |
+| Sky Jaguar with `start SKY`, from the Engesoft tape after Circus Charlie | The load starts at a later file, from a copy whose blocks are back on the grid, and the image passes the check ([A game later on the tape](DESIGN.md#a-game-later-on-the-tape)) |
 | The collection on `advanced/phc28s` and `basic/vg8020` | The CAS game files keep their results behind the model |

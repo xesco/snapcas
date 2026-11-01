@@ -102,7 +102,7 @@ def capture_once(game, machine, tape_path, data, side2, snap, procedures, found)
         build.apply_patch(patch, data if patch.page == "side1" else side2, patch.where)
     shutil.rmtree(snap, ignore_errors=True)
     os.makedirs(snap)
-    if found or any(patch.page == "side1" for patch in game.patches):
+    if found or game.start or any(patch.page == "side1" for patch in game.patches):
         # The tape that the capture loads, with the side1 patches.
         tape_path = os.path.join(snap, "side1" + os.path.splitext(game.tape)[1].lower())
         with open(tape_path, "wb") as f:
@@ -159,6 +159,10 @@ def main():
         return 1
     data, side2 = bytes(data), bytes(side2)
     try:
+        # A game later on the tape: the copy from its file on (DESIGN.md, A
+        # game later on the tape).
+        if game.start:
+            data = tape.start_copy(game.tape, data, game.start)
         command = load_command(game, data)
         first = tape.read(game.tape, data)[:1]
         if game.side2:

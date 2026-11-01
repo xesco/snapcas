@@ -1,0 +1,9 @@
+# Sky Jaguar (1984)(Konami), the second game on Engesoft's MSXF-07 side B, after
+# Circus Charlie (games/ENGESO07):
+# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxf-07.zip
+# The load starts at the BASIC loader SKY, as when the tape runs on after Circus
+# Charlie. The binary's loader searches the slots for RAM in page 1, copies the
+# ROM there and starts it.
+cas ENGESO07.CAS
+sha1 b881f79081689ded6de0142262be7f081af77f61
+start SKY

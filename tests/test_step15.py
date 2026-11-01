@@ -155,6 +155,35 @@ class Model(unittest.TestCase):
         self.assertIsNone(tape.file_offset(blocks, 0))
 
 
+class Start(unittest.TestCase):
+    def test_a_cas_header_off_the_grid_starts_a_block(self):
+        data = tape.HEADER + b"\xEA" * 10 + b"FIRST " + b"\x1A" * 3 + tape.HEADER + b"\x11\x22"
+        blocks = tape.read("GAME.CAS", data)
+        self.assertEqual([b.data for b in blocks], [b"\xEA" * 10 + b"FIRST " + b"\x1A" * 3, b"\x11\x22"])
+        self.assertEqual(blocks[1].offset, data.rindex(b"\x11\x22"))
+
+    def test_a_cas_copy_starts_at_the_named_file_on_the_grid(self):
+        second = b"\xD0" * 10 + b"SKY   "
+        data = (tape.HEADER + b"\xEA" * 10 + b"FIRST " + b"\x1A" * 3
+                + tape.HEADER + second + tape.HEADER + b"\x00\x80\x01\x80\x00\x80\xC9")
+        copy = tape.start_copy("GAME.CAS", data, "SKY")
+        self.assertEqual(copy, tape.HEADER + second + tape.HEADER + b"\x00\x80\x01\x80\x00\x80\xC9")
+        self.assertEqual(tape.load_command(copy), 'BLOAD"CAS:",R')
+
+    def test_a_tsx_copy_starts_at_the_named_files_block(self):
+        data = tsx_file(kcs(b"\xEA" * 10 + b"FIRST "), kcs(b"\x1A" * 8), kcs(b"\xD0" * 10 + b"SKY   "), kcs(b"\xC9"))
+        copy = tape.start_copy("GAME.TSX", data, "SKY")
+        self.assertEqual(copy[:10], data[:10])
+        self.assertEqual([b.data for b in tape.read("GAME.TSX", copy)], [b"\xD0" * 10 + b"SKY   ", b"\xC9"])
+
+    def test_a_name_that_is_no_files_block_is_refused(self):
+        data = tape.HEADER + b"\xEA" * 10 + b"FIRST " + b"\xD0" * 10 + b"SKY   "
+        with self.assertRaisesRegex(tape.TapeError, "SKY is inside a block"):
+            tape.start_copy("GAME.CAS", data, "SKY")
+        with self.assertRaisesRegex(tape.TapeError, "no file named MOON"):
+            tape.start_copy("GAME.CAS", data, "MOON")
+
+
 def restore(name, lines, tapes):
     """Captures, builds and checks a game file in WORK, and returns its folder
     and the check's report or the failed step's error."""
@@ -183,12 +212,16 @@ GAMES = {
     # loads to 82E0h.
     "s15-patched": (["tsx LAZERBYK.TSX", "sha1 d6f9fd9dd69bdbd2cb9c426240fb6053d6f6af53",
                      "patch side1:3EA 49 6E 73 > 69 6E 73"], TSX_DIR),
+    # Sky Jaguar, the second game on a side whose block headers are off the
+    # grid of 8 bytes.
+    "s15-sky": (["cas ENGESO07.CAS", "start SKY"], COLLECTION),
 }
 
 
 @unittest.skipUnless(all(os.path.isfile(os.path.join(TSX_DIR, n))
                          for n in ("LICENCE.TSX", "4X4OFFRO.TSX", "LAZERBYK.TSX", "PICOPICO.TSX"))
-                     and os.path.isfile(os.path.join(COLLECTION, "035-EDGY.CAS")), "CAS_DIR lacks the TSX games' files")
+                     and all(os.path.isfile(os.path.join(COLLECTION, n)) for n in ("035-EDGY.CAS", "ENGESO07.CAS")),
+                     "CAS_DIR lacks the TSX games' files")
 class Games(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -216,6 +249,12 @@ class Games(unittest.TestCase):
             service = tape.service(tape.read("PICOPICO.TSX", f.read()))
         state = build.read_state(self.snap("s15-picopico"))
         self.assertGreaterEqual(build.num(state, "tapepos"), tape.needed_end(service) - 7)
+
+    def test_a_start_line_loads_a_game_later_on_the_tape(self):
+        self.assertTrue(self.results["s15-sky"][1].startswith("point 1: pass"), self.results["s15-sky"][1])
+        self.assertIn("point 2: pass", self.results["s15-sky"][1])
+        with open(os.path.join(self.snap("s15-sky"), "side1.cas"), "rb") as f:
+            self.assertEqual(tape.read("SIDE1.CAS", f.read())[0].data, b"\xEA" * 10 + b"SKY   ")
 
     def test_a_patch_line_patches_the_tsx_file_that_the_capture_loads(self):
         self.assertTrue(self.results["s15-patched"][1].startswith("point 1: pass"), self.results["s15-patched"][1])

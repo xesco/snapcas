@@ -508,15 +508,23 @@ def check_unread(state, blocks, names, service_no):
 
 
 def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=False, wanted_page=None,
-          t0_mode=False, names=("side1.cas", "side2.cas"), service_no=False):
+          t0_mode=False, names=("side1.cas", "side2.cas"), service_no=False, start=None):
     """Returns (header and tables, the records' data, a report, scan.txt's
     text). side1 and side2 are the tape files' bytes, and names their files'
     names, patch_lines the game file's patches, rom_keep keeps T0 from
-    replacing the ROM, and service_no is the game file's service no."""
+    replacing the ROM, service_no is the game file's service no, and start its
+    start line's file."""
     state = read_state(snap)
-    patch_lines = list(patch_lines) + patches.slots.capture_patches(snap)
+    captured = patches.slots.capture_patches(snap)
     slots = patches.slots.read_slots(snap)
+    # The game file's patch lines fit the downloaded files, and the capture's
+    # patches the file that it played: with a start line, the copy (DESIGN.md,
+    # A game later on the tape).
     side1, side2 = patch_sides(patch_lines, side1, side2)
+    if start and side1:
+        side1 = tape.start_copy(names[0], side1, start)
+    side1, side2 = patch_sides(captured, side1, side2)
+    patch_lines = list(patch_lines) + captured
     # The tape service's tapes of the patched files (DESIGN.md, Tape files).
     blocks = (tape.read(names[0], side1) if side1 else [], tape.read(names[1], side2) if side2 else [])
     check_unread(state, blocks, names, service_no)
@@ -586,7 +594,7 @@ def main():
         side1, side2 = read_tapes(game, args.tapes)
         header, data, report, scanned = build(os.path.join(out, "snap"), args.service, side1, side2,
                                      game.patches, game.rom_keep, game.service_page, game.service_t0,
-                                     (game.tape, game.side2 or ""), game.service_no)
+                                     (game.tape, game.side2 or ""), game.service_no, game.start)
     except (OSError, gamefile.GameFileError, BuildError, tape.TapeError) as e:
         print(f"build.py: {e}", file=sys.stderr)
         return 1

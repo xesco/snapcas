@@ -55,6 +55,31 @@ def service(blocks):
     return bytes(tape)
 
 
+def start_copy(name, data, file):
+    """The copy of a tape file's bytes that begins at the block of the first
+    file named file, for the game file's start line (DESIGN.md, A game later
+    on the tape): a CAS file's as the tape service's tape of those blocks, and
+    a TSX file's as its first 10 bytes and its bytes from that 4Bh block on."""
+    blocks = read(name, data)
+    for n, block in enumerate(blocks):
+        head = block.data[:16]
+        if (len(head) == 16 and len(set(head[:10])) == 1 and head[0] in LOAD_COMMANDS
+                and head[10:].decode("latin-1").rstrip() == file):
+            break
+    else:
+        named = [bytes([t]) * 10 + file.ljust(6).encode("latin-1") for t in LOAD_COMMANDS]
+        if any(h in data for h in named):
+            raise TapeError(f"{name}: the file {file} is inside a block, not at a block's start")
+        raise TapeError(f"{name}: side 1 has no file named {file}")
+    if os.path.splitext(name)[1].lower() == ".cas":
+        return service(blocks[n:])
+    # A standard block 4Bh: its ID byte and 16 bytes of its body before the data.
+    at = block.offset - 17
+    if data[at] != 0x4B:
+        raise TapeError(f"{name}: the file {file} is not in a block 4Bh")
+    return data[:10] + data[at:]
+
+
 def side2_start(side1_length):
     """Side 2's position after side 1 in the tape service: side 1 padded to
     a multiple of 8 bytes, by at least 1 byte, where TAPIN turns the tape over

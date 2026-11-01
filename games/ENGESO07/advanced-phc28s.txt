@@ -1,0 +1,7 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The loader copies the ROM game to page 1's RAM, in the slot of page 3's RAM,
+# and jumps to it. The PHC-28S has its RAM for page 1 in another slot, the
+# cartridge's, slot 1. AND 0F3h / OR 04h selects slot 1 in page 1, in place of
+# the bits that the loader copies from page 3's.
+patch side1:456C CB 7F 28 02 CB DF CB 77 28 02 CB D7 > E6 F3 F6 04 00 00 00 00 00 00 00 00

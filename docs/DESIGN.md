@@ -183,6 +183,7 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 | `tsx` | The TSX file of side 1, in the `--tapes` folder ([Tape files](#tape-files)) | | `game.txt` |
 | `side2` | The file of side 2, in side 1's format | None | `game.txt` |
 | `load` | The load command, for a tape whose first block is not standard, quoted: `load 'RUN"CAS:"'` ([Tape files](#tape-files)) | From the first block's type | `game.txt` |
+| `start` | The name of a file on side 1, such as `start SKY`, for a game that is not the tape's first program: the load starts at the first file with that name ([A game later on the tape](#a-game-later-on-the-tape)) | The tape's start | `game.txt` |
 | `sha1` | The SHA-1 of `cas`, then that of `side2` | None | `game.txt` |
 | `name` | `<GAME>`, up to 8 letters and digits | The folder name in upper case, cut to 8 letters and digits | `game.txt` |
 | `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None | `game.txt` |
@@ -299,10 +300,10 @@ real tape. The rest works on the model:
    game file's `load` line.
 2. The tape position is an offset in the tape service's tape: the standard blocks,
    each after the 8-byte header `1F A6 DE BA CC 13 7D 74` at an offset that is a
-   multiple of 8. A CAS file has that layout, so its positions stay its offsets. The
-   capture follows standard blocks by the `TAPION` and `TAPIN` breakpoints, as for a
-   CAS file, and non-standard blocks by the player's time: a block is read when
-   `cassetteplayer getpos` passes its end.
+   multiple of 8. A CAS file whose headers are at multiples of 8 has that layout, so
+   its positions stay its offsets. The capture follows standard blocks by the
+   `TAPION` and `TAPIN` breakpoints, as for a CAS file, and non-standard blocks by
+   the player's time: a block is read when `cassetteplayer getpos` passes its end.
 3. A patch's place, `side1:` or `side2:` and an offset, is an offset in the tape
    file, of either format, because both formats keep a block's bytes as they are.
    The capture's watches search the files' bytes in the same way
@@ -313,6 +314,29 @@ real tape. The rest works on the model:
    reads with its own loader during play, which the tape service cannot serve, so
    the build stops with an error that names the block, unless the game file has
    `service no`.
+
+### A game later on the tape
+
+A compilation holds several programs on one side, each with its own loader, and a
+player reaches a later one by letting the tape run on and typing its load command
+again. Engesoft's MSXF-07 has Circus Charlie and then Sky Jaguar on side B. The game
+file's `start` line names the later program's first file, and the load starts there:
+
+1. The capture plays a copy of side 1 that begins at the first file with that name,
+   with the game file's patch lines applied to the original first, so that their
+   offsets and the SHA-1 lines stay those of the downloaded file. The capture's own
+   patches ([Slot patches](#slot-patches)) have offsets in the copy, which is the
+   file it plays. The build makes the same copy, so the tape service's tape and its
+   positions begin there too.
+2. A CAS file's copy is the tape service's tape of the blocks from the named file's
+   own block on, so its headers are at multiples of 8 even where the original's are
+   not, as on the tape with Sky Jaguar. The capture stops with an error when the
+   name is not a file's own block, but bytes inside one.
+3. A TSX file's copy keeps the file's first 10 bytes and begins at the block that
+   holds the file's header. The capture stops with an error when the header is not
+   at that block's start.
+4. The load command comes from the named file's type, unless the game file has
+   `load`. The capture stops with an error when side 1 has no file with that name.
 
 ## Capture
 
@@ -1330,11 +1354,14 @@ joysticks, cannot come between them.
 ### CAS data
 
 A CAS file is a sequence of blocks, each starting with the 8-byte header
-`1F A6 DE BA CC 13 7D 74` at an offset that is a multiple of 8. A file's first block
-holds 10 bytes of its type and a 6-byte name: D0h for a binary file loaded with
-`BLOAD"CAS:",R`, D3h for a BASIC program loaded with `CLOAD`, and EAh for an ASCII
-program loaded with `RUN"CAS:"`. The capture stops with an error when the first
-block has none of these types. The tape position is an offset in this data.
+`1F A6 DE BA CC 13 7D 74`. Most files put each header at an offset that is a
+multiple of 8, but 105 tapes of the test collection do not pad their blocks, among
+them Engesoft's and the Super MSX magazine's, and `openMSX` and `tools/cas.py` find
+a header at any offset. A file's first block holds 10 bytes of its type and a 6-byte
+name: D0h for a binary file loaded with `BLOAD"CAS:",R`, D3h for a BASIC program
+loaded with `CLOAD`, and EAh for an ASCII program loaded with `RUN"CAS:"`. The
+capture stops with an error when the first block has none of these types. The tape
+position is an offset in the tape service's tape ([Tape files](#tape-files)).
 
 ### TSX data
 
