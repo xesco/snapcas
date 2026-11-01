@@ -1,4 +1,0 @@
-# Engesoft msxf-18 / Engesoft MSXF-18- Lado B.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxf-18.zip
-cas ENGESOFB.CAS
-sha1 9be64582e8f42da3fa6adefdb180b5d68d7c4976

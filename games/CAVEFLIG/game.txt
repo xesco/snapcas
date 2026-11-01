@@ -1,4 +1,5 @@
-# Engesoft msxf-19 / Engesoft MSXF-19 - Lado A.cas
+# Cave Flight (1986)(Engesoft), the only game on Engesoft's MSXF-19 side A,
+# Engesoft MSXF-19 - Lado A.cas:
 # https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxf-19.zip
 cas ENGESO19.CAS
 sha1 d9144667e00918b72a26fd552bfa8a1d0721d08b

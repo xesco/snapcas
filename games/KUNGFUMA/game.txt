@@ -1,4 +1,5 @@
-# Engesoft msxk-06 / Engesoft MSXK-06 - Lado A.cas
+# Kung-Fu Master, the first game on Engesoft's MSXK-06 side A,
+# Engesoft MSXK-06 - Lado A.cas:
 # https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-06.zip
 cas ENGESO06.CAS
 sha1 d4aa3f756a8f04cbb52483eba0603e969b6949e6

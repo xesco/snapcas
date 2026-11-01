@@ -1,5 +1,5 @@
 # Athletic Land (1984)(Konami), the second game on Engesoft's MSXK-06 side A,
-# after Kung-Fu Master (games/ENGESO06):
+# after Kung-Fu Master (games/KUNGFUMA):
 # https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-06.zip
 # The load starts at the BASIC loader ATLET, as when the tape runs on after
 # Kung-Fu Master.
