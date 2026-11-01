@@ -221,6 +221,14 @@ to game files reruns only those, and a change to the code reruns all.
 `COLLECTION_FULL=1` reruns every game file. The run does 11 at once, because the
 efficiency cores of the Mac where it runs count as well.
 
+Some game files fail on a machine in `openMSX` itself, without `snapcas`: a plain
+load of the tape, with the same machine and no capture code, fails there too. Those
+are not failures of `snapcas`, so `tests/openmsx-failures.txt` lists them, with the
+machine, the game file's folder and what fails, to try again at the end. The run's
+test passes when every game file that fails is in that list, and it names the
+others. A listed game file that passes is only noted, for its line to go, because an
+`openMSX` failure can come and go.
+
 ## Step 10: automatic fixes
 
 This step makes the fixes that the game files hold by hand automatic, so that a new

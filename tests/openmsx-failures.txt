@@ -1,0 +1,7 @@
+# Game files that fail on a machine in openMSX itself: a plain load of the tape,
+# on the same machine without the capture code, fails too (docs/PLAN.md, step 9).
+# The collection's test passes when every game file that fails is here. Each
+# line: the machine, the game file's folder, and what fails in plain openMSX.
+
+advanced/phc28s ENGESO07 Stops with "Type mismatch in 25" without the Carnivore2, and resets to a blank screen with it
+advanced/phc28s ENGESOFB Stops with "Type mismatch in 23" without the Carnivore2, and resets to a blank screen with it

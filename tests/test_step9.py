@@ -123,6 +123,16 @@ COLLECTION_WORKERS = int(os.environ.get("COLLECTION_WORKERS", "11"))
 COLLECTION_FULL = os.environ.get("COLLECTION_FULL") == "1"
 
 
+# The game files that fail on a machine in openMSX itself (PLAN.md, step 9).
+OPENMSX_FAILURES = os.path.join(ROOT, "tests", "openmsx-failures.txt")
+
+
+def read_openmsx_failures():
+    """The list's (machine, game file's folder) pairs."""
+    with open(OPENMSX_FAILURES) as f:
+        return {tuple(line.split()[:2]) for line in f if line.strip() and not line.startswith("#")}
+
+
 def file_hash(h, path):
     h.update(path.encode() + b"\0")
     with open(path, "rb") as f:
@@ -220,6 +230,18 @@ class Collection(unittest.TestCase):
 
     def test_every_game_file_gets_a_result_on_each_machine(self):
         self.assertEqual(len(self.results), len(COLLECTION_MACHINES) * len(os.listdir(GAMES)))
+
+    def test_every_game_file_that_fails_fails_in_openmsx_itself(self):
+        known = read_openmsx_failures()
+        failed = {item for item, result in self.results.items() if result != "point 1: pass"}
+        passing = sorted(item for item in known - failed if item in self.results)
+        if passing:
+            print("\nIn tests/openmsx-failures.txt, but passing now: "
+                  + ", ".join(f"{name} on {machine}" for machine, name in passing), file=sys.stderr)
+        unknown = sorted(failed - known)
+        if unknown:
+            self.fail("These game files fail, and tests/openmsx-failures.txt does not list them:\n"
+                      + "\n".join(f"{name} on {machine}: {self.results[(machine, name)]}" for machine, name in unknown))
 
 
 if __name__ == "__main__":
