@@ -118,7 +118,8 @@ REPORTS = os.path.join(WORK, "collection")
 
 def collection_game(item):
     """Captures, builds and checks one game file on one machine, and returns
-    the first line of the check's report or the failed step's error."""
+    the first line of the check's report, point 2's failure with its first
+    line when point 2 fails, or the failed step's error."""
     machine, name = item
     folder = os.path.join(GAMES, name)
     for step in ("capture.py", "build.py"):
@@ -126,7 +127,11 @@ def collection_game(item):
         if result.returncode != 0:
             return (result.stderr.strip().splitlines() or [f"{step} failed"])[-1]
     result = test_step4.tool("check.py", folder, machine, "--dos", SHIPPED[machine])
-    return (result.stdout.strip().splitlines() or [result.stderr.strip()])[0]
+    lines = result.stdout.strip().splitlines()
+    if "point 2: fail" in lines:
+        failed = lines.index("point 2: fail")
+        return "point 2: fail:" + "".join(lines[failed + 1:failed + 2])
+    return (lines or [result.stderr.strip()])[0]
 
 
 @unittest.skipUnless(COLLECTION_DIR and os.path.isdir(COLLECTION_DIR), "COLLECTION_DIR names no folder")

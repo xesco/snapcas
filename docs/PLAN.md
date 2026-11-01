@@ -223,9 +223,11 @@ without a part in page 3 when page 3 has no room
 `tools/snapcas.py` on the capture variants
 ([Files and commands](DESIGN.md#files-and-commands)). The tests check each fix on a
 game that needed it by hand, without its line: Sootland and Finders Keepers for the
-slot patches, Chase H.Q. for the mode, and La Abadia del Crimen for the variants.
-The collection then runs on all seven shipped machines, and the report lists the
-game files that a machine still needs.
+slot patches, Chase H.Q. for the mode, and Sootland on the HB-F700P for the
+variants. La Abadia del Crimen was the variants' test until the RAM search patch
+fixed its load ([The RAM search patch](DESIGN.md#the-ram-search-patch)). The
+collection then runs on all seven shipped machines, and the report lists the game
+files that a machine still needs.
 
 ## Step 11: real hardware
 
@@ -260,3 +262,35 @@ that the outputs stay the same, byte for byte:
 | Every snapshot of `out/` on the seven shipped machines, built again | The images and `scan.txt` files are the same as before the step |
 | The collection on `advanced/phc28s` and `basic/vg8020` | The snapshots are the same as before the step, and every check passes |
 | `make test` | The steps' tests pass |
+
+## Step 13: the check's guard of page 3
+
+This step adds to the check's point 2 the watch on the tape service's part of page 3
+([Check](DESIGN.md#check)), after Altered Beast wrote its variables over the
+service's entries on the real machine. The collection reports point 2's failure in
+place of point 1's line:
+
+| Test | What it proves |
+|---|---|
+| Gauntlet's check on `advanced/phc28s` | The service's own writes to the part, during the game's tape calls, do not count |
+| The collection on `advanced/phc28s` and `basic/vg8020` | The games whose first 60 seconds write the part are listed, for a game file's `service t0` |
+
+On those two machines, the guard listed 53 game files. Most of them were not games
+that write the part. On the PHC-28S, 30 were captures whose loader had reset the
+machine, so the image replayed a reboot, and the reboot wrote the part. Most of
+those loaders cut off their own code ([Step 14](#step-14-the-ram-search-patch)).
+
+## Step 14: the RAM search patch
+
+This step adds the capture's watch for a slot register write that cuts off the code
+that made it, and the patch of the RAM search that Mot's loader and many Opera Soft
+loaders share ([The RAM search patch](DESIGN.md#the-ram-search-patch)). Mot and
+Satan's game files took the tape of their part 2 for a side 2. Each part now has a
+game file of its own, and Mot's demo has its own as well.
+
+| Test | What it proves |
+|---|---|
+| Mot, its demo and the 20 other tapes with the search that reset the PHC-28S, on `advanced/phc28s` | The capture patches the search, and each check passes |
+| Mot on `basic/vg8020` | A machine whose RAM for page 3 is in the slot that the loader finds gets no patch |
+| Made in Spain on `advanced/phc28s` | Each copy of the search on a tape is patched |
+| Sootland's variant test on `advanced/hbf700p` | Replaces La Abadia del Crimen's, whose load the patch fixes there |

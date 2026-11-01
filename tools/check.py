@@ -58,6 +58,26 @@ def patched_bytes(state, snap, patch_lines, page):
     return ranges
 
 
+def service_part(state, snap, page):
+    """The tape service's part of page 3 for point 2's watch, as the Tcl list
+    {first last E_INSIDE segment}, without the scratch bytes, where segment is page 3's mapper segment at
+    the snapshot, or -1 outside a mapper. Empty without a part: page is 0 then
+    (DESIGN.md, Check)."""
+    if page == 0:
+        return "{}"
+    parts = build.read_service(os.path.join(ROOT, "bin", "SERVICE.BIN"), page)
+    _, _, _, e_fc, _, e_sp = struct.unpack("<6H", parts[4])
+    first = page * 256 + 0xE1
+    ps, ss = selected_name(state, 3)
+    mapped = any(n.startswith(f"{ps}-{ss}-3-") and not n.endswith("-x.bin")
+                 for n in os.listdir(os.path.join(snap, "ram")))
+    segment = int(state["ff"], 16) if mapped else -1
+    # E_INSIDE follows E_FC, and the watch ends before the scratch bytes from
+    # e_sp to the stack's top, which the service sets before it reads them
+    # (src/service.asm).
+    return f"{{{first} {e_sp - 1} {e_fc + 1} {segment}}}"
+
+
 def settings(state, snap, image, report, check_dir, state_name, patch_lines):
     """Tcl variables for check.tcl."""
     with open(image, "rb") as f:
@@ -84,6 +104,7 @@ def settings(state, snap, image, report, check_dir, state_name, patch_lines):
         # The service's page 3 part, when build.py moved it from FCE1h.
         "p3": "{}" if header[15] in (0, build.DEFAULT_PAGE) else
               f"{{{header[15] * 256 + 0xE1} {(header[15] + 1) * 256 + 0x88}}}",
+        "part": service_part(state, snap, header[15]),
     }
     return "".join(f"set ::C({k}) {v}\n" for k, v in s.items())
 
@@ -148,7 +169,7 @@ def main():
     with open(report) as f:
         text = f.read()
     print(text, end="")
-    return 0 if text.startswith("point 1: pass") else 3
+    return 0 if text.startswith("point 1: pass") and "point 2: fail" not in text else 3
 
 
 if __name__ == "__main__":

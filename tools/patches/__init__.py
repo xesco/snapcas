@@ -6,7 +6,7 @@ lists them in the order that the scan runs them.
 """
 import collections
 
-from . import slots, tape
+from . import ramsearch, slots, tape  # noqa: F401
 
 KINDS = [tape, slots]
 

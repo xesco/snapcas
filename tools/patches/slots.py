@@ -72,7 +72,8 @@ def read_slots(snap):
 
 
 def capture_patches(snap):
-    """The capture's slot patches of the tape, in snap/patches.txt."""
+    """The capture's patches of the tape, in snap/patches.txt: the slot
+    patches and the RAM search patch."""
     path = os.path.join(snap, "patches.txt")
     if not os.path.exists(path):
         return []

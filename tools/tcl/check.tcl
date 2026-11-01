@@ -49,14 +49,61 @@ proc safe_check {} {
     if {[catch compare e]} { lappend ::diffs "check: $e" }
     write_report
     set ::n 0
+    watch_part
     after time 10 point2
 }
 
-# Point 2: the game runs for 60 seconds, saved every 10 seconds.
+# Point 2: the game runs for 60 seconds, saved every 10 seconds, and must not
+# write the tape service's part of page 3.
 proc point2 {} {
     incr ::n
     savestate "$::C(state)-[expr {$::n * 10}]s"
-    if {$::n < 6} { after time 10 point2 } else { exit }
+    if {$::n < 6} { after time 10 point2 } else { write_point2; exit }
+}
+
+# The watch on the service's part of page 3 without its scratch bytes,
+# ::C(part) = {first last E_INSIDE segment}. A write counts when it comes from code outside the part, outside a
+# call of the service, and goes to the snapshot's page 3: its slot in the slot
+# register and, in a mapper, its segment in register FFh. The service's code in
+# page 0 also runs without a call through the part, when the game calls T0's
+# jump table itself, so a write from page 0 does not count while page 0 selects
+# DOS's mapper with another segment than the snapshot's.
+set ::part_writes {}
+proc in_service_segment {} {
+    set ps [expr {$::dosslot & 3}]
+    if {([debug read ioports 0xA8] & 3) != $ps} { return 0 }
+    if {($::dosslot & 0x80) && ([subslot_reg $ps] & 3) != (($::dosslot >> 2) & 3)} { return 0 }
+    expr {[debug read {MSX Memory Mapper I/O} 0] != [scan $::K(fc) %x]}
+}
+proc watch_part {} {
+    if {[llength $::C(part)] == 0} return
+    lassign $::C(part) first last
+    debug set_watchpoint write_mem [list $first $last] {} { part_write }
+}
+proc part_write {} {
+    lassign $::C(part) first last inside segment
+    set pc [reg pc]
+    if {$pc >= $first && $pc <= $last} return
+    if {[debug read memory $inside] != 0} return
+    if {([debug read ioports 0xA8] >> 6) != ($::C(a8) >> 6)} return
+    if {$segment >= 0 && [debug read {MSX Memory Mapper I/O} 3] != $segment} return
+    if {$pc < 0x4000 && [in_service_segment]} return
+    set address [format %04X $::wp_last_address]
+    if {![dict exists $::part_writes $address] && [dict size $::part_writes] < 40} {
+        dict set ::part_writes $address [format %04X $pc]
+    }
+}
+proc write_point2 {} {
+    set f [open $::C(report) a]
+    if {[dict size $::part_writes] == 0} {
+        puts $f "point 2: pass"
+    } else {
+        puts $f "point 2: fail"
+        dict for {address pc} $::part_writes {
+            puts $f "  the game writes ${address}h, in the tape service's part of page 3, from ${pc}h"
+        }
+    }
+    close $f
 }
 
 proc hex2 {v} { format %02X $v }

@@ -101,6 +101,8 @@ game file. Each kind of automatic patch is one file in `tools/patches/`:
 | `tape.py` | The calls, stubs and entries of the tape routines, sent to the entries in page 3, and the readers of the cassette signal, which are only listed ([Scan](#scan)) |
 | `slots.py` | The fixed slot values that name a slot that holds nothing, the slot map, and the capture's patches of the tape ([Slot patches](#slot-patches)) |
 | `slots.tcl` | The capture's watch on the slot register ([Slot patches](#slot-patches)) |
+| `ramsearch.py` | The bytes of the loader's RAM search and its patch ([The RAM search patch](#the-ram-search-patch)) |
+| `ramsearch.tcl` | The capture's watch for a slot register write that cuts off the code that made it ([The RAM search patch](#the-ram-search-patch)) |
 
 The Python file of each kind has a function, `find(data, context)`, that returns the
 kind's findings in data. A finding is the code found, its offset, what it is, and
@@ -110,10 +112,12 @@ page of the entries, the slot map, and whether the image has the tape service.
 and holds the two things that all kinds share: the patch of the bytes and the text
 of `scan.txt`. So a new kind is a new file and a line in that list. A kind that also
 works in the capture has a Tcl file of the same name, which `capture.py` loads after
-`capture.tcl`. Data that both files of a kind need, such as the opcodes of
-[Slot patches](#slot-patches), is in the Python file only, and `capture.py` writes
-it into the Tcl settings. A game file's `patch` lines are not automatic patches, and
-the build applies them ([Game file](#game-file)).
+`capture.tcl`. A kind that works only in the capture has no `find` and is not in the
+list, because the loader that it patches has finished by the snapshot. Data that
+both files of a kind need, such as the opcodes of [Slot patches](#slot-patches), is
+in the Python file only, and `capture.py` writes it into the Tcl settings. A game
+file's `patch` lines are not automatic patches, and the build applies them
+([Game file](#game-file)).
 
 ## Machine file
 
@@ -254,7 +258,7 @@ games' `capture` lines name:
 | `basic/vg8020-nodisk` | The Carnivore2, and so Nextor | 67 games that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
 | `basic/nms8250-nocarnivore2` | The Carnivore2, and so Nextor | 46 games that fail in a capture with the Carnivore2 in slot 1 |
 | `basic/picoverse-nomapper` | The PicoVerse-like cartridge, and so its mapper and Nextor | 51 games whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go straight to their slot, without holding segments |
-| `advanced/hbf700p-noram` | The RAM cartridge in slot 1 | La Abadia del Crimen in the tests, which crashes with the cartridge in either slot, and 9 games of the collection |
+| `advanced/hbf700p-noram` | The RAM cartridge in slot 1 | 8 games of the collection, Sootland among them, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch ([The RAM search patch](#the-ram-search-patch)) |
 
 ## Capture
 
@@ -433,6 +437,41 @@ code whose `3E` can be an operand:
 
 A real `LD A,n` after an operand that has the value of such an opcode is skipped as
 well, and needs a `patch` line by hand.
+
+### The RAM search patch
+
+Some loaders search for RAM in pages 0 and 1 themselves, from code in page 3. Mot's
+loader tries each slot ID from 15 down to 0 through the BIOS's `WRSLT` and `RDSLT`,
+and marks each ID from 4 up as the ID of an expanded slot. To select the slot that
+it finds, the loader writes the slot's subslot register at FFFFh, so it selects that
+primary slot in page 3, where its own code runs. That works when the RAM of page 3
+is in the same primary slot, as on the VG-8020, whose RAM is all in slot 3. On the
+Sanyo PHC-28S, the RAM of page 3 is in slot 0 and the HBM-64's RAM is in slot 1, so
+the loader's code is gone after the write. The capture finds this itself, in two
+parts:
+
+1. At step 4, the write watchpoint on port A8h tests each write from code in page 3
+   that selects another primary slot in page 3. When the 4 bytes after the write's
+   `OUT` differ in that slot, the write cuts off the code that made it, and the
+   capture logs it.
+2. When the loader's search, below, occurs in the CAS files, the capture stops.
+   `capture.py` then adds a patch of each copy to `snap/patches.txt` and runs the
+   capture again, as for a slot patch. Each copy cuts off its code on this machine,
+   and a copy on side 2 or in a compilation's later game runs after the snapshot, as
+   the second copy on Made in Spain's tape does. The patched loader selects the slot
+   that it finds through the slot register only. Otherwise the logged write is for a
+   `patch` line by hand.
+
+| Code | Bytes | Patch |
+|---|---|---|
+| `LD A,B / DEC A / CP 4 / JR C,+2 / SET 7,A`: the slot ID from the search's count, with the expanded slot's mark from 4 up | `78 3D FE 04 38 02 CB FF` | `SET 7,A` to two `NOP`s, `00 00` |
+
+In the test collection, 70 tapes have this search, many of them from Opera Soft. A
+machine whose RAM for page 3 is in the same primary slot never gets the patch,
+because the write keeps the loader's code. *To verify:* the patch on a machine where
+the RAM that the loader finds is in an expanded slot other than the slot of page 3.
+The patched loader then selects the subslot that the slot's register already
+selects.
 
 ### Snapshot files
 
@@ -978,10 +1017,21 @@ that disk and the `boot` keys, and writes its report to `check/report.txt`:
    select the slot, and the values that restorer step 3 changes for the tape
    service. A difference or a timeout fails the check.
 2. The game runs for 60 seconds, saved with `savestate` every 10 seconds as
-   `check/10s.oms` to `check/60s.oms`, and a breakpoint on each scan finding in a
-   kept RAM page reports which findings the game executes. `openMSX` loads such a
-   savestate to show the screen, because it takes screenshots only with a renderer.
-   This point only reports.
+   `check/10s.oms` to `check/60s.oms`. `openMSX` loads such a savestate to show the
+   screen, because it takes screenshots only with a renderer. Meanwhile the game
+   must leave the tape service's part of page 3 alone, when the image has one. The
+   part's last bytes, from `e_sp` to the stack's top, do not count, because the
+   service sets them on each call before it reads them. A watchpoint on the part's
+   other addresses notes each write that the game makes there: from code outside the
+   part, while `E_INSIDE` is 0, so outside a call of the service, and while the slot
+   register and mapper register FFh select the snapshot's page 3. The report then
+   adds `point 2: fail` and the writes, or else `point 2: pass`, and a failed point
+   2 fails the check. Altered Beast, after loading its side B, writes its variables
+   over the service's entries at FCE1h, and its next call of the tape hangs, so a
+   game that writes the part needs the mode without a part in page 3
+   ([Without a part in page 3](#without-a-part-in-page-3)). The point sees only the
+   writes of its 60 seconds, not those that come after a key, a level or another
+   side, as Altered Beast's do.
 
 Code that a game builds only when the player reaches a level is not visible to the
 scan or to the check. It appears as a hang during play, and a trace of that load in
@@ -1161,7 +1211,7 @@ The parts hold the code that `build.py` places, with the operands and the data t
 | 1 | T0's stubs, for 19DDh to 1B44h ([Tape service](#tape-service)) |
 | 2 | The service's part of page 3, for FCE1h to FD88h |
 | 3 | The code segment's data and routines, from 0000h, up to the tape's start |
-| 4 | The addresses of `STMOTR`'s stub, of the tape position in the code segment, of the byte at FCF9h and of the marker's data in the code segment, with the most segments that the code segment and the tape can use, 2 bytes each |
+| 4 | The addresses of `STMOTR`'s stub, of the tape position in the code segment, of the byte at FCF9h, of the marker's data in the code segment and of `e_sp` in page 3, with the most segments that the code segment and the tape can use, 2 bytes each |
 | 5 | T0's routines and data without a part in page 3, for 19DDh to 1B44h ([Without a part in page 3](#without-a-part-in-page-3)) |
 | 6 | The addresses of T0's routines for the jump table's entries from 00E1h to 00F3h, in their order, then of T0's tape position, borrowed page and flash's data, and the most segments of the tape, 2 bytes each |
 | 7 | The offsets in the file of the bytes that move with the part of page 3, 2 bytes each: the high bytes of the addresses in that part |

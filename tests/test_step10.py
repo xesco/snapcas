@@ -86,9 +86,10 @@ class WithoutPage3(unittest.TestCase):
 
 
 class Variants(unittest.TestCase):
-    @unittest.skipUnless(has("ABADIA.CAS"), "COLLECTION_DIR holds no ABADIA.CAS")
-    def test_snapcas_py_finds_la_abadias_capture_variant(self):
-        folder = game("ABADIA", "advanced/hbf700p", [])
+    # La Abadia del Crimen needed the variant until the RAM search patch.
+    @unittest.skipUnless(has("SOOTLAND.CAS"), "COLLECTION_DIR holds no SOOTLAND.CAS")
+    def test_snapcas_py_finds_sootlands_capture_variant(self):
+        folder = game("SOOTLAND", "advanced/hbf700p", [])
         result = make(folder, "advanced/hbf700p")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("capture advanced/hbf700p-noram", result.stdout)

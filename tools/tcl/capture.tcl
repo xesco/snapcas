@@ -1,6 +1,6 @@
 # Procedures of the capture (docs/DESIGN.md, Capture). tools/capture.py puts
-# the game file's settings and memory.tcl before them, patches/slots.tcl after
-# them, and then the steps' start.
+# the game file's settings and memory.tcl before them, patches/slots.tcl and
+# patches/ramsearch.tcl after them, and then the steps' start.
 
 # ---- The steps (DESIGN.md, Capture) ----
 #
@@ -99,6 +99,7 @@ proc on_a8 {value} {
     set ::st(a8) $value
     note_selection $value
     slot_watch $value $before
+    ramsearch_watch $value $before
 }
 
 # Each TAPION call's entry is saved, with ::st, as a moment for the snapshot

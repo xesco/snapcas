@@ -7,7 +7,7 @@
 
         include "service.inc"
 
-VERSION equ 11
+VERSION equ 12
 
         org 0
 
@@ -248,9 +248,9 @@ D_STOP  equ E_STOP
 code_end:
 
 ; For build.py: STMOTR's address, the code segment's data, the tape's most
-; segments, E_FC, and the marker's data.
+; segments, E_FC, the marker's data, and the scratch bytes' start.
 fields:
-        dw t_stmotr, C_POS, SEGS_MAX, E_FC, C_BORDER
+        dw t_stmotr, C_POS, SEGS_MAX, E_FC, C_BORDER, e_sp
 fields_end:
 
 ; ---- T0 without a part in page 3, from 19DDh to 1B44h ----

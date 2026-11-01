@@ -22,7 +22,7 @@ import cas  # noqa: E402
 import gamefile  # noqa: E402
 import patches  # noqa: E402
 
-SERVICE_VERSION = 11
+SERVICE_VERSION = 12
 PAGE = 16384
 HEADER_SIZE = 4096
 MAGIC = b"SNAPCAS4"
@@ -292,7 +292,7 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
     in page 3, as 16 KB blocks, after writing the service's part of page 3
     into the game's page 3 at page's E1h (DESIGN.md, Tape service)."""
     _, stubs, page3, code, fields, t0m, t0m_fields = parts[:7]
-    stmotr, c_pos, segs_max, e_fc, c_border = struct.unpack("<5H", fields)
+    stmotr, c_pos, segs_max, e_fc, c_border, _ = struct.unpack("<6H", fields)
     t0 = tape_rom(snap)
     p3 = selected_page(state, pages, 3)
     if p3 is None:

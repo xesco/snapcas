@@ -149,18 +149,21 @@ def main():
 
     snap = os.path.join(gamefile.out_folder(args.machine, game.folder), "snap")
     procedures = (patches.slots.tcl_settings() + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/capture.tcl")
-                  + msx.tcl("patches/slots.tcl"))
-    # The slot patches that the capture finds (DESIGN.md, Slot patches): each
-    # one stops the capture, which runs again on the patched tape.
+                  + msx.tcl("patches/slots.tcl") + patches.ramsearch.tcl_settings()
+                  + msx.tcl("patches/ramsearch.tcl"))
+    # The patches of the tape that the capture finds (DESIGN.md, Slot patches,
+    # The RAM search patch): each one stops the capture, which runs again on the
+    # patched tape.
     found = []
     for run in range(MAX_SLOT_PATCHES + 1):
         result = capture_once(game, machine, cas_path, data, side2, snap, procedures, found)
         if result != "patch":
             break
+        # One line for a slot patch, one for each copy of the RAM search.
         with open(os.path.join(snap, "newpatch.txt")) as f:
-            line = f.read().strip()
-        found.append(gamefile.read_patch(line.split()[1:], f"{snap}/newpatch.txt"))
-        found[-1].line = line
+            for line in f.read().splitlines():
+                found.append(gamefile.read_patch(line.split()[1:], f"{snap}/newpatch.txt"))
+                found[-1].line = line
     else:
         print(f"capture.py: the capture found more than {MAX_SLOT_PATCHES} slot patches", file=sys.stderr)
         return 2
@@ -168,7 +171,7 @@ def main():
         print(result, file=sys.stderr)
         return 2
     with open(os.path.join(snap, "patches.txt"), "w") as f:
-        f.write("# The capture's slot patches of the tape (docs/DESIGN.md, Slot patches).\n")
+        f.write("# The capture's patches of the tape (docs/DESIGN.md, Slot patches, The RAM search patch).\n")
         f.writelines(p.line + "\n" for p in found)
     print(snap)
     return 0
