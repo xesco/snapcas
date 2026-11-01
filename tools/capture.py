@@ -21,7 +21,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import build  # noqa: E402
-import cas  # noqa: E402
+import tape  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
 import patches  # noqa: E402
@@ -46,9 +46,13 @@ def key_tcl(kind, value):
 
 
 def settings(game, machine, cas_path, data, snap, side2_path=None, side2=b""):
+    """The Tcl settings. data and side2 are the tape files' bytes, of which
+    the capture uses the tape service's tapes (DESIGN.md, Tape files)."""
     keys = [(t, key_tcl(kind, value)) for t, kind, value in game.keys]
     tries = ([game.continue_key] if game.continue_key else []) + ["space", "return"]
-    command = cas.load_command(data)
+    data = tape.service(tape.read(game.cas, data))
+    side2 = tape.service(tape.read(game.side2, side2)) if game.side2 else b""
+    command = tape.load_command(data)
     s = {
         "snap": msx.tcl_word(snap),
         "boot": tcl_list("{" + msx.tcl_word(text) + " " + msx.tcl_word(msx.press(key)) + "}"
@@ -58,14 +62,14 @@ def settings(game, machine, cas_path, data, snap, side2_path=None, side2=b""):
         "cas": msx.tcl_word(cas_path),
         "cmd": msx.tcl_word(command),
         "cload": "1" if command == "CLOAD" else "0",
-        "headers": tcl_list(str(h) for h in cas.headers(data)),
-        "needed": str(cas.needed_end(data)),
+        "headers": tcl_list(str(h) for h in tape.headers(data)),
+        "needed": str(tape.needed_end(data)),
         "side2": "1" if game.side2 else "0",
         # Side 2 follows side 1, padded to a multiple of 8 bytes, as in the
         # tape service's positions.
         "side2cas": "{}" if side2_path is None else msx.tcl_word(side2_path),
-        "s1len": str(cas.side2_start(len(data))),
-        "headers2": tcl_list(str(h + cas.side2_start(len(data))) for h in cas.headers(side2)),
+        "s1len": str(tape.side2_start(len(data))),
+        "headers2": tcl_list(str(h + tape.side2_start(len(data))) for h in tape.headers(side2)),
         "nosvc": "1" if game.service_no else "0",
         "keys": tcl_list(f"{t} {msx.tcl_word(tcl)}" for t, tcl in keys),
         "lastkey": str(max([t for t, _ in keys], default=0)),
@@ -88,14 +92,14 @@ def capture_once(game, machine, cas_path, data, side2, snap, procedures, found):
     os.makedirs(snap)
     if found or any(patch.page == "side1" for patch in game.patches):
         # The tape that the capture loads, with the side1 patches.
-        cas_path = os.path.join(snap, "side1.cas")
+        cas_path = os.path.join(snap, "side1" + os.path.splitext(game.cas)[1].lower())
         with open(cas_path, "wb") as f:
             f.write(data)
     side2_path = None
     if game.side2:
         # Side 2, with the side2 patches, for the capture to insert when the
         # game reads past side 1's end.
-        side2_path = os.path.join(snap, "side2.cas")
+        side2_path = os.path.join(snap, "side2" + os.path.splitext(game.side2)[1].lower())
         with open(side2_path, "wb") as f:
             f.write(side2)
     script = settings(game, machine, cas_path, bytes(data), snap, side2_path, bytes(side2)) + procedures + "\nstep1\n"
@@ -142,7 +146,14 @@ def main():
         print(f"capture.py: {e}", file=sys.stderr)
         return 1
     data, side2 = bytes(data), bytes(side2)
-    if cas.load_command(data) is None:
+    try:
+        command = tape.load_command(tape.service(tape.read(game.cas, data)))
+        if game.side2:
+            tape.read(game.side2, side2)
+    except tape.TapeError as e:
+        print(f"capture.py: {e}", file=sys.stderr)
+        return 1
+    if command is None:
         print(f"capture.py: {cas_path}: the first block is not a binary file, a BASIC "
               "program or an ASCII program", file=sys.stderr)
         return 1

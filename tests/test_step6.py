@@ -11,7 +11,7 @@ import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
-import cas  # noqa: E402
+import tape  # noqa: E402
 import patches  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step4  # noqa: E402
@@ -262,7 +262,7 @@ class PatchedTape(unittest.TestCase):
         self.assertTrue(self.report.startswith("point 1: pass"), self.report)
         self.assertIn("side 2 inserted", self.log)
         with open(os.path.join(CAS_DIR, "SOOTLAND.CAS"), "rb") as f:
-            side2_start = cas.side2_start(len(f.read()))
+            side2_start = tape.side2_start(len(f.read()))
         self.assertGreater(int(self.state["tapepos"], 16), side2_start)
 
 
@@ -280,9 +280,9 @@ def borrow_tape():
 
     def padded(data):
         return data + bytes(-len(data) % 8)
-    tape = padded(cas.HEADER + b"\xD0" * 10 + b"BORROW")
-    tape = padded(tape + cas.HEADER + struct.pack("<3H", start, start + len(code) - 1, start) + code)
-    return tape + cas.HEADER + bytes(range(256))
+    data = padded(tape.HEADER + b"\xD0" * 10 + b"BORROW")
+    data = padded(data + tape.HEADER + struct.pack("<3H", start, start + len(code) - 1, start) + code)
+    return data + tape.HEADER + bytes(range(256))
 
 
 @unittest.skipUnless(os.path.isfile(os.path.join(ROOT, "out", "borrow.bin")), "make builds out/borrow.bin")

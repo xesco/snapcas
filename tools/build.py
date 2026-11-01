@@ -18,7 +18,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
-import cas  # noqa: E402
+import tape  # noqa: E402
 import gamefile  # noqa: E402
 import patches  # noqa: E402
 
@@ -299,7 +299,7 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
         raise BuildError(f"{snap}: page 3 is not a RAM page that the snapshot keeps")
 
     side1_end = len(side1)
-    side1 = side1 + bytes((cas.side2_start(len(side1)) if side2 else len(side1) + (-len(side1) % 8)) - len(side1))
+    side1 = side1 + bytes((tape.side2_start(len(side1)) if side2 else len(side1) + (-len(side1) % 8)) - len(side1))
     if t0_mode:
         # T0 holds the routines and their data, and the jump table's entries
         # from 00E1h to 00F3h go to them.
@@ -310,13 +310,13 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
             t0[0xE1 + 3 * n:0xE4 + 3 * n] = bytes([0xC3]) + struct.pack("<H", target)
         t0[t_page:t_page + 6] = borrowed_page(state, pages)[1]
         start, data = 0, t0
-        tape = bytearray(side1 + side2)
+        stream = bytearray(side1 + side2)
     else:
         t0[TAPE_CODE:TAPE_CODE + len(stubs)] = stubs
         struct.pack_into("<H", t0, STMOTR + 1, stmotr)
         start, t_pos, base = len(code), c_pos, c_border
-        tape = bytearray(code) + side1 + side2
-        data = tape
+        stream = bytearray(code) + side1 + side2
+        data = stream
     pos = start + num(state, "tapepos")
     write_positions(data, t_pos, start, pos, len(side1), len(side2))
     side = 1 if side2 and pos >= start + len(side1) else 0
@@ -326,12 +326,12 @@ def service_segments(snap, parts, side1, side2, pages, state, tail_address, page
         # tape does not have, when side 2 follows it.
         real = start + (side1_end if side2 else len(side1))
         data[base + 13:base + 16] = real.to_bytes(3, "little")
-    tape += bytes(-len(tape) % PAGE)
-    if len(tape) // PAGE > segs_max:
-        raise BuildError(f"the tape needs {len(tape) // PAGE} segments, more than {segs_max}")
+    stream += bytes(-len(stream) % PAGE)
+    if len(stream) // PAGE > segs_max:
+        raise BuildError(f"the tape needs {len(stream) // PAGE} segments, more than {segs_max}")
     if not t0_mode:
         write_page3_part(p3, page3, page, tail_address, e_fc, state)
-    return [bytes(t0)] + [bytes(tape[n:n + PAGE]) for n in range(0, len(tape), PAGE)]
+    return [bytes(t0)] + [bytes(stream[n:n + PAGE]) for n in range(0, len(stream), PAGE)]
 
 
 def apply_patch(patch, data, place):
@@ -484,14 +484,18 @@ def image_header(snap, state, records, writes, flags, page, borrowed, tail_addre
 
 
 def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=False, wanted_page=None,
-          t0_mode=False):
+          t0_mode=False, names=("side1.cas", "side2.cas")):
     """Returns (header and tables, the records' data, a report, scan.txt's
-    text). side1 and side2 are the CAS data for the tape service, patch_lines
-    the game file's patches, and rom_keep keeps T0 from replacing the ROM."""
+    text). side1 and side2 are the tape files' bytes, and names their files'
+    names, patch_lines the game file's patches, and rom_keep keeps T0 from
+    replacing the ROM."""
     state = read_state(snap)
     patch_lines = list(patch_lines) + patches.slots.capture_patches(snap)
     slots = patches.slots.read_slots(snap)
     side1, side2 = patch_sides(patch_lines, side1, side2)
+    # The tape service's tapes of the patched files (DESIGN.md, Tape files).
+    side1 = tape.service(tape.read(names[0], side1)) if side1 else b""
+    side2 = tape.service(tape.read(names[1], side2)) if side2 else b""
     parts = read_service(service_path)
     tail = parts[0]
     pages = read_pages(snap)
@@ -525,7 +529,7 @@ def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=Fal
 
 
 def read_tapes(game, cas_dir):
-    """The CAS data of side 1 and side 2, b"" without a side 2. A patch fits
+    """The bytes of side 1's and side 2's tape files, b"" without a side 2. A patch fits
     only the dumps that it was made for, so with patch lines the CAS files
     must match the game file's sha1 lines."""
     side2 = b""
@@ -537,7 +541,7 @@ def read_tapes(game, cas_dir):
     if game.patches:
         dumps = [side1] + ([side2] if game.side2 else [])
         if [hashlib.sha1(d).hexdigest() for d in dumps] != game.sha1:
-            raise BuildError(f"{game.folder}/game.txt: patch lines need sha1 lines that match the CAS files")
+            raise BuildError(f"{game.folder}/game.txt: patch lines need sha1 lines that match the tape files")
     return side1, side2
 
 
@@ -556,8 +560,9 @@ def main():
         out = gamefile.out_folder(args.machine, folder)
         side1, side2 = read_tapes(game, args.cas)
         header, data, report, scanned = build(os.path.join(out, "snap"), args.service, side1, side2,
-                                     game.patches, game.rom_keep, game.service_page, game.service_t0)
-    except (OSError, gamefile.GameFileError, BuildError) as e:
+                                     game.patches, game.rom_keep, game.service_page, game.service_t0,
+                                     (game.cas, game.side2 or ""))
+    except (OSError, gamefile.GameFileError, BuildError, tape.TapeError) as e:
         print(f"build.py: {e}", file=sys.stderr)
         return 1
     image = os.path.join(out, f"{game.name}.SNP")

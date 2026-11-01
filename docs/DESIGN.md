@@ -85,7 +85,7 @@ The commands share their code through modules, and the Tcl that runs inside
 |---|---|
 | `tools/gamefile.py` | Reads game files. Finds a game's folder from a name below `games/` or from a path, and the game's output folder, `out/<machine>/<game>/` |
 | `tools/msx.py` | Reads machine files and finds one from its name. Starts `openMSX` with a Tcl script, and makes disk images |
-| `tools/cas.py` | Reads CAS files |
+| `tools/cas.py`, `tools/tape.py` | The reader of CAS files, and the tape model and the tape service's tape, which the rest of the code uses ([Tape files](#tape-files)) |
 | `tools/patches/` | The automatic patches, one file for each kind, as below |
 | `tools/tcl/prelude.tcl` | The procedures that every `openMSX` run gets: reading the screen, passing the boot menu, and typing at DOS's prompt |
 | `tools/tcl/memory.tcl` | The procedures that the capture and the check share: the CPU's view of memory with a slot selected, the tests of RAM and of a mapper, and the read of VRAM |
