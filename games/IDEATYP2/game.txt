@@ -1,0 +1,4 @@
+# IdeaType - Instructor Mecanografico (1985)(Idealogic)(es)(Side B)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/IdeaType%20-%20Instructor%20Mecanografico%20(1985)(Idealogic)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
+cas IDEATYPB.CAS
+sha1 ae757dda4e7c231a0571ec476b50766d3b012dcc

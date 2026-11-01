@@ -1,0 +1,4 @@
+# Mortadelo y Filemon II - Safari Callejero (1990)(Dro Soft)(es)(Side B)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Mortadelo%20y%20Filemon%20II%20-%20Safari%20Callejero%20(1990)(Dro%20Soft)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
+cas MORTADEB.CAS
+sha1 3d7eed9130b16432afd67e570d0d034997905dff

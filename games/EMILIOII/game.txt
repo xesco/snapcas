@@ -1,5 +1,4 @@
 # Emilio Butragueno Futbol II (1989)(Erbe Software - Ocean Software)(es)(Side A)[RUN'CAS-']
 # https://download.file-hunter.com/Games/MSX1/CAS/Emilio%20Butragueno%20Futbol%20II%20(1989)(Erbe%20Software%20-%20Ocean%20Software)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas EMILIOII.CAS
-side2 EMILIOB.CAS
-sha1 604f7ca61527564d564ab7aa5a6ba9265f31d8ab 9ac7cd9adb1555fc7a7cd25c3d07ec15deef79b3
+sha1 604f7ca61527564d564ab7aa5a6ba9265f31d8ab

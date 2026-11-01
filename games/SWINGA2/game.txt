@@ -1,0 +1,4 @@
+# Swing Man (Spectravideo) [_] [CLOAD-RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Swing%20Man%20(Spectravideo)%20%5B_%5D%20%5BCLOAD-RUN%5D.zip
+cas SWINGB.CAS
+sha1 d122e3c80cce689efe28dbb4734f411f6487ed98

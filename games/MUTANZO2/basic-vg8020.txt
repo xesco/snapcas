@@ -1,0 +1,5 @@
+# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2, whose RAM in slot 1 the game's loader
+# finds before the internal RAM in slot 3.
+capture basic/vg8020-nodisk

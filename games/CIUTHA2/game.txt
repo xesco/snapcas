@@ -1,0 +1,4 @@
+# Ci-U-Than Trilogy III - Chichen Itza (1992)(Aventuras AD)(es)(Side B)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Ci-U-Than%20Trilogy%20III%20-%20Chichen%20Itza%20(1992)(Aventuras%20AD)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
+cas CI-UIII.CAS
+sha1 76f7a2c26cce29d7a94f2401b823062b9371b7cb

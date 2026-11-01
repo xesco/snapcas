@@ -1,0 +1,4 @@
+# Capitan Trueno (1989)(Dinamic Software)(es)(Side B)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Capitan%20Trueno%20(1989)(Dinamic%20Software)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
+cas CAPITCAS.CAS
+sha1 12ce8815ef6fc0524b4af29919adcbf7b70ea085

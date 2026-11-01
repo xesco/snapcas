@@ -1,5 +1,4 @@
 # Ci-U-Than Trilogy II - Los Templos Sagrados (1991)(Aventuras AD)(es)(Side A)[RUN'CAS-']
 # https://download.file-hunter.com/Games/MSX1/CAS/Ci-U-Than%20Trilogy%20II%20-%20Los%20Templos%20Sagrados%20(1991)(Aventuras%20AD)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas CI-ULOS.CAS
-side2 CI-U91.CAS
-sha1 cd2f037b8375d783331dde004874426c448a46c8 2efeb2f05ccbdcd8ab1ed1cc116ae2d0eee7caf8
+sha1 cd2f037b8375d783331dde004874426c448a46c8

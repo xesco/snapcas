@@ -1,5 +1,4 @@
 # Legends of Star Arthur - Planet Mephius (1985)(T&E Soft)(ja)(Side A)[CLOAD + RUN]
 # https://download.file-hunter.com/Games/MSX1/CAS/Legends%20of%20Star%20Arthur%20-%20Planet%20Mephius%20(1985)(T%26E%20Soft)(ja)(Side%20A)%5BCLOAD%20%2B%20RUN%5D.zip
 cas LEGENDS.CAS
-side2 LEGENDSB.CAS
-sha1 87b6e7fdba9151ae971c0619f46e05e26bac56b3 d4af76cd5baec11a251e1b75198a4bdd514e7545
+sha1 87b6e7fdba9151ae971c0619f46e05e26bac56b3

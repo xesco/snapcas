@@ -1,0 +1,4 @@
+# Army Moves (1987)(Imagine Software)(Side B)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Army%20Moves%20(1987)(Imagine%20Software)(Side%20B)%5BRUN'CAS-'%5D.zip
+cas ARMY-MOB.CAS
+sha1 af618cb34ef22808037c1ac95e61c6b54d9545e4

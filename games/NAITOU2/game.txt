@@ -1,0 +1,4 @@
+# Naitou Kunio no Tsume Shougi (1984)(Apollo Technica)(Side B)(JP)[CLOAD + RUN]
+# https://download.file-hunter.com/Games/MSX1/CAS/Naitou%20Kunio%20no%20Tsume%20Shougi%20(1984)(Apollo%20Technica)(Side%20B)(JP)%5BCLOAD%20%2B%20RUN%5D.zip
+cas NAITOUB.CAS
+sha1 d6bda2ea100d07d51919f11340cbfda4f2a34ac6

@@ -1,0 +1,4 @@
+# Freddy Hardest (1987)(Dinamic Software)(es)(Side B)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Freddy%20Hardest%20(1987)(Dinamic%20Software)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
+cas FREDDYES.CAS
+sha1 a8764d402036d54848d5d1c704533da1e087be04

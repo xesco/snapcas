@@ -1,5 +1,4 @@
 # Toi Acid Game (1989)(Iber Soft)(es)(Side A)[RUN'CAS-']
 # https://download.file-hunter.com/Games/MSX1/CAS/Toi%20Acid%20Game%20(1989)(Iber%20Soft)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas TOI-ACID.CAS
-side2 TOI-ACIB.CAS
-sha1 dfaa55efe1291a3879739332e0a58d5c40f34780 b3617a45ded53bc2a8548b91e615df30a7d13bfc
+sha1 dfaa55efe1291a3879739332e0a58d5c40f34780

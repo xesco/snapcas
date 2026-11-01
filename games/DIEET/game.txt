@@ -1,5 +1,4 @@
 # Dieet (1986)(Philips)(nl)(Side A)[BLOAD'CAS-',R]
 # https://download.file-hunter.com/Games/MSX1/CAS/Dieet%20(1986)(Philips)(nl)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
 cas DIEET.CAS
-side2 DIEETB.CAS
-sha1 4e1ca57ec353efbd9014364afea50bbf5e20d70c 41b3e1422556b140400f10bfd8a7ef0800b92442
+sha1 4e1ca57ec353efbd9014364afea50bbf5e20d70c

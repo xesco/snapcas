@@ -1,5 +1,4 @@
 # Michel Futbol Master (1989)(Dinamic Software)(Side A)[RUN'CAS-']
 # https://download.file-hunter.com/Games/MSX1/CAS/Michel%20Futbol%20Master%20(1989)(Dinamic%20Software)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas MICHEL.CAS
-side2 MICHELB.CAS
-sha1 f7d0d7eef8f411babbea770ef047b21bca1021f2 ce599498c2ddea8878ba231491fbcbc751c5e555
+sha1 f7d0d7eef8f411babbea770ef047b21bca1021f2

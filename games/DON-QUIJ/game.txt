@@ -1,5 +1,4 @@
 # Don Quijote (1987)(Dinamic Software)(es)(Side A)[RUN'CAS-']
 # https://download.file-hunter.com/Games/MSX1/CAS/Don%20Quijote%20(1987)(Dinamic%20Software)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas DON-QUIJ.CAS
-side2 DON-QUIB.CAS
-sha1 d397cc5508c158329300f69bced7b9fc2d061b79 2ce8838591000e0ed11da7cc86c7fa9c482261b8
+sha1 d397cc5508c158329300f69bced7b9fc2d061b79

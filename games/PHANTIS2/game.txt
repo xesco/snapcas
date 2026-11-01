@@ -1,0 +1,4 @@
+# Phantis (1987)(Dinamic Software)(es)(Side B)[RUN'CAS-']
+# https://download.file-hunter.com/Games/MSX1/CAS/Phantis%20(1987)(Dinamic%20Software)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
+cas PHANTISB.CAS
+sha1 0bc7c944876cd92be8b868fbdc57a927e2b0b6c3

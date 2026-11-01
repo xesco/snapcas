@@ -1,5 +1,4 @@
 # Jabato (1989)(Aventuras AD)(es)(Side A)[RUN'CAS-']
 # https://download.file-hunter.com/Games/MSX1/CAS/Jabato%20(1989)(Aventuras%20AD)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas JABATO.CAS
-side2 JABATOB.CAS
-sha1 b300c9f204d427f8ec64ac244b23583aa0a26026 9d7cc5f500ca28b316e832684983acf0790540c3
+sha1 b300c9f204d427f8ec64ac244b23583aa0a26026
