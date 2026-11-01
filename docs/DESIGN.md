@@ -1122,6 +1122,11 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   stack pointer is below 26, as Breakout's 0004h is on the MFRSD machine, or whose
   bytes there are not in a kept RAM page, gets no image: `build.py` stops
   ([Tail](#tail)).
+- A game whose stack reaches FFFFh writes the subslot register when page 3 is an
+  expanded slot, as the Carnivore2's RAM is in a capture on the VG-8020, and its
+  slots change under it. Super MSX n.17's side B sets its stack pointer to 0000h, so
+  its game file captures without the Carnivore2, where FFFFh is RAM, and takes its
+  snapshot at 125 seconds, when the stack pointer leaves room for the tail.
 - Music that BASIC's `PLAY` statement is still playing at the snapshot does not
   resume on a real Sanyo PHC-28S, though it does in `openMSX`, and the cause is not
   known. Tokyo Nampa Street then waits for its music to end and never does. Its game
