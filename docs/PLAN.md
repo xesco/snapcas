@@ -353,8 +353,8 @@ after point 1, because the check's own boot passes there.
 
 | Test | What it proves |
 |---|---|
-| Aliens, from Super MSX n.9, on `advanced/phc28s` | An image that reboots to the boot screen fails point 3, though it passes points 1 and 2 and the reset breakpoint misses it |
-| Cita, from Super MSX n.15, on `basic/vg8020` | An image that reboots into DOS fails point 3, because `SNAPCAS.COM` starts again |
+| Aliens, from Super MSX n.9, on `advanced/phc28s`, without its machine's game file | An image that reboots to the boot screen fails point 3, though it passes points 1 and 2 |
+| Konami's Soccer on `basic/vg8020` | An image that reboots into DOS fails point 3, because `SNAPCAS.COM` starts again |
 | Enchanted on `advanced/phc28s` | A game whose code passes the tail's jump address again passes point 3 |
 | Roberto Mate, from Philips's Turbo Pack A, on `advanced/phc28s` | A game whose restored screen holds BASIC's banner passes point 3 |
 | Konami's Soccer on `advanced/phc28s` | An image whose restored game never reaches the reset that its capture shows fails point 3 |

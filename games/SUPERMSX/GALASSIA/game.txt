@@ -1,5 +1,5 @@
 # Galassia, the third game on the tape Super MSX n.15 (ottobre 1988) - cas_15 /
-# SUPER15A.CAS, after Cita (games/SUPERMSX/CITA):
+# SUPER15A.CAS, after Cita, whose dump is broken and has no game file:
 # https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.15%20(ottobre%201988)%20-%20cas_15.zip
 # It is a copy of Galaxian (Namco), as edicola8bit lists it. It also has a dump of
 # its own (games/GALAXIAN). Source:
