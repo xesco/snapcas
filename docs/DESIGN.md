@@ -1228,6 +1228,18 @@ report to `check/report.txt`:
    stops in the BIOS on the VG-8020 with its interrupts off. Its game file now
    captures it without the Carnivore2
    ([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)).
+4. During the same 60 seconds the game must not stop at a BASIC error. A BASIC
+   program, or a loader written in BASIC, that meets an error prints one of BASIC's
+   error messages, such as `Syntax error in 100`, and waits at `Ok`, in a text mode,
+   where `openMSX`'s `screen` reads it. The point fails when the screen's text holds
+   one of those messages at one of the savestates. Points 1 to 3 do not see such a
+   stop: a scan of the 60-second savestates of the collection's passing game files
+   found 17 runs on the PHC-28S and the VG-8020 that end at an error, among them
+   Field Master's `Overflow in 130` and three tapes of the CasLink3 loader, whose
+   `BLOAD` of the next part ends in `Syntax error`. A loader that stops at `Ok` on
+   purpose, and tells the player to press F5 or type `RUN`, as 12 tapes do, shows no
+   error message, so it passes. The report adds `point 4: fail` and the message, or
+   else `point 4: pass`, and a failed point 4 fails the check.
 
 Code that a game builds only when the player reaches a level is not visible to the
 scan or to the check. It appears as a hang during play, and a trace of that load in

@@ -382,3 +382,16 @@ the game file's settings as one value instead of a parameter for each.
 | A game file with `service at` an address whose page has room at the snapshot | `build.py` places the tape service's part there, and the image passes the check |
 | A game file with `rom keep` whose page 3 has no room for the part | `build.py` stops with an error instead of taking the mode without a part in page 3 |
 | Every shipped game file | It reads to the same settings as before, and the sample of game files keeps byte-identical images, scans, states and reports |
+
+## Step 18: the check's BASIC error point
+
+This step adds point 4 to the check: a BASIC error message on the screen at one of
+the savestates fails it ([Check](DESIGN.md#check)). The messages are BASIC's, and
+the check reads the screen's text at each savestate, as point 3 reads it for the
+boot screen.
+
+| Test | What it proves |
+|---|---|
+| Field Master on `advanced/phc28s` | A BASIC game that stops at `Overflow in 130` after the restore fails point 4, though it passes points 1 to 3 |
+| Aritmo, from Philips's Turbo Pack A, on `advanced/phc28s` | A loader that stops at `Ok` on purpose, for the player to press F5, passes point 4 |
+| The collection on `advanced/phc28s` and `basic/vg8020` | The game files that fail point 4 are the 17 runs of the scan, and they are fixed or sorted into the failure lists |
