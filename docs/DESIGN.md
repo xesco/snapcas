@@ -595,6 +595,32 @@ the RAM that the loader finds is in an expanded slot other than the slot of page
 The patched loader then selects the subslot that the slot's register already
 selects.
 
+### Page 3's slot for the other pages
+
+Many loaders take for granted that the slot of page 3's RAM also holds RAM in pages
+0 to 2, as it does on a machine with 64 KB in one slot, such as the Philips VG-8020.
+The Sanyo PHC-28S keeps its own 16 KB in slot 0, in page 3 only, beside the ROM in
+pages 0 and 1, and its RAM cartridge in slot 1. With the Carnivore2, BASIC takes
+pages 2 and 3 from the Carnivore2's mapper in slot 2-2 instead. Such a loader then
+copies the game into the ROM or into a subslot that the other pages do not select,
+and the game crashes into a reset. The loaders seen so far take one of these forms:
+
+| Form | Games | Fix in the PHC-28S's game file |
+|---|---|---|
+| `BIT 7,A` / `SET 3,A` / `BIT 6,A` / `SET 2,A`: page 1's bits of the slot register from page 3's | Circus Charlie and Hyper Sports 3 from Engesoft, and M-Droid's `core` | A patch that makes the routine select slot 1, the RAM cartridge, in page 1 |
+| The same routine as text, in a BASIC loader's `DATA` lines | M-Droid | A patch of the text |
+| A fixed value for pages 1 to 3, chosen by page 3's slot | Beach-Head: 54h for page 3 in slot 0 or 1 | A patch to 14h, and the capture without the Carnivore2 |
+| Page 2's slot copied into page 1's bits, by a program `slots` | Budokan, Michel Futbol Master's side B, and Professional Tennis Simulator, two dumps of each of the last two | The capture without the Carnivore2, where pages 1 to 3 are the RAM cartridge |
+| A search for RAM in page 1 only, and a ROM image read into page 1 there and into BASIC's page 2, after which the game selects page 1's slot in page 2 | Aliens from Super MSX n.9, and the second half of Hyper Sports 3 | The capture without the Carnivore2, where pages 1 and 2 are the RAM cartridge |
+| A shorter variant of `slots` that keeps the slots it finds | Underground | The capture without the Carnivore2. Which value leads the game to its reset is not known |
+
+The fixes are lines in the game files, not a patch that the capture makes itself,
+because the forms differ. A search of the test collection found the first form in
+the code of four tapes only, each of whose game files already has its line, and the
+other forms in one to three games each. The capture's own patches cover the forms
+that repeat over many tapes ([Slot patches](#slot-patches),
+[The RAM search patch](#the-ram-search-patch)).
+
 ### Snapshot files
 
 | File | Contents |
