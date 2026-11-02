@@ -192,9 +192,9 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 | `continue` | A key name that the capture tries before space and Return, to continue a load that waits for a key | None | `game.txt` |
 | `snapshot` | `at` and a time, at which the capture takes the snapshot: for a game that asks the player to stop the tape, the moment it asks, because `openMSX`'s tape runs on and the tape service serves every later load | Found by the capture | `game.txt` |
 | `capture` | A capture variant of the machine, on which the capture loads the game ([Machine file](#machine-file)) | The command's machine file | The machine's game file |
-| `service` | `no` for a game that never reads the rest of its tape, though blocks of it stay unread. A game can read them only at its end, so `no` is for a game that someone has played to its end. A compilation's program also takes `no` when its capture reads the tape up to the next program's loader, because the blocks after it are the later programs' ([A game later on the tape](#a-game-later-on-the-tape)). Or `at` and an address xxE1h in page 3, where the tape service's part of page 3 goes ([Build](#build)). Or `t0`, for the tape service without a part in page 3 ([Without a part in page 3](#without-a-part-in-page-3)) | Found by the capture, and by `build.py` | `game.txt` |
+| `service` | `no` for a game that never reads the rest of its tape, though blocks of it stay unread. A game can read them only at its end, so `no` is for a game that someone has played to its end. A compilation's program also takes `no` when its capture reads the tape up to the next program's loader, because the blocks after it are the later programs' ([A game later on the tape](#a-game-later-on-the-tape)). Or `at` and an address xxE1h in page 3, where the tape service's part of page 3 goes ([Build](#build)). Or `t0`, for the tape service without a part in page 3 ([Without a part in page 3](#without-a-part-in-page-3)). A file holds at most one `service` line, and `capture.py` and `build.py` stop with an error at a second one. A machine's game file's line replaces `game.txt`'s, as with any key that both give | Found by the capture, and by `build.py` | `game.txt`, or the machine's game file for a line that holds only on that machine, as the 8 shipped `t0` lines do |
 | `patch` | A place, the old bytes, `>`, the new bytes: `patch page3:215F CD E1 00 > CD E1 FC` | None | `game.txt`, and a patch of a slot register's value the machine's game file |
-| `rom` | `keep` for a game that must find the ROM in page 0 at the snapshot's slot: T0 does not replace the ROM, and the game reaches the tape service only through calls patched to the entries in page 3 | T0 replaces the ROM when the restorer's rule allows it | `game.txt` |
+| `rom` | `keep` for a game that must find the ROM in page 0 at the snapshot's slot: T0 does not replace the ROM, and the game reaches the tape service only through calls patched to the entries in page 3. So `rom keep` needs the part in page 3: a game file with `rom keep` and `service t0` is an error, and `build.py` stops when it would take the mode without a part in page 3 itself ([Without a part in page 3](#without-a-part-in-page-3)) | T0 replaces the ROM when the restorer's rule allows it | `game.txt` |
 
 A place is a RAM page as `page<n>:<offset>`, which names the RAM page that the
 snapshot selects in page n, 0 to 3, and the offset from that page's start. A place
@@ -951,9 +951,10 @@ to the next. For such a game, the game file's `service t0` puts the whole tape
 service into T0, and nothing of it stays in page 3. `build.py` also takes this mode
 itself when no part of page 3 has room at the snapshot, so a game file needs
 `service t0` only for a game whose page 3 is free at the snapshot but not in a later
-load, as Moonwalker's is. Such a game needs the line on every machine, in
-`game.txt`. The service's part of page 3 exists only because the service switches
-page 0 while it runs, so this mode removes the three switches:
+load, as Moonwalker's is. The line goes in the game file of each machine that needs
+it: Moonwalker's is in `advanced-phc28s.txt`. The service's part of page 3 exists
+only because the service switches page 0 while it runs, so this mode removes the
+three switches:
 
 | Switch | Without a part in page 3 |
 |---|---|
@@ -971,6 +972,7 @@ stops with an error, or the restorer with a message for the last condition:
 | Condition | Why |
 |---|---|
 | No RAM page kept for page 0 is in DOS's mapper | T0 takes the game's mapper register FCh for good |
+| The game file has no `rom keep` | With `rom keep` the ROM stays in page 0, and this mode has no entries in page 3, so the game's tape calls reach the BIOS's own routines and not T0 |
 | When the borrowed page is in DOS's mapper, the game keeps its segment there from then on | `TAPIN` writes back the snapshot's segment |
 | When DOS's mapper's slot is expanded, the snapshot's subslot register of that slot selects the mapper in the borrowed page | The slot register alone then selects the mapper there. The restorer checks this, because only it knows DOS's mapper's slot. When the capture did not have that slot expanded, as a capture variant without the Carnivore2 does not, the game never wrote its subslot register, so the restorer sets the borrowed page's bits there to the mapper's subslot instead |
 
@@ -1207,6 +1209,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | A game file for each program of a compilation, named after its game | A player looks for a game by its name, and an image named after the tape holds only the tape's first program. One game file for the tape, with a line for each program, would keep the tape's `cas` and `sha1` lines in one place, but it needs game files with sections and changes to every tool and to the collection's cache, to save two lines for each program ([A game later on the tape](#a-game-later-on-the-tape)) |
 | Every program of a compilation in the collection's folder, even when the game has a dump of its own | A compilation's copy can differ from that dump: of 112 such programs on the Engesoft and Super MSX tapes, none had game blocks that equal the dump's, because the magazines renamed the games and changed their title screens. A folder for each collection keeps their names, such as `GOLF` or `STAR`, apart from the games of `games/`. This replaces the rule that gave such a program no game file |
 | A reboot after the restore fails the check, and a reset alone does not | Points 1 and 2 compare the restore and watch page 3, so a game that crashes into a reboot after the restore passed them, as eight Super MSX images did. A first rule failed every reset after the restore, on the view that a loader resets on purpose only before the snapshot, as The Goonies's does. Japan, from Super MSX n.20, resets the VG-8020 after the restore and then starts, so the point now judges where the machine ends: DOS starting `SNAPCAS.COM` again, or the BIOS's boot screen ([Check](#check)). Its first signs, the tail's jump running again and `Copyright 1983 by Microsoft` on the screen, failed games that do not reboot: three whose code passes the tail's jump address, and games whose restored screen holds BASIC's banner. The capture only logs its resets, for the same reason |
+| One `service` value for a game, and `rom keep` without the mode without a part in page 3 | `no`, `at` and `t0` choose between ways to serve the tape, so a game takes one of them, and the machine's game file can replace it as it replaces other keys. `rom keep` leaves the game only the entries in page 3, which that mode removes, so the two together give an image whose tape calls reach the BIOS. No shipped game file has both |
 | Restore a snapshot | The game's loader runs once, in `openMSX`, so its slot code, stubs and checks need no changes on the real machine |
 | Capture on a copy of the user's machine, with the disk system's hooks and work area removed | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
 | Snapshot at an interrupt's entry | The CPU's state is complete, interrupts are off, and the bytes below the stack pointer are free for the tail |

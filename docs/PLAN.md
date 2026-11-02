@@ -360,3 +360,20 @@ after point 1, because the check's own boot passes there.
 | Raider, from Super MSX n.18, on `basic/vg8020` | A reset on purpose whose boot screen a single savestate catches passes point 3 |
 | A single-load game on each shipped machine | The check's own boot, before the restore, is not a reboot |
 | The collection on `advanced/phc28s` and `basic/vg8020` | The game files that fail point 3 are sorted into the failure lists |
+
+## Step 17: one service setting
+
+This step makes the game file's `service` line one value, `no`, `at xxE1` or `t0`,
+which a machine's game file replaces, and makes `rom keep` with the mode without a
+part in page 3 an error ([Game file](DESIGN.md#game-file),
+[Without a part in page 3](DESIGN.md#without-a-part-in-page-3)). `build.py` takes
+the game file's settings as one value instead of a parameter for each.
+
+| Test | What it proves |
+|---|---|
+| A game file with two different `service` lines | The game file is refused with an error that names the second line |
+| A game file with `rom keep` and `service t0` | The game file is refused with an error |
+| A game file with `service no` and a machine's game file with `service t0` | The machine's line replaces `game.txt`'s on that machine, and only there |
+| A game file with `service at` an address whose page has room at the snapshot | `build.py` places the tape service's part there, and the image passes the check |
+| A game file with `rom keep` whose page 3 has no room for the part | `build.py` stops with an error instead of taking the mode without a part in page 3 |
+| Every shipped game file | It reads to the same settings as before, and the sample of game files keeps byte-identical images, scans, states and reports |
