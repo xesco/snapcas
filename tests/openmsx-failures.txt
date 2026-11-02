@@ -12,6 +12,4 @@ basic/vg8020 ENGESOFT/YIEARKUN Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 KONAMI Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 MONOPOLY Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 HANG-ON Resets 5 times after the load, and ends on the boot screen
-advanced/phc28s ENGESOFT/NIGHTSHA Stays on Engesoft's loading screen of Night Shade, and the game never starts
-basic/vg8020 ENGESOFT/NIGHTSHA Stays on Engesoft's loading screen of Night Shade, and the game never starts
 advanced/phc28s KONAMI Resets after the load, and ends in Nextor's BASIC
