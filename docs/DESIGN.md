@@ -1169,13 +1169,14 @@ report to `check/report.txt`:
 3. During the same 60 seconds the restored machine must not reboot. Points 1 and 2
    do not see a reboot: seven Super MSX images on the PHC-28S, and American Football
    on the VG-8020, passed them and showed the boot screen or Nextor's 60 seconds
-   after the restore, as their loads do in plain `openMSX`. Either of two signs
-   fails the point:
+   after the restore, as their loads do in plain `openMSX`. Any of three signs fails
+   the point:
 
    | Sign | What it shows |
    |---|---|
    | `SNAPCAS.COM` starts again: the breakpoint at 0100h that reads RAMAD3 fires after the restore | A reset has booted DOS from the check's disk, and its `AUTOEXEC.BAT` runs the restorer again |
    | The screen's text holds `MSX  system` at two or more of the six savestates | The machine stays on the MSX1 BIOS's boot screen, whose first line that is, or comes back to it in a loop of resets. A reset on purpose shows the boot screen for a few seconds before the game starts, so a single savestate can catch it: Raider, from Super MSX n.18, resets the VG-8020 6.2 seconds after the restore and shows its game at 60 seconds. BASIC's banner holds `MSX BASIC` instead, so a BASIC game whose restored screen still holds the banner does not count. The MSX2 BIOS draws its boot screen as graphics, so this sign holds only on an MSX1 |
+   | The capture's log holds a reset in the 60 seconds after the snapshot, and the check notes none | The restored game does not do what the loaded one did. Konami's Soccer and Budokan on the PHC-28S stay on a title or an empty screen for the 60 seconds, though their captures reset 8.7 and 7.8 seconds after the snapshot, and on a real PHC-28S Konami's Soccer's restored game does reset, into DOS |
 
    The first signs were the tail's jump running a second time and
    `Copyright 1983 by Microsoft` on the screen ([Decisions](#decisions)). The first
@@ -1191,12 +1192,14 @@ report to `check/report.txt`:
    finds the ROM copy in RAM and starts it. A breakpoint at the start of the BIOS's
    reset routine, where 0000h's `DI / JP` jumps, while page 0 selects the main ROM,
    as in the capture's log ([Capture](#capture)), notes each reset in the report
-   with its time, but a reset alone does not fail the point. That breakpoint also
-   misses a reboot: Aliens, from Super MSX n.9, reaches the boot screen on the
-   PHC-28S without it, by a way that is *to verify*, and the screen's sign catches
-   it. The report adds `point 3: fail` and the sign, or else `point 3: pass`, and a
-   failed point 3 fails the check. A hang is not a reboot, and point 3 does not see
-   it: American Football stops in the BIOS on the VG-8020 with its interrupts off.
+   with its time, but a reset alone does not fail the point. The check reads EXPTBL,
+   for the main ROM's slot, when `SNAPCAS.COM` starts. It read it when the boot
+   steps ended at first, and on the PHC-28S the BIOS has not set it then, so the
+   breakpoint took the main ROM for slot 3-3 and missed every reset there, Aliens's
+   among them. The report adds `point 3: fail` and the sign, or else
+   `point 3: pass`, and a failed point 3 fails the check. A hang is not a reboot,
+   and point 3 does not see it: American Football stops in the BIOS on the VG-8020
+   with its interrupts off.
 
 Code that a game builds only when the player reaches a level is not visible to the
 scan or to the check. It appears as a hang during play, and a trace of that load in
@@ -1298,9 +1301,11 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   after the snapshot in its capture on the Sanyo PHC-28S, with no key pressed. On a
   real PHC-28S with the RAM cartridge in slot 1 and the Carnivore2 in slot 2, the
   restored game resets too, and the BIOS boots Nextor into DOS, as it does in
-  `openMSX` on the VG-8020. In `openMSX`'s check on the PHC-28S, the restored game
-  stays on its title screen for the 60 seconds and never resets, so the check
-  passes. Why the restored machine does not reset there is not known.
+  `openMSX` on the VG-8020, and as the plain load does in `openMSX` on the PHC-28S.
+  In `openMSX`'s check on the PHC-28S, the restored game stays on its title screen
+  for the 60 seconds and never resets. Point 3's third sign fails the check for that
+  ([Check](#check)), and Budokan does the same, but why the restored machine does
+  not reset there is not known.
 
 ## Formats
 

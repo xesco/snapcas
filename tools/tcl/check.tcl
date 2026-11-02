@@ -18,15 +18,15 @@ proc write_report {} {
 }
 
 proc start_check {} {
-    # EXPTBL, read while the system area is still DOS's.
-    read_exptbl
-    # RAMAD3 at F344h: DOS's mapper's slot ID, read when SNAPCAS.COM starts,
-    # after DOS has set it. A start after the restore is point 3's reboot into
-    # DOS.
+    # EXPTBL and RAMAD3 at F344h, DOS's mapper's slot ID, read when
+    # SNAPCAS.COM starts, while the system area is DOS's. On a machine whose
+    # boot steps end before the BIOS has set EXPTBL, as the Sanyo PHC-28S's do,
+    # it does not hold the slots yet when start_check runs. A start after the
+    # restore is point 3's reboot into DOS.
     set ::reached 0
     set ::dosslot 0
     lassign $::C(com) b0 b1 b2
-    debug set_bp 0x0100 "\[debug read memory 0x100\] == $b0 && \[debug read memory 0x101\] == $b1 && \[debug read memory 0x102\] == $b2" { if {$::reached} { rerun } else { set ::dosslot [debug read memory 0xF344] } }
+    debug set_bp 0x0100 "\[debug read memory 0x100\] == $b0 && \[debug read memory 0x101\] == $b1 && \[debug read memory 0x102\] == $b2" { if {$::reached} { rerun } else { read_exptbl; set ::dosslot [debug read memory 0xF344] } }
     # With the tape service, page 0's bits of the slot register, of DOS's
     # mapper's subslot register, and of SLTTBL, and mapper register FCh, can
     # select T0 (DESIGN.md, Restorer, step 3).
@@ -100,6 +100,11 @@ proc watch_reset {} {
 }
 proc write_point3 {} {
     set f [open $::C(report) a]
+    # The capture reset the machine after the snapshot, and the restored game
+    # does not.
+    if {$::C(capreset) ne "" && [llength $::resets] == 0} {
+        lappend ::reboots "the capture resets the machine $::C(capreset) seconds after the snapshot, and the restored game does not"
+    }
     set failed [expr {[llength $::reboots] || [llength $::boots] >= 2}]
     puts $f [expr {$failed ? "point 3: fail" : "point 3: pass"}]
     foreach line [concat $::reboots $::boots $::resets] { puts $f "  $line" }

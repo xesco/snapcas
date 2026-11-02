@@ -44,6 +44,21 @@ def read_facts(out):
     return facts
 
 
+def capture_reset(snap):
+    """The seconds from the snapshot to the first reset that the capture's log
+    holds in the 60 seconds after it, or "" (DESIGN.md, Check, point 3)."""
+    snapshot = None
+    with open(os.path.join(snap, "log.txt")) as f:
+        for line in f:
+            time, _, text = line.partition(" ")
+            if text.startswith("snapshot"):
+                snapshot = float(time)
+            elif snapshot is not None and text.startswith("the game reset the machine"):
+                delay = float(time) - snapshot
+                return f"{delay:.1f}" if delay < 60 else ""
+    return ""
+
+
 def settings(state, snap, image, report, check_dir, state_name, facts):
     """Tcl variables for check.tcl."""
     with open(image, "rb") as f:
@@ -70,6 +85,7 @@ def settings(state, snap, image, report, check_dir, state_name, facts):
         "p3": "{" + facts["moved"] + "}",
         "part": "{" + facts["part"] + "}",
         "cpos": facts["cpos"],
+        "capreset": msx.tcl_word(capture_reset(snap)),
     }
     return "".join(f"set ::C({k}) {v}\n" for k, v in s.items())
 

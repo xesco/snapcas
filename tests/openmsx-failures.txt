@@ -40,3 +40,4 @@ basic/vg8020 ENGESOFT/NIGHTSHA Stays on Engesoft's loading screen of Night Shade
 advanced/phc28s SUPERMSX/ALEXIS Crashes after its title: the CPU loops in the BIOS at 07ECh with the stack pointer at 004Bh, in the ROM
 basic/vg8020 SUPERMSX/ALEXIS Crashes after its title: the CPU loops in the BIOS at 057Ah with the stack pointer at 0073h, in the ROM
 advanced/phc28s SUPERMSX/GUARDIC Crashes after its title: the CPU loops in the BIOS from 057Fh to 0608h with the stack pointer near 007Fh, in the ROM
+advanced/phc28s KONAMI Resets after the load, and ends in Nextor's BASIC

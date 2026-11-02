@@ -28,6 +28,11 @@ GAMES = {
     "s16-enchante": ("ENCHANTE", "advanced/phc28s"),
     # Keeps BASIC's banner on its restored screen.
     "s16-robe": ("016-ROBE", "advanced/phc28s"),
+    # Never reaches the reset that its capture shows 8.7 seconds after the
+    # snapshot.
+    "s16-konami": ("KONAMI", "advanced/phc28s"),
+    # Resets the PHC-28S on purpose after the restore, and starts its game.
+    "s16-bumper": ("BUMPER", "advanced/phc28s"),
     # Resets the VG-8020 on purpose after the restore, and one savestate catches
     # the boot screen before the game starts.
     "s16-raider": ("SUPERMSX/RAIDER18", "basic/vg8020"),
@@ -48,7 +53,11 @@ def check(name):
     return test_step4.tool("check.py", folder, machine, "--dos", test_step9.SHIPPED[machine]).stdout
 
 
-@unittest.skipUnless(all(os.path.isfile(os.path.join(COLLECTION, n)) for n in ("SUPER-09.CAS", "SUPER-15.CAS", "SUPERMOB.CAS", "ENCHANTE.CAS", "016-ROBE.CAS", "SUPERM18.CAS")),
+TAPES = ("SUPER-09.CAS", "SUPER-15.CAS", "SUPERMOB.CAS", "ENCHANTE.CAS", "016-ROBE.CAS", "SUPERM18.CAS",
+         "KONAMI.CAS", "BUMPER.CAS")
+
+
+@unittest.skipUnless(all(os.path.isfile(os.path.join(COLLECTION, n)) for n in TAPES),
                      "CAS_DIR lacks the tapes of Reboots")
 class Reboots(unittest.TestCase):
     @classmethod
@@ -91,6 +100,17 @@ class Reboots(unittest.TestCase):
         self.assertTrue(report.startswith("point 1: pass"), report)
         self.assertIn("point 3: pass", report)
         self.assertIn("the screen shows the BIOS's boot screen", report)
+
+
+    def test_a_restore_that_skips_the_captures_reset_fails_point_3(self):
+        report = self.reports["s16-konami"]
+        self.assertIn("point 3: fail", report)
+        self.assertIn("the restored game does not", report)
+
+    def test_a_reset_on_the_phc28s_is_noted(self):
+        report = self.reports["s16-bumper"]
+        self.assertIn("point 3: pass", report)
+        self.assertIn("the machine resets", report)
 
 
 if __name__ == "__main__":
