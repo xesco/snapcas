@@ -1,0 +1,9 @@
+# Star, the third game on the tape Super MSX n.16 (novembre 1988) - cas_16 /
+# super_msx_16_lato_B.cas, after Hockey (games/SUPERMSX/HOCKEY):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.16%20(novembre%201988)%20-%20cas_16.zip
+# It is a copy of Guardic (Compile), as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=16
+# The load starts at the BASIC loader STAR, as when the tape runs on after Hockey.
+cas SUPER16B.CAS
+sha1 c7a5fb199e82e0f7380b23de2a2d61138736f99c
+start STAR

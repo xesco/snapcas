@@ -1,4 +1,0 @@
-# Super MSX n.24 (ottobre 1989) - cas_24 / super24latoa.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.24%20(ottobre%201989)%20-%20cas_24.zip
-cas SUPER-24.CAS
-sha1 770bfcfa7ee1722263f99a832d1348c89b8a950d

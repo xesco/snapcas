@@ -1,0 +1,11 @@
+# Miner, the fifth game on the tape Super MSX n.1 (maggio 1987) - cas_1, after Mad
+# Driver (games/SUPERMSX/MADDRIVE):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.1%20(maggio%201987)%20-%20cas_1.zip
+# It is a copy of Dig Dug (Namco), as edicola8bit lists it. It also has a dump of
+# its own (games/DIG-DUG). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=1
+# The load starts at the BASIC loader MINER, as when the tape runs on after Mad
+# Driver.
+cas SUPER-1.CAS
+sha1 33622e2e498ac0052ae70200435d222927b14ec0
+start MINER

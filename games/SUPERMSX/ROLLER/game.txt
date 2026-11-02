@@ -1,0 +1,9 @@
+# Roller, the third game on the tape Super MSX n.4 (settembre 1987) - cas_4 /
+# super_msx_4_lato_A.cas, after Ugo (games/SUPERMSX/UGO):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.4%20(settembre%201987)%20-%20cas_4.zip
+# It is a copy of Rotors, as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=4
+# The load starts at the BASIC loader ROLLER, as when the tape runs on after Ugo.
+cas SUPER4.CAS
+sha1 3719c9ec1ab2ea69d2d6bd060eed73150f3e5523
+start ROLLER

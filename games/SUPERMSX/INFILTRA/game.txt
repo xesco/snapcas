@@ -1,0 +1,8 @@
+# Infiltrator, the first game on the tape Super MSX n.12 (Maggio 1988) - cas_12 /
+# super msx 12b.cas:
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.12%20(Maggio%201988)%20-%20cas_12.zip
+# It is a copy of ByteBusters, as edicola8bit lists it. It also has a dump of its
+# own (games/BYTEBUST). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=12
+cas SUPERMSX.CAS
+sha1 bc160bcf95ac8d12cdea49f7a74972e3788181e7

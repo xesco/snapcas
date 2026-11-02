@@ -1,0 +1,10 @@
+# Rimpallino, the fifth game on the tape Super MSX n.26 (Gennaio 1990) - cas_26 /
+# super26max2.cas, after Pub's Dart (games/SUPERMSX/PUBSDART):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.26%20(Gennaio%201990)%20-%20cas_26.zip
+# It is a copy of Penguin-Kun Wars (ASCII), as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=26
+# The load starts at the BASIC loader RIMPAL, as when the tape runs on after Pub's
+# Dart.
+cas SUPER2.CAS
+sha1 e128c4496e9f32b244f2db5b2db3a9bbb84c4dff
+start RIMPAL

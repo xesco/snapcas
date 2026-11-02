@@ -1,4 +1,0 @@
-# Demo, De (1985)(Philips)(nl)[position tape + RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Demo%2C%20De%20(1985)(Philips)(nl)%5Bposition%20tape%20%2B%20RUN'CAS-'%5D.zip
-cas DEMO85.CAS
-sha1 655b364d7608b25e1c77d983f202bdc7ecf73c3c

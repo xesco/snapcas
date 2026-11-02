@@ -89,15 +89,22 @@ def number(text, where):
 
 
 def game_folder(game):
-    """The folder of a game: a folder below games/, or a folder's path."""
-    if os.sep in game or os.path.isdir(game):
+    """The folder of a game: a folder's path, or a folder below games/, such as
+    ABADIA or a compilation's program, SUPERMSX/GOLF."""
+    if os.path.isdir(game):
         return os.path.abspath(game)
     return os.path.join(ROOT, "games", game)
 
 
 def out_folder(machine, folder):
-    """The output folder, out/<machine>/<game>/, of the game in folder."""
-    return os.path.join(ROOT, "out", machine, os.path.basename(os.path.normpath(folder)))
+    """The output folder, out/<machine>/<game>/, of the game in folder: <game>
+    is its path below games/, so that two collections' programs of the same name
+    stay apart, or the folder's name for a folder elsewhere."""
+    folder = os.path.abspath(folder)
+    games = os.path.join(ROOT, "games")
+    if os.path.commonpath([folder, games]) == games:
+        return os.path.join(ROOT, "out", machine, os.path.relpath(folder, games))
+    return os.path.join(ROOT, "out", machine, os.path.basename(folder))
 
 
 def machine_file(folder, machine):

@@ -1,0 +1,7 @@
+# Container, the first game on the tape Super MSX n.24 (ottobre 1989) - cas_24 /
+# super24latob.cas:
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.24%20(ottobre%201989)%20-%20cas_24.zip
+# It is a copy of Supermind, as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=24
+cas SUPEROB.CAS
+sha1 f747f0115d96e2a290de21c99dd891ec3bd1f4e4

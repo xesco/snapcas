@@ -33,6 +33,7 @@ in [PLAN.md](PLAN.md).
 | `machines/<machine>.txt` | A person, once per machine | How to start the machine in `openMSX` |
 | `games/<game>/game.txt` | A person or an LLM | The game's settings that hold on every machine |
 | `games/<game>/<machine>.txt` | A person or an LLM, for a game that needs it | The game's settings that hold only on one machine, named after the machine file with `-` for `/` ([Game file](#game-file)) |
+| `games/<collection>/<game>/` | A person or an LLM | A compilation's program, with the same files as a game's folder. Its output goes to `out/<machine>/<collection>/<game>/` ([A game later on the tape](#a-game-later-on-the-tape)) |
 | `out/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
 | `out/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image |
 | `out/<machine>/<game>/<GAME>.RPL` | `tools/build.py` | The replay |
@@ -83,7 +84,7 @@ The commands share their code through modules, and the Tcl that runs inside
 
 | File | Holds |
 |---|---|
-| `tools/gamefile.py` | Reads game files. Finds a game's folder from a name below `games/` or from a path, and the game's output folder, `out/<machine>/<game>/` |
+| `tools/gamefile.py` | Reads game files. Finds a game's folder from a name below `games/`, such as `ABADIA` or `SUPERMSX/GOLF`, or from a path, and the game's output folder, `out/<machine>/<game>/`, with the same name below `out/<machine>/` |
 | `tools/msx.py` | Reads machine files and finds one from its name. Starts `openMSX` with a Tcl script, and makes disk images |
 | `tools/cas.py`, `tools/tsx.py`, `tools/tape.py` | The readers of CAS and TSX files, and the tape model and the tape service's tape, which the rest of the code uses ([Tape files](#tape-files)) |
 | `tools/patches/` | The automatic patches, one file for each kind, as below |
@@ -225,7 +226,8 @@ The repository ships a game file for each game of File-Hunter's MSX CAS collecti
 in `games/`, in a folder named after the short name of its side 1 CAS file, such as
 `games/ABADIA/` for `ABADIA.CAS`. The folder name then also names the image. A
 compilation's programs are the exception: each has a game file of its own, in a
-folder named after the program's game
+folder named after the program's game, inside a folder named after the collection,
+such as `games/ENGESOFT/ATHLETIC/`
 ([A game later on the tape](#a-game-later-on-the-tape)). Each game file starts with
 two comments: the game's File-Hunter name, and the link to its zip in File-Hunter's
 MSX1 CAS folder, which a few games lack because the folder does not list them. The
@@ -342,21 +344,26 @@ file's `start` line names the later program's first file, and the load starts th
 
 The shipped files give each program of a compilation a game file of its own, so that
 each image is named after its game and not after the tape, which holds more than one
-game:
+game. The game files of one collection share a folder named after it, such as
+`games/ENGESOFT/` for Engesoft's tapes and `games/SUPERMSX/` for the 27 issues of
+the magazine Super MSX:
 
 | Program | Its game file |
 |---|---|
 | The tape's first program | `cas` and `sha1`, without `start`. A magazine's intro belongs to it, because the intro loads that program itself |
 | A later program | `cas`, `sha1` and `start` |
-| A program that File-Hunter also has as a dump of its own | None: the game file of that dump is the game's, as for Exerion on Engesoft's MSXK-06 |
+| A program that File-Hunter also has as a dump of its own | A game file in the collection's folder as well, as Exerion on Engesoft's MSXK-06 has beside `games/EXERION/`, because a tape's copy can differ from that dump. An earlier rule gave it none ([Decisions](#decisions)) |
 
-Each program's folder is named after its game, as `games/ATHLETIC/` is for Athletic
-Land, the second program on Engesoft's MSXK-06 side A. The game file's first comment
-names the game, the compilation and the program's place on it, and the second
-comment links the compilation's zip. A loader's file name, such as ATLET, seldom
-gives the title, so the title comes from a list of the tape's contents. Each program
-has its own machine's game files, because each program has its own loader. Athletic
-Land's capture runs without the disk system only on the Sanyo PHC-28S, and Kung-Fu
+Each program's folder is named after its game, as `games/ENGESOFT/ATHLETIC/` is for
+Athletic Land, the second program on Engesoft's MSXK-06 side A. A magazine renamed
+the commercial games that it copied, and such a program's folder takes the
+magazine's title, which its title screen shows: Super MSX's Attila is a copy of
+Knightmare, in `games/SUPERMSX/ATTILA/`. The game file's first comment names the
+game, the compilation and the program's place on it, and the second comment links
+the compilation's zip. A loader's file name, such as ATLET, seldom gives the title,
+so the title comes from a list of the tape's contents. Each program has its own
+machine's game files, because each program has its own loader. Athletic Land's
+capture runs without the disk system only on the Sanyo PHC-28S, and Kung-Fu
 Master's, before it on the tape, on the PHC-28S and on the Philips VG-8020. A
 program that is not a game also has a game file, as De Demo's programs have.
 
@@ -1162,6 +1169,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 |---|---|
 | One reader for each tape format, and a format-neutral tape model for the rest of the code | A TSX file holds the turbo blocks that a CAS file cannot, so converting it to CAS would lose the games that need TSX. Teaching each tool both formats would mix them in every tool, while the model keeps each format in one file ([Tape files](#tape-files)) |
 | A game file for each program of a compilation, named after its game | A player looks for a game by its name, and an image named after the tape holds only the tape's first program. One game file for the tape, with a line for each program, would keep the tape's `cas` and `sha1` lines in one place, but it needs game files with sections and changes to every tool and to the collection's cache, to save two lines for each program ([A game later on the tape](#a-game-later-on-the-tape)) |
+| Every program of a compilation in the collection's folder, even when the game has a dump of its own | A compilation's copy can differ from that dump: of 112 such programs on the Engesoft and Super MSX tapes, none had game blocks that equal the dump's, because the magazines renamed the games and changed their title screens. A folder for each collection keeps their names, such as `GOLF` or `STAR`, apart from the games of `games/`. This replaces the rule that gave such a program no game file |
 | Restore a snapshot | The game's loader runs once, in `openMSX`, so its slot code, stubs and checks need no changes on the real machine |
 | Capture on a copy of the user's machine, with the disk system's hooks and work area removed | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
 | Snapshot at an interrupt's entry | The CPU's state is complete, interrupts are off, and the bytes below the stack pointer are free for the tail |

@@ -1,4 +1,0 @@
-# Super MSX n.1 (maggio 1987) - cas_1
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.1%20(maggio%201987)%20-%20cas_1.zip
-cas SUPER-1.CAS
-sha1 33622e2e498ac0052ae70200435d222927b14ec0

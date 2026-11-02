@@ -1,0 +1,10 @@
+# Igloo, the third game on the tape Super MSX n.4 (settembre 1987) - cas_4 /
+# super_msx_4_lato_B.cas, after Jetty (games/SUPERMSX/JETTY):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.4%20(settembre%201987)%20-%20cas_4.zip
+# It is a copy of Doki Doki Penguin Land (Sega), as edicola8bit lists it. It also
+# has a dump of its own (games/DOKI-DOK). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=4
+# The load starts at the BASIC loader IGLOO, as when the tape runs on after Jetty.
+cas SUPER4B.CAS
+sha1 b5e649d6018ade5789adb50be525e2713c314c6c
+start IGLOO

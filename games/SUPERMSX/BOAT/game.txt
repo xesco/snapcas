@@ -1,0 +1,9 @@
+# Boat, the third game on the tape Super MSX n.12 (Maggio 1988) - cas_12 / super
+# msx 12b.cas, after Susy (games/SUPERMSX/SUSY):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.12%20(Maggio%201988)%20-%20cas_12.zip
+# It is a copy of Sailor's Delight, as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=12
+# The load starts at the BASIC loader BOAT, as when the tape runs on after Susy.
+cas SUPERMSX.CAS
+sha1 bc160bcf95ac8d12cdea49f7a74972e3788181e7
+start BOAT

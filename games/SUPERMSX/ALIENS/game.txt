@@ -1,0 +1,11 @@
+# Aliens, the second game on the tape Super MSX n.9 (febbraio 1988) - cas_9 /
+# SUPER09A.CAS, after Calcio (games/SUPERMSX/CALCIO):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.9%20(febbraio%201988)%20-%20cas_9.zip
+# It is a copy of Galaga (Namco), as edicola8bit lists it. It also has a dump of
+# its own (games/GALAGA). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=9
+# The load starts at the BASIC loader ALIENS, as when the tape runs on after
+# Calcio.
+cas SUPER-09.CAS
+sha1 b0a1e73ee6fa9a5fd4691ef8a6b74c14278433e9
+start ALIENS

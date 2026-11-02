@@ -1,0 +1,7 @@
+# Magic Bell, the first game on the tape Super MSX n.2 (giugno 1987) - cas_2 /
+# super msx 2a.cas, after the issue's intro:
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.2%20(giugno%201987)%20-%20cas_2.zip
+# It is a copy of TwinBee (Konami), as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=2
+cas SUPERA2.CAS
+sha1 a9ad5a5676b7e80ceeac6add5fe25ca4075f588e

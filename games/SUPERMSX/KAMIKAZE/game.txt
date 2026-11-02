@@ -1,0 +1,10 @@
+# Kamikaze, the fifth game on the tape Super MSX n.24 (ottobre 1989) - cas_24 /
+# super24latoa.cas, after Gunship (games/SUPERMSX/GUNSHIP):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.24%20(ottobre%201989)%20-%20cas_24.zip
+# edicola8bit lists no original game for it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=24
+# The load starts at the BASIC loader KAMIKA, as when the tape runs on after
+# Gunship.
+cas SUPER-24.CAS
+sha1 770bfcfa7ee1722263f99a832d1348c89b8a950d
+start KAMIKA

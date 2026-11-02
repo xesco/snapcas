@@ -1,0 +1,7 @@
+# Tiddler, the first game on the tape Super MSX n.18 (gennaio 1989) - cas_18 /
+# SuperMSX18-LatoA.CAS, after the issue's intro:
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.18%20(gennaio%201989)%20-%20cas_18.zip
+# It is a copy of Labboss, as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=18
+cas SUPERM18.CAS
+sha1 be004a131f85a077205a70e00285a527746ea353

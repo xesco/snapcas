@@ -1,0 +1,5 @@
+# Nightshade, as Night Shade, the first game on Engesoft's MSXF-07 side A,
+# Engesoft MSXF-07 - Lado A.cas:
+# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxf-07.zip
+cas ENGESOFT.CAS
+sha1 8d457d66337edaea908fa769518292ba7c5d51ca

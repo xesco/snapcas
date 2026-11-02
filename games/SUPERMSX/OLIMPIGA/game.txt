@@ -1,0 +1,8 @@
+# Olimpigames, the first game on the tape Super MSX n.3 (luglio-agosto 1987) -
+# cas_3, after the issue's intro:
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.3%20(luglio-agosto%201987)%20-%20cas_3.zip
+# It is a copy of Hyper Sports 3 (Konami), as edicola8bit lists it. It also has a
+# dump of its own (games/HYPERSP3). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=3
+cas SUPER-MS.CAS
+sha1 dcc09cf7d6e985053ac6cb96157c91847ebf7e40

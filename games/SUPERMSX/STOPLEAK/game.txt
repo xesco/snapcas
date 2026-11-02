@@ -1,0 +1,7 @@
+# Stop Leak, the first game on the tape Super MSX n.15 (ottobre 1988) - cas_15 /
+# SUPER15B.CAS:
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.15%20(ottobre%201988)%20-%20cas_15.zip
+# It is a copy of Astro Plumber, as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=15
+cas SUPER15.CAS
+sha1 8404927cfc2d5b429d660858ef1921240054f7c3

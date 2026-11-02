@@ -1,0 +1,11 @@
+# Karateka, the fourth game on the tape Super MSX n.9 (febbraio 1988) - cas_9 /
+# SUPER09B.CAS, after Pinguin (games/SUPERMSX/PINGUIN):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.9%20(febbraio%201988)%20-%20cas_9.zip
+# It is a copy of International Karate (System 3 / Endurance Games), as
+# edicola8bit lists it. It also has a dump of its own (games/INTERNAT). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=9
+# The load starts at the BASIC loader KARATE, as when the tape runs on after
+# Pinguin.
+cas SUPERB.CAS
+sha1 09f3b40ac2697ec3eddc984ef6188b3a7ae6d034
+start KARATE

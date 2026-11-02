@@ -1,0 +1,11 @@
+# Crazy Shoe, the second game on the tape Super MSX n.7 (dicembre 1987) - cas_7 /
+# super_msx_7_lato_A.cas, after The Wall (games/SUPERMSX/THEWALL):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.7%20(dicembre%201987)%20-%20cas_7.zip
+# It is a copy of Nick Neaker, as edicola8bit lists it. It also has a dump of its
+# own (games/NICK-NEA). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=7
+# The load starts at the BASIC loader CRAZY, as when the tape runs on after The
+# Wall.
+cas SUPER7.CAS
+sha1 4be314d12e3a0ddb3c83eec316d8a186a0e61db6
+start CRAZY

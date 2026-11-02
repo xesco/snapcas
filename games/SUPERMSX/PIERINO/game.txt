@@ -1,0 +1,10 @@
+# Pierino, the second game on the tape Super MSX n.2 (giugno 1987) - cas_2 / super
+# msx 2a.cas, after Magic Bell (games/SUPERMSX/MAGICBEL):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.2%20(giugno%201987)%20-%20cas_2.zip
+# It is a copy of Boggy, as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=2
+# The load starts at the BASIC loader PIERIN, as when the tape runs on after Magic
+# Bell.
+cas SUPERA2.CAS
+sha1 a9ad5a5676b7e80ceeac6add5fe25ca4075f588e
+start PIERIN

@@ -1,4 +1,0 @@
-# Super MSX n.20 (aprile 1989) - cas_20 / SuperMSX20-LatoA.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.20%20(aprile%201989)%20-%20cas_20.zip
-cas SUPERM20.CAS
-sha1 0f0b306b3d6aa6861ca56c3d8388e844511e450f

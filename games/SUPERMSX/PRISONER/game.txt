@@ -1,0 +1,11 @@
+# Prisoner, the fourth game on the tape Super MSX n.25 (Dicembre 1989) - cas_25 /
+# super_msx_25_lato_B.cas, after Bandits (games/SUPERMSX/BANDITS):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.25%20(Dicembre%201989)%20-%20cas_25.zip
+# It is a copy of Dustin (Dinamic), as edicola8bit lists it. It also has a dump of
+# its own (games/DUSTIN). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=25
+# The load starts at the BASIC loader PRISON, as when the tape runs on after
+# Bandits.
+cas SUPER25B.CAS
+sha1 1de8848f0d4de7aaa2b7969754512524017eaca3
+start PRISON

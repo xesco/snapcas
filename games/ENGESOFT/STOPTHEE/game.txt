@@ -1,0 +1,8 @@
+# Stop the Express, the second game on Engesoft's MSXK-06 side B, after Spelunker
+# (games/ENGESOFT/SPELUNKE). It also has a dump of its own (games/STOP-THE):
+# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-06.zip
+# The load starts at the BASIC loader STOP, as when the tape runs on after
+# Spelunker.
+cas ENGES06B.CAS
+sha1 9dbdb1ee658fd5f84930f376f008077410c41732
+start STOP

@@ -1,0 +1,7 @@
+# Rabbit, the first game on the tape Super MSX n.14 (settembre 1988) - cas_14 /
+# super_msx_14_lato_A.cas:
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.14%20(settembre%201988)%20-%20cas_14.zip
+# It is a copy of Telebunnie, as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=14
+cas SUPER14.CAS
+sha1 96dabf8c8d2e0200f4b36f322b65ac0c7df4c4fb

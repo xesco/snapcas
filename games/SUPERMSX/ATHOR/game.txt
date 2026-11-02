@@ -1,0 +1,11 @@
+# Athor, the second game on the tape Super MSX n.7 (dicembre 1987) - cas_7 /
+# super_msx_7_lato_B.cas, after Terror (games/SUPERMSX/TERROR):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.7%20(dicembre%201987)%20-%20cas_7.zip
+# It is a copy of Demand, as edicola8bit lists it. It also has a dump of its own
+# (games/DEMANRUN). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=7
+# The load starts at the BASIC loader ATHOR, as when the tape runs on after
+# Terror.
+cas SUPER7B.CAS
+sha1 828bcf439941fa38260d7c7bd14b089f046d550d
+start ATHOR

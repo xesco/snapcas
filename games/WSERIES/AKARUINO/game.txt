@@ -1,0 +1,8 @@
+# Akarui Nouen, the second game on Hudson Soft's W Series 3 side A, after Fireball
+# (games/WSERIES/FIREBALL). It also has a dump of its own (games/AKARUI):
+# https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%203%20(1983)%20(Hudson%20Soft)%5BSide%20A%20-%20Fireball%2C%20Akarui%20Nouen%5D%5BBLOAD'CAS-'%2CR%5D.zip
+# The load starts at the binary file NOUEN, as when the tape runs on after
+# Fireball.
+cas W-SERIEA.CAS
+sha1 08b24777748e02933c0eab80f1e36942b9f28a82
+start NOUEN

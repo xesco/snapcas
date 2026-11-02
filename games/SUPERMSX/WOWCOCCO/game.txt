@@ -1,0 +1,7 @@
+# Wow Cocco, the first game on the tape Super MSX n.10 (marzo 1988) - cas_10 /
+# super_msx_10_lato_B.cas:
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.10%20(marzo%201988)%20-%20cas_10.zip
+# It is a copy of Sweet Acorn (Taito), as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=10
+cas SUPER10B.CAS
+sha1 0114f184a57f9723903b467fa4ce9aa446c82b41

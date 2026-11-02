@@ -1,8 +1,0 @@
-# Maze Up (1986)(Engesoft), the second game on Engesoft's MSXF-19 side B, after
-# Bumerangue (games/BUMERANG):
-# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxf-19.zip
-# The load starts at the BASIC program MAZE, as when the tape runs on after
-# Bumerangue.
-cas ENGES19B.CAS
-sha1 b6834f0fce17621f60e54678a1f5d62ed74cae91
-start MAZE

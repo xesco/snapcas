@@ -1,4 +1,0 @@
-# Super MSX n.27 (febbraio 1990) - cas_27
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.27%20(febbraio%201990)%20-%20cas_27.zip
-cas SUPER-27.CAS
-sha1 0dfacc50927cc042385de204ea208888d2b35dd8

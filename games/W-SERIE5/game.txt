@@ -1,4 +1,0 @@
-# W Series 5 (1983) (Hudson Soft)(Side A - Submarine Shooter, Gunman)[BLOAD'CAS-',R].
-# https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%205%20(1983)%20(Hudson%20Soft)(Side%20A%20-%20Submarine%20Shooter%2C%20Gunman)%5BBLOAD'CAS-'%2CR%5D..zip
-cas W-SERIE5.CAS
-sha1 09bc93e737b9f7f33486d90fce4a89c9c59176bb

@@ -1,0 +1,8 @@
+# Galaxian, the second game on Engesoft's MSXK-13 side B, after Green Beret
+# (games/ENGESOFT/GREENBER). It also has a dump of its own (games/GALAXIAN):
+# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-13.zip
+# The load starts at the BASIC loader GALAX, as when the tape runs on after Green
+# Beret.
+cas ENGES13B.CAS
+sha1 cd3b667781e093ab05dd77b57a98be42c9dd935a
+start GALAX

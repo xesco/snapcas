@@ -1,0 +1,8 @@
+# Killer Station, the second game on Hudson Soft's W Series 1 side A, after
+# Biotech (games/WSERIES/BIOTECH). It also has a dump of its own (games/KILLER):
+# https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%201%20(1983)%20(Hudson%20Soft)%5BSide%20A%20-%20Biotech%2C%20Killer%20Station%5D%5BBLOAD'CAS-'%2CR%5D.zip
+# The load starts at the binary file KILLER, as when the tape runs on after
+# Biotech.
+cas W-SERIE1.CAS
+sha1 eb28b4de3b276b20d16160f354c98be21b99572c
+start KILLER

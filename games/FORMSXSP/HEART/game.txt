@@ -1,0 +1,8 @@
+# Heart, the twenty-first program on Technopolis Soft's For MSX Special, after
+# Wonder (games/FORMSXSP/WONDER):
+# https://download.file-hunter.com/Games/MSX1/CAS/For%20MSX%20Special%20(1985)(Technopolis%20Soft).zip
+# The title comes from the program's name on the tape (HEART). The load starts at
+# that BASIC program, as when the tape runs on after Wonder.
+cas FOR-MSX.CAS
+sha1 81ea6916b986dbe9e88d8e7d130526152e43b776
+start HEART

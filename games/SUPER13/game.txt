@@ -1,4 +1,0 @@
-# Super MSX n.13 (Giugno 1988) - cas_13 / super_msx_13_lato_A.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.13%20(Giugno%201988)%20-%20cas_13.zip
-cas SUPER13.CAS
-sha1 1092075064f631b49b8c2ed103209bde0a49b689

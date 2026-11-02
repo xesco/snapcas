@@ -1,0 +1,11 @@
+# Bad Boy, the fourth game on the tape Super MSX n.8 (gennaio 1988) - cas_8 /
+# super_msx_8_lato_B.cas, after Pallacanestro (games/SUPERMSX/PALLACAN):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.8%20(gennaio%201988)%20-%20cas_8.zip
+# It is a copy of Jack the Nipper II (Gremlin Graphics), as edicola8bit lists it.
+# It also has a dump of its own (games/JACKII). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=8
+# The load starts at the BASIC loader BAD, as when the tape runs on after
+# Pallacanestro.
+cas SUPER8B.CAS
+sha1 d2959e683fea39cde0e8ce38a424fd83291305ea
+start BAD

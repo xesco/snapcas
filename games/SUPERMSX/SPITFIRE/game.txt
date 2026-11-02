@@ -1,0 +1,10 @@
+# Spitfire, the second game on the tape Super MSX n.14 (settembre 1988) - cas_14 /
+# super_msx_14_lato_B.cas, after Flipper (games/SUPERMSX/FLIPPER):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.14%20(settembre%201988)%20-%20cas_14.zip
+# It is a copy of Danger X4, as edicola8bit lists it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=14
+# The load starts at the BASIC loader SPITFI, as when the tape runs on after
+# Flipper.
+cas SUPER14B.CAS
+sha1 bc9fd14df07b44fe5a05c0043cb8d84f75c7b21a
+start SPITFI

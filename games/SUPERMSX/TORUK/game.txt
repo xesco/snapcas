@@ -1,0 +1,11 @@
+# Toruk, the second game on the tape Super MSX n.19 (febbraio 1989) - cas_19 /
+# super msx 19 lato A.cas, after Bang Them (games/SUPERMSX/BANGTHEM):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.19%20(febbraio%201989)%20-%20cas_19.zip
+# It is a copy of Storm (Mastertronic), as edicola8bit lists it. It also has a
+# dump of its own (games/STORM-UN). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=19
+# The load starts at the BASIC loader TORUK, as when the tape runs on after Bang
+# Them.
+cas SUPER19.CAS
+sha1 73b877417e260dab4595e3c05db4c72102e98601
+start TORUK

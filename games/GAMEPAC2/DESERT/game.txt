@@ -1,0 +1,8 @@
+# Desert, the sixth program on Aackosoft's Game Pack 2, after Bioritme
+# (games/GAMEPAC2/BIORITME):
+# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
+# The load starts at the BASIC loader DESERT, as when the tape runs on after
+# Bioritme.
+cas GAME-PAC.CAS
+sha1 e65f4e4dbabffd242081acc8d66b3ef107a9394c
+start DESERT

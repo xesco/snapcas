@@ -1,4 +1,0 @@
-# Super MSX n.22 (giugno 1989) - cas_22 / SUPER22B.CAS
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.22%20(giugno%201989)%20-%20cas_22.zip
-cas SUPER22.CAS
-sha1 87a47d93548a00c741d6ae3eab5af8d06959b618

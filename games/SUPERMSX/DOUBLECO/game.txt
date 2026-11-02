@@ -1,0 +1,10 @@
+# Double & Couple, the sixth game on the tape Super MSX n.27 (febbraio 1990) -
+# cas_27, after Reversi (games/SUPERMSX/REVERSI):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.27%20(febbraio%201990)%20-%20cas_27.zip
+# edicola8bit lists no original game for it. Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=27
+# The load starts at the BASIC loader DOUBLE, as when the tape runs on after
+# Reversi.
+cas SUPER-27.CAS
+sha1 0dfacc50927cc042385de204ea208888d2b35dd8
+start DOUBLE

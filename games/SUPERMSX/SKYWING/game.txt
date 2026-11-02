@@ -1,0 +1,11 @@
+# Sky Wing, the second game on the tape Super MSX n.16 (novembre 1988) - cas_16 /
+# super_msx_16_lato_A.cas, after Pig Bomber (games/SUPERMSX/PIGBOMBE):
+# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.16%20(novembre%201988)%20-%20cas_16.zip
+# It is a copy of Phantis (Dinamic), as edicola8bit lists it. It also has a dump
+# of its own (games/PHANTIS2). Source:
+# https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=16
+# The load starts at the BASIC loader SKY, as when the tape runs on after Pig
+# Bomber.
+cas SUPER16.CAS
+sha1 a2cc5ece6463700eae479396cd84adcf050bb6bd
+start SKY

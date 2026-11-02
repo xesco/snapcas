@@ -15,6 +15,22 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step4  # noqa: E402
 
 GAMES = os.path.join(ROOT, "games")
+
+
+def game_names():
+    """The game files' folders below games/: a game's, or a compilation's
+    program's in its collection's folder, such as SUPERMSX/GOLF, for a folder
+    without a game.txt (DESIGN.md, A game later on the tape)."""
+    names = []
+    for name in sorted(os.listdir(GAMES)):
+        if os.path.isfile(os.path.join(GAMES, name, "game.txt")):
+            names.append(name)
+        elif os.path.isdir(os.path.join(GAMES, name)):
+            names += [f"{name}/{n}" for n in sorted(os.listdir(os.path.join(GAMES, name)))
+                      if os.path.isdir(os.path.join(GAMES, name, n))]
+    return names
+
+
 WORK = os.path.join(ROOT, "out", "test", "step9")
 
 # The shipped machines and the DOS that each boots (PLAN.md, Test setup).
@@ -50,14 +66,14 @@ class MachineFile(unittest.TestCase):
 @unittest.skipUnless(os.path.isdir(GAMES), "no games/ folder")
 class ShippedGameFiles(unittest.TestCase):
     def test_every_game_file_reads_on_each_machine(self):
-        for name in sorted(os.listdir(GAMES)):
+        for name in game_names():
             for machine in ("advanced/phc28s", "basic/vg8020"):
                 with self.subTest(game=name, machine=machine):
                     game = gamefile.read_game(os.path.join(GAMES, name), machine)
                     self.assertTrue(game.sha1)
 
     def test_machine_files_name_a_machine_file(self):
-        for name in sorted(os.listdir(GAMES)):
+        for name in game_names():
             for file in os.listdir(os.path.join(GAMES, name)):
                 if file.endswith(".txt") and file != "game.txt":
                     with self.subTest(game=name, file=file):
@@ -210,7 +226,7 @@ class Collection(unittest.TestCase):
             os.makedirs(os.path.dirname(path), exist_ok=True)
             # The cache holds each game file's inputs' hash beside its result.
             cache = read_cache(path + ".cache")
-            hashes = {name: inputs_hash(machine, name, tools) for name in sorted(os.listdir(GAMES))}
+            hashes = {name: inputs_hash(machine, name, tools) for name in game_names()}
             todo = [(machine, name) for name, h in hashes.items()
                     if name not in cache or cache[name][0] != h]
             print(f"{machine}: {len(hashes) - len(todo)} unchanged, {len(todo)} to run",
@@ -229,7 +245,7 @@ class Collection(unittest.TestCase):
                     f.write(f"{name}\t{h}\t{cache[name][1]}\n")
 
     def test_every_game_file_gets_a_result_on_each_machine(self):
-        self.assertEqual(len(self.results), len(COLLECTION_MACHINES) * len(os.listdir(GAMES)))
+        self.assertEqual(len(self.results), len(COLLECTION_MACHINES) * len(game_names()))
 
     def test_every_game_file_that_fails_fails_in_openmsx_itself(self):
         known = read_openmsx_failures()

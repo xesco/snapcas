@@ -1,4 +1,0 @@
-# Super MSX n.25 (Dicembre 1989) - cas_25 / super_msx_25_lato_A.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.25%20(Dicembre%201989)%20-%20cas_25.zip
-cas SUPER25.CAS
-sha1 4f865e9054f5c7a9deb21d412d86229daed56bd4
