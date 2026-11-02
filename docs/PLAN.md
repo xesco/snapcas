@@ -341,16 +341,19 @@ length of the tape:
 | Sky Jaguar with `start SKY`, from the Engesoft tape after Circus Charlie | The load starts at a later file, from a copy whose blocks are back on the grid, and the image passes the check ([A game later on the tape](DESIGN.md#a-game-later-on-the-tape)) |
 | The collection on `advanced/phc28s` and `basic/vg8020` | The CAS game files keep their results behind the model |
 
-## Step 16: the check's reset point
+## Step 16: the check's reboot point
 
-This step adds point 3 to the check: a reset of the machine during the 60 seconds
-after the restore fails it ([Check](DESIGN.md#check)). The breakpoint is the
-capture's, at the start of the BIOS's reset routine while page 0 selects the main
-ROM, and it is set only after point 1, because the check's own boot passes there.
+This step adds point 3 to the check: a reboot of the machine during the 60 seconds
+after the restore fails it, shown by the tail's jump running a second time or by
+`Copyright 1983 by Microsoft` on the screen at a savestate
+([Check](DESIGN.md#check)). The breakpoint at the start of the BIOS's reset routine
+while page 0 selects the main ROM only notes each reset in the report, and it is set
+after point 1, because the check's own boot passes there.
 
 | Test | What it proves |
 |---|---|
-| Aliens, from Super MSX n.9, on `advanced/phc28s` | An image whose game resets after the restore fails point 3, though it passes points 1 and 2 |
-| The Goonies on `advanced/phc28s` | A loader that resets on purpose before the snapshot leaves an image that passes point 3 |
-| A single-load game on each shipped machine | The check's own boot, before the restore, is not a reset of the game |
-| The collection on `advanced/phc28s` and `basic/vg8020` | The game files that fail point 3 are sorted into the failure lists, and any game that resets and still starts shows whether the rule needs an exception |
+| Aliens, from Super MSX n.9, on `advanced/phc28s` | An image that reboots to the boot screen fails point 3, though it passes points 1 and 2 and the reset breakpoint misses it |
+| American Football, from Super MSX n.24, on `basic/vg8020` | An image that reboots into DOS fails point 3, because the restorer runs again |
+| Japan, from Super MSX n.20, on `basic/vg8020` | A loader that resets on purpose after the restore and then starts its ROM copy passes point 3, and the report notes the reset |
+| A single-load game on each shipped machine | The check's own boot, before the restore, is not a reboot |
+| The collection on `advanced/phc28s` and `basic/vg8020` | The game files that fail point 3 are sorted into the failure lists |
