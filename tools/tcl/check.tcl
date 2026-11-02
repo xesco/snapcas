@@ -62,7 +62,8 @@ proc point2 {} {
     incr ::n
     savestate "$::C(state)-[expr {$::n * 10}]s"
     look_for_boot
-    if {$::n < 6} { after time 10 point2 } else { write_point2; write_point3; exit }
+    look_for_error
+    if {$::n < 6} { after time 10 point2 } else { write_point2; write_point3; write_point4; exit }
 }
 
 # Point 3: in the same 60 seconds the restored machine must not reboot
@@ -97,6 +98,40 @@ proc watch_reset {} {
     debug set_bp $reset {[page0_selects [exptbl 0] subslot_reg]} {
         if {[llength $::resets] < 10} { lappend ::resets "the machine resets [after_restore] seconds after the restore" }
     }
+}
+# Point 4: in the same 60 seconds the game must not stop at a BASIC error
+# (DESIGN.md, Check, point 4). BASIC prints the message, with "in" and the line
+# number in a program, and then Ok, in a text mode. The message counts only with
+# the Ok after it, so that a game's own words do not.
+set ::basic_errors {}
+set ::basic_messages {
+    {NEXT without FOR} {Syntax error} {RETURN without GOSUB} {Out of DATA}
+    {Illegal function call} {Overflow} {Out of memory} {Undefined line number}
+    {Subscript out of range} {Redimensioned array} {Division by zero}
+    {Illegal direct} {Type mismatch} {Out of string space} {String too long}
+    {String formula too complex} {Can't CONTINUE} {Undefined user function}
+    {Device I/O error} {Verify error} {No RESUME} {RESUME without error}
+    {Unprintable error} {Missing operand} {Line buffer overflow} {FIELD overflow}
+    {Internal error} {Bad file number} {File not found} {File already open}
+    {Input past end} {Bad file name} {Direct statement in file}
+    {Sequential I/O only} {File not OPEN} {Bad allocation table} {Disk I/O error}
+    {Disk full} {Disk offline} {Bad drive name}
+}
+proc look_for_error {} {
+    if {[catch screen text]} return
+    set text [regsub -all {\s+} $text { }]
+    foreach message $::basic_messages {
+        if {[regexp "(${message}(?: in \\d+)?) Ok" $text -> found]} {
+            lappend ::basic_errors "the screen shows $found [after_restore] seconds after the restore"
+            return
+        }
+    }
+}
+proc write_point4 {} {
+    set f [open $::C(report) a]
+    puts $f [expr {[llength $::basic_errors] ? "point 4: fail" : "point 4: pass"}]
+    foreach line $::basic_errors { puts $f "  $line" }
+    close $f
 }
 proc write_point3 {} {
     set f [open $::C(report) a]

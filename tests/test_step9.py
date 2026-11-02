@@ -110,6 +110,7 @@ class Machines(unittest.TestCase):
                 # The check's own boot, before the restore, is no reboot
                 # (PLAN.md, step 16).
                 self.assertIn("point 3: pass", report)
+                self.assertIn("point 4: pass", report)
 
 
 @unittest.skipUnless(os.path.isfile(os.path.join(test_step4.CAS_DIR, SINGLE)), f"CAS_DIR holds no {SINGLE}")
@@ -201,7 +202,7 @@ def read_cache(path):
 
 def collection_game(item):
     """Captures, builds and checks one game file on one machine, and returns
-    the first line of the check's report, point 2's or point 3's failure with
+    the first line of the check's report, the failure of point 2, 3 or 4 with
     its first line when that point fails, or the failed step's error."""
     machine, name = item
     folder = os.path.join(GAMES, name)
@@ -211,7 +212,7 @@ def collection_game(item):
             return (result.stderr.strip().splitlines() or [f"{step} failed"])[-1]
     result = test_step4.tool("check.py", folder, machine, "--dos", SHIPPED[machine])
     lines = result.stdout.strip().splitlines()
-    for point in ("point 2: fail", "point 3: fail"):
+    for point in ("point 2: fail", "point 3: fail", "point 4: fail"):
         if point in lines:
             failed = lines.index(point)
             return point + ":" + "".join(lines[failed + 1:failed + 2])

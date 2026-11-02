@@ -392,6 +392,6 @@ boot screen.
 
 | Test | What it proves |
 |---|---|
-| Field Master on `advanced/phc28s` | A BASIC game that stops at `Overflow in 130` after the restore fails point 4, though it passes points 1 to 3 |
+| Field Master without its patch line, on `advanced/phc28s` | A BASIC game that stops at `Overflow in 130` after the restore fails point 4, though it passes points 1 to 3 |
 | Aritmo, from Philips's Turbo Pack A, on `advanced/phc28s` | A loader that stops at `Ok` on purpose, for the player to press F5, passes point 4 |
 | The collection on `advanced/phc28s` and `basic/vg8020` | The game files that fail point 4 are the 17 runs of the scan, and they are fixed or sorted into the failure lists |

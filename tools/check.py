@@ -151,7 +151,7 @@ def main():
     with open(report) as f:
         text = f.read()
     print(text, end="")
-    failed = "point 2: fail" in text or "point 3: fail" in text
+    failed = any(f"point {n}: fail" in text for n in (2, 3, 4))
     return 0 if text.startswith("point 1: pass") and not failed else 3
 
 
