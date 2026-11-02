@@ -19,7 +19,7 @@ proc write_report {} {
 
 proc start_check {} {
     # EXPTBL, read while the system area is still DOS's.
-    set ::exptbl [lmap ps {0 1 2 3} {debug read memory [expr {0xFCC1 + $ps}]}]
+    read_exptbl
     # RAMAD3 at F344h: DOS's mapper's slot ID, read when SNAPCAS.COM starts,
     # after DOS has set it. A start after the restore is point 3's reboot into
     # DOS.
@@ -81,31 +81,28 @@ proc after_restore {} { format %.1f [expr {[machine_info time] - $::restored}] }
 proc rerun {} {
     if {[llength $::reboots] < 10} { lappend ::reboots "SNAPCAS.COM starts again [after_restore] seconds after the restore" }
 }
+# The boot screen counts at two savestates or more: a reset on purpose shows
+# it for a few seconds before the game starts, so one savestate can catch it.
+set ::boots {}
 proc look_for_boot {} {
     if {[catch screen text]} return
-    if {[regexp {MSX +system} $text] && [llength $::reboots] < 10} {
-        lappend ::reboots "the screen shows the BIOS's boot screen [after_restore] seconds after the restore"
+    if {[regexp {MSX +system} $text]} {
+        lappend ::boots "the screen shows the BIOS's boot screen [after_restore] seconds after the restore"
     }
 }
-proc main_rom0 {} {
-    set id [lindex $::exptbl 0]
-    if {([debug read ioports 0xA8] & 3) != ($id & 3)} { return 0 }
-    if {!($id & 0x80)} { return 1 }
-    expr {([subslot_reg [expr {$id & 3}]] & 3) == (($id >> 2) & 3)}
-}
 proc watch_reset {} {
-    set id [lindex $::exptbl 0]
-    set ss [expr {$id & 0x80 ? ($id >> 2) & 3 : "x"}]
-    binary scan [with_slot [expr {$id & 3}] $ss 0 { debug read_block memory 2 2 }] su reset
+    lassign [slot_parts [exptbl 0]] ps ss
+    set reset [with_slot $ps $ss 0 { word_at 2 }]
     set ::restored [machine_info time]
-    debug set_bp $reset {[main_rom0]} {
+    debug set_bp $reset {[page0_selects [exptbl 0] subslot_reg]} {
         if {[llength $::resets] < 10} { lappend ::resets "the machine resets [after_restore] seconds after the restore" }
     }
 }
 proc write_point3 {} {
     set f [open $::C(report) a]
-    puts $f [expr {[llength $::reboots] ? "point 3: fail" : "point 3: pass"}]
-    foreach line [concat $::reboots $::resets] { puts $f "  $line" }
+    set failed [expr {[llength $::reboots] || [llength $::boots] >= 2}]
+    puts $f [expr {$failed ? "point 3: fail" : "point 3: pass"}]
+    foreach line [concat $::reboots $::boots $::resets] { puts $f "  $line" }
     close $f
 }
 
@@ -119,22 +116,20 @@ proc write_point3 {} {
 # service has read the tape to its end does not count.
 set ::part_writes {}
 proc in_service_segment {} {
-    set ps [expr {$::dosslot & 3}]
-    if {([debug read ioports 0xA8] & 3) != $ps} { return 0 }
-    if {($::dosslot & 0x80) && ([subslot_reg $ps] & 3) != (($::dosslot >> 2) & 3)} { return 0 }
+    if {![page0_selects $::dosslot subslot_reg]} { return 0 }
     expr {[debug read {MSX Memory Mapper I/O} 0] != [scan $::K(fc) %x]}
 }
 # Whether the service has read the tape to its end: at most 7 bytes, a block's
 # padding, between C_POS and C_TOTAL in the code segment, whose number E_CODE
 # holds, 2 bytes before E_INSIDE (src/service.inc, src/service.asm). The code
-# segment is read in page 1 of DOS's mapper, through port FDh.
+# segment is read in page 1 of DOS's mapper, through port FDh, at C_POS's
+# address from build.txt.
 proc tape_read {} {
     set code [debug read memory [expr {[lindex $::C(part) 2] - 2}]]
-    set ps [expr {$::dosslot & 3}]
-    set ss [expr {$::dosslot & 0x80 ? ($::dosslot >> 2) & 3 : "x"}]
+    lassign [slot_parts $::dosslot] ps ss
     set fd [debug read {MSX Memory Mapper I/O} 1]
     debug write ioports 0xFD $code
-    binary scan [with_slot $ps $ss 1 { debug read_block memory 0x4006 9 }] cu* b
+    binary scan [with_slot $ps $ss 1 { debug read_block memory $::C(cpos) 9 }] cu* b
     debug write ioports 0xFD $fd
     set pos [expr {[lindex $b 0] | ([lindex $b 1] << 8) | ([lindex $b 2] << 16)}]
     set total [expr {[lindex $b 6] | ([lindex $b 7] << 8) | ([lindex $b 8] << 16)}]
@@ -180,7 +175,7 @@ proc compare {} {
     foreach {r v} $::C(regs) {
         if {[reg $r] != $v} { note "register $r is [format %04X [reg $r]], expected [format %04X $v]" }
     }
-    set target [expr {[debug read memory [expr {$::C(tail) + 22}]] | ([debug read memory [expr {$::C(tail) + 23}]] << 8)}]
+    set target [word_at [expr {$::C(tail) + 22}]]
     if {$target != $::C(pc)} { note "the tail jumps to [format %04X $target], expected [format %04X $::C(pc)]" }
     foreach {r name} {I i IM im} {
         if {[reg $r] != [scan $::K($name) %x]} { note "$r is [reg $r], expected $::K($name)" }

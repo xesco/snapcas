@@ -17,13 +17,11 @@ proc ramsearch_watch {value before} {
     if {[read_with $value $next 4] eq [read_with $before $next 4]} return
     set found [tape_find $::ramsearch]
     if {[llength $found]} {
-        set f [open [file join $::S(snap) newpatch.txt] w]
-        foreach place $found {
+        write_newpatch [lmap place $found {
             lassign $place side offset
-            puts $f [format "patch side%d:%X %s > %s" $side [expr {$offset + $::ramsearch_at}] \
-                $::ramsearch_old $::ramsearch_new]
-        }
-        close $f
+            format "patch side%d:%X %s > %s" $side [expr {$offset + $::ramsearch_at}] \
+                $::ramsearch_old $::ramsearch_new
+        }]
         decide "the slot register write of [hex 2 $value] at PC [hex 4 $pc] cuts off its code: the RAM search patched"
         catch write_log
         quit

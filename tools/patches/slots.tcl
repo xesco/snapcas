@@ -2,6 +2,15 @@
 # tools/capture.py loads it after capture.tcl, and sets ::operand1 and
 # ::operand2 from patches/slots.py's OPERAND_1 and OPERAND_2.
 
+# Writes a found patch's lines to newpatch.txt, which stops the capture so
+# that it runs again on the patched tape (DESIGN.md, Slot patches, The RAM
+# search patch). ramsearch.tcl, loaded after this file, writes there too.
+proc write_newpatch {lines} {
+    set f [open [file join $::S(snap) newpatch.txt] w]
+    foreach line $lines { puts $f $line }
+    close $f
+}
+
 # Step 3's part: the slot map, and the CAS files that a patch must occur in.
 proc slot_start {} {
     slot_map
@@ -140,10 +149,8 @@ proc slot_watch {value before} {
             set old [read_with $before $address $length]
             binary scan $old cu* bytes
             set patched [lreplace $bytes 1 1 $new]
-            set f [open [file join $::S(snap) newpatch.txt] w]
-            puts $f [format "patch side%d:%X %s > %s" $side $offset \
-                [join [lmap b $bytes {format %02X $b}]] [join [lmap b $patched {format %02X $b}]]]
-            close $f
+            write_newpatch [list [format "patch side%d:%X %s > %s" $side $offset \
+                [join [lmap b $bytes {format %02X $b}]] [join [lmap b $patched {format %02X $b}]]]]
             decide "the slot register write of [hex 2 $value] at [hex 4 $address] names a slot that holds nothing: patched to [hex 2 $new]"
             catch write_log
             quit

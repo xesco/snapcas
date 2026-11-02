@@ -10,6 +10,29 @@ proc exptbl {ps} {
     debug read memory [expr {0xFCC1 + $ps}]
 }
 proc expanded {ps} { expr {([exptbl $ps] & 0x80) != 0} }
+proc read_exptbl {} {
+    set ::exptbl [lmap ps {0 1 2 3} {debug read memory [expr {0xFCC1 + $ps}]}]
+}
+
+# A slot ID's primary slot and subslot, "x" when the slot is not expanded.
+proc slot_parts {id} {
+    list [expr {$id & 3}] [expr {$id & 0x80 ? ($id >> 2) & 3 : "x"}]
+}
+
+# The 16-bit word at an address, low byte first.
+proc word_at {a} {
+    expr {[debug read memory $a] | ([debug read memory [expr {($a + 1) & 0xFFFF}]] << 8)}
+}
+
+# Whether page 0 selects the slot of a slot ID. sub_of gives an expanded
+# slot's subslot register: the check reads it, while the capture keeps track
+# of it, because a read writes port A8h, which the capture watches.
+proc page0_selects {id sub_of} {
+    lassign [slot_parts $id] ps ss
+    if {([debug read ioports 0xA8] & 3) != $ps} { return 0 }
+    if {$ss eq "x"} { return 1 }
+    expr {([{*}$sub_of $ps] & 3) == $ss}
+}
 
 proc a8_with {a8 page ps} {
     set shift [expr {$page * 2}]

@@ -35,7 +35,7 @@ proc quit {} {
     catch { delete_savestate $::S(state)-tapion-saved }
     exit
 }
-proc savestate_file {name} { file join $::env(OPENMSX_HOME) savestates $name.oms }
+proc savestate_file {name} { file join $::S(home) savestates $name.oms }
 proc fail {msg} {
     set f [open [file join $::S(snap) error.txt] w]
     puts $f "capture: $msg"
@@ -69,14 +69,10 @@ proc at_end {} {
     expr {[cassetteplayer getpos] >= [cassetteplayer getlength] - 0.01}
 }
 
-# Whether page 0 selects the main ROM, whose slot ID is EXPTBL's first byte.
-proc rom0 {} {
-    set id [exptbl 0]
-    set a8 [debug read ioports 0xA8]
-    if {($a8 & 3) != ($id & 3)} { return 0 }
-    if {!($id & 0x80)} { return 1 }
-    expr {($::st(sub[expr {$id & 3}]) & 3) == (($id >> 2) & 3)}
-}
+# Whether page 0 selects the main ROM, whose slot ID is EXPTBL's first byte,
+# by the tracked subslot registers.
+proc tracked_sub {ps} { return $::st(sub$ps) }
+proc rom0 {} { page0_selects [exptbl 0] tracked_sub }
 
 proc note_selection {a8} {
     foreach page {0 1 2 3} {
@@ -166,7 +162,7 @@ proc step2 {} {
     set v [debug read memory 0x002D]
     if {$v > 1} { fail "the machine is not an MSX1 or an MSX2: 002Dh holds $v" }
     set ::S(msx2) $v
-    set ::exptbl [lmap ps {0 1 2 3} {debug read memory [expr {0xFCC1 + $ps}]}]
+    read_exptbl
     # EXBRSA at FAF8h: the slot ID of the MSX2 sub-ROM.
     set ::exbrsa [debug read memory 0xFAF8]
     for {set a 0xFD9A} {$a <= 0xFFC9} {incr a 5} { debug write memory $a 0xC9 }
@@ -198,14 +194,14 @@ proc step3 {} {
     slot_start
     # TAPION and TAPIN: the addresses that the jump table entries 00E1h and
     # 00E4h jump to.
-    set tapion [expr {[debug read memory 0xE2] | ([debug read memory 0xE3] << 8)}]
-    set tapin [expr {[debug read memory 0xE5] | ([debug read memory 0xE6] << 8)}]
+    set tapion [word_at 0xE2]
+    set tapin [word_at 0xE5]
     debug set_bp $tapion {[rom0]} {safe on_tapion}
     debug set_bp $tapin {[rom0]} {safe on_tapin}
     # The BIOS's reset routine, where 0000h's DI / JP jumps: a loader that has
     # crashed or rebooted the machine can also jump there itself (DESIGN.md,
     # Capture, step 4).
-    set reset [expr {[debug read memory 2] | ([debug read memory 3] << 8)}]
+    set reset [word_at 2]
     debug set_bp $reset {[rom0]} {safe on_reset}
     debug set_watchpoint write_io 0xA8 {} {safe {on_a8 $::wp_last_value}}
     debug set_watchpoint write_mem 0xFFFF {} {safe {on_ffff $::wp_last_value}}
@@ -372,7 +368,7 @@ proc step6 {} {
                              (![side1_read] || $::S(side2))}]
     if {[reg IM] == 2} {
         set v [expr {[reg I] * 256 + 0xFF}]
-        set handler [expr {[debug read memory $v] | ([debug read memory [expr {($v + 1) & 0xFFFF}]] << 8)}]
+        set handler [word_at $v]
     } else {
         set handler 0x0038
     }
@@ -435,7 +431,7 @@ proc in_tape_code {pc} {
     set sp [reg SP]
     for {set n 0} {$n < 8} {incr n} {
         set a [expr {($sp + 2 * $n) & 0xFFFF}]
-        set w [expr {[debug read memory $a] | ([debug read memory [expr {($a + 1) & 0xFFFF}]] << 8)}]
+        set w [word_at $a]
         if {$w >= 0x19DD && $w <= 0x1B44} { return 1 }
     }
     return 0
@@ -506,15 +502,13 @@ proc take_snapshot {{pc {}}} {
         lassign [split $key -] ps ss page
         dict set data $key [with_slot $ps $ss $page { read_page $page }]
     }
-    set id [exptbl 0]
-    set ss [expr {$id & 0x80 ? ($id >> 2) & 3 : "x"}]
-    set rom [with_slot [expr {$id & 3}] $ss 0 { read_page 0 }]
-    append rom [with_slot [expr {$id & 3}] $ss 1 { read_page 1 }]
+    lassign [slot_parts [exptbl 0]] ps ss
+    set rom [with_slot $ps $ss 0 { read_page 0 }]
+    append rom [with_slot $ps $ss 1 { read_page 1 }]
     write_file rom.bin $rom
     if {$::S(msx2)} {
-        set id $::exbrsa
-        set ss [expr {$id & 0x80 ? ($id >> 2) & 3 : "x"}]
-        write_file subrom.bin [with_slot [expr {$id & 3}] $ss 0 { read_page 0 }]
+        lassign [slot_parts $::exbrsa] ps ss
+        write_file subrom.bin [with_slot $ps $ss 0 { read_page 0 }]
     }
     write_file vram.bin [physical_vram]
 

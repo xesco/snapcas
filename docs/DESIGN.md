@@ -38,6 +38,7 @@ in [PLAN.md](PLAN.md).
 | `out/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image |
 | `out/<machine>/<game>/<GAME>.RPL` | `tools/build.py` | The replay |
 | `out/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
+| `out/<machine>/<game>/build.txt` | `tools/build.py` | What the check takes from the build: the RAM bytes that the build patched, under each RAM file of their segment, the tape service's part of page 3, and the address of its tape position `C_POS` ([Check](#check)) |
 | `out/<machine>/<game>/check/` | `tools/check.py` | The check's report and savestates |
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
 | `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm` ([SERVICE.BIN](#servicebin)) |
@@ -85,11 +86,11 @@ The commands share their code through modules, and the Tcl that runs inside
 | File | Holds |
 |---|---|
 | `tools/gamefile.py` | Reads game files. Finds a game's folder from a name below `games/`, such as `ABADIA` or `SUPERMSX/GOLF`, or from a path, and the game's output folder, `out/<machine>/<game>/`, with the same name below `out/<machine>/` |
-| `tools/msx.py` | Reads machine files and finds one from its name. Starts `openMSX` with a Tcl script, and makes disk images |
+| `tools/msx.py` | Reads machine files and finds one from its name. Starts `openMSX` with a Tcl script, gives its home folder, where it writes savestates, and makes disk images |
 | `tools/cas.py`, `tools/tsx.py`, `tools/tape.py` | The readers of CAS and TSX files, and the tape model and the tape service's tape, which the rest of the code uses ([Tape files](#tape-files)) |
 | `tools/patches/` | The automatic patches, one file for each kind, as below |
 | `tools/tcl/prelude.tcl` | The procedures that every `openMSX` run gets: reading the screen, passing the boot menu, and typing at DOS's prompt |
-| `tools/tcl/memory.tcl` | The procedures that the capture and the check share: the CPU's view of memory with a slot selected, the tests of RAM and of a mapper, and the read of VRAM |
+| `tools/tcl/memory.tcl` | The procedures that the capture and the check share: EXPTBL, a slot ID's primary slot and subslot, whether page 0 selects a slot, a 16-bit word in memory, the CPU's view of memory with a slot selected, the tests of RAM and of a mapper, and the read of VRAM |
 | `tools/tcl/capture.tcl` | The capture's steps ([Capture](#capture)) |
 | `tools/tcl/check.tcl` | The check ([Check](#check)) |
 | `tools/relocs.py` | The offsets that `build.py` changes to move `SERVICE.BIN`'s page 3 part ([SERVICE.BIN](#servicebin)) |
@@ -1123,8 +1124,12 @@ image without a partition table, which Nextor reads from its first sector and
 MSX-DOS reads as a floppy disk. It holds the `--dos` folder's files, `SNAPCAS.COM`,
 the image and an `AUTOEXEC.BAT` that runs `SNAPCAS <GAME>`. The folder holds
 `NEXTOR.SYS` and `COMMAND2.COM`, `MSXDOS2.SYS` and `COMMAND2.COM`, or `MSXDOS.SYS`
-and `COMMAND.COM`, which `snapcas` cannot ship. `check.py` boots the machine with
-that disk and the `boot` keys, and writes its report to `check/report.txt`:
+and `COMMAND.COM`, which `snapcas` cannot ship. The check takes the bytes that the
+build patched, the tape service's part of page 3 and `C_POS`'s address from
+`build.txt`, which `build.py` writes beside the image, so that it judges the image
+by the build's own decisions and by the `SERVICE.BIN` that the build used.
+`check.py` boots the machine with that disk and the `boot` keys, and writes its
+report to `check/report.txt`:
 
 1. A breakpoint at the tail's last instruction, while the slot register and the
    jump's target are the snapshot's, compares the machine with the snapshot. It must

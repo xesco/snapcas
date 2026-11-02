@@ -113,6 +113,12 @@ def boot_steps(machine):
 SETTINGS = os.path.join(HERE, "openmsx-settings.xml")
 
 
+def home():
+    """openMSX's home folder, where it writes savestates: OPENMSX_HOME, as the
+    tests set it, or else openMSX's own default."""
+    return os.environ.get("OPENMSX_HOME", os.path.join(os.path.expanduser("~"), ".openMSX"))
+
+
 def run(args, script, timeout):
     """Runs openMSX with the given arguments and Tcl script text."""
     with tempfile.NamedTemporaryFile("w", suffix=".tcl", delete=False) as f:

@@ -24,61 +24,27 @@ sys.path.insert(0, HERE)
 import build  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
-import patches  # noqa: E402
 
 TIMEOUT = 600  # real seconds for one check
 
 
-def selected_name(state, page):
-    """The primary slot and subslot, as ram/ file names write them, that the
-    snapshot selects in a page."""
-    ps, ss = build.selected(state, page)
-    return ps, "x" if ss is None else ss
+def read_facts(out):
+    """build.txt's facts (DESIGN.md, Check): the service flag, the patched
+    ranges, and the tape service's part, moved part and C_POS's address, each
+    as a Tcl list, empty when the image has none."""
+    facts = {"service": "0", "patched": [], "part": "", "moved": "", "cpos": "0"}
+    with open(os.path.join(out, "build.txt")) as f:
+        for line in f:
+            if line.strip() and not line.startswith("#"):
+                key, value = line.rstrip("\n").split(" ", 1)
+                if key == "patched":
+                    facts["patched"].append(value)
+                else:
+                    facts[key] = value
+    return facts
 
 
-def patched_bytes(state, snap, patch_lines, page):
-    """The RAM pages' bytes that the patch lines and the scan change, as
-    ps-ss-page, first and last offset. The scan's patches point to the entries
-    at page's E1h, and page is 0 without a part in page 3, where the scan
-    patches only fixed slot values."""
-    ranges = ["{}-{}-{} {} {}".format(*selected_name(state, p.page), p.page, p.offset, p.offset + len(p.old) - 1)
-              for p in patch_lines if p.page not in ("side1", "side2")]
-    # The scan's fixed slot values on every image, and its tape findings with
-    # a part in page 3.
-    slots = patches.slots.read_slots(snap)
-    tape = state["service"] == "1" and page
-    if tape or slots:
-        context = patches.Context(page or patches.tape.ENTRY_PAGE, slots, bool(tape))
-        for name in sorted(os.listdir(os.path.join(snap, "ram"))):
-            with open(os.path.join(snap, "ram", name), "rb") as f:
-                findings = patches.find(f.read(), context)
-            ps, ss, ram_page, _ = name[:-4].split("-")
-            ranges += [f"{ps}-{ss}-{ram_page} {f.offset} {f.offset + len(f.old) - 1}"
-                       for f in findings if f.new is not None]
-    return ranges
-
-
-def service_part(state, snap, page):
-    """The tape service's part of page 3 for point 2's watch, as the Tcl list
-    {first last E_INSIDE segment}, without the scratch bytes, where segment is page 3's mapper segment at
-    the snapshot, or -1 outside a mapper. Empty without a part: page is 0 then
-    (DESIGN.md, Check)."""
-    if page == 0:
-        return "{}"
-    parts = build.read_service(os.path.join(ROOT, "bin", "SERVICE.BIN"), page)
-    _, _, _, e_fc, _, e_sp = struct.unpack("<6H", parts[4])
-    first = page * 256 + 0xE1
-    ps, ss = selected_name(state, 3)
-    mapped = any(n.startswith(f"{ps}-{ss}-3-") and not n.endswith("-x.bin")
-                 for n in os.listdir(os.path.join(snap, "ram")))
-    segment = int(state["ff"], 16) if mapped else -1
-    # E_INSIDE follows E_FC, and the watch ends before the scratch bytes from
-    # e_sp to the stack's top, which the service sets before it reads them
-    # (src/service.asm).
-    return f"{{{first} {e_sp - 1} {e_fc + 1} {segment}}}"
-
-
-def settings(state, snap, image, report, check_dir, state_name, patch_lines):
+def settings(state, snap, image, report, check_dir, state_name, facts):
     """Tcl variables for check.tcl."""
     with open(image, "rb") as f:
         header = f.read(4096)
@@ -96,15 +62,15 @@ def settings(state, snap, image, report, check_dir, state_name, patch_lines):
         "state": state_name,
         "tail": str(tail),
         "a8": str(header[43]),
-        "service": "1" if any(header[64 + 4 * n] == build.SERVICE_SEGMENT for n in range(header[12])) else "0",
+        "service": facts["service"],
         "regs": "{" + values + "}",
         "pc": str(int(state["pc"], 16)),
         "kv": "{" + " ".join(f"{k} {v}" for k, v in keep.items()) + "}",
-        "patched": "{" + " ".join(patched_bytes(state, snap, patch_lines, header[15])) + "}",
+        "patched": "{" + " ".join(facts["patched"]) + "}",
         # The service's page 3 part, when build.py moved it from FCE1h.
-        "p3": "{}" if header[15] in (0, build.DEFAULT_PAGE) else
-              f"{{{header[15] * 256 + 0xE1} {(header[15] + 1) * 256 + 0x88}}}",
-        "part": service_part(state, snap, header[15]),
+        "p3": "{" + facts["moved"] + "}",
+        "part": "{" + facts["part"] + "}",
+        "cpos": facts["cpos"],
     }
     return "".join(f"set ::C({k}) {v}\n" for k, v in s.items())
 
@@ -129,6 +95,7 @@ def main():
         state = build.read_state(snap)
         if not os.path.exists(image):
             raise OSError(f"{image}: no image; run build.py first")
+        facts = read_facts(out)
     except (OSError, gamefile.GameFileError, msx.MachineError) as e:
         print(f"check.py: {e}", file=sys.stderr)
         return 1
@@ -147,7 +114,7 @@ def main():
         return 2
     report = os.path.join(check_dir, "report.txt")
     state_name = f"snapcas-check-{os.getpid()}"
-    script = (settings(state, snap, image, report, check_dir, state_name, game.patches)
+    script = (settings(state, snap, image, report, check_dir, state_name, facts)
               + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/check.tcl")
               + "\nboot {" + msx.boot_steps(machine) + "} "
               # On a machine that boots DOS from its own disk, the check's disk
@@ -160,7 +127,7 @@ def main():
         print(f"check.py: openMSX failed: {e}", file=sys.stderr)
         return 2
     # The savestates of point 2, from openMSX's savestate folder.
-    home = os.environ.get("OPENMSX_HOME", os.path.join(os.path.expanduser("~"), ".openMSX"))
+    home = msx.home()
     for path in glob.glob(os.path.join(home, "savestates", state_name + "-*.oms")):
         shutil.move(path, os.path.join(check_dir, os.path.basename(path)[len(state_name) + 1:]))
     if not os.path.exists(report):

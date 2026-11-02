@@ -90,6 +90,7 @@ class Page:
 
     def __init__(self, snap, name):
         ps, ss, page, seg = name[:-4].split("-")
+        self.snap = snap
         self.ps, self.page = int(ps), int(page)
         self.ss = None if ss == "x" else int(ss)
         self.seg = None if seg == "x" else int(seg)
@@ -342,16 +343,23 @@ def apply_patch(patch, data, place):
     data[patch.offset:end] = patch.new
 
 
-def scan_snapshot(state, pages, side1, side2, page, slots, with_tape=True, patch=True, blocks=((), ())):
+def scan_snapshot(state, pages, side1, side2, page, slots, with_tape=True, patch=True, blocks=((), ()),
+                  patched=None):
     """Patches the scan's findings in the RAM pages, for the entries at page's
     E1h, and returns scan.txt's text, with the findings in the unread blocks:
     side 1 from the tape position, and side 2 (DESIGN.md, Scan), at their
     offsets in the tape files of blocks. Without with_tape, it looks only for
-    fixed slot values, and without patch, it patches only those."""
+    fixed slot values, and without patch, it patches only those. patched,
+    a dict, gets each ram/ file's patched ranges for the check."""
     ram = []
     for p in pages:
         findings = patches.find(p.data, patches.Context(page, slots, with_tape))
-        patches.patch(p.data, [f for f in findings if patch or f.what == patches.slots.SLOT_VALUE])
+        applied = [f for f in findings if patch or f.what == patches.slots.SLOT_VALUE]
+        patches.patch(p.data, applied)
+        if patched is not None:
+            for name in ram_names(p.snap, p):
+                patched.setdefault(name, []).extend(patched_range(name, f.offset, len(f.old))
+                                                    for f in applied if f.new is not None)
         if p is selected_page(state, pages, p.page):
             place = f"page{p.page}"
         else:
@@ -389,28 +397,58 @@ def patch_sides(patch_lines, side1, side2):
     return bytes(sides["side1"]), bytes(sides["side2"])
 
 
+def ram_key(slot_id, page, seg):
+    """What a RAM page is: its mapper segment in its slot, or its page in its
+    slot outside a mapper. A game can select one segment in two pages."""
+    return (slot_id, seg) if seg is not None else (slot_id, "page", page)
+
+
 def read_pages(snap):
     """The RAM pages of snap/ram/, each mapper segment and each page outside a
     mapper once."""
     pages, seen = [], set()
     for name in sorted(os.listdir(os.path.join(snap, "ram"))):
         page = Page(snap, name)
-        key = (page.slot_id(), page.seg) if page.seg is not None else (page.slot_id(), "page", page.page)
+        key = name_key(name)
         if key not in seen:
             seen.add(key)
             pages.append(page)
     return pages
 
 
+def name_key(name):
+    """ram_key of a ram/ file's name, <ps>-<ss>-<page>-<seg>.bin."""
+    ps, ss, page, seg = name[:-4].split("-")
+    slot_id = int(ps) if ss == "x" else 0x80 | (int(ss) << 2) | int(ps)
+    return ram_key(slot_id, int(page), None if seg == "x" else int(seg))
+
+
+def ram_names(snap, page):
+    """The ram/ file names of a RAM page: one per CPU page that selects it."""
+    key = ram_key(page.slot_id(), page.page, page.seg)
+    return [name for name in sorted(os.listdir(os.path.join(snap, "ram"))) if name_key(name) == key]
+
+
+def patched_range(name, offset, length):
+    """A patched range of a ram/ file as the check reads it: ps-ss-page, the
+    first and the last offset."""
+    return f"{name[:-4].rsplit('-', 1)[0]} {offset} {offset + length - 1}"
+
+
 def patch_pages(patch_lines, state, pages):
     """Applies the patch lines of pages 0 to 3 to the RAM pages that the
-    snapshot selects there."""
+    snapshot selects there, and returns their ranges for the check."""
+    ranges = []
     for patch in patch_lines:
         if patch.page not in ("side1", "side2"):
             found = selected_page(state, pages, patch.page)
             if found is None:
                 raise BuildError(f"{patch.where}: page {patch.page} is not a RAM page that the snapshot keeps")
             apply_patch(patch, found.data, f"{patch.page * 0x4000 + patch.offset:04X}")
+            ps, ss = selected(state, patch.page)
+            ranges.append(f"{ps}-{'x' if ss is None else ss}-{patch.page} "
+                          f"{patch.offset} {patch.offset + len(patch.old) - 1}")
+    return ranges
 
 
 def service_mode(state, pages, length, wanted_page, t0_mode):
@@ -508,40 +546,34 @@ def check_unread(state, blocks, names, service_no):
 
 
 def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=False, wanted_page=None,
-          t0_mode=False, names=("side1.cas", "side2.cas"), service_no=False, start=None):
+          t0_mode=False, names=("side1.cas", "side2.cas"), service_no=False):
     """Returns (header and tables, the records' data, a report, scan.txt's
-    text). side1 and side2 are the tape files' bytes, and names their files'
-    names, patch_lines the game file's patches, rom_keep keeps T0 from
-    replacing the ROM, service_no is the game file's service no, and start its
-    start line's file."""
+    text). side1 and side2 are the bytes of the tape files that the capture
+    played (played_tapes), and names their files' names, patch_lines the game
+    file's patches and the capture's, rom_keep keeps T0 from replacing the ROM,
+    and service_no is the game file's service no."""
     state = read_state(snap)
-    captured = patches.slots.capture_patches(snap)
     slots = patches.slots.read_slots(snap)
-    # The game file's patch lines fit the downloaded files, and the capture's
-    # patches the file that it played: with a start line, the copy (DESIGN.md,
-    # A game later on the tape).
-    side1, side2 = patch_sides(patch_lines, side1, side2)
-    if start and side1:
-        side1 = tape.start_copy(names[0], side1, start)
-    side1, side2 = patch_sides(captured, side1, side2)
-    patch_lines = list(patch_lines) + captured
-    # The tape service's tapes of the patched files (DESIGN.md, Tape files).
+    # The tape service's tapes of the played files (DESIGN.md, Tape files).
     blocks = (tape.read(names[0], side1) if side1 else [], tape.read(names[1], side2) if side2 else [])
     check_unread(state, blocks, names, service_no)
     side1, side2 = tape.service(blocks[0]), tape.service(blocks[1])
     parts = read_service(service_path)
     tail = parts[0]
     pages = read_pages(snap)
-    patch_pages(patch_lines, state, pages)
+    ranges = patch_pages(patch_lines, state, pages)
+    scan_ranges = {}
 
     if state["service"] != "1":
-        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, with_tape=False)
+        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, with_tape=False,
+                                patched=scan_ranges)
     page, t0_mode = service_mode(state, pages, len(parts[2]), wanted_page, t0_mode)
     if state["service"] == "1" and t0_mode:
-        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, patch=False, blocks=blocks)
+        scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, patch=False, blocks=blocks,
+                                patched=scan_ranges)
     elif state["service"] == "1":
         parts = read_service(service_path, page)
-        scanned = scan_snapshot(state, pages, side1, side2, page, slots, blocks=blocks)
+        scanned = scan_snapshot(state, pages, side1, side2, page, slots, blocks=blocks, patched=scan_ranges)
     tail_address = place_tail(state, pages, tail)
     service = []
     if state["service"] == "1":
@@ -558,7 +590,33 @@ def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=Fal
     mapper = sum(1 for r in records if r[0] in (RAM_IN_MAPPER, SERVICE_SEGMENT))
     report = (f"{len(records)} records, {len(writes)} port writes, "
               f"up to {mapper + 1} free mapper segments")
-    return header, data, report, scanned
+    for name in sorted(scan_ranges):
+        ranges += scan_ranges[name]
+    checked = check_facts(state, pages, parts, page, bool(service), ranges)
+    return header, data, report, scanned, checked
+
+
+def check_facts(state, pages, parts, page, service, ranges):
+    """build.txt's text: what the check takes from the build (DESIGN.md,
+    Check). The tape service's part of page 3, when the image has one, is
+    {first last E_INSIDE segment} without the scratch bytes from e_sp on, which
+    the service sets before it reads them, with page 3's mapper segment at the
+    snapshot, or -1 outside a mapper. When the part moved from FCE1h, moved is
+    its first and last byte. cpos is the address of C_POS in the code segment,
+    selected in page 1."""
+    lines = ["# What the check takes from the build (docs/DESIGN.md, Check).",
+             f"service {1 if service else 0}"]
+    lines += [f"patched {r}" for r in ranges]
+    if page:
+        _, c_pos, _, e_fc, _, e_sp = struct.unpack("<6H", parts[4])
+        p3 = selected_page(state, pages, 3)
+        segment = p3.seg if p3 is not None and p3.seg is not None else -1
+        first = page * 256 + 0xE1
+        lines.append(f"part {first} {e_sp - 1} {e_fc + 1} {segment}")
+        lines.append(f"cpos {0x4000 + c_pos}")
+        if page != DEFAULT_PAGE:
+            lines.append(f"moved {first} {first + len(parts[2]) - 1}")
+    return "\n".join(lines) + "\n"
 
 
 def read_tapes(game, tapes_dir):
@@ -578,6 +636,18 @@ def read_tapes(game, tapes_dir):
     return side1, side2
 
 
+def played_tapes(game, tapes_dir, captured=()):
+    """The bytes of side 1's and side 2's tape files as the capture plays them.
+    The game file's patch lines fit the downloaded files, so they come first.
+    With a start line, side 1 is then the copy from that file on, and the
+    capture's patches, captured, fit the file that it played, so they come last
+    (DESIGN.md, A game later on the tape)."""
+    side1, side2 = patch_sides(game.patches, *read_tapes(game, tapes_dir))
+    if game.start:
+        side1 = tape.start_copy(game.tape, side1, game.start)
+    return patch_sides(captured, side1, side2)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Write a game's image from its snapshot.")
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
@@ -591,10 +661,12 @@ def main():
     try:
         game = gamefile.read_game(folder, args.machine)
         out = gamefile.out_folder(args.machine, folder)
-        side1, side2 = read_tapes(game, args.tapes)
-        header, data, report, scanned = build(os.path.join(out, "snap"), args.service, side1, side2,
-                                     game.patches, game.rom_keep, game.service_page, game.service_t0,
-                                     (game.tape, game.side2 or ""), game.service_no, game.start)
+        snap = os.path.join(out, "snap")
+        captured = patches.slots.capture_patches(snap)
+        side1, side2 = played_tapes(game, args.tapes, captured)
+        header, data, report, scanned, checked = build(snap, args.service, side1, side2,
+                                     list(game.patches) + captured, game.rom_keep, game.service_page,
+                                     game.service_t0, (game.tape, game.side2 or ""), game.service_no)
     except (OSError, gamefile.GameFileError, BuildError, tape.TapeError) as e:
         print(f"build.py: {e}", file=sys.stderr)
         return 1
@@ -605,6 +677,8 @@ def main():
             f.write(chunk)
     with open(os.path.join(out, "scan.txt"), "w") as f:
         f.write(scanned)
+    with open(os.path.join(out, "build.txt"), "w") as f:
+        f.write(checked)
     print(f"{game.name}: {image}: {report}")
     return 0
 
