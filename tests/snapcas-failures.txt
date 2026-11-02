@@ -3,3 +3,16 @@
 # the game file's folder, and what fails and why.
 
 advanced/hbf700p AFTERBUR The game fills page 3, so the tape service has no part there, and T0 takes mapper register FCh. The game's page 0 is RAM in the internal mapper, which follows the same register, so the restore changes it: RAM 3-3-0 differs at 0000
+advanced/phc28s SUPERMSX/ALEXIS build.py: the 26 bytes below SP 004B are not in a RAM page that the snapshot keeps
+basic/vg8020 SUPERMSX/ALEXIS build.py: the 26 bytes below SP 0073 are not in a RAM page that the snapshot keeps
+advanced/phc28s SUPERMSX/GUARDIC build.py: the 26 bytes below SP 007F are not in a RAM page that the snapshot keeps
+basic/vg8020 SUPERMSX/XERIDER build.py: the 26 bytes below SP 50A0 are not in a RAM page that the snapshot keeps
+advanced/phc28s SUPERMSX/CRAZYEAT Check point 2: the game writes FCE1h, in the tape service's part of page 3, from 800Fh
+basic/vg8020 SUPERMSX/CRAZYEAT Check point 2: the game writes FCE1h, in the tape service's part of page 3, from 800Fh
+advanced/phc28s SUPERMSX/SERVICEA Check point 2: the game writes FCE1h, in the tape service's part of page 3, from 27FEh
+basic/vg8020 SUPERMSX/SERVICEA Check point 2: the game writes FCE1h, in the tape service's part of page 3, from 27FEh
+advanced/phc28s SUPERMSX/VERTIGO Check point 2: the game writes FCE1h, in the tape service's part of page 3, from EA8Ah
+basic/vg8020 SUPERMSX/VERTIGO Check point 2: the game writes FCE1h, in the tape service's part of page 3, from EA8Ah
+basic/vg8020 SUPERMSX/JAPAN Check point 2: the game writes FD00h, in the tape service's part of page 3, from 036Ah
+basic/vg8020 SUPERMSX/THEKARAT Check point 2: the game writes FD00h, in the tape service's part of page 3, from 036Ah
+basic/vg8020 SUPERMSX/ODINOII Check point 1 fails
