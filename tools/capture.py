@@ -6,7 +6,7 @@ Usage: capture.py <game> <machine> --tapes <dir> [--capture <variant>]
 
 <game> is a folder below games/, or the path of a folder, that holds
 game.txt. <machine> is a path below machines/ without .txt. <dir> holds the
-CAS files. The snapshot goes to out/<machine>/<game>/snap/. A game file's
+tape files. The snapshot goes to out/<machine>/<game>/snap/. A game file's
 capture line, or --capture, names another machine file to load the game on:
 the user's machine without a cartridge that the game's loader trips over.
 
@@ -67,8 +67,7 @@ def settings(game, machine, tape_path, data, snap, side2_path=None, side2=b""):
     side2 = tape.service(tape.read(game.side2, side2)) if game.side2 else b""
     s = {
         "snap": msx.tcl_word(snap),
-        "boot": tcl_list("{" + msx.tcl_word(text) + " " + msx.tcl_word(msx.press(key)) + "}"
-                         for text, key in machine.boot),
+        "boot": "{" + msx.boot_steps(machine) + "}",
         # On a machine that boots DOS from its own disk, BASIC comes from DOS.
         "afterboot": "{" + msx.at_prompt(machine, "BASIC", "wait_ok") + "}",
         "tape": msx.tcl_word(tape_path),
@@ -76,7 +75,6 @@ def settings(game, machine, tape_path, data, snap, side2_path=None, side2=b""):
         "cload": "1" if command == "CLOAD" else "0",
         "headers": tcl_list(str(h) for h in tape.headers(data)),
         "needed": str(tape.needed_end(data)),
-        "side2": "1" if game.side2 else "0",
         # Side 2 follows side 1, padded to a multiple of 8 bytes, as in the
         # tape service's positions.
         "side2tape": "{}" if side2_path is None else msx.tcl_word(side2_path),

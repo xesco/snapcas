@@ -11,7 +11,7 @@ proc write_newpatch {lines} {
     close $f
 }
 
-# Step 3's part: the slot map, and the CAS files that a patch must occur in.
+# Step 3's part: the slot map, and the tape files that a patch must occur in.
 proc slot_start {} {
     slot_map
     set ::tape1 [read_binary $::S(tape)]
@@ -111,7 +111,7 @@ proc slot_code {value before} {
     return ""
 }
 
-# Each place of bytes in the CAS files, as {side offset}.
+# Each place of bytes in the tape files, as {side offset}.
 proc tape_find {bytes} {
     set found {}
     foreach side {1 2} data [list $::tape1 $::tape2] {
@@ -127,7 +127,7 @@ proc tape_find {bytes} {
 # Step 4's watch on the slot register, for each value written, with the value
 # before it. A value that names a slot that holds nothing is logged. When its
 # code is one of the two forms, and the code with the 8 bytes before it, or else
-# after it, occurs once in the CAS files, the capture writes the patch to
+# after it, occurs once in the tape files, the capture writes the patch to
 # newpatch.txt and stops, and capture.py runs it again.
 proc slot_watch {value before} {
     if {![names_nothing $value]} return

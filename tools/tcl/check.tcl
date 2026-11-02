@@ -51,6 +51,7 @@ proc safe_check {} {
     write_report
     set ::n 0
     watch_part
+    set ::restored [machine_info time]
     watch_reset
     after time 10 point2
 }
@@ -93,7 +94,6 @@ proc look_for_boot {} {
 proc watch_reset {} {
     lassign [slot_parts [exptbl 0]] ps ss
     set reset [with_slot $ps $ss 0 { word_at 2 }]
-    set ::restored [machine_info time]
     debug set_bp $reset {[page0_selects [exptbl 0] subslot_reg]} {
         if {[llength $::resets] < 10} { lappend ::resets "the machine resets [after_restore] seconds after the restore" }
     }
@@ -216,7 +216,7 @@ proc compare {} {
         if {$v != $e} { note "PSG register $r is [hex2 $v], expected $::K(psg$r)" }
     }
     set v9938 [v9938]
-    set regs [expr {$v9938 ? [concat [lrange {0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23} 0 end] {32 33 34 35 36 37 38 39 40 41 42 43 44 45}] : {0 1 2 3 4 5 6 7}}]
+    set regs [expr {$v9938 ? [concat {0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23} {32 33 34 35 36 37 38 39 40 41 42 43 44 45}] : {0 1 2 3 4 5 6 7}}]
     foreach r $regs {
         if {[debug read {VDP regs} $r] != [scan $::K(vdp$r) %x]} { note "VDP register $r is [hex2 [debug read {VDP regs} $r]], expected $::K(vdp$r)" }
     }

@@ -6,7 +6,7 @@
 # Step 4's watch on the slot register, for each value written, with the value
 # before it. A write from code in page 3 that selects another primary slot
 # there, where the 4 bytes after its OUT differ, is logged. When the loader's
-# RAM search occurs in the CAS files, the capture writes a patch of each copy to
+# RAM search occurs in the tape files, the capture writes a patch of each copy to
 # newpatch.txt and stops, and capture.py runs it again. Each copy cuts off its
 # code on this machine, and a copy on side 2, or in a compilation's later game,
 # runs after the snapshot.

@@ -51,7 +51,6 @@ def settings(state, snap, image, report, check_dir, state_name, facts):
     tail = struct.unpack_from("<H", header, 52)[0]
     names = "af bc de hl af2 bc2 de2 hl2 ix iy sp".split()
     values = " ".join(f"{n.upper()} {int(state[n], 16)}" for n in names)
-    keep = {k: v for k, v in state.items()}
     with open(os.path.join(ROOT, "bin", "SNAPCAS.COM"), "rb") as f:
         com = f.read(3)
     s = {
@@ -65,7 +64,7 @@ def settings(state, snap, image, report, check_dir, state_name, facts):
         "service": facts["service"],
         "regs": "{" + values + "}",
         "pc": str(int(state["pc"], 16)),
-        "kv": "{" + " ".join(f"{k} {v}" for k, v in keep.items()) + "}",
+        "kv": "{" + " ".join(f"{k} {v}" for k, v in state.items()) + "}",
         "patched": "{" + " ".join(facts["patched"]) + "}",
         # The service's page 3 part, when build.py moved it from FCE1h.
         "p3": "{" + facts["moved"] + "}",

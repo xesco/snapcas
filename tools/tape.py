@@ -17,7 +17,7 @@ Block = collections.namedtuple("Block", "standard data offset start end")
 
 READERS = {".cas": cas.read, ".tsx": tsx.read}
 
-HEADER = bytes.fromhex("1FA6DEBACC137D74")
+HEADER = cas.HEADER
 
 # The type of a file's first block: its first 10 bytes, and the BASIC command
 # that loads it.

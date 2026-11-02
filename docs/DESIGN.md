@@ -1,7 +1,7 @@
 # `snapcas` design
 
 `snapcas` starts a cassette game from disk on one real MSX1 or MSX2. `openMSX` loads
-the game from its CAS file, in its own cassette player, on a copy of the user's
+the game from its tape file, in its own cassette player, on a copy of the user's
 machine, and `snapcas` saves the machine's state when the game is ready. On the real
 machine, the restorer, `SNAPCAS.COM`, restores that state and transfers control to
 the game. A game that loads further data during play also receives a tape service,
@@ -199,13 +199,13 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 A place is a RAM page as `page<n>:<offset>`, which names the RAM page that the
 snapshot selects in page n, 0 to 3, and the offset from that page's start. A place
 can also be on the tape, as `side1:<offset>` or `side2:<offset>`, an offset in the
-CAS file. A patch on the tape changes the tape that the capture loads and that the
+tape file. A patch on the tape changes the tape that the capture loads and that the
 tape service serves, so it also reaches the code that the capture runs. Neither form
 names a slot, so a patch line holds on every machine that the game runs on, unless
 its new bytes are a slot register's value. A patch fits only the dump that it was
 made for, so `capture.py` and `build.py` stop with an error when the old bytes
 differ, or when the game file has `patch` lines and `sha1` is missing or differs
-from a CAS file's SHA-1.
+from a tape file's SHA-1.
 
 `game.txt` describes the game and its tape, and holds on every machine. A game's
 folder can also hold a machine's game file: a game file for one machine, named after
@@ -394,9 +394,9 @@ or step 5 restarts more than 20 times. It performs the following steps:
    claims them and the tape service can use them. It then types `CLEAR200,&HF380`,
    which sets `HIMEM` to a cassette machine's F380h, and writes the slot map
    ([Slot patches](#slot-patches)).
-3. Inserts the CAS file of side 1, with the game file's `side1` patches written into
-   a copy in `snap/`, into the cassette player, notes the slots selected in each
-   page, and types the load command for the first header's type
+3. Inserts the tape file of side 1, with the game file's `side1` patches written
+   into a copy in `snap/`, into the cassette player, notes the slots selected in
+   each page, and types the load command for the first header's type
    ([CAS data](#cas-data)): `BLOAD"CAS:",R`, `CLOAD`, or `RUN"CAS:"`. After `CLOAD`,
    it types `RUN` when the motor has stopped for 1 second. When the game file has
    `side2` and the game reads past side 1's end, by a `TAPION` call at its end or
@@ -418,12 +418,12 @@ or step 5 restarts more than 20 times. It performs the following steps:
      BIOS's search for cartridges at the reset finds the copy and starts it. The
      Goonies's snapshot is taken during that start, and the restored machine
      finishes it. A loader that crashes into a reset makes an image of a reboot,
-     which writes the tape service's part of page 3, so the check's point 2 fails
-     ([Check](#check)): 30 collection tapes on the PHC-28S did, most of them through
-     the loader that [The RAM search patch](#the-ram-search-patch) now fixes. The
-     capture stopped at every reset for a time, which failed 37 game files on the
-     PHC-28S, among them The Goonies, KONAMI and KNIGHTMA, whose images pass the
-     check and show the game.
+     which writes the tape service's part of page 3, so the check's point 2 or point
+     3 fails ([Check](#check)): 30 collection tapes on the PHC-28S did, most of them
+     through the loader that [The RAM search patch](#the-ram-search-patch) now
+     fixes. The capture stopped at every reset for a time, which failed 37 game
+     files on the PHC-28S, among them The Goonies, KONAMI and KNIGHTMA, whose images
+     pass the check and show the game.
 5. Polls bit 4 of PPI port C, the cassette motor (0 = on), every 0.1 seconds. When
    the motor has been off, or the player has been at the tape's end
    (`cassetteplayer getpos` at least `getlength` minus 0.01), for 1 second, it saves
@@ -434,8 +434,9 @@ or step 5 restarts more than 20 times. It performs the following steps:
    `loadstate`, and proceeds:
    - If side 1 is read, it goes to step 6. Side 1 is read when the `TAPION` and
      `TAPIN` breakpoints fired and every block after the tape position is under 16
-     bytes or equal to a block before it. A CAS file pads each block to a multiple
-     of 8 bytes, so a block counts as read when at most 7 bytes of it are left.
+     bytes or equal to a block before it. The tape service's tape pads each block to
+     a multiple of 8 bytes, so a block counts as read when at most 7 bytes of it are
+     left.
    - Otherwise it tries the game file's `continue` key, then space, then Return,
      each from the saved moment and held for 0.5 seconds, because a loader can read
      the keyboard rarely. If the motor starts within 10 seconds of a key, and the
@@ -516,12 +517,12 @@ that no game file needs a line for them. It does this in four parts:
    map. A value whose field names a slot that holds nothing makes the capture log
    the write, the address of its `OUT` and the new value. When the code that set the
    value is one of the forms in the second table below, and its bytes with the 8
-   bytes before them, or else with the 8 bytes after them, occur once in a CAS file,
-   the capture stops. The bytes after them serve a loader that copies a routine to
-   RAM without the bytes before it, as Sootland's does. `capture.py` then adds a
-   patch of n on the tape to `snap/patches.txt` and runs the capture again from step
-   1, up to 16 times. Otherwise the capture goes on, and the logged write is for a
-   `patch` line by hand.
+   bytes before them, or else with the 8 bytes after them, occur once in a tape
+   file, the capture stops. The bytes after them serve a loader that copies a
+   routine to RAM without the bytes before it, as Sootland's does. `capture.py` then
+   adds a patch of n on the tape to `snap/patches.txt` and runs the capture again
+   from step 1, up to 16 times. Otherwise the capture goes on, and the logged write
+   is for a `patch` line by hand.
 4. The build's scan ([Scan](#scan)) looks for the same code with such a value in the
    snapshot's RAM pages and in the tape's unread blocks, for code that runs only
    while the game is played.
@@ -575,7 +576,7 @@ parts:
    that selects another primary slot in page 3. When the 4 bytes after the write's
    `OUT` differ in that slot, the write cuts off the code that made it, and the
    capture logs it.
-2. When the loader's search, below, occurs in the CAS files, the capture stops.
+2. When the loader's search, below, occurs in the tape files, the capture stops.
    `capture.py` then adds a patch of each copy to `snap/patches.txt` and runs the
    capture again, as for a slot patch. Each copy cuts off its code on this machine,
    and a copy on side 2 or in a compilation's later game runs after the snapshot, as
@@ -644,8 +645,8 @@ selects.
 - Applies the patches of `snap/patches.txt` to the tape, and runs the scan's search
   for slot values on every image ([Slot patches](#slot-patches)).
 - With the tape service, builds T0, the code segment and the other tape segments
-  from `rom.bin`, the CAS files and `SERVICE.BIN`, writes the service's part of page
-  3 into the game's page 3, with the snapshot's value of mapper register FCh at
+  from `rom.bin`, the tape files and `SERVICE.BIN`, writes the service's part of
+  page 3 into the game's page 3, with the snapshot's value of mapper register FCh at
   FCF9h, runs the scan, and applies the scan's patches and the `patch` lines
   ([Tape service](#tape-service)). When no part of page 3 has room for the service's
   part, it uses the mode without a part in page 3, as `service t0` does

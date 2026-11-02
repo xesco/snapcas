@@ -29,7 +29,7 @@ MAGIC = b"SNAPCAS4"
 TAIL_SIZE = 26
 FLAG_ROM_KEEP = 1  # header byte 14, bit 0: T0 does not replace the ROM
 FLAG_T0 = 2  # bit 1: the tape service without a part in page 3
-DEFAULT_PAGE = 0xFC  # the page of the service's page 3 part, as assembled
+DEFAULT_PAGE = patches.tape.ENTRY_PAGE  # the page of the service's page 3 part, as assembled
 
 # Record types (DESIGN.md, Image).
 RAM_IN_MAPPER, RAM, SERVICE_SEGMENT, VRAM, VRAM_ZEROS = 1, 2, 3, 4, 5
@@ -372,7 +372,8 @@ def scan_snapshot(state, pages, side1, side2, page, slots, with_tape=True, patch
         context = patches.Context(page, slots)
         found = [[f for f in patches.find(side1, context) if f.offset >= unread], patches.find(side2, context)]
         # A patch line's offset is an offset in the tape file (DESIGN.md, Tape
-        # files): a CAS file's offsets are the tape service's.
+        # files): a CAS file's offsets are the tape service's, and a TSX file's are
+        # found through the blocks.
         for side, side_blocks in zip(found, blocks):
             for f in side:
                 f.offset = tape.file_offset(side_blocks, f.offset)
@@ -628,7 +629,7 @@ def check_facts(state, pages, parts, page, service, ranges):
 
 def read_tapes(game, tapes_dir):
     """The bytes of side 1's and side 2's tape files, b"" without a side 2. A patch fits
-    only the dumps that it was made for, so with patch lines the CAS files
+    only the dumps that it was made for, so with patch lines the tape files
     must match the game file's sha1 lines."""
     side2 = b""
     with open(os.path.join(tapes_dir, game.tape), "rb") as f:

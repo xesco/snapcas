@@ -13,7 +13,6 @@
 #   ::S(cmd)      the load command; ::S(cload) is 1 for CLOAD, then RUN
 #   ::S(headers)  the offsets of side 1's headers
 #   ::S(needed)   the end of the last block that the load must read
-#   ::S(side2)    1 when the game file has side2
 #   ::S(side2tape) side 2's tape file, or "" without a side 2
 #   ::S(s1len)    side 1's length, padded to a multiple of 8: side 2's start
 #   ::S(headers2) the positions of side 2's headers, from side 1's start
@@ -24,10 +23,26 @@
 #   ::S(snapat)   the snapshot at time, or ""
 #   ::S(state)    the name of the capture's savestate, its own so that
 #                 captures can run side by side
+#   ::S(home)     openMSX's home folder, whose savestates/ folder a rewind reads
 #
 # ::st holds the state that the capture logs. A rewind puts back its copy
 # from the savestate's moment, because openMSX's loadstate restores the machine
 # but neither Tcl variables nor timers.
+#
+# The run's other variables:
+#   ::booted      1 once BASIC's Ok has appeared (step 1)
+#   ::exptbl, ::exbrsa  EXPTBL and the sub-ROM's slot ID, read in step 2
+#   ::t0          the moment of the load command; ::elapsed the emulated
+#                 seconds since then, across rewinds
+#   ::restarts    the rewinds so far
+#   ::since       when the motor last stopped, or "" while it runs (step 5)
+#   ::saved, ::saved_st  whether the wait has a savestate, and ::st then
+#   ::tapion_st, ::saved_tapion_st  ::st at the last TAPION entry, and at the
+#                 moment of the saved wait, for a rewind to it
+#   ::trying, ::tried_at  the keys left to try, and when the last one went
+#   ::decisions   what the capture decided, kept across rewinds
+#   ::done, ::accepted, ::irq_probe, ::irq_bp, ::fallback_pc  the snapshot's
+#                 wait for an interrupt (step 6)
 
 proc quit {} {
     catch { delete_savestate $::S(state) }
@@ -107,19 +122,21 @@ proc on_tapion {} {
     }
     incr ::st(tapion)
     # A TAPION call at side 1's end, with a side 2: the player turns the tape
-    # over, so side 2 goes in, at its start.
-    if {$::S(side2tape) ne "" && !$::st(side2in) && [at_end]} {
-        cassetteplayer insert $::S(side2tape)
-        set ::st(side2in) 1
-        set ::st(pos) $::S(s1len)
-        logev "side 2 inserted"
-    }
+    # over, so side 2 goes in, at its start, and TAPION finds its first header.
+    if {$::S(side2tape) ne "" && !$::st(side2in) && [at_end]} { insert_side2 $::S(s1len) }
     set next ""
     foreach h [concat $::S(headers) $::S(headers2)] { if {$h >= $::st(pos)} { set next $h; break } }
     set ::st(pos) [expr {$next eq "" ? $::st(pos) : $next + 8}]
     logev "TAPION, tape position $::st(pos)"
 }
 proc on_tapin {} { incr ::st(tapin); incr ::st(pos) }
+# Side 2 goes in, with the tape service's position pos.
+proc insert_side2 {pos} {
+    cassetteplayer insert $::S(side2tape)
+    set ::st(side2in) 1
+    set ::st(pos) $pos
+    logev "side 2 inserted"
+}
 # A game that reads on past side 1's end, with the motor on and the CPU waiting
 # in the BIOS's tape code, waits for side 2: the player turns the tape over, so
 # side 2 goes in, and the read goes on after side 2's first header. A motor
@@ -127,14 +144,11 @@ proc on_tapin {} { incr ::st(tapin); incr ::st(pos) }
 proc turn_over {} {
     if {$::S(side2tape) eq "" || $::st(side2in) || ![motor_on] || ![at_end]} { return }
     if {![in_tape_code [reg PC]]} { return }
-    cassetteplayer insert $::S(side2tape)
-    set ::st(side2in) 1
-    set ::st(pos) [expr {[lindex $::S(headers2) 0] + 8}]
-    logev "side 2 inserted"
+    insert_side2 [expr {[lindex $::S(headers2) 0] + 8}]
 }
 
-# A CAS file pads each block to a multiple of 8 bytes, so a block counts as
-# read when at most 7 bytes of it are left.
+# The tape service's tape pads each block to a multiple of 8 bytes, so a block
+# counts as read when at most 7 bytes of it are left.
 proc side1_read {} {
     expr {$::st(tapion) > 0 && $::st(tapin) > 0 && $::st(pos) >= $::S(needed) - 7}
 }
@@ -223,6 +237,13 @@ proc step3 {} {
 # With snapshot at, side 2 still goes in when side 1 runs out.
 proc watch_turn {} { turn_over; later 0.1 watch_turn }
 
+# After CLOAD, the program runs when the capture types RUN, once.
+proc type_run {} {
+    set ::st(ran) 1
+    type "RUN\r"
+    logev "typed RUN"
+}
+
 # With snapshot at, no wait decides anything, but a CLOAD still needs its RUN:
 # typed as poll types it, when the motor has run and stopped for 1 second.
 proc run_after_cload {} {
@@ -233,9 +254,7 @@ proc run_after_cload {} {
     } elseif {$::st(on_seen)} {
         if {$::since eq ""} { set ::since [now] }
         if {[now] - $::since >= 1} {
-            set ::st(ran) 1
-            type "RUN\r"
-            logev "typed RUN"
+            type_run
             return
         }
     }
@@ -281,9 +300,7 @@ proc poll {} {
         if {$::since eq ""} { set ::since [now] }
         set off [expr {[now] - $::since}]
         if {$::S(cload) && !$::st(ran) && $::st(on_seen) && $off >= 1} {
-            set ::st(ran) 1
-            type "RUN\r"
-            logev "typed RUN"
+            type_run
             set ::since ""
         } elseif {!$::saved && $off >= 1} {
             savestate $::S(state)
@@ -365,7 +382,7 @@ proc vdp_quiet {} {
 }
 proc step6 {} {
     set ::st(service) [expr {!$::S(nosvc) && $::st(tapion) > 0 && $::st(tapin) > 0 &&
-                             (![side1_read] || $::S(side2))}]
+                             (![side1_read] || $::S(side2tape) ne "")}]
     if {[reg IM] == 2} {
         set v [expr {[reg I] * 256 + 0xFF}]
         set handler [word_at $v]
