@@ -1166,8 +1166,16 @@ that disk and the `boot` keys, and writes its report to `check/report.txt`:
 
    | Sign | What it shows |
    |---|---|
-   | The tail's jump runs a second time | A reset has booted DOS from the check's disk, whose `AUTOEXEC.BAT` runs the restorer again |
-   | The screen's text holds `Copyright 1983 by Microsoft` at one of the savestates | The BIOS shows that line on its boot screen, and BASIC in its banner, so the machine has rebooted to the boot screen or to BASIC |
+   | `SNAPCAS.COM` starts again: the breakpoint at 0100h that reads RAMAD3 fires after the restore | A reset has booted DOS from the check's disk, and its `AUTOEXEC.BAT` runs the restorer again |
+   | The screen's text holds `MSX  system` at two or more of the six savestates | The machine stays on the MSX1 BIOS's boot screen, whose first line that is, or comes back to it in a loop of resets. A reset on purpose shows the boot screen for a few seconds before the game starts, so a single savestate can catch it: Raider, from Super MSX n.18, resets the VG-8020 6.2 seconds after the restore and shows its game at 60 seconds. BASIC's banner holds `MSX BASIC` instead, so a BASIC game whose restored screen still holds the banner does not count. The MSX2 BIOS draws its boot screen as graphics, so this sign holds only on an MSX1 |
+
+   The first signs were the tail's jump running a second time and
+   `Copyright 1983 by Microsoft` on the screen ([Decisions](#decisions)). The first
+   also fired when a game's own code passed the tail's jump address, within 0.4
+   seconds of the restore, as the code of Ci-U-Than Trilogy III and of Enchanted
+   does on the PHC-28S. The second also fired for games whose restored screen still
+   holds BASIC's banner with that line, such as Roberto Mate from Philips's Turbo
+   Pack A and Trick Boy.
 
    The point judges where the machine ends, not the reset, because a loader can
    reset the machine on purpose after the restore: Japan, from Super MSX n.20,
@@ -1193,7 +1201,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | One reader for each tape format, and a format-neutral tape model for the rest of the code | A TSX file holds the turbo blocks that a CAS file cannot, so converting it to CAS would lose the games that need TSX. Teaching each tool both formats would mix them in every tool, while the model keeps each format in one file ([Tape files](#tape-files)) |
 | A game file for each program of a compilation, named after its game | A player looks for a game by its name, and an image named after the tape holds only the tape's first program. One game file for the tape, with a line for each program, would keep the tape's `cas` and `sha1` lines in one place, but it needs game files with sections and changes to every tool and to the collection's cache, to save two lines for each program ([A game later on the tape](#a-game-later-on-the-tape)) |
 | Every program of a compilation in the collection's folder, even when the game has a dump of its own | A compilation's copy can differ from that dump: of 112 such programs on the Engesoft and Super MSX tapes, none had game blocks that equal the dump's, because the magazines renamed the games and changed their title screens. A folder for each collection keeps their names, such as `GOLF` or `STAR`, apart from the games of `games/`. This replaces the rule that gave such a program no game file |
-| A reboot after the restore fails the check, and a reset alone does not | Points 1 and 2 compare the restore and watch page 3, so a game that crashes into a reboot after the restore passed them, as eight Super MSX images did. A first rule failed every reset after the restore, on the view that a loader resets on purpose only before the snapshot, as The Goonies's does. Japan, from Super MSX n.20, resets the VG-8020 after the restore and then starts, so the point now judges where the machine ends: DOS running the restorer again, or the boot screen or BASIC ([Check](#check)). The capture only logs its resets, for the same reason |
+| A reboot after the restore fails the check, and a reset alone does not | Points 1 and 2 compare the restore and watch page 3, so a game that crashes into a reboot after the restore passed them, as eight Super MSX images did. A first rule failed every reset after the restore, on the view that a loader resets on purpose only before the snapshot, as The Goonies's does. Japan, from Super MSX n.20, resets the VG-8020 after the restore and then starts, so the point now judges where the machine ends: DOS starting `SNAPCAS.COM` again, or the BIOS's boot screen ([Check](#check)). Its first signs, the tail's jump running again and `Copyright 1983 by Microsoft` on the screen, failed games that do not reboot: three whose code passes the tail's jump address, and games whose restored screen holds BASIC's banner. The capture only logs its resets, for the same reason |
 | Restore a snapshot | The game's loader runs once, in `openMSX`, so its slot code, stubs and checks need no changes on the real machine |
 | Capture on a copy of the user's machine, with the disk system's hooks and work area removed | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
 | Snapshot at an interrupt's entry | The CPU's state is complete, interrupts are off, and the bytes below the stack pointer are free for the tail |

@@ -14,16 +14,20 @@ import test_step9  # noqa: E402
 COLLECTION = os.path.join(test_step4.CAS_DIR, "collection")
 WORK = os.path.join(ROOT, "out", "test", "step16")
 
-# The Super MSX programs that Reboots checks, as name: the shipped game file's
-# folder below games/ and the machine.
+# The game files that Reboots checks, as name: the shipped game file's folder
+# below games/ and the machine.
 GAMES = {
     # Reboots to the boot screen on the PHC-28S, by a way that the reset
     # breakpoint does not see.
     "s16-aliens": ("SUPERMSX/ALIENS", "advanced/phc28s"),
-    # Reboots into DOS on the VG-8020, whose AUTOEXEC.BAT runs the restorer again.
+    # Reboots into DOS on the VG-8020, whose AUTOEXEC.BAT runs SNAPCAS.COM again.
     "s16-cita": ("SUPERMSX/CITA", "basic/vg8020"),
     # Resets the VG-8020 on purpose after the restore, and starts its ROM copy.
     "s16-japan": ("SUPERMSX/JAPAN", "basic/vg8020"),
+    # Passes the tail's jump address again with its own code.
+    "s16-enchante": ("ENCHANTE", "advanced/phc28s"),
+    # Keeps BASIC's banner on its restored screen.
+    "s16-robe": ("016-ROBE", "advanced/phc28s"),
 }
 
 
@@ -41,8 +45,8 @@ def check(name):
     return test_step4.tool("check.py", folder, machine, "--dos", test_step9.SHIPPED[machine]).stdout
 
 
-@unittest.skipUnless(all(os.path.isfile(os.path.join(COLLECTION, n)) for n in ("SUPER-09.CAS", "SUPER-15.CAS", "SUPERMOB.CAS")),
-                     "CAS_DIR lacks the Super MSX tapes")
+@unittest.skipUnless(all(os.path.isfile(os.path.join(COLLECTION, n)) for n in ("SUPER-09.CAS", "SUPER-15.CAS", "SUPERMOB.CAS", "ENCHANTE.CAS", "016-ROBE.CAS")),
+                     "CAS_DIR lacks the tapes of Reboots")
 class Reboots(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -55,18 +59,28 @@ class Reboots(unittest.TestCase):
         self.assertTrue(report.startswith("point 1: pass"), report)
         self.assertIn("point 2: pass", report)
         self.assertIn("point 3: fail", report)
-        self.assertIn("the screen shows the BIOS's boot screen or BASIC", report)
+        self.assertIn("the screen shows the BIOS's boot screen", report)
 
     def test_a_reboot_into_dos_fails_point_3(self):
         report = self.reports["s16-cita"]
         self.assertIn("point 3: fail", report)
-        self.assertIn("the restorer runs again", report)
+        self.assertIn("SNAPCAS.COM starts again", report)
 
     def test_a_reset_that_starts_the_game_passes_point_3(self):
         report = self.reports["s16-japan"]
         self.assertTrue(report.startswith("point 1: pass"), report)
         self.assertIn("point 3: pass", report)
         self.assertIn("the machine resets", report)
+
+    def test_a_game_that_passes_the_tails_jump_again_passes_point_3(self):
+        report = self.reports["s16-enchante"]
+        self.assertTrue(report.startswith("point 1: pass"), report)
+        self.assertIn("point 3: pass", report)
+
+    def test_a_restored_screen_with_basics_banner_passes_point_3(self):
+        report = self.reports["s16-robe"]
+        self.assertTrue(report.startswith("point 1: pass"), report)
+        self.assertIn("point 3: pass", report)
 
 
 if __name__ == "__main__":

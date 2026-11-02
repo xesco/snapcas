@@ -21,20 +21,21 @@ proc start_check {} {
     # EXPTBL, read while the system area is still DOS's.
     set ::exptbl [lmap ps {0 1 2 3} {debug read memory [expr {0xFCC1 + $ps}]}]
     # RAMAD3 at F344h: DOS's mapper's slot ID, read when SNAPCAS.COM starts,
-    # after DOS has set it.
+    # after DOS has set it. A start after the restore is point 3's reboot into
+    # DOS.
+    set ::reached 0
     set ::dosslot 0
     lassign $::C(com) b0 b1 b2
-    debug set_bp 0x0100 "\[debug read memory 0x100\] == $b0 && \[debug read memory 0x101\] == $b1 && \[debug read memory 0x102\] == $b2" { set ::dosslot [debug read memory 0xF344] }
+    debug set_bp 0x0100 "\[debug read memory 0x100\] == $b0 && \[debug read memory 0x101\] == $b1 && \[debug read memory 0x102\] == $b2" { if {$::reached} { rerun } else { set ::dosslot [debug read memory 0xF344] } }
     # With the tape service, page 0's bits of the slot register, of DOS's
     # mapper's subslot register, and of SLTTBL, and mapper register FCh, can
     # select T0 (DESIGN.md, Restorer, step 3).
     set ::p0mask [expr {$::C(service) ? 0xFC : 0xFF}]
     set jp [expr {$::C(tail) + 21}]
-    set ::reached 0
     # The slot register alone can match DOS's own, so the breakpoint also
     # needs the jump to the snapshot's program counter.
     set target [expr {$::C(tail) + 22}]
-    debug set_bp $jp "(\[debug read ioports 0xA8\] & $::p0mask) == ($::C(a8) & $::p0mask) && \[debug read memory $target\] == [expr {$::C(pc) & 0xFF}] && \[debug read memory [expr {$target + 1}]\] == [expr {$::C(pc) >> 8}]" { if {!$::reached} { set ::reached 1; safe_check } else { rerun } }
+    debug set_bp $jp "(\[debug read ioports 0xA8\] & $::p0mask) == ($::C(a8) & $::p0mask) && \[debug read memory $target\] == [expr {$::C(pc) & 0xFF}] && \[debug read memory [expr {$target + 1}]\] == [expr {$::C(pc) >> 8}]" { if {!$::reached} { set ::reached 1; safe_check } }
     after time 120 {
         if {!$::reached} {
             lappend ::diffs "the tail's jump did not run within 120 seconds"
@@ -64,9 +65,10 @@ proc point2 {} {
 }
 
 # Point 3: in the same 60 seconds the restored machine must not reboot
-# (DESIGN.md, Check, point 3). A reboot shows itself as the tail's jump running a
-# second time, when a reset has booted DOS and AUTOEXEC.BAT runs the restorer
-# again, or as the BIOS's boot screen or BASIC's banner at a savestate. A reset
+# (DESIGN.md, Check, point 3). A reboot shows itself as SNAPCAS.COM starting
+# again, when a reset has booted DOS and AUTOEXEC.BAT runs it, or as the MSX1
+# BIOS's boot screen, whose first line is "MSX  system", at a savestate. BASIC's
+# banner, which a game's restored screen can still hold, does not count. A reset
 # alone does not fail the point, because a loader can reset on purpose to start a
 # ROM copy, but the report notes each one. The reset breakpoint is the capture's:
 # the BIOS's reset routine, where 0000h's DI / JP jumps, while page 0 selects
@@ -77,12 +79,12 @@ set ::resets {}
 set ::reboots {}
 proc after_restore {} { format %.1f [expr {[machine_info time] - $::restored}] }
 proc rerun {} {
-    if {[llength $::reboots] < 10} { lappend ::reboots "the restorer runs again [after_restore] seconds after the restore" }
+    if {[llength $::reboots] < 10} { lappend ::reboots "SNAPCAS.COM starts again [after_restore] seconds after the restore" }
 }
 proc look_for_boot {} {
     if {[catch screen text]} return
-    if {[string first "Copyright 1983 by Microsoft" $text] >= 0 && [llength $::reboots] < 10} {
-        lappend ::reboots "the screen shows the BIOS's boot screen or BASIC [after_restore] seconds after the restore"
+    if {[regexp {MSX +system} $text] && [llength $::reboots] < 10} {
+        lappend ::reboots "the screen shows the BIOS's boot screen [after_restore] seconds after the restore"
     }
 }
 proc main_rom0 {} {

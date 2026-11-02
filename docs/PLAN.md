@@ -344,8 +344,8 @@ length of the tape:
 ## Step 16: the check's reboot point
 
 This step adds point 3 to the check: a reboot of the machine during the 60 seconds
-after the restore fails it, shown by the tail's jump running a second time or by
-`Copyright 1983 by Microsoft` on the screen at a savestate
+after the restore fails it, shown by `SNAPCAS.COM` starting again or by
+`MSX  system`, the MSX1 BIOS's boot screen, on the screen at two or more savestates
 ([Check](DESIGN.md#check)). The breakpoint at the start of the BIOS's reset routine
 while page 0 selects the main ROM only notes each reset in the report, and it is set
 after point 1, because the check's own boot passes there.
@@ -353,7 +353,10 @@ after point 1, because the check's own boot passes there.
 | Test | What it proves |
 |---|---|
 | Aliens, from Super MSX n.9, on `advanced/phc28s` | An image that reboots to the boot screen fails point 3, though it passes points 1 and 2 and the reset breakpoint misses it |
-| Cita, from Super MSX n.15, on `basic/vg8020` | An image that reboots into DOS fails point 3, because the restorer runs again |
+| Cita, from Super MSX n.15, on `basic/vg8020` | An image that reboots into DOS fails point 3, because `SNAPCAS.COM` starts again |
+| Enchanted on `advanced/phc28s` | A game whose code passes the tail's jump address again passes point 3 |
+| Roberto Mate, from Philips's Turbo Pack A, on `advanced/phc28s` | A game whose restored screen holds BASIC's banner passes point 3 |
 | Japan, from Super MSX n.20, on `basic/vg8020` | A loader that resets on purpose after the restore and then starts its ROM copy passes point 3, and the report notes the reset |
+| Raider, from Super MSX n.18, on `basic/vg8020` | A reset on purpose whose boot screen a single savestate catches passes point 3 |
 | A single-load game on each shipped machine | The check's own boot, before the restore, is not a reboot |
 | The collection on `advanced/phc28s` and `basic/vg8020` | The game files that fail point 3 are sorted into the failure lists |
