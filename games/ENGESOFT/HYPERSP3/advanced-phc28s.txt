@@ -1,0 +1,15 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# HYP and HYPER each end with a routine that selects page 3's slot in page 1, by
+# setting page 1's bits from page 3's, and copies the game's ROM image from 9000h:
+# HYP's half to 4000h, and HYPER's to 8000h before it jumps to the ROM's INIT at
+# 4002h. On the PHC-28S page 3 is the internal RAM in slot 0, so the first half
+# goes into the ROM and the jump reads ROM bytes. The patches replace the bit
+# tests with NOPs and keep the SET 2,A after them, which selects the RAM
+# cartridge, slot 1, in page 1.
+patch side1:4584 CB 7F 28 02 CB DF CB 77 28 02 > 00 00 00 00 00 00 00 00 00 00
+patch side1:85DC CB 7F 28 02 CB DF CB 77 28 02 > 00 00 00 00 00 00 00 00 00 00
+
+# The capture runs without the Carnivore2, so that BASIC's page 2, where HYPER
+# copies the second half, is the RAM cartridge too, which the game selects there.
+capture advanced/phc28s-nodisk
