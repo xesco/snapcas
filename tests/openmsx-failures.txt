@@ -18,10 +18,8 @@ basic/vg8020 SUPERMSX/MADDRIVE Shows a black screen 60 seconds after the load, a
 basic/vg8020 SUPERMSX/ROBOTRON Shows a black screen 60 seconds after the load, also after a press of space
 basic/vg8020 SUPERMSX/SHOOTING Shows a screen half white and half black 60 seconds after the load, also after a press of space
 basic/vg8020 SUPERMSX/AMERICAN Resets after the load, and ends on an empty blue screen
-advanced/phc28s BEACH-HE Resets after the load, and ends in Nextor's BASIC
 advanced/phc28s ENGESOFT/HYPERSP3 Resets after the load, and ends in Nextor's BASIC
 advanced/phc28s M-DROID Resets after the load, and ends in Nextor's BASIC
-basic/vg8020 BEACH-HE Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 DOKI-DOK Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 EGGERLAN Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 ENGESOFT/YIEARKUN Resets after the load, and ends in Nextor's BASIC

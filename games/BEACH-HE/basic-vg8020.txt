@@ -1,0 +1,6 @@
+# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2. With it, the game resets the machine
+# 4.2 seconds after the snapshot, as the plain load does, and the BIOS boots
+# Nextor into DOS. Without it the game runs, and shows its first screen.
+capture basic/vg8020-nodisk
