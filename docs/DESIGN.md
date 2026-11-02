@@ -610,7 +610,7 @@ and the game crashes into a reset. The loaders seen so far take one of these for
 | `BIT 7,A` / `SET 3,A` / `BIT 6,A` / `SET 2,A`: page 1's bits of the slot register from page 3's | Circus Charlie and Hyper Sports 3 from Engesoft, and M-Droid's `core` | A patch that makes the routine select slot 1, the RAM cartridge, in page 1 |
 | The same routine as text, in a BASIC loader's `DATA` lines | M-Droid | A patch of the text |
 | A fixed value for pages 1 to 3, chosen by page 3's slot | Beach-Head: 54h for page 3 in slot 0 or 1 | A patch to 14h, and the capture without the Carnivore2 |
-| Page 2's slot copied into page 1's bits | Budokan, Michel Futbol Master's side B, and Professional Tennis Simulator, two dumps of each of the last two, whose program is `slots`. Night Shade from Engesoft, whose NIGHT and SHADE end with the copy | The capture without the Carnivore2, where pages 1 to 3 are the RAM cartridge |
+| Page 2's slot copied into page 1's bits | Budokan, Michel Futbol Master's side B, and Professional Tennis Simulator, two dumps of each of the last two, whose program is `slots`. Night Shade from Engesoft, whose NIGHT and SHADE end with the copy. Konami's Soccer, whose MUNDIA parts OR the slot register with itself shifted right by two bits | The capture without the Carnivore2, where pages 1 to 3 are the RAM cartridge |
 | A search for RAM in page 1 only, and a ROM image read into page 1 there and into BASIC's page 2, after which the game selects page 1's slot in page 2 | From Super MSX: Aliens, Star and Worm, whose loader is LOADER, and American Football, Japan, Xerider, The Karate Kid, Alexis, Guardic and Mad Driver, whose loader is two parts. Also Dam Busters, and the second half of Hyper Sports 3 | The capture without the Carnivore2, where pages 1 and 2 are the RAM cartridge |
 | A shorter variant of `slots` that keeps the slots it finds | Underground | The capture without the Carnivore2. Which value leads the game to its reset is not known |
 
@@ -1202,7 +1202,7 @@ report to `check/report.txt`:
    |---|---|
    | `SNAPCAS.COM` starts again: the breakpoint at 0100h that reads RAMAD3 fires after the restore | A reset has booted DOS from the check's disk, and its `AUTOEXEC.BAT` runs the restorer again |
    | The screen's text holds `MSX  system` at two or more of the six savestates | The machine stays on the MSX1 BIOS's boot screen, whose first line that is, or comes back to it in a loop of resets. A reset on purpose shows the boot screen for a few seconds before the game starts, so a single savestate can catch it: Raider, from Super MSX n.18, resets the VG-8020 6.2 seconds after the restore and shows its game at 60 seconds. BASIC's banner holds `MSX BASIC` instead, so a BASIC game whose restored screen still holds the banner does not count. The MSX2 BIOS draws its boot screen as graphics, so this sign holds only on an MSX1 |
-   | The capture's log holds a reset in the 60 seconds after the snapshot, and the check notes none | The restored game does not do what the loaded one did. Konami's Soccer and Budokan on the PHC-28S stay on a title or an empty screen for the 60 seconds, though their captures reset 8.7 and 7.8 seconds after the snapshot, and on a real PHC-28S Konami's Soccer's restored game does reset, into DOS |
+   | The capture's log holds a reset in the 60 seconds after the snapshot, and the check notes none | The restored game does not do what the loaded one did. Konami's Soccer and Budokan on the PHC-28S, captured with the Carnivore2, stay on a title or an empty screen for the 60 seconds, though their captures reset 8.7 and 7.8 seconds after the snapshot, and on a real PHC-28S Konami's Soccer's restored game does reset, into DOS |
 
    The first signs were the tail's jump running a second time and
    `Copyright 1983 by Microsoft` on the screen ([Decisions](#decisions)). The first
@@ -1333,7 +1333,12 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   In `openMSX`'s check on the PHC-28S, the restored game stays on its title screen
   for the 60 seconds and never resets. Point 3's third sign fails the check for that
   ([Check](#check)), and Budokan does the same, but why the restored machine does
-  not reset there is not known.
+  not reset there is not known. Both captures reset because the loaders crash: they
+  copy page 2's slot into page 1's bits, and with the Carnivore2 page 2 is its
+  mapper's subslot
+  ([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)). Their
+  game files now capture them without the Carnivore2, where neither resets, and both
+  games run.
 
 ## Formats
 

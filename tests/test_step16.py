@@ -21,8 +21,9 @@ GAMES = {
     # Reboots to the boot screen on the PHC-28S without its machine's game file,
     # whose capture without the Carnivore2 fixes it.
     "s16-aliens": ("SUPERMSX/ALIENS", "advanced/phc28s", True),
-    # Reboots into DOS on the VG-8020, whose AUTOEXEC.BAT runs SNAPCAS.COM again.
-    "s16-konami-vg": ("KONAMI", "basic/vg8020", False),
+    # Reboots into DOS on the VG-8020, whose AUTOEXEC.BAT runs SNAPCAS.COM again,
+    # without its machine's game file, whose capture without the Carnivore2 fixes it.
+    "s16-konami-vg": ("KONAMI", "basic/vg8020", True),
     # Resets the VG-8020 on purpose after the restore, and starts its ROM copy.
     "s16-japan": ("SUPERMSX/JAPAN", "basic/vg8020", False),
     # Passes the tail's jump address again with its own code.
@@ -30,8 +31,8 @@ GAMES = {
     # Keeps BASIC's banner on its restored screen.
     "s16-robe": ("016-ROBE", "advanced/phc28s", False),
     # Never reaches the reset that its capture shows 8.7 seconds after the
-    # snapshot.
-    "s16-konami": ("KONAMI", "advanced/phc28s", False),
+    # snapshot, without its machine's game file.
+    "s16-konami": ("KONAMI", "advanced/phc28s", True),
     # Resets the PHC-28S on purpose after the restore, and starts its game.
     "s16-bumper": ("BUMPER", "advanced/phc28s", False),
     # Resets the VG-8020 on purpose after the restore, and one savestate catches

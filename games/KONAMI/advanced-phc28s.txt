@@ -1,0 +1,10 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The capture runs without the Carnivore2. The two MUNDIA parts each copy page 2's
+# slot into page 1's bits, by ORing the slot register with itself shifted right by
+# two bits, and copy the game from 8800h to 4000h and to 8000h. With the
+# Carnivore2, BASIC's page 2 is its mapper in slot 2-2, whose subslot page 1 does
+# not select, and the game crashes into a reset, into DOS on a real PHC-28S too.
+# Without it, pages 1 and 2 are the RAM cartridge in slot 1, and the game waits
+# on a blank screen for a key before its title.
+capture advanced/phc28s-nodisk

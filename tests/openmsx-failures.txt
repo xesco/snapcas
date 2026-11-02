@@ -9,7 +9,5 @@ basic/vg8020 SUPERMSX/SHOOTING Shows a screen half white and half black 60 secon
 basic/vg8020 DOKI-DOK Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 EGGERLAN Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 ENGESOFT/YIEARKUN Resets after the load, and ends in Nextor's BASIC
-basic/vg8020 KONAMI Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 MONOPOLY Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 HANG-ON Resets 5 times after the load, and ends on the boot screen
-advanced/phc28s KONAMI Resets after the load, and ends in Nextor's BASIC
