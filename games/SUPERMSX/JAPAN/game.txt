@@ -8,3 +8,7 @@
 cas SUPERMOB.CAS
 sha1 42c1e6026fdcb866c0215eb0cab2661b5b807b9b
 start JAPAN
+
+# The capture reads the tape up to the next program's loader, so the rest of the
+# tape holds only the magazine's later programs, which this game never reads.
+service no

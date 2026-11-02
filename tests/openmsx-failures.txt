@@ -17,3 +17,4 @@ advanced/phc28s SUPERMSX/MADDRIVE Shows a black screen 60 seconds after the load
 basic/vg8020 SUPERMSX/MADDRIVE Shows a black screen 60 seconds after the load, also after a press of space
 basic/vg8020 SUPERMSX/ROBOTRON Shows a black screen 60 seconds after the load, also after a press of space
 basic/vg8020 SUPERMSX/SHOOTING Shows a screen half white and half black 60 seconds after the load, also after a press of space
+basic/vg8020 SUPERMSX/AMERICAN Resets after the load, and ends on an empty blue screen

@@ -7,3 +7,7 @@
 cas SUPER-24.CAS
 sha1 770bfcfa7ee1722263f99a832d1348c89b8a950d
 start VERTIG
+
+# The capture reads the tape up to the next program's loader, so the rest of the
+# tape holds only the magazine's later programs, which this game never reads.
+service no

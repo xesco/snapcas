@@ -8,3 +8,7 @@
 cas SUPER-MS.CAS
 sha1 dcc09cf7d6e985053ac6cb96157c91847ebf7e40
 start CRAZY
+
+# The capture reads the tape up to the next program's loader, so the rest of the
+# tape holds only the magazine's later programs, which this game never reads.
+service no

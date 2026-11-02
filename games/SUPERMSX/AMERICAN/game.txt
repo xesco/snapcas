@@ -8,3 +8,7 @@
 cas SUPEROB.CAS
 sha1 f747f0115d96e2a290de21c99dd891ec3bd1f4e4
 start AMERIC
+
+# The capture reads the tape up to the next program's loader, so the rest of the
+# tape holds only the magazine's later programs, which this game never reads.
+service no

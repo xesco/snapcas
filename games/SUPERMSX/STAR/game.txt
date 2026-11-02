@@ -7,3 +7,7 @@
 cas SUPER16B.CAS
 sha1 c7a5fb199e82e0f7380b23de2a2d61138736f99c
 start STAR
+
+# The capture reads the tape up to the next program's loader, so the rest of the
+# tape holds only the magazine's later programs, which this game never reads.
+service no

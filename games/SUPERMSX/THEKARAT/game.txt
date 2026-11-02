@@ -8,3 +8,7 @@
 cas SUPER23.CAS
 sha1 6d00125ee270d5d95729917c7eb24b5751cf7be7
 start KARATE
+
+# The capture reads the tape up to the next program's loader, so the rest of the
+# tape holds only the magazine's later programs, which this game never reads.
+service no
