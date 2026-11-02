@@ -1,0 +1,6 @@
+# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2. With it, the game resets the machine
+# after the load and Nextor starts, as its plain load does in openMSX with the
+# Carnivore2, by a cause not yet traced. Without it the game runs.
+capture basic/vg8020-nodisk
