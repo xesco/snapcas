@@ -2,3 +2,12 @@
 # https://download.file-hunter.com/Games/MSX1/CAS/UchiMata%5B%2B3%5D%5BNR%5D.zip
 cas UCHIMATA.CAS
 sha1 604965ba31d18eea37bc4914a83a2e941cc76a3e
+
+# The game's loader, at 86B2h and copied to 400Bh, reads 5808h bytes into 85D9h
+# with TAPIN after its own TAPION, but the tape holds 22152 of them, in a block of
+# 22144 and one of 8, and ends there. The loader then waits for the rest, with its
+# interrupts off and a blank screen, in a plain load in openMSX as well. The
+# dump's last block ends in zeros, so the missing bytes are taken to be its
+# padding. The patch makes the count 5688h, the 22152 bytes the tape holds, after
+# which the loader stops the motor and starts the game at 4230h.
+patch side1:2018 01 08 58 > 01 88 56

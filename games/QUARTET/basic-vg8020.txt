@@ -1,0 +1,7 @@
+# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2. With it, page 2 selects the Carnivore2's
+# subslot 1 at the snapshot, where the game's interrupted code at 919Fh is, and the
+# image holds the mapper's RAM in page 2, not that subslot, so after the restore the
+# game runs into empty RAM and hangs.
+capture basic/vg8020-nodisk

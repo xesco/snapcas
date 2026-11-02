@@ -614,16 +614,20 @@ and the game crashes into a reset, or starts in BASIC's ROM, which stops at an e
 | Page 2's slot copied into page 1's bits | Budokan, Michel Futbol Master's side B, Professional Tennis Simulator and Arquimedes XXI, whose program is `slots`, with two dumps each of Michel Futbol Master and Professional Tennis Simulator. Night Shade from Engesoft, whose NIGHT and SHADE end with the copy. Konami's Soccer, whose MUNDIA parts OR the slot register with itself shifted right by two bits | The capture without the Carnivore2, where pages 1 to 3 are the RAM cartridge |
 | A search for RAM in page 1 only, and a ROM image read into page 1 there and into BASIC's page 2, after which the game selects page 1's slot in page 2 | From Super MSX: Aliens, Star and Worm, whose loader is LOADER, and American Football, Japan, Xerider, The Karate Kid, Alexis, Guardic and Mad Driver, whose loader is two parts. Also Dam Busters, and the second half of Hyper Sports 3 | The capture without the Carnivore2, where pages 1 and 2 are the RAM cartridge |
 | A shorter variant of `slots` that keeps the slots it finds | Underground | The capture without the Carnivore2. Which value leads the game to its reset is not known |
-| Pages 2 and 3's slots copied into pages 0 and 1: `AND F0h`, `LD B,A`, four `RLCA`s or `RRCA`s, then `OR B`, with `AND 0Fh` before it after `RRCA`s | The Wall from Super MSX 7, whose LOADER is at DD00h. Each part of a tape made by CasLink3: Hang-On and Lunar Ball | A patch to `LD A,15h`, and the capture without the Carnivore2 |
+| Pages 2 and 3's slots copied into pages 0 and 1: `AND F0h`, then four `RLCA`s, `RRCA`s or `SRA A`s of the slot register's value, then `OR` with the first, with `AND 0Fh` before it after `RRCA`s or `SRA A`s | The Wall from Super MSX 7, whose LOADER is at DD00h. Each part of a tape made by CasLink3: Hang-On, Lunar Ball and Quartet. Level 9's adventures, which read their A-code in pages 0 and 1: Emerald Isle, Red Moon, Time and Magik II, Return to Eden, Silicon Dreams II, The Worm in Paradise, and the four parts of The Secret Diary of Adrian Mole | A patch to `LD A,15h`, and the capture without the Carnivore2 |
 
 The fixes are lines in the game files, not a patch that the capture makes itself,
 because the forms differ. A search of the test collection found the first form in
 the code of four tapes only, each of whose game files already has its line, and the
-other forms in one to three games each. CasLink3's form is in 60 tapes, but with the
-Carnivore2 pages 2 and 3 are its mapper, so pages 0 and 1 get the mapper too, and
-the capture needs no patch. Only the two games that crash when a disk system is
-present need one. The capture's own patches cover the forms that repeat over many
-tapes ([Slot patches](#slot-patches),
+other forms in one to three games each, apart from CasLink3's and Level 9's.
+CasLink3's form is in 60 tapes, but its parts also copy the subslot register's
+fields of pages 2 and 3 to pages 0 and 1. With the Carnivore2, pages 2 and 3 are its
+mapper, so pages 0 and 1 get the mapper too, and the capture needs no patch. Only
+the games that need the capture without the Carnivore2 for another reason need one.
+Level 9's code copies the slot register only, so its games need the capture without
+the Carnivore2, and the patch on the PHC-28S, though Erik the Viking, which has the
+same code, works with the Carnivore2. The capture's own patches cover the forms that
+repeat over many tapes ([Slot patches](#slot-patches),
 [The RAM search patch](#the-ram-search-patch)).
 
 ### Snapshot files

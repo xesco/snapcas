@@ -1,0 +1,14 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The loader advent, at EF00h, copies the game's A-code to 0000h with pages 0 and
+# 1 in the slots of pages 2 and 3, and the game at 8000h selects the same slots
+# to read it, with IN A,(A8h), four SRA As, AND 0Fh and OR C. With the Carnivore2,
+# pages 2 and 3 are its mapper in slot 2-2, whose subslot pages 0 and 1 do not
+# select, and the interpreter answers "Acode?". The capture runs without it, where
+# page 3 is the internal RAM in slot 0, which has the ROM in pages 0 and 1, so the
+# patches load 15h in their place: slot 1, the RAM cartridge, in pages 0 to 2,
+# and slot 0 in page 3. The last one keeps the sum that ends the block.
+capture advanced/phc28s-nodisk
+patch side1:8B9 DB A8 CB 2F CB 2F CB 2F CB 2F E6 0F B1 > 3E 15 00 00 00 00 00 00 00 00 00 00 00
+patch side1:74DA DB A8 CB 2F CB 2F CB 2F CB 2F E6 0F B1 > 3E 15 00 00 00 00 00 00 00 00 00 00 00
+patch side1:BAB8 92 > D4
