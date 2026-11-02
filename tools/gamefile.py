@@ -30,9 +30,10 @@ class Game:
         self.keys = []        # [(time, kind, value)], kind "key" or "text"
         self.continue_key = None
         self.snapshot_at = None
-        self.service_no = False  # service no: the game never reads the rest
-        self.service_page = None  # service at xxE1: the page of the service's page 3 part
-        self.service_t0 = False   # service t0: the tape service without a part in page 3
+        # The service line: None, "no" when the game never reads the rest of
+        # its tape, "t0" for the tape service without a part in page 3, or for
+        # service at xxE1 the page of the service's page 3 part.
+        self.service = None
         self.capture = None      # the machine file for the capture, if not the user's
         self.rom_keep = False    # rom keep: page 0 keeps the ROM, and T0 does not replace it
         self.patches = []     # [Patch]
@@ -123,6 +124,7 @@ def read_game(folder, machine=None):
     if machine is not None and os.path.exists(machine_file(folder, machine)):
         with open(machine_file(folder, machine), encoding="utf-8") as f:
             lines += [(machine_file(folder, machine), n, line) for n, line in enumerate(f.read().splitlines(), 1)]
+    service_files = set()
     for file, number_, line in lines:
         where = f"{file}:{number_}"
         if not line.strip() or line.lstrip().startswith("#"):
@@ -170,12 +172,15 @@ def read_game(folder, machine=None):
                 raise GameFileError(f"{where}: snapshot takes at and a time")
             game.snapshot_at = number(args[1], where)
         elif key == "service":
-            if args == ["no"]:
-                game.service_no = True
+            # One line in each file, and the machine's file's replaces
+            # game.txt's.
+            if file in service_files:
+                raise GameFileError(f"{where}: a file holds one service line")
+            service_files.add(file)
+            if args in (["no"], ["t0"]):
+                game.service = args[0]
             elif len(args) == 2 and args[0] == "at" and re.fullmatch(r"[C-Fc-f][0-9A-Fa-f][Ee]1", args[1]):
-                game.service_page = int(args[1][:2], 16)
-            elif args == ["t0"]:
-                game.service_t0 = True
+                game.service = int(args[1][:2], 16)
             else:
                 raise GameFileError(f"{where}: service takes no, at and an address xxE1 in page 3, or t0")
         elif key == "capture":
@@ -192,4 +197,9 @@ def read_game(folder, machine=None):
         raise GameFileError(f"{path}: needs a cas or tsx line")
     if game.side2 and os.path.splitext(game.side2)[1].lower() != os.path.splitext(game.tape)[1].lower():
         raise GameFileError(f"{path}: side2 takes a file of side 1's format")
+    # rom keep leaves the game only the entries in page 3, which service t0
+    # removes (DESIGN.md, Game file).
+    if game.rom_keep and game.service == "t0":
+        raise GameFileError(f"{folder}: rom keep needs the tape service's part of page 3, so it cannot "
+                            "go with service t0")
     return game

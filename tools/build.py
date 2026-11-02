@@ -451,16 +451,21 @@ def patch_pages(patch_lines, state, pages):
     return ranges
 
 
-def service_mode(state, pages, length, wanted_page, t0_mode):
+def service_mode(state, pages, length, game):
     """The page of the service's page 3 part, 0 without one, and whether the
-    image has the mode without a part in page 3: by the game file, or when
-    page 3 has no room for the part's length."""
+    image has the mode without a part in page 3: by the game file's service
+    t0, or when page 3 has no room for the part's length. A game file with rom
+    keep cannot take that mode (DESIGN.md, Game file)."""
     if state["service"] != "1":
-        return 0, t0_mode
-    if not t0_mode:
-        page = service_page(state, pages, length, wanted_page)
+        return 0, False
+    if game.service != "t0":
+        wanted = game.service if isinstance(game.service, int) else None
+        page = service_page(state, pages, length, wanted)
         if page is not None:
             return page, False
+    if game.rom_keep:
+        raise BuildError(f"{game.folder}: page 3 has no room for the tape service's part, and rom keep "
+                         "needs it, because the mode without a part in page 3 has no entries there")
     return 0, True
 
 
@@ -545,18 +550,17 @@ def check_unread(state, blocks, names, service_no):
                          "The game file needs service no if the game never reads it")
 
 
-def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=False, wanted_page=None,
-          t0_mode=False, names=("side1.cas", "side2.cas"), service_no=False):
+def build(snap, service_path, game, side1=b"", side2=b"", patch_lines=()):
     """Returns (header and tables, the records' data, a report, scan.txt's
-    text). side1 and side2 are the bytes of the tape files that the capture
-    played (played_tapes), and names their files' names, patch_lines the game
-    file's patches and the capture's, rom_keep keeps T0 from replacing the ROM,
-    and service_no is the game file's service no."""
+    text, build.txt's text) for game, a gamefile.Game. side1 and side2 are the
+    bytes of the tape files that the capture played (played_tapes), and
+    patch_lines the game file's patches and the capture's."""
     state = read_state(snap)
     slots = patches.slots.read_slots(snap)
+    names = (game.tape, game.side2 or "")
     # The tape service's tapes of the played files (DESIGN.md, Tape files).
     blocks = (tape.read(names[0], side1) if side1 else [], tape.read(names[1], side2) if side2 else [])
-    check_unread(state, blocks, names, service_no)
+    check_unread(state, blocks, names, game.service == "no")
     side1, side2 = tape.service(blocks[0]), tape.service(blocks[1])
     parts = read_service(service_path)
     tail = parts[0]
@@ -564,27 +568,30 @@ def build(snap, service_path, side1=b"", side2=b"", patch_lines=(), rom_keep=Fal
     ranges = patch_pages(patch_lines, state, pages)
     scan_ranges = {}
 
-    if state["service"] != "1":
+    # The tape service and its mode: without it, the scan looks only for fixed
+    # slot values, and without a part in page 3, it patches only those.
+    with_service = state["service"] == "1"
+    page, t0_mode = service_mode(state, pages, len(parts[2]), game)
+    if not with_service:
         scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, with_tape=False,
                                 patched=scan_ranges)
-    page, t0_mode = service_mode(state, pages, len(parts[2]), wanted_page, t0_mode)
-    if state["service"] == "1" and t0_mode:
+    elif t0_mode:
         scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, patch=False, blocks=blocks,
                                 patched=scan_ranges)
-    elif state["service"] == "1":
+    else:
         parts = read_service(service_path, page)
         scanned = scan_snapshot(state, pages, side1, side2, page, slots, blocks=blocks, patched=scan_ranges)
     tail_address = place_tail(state, pages, tail)
     service = []
-    if state["service"] == "1":
+    if with_service:
         service = service_segments(snap, parts, side1, side2, pages, state, tail_address, page, t0_mode)
 
     records, data, v9938 = records_and_data(snap, pages, service)
     writes = port_writes(state, v9938)
     if len(records) > 255 or len(writes) > 255:
         raise BuildError(f"{snap}: too many records or port writes for the image")
-    flags = (FLAG_ROM_KEEP if rom_keep else 0) | (FLAG_T0 if t0_mode and service else 0)
-    borrowed = borrowed_page(state, pages)[0] if t0_mode and service else 0
+    flags = (FLAG_ROM_KEEP if game.rom_keep else 0) | (FLAG_T0 if t0_mode else 0)
+    borrowed = borrowed_page(state, pages)[0] if t0_mode else 0
     header = image_header(snap, state, records, writes, flags, page, borrowed, tail_address)
 
     mapper = sum(1 for r in records if r[0] in (RAM_IN_MAPPER, SERVICE_SEGMENT))
@@ -664,9 +671,8 @@ def main():
         snap = os.path.join(out, "snap")
         captured = patches.slots.capture_patches(snap)
         side1, side2 = played_tapes(game, args.tapes, captured)
-        header, data, report, scanned, checked = build(snap, args.service, side1, side2,
-                                     list(game.patches) + captured, game.rom_keep, game.service_page,
-                                     game.service_t0, (game.tape, game.side2 or ""), game.service_no)
+        header, data, report, scanned, checked = build(snap, args.service, game, side1, side2,
+                                                       list(game.patches) + captured)
     except (OSError, gamefile.GameFileError, BuildError, tape.TapeError) as e:
         print(f"build.py: {e}", file=sys.stderr)
         return 1

@@ -82,7 +82,7 @@ def settings(game, machine, tape_path, data, snap, side2_path=None, side2=b""):
         "side2tape": "{}" if side2_path is None else msx.tcl_word(side2_path),
         "s1len": str(tape.side2_start(len(data))),
         "headers2": tcl_list(str(h + tape.side2_start(len(data))) for h in tape.headers(side2)),
-        "nosvc": "1" if game.service_no else "0",
+        "nosvc": "1" if game.service == "no" else "0",
         "keys": tcl_list(f"{t} {msx.tcl_word(tcl)}" for t, tcl in keys),
         "lastkey": str(max([t for t, _ in keys], default=0)),
         # A loader can read the keyboard rarely, so the keys that may
