@@ -21,7 +21,6 @@ basic/vg8020 SUPERMSX/AMERICAN Resets after the load, and ends on an empty blue 
 advanced/phc28s BEACH-HE Resets after the load, and ends in Nextor's BASIC
 advanced/phc28s ENGESOFT/HYPERSP3 Resets after the load, and ends in Nextor's BASIC
 advanced/phc28s M-DROID Resets after the load, and ends in Nextor's BASIC
-advanced/phc28s MICHELA2 Resets after the load, and ends in Nextor's BASIC
 advanced/phc28s PROFEAKA Resets after the load, and ends in Nextor's BASIC
 advanced/phc28s SIMULADO Resets after the load, and ends in Nextor's BASIC
 advanced/phc28s UNDERGRO Resets after the load, and ends in Nextor's BASIC
