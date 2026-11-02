@@ -5,7 +5,6 @@
 # file's folder, and what fails in plain openMSX.
 
 advanced/phc28s SUPERMSX/THEKARAT Resets 13 times after the load, and ends on the boot screen
-advanced/phc28s SUPERMSX/XERIDER Resets after the load, and ends on a garbled BASIC screen
 advanced/phc28s SUPERMSX/MADDRIVE Shows a black screen 60 seconds after the load, also after a press of space
 basic/vg8020 SUPERMSX/MADDRIVE Shows a black screen 60 seconds after the load, also after a press of space
 basic/vg8020 SUPERMSX/ROBOTRON Shows a black screen 60 seconds after the load, also after a press of space
