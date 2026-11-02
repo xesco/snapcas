@@ -4,7 +4,6 @@
 # line can still make such a game work later. Each line: the machine, the game
 # file's folder, and what fails in plain openMSX.
 
-advanced/phc28s SUPERMSX/AMERICAN Resets 17 times after the load, and ends on the boot screen
 advanced/phc28s SUPERMSX/JAPAN Resets 4 times after the load, and ends on a garbled BASIC screen
 advanced/phc28s SUPERMSX/THEKARAT Resets 13 times after the load, and ends on the boot screen
 advanced/phc28s SUPERMSX/XERIDER Resets after the load, and ends on a garbled BASIC screen
@@ -12,7 +11,6 @@ advanced/phc28s SUPERMSX/MADDRIVE Shows a black screen 60 seconds after the load
 basic/vg8020 SUPERMSX/MADDRIVE Shows a black screen 60 seconds after the load, also after a press of space
 basic/vg8020 SUPERMSX/ROBOTRON Shows a black screen 60 seconds after the load, also after a press of space
 basic/vg8020 SUPERMSX/SHOOTING Shows a screen half white and half black 60 seconds after the load, also after a press of space
-basic/vg8020 SUPERMSX/AMERICAN Resets after the load, and ends on an empty blue screen
 basic/vg8020 DOKI-DOK Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 EGGERLAN Resets after the load, and ends in Nextor's BASIC
 basic/vg8020 ENGESOFT/YIEARKUN Resets after the load, and ends in Nextor's BASIC

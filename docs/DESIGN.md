@@ -611,7 +611,7 @@ and the game crashes into a reset. The loaders seen so far take one of these for
 | The same routine as text, in a BASIC loader's `DATA` lines | M-Droid | A patch of the text |
 | A fixed value for pages 1 to 3, chosen by page 3's slot | Beach-Head: 54h for page 3 in slot 0 or 1 | A patch to 14h, and the capture without the Carnivore2 |
 | Page 2's slot copied into page 1's bits, by a program `slots` | Budokan, Michel Futbol Master's side B, and Professional Tennis Simulator, two dumps of each of the last two | The capture without the Carnivore2, where pages 1 to 3 are the RAM cartridge |
-| A search for RAM in page 1 only, and a ROM image read into page 1 there and into BASIC's page 2, after which the game selects page 1's slot in page 2 | Aliens from Super MSX n.9, and the second half of Hyper Sports 3 | The capture without the Carnivore2, where pages 1 and 2 are the RAM cartridge |
+| A search for RAM in page 1 only, and a ROM image read into page 1 there and into BASIC's page 2, after which the game selects page 1's slot in page 2 | Aliens, Star and Worm from Super MSX, with LOADER, American Football from Super MSX with AMERI1 and AMERI2, and the second half of Hyper Sports 3 | The capture without the Carnivore2, where pages 1 and 2 are the RAM cartridge |
 | A shorter variant of `slots` that keeps the slots it finds | Underground | The capture without the Carnivore2. Which value leads the game to its reset is not known |
 
 The fixes are lines in the game files, not a patch that the capture makes itself,
@@ -1224,8 +1224,10 @@ report to `check/report.txt`:
    breakpoint took the main ROM for slot 3-3 and missed every reset there, Aliens's
    among them. The report adds `point 3: fail` and the sign, or else
    `point 3: pass`, and a failed point 3 fails the check. A hang is not a reboot,
-   and point 3 does not see it: American Football stops in the BIOS on the VG-8020
-   with its interrupts off.
+   and point 3 does not see it: American Football, captured with the Carnivore2,
+   stops in the BIOS on the VG-8020 with its interrupts off. Its game file now
+   captures it without the Carnivore2
+   ([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)).
 
 Code that a game builds only when the player reaches a level is not visible to the
 scan or to the check. It appears as a hang during play, and a trace of that load in
