@@ -3,4 +3,3 @@
 # the game file's folder, and what fails and why.
 
 advanced/hbf700p AFTERBUR The game fills page 3, so the tape service has no part there, and T0 takes mapper register FCh. The game's page 0 is RAM in the internal mapper, which follows the same register, so the restore changes it: RAM 3-3-0 differs at 0000
-basic/vg8020 SUPERMSX/ODINOII Check point 1 fails
