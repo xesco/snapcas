@@ -1158,6 +1158,19 @@ that disk and the `boot` keys, and writes its report to `check/report.txt`:
    ([Without a part in page 3](#without-a-part-in-page-3)). The point sees only the
    writes of its 60 seconds, not those that come after a key, a level or another
    side, as Altered Beast's do.
+3. During the same 60 seconds the game must not reset the machine. A breakpoint at
+   the start of the BIOS's reset routine, where 0000h's `DI / JP` jumps, while page
+   0 selects the main ROM, as in the capture's log ([Capture](#capture)), notes each
+   reset after point 1 with its time. A reset after the restore reboots the machine,
+   and points 1 and 2 do not see it: seven Super MSX images on the PHC-28S, and
+   American Football on the VG-8020, passed them and showed the boot screen or
+   Nextor's 60 seconds after the restore, as their loads do in plain `openMSX`. A
+   loader that resets on purpose, to start a ROM game that it copied into RAM, does
+   so before the snapshot, so the restored machine has no reset left to make: The
+   Goonies's snapshot is taken during the start that follows its reset. *To verify*
+   over the collection: a game whose restore resets and still starts would fail this
+   point. The report then adds `point 3: fail` and the time of each reset, or else
+   `point 3: pass`, and a failed point 3 fails the check.
 
 Code that a game builds only when the player reaches a level is not visible to the
 scan or to the check. It appears as a hang during play, and a trace of that load in
@@ -1170,6 +1183,7 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | One reader for each tape format, and a format-neutral tape model for the rest of the code | A TSX file holds the turbo blocks that a CAS file cannot, so converting it to CAS would lose the games that need TSX. Teaching each tool both formats would mix them in every tool, while the model keeps each format in one file ([Tape files](#tape-files)) |
 | A game file for each program of a compilation, named after its game | A player looks for a game by its name, and an image named after the tape holds only the tape's first program. One game file for the tape, with a line for each program, would keep the tape's `cas` and `sha1` lines in one place, but it needs game files with sections and changes to every tool and to the collection's cache, to save two lines for each program ([A game later on the tape](#a-game-later-on-the-tape)) |
 | Every program of a compilation in the collection's folder, even when the game has a dump of its own | A compilation's copy can differ from that dump: of 112 such programs on the Engesoft and Super MSX tapes, none had game blocks that equal the dump's, because the magazines renamed the games and changed their title screens. A folder for each collection keeps their names, such as `GOLF` or `STAR`, apart from the games of `games/`. This replaces the rule that gave such a program no game file |
+| A reset after the restore fails the check, while the capture only logs its resets | Points 1 and 2 compare the restore and watch page 3, so a game that crashes into a reset after the restore passed them, as eight Super MSX images did. The capture cannot stop at a reset, because a loader that starts a ROM copy resets on purpose before the snapshot ([Check](#check)) |
 | Restore a snapshot | The game's loader runs once, in `openMSX`, so its slot code, stubs and checks need no changes on the real machine |
 | Capture on a copy of the user's machine, with the disk system's hooks and work area removed | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
 | Snapshot at an interrupt's entry | The CPU's state is complete, interrupts are off, and the bytes below the stack pointer are free for the tail |

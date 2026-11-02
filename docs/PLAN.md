@@ -340,3 +340,17 @@ length of the tape:
 | A CAS file whose block headers are off the grid of 8 bytes | The reader finds each block, as `openMSX` does |
 | Sky Jaguar with `start SKY`, from the Engesoft tape after Circus Charlie | The load starts at a later file, from a copy whose blocks are back on the grid, and the image passes the check ([A game later on the tape](DESIGN.md#a-game-later-on-the-tape)) |
 | The collection on `advanced/phc28s` and `basic/vg8020` | The CAS game files keep their results behind the model |
+
+## Step 16: the check's reset point
+
+This step adds point 3 to the check: a reset of the machine during the 60 seconds
+after the restore fails it ([Check](DESIGN.md#check)). The breakpoint is the
+capture's, at the start of the BIOS's reset routine while page 0 selects the main
+ROM, and it is set only after point 1, because the check's own boot passes there.
+
+| Test | What it proves |
+|---|---|
+| Aliens, from Super MSX n.9, on `advanced/phc28s` | An image whose game resets after the restore fails point 3, though it passes points 1 and 2 |
+| The Goonies on `advanced/phc28s` | A loader that resets on purpose before the snapshot leaves an image that passes point 3 |
+| A single-load game on each shipped machine | The check's own boot, before the restore, is not a reset of the game |
+| The collection on `advanced/phc28s` and `basic/vg8020` | The game files that fail point 3 are sorted into the failure lists, and any game that resets and still starts shows whether the rule needs an exception |
