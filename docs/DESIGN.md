@@ -1294,6 +1294,13 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   known. Tokyo Nampa Street then waits for its music to end and never does. Its game
   file's `snapshot at` comes after the music, and with it the game runs on the real
   machine.
+- Konami's Soccer, in its hacked dump `KONAMI.CAS`, resets the machine 8.7 seconds
+  after the snapshot in its capture on the Sanyo PHC-28S, with no key pressed. On a
+  real PHC-28S with the RAM cartridge in slot 1 and the Carnivore2 in slot 2, the
+  restored game resets too, and the BIOS boots Nextor into DOS, as it does in
+  `openMSX` on the VG-8020. In `openMSX`'s check on the PHC-28S, the restored game
+  stays on its title screen for the 60 seconds and never resets, so the check
+  passes. Why the restored machine does not reset there is not known.
 
 ## Formats
 
