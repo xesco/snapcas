@@ -2,3 +2,9 @@
 # https://download.file-hunter.com/Games/MSX1/CAS/Yo%20Calculo%20(1986)(Anaya%20Multimedia)(es)%5BRUN'CAS-'%5D.zip
 cas YO-CALCU.CAS
 sha1 5c45edb2452e8c675445211a641dd216f7096822
+
+# Line 55 of the first program, CLEAR 200,&HCDFD, moves HIMEM down from F380h,
+# and after that line 60's LOAD"MSXCIM",R finds the file and stops at "Bad file
+# name in 60", in plain openMSX as well. The program loads no code above CDFDh,
+# so the patch makes the address F380h, which leaves HIMEM where it is.
+patch side1:19A 43 44 46 44 > 46 33 38 30
