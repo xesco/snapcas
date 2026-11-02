@@ -34,7 +34,7 @@ proc start_check {} {
     # The slot register alone can match DOS's own, so the breakpoint also
     # needs the jump to the snapshot's program counter.
     set target [expr {$::C(tail) + 22}]
-    debug set_bp $jp "(\[debug read ioports 0xA8\] & $::p0mask) == ($::C(a8) & $::p0mask) && \[debug read memory $target\] == [expr {$::C(pc) & 0xFF}] && \[debug read memory [expr {$target + 1}]\] == [expr {$::C(pc) >> 8}]" { if {!$::reached} { set ::reached 1; safe_check } }
+    debug set_bp $jp "(\[debug read ioports 0xA8\] & $::p0mask) == ($::C(a8) & $::p0mask) && \[debug read memory $target\] == [expr {$::C(pc) & 0xFF}] && \[debug read memory [expr {$target + 1}]\] == [expr {$::C(pc) >> 8}]" { if {!$::reached} { set ::reached 1; safe_check } else { rerun } }
     after time 120 {
         if {!$::reached} {
             lappend ::diffs "the tail's jump did not run within 120 seconds"
@@ -50,6 +50,7 @@ proc safe_check {} {
     write_report
     set ::n 0
     watch_part
+    watch_reset
     after time 10 point2
 }
 
@@ -58,7 +59,52 @@ proc safe_check {} {
 proc point2 {} {
     incr ::n
     savestate "$::C(state)-[expr {$::n * 10}]s"
-    if {$::n < 6} { after time 10 point2 } else { write_point2; exit }
+    look_for_boot
+    if {$::n < 6} { after time 10 point2 } else { write_point2; write_point3; exit }
+}
+
+# Point 3: in the same 60 seconds the restored machine must not reboot
+# (DESIGN.md, Check, point 3). A reboot shows itself as the tail's jump running a
+# second time, when a reset has booted DOS and AUTOEXEC.BAT runs the restorer
+# again, or as the BIOS's boot screen or BASIC's banner at a savestate. A reset
+# alone does not fail the point, because a loader can reset on purpose to start a
+# ROM copy, but the report notes each one. The reset breakpoint is the capture's:
+# the BIOS's reset routine, where 0000h's DI / JP jumps, while page 0 selects
+# the main ROM. It is set after point 1, because the check's own boot passes
+# there, and the routine's address is read in the main ROM's slot, whose ID
+# EXPTBL holds, because page 0 is DOS's RAM now.
+set ::resets {}
+set ::reboots {}
+proc after_restore {} { format %.1f [expr {[machine_info time] - $::restored}] }
+proc rerun {} {
+    if {[llength $::reboots] < 10} { lappend ::reboots "the restorer runs again [after_restore] seconds after the restore" }
+}
+proc look_for_boot {} {
+    if {[catch screen text]} return
+    if {[string first "Copyright 1983 by Microsoft" $text] >= 0 && [llength $::reboots] < 10} {
+        lappend ::reboots "the screen shows the BIOS's boot screen or BASIC [after_restore] seconds after the restore"
+    }
+}
+proc main_rom0 {} {
+    set id [lindex $::exptbl 0]
+    if {([debug read ioports 0xA8] & 3) != ($id & 3)} { return 0 }
+    if {!($id & 0x80)} { return 1 }
+    expr {([subslot_reg [expr {$id & 3}]] & 3) == (($id >> 2) & 3)}
+}
+proc watch_reset {} {
+    set id [lindex $::exptbl 0]
+    set ss [expr {$id & 0x80 ? ($id >> 2) & 3 : "x"}]
+    binary scan [with_slot [expr {$id & 3}] $ss 0 { debug read_block memory 2 2 }] su reset
+    set ::restored [machine_info time]
+    debug set_bp $reset {[main_rom0]} {
+        if {[llength $::resets] < 10} { lappend ::resets "the machine resets [after_restore] seconds after the restore" }
+    }
+}
+proc write_point3 {} {
+    set f [open $::C(report) a]
+    puts $f [expr {[llength $::reboots] ? "point 3: fail" : "point 3: pass"}]
+    foreach line [concat $::reboots $::resets] { puts $f "  $line" }
+    close $f
 }
 
 # The watch on the service's part of page 3 without its scratch bytes,

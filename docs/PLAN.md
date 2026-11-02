@@ -353,7 +353,7 @@ after point 1, because the check's own boot passes there.
 | Test | What it proves |
 |---|---|
 | Aliens, from Super MSX n.9, on `advanced/phc28s` | An image that reboots to the boot screen fails point 3, though it passes points 1 and 2 and the reset breakpoint misses it |
-| American Football, from Super MSX n.24, on `basic/vg8020` | An image that reboots into DOS fails point 3, because the restorer runs again |
+| Cita, from Super MSX n.15, on `basic/vg8020` | An image that reboots into DOS fails point 3, because the restorer runs again |
 | Japan, from Super MSX n.20, on `basic/vg8020` | A loader that resets on purpose after the restore and then starts its ROM copy passes point 3, and the report notes the reset |
 | A single-load game on each shipped machine | The check's own boot, before the restore, is not a reboot |
 | The collection on `advanced/phc28s` and `basic/vg8020` | The game files that fail point 3 are sorted into the failure lists |

@@ -1,0 +1,73 @@
+"""Step 16 (docs/PLAN.md): the check's point 3, which fails a reboot of the
+machine after the restore (DESIGN.md, Check, point 3)."""
+import concurrent.futures
+import os
+import shutil
+import sys
+import unittest
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import test_step4  # noqa: E402
+import test_step9  # noqa: E402
+
+COLLECTION = os.path.join(test_step4.CAS_DIR, "collection")
+WORK = os.path.join(ROOT, "out", "test", "step16")
+
+# The Super MSX programs that Reboots checks, as name: the shipped game file's
+# folder below games/ and the machine.
+GAMES = {
+    # Reboots to the boot screen on the PHC-28S, by a way that the reset
+    # breakpoint does not see.
+    "s16-aliens": ("SUPERMSX/ALIENS", "advanced/phc28s"),
+    # Reboots into DOS on the VG-8020, whose AUTOEXEC.BAT runs the restorer again.
+    "s16-cita": ("SUPERMSX/CITA", "basic/vg8020"),
+    # Resets the VG-8020 on purpose after the restore, and starts its ROM copy.
+    "s16-japan": ("SUPERMSX/JAPAN", "basic/vg8020"),
+}
+
+
+def check(name):
+    """Captures, builds and checks a copy of a shipped game file in WORK, and
+    returns the check's report or the failed step's error."""
+    shipped, machine = GAMES[name]
+    folder = os.path.join(WORK, "games", name)
+    shutil.rmtree(folder, ignore_errors=True)
+    shutil.copytree(os.path.join(ROOT, "games", shipped), folder)
+    for step in ("capture.py", "build.py"):
+        result = test_step4.tool(step, folder, machine, "--tapes", COLLECTION)
+        if result.returncode != 0:
+            return f"{step}: {result.stderr.strip()}"
+    return test_step4.tool("check.py", folder, machine, "--dos", test_step9.SHIPPED[machine]).stdout
+
+
+@unittest.skipUnless(all(os.path.isfile(os.path.join(COLLECTION, n)) for n in ("SUPER-09.CAS", "SUPER-15.CAS", "SUPERMOB.CAS")),
+                     "CAS_DIR lacks the Super MSX tapes")
+class Reboots(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
+            cls.reports = dict(zip(GAMES, pool.map(check, GAMES)))
+
+    def test_a_reboot_to_the_boot_screen_fails_point_3(self):
+        report = self.reports["s16-aliens"]
+        self.assertTrue(report.startswith("point 1: pass"), report)
+        self.assertIn("point 2: pass", report)
+        self.assertIn("point 3: fail", report)
+        self.assertIn("the screen shows the BIOS's boot screen or BASIC", report)
+
+    def test_a_reboot_into_dos_fails_point_3(self):
+        report = self.reports["s16-cita"]
+        self.assertIn("point 3: fail", report)
+        self.assertIn("the restorer runs again", report)
+
+    def test_a_reset_that_starts_the_game_passes_point_3(self):
+        report = self.reports["s16-japan"]
+        self.assertTrue(report.startswith("point 1: pass"), report)
+        self.assertIn("point 3: pass", report)
+        self.assertIn("the machine resets", report)
+
+
+if __name__ == "__main__":
+    unittest.main()

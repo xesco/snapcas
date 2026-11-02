@@ -169,7 +169,8 @@ def main():
     with open(report) as f:
         text = f.read()
     print(text, end="")
-    return 0 if text.startswith("point 1: pass") and "point 2: fail" not in text else 3
+    failed = "point 2: fail" in text or "point 3: fail" in text
+    return 0 if text.startswith("point 1: pass") and not failed else 3
 
 
 if __name__ == "__main__":

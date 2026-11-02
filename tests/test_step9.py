@@ -107,6 +107,9 @@ class Machines(unittest.TestCase):
         for machine, report in self.reports.items():
             with self.subTest(machine=machine):
                 self.assertTrue(report.startswith("point 1: pass"), report)
+                # The check's own boot, before the restore, is no reboot
+                # (PLAN.md, step 16).
+                self.assertIn("point 3: pass", report)
 
 
 @unittest.skipUnless(os.path.isfile(os.path.join(test_step4.CAS_DIR, SINGLE)), f"CAS_DIR holds no {SINGLE}")
@@ -198,8 +201,8 @@ def read_cache(path):
 
 def collection_game(item):
     """Captures, builds and checks one game file on one machine, and returns
-    the first line of the check's report, point 2's failure with its first
-    line when point 2 fails, or the failed step's error."""
+    the first line of the check's report, point 2's or point 3's failure with
+    its first line when that point fails, or the failed step's error."""
     machine, name = item
     folder = os.path.join(GAMES, name)
     for step in ("capture.py", "build.py"):
@@ -208,9 +211,10 @@ def collection_game(item):
             return (result.stderr.strip().splitlines() or [f"{step} failed"])[-1]
     result = test_step4.tool("check.py", folder, machine, "--dos", SHIPPED[machine])
     lines = result.stdout.strip().splitlines()
-    if "point 2: fail" in lines:
-        failed = lines.index("point 2: fail")
-        return "point 2: fail:" + "".join(lines[failed + 1:failed + 2])
+    for point in ("point 2: fail", "point 3: fail"):
+        if point in lines:
+            failed = lines.index(point)
+            return point + ":" + "".join(lines[failed + 1:failed + 2])
     return (lines or [result.stderr.strip()])[0]
 
 

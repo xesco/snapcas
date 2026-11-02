@@ -1179,7 +1179,8 @@ that disk and the `boot` keys, and writes its report to `check/report.txt`:
    misses a reboot: Aliens, from Super MSX n.9, reaches the boot screen on the
    PHC-28S without it, by a way that is *to verify*, and the screen's sign catches
    it. The report adds `point 3: fail` and the sign, or else `point 3: pass`, and a
-   failed point 3 fails the check.
+   failed point 3 fails the check. A hang is not a reboot, and point 3 does not see
+   it: American Football stops in the BIOS on the VG-8020 with its interrupts off.
 
 Code that a game builds only when the player reaches a level is not visible to the
 scan or to the check. It appears as a hang during play, and a trace of that load in
