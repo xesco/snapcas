@@ -1,4 +1,0 @@
-# Knight Lore Remake (2009) [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Lore%20Remake%20(2009)%20%5BBLOAD'CAS-'%2CR%5D.zip
-cas KNIGHTR.CAS
-sha1 d729ad53401402495848e42371c968e53e5fd00c
