@@ -1,0 +1,6 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The capture runs without the Carnivore2. With it, the game crashes after the
+# load, with its interrupts off and the CPU at 0038h, in a plain load in openMSX as
+# well, by a cause not yet traced. Without it the game reaches its start screen.
+capture phc28s-ram64k

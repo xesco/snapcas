@@ -22,7 +22,7 @@ import test_step4  # noqa: E402
 TSX_DIR = os.path.join(test_step4.CAS_DIR, "tsx")
 COLLECTION = os.path.join(test_step4.CAS_DIR, "collection")
 WORK = os.path.join(ROOT, "out", "test", "step15")
-MACHINE = "advanced/phc28s"
+MACHINE = "phc28s-ram64k-carnivore2"
 
 
 def kcs(data, byte_cfg=0x54, zero=1458, one=729, pilots=100, pause=1000):

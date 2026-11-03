@@ -20,24 +20,24 @@ WORK = os.path.join(ROOT, "out", "test", "step16")
 GAMES = {
     # Reboots to the boot screen on the PHC-28S without its machine's game file,
     # whose capture without the Carnivore2 fixes it.
-    "s16-aliens": ("SUPERMSX/ALIENS", "advanced/phc28s", True),
+    "s16-aliens": ("SUPERMSX/ALIENS", "phc28s-ram64k-carnivore2", True),
     # Reboots into DOS on the VG-8020, whose AUTOEXEC.BAT runs SNAPCAS.COM again,
     # without its machine's game file, whose capture without the Carnivore2 fixes it.
-    "s16-konami-vg": ("KONAMI", "basic/vg8020", True),
+    "s16-konami-vg": ("KONAMI", "vg8020-carnivore2", True),
     # Resets the VG-8020 on purpose after the restore, and starts its ROM copy.
-    "s16-japan": ("SUPERMSX/JAPAN", "basic/vg8020", False),
+    "s16-japan": ("SUPERMSX/JAPAN", "vg8020-carnivore2", False),
     # Passes the tail's jump address again with its own code.
-    "s16-enchante": ("ENCHANTE", "advanced/phc28s", False),
+    "s16-enchante": ("ENCHANTE", "phc28s-ram64k-carnivore2", False),
     # Keeps BASIC's banner on its restored screen.
-    "s16-robe": ("016-ROBE", "advanced/phc28s", False),
+    "s16-robe": ("016-ROBE", "phc28s-ram64k-carnivore2", False),
     # Never reaches the reset that its capture shows 8.7 seconds after the
     # snapshot, without its machine's game file.
-    "s16-konami": ("KONAMI", "advanced/phc28s", True),
+    "s16-konami": ("KONAMI", "phc28s-ram64k-carnivore2", True),
     # Resets the PHC-28S on purpose after the restore, and starts its game.
-    "s16-bumper": ("BUMPER", "advanced/phc28s", False),
+    "s16-bumper": ("BUMPER", "phc28s-ram64k-carnivore2", False),
     # Resets the VG-8020 on purpose after the restore, and one savestate catches
     # the boot screen before the game starts.
-    "s16-raider": ("SUPERMSX/RAIDER18", "basic/vg8020", False),
+    "s16-raider": ("SUPERMSX/RAIDER18", "vg8020-carnivore2", False),
 }
 
 

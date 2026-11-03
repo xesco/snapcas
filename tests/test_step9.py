@@ -35,9 +35,11 @@ WORK = os.path.join(ROOT, "out", "test", "step9")
 
 # The shipped machines and the DOS that each boots (PLAN.md, Test setup).
 SHIPPED = {machine: test_step4.MACHINES[machine][0]
-           for machine in ("advanced/phc28s", "basic/vg8020", "basic/nms8250", "advanced/hbf700p")}
-SHIPPED.update({"basic/msx2ide": test_step4.NEXTOR, "advanced/mfrsd": test_step4.NEXTOR,
-                "basic/picoverse": test_step4.NEXTOR})
+           for machine in ("phc28s-ram64k-carnivore2", "vg8020-carnivore2", "nms8250-carnivore2", "hbf700p-ram512k-msxdos2")}
+SHIPPED.update({"nms8245-ram512k-sunriseide": test_step4.NEXTOR, "hb75p-mfrsd": test_step4.NEXTOR,
+                "vg8020-picoverse": test_step4.NEXTOR, "vg8020-sdmapper": test_step4.NEXTOR,
+                "xp800-sdmapper": test_step4.NEXTOR, "fsa1-mfrsd": test_step4.NEXTOR,
+                "hbf1xd-mfrsd": test_step4.NEXTOR, "vg8235": os.path.join(test_step4.DOS_DIR, "msxdos1")})
 # A single-load game that fits each of them, the NMS 8250's 128 KB included.
 SINGLE = "CALDERO.CAS"
 
@@ -47,18 +49,18 @@ class MachineFile(unittest.TestCase):
         self.folder = tempfile.mkdtemp()
         with open(os.path.join(self.folder, "game.txt"), "w") as f:
             f.write("cas GAME.CAS\nsnapshot at 10\n")
-        with open(os.path.join(self.folder, "advanced-phc28s.txt"), "w") as f:
-            f.write("# Only for the PHC-28S.\ncapture advanced/phc28s-nodisk\nsnapshot at 20\n")
+        with open(os.path.join(self.folder, "phc28s-ram64k-carnivore2.txt"), "w") as f:
+            f.write("# Only for the PHC-28S.\ncapture phc28s-ram64k\nsnapshot at 20\n")
 
     def test_the_machine_file_adds_its_lines_for_its_machine(self):
-        game = gamefile.read_game(self.folder, "advanced/phc28s")
-        self.assertEqual(game.capture, "advanced/phc28s-nodisk")
+        game = gamefile.read_game(self.folder, "phc28s-ram64k-carnivore2")
+        self.assertEqual(game.capture, "phc28s-ram64k")
 
     def test_the_machine_file_gives_a_value_that_both_give(self):
-        self.assertEqual(gamefile.read_game(self.folder, "advanced/phc28s").snapshot_at, 20)
+        self.assertEqual(gamefile.read_game(self.folder, "phc28s-ram64k-carnivore2").snapshot_at, 20)
 
     def test_other_machines_read_only_game_txt(self):
-        game = gamefile.read_game(self.folder, "basic/vg8020")
+        game = gamefile.read_game(self.folder, "vg8020-carnivore2")
         self.assertIsNone(game.capture)
         self.assertEqual(game.snapshot_at, 10)
 
@@ -67,7 +69,7 @@ class MachineFile(unittest.TestCase):
 class ShippedGameFiles(unittest.TestCase):
     def test_every_game_file_reads_on_each_machine(self):
         for name in game_names():
-            for machine in ("advanced/phc28s", "basic/vg8020"):
+            for machine in ("phc28s-ram64k-carnivore2", "vg8020-carnivore2"):
                 with self.subTest(game=name, machine=machine):
                     game = gamefile.read_game(os.path.join(GAMES, name), machine)
                     self.assertTrue(game.sha1)
@@ -77,8 +79,18 @@ class ShippedGameFiles(unittest.TestCase):
             for file in os.listdir(os.path.join(GAMES, name)):
                 if file.endswith(".txt") and file != "game.txt":
                     with self.subTest(game=name, file=file):
-                        machine = file[:-4].replace("-", "/", 1)
-                        self.assertTrue(os.path.isfile(msx.machine_path(machine)))
+                        self.assertTrue(os.path.isfile(msx.machine_path(file[:-4])))
+
+    def test_capture_lines_name_a_variant_of_their_machine(self):
+        for name in game_names():
+            for file in os.listdir(os.path.join(GAMES, name)):
+                if file.endswith(".txt") and file != "game.txt":
+                    with self.subTest(game=name, file=file):
+                        machine = file[:-4]
+                        game = gamefile.read_game(os.path.join(GAMES, name), machine)
+                        if game.capture:
+                            variants = msx.read_machine(msx.machine_path(machine)).variants
+                            self.assertIn(game.capture, variants)
 
 
 def single_load(machine):
@@ -121,11 +133,11 @@ class OneCommand(unittest.TestCase):
         os.makedirs(folder, exist_ok=True)
         with open(os.path.join(folder, "game.txt"), "w") as f:
             f.write(f"cas {SINGLE}\n")
-        result = test_step4.tool("snapcas.py", folder, "advanced/phc28s", "--tapes", test_step4.CAS_DIR,
+        result = test_step4.tool("snapcas.py", folder, "phc28s-ram64k-carnivore2", "--tapes", test_step4.CAS_DIR,
                                  "--dos", test_step4.NEXTOR)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("point 1: pass", result.stdout)
-        self.assertTrue(os.path.isfile(os.path.join(ROOT, "out", "advanced/phc28s", "one-command", "ONECOMMA.SNP")))
+        self.assertTrue(os.path.isfile(os.path.join(ROOT, "out", "phc28s-ram64k-carnivore2", "one-command", "ONECOMMA.SNP")))
 
 
 # The collection's CAS files, for the run over every game file, which takes
@@ -133,7 +145,7 @@ class OneCommand(unittest.TestCase):
 COLLECTION_DIR = os.environ.get("COLLECTION_DIR")
 # The machines of the run, which COLLECTION_MACHINES can name, and the folder
 # of their reports, one per machine.
-COLLECTION_MACHINES = tuple(os.environ.get("COLLECTION_MACHINES", "advanced/phc28s basic/vg8020").split())
+COLLECTION_MACHINES = tuple(os.environ.get("COLLECTION_MACHINES", "phc28s-ram64k-carnivore2 vg8020-carnivore2").split())
 REPORTS = os.path.join(WORK, "collection")
 # The runs at once: openMSX keeps about one core busy, and the machine's
 # efficiency cores count as well.
@@ -186,8 +198,9 @@ def inputs_hash(machine, name, tools):
     for cas in (game.tape, game.side2):
         if cas and os.path.isfile(os.path.join(COLLECTION_DIR, cas)):
             file_hash(h, os.path.join(COLLECTION_DIR, cas))
-    for m in sorted({machine, game.capture or machine}):
-        file_hash(h, msx.machine_path(m))
+    file_hash(h, msx.machine_path(machine))
+    if game.capture:
+        file_hash(h, msx.variant_path(game.capture))
     return h.hexdigest()
 
 

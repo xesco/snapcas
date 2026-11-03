@@ -1,6 +1,0 @@
-# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
-
-# The capture runs without the Carnivore2. With it, the magazine intro's LOADER,
-# which searches RAM through ENASLT, returns to BASIC, which stops at "Syntax error
-# in 100". Without it, the game loads.
-capture basic/vg8020-nodisk

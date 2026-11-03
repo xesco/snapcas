@@ -1,5 +1,0 @@
-# A capture variant of advanced/phc28s without the RAM cartridge in slot 1, for a
-# game whose loader trips over it. The image still runs on advanced/phc28s.
-openmsx -machine Sanyo_PHC-28S -extb Carnivore2
-disk hda
-boot "DefConfig" space

@@ -1,0 +1,7 @@
+# Sanyo PHC-28S, an MSX1 with 16 KB, with a 64 KB RAM cartridge in slot 1 and a
+# Carnivore2 in slot 2, under Nextor.
+openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2
+disk hda
+boot "DefConfig" space
+variant phc28s-ram64k
+variant phc28s-empty-carnivore2

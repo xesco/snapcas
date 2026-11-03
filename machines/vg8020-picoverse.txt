@@ -1,0 +1,7 @@
+# A Philips VG-8020 with a cartridge like the PicoVerse: a Sunrise IDE interface
+# under Nextor and a 192 KB memory mapper. openMSX has no PicoVerse, so two
+# cartridges stand in for it: SunriseIDE_Nextor and ram192k, which the Makefile
+# makes from openMSX's ram512k.
+openmsx -machine Philips_VG_8020 -ext SunriseIDE_Nextor -ext ram192k
+disk hda
+variant vg8020

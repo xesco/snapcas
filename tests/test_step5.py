@@ -18,7 +18,7 @@ import msx  # noqa: E402
 import test_step4  # noqa: E402
 
 CAS_DIR = test_step4.CAS_DIR
-MACHINE = "advanced/phc28s"
+MACHINE = "phc28s-ram64k-carnivore2"
 MAPPER_RAM = "Carnivore2 ram"  # the openMSX debuggable of DOS's mapper on it
 WORK = os.path.join(ROOT, "out", "test", "step5")
 

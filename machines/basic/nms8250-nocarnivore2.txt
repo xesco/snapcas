@@ -1,6 +1,0 @@
-# A capture variant of basic/nms8250 without the Carnivore2, so without Nextor,
-# for a game that fails in a capture with the Carnivore2 in slot 1. The image
-# still runs on basic/nms8250. The capture uses no disk, but a machine file
-# needs this line.
-openmsx -machine Philips_NMS_8250
-disk diska

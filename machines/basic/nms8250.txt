@@ -1,5 +1,0 @@
-# Philips NMS 8250, an MSX2 with a 128 KB mapper and a floppy drive, with a
-# Carnivore2 under Nextor: the cartridge's 1 MB mapper and its disk interface.
-openmsx -machine Philips_NMS_8250 -ext Carnivore2
-disk hda
-boot "DefConfig" space

@@ -1,0 +1,7 @@
+# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2. The loader and core select page 3's
+# slot in page 1 to copy the graphics, and with the Carnivore2 page 3 is its
+# mapper in slot 1-2, which page 1 does not select, so the graphics come out as
+# noise. Without it, page 3 is the internal RAM in slot 3, which holds page 1 too.
+capture vg8020

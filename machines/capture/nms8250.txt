@@ -1,0 +1,5 @@
+# Philips NMS 8250 without cartridges, so without Nextor: the capture variant of
+# nms8250-carnivore2, for a game that fails in a capture with the Carnivore2 in
+# slot 1. The capture uses no disk, but a machine file needs this line.
+openmsx -machine Philips_NMS_8250
+disk diska

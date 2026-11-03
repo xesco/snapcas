@@ -1,5 +1,5 @@
 """Step 1 (docs/PLAN.md): the build, the disk image, the boot keys and the
-screen reading, with the first SNAPCAS.COM on advanced/phc28s."""
+screen reading, with the first SNAPCAS.COM on phc28s-ram64k-carnivore2."""
 import os
 import sys
 import unittest
@@ -32,8 +32,7 @@ class Step1(unittest.TestCase):
                              os.path.join(NEXTOR, "COMMAND2.COM"),
                              os.path.join(ROOT, "bin", "SNAPCAS.COM"),
                              autoexec, bad, old, short])
-        machine = msx.read_machine(
-            os.path.join(ROOT, "machines", "advanced", "phc28s.txt"))
+        machine = msx.read_machine(msx.machine_path("phc28s-ram64k-carnivore2"))
         screen = msx.screen_after(machine, disk, "OLD.SNP: made",
                                   os.path.join(WORK, "screen.txt"))
         self.assertIn("Usage: SNAPCAS <game>", screen)

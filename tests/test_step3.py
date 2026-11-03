@@ -17,10 +17,10 @@ WORK = os.path.join(ROOT, "out", "test", "step3")
 
 # game: (CAS file, machine), all single loads.
 GAMES = {
-    "freddy": ("FREDDY.CAS", "advanced/phc28s"),
-    "fernando": ("FERNANDO.CAS", "advanced/phc28s"),
-    "caldero": ("CALDERO.CAS", "advanced/phc28s"),
-    "freddy8250": ("FREDDY.CAS", "basic/nms8250"),
+    "freddy": ("FREDDY.CAS", "phc28s-ram64k-carnivore2"),
+    "fernando": ("FERNANDO.CAS", "phc28s-ram64k-carnivore2"),
+    "caldero": ("CALDERO.CAS", "phc28s-ram64k-carnivore2"),
+    "freddy8250": ("FREDDY.CAS", "nms8250-carnivore2"),
 }
 
 

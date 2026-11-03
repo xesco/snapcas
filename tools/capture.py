@@ -5,10 +5,11 @@ Capture).
 Usage: capture.py <game> <machine> --tapes <dir> [--capture <variant>]
 
 <game> is a folder below games/, or the path of a folder, that holds
-game.txt. <machine> is a path below machines/ without .txt. <dir> holds the
-tape files. The snapshot goes to out/<machine>/<game>/snap/. A game file's
-capture line, or --capture, names another machine file to load the game on:
-the user's machine without a cartridge that the game's loader trips over.
+game.txt. <machine> is a machine file's name below machines/ without .txt.
+<dir> holds the tape files. The snapshot goes to out/<machine>/<game>/snap/. A
+game file's capture line, or --capture, names a capture variant in
+machines/capture/ to load the game on: the user's machine without a cartridge
+that the game's loader trips over.
 
 Exit status: 0 on success, 1 for an error in the input files, 2 when openMSX
 fails or a wait times out.
@@ -132,15 +133,16 @@ def capture_once(game, machine, tape_path, tapes_dir, snap, procedures, found):
 def main():
     parser = argparse.ArgumentParser(description="Load a cassette game in openMSX and save its snapshot.")
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
-    parser.add_argument("machine", help="a machine file's path below machines/, without .txt")
+    parser.add_argument("machine", help="a machine file's name below machines/, without .txt")
     parser.add_argument("--tapes", required=True, help="the folder that holds the tape files, CAS or TSX")
-    parser.add_argument("--capture", help="a capture variant of the machine to load the game on, in place of "
-                        "the game file's capture line")
+    parser.add_argument("--capture", help="a capture variant in machines/capture/ to load the game on, in "
+                        "place of the game file's capture line")
     args = parser.parse_args()
 
     try:
         game = gamefile.read_game(gamefile.game_folder(args.game), args.machine)
-        machine = msx.read_machine(msx.machine_path(args.capture or game.capture or args.machine))
+        variant = args.capture or game.capture
+        machine = msx.read_machine(msx.variant_path(variant) if variant else msx.machine_path(args.machine))
     except (OSError, gamefile.GameFileError, msx.MachineError) as e:
         print(f"capture.py: {e}", file=sys.stderr)
         return 1

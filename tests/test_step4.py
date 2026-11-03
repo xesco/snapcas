@@ -31,17 +31,17 @@ GAMES = {
     # patch fixes that now, and this one tests the capture line. On the
     # HB-F700P the patch fixes the load with the RAM cartridge, and without it
     # the loader finds no RAM and resets the machine.
-    "abadia-phc": "cas ABADIA.CAS\nservice no\ncapture advanced/phc28s-noslot1\n",
+    "abadia-phc": "cas ABADIA.CAS\nservice no\ncapture phc28s-empty-carnivore2\n",
 }
 
 # machine: (DOS folder, games that pass, games that the restorer stops for
 # too few free segments). A game left out of both fails on that machine in
 # openMSX itself (docs/PLAN.md, the corpus).
 MACHINES = {
-    "advanced/phc28s": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero", "abadia-phc"}, set()),
-    "basic/vg8020": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero"}, set()),
-    "basic/nms8250": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero"}, set()),
-    "advanced/hbf700p": (os.path.join(DOS_DIR, "msxdos2"), {"moonrider", "caldero", "abadia"}, set()),
+    "phc28s-ram64k-carnivore2": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero", "abadia-phc"}, set()),
+    "vg8020-carnivore2": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero"}, set()),
+    "nms8250-carnivore2": (NEXTOR, {"freddy", "fernando", "moonrider", "caldero"}, set()),
+    "hbf700p-ram512k-msxdos2": (os.path.join(DOS_DIR, "msxdos2"), {"moonrider", "caldero", "abadia"}, set()),
     "test/nms8250-128k": (os.path.join(DOS_DIR, "msxdos2"), {"caldero"},
                           {"freddy", "fernando", "moonrider", "abadia"}),
     "test/nms8250-dos1": (os.path.join(DOS_DIR, "msxdos1"),

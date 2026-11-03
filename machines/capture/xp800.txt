@@ -1,0 +1,5 @@
+# Gradiente Expert XP-800 without cartridges, so without a disk system: the capture
+# variant of xp800-sdmapper, for a game whose loader trips over the SD Mapper. The
+# capture uses no disk, but a machine file needs this line.
+openmsx -machine Gradiente_Expert_XP-800
+disk hda

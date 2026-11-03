@@ -1,7 +1,0 @@
-# A capture variant of basic/picoverse without the cartridge, so without its memory
-# mapper and Nextor: the game then runs in the internal RAM, whose pages the
-# restorer writes straight to their slot, so the image needs fewer free mapper
-# segments. The image still runs on basic/picoverse. The capture uses no disk, but
-# a machine file needs this line.
-openmsx -machine Philips_VG_8020
-disk hda

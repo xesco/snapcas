@@ -1,0 +1,7 @@
+# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2. Level 9's code reads the game's A-code
+# with pages 0 and 1 in the slots of pages 2 and 3. With the Carnivore2, pages 2
+# and 3 are its mapper in slot 1-2, whose subslot pages 0 and 1 do not select.
+# Without it, pages 0 to 3 are the internal RAM.
+capture vg8020

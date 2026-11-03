@@ -1,0 +1,5 @@
+# Sony HB-F700P with an MSX-DOS 2 cartridge: the capture variant of
+# hbf700p-ram512k-msxdos2 without the RAM cartridge in slot 1, for a game whose
+# loader trips over it.
+openmsx -machine Sony_HB-F700P -ext msxdos2
+disk diska

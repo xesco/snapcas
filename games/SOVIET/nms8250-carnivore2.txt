@@ -1,0 +1,5 @@
+# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2, because the game fails in a capture
+# with it in slot 1.
+capture nms8250

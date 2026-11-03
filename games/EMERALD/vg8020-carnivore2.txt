@@ -1,0 +1,8 @@
+# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2. The loader advent copies the game's
+# A-code to 0000h with pages 0 and 1 in the slots of pages 2 and 3, and the game
+# selects the same slots to read it. With the Carnivore2, pages 2 and 3 are its
+# mapper in slot 1-2, whose subslot pages 0 and 1 do not select, and the
+# interpreter answers "Acode?". Without it, pages 0 to 3 are the internal RAM.
+capture vg8020

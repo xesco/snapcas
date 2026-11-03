@@ -34,15 +34,17 @@ This example makes Gauntlet for a Sanyo PHC-28S.
 
 1. Find Gauntlet in `games/GAUNTLET/game.txt`. Its first lines have the link to
    download `GAUNTLET.CAS`. Put the file in a folder, for example `~/tapes`.
-2. Find your MSX in the `machines/` folder. The Sanyo PHC-28S is
-   `machines/advanced/phc28s.txt`. You will call it `advanced/phc28s`.
+2. Find your MSX in the `machines/` folder. A file's name is the MSX's model, then
+   its cartridges in slot order. A Sanyo PHC-28S with a 64 KB RAM cartridge in slot
+   1 and a Carnivore2 in slot 2 is `machines/phc28s-ram64k-carnivore2.txt`. You will
+   call it `phc28s-ram64k-carnivore2`.
 3. Make the `.SNP` file:
 
    ```
-   python3 tools/snapcas.py GAUNTLET advanced/phc28s --tapes ~/tapes
+   python3 tools/snapcas.py GAUNTLET phc28s-ram64k-carnivore2 --tapes ~/tapes
    ```
 
-   You get `out/advanced/phc28s/GAUNTLET/GAUNTLET.SNP`.
+   You get `out/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`.
 4. Copy `bin/SNAPCAS.COM` and `GAUNTLET.SNP` to your MSX's disk. On the MSX, type:
 
    ```
@@ -87,7 +89,7 @@ press GRAPH or CODE to wind the tape back. With a few games, `/M` does not work.
 | Folder | What it holds |
 |---|---|
 | `games/` | A game file for each MSX1 CAS game, without the game itself |
-| `machines/` | One file for each MSX |
+| `machines/` | One file for each MSX with its cartridges |
 | `tools/` | The programs that make `.SNP` files |
 | `bin/` | `SNAPCAS.COM`, which starts a `.SNP` file on your MSX |
 | `out/` | The `.SNP` files that you make |
