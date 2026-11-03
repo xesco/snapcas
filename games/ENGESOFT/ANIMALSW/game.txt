@@ -1,8 +1,8 @@
 # Animals Wars, as Engesoft's loader names it, the second game on Engesoft's
 # MSXK-13 side A, after Zanac, which has its own dump (games/ZANAC). It is a game
-# by ASCII, and its original title is not verified:
-# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-13.zip
+# by ASCII, and its original title is not verified.
 # The load starts at the BASIC loader ANIMAL, as when the tape runs on after Zanac.
 cas ENGESO13.CAS
 sha1 1937a5d04d9bffa6a128bf75e84a8f330bcfc903
+url https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-13.zip
 start ANIMAL

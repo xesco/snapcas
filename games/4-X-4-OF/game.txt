@@ -1,5 +1,5 @@
 # 4x4 Off-Road Racing (1988)(US Gold)(Side A)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/4x4%20Off-Road%20Racing%20(1988)(US%20Gold)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
 cas 4-X-4-OF.CAS
 side2 4-X-4B.CAS
 sha1 27f3f730c971d71da59ca20e28190eafa6cf292e 9b3fb28b0766e74aacd98a61d4cf2d19666cec8c
+url https://download.file-hunter.com/Games/MSX1/CAS/4x4%20Off-Road%20Racing%20(1988)(US%20Gold)(Side%20A)%5BBLOAD%27CAS-%27%2CR%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/4x4%20Off-Road%20Racing%20(1988)(US%20Gold)(Side%20B)%5BBLOAD%27CAS-%27%2CR%5D.zip

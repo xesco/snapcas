@@ -1,4 +1,4 @@
 # Gunman (1983)(Hudson Soft)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Gunman%20(1983)(Hudson%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
 cas GUNMAN.CAS
 sha1 e1154e6403bfb5e4be7f4c28a68748720fc22fd9
+url https://download.file-hunter.com/Games/MSX1/CAS/Gunman%20(1983)(Hudson%20Soft)%5BBLOAD%27CAS-%27%2CR%5D.zip

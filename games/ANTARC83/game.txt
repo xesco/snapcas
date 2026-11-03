@@ -1,4 +1,4 @@
 # Antarctica (1983) (Pony Canyon) [cload''NA'']
-# https://download.file-hunter.com/Games/MSX1/CAS/Antarctica%20(1983)%20(Pony%20Canyon)%20%5Bcload''NA''%5D.zip
 cas ANTARC83.CAS
 sha1 760bc2692a625710d88b5daac576111be127c530
+url https://download.file-hunter.com/Games/MSX1/CAS/Antarctica%20(1983)%20(Pony%20Canyon)%20%5Bcload%27%27NA%27%27%5D.zip

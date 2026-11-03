@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 025-Fire Hawk.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 025-FIRE.CAS
 sha1 246fbe51f0b0ea8cb1fbf287686ccad59aed82ad
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

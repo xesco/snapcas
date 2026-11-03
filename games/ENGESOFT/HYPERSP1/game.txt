@@ -1,5 +1,5 @@
 # Hyper Sports 1 (1984)(Konami), the first game on Engesoft's MSXF-18 side A,
-# Engesoft MSXF-18- Lado A.cas:
-# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxf-18.zip
+# Engesoft MSXF-18- Lado A.cas.
 cas ENGESO18.CAS
 sha1 59cdef48c155ce5c6659d7ab81c7ae8721386047
+url https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxf-18.zip

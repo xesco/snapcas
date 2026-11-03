@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 008-Hoja de calculo.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 008-HOJA.CAS
 sha1 babe17666c6590b8ff581431eb980143473805e1
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

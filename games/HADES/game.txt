@@ -1,4 +1,4 @@
 # Hades (1985)(Sony)(ES)[h CEZ][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Hades%20(1985)(Sony)(ES)%5Bh%20CEZ%5D%5BRUN'CAS-'%5D.zip
 cas HADES.CAS
 sha1 c38cdf30e3cac520f78ac4a5aea605d3a019b7c9
+url https://download.file-hunter.com/Games/MSX1/CAS/Hades%20(1985)(Sony)(ES)%5Bh%20CEZ%5D%5BRUN%27CAS-%27%5D.zip

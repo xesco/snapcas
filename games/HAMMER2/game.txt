@@ -1,4 +1,4 @@
 # Hammer Boy (1991)(Dinamic Software)(Side B)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Hammer%20Boy%20(1991)(Dinamic%20Software)(Side%20B)%5BRUN'CAS-'%5D.zip
 cas HAMMERB.CAS
 sha1 45edf1319864c958437c2b22e8ba03ed2fb194dd
+url https://download.file-hunter.com/Games/MSX1/CAS/Hammer%20Boy%20(1991)(Dinamic%20Software)(Side%20B)%5BRUN%27CAS-%27%5D.zip

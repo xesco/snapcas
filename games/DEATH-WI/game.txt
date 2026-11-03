@@ -1,4 +1,4 @@
 # Death Wish 3 (1987)(Gremlin Graphics Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Death%20Wish%203%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas DEATH-WI.CAS
 sha1 249ccf20dac351438b7b13143b4a5ca5364d931e
+url https://download.file-hunter.com/Games/MSX1/CAS/Death%20Wish%203%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

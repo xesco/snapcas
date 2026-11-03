@@ -1,4 +1,4 @@
 # Alien 8 (1985)(Ultimate Play The Game)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Alien%208%20(1985)(Ultimate%20Play%20The%20Game)%5BBLOAD'CAS-'%2CR%5D.zip
 cas ALIENTHE.CAS
 sha1 42635858af56dff7f16e1309e74679145c3191de
+url https://download.file-hunter.com/Games/MSX1/CAS/Alien%208%20(1985)(Ultimate%20Play%20The%20Game)%5BBLOAD%27CAS-%27%2CR%5D.zip

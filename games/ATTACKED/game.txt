@@ -1,4 +1,0 @@
-# Attacked (Tynesoft)
-# https://download.file-hunter.com/Games/MSX1/CAS/Attacked%20(Tynesoft).zip
-cas ATTACKED.CAS
-sha1 c9355bcdad2d6627e4ca7b42446c39b13dd66e47

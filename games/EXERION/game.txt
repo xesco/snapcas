@@ -1,4 +1,4 @@
 # Exerion (1987)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Exerion%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas EXERION.CAS
 sha1 93c50c46b877c0e750983f6f198dec2ef4e2e644
+url https://download.file-hunter.com/Games/MSX1/CAS/Exerion%20(1987)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

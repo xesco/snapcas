@@ -1,4 +1,4 @@
 # Silvestro Spazzino Maldestro - Gianluca Barfi (1986)(it)
-# https://download.file-hunter.com/Games/MSX1/CAS/Silvestro%20Spazzino%20Maldestro%20-%20Gianluca%20Barfi%20(1986)(it).zip
 cas SILVESTR.CAS
 sha1 6ec6178f8ff1daa190ee35c1ba294582f077a01b
+url https://download.file-hunter.com/Games/MSX1/CAS/Silvestro%20Spazzino%20Maldestro%20-%20Gianluca%20Barfi%20(1986)(it).zip

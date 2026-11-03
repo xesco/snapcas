@@ -1,4 +1,4 @@
 # Galaga (1984)(Bug-Byte Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Galaga%20(1984)(Bug-Byte%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas GALAGA.CAS
 sha1 fb39b6e4c90dbf045e21f23469b7a55bcc762ef7
+url https://download.file-hunter.com/Games/MSX1/CAS/Galaga%20(1984)(Bug-Byte%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

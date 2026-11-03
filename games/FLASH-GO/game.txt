@@ -1,4 +1,4 @@
 # Flash Gordon (1987)(Mastertronic Added Dimension)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Flash%20Gordon%20(1987)(Mastertronic%20Added%20Dimension)%5BRUN'CAS-'%5D.zip
 cas FLASH-GO.CAS
 sha1 198d67a82942f9616b905ec60e3b459fd6d74ef6
+url https://download.file-hunter.com/Games/MSX1/CAS/Flash%20Gordon%20(1987)(Mastertronic%20Added%20Dimension)%5BRUN%27CAS-%27%5D.zip

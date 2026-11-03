@@ -1,4 +1,4 @@
 # African Trail Simulator (1990)(Positive)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/African%20Trail%20Simulator%20(1990)(Positive)(es)%5BRUN'CAS-'%5D.zip
 cas AFRICAN.CAS
 sha1 14c1d881877b9a28cfbbf3eb6c34172867e21281
+url https://download.file-hunter.com/Games/MSX1/CAS/African%20Trail%20Simulator%20(1990)(Positive)(es)%5BRUN%27CAS-%27%5D.zip

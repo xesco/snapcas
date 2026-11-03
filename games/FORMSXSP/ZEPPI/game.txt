@@ -1,8 +1,8 @@
 # Zeppi, the sixth program on Technopolis Soft's For MSX Special, after Jewele
-# (games/FORMSXSP/JEWELE):
-# https://download.file-hunter.com/Games/MSX1/CAS/For%20MSX%20Special%20(1985)(Technopolis%20Soft).zip
+# (games/FORMSXSP/JEWELE).
 # The title comes from the program's name on the tape (ZEPPI). The load starts at
 # that BASIC program, as when the tape runs on after Jewele.
 cas FOR-MSX.CAS
 sha1 81ea6916b986dbe9e88d8e7d130526152e43b776
+url https://download.file-hunter.com/Games/MSX1/CAS/For%20MSX%20Special%20(1985)(Technopolis%20Soft).zip
 start ZEPPI

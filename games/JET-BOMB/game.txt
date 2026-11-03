@@ -1,4 +1,4 @@
 # Jet Bomber (1985)(Aackosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Jet%20Bomber%20(1985)(Aackosoft)%5BRUN'CAS-'%5D.zip
 cas JET-BOMB.CAS
 sha1 cd4dd0b71c6f527ae783ee4023dbcaa0d7f9df00
+url https://download.file-hunter.com/Games/MSX1/CAS/Jet%20Bomber%20(1985)(Aackosoft)%5BRUN%27CAS-%27%5D.zip

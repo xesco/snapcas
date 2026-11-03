@@ -1,10 +1,10 @@
 # Footballers League, the fifth game on the tape Super MSX n.23 (settembre 1989) -
-# cas_23 / super_msx_23_lato_B.CAS, after Africa Film (games/SUPERMSX/AFRICAFI):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.23%20(settembre%201989)%20-%20cas_23.zip
+# cas_23 / super_msx_23_lato_B.CAS, after Africa Film (games/SUPERMSX/AFRICAFI).
 # edicola8bit lists no original game for it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=23
 # The load starts at the BASIC loader FOOTBA, as when the tape runs on after
 # Africa Film.
 cas SUPER23B.CAS
 sha1 cca9e481111050c59842beac90e47d91fd6c0219
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.23%20(settembre%201989)%20-%20cas_23.zip
 start FOOTBA

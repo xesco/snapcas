@@ -1,5 +1,5 @@
 # Games, The - Winter Edition (1988)(US Gold)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Games%2C%20The%20-%20Winter%20Edition%20(1988)(US%20Gold)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas GAMES-TH.CAS
 side2 GAMESB.CAS
 sha1 a89915d04a40968351402ae1ad83b82d48346c95 c8259a0e0ffc52018e6b3908d7571bbfeb27499f
+url https://download.file-hunter.com/Games/MSX1/CAS/Games%2C%20The%20-%20Winter%20Edition%20(1988)(US%20Gold)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Games%2C%20The%20-%20Winter%20Edition%20(1988)(US%20Gold)(Side%20B)%5BRUN%27CAS-%27%5D.zip

@@ -1,10 +1,10 @@
 # Trapper, the second game on the tape Super MSX n.13 (Giugno 1988) - cas_13 /
-# super_msx_13_lato_B.cas, after Unprimer (games/SUPERMSX/UNPRIMER):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.13%20(Giugno%201988)%20-%20cas_13.zip
+# super_msx_13_lato_B.cas, after Unprimer (games/SUPERMSX/UNPRIMER).
 # It is a copy of Chick Fighter, as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=13
 # The load starts at the BASIC loader TRAPPE, as when the tape runs on after
 # Unprimer.
 cas SUPER13B.CAS
 sha1 e2f769825064c39cfb9ef760fb22c3efe85a350e
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.13%20(Giugno%201988)%20-%20cas_13.zip
 start TRAPPE

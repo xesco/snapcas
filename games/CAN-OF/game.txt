@@ -1,4 +1,4 @@
 # Can of Worms (1986)(LiveWire Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Can%20of%20Worms%20(1986)(LiveWire%20Software)%5BRUN'CAS-'%5D.zip
 cas CAN-OF.CAS
 sha1 5fa247a42e2b2bc024dcf09739038010abcbce2b
+url https://download.file-hunter.com/Games/MSX1/CAS/Can%20of%20Worms%20(1986)(LiveWire%20Software)%5BRUN%27CAS-%27%5D.zip

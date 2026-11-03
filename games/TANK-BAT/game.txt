@@ -1,4 +1,4 @@
 # Tank Battalion (1984)(Bug-Byte Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Tank%20Battalion%20(1984)(Bug-Byte%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas TANK-BAT.CAS
 sha1 9a2fb1881140c41d3e52d389f38e7cbd5df3166c
+url https://download.file-hunter.com/Games/MSX1/CAS/Tank%20Battalion%20(1984)(Bug-Byte%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

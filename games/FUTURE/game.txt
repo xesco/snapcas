@@ -1,4 +1,4 @@
 # Future Knight (1986)(Erbe Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Future%20Knight%20(1986)(Erbe%20Software)%5BRUN'CAS-'%5D.zip
 cas FUTURE.CAS
 sha1 ab48b8ef1cefa017fab1d149504657a570de6274
+url https://download.file-hunter.com/Games/MSX1/CAS/Future%20Knight%20(1986)(Erbe%20Software)%5BRUN%27CAS-%27%5D.zip

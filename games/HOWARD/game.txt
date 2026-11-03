@@ -1,4 +1,4 @@
 # Howard the Duck (1987)(Activision)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Howard%20the%20Duck%20(1987)(Activision)%5BBLOAD'CAS-'%2CR%5D.zip
 cas HOWARD.CAS
 sha1 43eb959e1470295cf0cbc1675133f064f9848931
+url https://download.file-hunter.com/Games/MSX1/CAS/Howard%20the%20Duck%20(1987)(Activision)%5BBLOAD%27CAS-%27%2CR%5D.zip

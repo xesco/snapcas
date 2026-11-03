@@ -1,4 +1,4 @@
 # Knight Orc - Part 3 - Hordes of the Mountain King (1987)(Rainbird Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Orc%20-%20Part%203%20-%20Hordes%20of%20the%20Mountain%20King%20(1987)(Rainbird%20Software)%5BRUN'CAS-'%5D.zip
 cas KNIGHT3.CAS
 sha1 bd6db805c1c5c0c258ff2038d0505e1d705aad2c
+url https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Orc%20-%20Part%203%20-%20Hordes%20of%20the%20Mountain%20King%20(1987)(Rainbird%20Software)%5BRUN%27CAS-%27%5D.zip

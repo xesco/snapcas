@@ -1,4 +1,4 @@
 # Aliens (1987)(Mr. Micro)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Aliens%20(1987)(Mr.%20Micro)%5BBLOAD'CAS-'%2CR%5D.zip
 cas ALIENS.CAS
 sha1 8707a2545449d3b44baea55c2766a3852263001c
+url https://download.file-hunter.com/Games/MSX1/CAS/Aliens%20(1987)(Mr.%20Micro)%5BBLOAD%27CAS-%27%2CR%5D.zip

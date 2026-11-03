@@ -1,4 +1,4 @@
 # Hanggliding Game (1985)(Login Soft)[CLOAD+RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Hanggliding%20Game%20(1985)(Login%20Soft)%5BCLOAD%2BRUN%5D.zip
 cas HANGGLID.CAS
 sha1 996c0b25363df8259aff608fe41b4110acd524da
+url https://download.file-hunter.com/Games/MSX1/CAS/Hanggliding%20Game%20(1985)(Login%20Soft)%5BCLOAD%2BRUN%5D.zip

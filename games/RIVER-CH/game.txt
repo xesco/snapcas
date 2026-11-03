@@ -1,4 +1,4 @@
 # River Chase (Soft Pro International) [v0.8.5b fixed] [CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/River%20Chase%20(Soft%20Pro%20International)%20%5Bv0.8.5b%20fixed%5D%20%5BCLOAD%20%2B%20RUN%5D.zip
 cas RIVER-CH.CAS
 sha1 ab76710152febb4624ccd6afcd243db6511da4bb
+url https://download.file-hunter.com/Games/MSX1/CAS/River%20Chase%20(Soft%20Pro%20International)%20%5Bv0.8.5b%20fixed%5D%20%5BCLOAD%20%2B%20RUN%5D.zip

@@ -1,6 +1,5 @@
 # Naked Ali, the fourth game on the tape Super MSX n.19 (febbraio 1989) - cas_19 /
-# super msx 19 lato B.cas, after Baller (games/SUPERMSX/BALLER):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.19%20(febbraio%201989)%20-%20cas_19.zip
+# super msx 19 lato B.cas, after Baller (games/SUPERMSX/BALLER).
 # It is a copy of Streaker, as edicola8bit lists it. It also has a dump of its own
 # (games/STREAKER). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=19
@@ -8,4 +7,5 @@
 # Baller.
 cas SUPER19B.CAS
 sha1 f2627777fcf65ba6e4a781f22eb9f9477d5c969d
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.19%20(febbraio%201989)%20-%20cas_19.zip
 start NAKALI

@@ -1,4 +1,4 @@
 # Golden Grave II (Stratford Computer Center, 1985)(jp)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Golden%20Grave%20II%20(Stratford%20Computer%20Center%2C%201985)(jp)%5BCLOAD%20%2B%20RUN%5D.zip
 cas GOLDEN.CAS
 sha1 c102d103b26d50fff32a7a2ef7649348167f9826
+url https://download.file-hunter.com/Games/MSX1/CAS/Golden%20Grave%20II%20(Stratford%20Computer%20Center%2C%201985)(jp)%5BCLOAD%20%2B%20RUN%5D.zip

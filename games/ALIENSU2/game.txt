@@ -1,4 +1,4 @@
 # Alien Sunday... (1986)(Soft Studio WING)(Side B)
-# https://download.file-hunter.com/Games/MSX1/CAS/Alien%20Sunday...%20(1986)(Soft%20Studio%20WING)(Side%20B).zip
 cas ALIENB.CAS
 sha1 82557ffe664eff4579ec70edc9b34afdb0ab45cf
+url https://download.file-hunter.com/Games/MSX1/CAS/Alien%20Sunday...%20(1986)(Soft%20Studio%20WING)(Side%20B).zip

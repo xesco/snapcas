@@ -1,4 +1,4 @@
 # Caldero Magico, El (1986)(Grupo de Trabajo Software)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Caldero%20Magico%2C%20El%20(1986)(Grupo%20de%20Trabajo%20Software)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas CALDERO.CAS
 sha1 1943c90b30580dbc805852f23c469503dc38ecd7
+url https://download.file-hunter.com/Games/MSX1/CAS/Caldero%20Magico%2C%20El%20(1986)(Grupo%20de%20Trabajo%20Software)(es)%5BCLOAD%20%2B%20RUN%5D.zip

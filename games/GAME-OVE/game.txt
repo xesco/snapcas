@@ -1,4 +1,4 @@
 # Game Over (1988)(Dinamic Software)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Over%20(1988)(Dinamic%20Software)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas GAME-OVE.CAS
 sha1 de8b8bb9a4217638e8b93bcfbe91674fe2a73549
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Over%20(1988)(Dinamic%20Software)(Side%20A)%5BRUN%27CAS-%27%5D.zip

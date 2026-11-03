@@ -1,4 +1,4 @@
 # Arithmetic, Mathematics and English for Elementary and Junior High School Students, 2 Volumes, Learning Software (198x)(Soft & Soft)[CLOAD'MAT-1'],R
-# https://download.file-hunter.com/Games/MSX1/CAS/Arithmetic%2C%20Mathematics%20and%20English%20for%20Elementary%20and%20Junior%20High%20School%20Students%2C%202%20Volumes%2C%20Learning%20Software%20(198x)(Soft%20%26%20Soft)%5BCLOAD'MAT-1'%5D%2CR.zip
 cas ARITHAND.CAS
 sha1 b749f19116acd24c794b923d0ea1e4c81496e0c2
+url https://download.file-hunter.com/Games/MSX1/CAS/Arithmetic%2C%20Mathematics%20and%20English%20for%20Elementary%20and%20Junior%20High%20School%20Students%2C%202%20Volumes%2C%20Learning%20Software%20(198x)(Soft%20%26%20Soft)%5BCLOAD%27MAT-1%27%5D%2CR.zip

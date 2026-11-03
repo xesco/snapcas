@@ -1,4 +1,4 @@
 # Blackbeard (1988)(Topo Soft)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Blackbeard%20(1988)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
 cas BLACKBEA.CAS
 sha1 aad3641ad18ae365984678e2c2bd96dcadfbb01b
+url https://download.file-hunter.com/Games/MSX1/CAS/Blackbeard%20(1988)(Topo%20Soft)(es)%5BRUN%27CAS-%27%5D.zip

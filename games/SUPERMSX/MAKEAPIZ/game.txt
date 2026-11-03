@@ -1,7 +1,7 @@
 # Make a Pizza, the first game on the tape Super MSX n.10 (marzo 1988) - cas_10 /
-# super_msx_10_lato_A.cas, after the issue's intro:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.10%20(marzo%201988)%20-%20cas_10.zip
+# super_msx_10_lato_A.cas, after the issue's intro.
 # It is a copy of Attack of the Killer Tomatoes, as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=10
 cas SUPER10.CAS
 sha1 abcfa7ab5dac0acf72619ac042d27626666d6a1e
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.10%20(marzo%201988)%20-%20cas_10.zip

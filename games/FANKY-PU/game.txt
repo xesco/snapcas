@@ -1,4 +1,4 @@
 # Fanky Punky (1987)(P.J. Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Fanky%20Punky%20(1987)(P.J.%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas FANKY-PU.CAS
 sha1 c56f8c5a81be62247a5bcf3126efc902c8e9cd54
+url https://download.file-hunter.com/Games/MSX1/CAS/Fanky%20Punky%20(1987)(P.J.%20Software)(es)%5BRUN%27CAS-%27%5D.zip

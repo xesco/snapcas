@@ -1,4 +1,4 @@
 # Jewels of Darkness II - Adventure Quest v2 (1986)(Level 9 Computing)[a2 - Cracked][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Jewels%20of%20Darkness%20II%20-%20Adventure%20Quest%20v2%20(1986)(Level%209%20Computing)%5Ba2%20-%20Cracked%5D%5BRUN'CAS-'%5D.zip
 cas JEWELRUN.CAS
 sha1 d491e286921fdb9456460ea3adab3cffd1d8efef
+url https://download.file-hunter.com/Games/MSX1/CAS/Jewels%20of%20Darkness%20II%20-%20Adventure%20Quest%20v2%20(1986)(Level%209%20Computing)%5Ba2%20-%20Cracked%5D%5BRUN%27CAS-%27%5D.zip

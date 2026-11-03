@@ -435,3 +435,23 @@ Nextor only, because the stock flash's ROM disk starts a file manager on an MSX2
 |---|---|
 | Caldero on each of the five machines | A single-load game restores on each, under Nextor or, on the VG-8235, MSX-DOS 1 |
 | The collection on each of the five machines | Each game file passes, or is fixed, or is in a failure list |
+
+## Step 21: the url line
+
+This step is the first of the `snapcas` command's ([CLI.md](CLI.md)). It adds the
+game file's `url` line, the links to the zips that hold a game's sides
+([Game file](DESIGN.md#game-file)), which the command downloads. A one-off script
+filled the lines from File-Hunter's listing of its MSX1 CAS folder and the
+collection's lists of its files, and removed the link comments, which had no side
+2's link. An apostrophe in a link is written `%27`, because the game file's lines
+are split as a shell splits words, which would take it for a quote. The 8 game files
+without a link, in the `SM-` folders, were copies of Spectravideo's Swing Man,
+Cryptic Cube and Roulette under their catalogue numbers, so they went, with 13 other
+copies of a release under several names ([Shipped files](DESIGN.md#shipped-files)).
+
+| Test | What it proves |
+|---|---|
+| A game file with a link for each side | The game file reads, with both links |
+| A game file with side 2 and one link, or with a link that is not https to a zip | The game file is refused with an error |
+| Every shipped game file | Each links its zips on File-Hunter |
+| Side 2 of Gauntlet, Meganova and Strip Poker II+, downloaded once | Each side 2's zip holds the file with the game file's SHA-1 |

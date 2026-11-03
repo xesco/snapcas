@@ -1,4 +1,4 @@
 # Xenon(1988)(Melbourne House)[EN][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Xenon(1988)(Melbourne%20House)%5BEN%5D%5BRUN'CAS-'%5D.zip
 cas XENONEN.CAS
 sha1 958cbc322bc3e3be385273a106a789c4c964f0e4
+url https://download.file-hunter.com/Games/MSX1/CAS/Xenon(1988)(Melbourne%20House)%5BEN%5D%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Aerial (2021)(Inufuto)
-# https://download.file-hunter.com/Games/MSX1/CAS/Aerial%20(2021)(Inufuto).zip
 cas AERIAL.CAS
 sha1 c01f826797bbc774d3be39206bab60c0c04f8880
+url https://download.file-hunter.com/Games/MSX1/CAS/Aerial%20(2021)(Inufuto).zip

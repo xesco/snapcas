@@ -1,4 +1,4 @@
 # Samantha Fox Strip Poker (1986)(Martech Games)[a][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Samantha%20Fox%20Strip%20Poker%20(1986)(Martech%20Games)%5Ba%5D%5BRUN'CAS-'%5D.zip
 cas SAMANCAS.CAS
 sha1 8f22cb1ffc0469abb570cb572aaadd5d674101af
+url https://download.file-hunter.com/Games/MSX1/CAS/Samantha%20Fox%20Strip%20Poker%20(1986)(Martech%20Games)%5Ba%5D%5BRUN%27CAS-%27%5D.zip

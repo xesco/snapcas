@@ -1,6 +1,5 @@
 # Bici Cross, the fourth game on the tape Super MSX n.11 (Aprile 1988) - cas_11 /
-# super_msx_11_lato_B.cas, after Il Circo (games/SUPERMSX/ILCIRCO):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.11%20(Aprile%201988)%20-%20cas_11.zip
+# super_msx_11_lato_B.cas, after Il Circo (games/SUPERMSX/ILCIRCO).
 # It is a copy of BMX Simulator (Codemasters), as edicola8bit lists it. It also
 # has a dump of its own (games/BMX-SIMU). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=11
@@ -8,4 +7,5 @@
 # Circo.
 cas SUPER11B.CAS
 sha1 8b716cf807acf587e35cd539ef54b74d1dcde86c
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.11%20(Aprile%201988)%20-%20cas_11.zip
 start BICI

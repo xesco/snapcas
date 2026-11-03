@@ -1,4 +1,4 @@
 # Champions Grand National (1984)(Pony Canyon)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Champions%20Grand%20National%20(1984)(Pony%20Canyon)%5BCLOAD%20%2B%20RUN%5D.zip
 cas CHAMPION.CAS
 sha1 96d045baf0a5cf30cf85182db5815467dce72d27
+url https://download.file-hunter.com/Games/MSX1/CAS/Champions%20Grand%20National%20(1984)(Pony%20Canyon)%5BCLOAD%20%2B%20RUN%5D.zip

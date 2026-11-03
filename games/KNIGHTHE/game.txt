@@ -1,4 +1,4 @@
 # Knight Lore (Ultimate Play The Game)[BLOAD'CAS-',R] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Lore%20(Ultimate%20Play%20The%20Game)%5BBLOAD'CAS-'%2CR%5D%20%5B_%5D.zip
 cas KNIGHTHE.CAS
 sha1 d973ccc6d4ee0aaa6b95780aee409ac8f043ed44
+url https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Lore%20(Ultimate%20Play%20The%20Game)%5BBLOAD%27CAS-%27%2CR%5D%20%5B_%5D.zip

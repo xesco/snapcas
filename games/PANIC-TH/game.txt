@@ -1,4 +1,4 @@
 # Panic The Train (1984)(Centralsoft)
-# https://download.file-hunter.com/Games/MSX1/CAS/Panic%20The%20Train%20(1984)(Centralsoft).zip
 cas PANIC-TH.CAS
 sha1 276de859bb219fffc8345cb46f6f99b6760c3b74
+url https://download.file-hunter.com/Games/MSX1/CAS/Panic%20The%20Train%20(1984)(Centralsoft).zip

@@ -1,12 +1,12 @@
 # Worm, the second game on the tape Super MSX n.11 (Aprile 1988) - cas_11 /
-# super_msx_11_lato_B.cas, after Shuriken (games/SUPERMSX/SHURIKEN):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.11%20(Aprile%201988)%20-%20cas_11.zip
+# super_msx_11_lato_B.cas, after Shuriken (games/SUPERMSX/SHURIKEN).
 # It is a copy of Monster's Fair, as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=11
 # The load starts at the BASIC loader WORM, as when the tape runs on after
 # Shuriken.
 cas SUPER11B.CAS
 sha1 8b716cf807acf587e35cd539ef54b74d1dcde86c
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.11%20(Aprile%201988)%20-%20cas_11.zip
 start WORM
 
 # The capture reads the tape up to the next program's loader, so the rest of the

@@ -1,4 +1,4 @@
 # Chiller (1985)(Mastertronic)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Chiller%20(1985)(Mastertronic)%5BRUN'CAS-'%5D.zip
 cas CHILLER.CAS
 sha1 73d806fa5d002c0016a0bd983ed9f7f99e03215d
+url https://download.file-hunter.com/Games/MSX1/CAS/Chiller%20(1985)(Mastertronic)%5BRUN%27CAS-%27%5D.zip

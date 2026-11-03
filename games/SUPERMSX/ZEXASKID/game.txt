@@ -1,10 +1,10 @@
 # Zexas Kid, the second game on the tape Super MSX n.17 (dicembre 1988) - cas_17 /
-# super_msx_17_lato_B.cas, after Space Beater (games/SUPERMSX/SPACEBEA):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.17%20(dicembre%201988)%20-%20cas_17.zip
+# super_msx_17_lato_B.cas, after Space Beater (games/SUPERMSX/SPACEBEA).
 # It is a copy of Topple Zip (Bothtec), as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=17
 # The load starts at the BASIC loader ZEXASK, as when the tape runs on after Space
 # Beater.
 cas SUPER17B.CAS
 sha1 fa20084b1c0c70b4b144c7f9b0f54ebe21409bfb
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.17%20(dicembre%201988)%20-%20cas_17.zip
 start ZEXASK

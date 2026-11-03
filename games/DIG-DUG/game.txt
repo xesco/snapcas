@@ -1,4 +1,4 @@
 # Dig Dug (1984)(Bug-Byte Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Dig%20Dug%20(1984)(Bug-Byte%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas DIG-DUG.CAS
 sha1 892b3dbe513e8611471a26bcd6f867f72fce43b1
+url https://download.file-hunter.com/Games/MSX1/CAS/Dig%20Dug%20(1984)(Bug-Byte%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

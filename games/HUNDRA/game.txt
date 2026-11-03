@@ -1,4 +1,4 @@
 # Hundra (1988)(Dinamic Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Hundra%20(1988)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas HUNDRA.CAS
 sha1 4a2dfd9ac5a4cc4d3e7e5538ba9fbc72c8d71845
+url https://download.file-hunter.com/Games/MSX1/CAS/Hundra%20(1988)(Dinamic%20Software)(es)%5BRUN%27CAS-%27%5D.zip

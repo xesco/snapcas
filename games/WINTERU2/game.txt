@@ -1,4 +1,4 @@
 # Winter Olympics (1986)(Tynesoft)(Side B)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Winter%20Olympics%20(1986)(Tynesoft)(Side%20B)%5BRUN'CAS-'%5D.zip
 cas WINTERB.CAS
 sha1 2e017571b81765450baa6a688a5c8ed4bb92df61
+url https://download.file-hunter.com/Games/MSX1/CAS/Winter%20Olympics%20(1986)(Tynesoft)(Side%20B)%5BRUN%27CAS-%27%5D.zip

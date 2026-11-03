@@ -1,4 +1,4 @@
 # Who Dares Wins II (1986)(Alligata Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Who%20Dares%20Wins%20II%20(1986)(Alligata%20Software)%5BRUN'CAS-'%5D.zip
 cas WHO-DARE.CAS
 sha1 6a36fe5c3303c313181bf761ce93a47777cce766
+url https://download.file-hunter.com/Games/MSX1/CAS/Who%20Dares%20Wins%20II%20(1986)(Alligata%20Software)%5BRUN%27CAS-%27%5D.zip

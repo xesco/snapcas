@@ -1,5 +1,5 @@
 # Perico Delgado Maillot Amarillo (1989)(Topo Soft)(es)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Perico%20Delgado%20Maillot%20Amarillo%20(1989)(Topo%20Soft)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas PERICO.CAS
 side2 PERICOB.CAS
 sha1 35c01f9de8e3548c48d6a2db01c3456077c67959 b39b77e5cf5a5ebf54b55800f4bb2c0c0010f6f3
+url https://download.file-hunter.com/Games/MSX1/CAS/Perico%20Delgado%20Maillot%20Amarillo%20(1989)(Topo%20Soft)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Perico%20Delgado%20Maillot%20Amarillo%20(1989)(Topo%20Soft)(es)(Side%20B)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Star Wars (1986)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Star%20Wars%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas STAR-WAR.CAS
 sha1 a0ef791cb51bbe8c4921b00dbca054dd2eac47ec
+url https://download.file-hunter.com/Games/MSX1/CAS/Star%20Wars%20(1986)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

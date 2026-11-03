@@ -1,7 +1,7 @@
 # Sprite Maker, the fourth program on Aackosoft's Game Pack 2, after Spiro
-# (games/GAMEPAC2/SPIRO):
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
+# (games/GAMEPAC2/SPIRO).
 # The load starts at the BASIC loader SPRITE, as when the tape runs on after Spiro.
 cas GAME-PAC.CAS
 sha1 e65f4e4dbabffd242081acc8d66b3ef107a9394c
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
 start SPRITE

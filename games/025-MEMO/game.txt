@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 049-Memorion.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 025-MEMO.CAS
 sha1 a18e77c080e0aa12b170917bb2afa4166f5041aa
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

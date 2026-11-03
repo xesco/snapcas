@@ -1,4 +1,4 @@
 # Super MSX n.22 (giugno 1989) - cas_22 / Aliantantor dump di Andrea bendoni.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.22%20(giugno%201989)%20-%20cas_22.zip
 cas ALIANTAN.CAS
 sha1 69924241c3935a505087816a4deb9412edd67033
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.22%20(giugno%201989)%20-%20cas_22.zip

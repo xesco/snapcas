@@ -1,8 +1,8 @@
 # Auto-Race, the third program on the Computer Users Club's tape C.04, after
-# Klaverjassen (games/MEMORYC4/KLAVERJA):
-# https://download.file-hunter.com/Games/MSX1/CAS/Memory%20-%20C.04%20(1985)(Computer%20Users%20Club)(nl)%5Bposition%20tape%20%2B%20CLOAD%20%2B%20RUN%5D.zip
+# Klaverjassen (games/MEMORYC4/KLAVERJA).
 # The load starts at the BASIC program Racen, as when the tape runs on after
 # Klaverjassen.
 cas MEMORY.CAS
 sha1 bbed5547cc0a64b068c90612c4f8af0c182ea075
+url https://download.file-hunter.com/Games/MSX1/CAS/Memory%20-%20C.04%20(1985)(Computer%20Users%20Club)(nl)%5Bposition%20tape%20%2B%20CLOAD%20%2B%20RUN%5D.zip
 start Racen

@@ -1,4 +1,4 @@
 # Tales Of Popolon (v1.2)(2017)(EN) [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Tales%20Of%20Popolon%20(v1.2)(2017)(EN)%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas TALESEN.CAS
 sha1 5b5e99b676ddd7fb467ac51a36484b83f9ec3e5f
+url https://download.file-hunter.com/Games/MSX1/CAS/Tales%20Of%20Popolon%20(v1.2)(2017)(EN)%20%5BBLOAD%27CAS-%27%2CR%5D.zip

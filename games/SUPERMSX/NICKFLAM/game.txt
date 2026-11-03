@@ -1,7 +1,7 @@
 # Nick Flame, the first game on the tape Super MSX n.23 (settembre 1989) - cas_23
-# / super_msx_23_lato_A.CAS, after the issue's intro:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.23%20(settembre%201989)%20-%20cas_23.zip
+# / super_msx_23_lato_A.CAS, after the issue's intro.
 # edicola8bit lists no original game for it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=23
 cas SUPER23.CAS
 sha1 6d00125ee270d5d95729917c7eb24b5751cf7be7
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.23%20(settembre%201989)%20-%20cas_23.zip

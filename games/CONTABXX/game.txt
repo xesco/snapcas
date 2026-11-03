@@ -1,4 +1,4 @@
 # Contabilidad I (19xx)(Mind Games Espana)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Contabilidad%20I%20(19xx)(Mind%20Games%20Espana)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas CONTABXX.CAS
 sha1 709d4e063ec30f0a5f8aa90eabb816b0c6d05f28
+url https://download.file-hunter.com/Games/MSX1/CAS/Contabilidad%20I%20(19xx)(Mind%20Games%20Espana)(es)%5BCLOAD%20%2B%20RUN%5D.zip

@@ -1,4 +1,4 @@
 # Mazes Unlimited (1986)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Mazes%20Unlimited%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas MAZES-UN.CAS
 sha1 4e9cb8ec6846784cbce2f960f84005026bf4aa42
+url https://download.file-hunter.com/Games/MSX1/CAS/Mazes%20Unlimited%20(1986)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

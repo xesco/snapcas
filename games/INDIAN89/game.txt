@@ -1,5 +1,5 @@
 # Indiana Jones and the Last Crusade (1989)(Erbe Software)(es)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Indiana%20Jones%20and%20the%20Last%20Crusade%20(1989)(Erbe%20Software)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas INDIAN89.CAS
 side2 INDIANAB.CAS
 sha1 783438eb97a6cbdce5b5f48abd4a6381ca0dd256 23ebb2257b5d6637a7328754bf3b8d079efa43aa
+url https://download.file-hunter.com/Games/MSX1/CAS/Indiana%20Jones%20and%20the%20Last%20Crusade%20(1989)(Erbe%20Software)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Indiana%20Jones%20and%20the%20Last%20Crusade%20(1989)(Erbe%20Software)(es)(Side%20B)%5BRUN%27CAS-%27%5D.zip

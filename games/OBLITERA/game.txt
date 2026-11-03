@@ -1,4 +1,4 @@
 # Obliterator (1989)(Dro Soft)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Obliterator%20(1989)(Dro%20Soft)(es)%5BRUN'CAS-'%5D.zip
 cas OBLITERA.CAS
 sha1 f2f52f21b5a3490af85df4faee63bc7058d4e626
+url https://download.file-hunter.com/Games/MSX1/CAS/Obliterator%20(1989)(Dro%20Soft)(es)%5BRUN%27CAS-%27%5D.zip

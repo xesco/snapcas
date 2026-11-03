@@ -1,4 +1,4 @@
 # Blasteroids (1987)(Image Works)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Blasteroids%20(1987)(Image%20Works)%5BBLOAD'CAS-'%2CR%5D.zip
 cas BLASTERO.CAS
 sha1 a85f7ca2ea5617f30b0a39d746e02d902d0eba3c
+url https://download.file-hunter.com/Games/MSX1/CAS/Blasteroids%20(1987)(Image%20Works)%5BBLOAD%27CAS-%27%2CR%5D.zip

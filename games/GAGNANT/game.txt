@@ -1,4 +1,4 @@
 # Gagnant (1986) (Humming Bird Soft)[BLOAD'CAS-',r]
-# https://download.file-hunter.com/Games/MSX1/CAS/Gagnant%20(1986)%20(Humming%20Bird%20Soft)%5BBLOAD'CAS-'%2Cr%5D.zip
 cas GAGNANT.CAS
 sha1 5ec512e13e1833fecf5cb3c09f07f0f100cc250f
+url https://download.file-hunter.com/Games/MSX1/CAS/Gagnant%20(1986)%20(Humming%20Bird%20Soft)%5BBLOAD%27CAS-%27%2Cr%5D.zip

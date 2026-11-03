@@ -1,4 +1,0 @@
-# Roulette (Spectravideo) [_] [CLOAD-RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Roulette%20(Spectravideo)%20%5B_%5D%20%5BCLOAD-RUN%5D.zip
-cas ROULETTB.CAS
-sha1 30bb8988b2d4672743dcc9ec1da22150fe119e0c

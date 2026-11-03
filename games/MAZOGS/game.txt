@@ -1,4 +1,4 @@
 # Mazogs (2017)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Mazogs%20(2017)%5BBLOAD'CAS-'%2CR%5D.zip
 cas MAZOGS.CAS
 sha1 2c6eb2f4a11f2f81c17acd32c72edd579ad90798
+url https://download.file-hunter.com/Games/MSX1/CAS/Mazogs%20(2017)%5BBLOAD%27CAS-%27%2CR%5D.zip

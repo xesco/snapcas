@@ -1,4 +1,4 @@
 # Bestial Warrior (1989)(Dinamic Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Bestial%20Warrior%20(1989)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas BESTIAL.CAS
 sha1 4d7d6bdff7505839d8599db373d8a426d26a50f9
+url https://download.file-hunter.com/Games/MSX1/CAS/Bestial%20Warrior%20(1989)(Dinamic%20Software)(es)%5BRUN%27CAS-%27%5D.zip

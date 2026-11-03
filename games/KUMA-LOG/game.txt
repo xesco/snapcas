@@ -1,4 +1,4 @@
 # Kuma Logo (1984)(Kuma Computers)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Kuma%20Logo%20(1984)(Kuma%20Computers)%5BCLOAD%20%2B%20RUN%5D.zip
 cas KUMA-LOG.CAS
 sha1 589fd4cd1ec7d6fd6021d8bbebf193d98bf6d63f
+url https://download.file-hunter.com/Games/MSX1/CAS/Kuma%20Logo%20(1984)(Kuma%20Computers)%5BCLOAD%20%2B%20RUN%5D.zip

@@ -1,4 +1,4 @@
 # Blocker (19xx)(Grupo de Trabajo Software)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Blocker%20(19xx)(Grupo%20de%20Trabajo%20Software)%5BCLOAD%20%2B%20RUN%5D.zip
 cas BLOCKER.CAS
 sha1 83905a03a0de6616c89505ee142765d469002ab3
+url https://download.file-hunter.com/Games/MSX1/CAS/Blocker%20(19xx)(Grupo%20de%20Trabajo%20Software)%5BCLOAD%20%2B%20RUN%5D.zip

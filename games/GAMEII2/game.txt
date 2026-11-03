@@ -1,4 +1,4 @@
 # Game Over II (1988)(Dinamic Software)(Side B)[re-release of Phantis][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Over%20II%20(1988)(Dinamic%20Software)(Side%20B)%5Bre-release%20of%20Phantis%5D%5BRUN'CAS-'%5D.zip
 cas GAMEOF.CAS
 sha1 1b73d0ccbac4ed6680f9a13c695f288778cee685
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Over%20II%20(1988)(Dinamic%20Software)(Side%20B)%5Bre-release%20of%20Phantis%5D%5BRUN%27CAS-%27%5D.zip

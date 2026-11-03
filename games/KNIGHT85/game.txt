@@ -1,4 +1,4 @@
 # Knight Lore (1985)(Ultimate Play The Game)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Lore%20(1985)(Ultimate%20Play%20The%20Game)%5BBLOAD'CAS-'%2CR%5D.zip
 cas KNIGHT85.CAS
 sha1 d1ec8a26e9b84b5a7e4f6aa6a26e363da3f56121
+url https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Lore%20(1985)(Ultimate%20Play%20The%20Game)%5BBLOAD%27CAS-%27%2CR%5D.zip

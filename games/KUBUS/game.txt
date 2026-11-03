@@ -1,4 +1,4 @@
 # Kubus (1985)(Kuma Computers)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Kubus%20(1985)(Kuma%20Computers)%5BRUN'CAS-'%5D.zip
 cas KUBUS.CAS
 sha1 c4fdeddfb1205cccabb1dcad23af963dcb1fd512
+url https://download.file-hunter.com/Games/MSX1/CAS/Kubus%20(1985)(Kuma%20Computers)%5BRUN%27CAS-%27%5D.zip

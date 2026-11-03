@@ -1,4 +1,4 @@
 # Squash 1986 (Robtek Software) [CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Squash%201986%20(Robtek%20Software)%20%5BCLOAD%20%2B%20RUN%5D.zip
 cas SQUASH.CAS
 sha1 9524bffedf365cf94bdcf87d626fc0ac4d3d1849
+url https://download.file-hunter.com/Games/MSX1/CAS/Squash%201986%20(Robtek%20Software)%20%5BCLOAD%20%2B%20RUN%5D.zip

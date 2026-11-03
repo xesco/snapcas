@@ -1,5 +1,5 @@
 # Untouchables, The (1989)(Erbe Software)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Untouchables%2C%20The%20(1989)(Erbe%20Software)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas UNTOUCHA.CAS
 side2 UNTOUCHB.CAS
 sha1 02714600f7828fec23348e7a76af4b5bb87c5e61 631ac19be006d1aed2e2c86ad3ab71124b637334
+url https://download.file-hunter.com/Games/MSX1/CAS/Untouchables%2C%20The%20(1989)(Erbe%20Software)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Untouchables%2C%20The%20(1989)(Erbe%20Software)(Side%20B)%5BRUN%27CAS-%27%5D.zip

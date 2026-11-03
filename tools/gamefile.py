@@ -25,6 +25,7 @@ class Game:
         self.load = None      # the load command, for a tape whose first block is not standard
         self.start = None     # the name of the file on side 1 where the load starts
         self.sha1 = []
+        self.urls = []        # the links to side 1's zip and side 2's, to download them
         self.name = default_name(os.path.basename(os.path.normpath(folder)))
         self.keys = []        # [(time, kind, value)], kind "key" or "text"
         self.continue_key = None
@@ -151,6 +152,10 @@ def read_game(folder, machine=None):
             if not 1 <= len(args) <= 2 or not all(re.fullmatch(r"[0-9a-f]{40}", a) for a in args):
                 raise GameFileError(f"{where}: sha1 takes one or two 40-digit SHA-1s")
             game.sha1 = args
+        elif key == "url":
+            if not 1 <= len(args) <= 2 or not all(re.fullmatch(r"https://\S+\.(zip|ZIP)", a) for a in args):
+                raise GameFileError(f"{where}: url takes one or two https links to zip files")
+            game.urls = args
         elif key == "name":
             if not re.fullmatch(r"[A-Z0-9]{1,8}", args[0]):
                 raise GameFileError(f"{where}: name takes up to 8 capital letters and digits")
@@ -196,6 +201,8 @@ def read_game(folder, machine=None):
         raise GameFileError(f"{path}: needs a cas or tsx line")
     if game.side2 and os.path.splitext(game.side2)[1].lower() != os.path.splitext(game.tape)[1].lower():
         raise GameFileError(f"{path}: side2 takes a file of side 1's format")
+    if game.urls and len(game.urls) != (2 if game.side2 else 1):
+        raise GameFileError(f"{path}: url takes a link for each side")
     # rom keep leaves the game only the entries in page 3, which service t0
     # removes (DESIGN.md, Game file).
     if game.rom_keep and game.service == "t0":

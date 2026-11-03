@@ -1,4 +1,4 @@
 # Awass (2026)(inufuto)
-# https://download.file-hunter.com/Games/MSX1/CAS/Awass%20(2026)(inufuto).zip
 cas AWASS.CAS
 sha1 e2dc0064aaf1972411f24c813fd1e97f470d1ec5
+url https://download.file-hunter.com/Games/MSX1/CAS/Awass%20(2026)(inufuto).zip

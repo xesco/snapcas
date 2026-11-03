@@ -1,4 +1,4 @@
 # Skramble - Compilation Tape 1 (ByteBusters) (Aackosoft - Eaglesoft) [RUN'CAS-'] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Skramble%20-%20Compilation%20Tape%201%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
 cas SKRAMBL1.CAS
 sha1 cd793d02a7bb0663351d54ada0d02c8c8729b6e5
+url https://download.file-hunter.com/Games/MSX1/CAS/Skramble%20-%20Compilation%20Tape%201%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN%27CAS-%27%5D%20%5B_%5D.zip

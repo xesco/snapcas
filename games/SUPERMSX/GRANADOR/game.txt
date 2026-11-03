@@ -1,6 +1,5 @@
 # Granador, the second game on the tape Super MSX n.6 (novembre 1987) - cas_6 /
-# super_msx_6_lato_A.cas, after Pharaoh (games/SUPERMSX/PHARAOH):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.6%20(novembre%201987)%20-%20cas_6.zip
+# super_msx_6_lato_A.cas, after Pharaoh (games/SUPERMSX/PHARAOH).
 # It is a copy of Crusader, as edicola8bit lists it. It also has a dump of its own
 # (games/CRUSADER). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=6
@@ -8,4 +7,5 @@
 # Pharaoh.
 cas SUPER6.CAS
 sha1 746a9e4da001d9c7b66abff263f5e0ec1c2facab
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.6%20(novembre%201987)%20-%20cas_6.zip
 start GRANAD

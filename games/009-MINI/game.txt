@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 017-Mini Super Sprites.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 009-MINI.CAS
 sha1 e43edf50ce69489ca8756224b880fc013ca90cb1
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

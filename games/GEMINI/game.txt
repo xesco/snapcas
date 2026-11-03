@@ -1,5 +1,5 @@
 # Gemini Wing (1989)(Virgin Mastertronic)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Gemini%20Wing%20(1989)(Virgin%20Mastertronic)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas GEMINI.CAS
 side2 GEMINCAS.CAS
 sha1 e6b1cc16724c2f393e639839402f761c09fee7e7 7f3b82dcc83b086b32b20972712adfa1ee534f3d
+url https://download.file-hunter.com/Games/MSX1/CAS/Gemini%20Wing%20(1989)(Virgin%20Mastertronic)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Gemini%20Wing%20(1989)(Virgin%20Mastertronic)(Side%20B)%5BFixed%5D%5BRUN%27CAS-%27%5D.zip

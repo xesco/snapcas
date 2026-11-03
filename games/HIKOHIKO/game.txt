@@ -1,4 +1,4 @@
 # Hikohiko Ace (From Valis Club Vol. 1)(1989)(Telenet Japan)(ja)
-# https://download.file-hunter.com/Games/MSX1/CAS/Hikohiko%20Ace%20(From%20Valis%20Club%20Vol.%201)(1989)(Telenet%20Japan)(ja).zip
 cas HIKOHIKO.CAS
 sha1 0f7caaf12bf3e3bb0e47504414942a8f60239aec
+url https://download.file-hunter.com/Games/MSX1/CAS/Hikohiko%20Ace%20(From%20Valis%20Club%20Vol.%201)(1989)(Telenet%20Japan)(ja).zip

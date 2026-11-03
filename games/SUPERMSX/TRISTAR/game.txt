@@ -1,6 +1,5 @@
 # Tristar, the second game on the tape Super MSX n.18 (gennaio 1989) - cas_18 /
-# SuperMSX18-LatoB.CAS, after Snowrun (games/SUPERMSX/SNOWRUN):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.18%20(gennaio%201989)%20-%20cas_18.zip
+# SuperMSX18-LatoB.CAS, after Snowrun (games/SUPERMSX/SNOWRUN).
 # It is a copy of Eagle, as edicola8bit lists it. It also has a dump of its own
 # (games/EAGLE). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=18
@@ -8,4 +7,5 @@
 # Snowrun.
 cas SUPERMSB.CAS
 sha1 9fa55b37487e2545e40cc56183f5082a65487538
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.18%20(gennaio%201989)%20-%20cas_18.zip
 start TRISTA

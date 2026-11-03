@@ -1,4 +1,4 @@
 # Test de Capacidad de Concentracion (1984)(DIMensionNEW)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Test%20de%20Capacidad%20de%20Concentracion%20(1984)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
 cas TESTDE.CAS
 sha1 65e795c2c160be9870632ed2b59bbf1c0f638683
+url https://download.file-hunter.com/Games/MSX1/CAS/Test%20de%20Capacidad%20de%20Concentracion%20(1984)(DIMensionNEW)(es)%5BRUN%27CAS-%27%5D.zip

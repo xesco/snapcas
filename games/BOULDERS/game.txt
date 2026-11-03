@@ -1,4 +1,4 @@
 # Boulder Dash II - Rockford's Revenge (First Star) (Databyte) / Boulder Dash II - Rockford's Revenge (First Star) (Databyte) (Side A) [RUN'CAS-'] [_].cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Boulder%20Dash%20II%20-%20Rockford's%20Revenge%20(First%20Star)%20(Databyte).zip
 cas BOULDERS.CAS
 sha1 44dac226e0d0f1466e2a5deda5bc79fc5cd56672
+url https://download.file-hunter.com/Games/MSX1/CAS/Boulder%20Dash%20II%20-%20Rockford%27s%20Revenge%20(First%20Star)%20(Databyte).zip

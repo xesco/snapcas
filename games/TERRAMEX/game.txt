@@ -1,4 +1,4 @@
 # Terramex (1988)(Grandslam Entertainments)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Terramex%20(1988)(Grandslam%20Entertainments)%5BBLOAD'CAS-'%2CR%5D.zip
 cas TERRAMEX.CAS
 sha1 7b72f22025d6acde3d01778e2512a509db519af9
+url https://download.file-hunter.com/Games/MSX1/CAS/Terramex%20(1988)(Grandslam%20Entertainments)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
 # Indiana Jones and the Temple of Doom (1987)(US Gold)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Indiana%20Jones%20and%20the%20Temple%20of%20Doom%20(1987)(US%20Gold)%5BRUN'CAS-'%5D.zip
 cas INDIANA.CAS
 sha1 08e57d9429505e7ce219e2f4ae840ab3429964d1
+url https://download.file-hunter.com/Games/MSX1/CAS/Indiana%20Jones%20and%20the%20Temple%20of%20Doom%20(1987)(US%20Gold)%5BRUN%27CAS-%27%5D.zip

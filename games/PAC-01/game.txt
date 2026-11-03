@@ -1,4 +1,4 @@
 # PAC-01 - Arcs (2021)
-# https://download.file-hunter.com/Games/MSX1/CAS/PAC-01%20-%20Arcs%20(2021).zip
 cas PAC-01.CAS
 sha1 84aca48686d66979df4fbfaec255b374b1b87a26
+url https://download.file-hunter.com/Games/MSX1/CAS/PAC-01%20-%20Arcs%20(2021).zip

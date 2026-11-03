@@ -1,4 +1,4 @@
 # Polar Star (1984)(Micro Cabin)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Polar%20Star%20(1984)(Micro%20Cabin)%5BCLOAD%20%2B%20RUN%5D.zip
 cas POLAR-ST.CAS
 sha1 d902af0dfb7b3079e26ddc427638d49d88b0dc44
+url https://download.file-hunter.com/Games/MSX1/CAS/Polar%20Star%20(1984)(Micro%20Cabin)%5BCLOAD%20%2B%20RUN%5D.zip

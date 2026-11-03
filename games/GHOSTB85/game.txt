@@ -1,4 +1,4 @@
 # Ghostbusters (1985)(Activision)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Ghostbusters%20(1985)(Activision)%5BBLOAD'CAS-'%2CR%5D.zip
 cas GHOSTB85.CAS
 sha1 39a8b8b0770f684b0eb63182a95060609ba0cf7a
+url https://download.file-hunter.com/Games/MSX1/CAS/Ghostbusters%20(1985)(Activision)%5BBLOAD%27CAS-%27%2CR%5D.zip

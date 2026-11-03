@@ -1,4 +1,4 @@
 # Wizard's Lair (1986)(Bubblebus Software)(M3)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Wizard's%20Lair%20(1986)(Bubblebus%20Software)(M3)%5BCLOAD%20%2B%20RUN%5D.zip
 cas WIZARD.CAS
 sha1 8975c7c42fa0685495922a8a66534dad5d7adeb6
+url https://download.file-hunter.com/Games/MSX1/CAS/Wizard%27s%20Lair%20(1986)(Bubblebus%20Software)(M3)%5BCLOAD%20%2B%20RUN%5D.zip

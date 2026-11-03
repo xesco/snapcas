@@ -1,4 +1,4 @@
 # Bit Byter (19xx)(Spectravideo)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Bit%20Byter%20(19xx)(Spectravideo)%5BCLOAD%20%2B%20RUN%5D.zip
 cas BIT-BYTE.CAS
 sha1 edf0fee29681e5f20de99415bfb08c22ed6d4300
+url https://download.file-hunter.com/Games/MSX1/CAS/Bit%20Byter%20(19xx)(Spectravideo)%5BCLOAD%20%2B%20RUN%5D.zip

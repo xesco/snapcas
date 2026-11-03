@@ -1,4 +1,4 @@
 # Sito Pons 500cc Grand Prix (1990)(Zigurat Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Sito%20Pons%20500cc%20Grand%20Prix%20(1990)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas SITO-PON.CAS
 sha1 f584c6a729b7b5b05b53ade1c52491b919392810
+url https://download.file-hunter.com/Games/MSX1/CAS/Sito%20Pons%20500cc%20Grand%20Prix%20(1990)(Zigurat%20Software)(es)%5BRUN%27CAS-%27%5D.zip

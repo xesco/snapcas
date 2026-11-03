@@ -1,5 +1,5 @@
 # Space Harrier II (1990)(Grandslam)(GB)(Side A)[BLOAD'CAS_',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Space%20Harrier%20II%20(1990)(Grandslam)(GB)(Side%20A)%5BBLOAD'CAS_'%2CR%5D.zip
 cas SPACECAS.CAS
 side2 SPACE-HA.CAS
 sha1 e10ffdeba1cdeb7a9dfe61099eb3b240083384c3 ec7506b183005a6fedaa7cb7688ef406574afc2a
+url https://download.file-hunter.com/Games/MSX1/CAS/Space%20Harrier%20II%20(1990)(Grandslam)(GB)(Side%20A)%5BBLOAD%27CAS_%27%2CR%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Space%20Harrier%20II%20(1990)(Grandslam)(GB)(Side%20B).zip

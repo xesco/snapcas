@@ -1,4 +1,4 @@
 # MSXtra - Disc Warrior (1986)[Alligata][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/MSXtra%20-%20Disc%20Warrior%20(1986)%5BAlligata%5D%5BRUN'CAS-'%5D.zip
 cas MSXTRRUN.CAS
 sha1 8a68746b10bb3e96f8247c596dc681b6a5becc51
+url https://download.file-hunter.com/Games/MSX1/CAS/MSXtra%20-%20Disc%20Warrior%20(1986)%5BAlligata%5D%5BRUN%27CAS-%27%5D.zip

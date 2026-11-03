@@ -123,20 +123,18 @@ command needs no change of its own to them.
 
 ## Download
 
-A game file gets a new key, `url`, with the link to side 1's zip and, for a game
-with a side 2, the link to side 2's zip, in the order of `sha1`:
+A game file's `url` line holds the link to side 1's zip and, for a game with a side
+2, the link to side 2's zip, in the order of `sha1`:
 
 ```
 cas GAUNTLET.CAS
 side2 GAUNTLEB.CAS
 sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d6400b3
-url https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20A)%5BRUN'CAS-'%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20B)%5BRUN'CAS-'%5D.zip
+url https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20B)%5BRUN%27CAS-%27%5D.zip
 ```
 
-A script fills the `url` lines once from File-Hunter's listing of its MSX1 CAS
-folder, and removes the link comments. Today 1558 of the 1566 game files have a link
-comment, and none has a link to side 2's zip, which is a zip of its own on
-File-Hunter, as Gauntlet's is.
+The `url` lines are in place ([DESIGN.md, Game file][gamefile]): each of the 1545
+shipped game files has one.
 
 For each side, the command does these steps:
 
@@ -150,13 +148,13 @@ For each side, the command does these steps:
    error that names the zip, and writes nothing.
 
 The programs of one compilation share a tape, so its zip is downloaded only for the
-first of them. A game file without a `url` line stops the command with the file to
-put in the tapes folder:
+first of them. A game file without a `url` line, such as one that a user writes,
+stops the command with the file to put in the tapes folder:
 
 ```
-$ python3 snapcas.py sm-245 phc28s
-snapcas.py: games/SM-245/game.txt has no url line. Put the CAS file whose SHA-1 is
-306f9857349ccbe5ebd088affb00b51e1d1d39ea in tapes/ as SM-245.CAS
+$ python3 snapcas.py mygame phc28s
+snapcas.py: games/MYGAME/game.txt has no url line. Put the CAS file whose SHA-1 is
+d122e3c80cce689efe28dbb4734f411f6487ed98 in tapes/ as MYGAME.CAS
 ```
 
 ## Card layout
@@ -191,7 +189,7 @@ at the first copy that differs. It never deletes a file on the card.
 
 | Limit | How the user sees it |
 |---|---|
-| A game file without a link, 8 of them today | The command stops and names the file and the SHA-1 to put in the tapes folder |
+| A game file without a link, such as one that a user writes | The command stops and names the file and the SHA-1 to put in the tapes folder |
 | A tape that File-Hunter has changed or removed | The command stops: no zip, or no member with the SHA-1 |
 | A machine whose system ROMs are missing | `openMSX` does not start, and the command prints its error with exit code 2 |
 | `vg8020-picoverse` needs a 192 KB mapper, which the Makefile makes for the tests | The command writes `ram192k.xml` into `openMSX`'s `share/extensions` when it is missing, as the Makefile does |
@@ -221,3 +219,4 @@ at the first copy that differs. It never deletes a file on the card.
 [files]: DESIGN.md#files-and-commands
 [check]: DESIGN.md#check
 [machine]: DESIGN.md#machine-file
+[gamefile]: DESIGN.md#game-file

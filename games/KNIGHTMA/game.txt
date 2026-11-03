@@ -1,7 +1,7 @@
 # Knightmare[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Knightmare%5BBLOAD'CAS-'%2CR%5D.zip
 cas KNIGHTMA.CAS
 sha1 f8d4faacc697318ad0514e86726a8bd843599f9f
+url https://download.file-hunter.com/Games/MSX1/CAS/Knightmare%5BBLOAD%27CAS-%27%2CR%5D.zip
 
 # The capture takes its snapshot at 130 seconds instead of its own moment, 120
 # seconds, right after the last BLOAD. In openMSX the game also starts from the

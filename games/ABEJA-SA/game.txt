@@ -1,4 +1,4 @@
 # Abeja Sabia 2, La (1986)(Anaya Multimedia)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Abeja%20Sabia%202%2C%20La%20(1986)(Anaya%20Multimedia)(es)%5BRUN'CAS-'%5D.zip
 cas ABEJA-SA.CAS
 sha1 c1ef44792b7e8c99a83270ce58b85277d2927594
+url https://download.file-hunter.com/Games/MSX1/CAS/Abeja%20Sabia%202%2C%20La%20(1986)(Anaya%20Multimedia)(es)%5BRUN%27CAS-%27%5D.zip

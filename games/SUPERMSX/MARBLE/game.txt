@@ -1,7 +1,7 @@
 # Marble, the first game on the tape Super MSX n.26 (Gennaio 1990) - cas_26 /
-# super26max.cas, after the issue's intro:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.26%20(Gennaio%201990)%20-%20cas_26.zip
+# super26max.cas, after the issue's intro.
 # It is a copy of The Bubbler (Ultimate), as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=26
 cas SUPER-26.CAS
 sha1 95adf13d699bdae1e66e4610a378810858780737
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.26%20(Gennaio%201990)%20-%20cas_26.zip

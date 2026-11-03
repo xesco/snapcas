@@ -1,4 +1,4 @@
 # Buzz Off! (1984)(Electric Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Buzz%20Off!%20(1984)(Electric%20Software)%5BRUN'CAS-'%5D.zip
 cas BUZZ-OFF.CAS
 sha1 04d75481ce4360bb4be1111ba63ea38e6239d223
+url https://download.file-hunter.com/Games/MSX1/CAS/Buzz%20Off!%20(1984)(Electric%20Software)%5BRUN%27CAS-%27%5D.zip

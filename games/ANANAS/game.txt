@@ -1,4 +1,4 @@
 # Ananas (1989)(Eurosoft)[aka Pine Applin][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Ananas%20(1989)(Eurosoft)%5Baka%20Pine%20Applin%5D%5BRUN'CAS-'%5D.zip
 cas ANANAS.CAS
 sha1 a59f0fea16337d8b63b9d03fae0d4d301c31610b
+url https://download.file-hunter.com/Games/MSX1/CAS/Ananas%20(1989)(Eurosoft)%5Baka%20Pine%20Applin%5D%5BRUN%27CAS-%27%5D.zip

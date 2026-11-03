@@ -1,4 +1,4 @@
 # Guss en la Atlantida (1985)(Creativos Editoriales) / Mejor Software - Issue 01 - Guss en la Atlantida (19xx)(Creativos Editoriales)(ES)[CLOAD + RUN].cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Guss%20en%20la%20Atlantida%20(1985)(Creativos%20Editoriales).zip
 cas MEJOR-SO.CAS
 sha1 416ea6f6d559d656e30e52fb9f7de20a6d2b70fd
+url https://download.file-hunter.com/Games/MSX1/CAS/Guss%20en%20la%20Atlantida%20(1985)(Creativos%20Editoriales).zip

@@ -1,5 +1,5 @@
 # Curso de BASIC (1985)(Sony)(es)(Side A)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Curso%20de%20BASIC%20(1985)(Sony)(es)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
 cas CURSO-DE.CAS
 side2 CURSOB.CAS
 sha1 f32ec2904da8952e4093e7ce466d1454ff7eb512 20041190a10f50656b3b8f8b8471749045e275a2
+url https://download.file-hunter.com/Games/MSX1/CAS/Curso%20de%20BASIC%20(1985)(Sony)(es)(Side%20A)%5BBLOAD%27CAS-%27%2CR%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Curso%20de%20BASIC%20(1985)(Sony)(es)(Side%20B)%5BBLOAD%27CAS-%27%2CR%5D.zip

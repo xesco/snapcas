@@ -1,5 +1,5 @@
 # Capitan Sevilla (1988)(Dinamic Software)(es)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Capitan%20Sevilla%20(1988)(Dinamic%20Software)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 # Part 1. Side B, part 2, loads from BASIC on its own, in games/CAPIT882.
 cas CAPITA88.CAS
 sha1 e419353c08b2f00734e91aef921b73974c240d5f
+url https://download.file-hunter.com/Games/MSX1/CAS/Capitan%20Sevilla%20(1988)(Dinamic%20Software)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip

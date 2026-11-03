@@ -1,4 +1,4 @@
 # Time Curb (1986)(Aackosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Time%20Curb%20(1986)(Aackosoft)%5BRUN'CAS-'%5D.zip
 cas TIME-CUR.CAS
 sha1 c315e3080b6ddc56af24d5c5b99d09fcaeb367bc
+url https://download.file-hunter.com/Games/MSX1/CAS/Time%20Curb%20(1986)(Aackosoft)%5BRUN%27CAS-%27%5D.zip

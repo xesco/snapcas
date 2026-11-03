@@ -1,4 +1,4 @@
 # Johny Comomolo in 3-2-1 Fire (1986)(Dro Soft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Johny%20Comomolo%20in%203-2-1%20Fire%20(1986)(Dro%20Soft)%5BRUN'CAS-'%5D.zip
 cas JOHNY-CO.CAS
 sha1 0527f8b087fade055e5cf789fbc6dd5329d3d416
+url https://download.file-hunter.com/Games/MSX1/CAS/Johny%20Comomolo%20in%203-2-1%20Fire%20(1986)(Dro%20Soft)%5BRUN%27CAS-%27%5D.zip

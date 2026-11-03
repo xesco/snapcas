@@ -1,4 +1,4 @@
 # Antarctic Adventure-eu[BLOAD'CAS-',r]
-# https://download.file-hunter.com/Games/MSX1/CAS/Antarctic%20Adventure-eu%5BBLOAD'CAS-'%2Cr%5D.zip
 cas ANTARCEU.CAS
 sha1 f3c00484a9a806c9988c8c9afc592d113931bf95
+url https://download.file-hunter.com/Games/MSX1/CAS/Antarctic%20Adventure-eu%5BBLOAD%27CAS-%27%2Cr%5D.zip

@@ -1,4 +1,4 @@
 # Mazy (2021)(Inufuto)
-# https://download.file-hunter.com/Games/MSX1/CAS/Mazy%20(2021)(Inufuto).zip
 cas MAZY.CAS
 sha1 0e7194febef804a459ee6d6ad3a072c34888f773
+url https://download.file-hunter.com/Games/MSX1/CAS/Mazy%20(2021)(Inufuto).zip

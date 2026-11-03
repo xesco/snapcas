@@ -1,4 +1,4 @@
 # Hype (1987)(Methodic Solutions)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Hype%20(1987)(Methodic%20Solutions)%5BRUN'CAS-'%5D.zip
 cas HYPE.CAS
 sha1 70907ce0ed4fd7622c193aaa3e7931d818e03620
+url https://download.file-hunter.com/Games/MSX1/CAS/Hype%20(1987)(Methodic%20Solutions)%5BRUN%27CAS-%27%5D.zip

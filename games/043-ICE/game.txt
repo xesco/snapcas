@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 093-Ice.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 043-ICE.CAS
 sha1 229832069dd82fb9287de212104fd80ee79ced32
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

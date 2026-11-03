@@ -1,4 +1,4 @@
 # Paises de Asia (1984)(Sony)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Paises%20de%20Asia%20(1984)(Sony)(es)%5BRUN'CAS-'%5D.zip
 cas PAISESDE.CAS
 sha1 bee04a710220c8c79990baa5b7b5bc87e73f6191
+url https://download.file-hunter.com/Games/MSX1/CAS/Paises%20de%20Asia%20(1984)(Sony)(es)%5BRUN%27CAS-%27%5D.zip

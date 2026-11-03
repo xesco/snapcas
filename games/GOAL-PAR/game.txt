@@ -1,4 +1,4 @@
 # GOAL Part 1 (2019) (G.G.G. Software) [CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/GOAL%20Part%201%20(2019)%20(G.G.G.%20Software)%20%5BCLOAD%20%2B%20RUN%5D.zip
 cas GOAL-PAR.CAS
 sha1 15c0a98af4b2c538a8e4a60f3b452b8a5b952f8d
+url https://download.file-hunter.com/Games/MSX1/CAS/GOAL%20Part%201%20(2019)%20(G.G.G.%20Software)%20%5BCLOAD%20%2B%20RUN%5D.zip

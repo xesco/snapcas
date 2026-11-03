@@ -1,4 +1,4 @@
 # Burn Us (2018) (Carambalan Studios)[Bload'CAS-',R
-# https://download.file-hunter.com/Games/MSX1/CAS/Burn%20Us%20(2018)%20(Carambalan%20Studios)%5BBload'CAS-'%2CR.zip
 cas BURN-US.CAS
 sha1 654e54c228648e42f9d32919dce6f44dddb4fbbc
+url https://download.file-hunter.com/Games/MSX1/CAS/Burn%20Us%20(2018)%20(Carambalan%20Studios)%5BBload%27CAS-%27%2CR.zip

@@ -1,4 +1,4 @@
 # Dizzy Ball (1984)(Pony Canyon)
-# https://download.file-hunter.com/Games/MSX1/CAS/Dizzy%20Ball%20(1984)(Pony%20Canyon).zip
 cas DIZZY-BA.CAS
 sha1 4186472add590e74b41ceea9520df3d94a0549d8
+url https://download.file-hunter.com/Games/MSX1/CAS/Dizzy%20Ball%20(1984)(Pony%20Canyon).zip

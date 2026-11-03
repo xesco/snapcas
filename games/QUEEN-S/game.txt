@@ -1,4 +1,4 @@
 # Queen's Golf (1984)(Ascii)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Queen's%20Golf%20(1984)(Ascii)%5BBLOAD'CAS-'%2CR%5D.zip
 cas QUEEN-S.CAS
 sha1 9b7126afd818eb4ac790e5008d405fb18ca93f38
+url https://download.file-hunter.com/Games/MSX1/CAS/Queen%27s%20Golf%20(1984)(Ascii)%5BBLOAD%27CAS-%27%2CR%5D.zip

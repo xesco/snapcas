@@ -1,4 +1,4 @@
 # Offering (1984)(AI Inc.)[RUN'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Offering%20(1984)(AI%20Inc.)%5BRUN'CAS-'%2CR%5D.zip
 cas OFFERING.CAS
 sha1 385016a79d139e867bc78bd5d25167440e65c63c
+url https://download.file-hunter.com/Games/MSX1/CAS/Offering%20(1984)(AI%20Inc.)%5BRUN%27CAS-%27%2CR%5D.zip

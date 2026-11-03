@@ -1,4 +1,4 @@
 # Decathlon (1984)(Activision)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Decathlon%20(1984)(Activision)%5BBLOAD'CAS-'%2CR%5D.zip
 cas DECATHLO.CAS
 sha1 ceb2396e3fac6c1e642abd16b4c4bed8e081d662
+url https://download.file-hunter.com/Games/MSX1/CAS/Decathlon%20(1984)(Activision)%5BBLOAD%27CAS-%27%2CR%5D.zip

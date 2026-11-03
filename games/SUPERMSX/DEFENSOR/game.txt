@@ -1,6 +1,5 @@
 # Defensor, the third game on the tape Super MSX n.25 (Dicembre 1989) - cas_25 /
-# super_msx_25_lato_A.cas, after Service Ace (games/SUPERMSX/SERVICEA):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.25%20(Dicembre%201989)%20-%20cas_25.zip
+# super_msx_25_lato_A.cas, after Service Ace (games/SUPERMSX/SERVICEA).
 # It is a copy of Desolator (U.S. Gold), as edicola8bit lists it. It also has a
 # dump of its own (games/DESOLATO). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=25
@@ -8,4 +7,5 @@
 # Service Ace.
 cas SUPER25.CAS
 sha1 4f865e9054f5c7a9deb21d412d86229daed56bd4
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.25%20(Dicembre%201989)%20-%20cas_25.zip
 start DEFENS

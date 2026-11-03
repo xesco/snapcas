@@ -1,4 +1,4 @@
 # Pepe Saltarin (1986)(Grupo de Trabajo Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Pepe%20Saltarin%20(1986)(Grupo%20de%20Trabajo%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas PEPE-SAL.CAS
 sha1 d2828905d9ccd928a055c2f7f8426fb7d48e1779
+url https://download.file-hunter.com/Games/MSX1/CAS/Pepe%20Saltarin%20(1986)(Grupo%20de%20Trabajo%20Software)(es)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Lizard (1985)(Micro Cabin)(ja)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Lizard%20(1985)(Micro%20Cabin)(ja)%5BCLOAD%20%2B%20RUN%5D.zip
 cas LIZARDJA.CAS
 sha1 ebc167e54bcd604fc54763346d0d165599bda33c
+url https://download.file-hunter.com/Games/MSX1/CAS/Lizard%20(1985)(Micro%20Cabin)(ja)%5BCLOAD%20%2B%20RUN%5D.zip

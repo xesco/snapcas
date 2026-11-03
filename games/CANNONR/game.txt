@@ -1,4 +1,4 @@
 # Cannon Fighter (1984) (Moorwood Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Cannon%20Fighter%20(1984)%20(Moorwood%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas CANNONR.CAS
 sha1 7b223cb06e844ee223666c55989cd8ce700bc8f5
+url https://download.file-hunter.com/Games/MSX1/CAS/Cannon%20Fighter%20(1984)%20(Moorwood%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,7 +1,7 @@
 # Field Master (1985)(Login Soft)[CLOAD+RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Field%20Master%20(1985)(Login%20Soft)%5BCLOAD%2BRUN%5D.zip
 cas FIELD-MA.CAS
 sha1 2b1a6ac81218dd03625d4cd1bca8c83cf57b27a9
+url https://download.file-hunter.com/Games/MSX1/CAS/Field%20Master%20(1985)(Login%20Soft)%5BCLOAD%2BRUN%5D.zip
 
 # Line 130 sums the 129 bytes at A800h in an integer, to skip the BLOAD of the
 # code when it is already there. openMSX starts that RAM as FFh, whose sum,

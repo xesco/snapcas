@@ -1,4 +1,4 @@
 # Gangman (1984)(Hudson Soft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Gangman%20(1984)(Hudson%20Soft)%5BRUN'CAS-'%5D.zip
 cas GANGMAN.CAS
 sha1 812cc43c0e0cd566c05ca54e8eb396cd110f55d9
+url https://download.file-hunter.com/Games/MSX1/CAS/Gangman%20(1984)(Hudson%20Soft)%5BRUN%27CAS-%27%5D.zip

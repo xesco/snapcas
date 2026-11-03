@@ -1,4 +1,4 @@
 # Buggy Ranger (1990)(Dinamic Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Buggy%20Ranger%20(1990)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas BUGGY-RA.CAS
 sha1 debfb25896841fded7ab88e4bd76bb830f7b0eb3
+url https://download.file-hunter.com/Games/MSX1/CAS/Buggy%20Ranger%20(1990)(Dinamic%20Software)(es)%5BRUN%27CAS-%27%5D.zip

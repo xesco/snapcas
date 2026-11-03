@@ -1,4 +1,4 @@
 # Xyxolog. Xyzolog (1985)(Electric Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Xyxolog.%20Xyzolog%20(1985)(Electric%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas XYXOLOG.CAS
 sha1 1a843101f1d49518e2e97917e584aef2ad403a16
+url https://download.file-hunter.com/Games/MSX1/CAS/Xyxolog.%20Xyzolog%20(1985)(Electric%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

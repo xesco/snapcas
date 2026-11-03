@@ -1,5 +1,5 @@
 # European Games (1987)(Tynesoft)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/European%20Games%20(1987)(Tynesoft)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas EUROPEAA.CAS
 side2 EUROPEAB.CAS
 sha1 5ca3b3b57188075a2d777212c1d627d6dcd83e0e e69ff0b2a0ed967e7ca9c2ea71d39a93d4a1ef50
+url https://download.file-hunter.com/Games/MSX1/CAS/European%20Games%20(1987)(Tynesoft)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/European%20Games%20(1987)(Tynesoft)(Side%20B)%5BRUN%27CAS-%27%5D.zip

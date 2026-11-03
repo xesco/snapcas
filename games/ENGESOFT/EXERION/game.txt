@@ -1,8 +1,8 @@
 # Exerion, the third game on Engesoft's MSXK-06 side A, after Athletic Land
-# (games/ENGESOFT/ATHLETIC). It also has a dump of its own (games/EXERION):
-# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-06.zip
+# (games/ENGESOFT/ATHLETIC). It also has a dump of its own (games/EXERION).
 # The load starts at the BASIC loader EXER, as when the tape runs on after
 # Athletic Land.
 cas ENGESO06.CAS
 sha1 d4aa3f756a8f04cbb52483eba0603e969b6949e6
+url https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-06.zip
 start EXER

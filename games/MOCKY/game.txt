@@ -1,4 +1,4 @@
 # Mocky (1985)(Login Soft)[CLOAD+BLOAD'CAS-'+RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Mocky%20(1985)(Login%20Soft)%5BCLOAD%2BBLOAD'CAS-'%2BRUN%5D.zip
 cas MOCKY.CAS
 sha1 1d3b29532f5b0ddbd95379672da502b5ee89254a
+url https://download.file-hunter.com/Games/MSX1/CAS/Mocky%20(1985)(Login%20Soft)%5BCLOAD%2BBLOAD%27CAS-%27%2BRUN%5D.zip

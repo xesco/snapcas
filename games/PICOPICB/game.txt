@@ -1,4 +1,0 @@
-# picopico_toshiba_b
-# https://download.file-hunter.com/Games/MSX1/CAS/Pico%20Pico%20(Micro%20Cabin)%20(Toshiba)%20(Japan)%20%5BCLOAD-RUN%5D%20%5B_%5D.zip
-cas PICOPICB.CAS
-sha1 5a3103615205d8cbbf2fb7637928d0907d31695f

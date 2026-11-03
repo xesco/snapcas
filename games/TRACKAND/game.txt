@@ -1,4 +1,4 @@
 # TrackAndField1[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/TrackAndField1%5BBLOAD'CAS-'%2CR%5D.zip
 cas TRACKAND.CAS
 sha1 da12741aeb2042bbb2311edfbcc674b5e3f7a43c
+url https://download.file-hunter.com/Games/MSX1/CAS/TrackAndField1%5BBLOAD%27CAS-%27%2CR%5D.zip

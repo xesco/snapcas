@@ -1,4 +1,4 @@
 # U-Boot (1985)(Manhattan Transfer)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/U-Boot%20(1985)(Manhattan%20Transfer)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas U-BOOT.CAS
 sha1 dc48a7b17f7459c174383e7d5e8c547b0ab824e9
+url https://download.file-hunter.com/Games/MSX1/CAS/U-Boot%20(1985)(Manhattan%20Transfer)(es)%5BCLOAD%20%2B%20RUN%5D.zip

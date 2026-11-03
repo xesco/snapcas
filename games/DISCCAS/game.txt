@@ -1,4 +1,4 @@
 # Disc Warrior (1984)(Alligata Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Disc%20Warrior%20(1984)(Alligata%20Software)%5BRUN'CAS-'%5D.zip
 cas DISCCAS.CAS
 sha1 0994cd7b3f0a454275d9de4539228501a304fbd9
+url https://download.file-hunter.com/Games/MSX1/CAS/Disc%20Warrior%20(1984)(Alligata%20Software)%5BRUN%27CAS-%27%5D.zip

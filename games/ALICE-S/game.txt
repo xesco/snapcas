@@ -1,4 +1,4 @@
 # Alice's Adventure in Wonderland (1984)(MicroCabin)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Alice's%20Adventure%20in%20Wonderland%20(1984)(MicroCabin)%5BCLOAD%20%2B%20RUN%5D.zip
 cas ALICE-S.CAS
 sha1 d2ab7cb6f71d8fe0d1d28b5dd6b58290563f7497
+url https://download.file-hunter.com/Games/MSX1/CAS/Alice%27s%20Adventure%20in%20Wonderland%20(1984)(MicroCabin)%5BCLOAD%20%2B%20RUN%5D.zip

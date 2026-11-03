@@ -1,4 +1,4 @@
 # Submarine Shooter (1983)(Hudson Soft)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Submarine%20Shooter%20(1983)(Hudson%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
 cas SUBMARIN.CAS
 sha1 67f909e8bc669d9a7ccba94bce306a51f286f41f
+url https://download.file-hunter.com/Games/MSX1/CAS/Submarine%20Shooter%20(1983)(Hudson%20Soft)%5BBLOAD%27CAS-%27%2CR%5D.zip

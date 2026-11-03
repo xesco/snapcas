@@ -1,4 +1,4 @@
 # Snowman, The (1984)(Quicksilva)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Snowman%2C%20The%20(1984)(Quicksilva)%5BBLOAD'CAS-'%2CR%5D.zip
 cas SNOWMAN.CAS
 sha1 1c9c5f319b973d71bd09bc6001b7169433eb3aa2
+url https://download.file-hunter.com/Games/MSX1/CAS/Snowman%2C%20The%20(1984)(Quicksilva)%5BBLOAD%27CAS-%27%2CR%5D.zip

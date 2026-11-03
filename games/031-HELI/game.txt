@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 063-Heli.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 031-HELI.CAS
 sha1 e0eda00750dfe7032b1e92340efec0870900f055
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

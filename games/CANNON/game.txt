@@ -1,4 +1,4 @@
 # Cannon Ball (1983)(Hudson Soft)
-# https://download.file-hunter.com/Games/MSX1/CAS/Cannon%20Ball%20(1983)(Hudson%20Soft).zip
 cas CANNON.CAS
 sha1 7a6361e0f6456a7161e680469c1c08241b1624f3
+url https://download.file-hunter.com/Games/MSX1/CAS/Cannon%20Ball%20(1983)(Hudson%20Soft).zip

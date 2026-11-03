@@ -1,4 +1,4 @@
 # Astronauta (1986)(Load 'n' Run)(es)[aka Space Walk][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Astronauta%20(1986)(Load%20'n'%20Run)(es)%5Baka%20Space%20Walk%5D%5BRUN'CAS-'%5D.zip
 cas ASTRONAU.CAS
 sha1 20161e59d0ad33d0c611e12e977118724503eb7f
+url https://download.file-hunter.com/Games/MSX1/CAS/Astronauta%20(1986)(Load%20%27n%27%20Run)(es)%5Baka%20Space%20Walk%5D%5BRUN%27CAS-%27%5D.zip

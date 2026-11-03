@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 079 - Editor de Sprites.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 041-EDIT.CAS
 sha1 cc617143a2bcb7d6dea2788eb60ed0ceda22fabf
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

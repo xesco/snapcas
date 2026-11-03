@@ -1,4 +1,4 @@
 # Sol Negro (1989)(Opera Soft)(es)(Side B)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Sol%20Negro%20(1989)(Opera%20Soft)(es)(Side%20B)%5BBLOAD'CAS-'%2CR%5D.zip
 cas SOL-NEGB.CAS
 sha1 2d447441e6019e081463f7838d0d1710eed68a2f
+url https://download.file-hunter.com/Games/MSX1/CAS/Sol%20Negro%20(1989)(Opera%20Soft)(es)(Side%20B)%5BBLOAD%27CAS-%27%2CR%5D.zip

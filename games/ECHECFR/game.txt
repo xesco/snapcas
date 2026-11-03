@@ -1,4 +1,4 @@
 # Echec (1985)(Loriciels)(fr)[Side A - Bibliotheque)[Fixed by  GDX, MSX1 Only][RUN'CAS-',r]
-# https://download.file-hunter.com/Games/MSX1/CAS/Echec%20(1985)(Loriciels)(fr)%5BSide%20A%20-%20Bibliotheque)%5BFixed%20by%20%20GDX%2C%20MSX1%20Only%5D%5BRUN'CAS-'%2Cr%5D.zip
 cas ECHECFR.CAS
 sha1 a7666bfae2738df074753f5c06d530a2fc3c1192
+url https://download.file-hunter.com/Games/MSX1/CAS/Echec%20(1985)(Loriciels)(fr)%5BSide%20A%20-%20Bibliotheque)%5BFixed%20by%20%20GDX%2C%20MSX1%20Only%5D%5BRUN%27CAS-%27%2Cr%5D.zip

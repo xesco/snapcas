@@ -1,4 +1,4 @@
 # Splash (1986)(Mind Games Espana)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Splash%20(1986)(Mind%20Games%20Espana)%5BRUN'CAS-'%5D.zip
 cas SPLASH.CAS
 sha1 537f236840c4a59a4d6be681e4a6dc1c298a63a3
+url https://download.file-hunter.com/Games/MSX1/CAS/Splash%20(1986)(Mind%20Games%20Espana)%5BRUN%27CAS-%27%5D.zip

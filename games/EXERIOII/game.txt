@@ -1,4 +1,4 @@
 # Exerion II - Zorni (1987)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Exerion%20II%20-%20Zorni%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas EXERIOII.CAS
 sha1 d383991fadae9a7d07ad6427f1b1c999c57d7dba
+url https://download.file-hunter.com/Games/MSX1/CAS/Exerion%20II%20-%20Zorni%20(1987)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

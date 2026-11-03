@@ -1,4 +1,4 @@
 # Dragon Slayer (1985)(Square)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Dragon%20Slayer%20(1985)(Square)%5BBLOAD'CAS-'%2CR%5D.zip
 cas DRAGON85.CAS
 sha1 f54588574bff49648e17a4f405601dfdeac74b90
+url https://download.file-hunter.com/Games/MSX1/CAS/Dragon%20Slayer%20(1985)(Square)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
 # Krakout (1987)(Gremlin Graphics Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Krakout%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas KRAKOUT.CAS
 sha1 7a53c8825efcd906c6f579d0209341810e58c65c
+url https://download.file-hunter.com/Games/MSX1/CAS/Krakout%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

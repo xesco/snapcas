@@ -1,4 +1,4 @@
 # Power and Magic (1990)(Zigurat Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Power%20and%20Magic%20(1990)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas POWER-AN.CAS
 sha1 1914d1512d83a110fc39576bf255f138b6302afc
+url https://download.file-hunter.com/Games/MSX1/CAS/Power%20and%20Magic%20(1990)(Zigurat%20Software)(es)%5BRUN%27CAS-%27%5D.zip

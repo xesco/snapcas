@@ -1,4 +1,4 @@
 # World Map Software For Color Plotter Printer (1985)(Matsushita Electric Industrial)(Side A)[CLOAD]
-# https://download.file-hunter.com/Games/MSX1/CAS/World%20Map%20Software%20For%20Color%20Plotter%20Printer%20(1985)(Matsushita%20Electric%20Industrial)(Side%20A)%5BCLOAD%5D.zip
 cas WORLD-MA.CAS
 sha1 2512ba0ccdcc4d6c581f2a21502750293a7da2f6
+url https://download.file-hunter.com/Games/MSX1/CAS/World%20Map%20Software%20For%20Color%20Plotter%20Printer%20(1985)(Matsushita%20Electric%20Industrial)(Side%20A)%5BCLOAD%5D.zip

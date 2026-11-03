@@ -1,4 +1,4 @@
 # Ingrid's Back  Part 1 (1988)(Level 9 Computing)[Corrupt][RUN'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Ingrid's%20Back%20%20Part%201%20(1988)(Level%209%20Computing)%5BCorrupt%5D%5BRUN'CAS-'%2CR%5D.zip
 cas INGRID.CAS
 sha1 86e4c850e4cd5a2c4ee293484fd29efd2a7371ad
+url https://download.file-hunter.com/Games/MSX1/CAS/Ingrid%27s%20Back%20%20Part%201%20(1988)(Level%209%20Computing)%5BCorrupt%5D%5BRUN%27CAS-%27%2CR%5D.zip

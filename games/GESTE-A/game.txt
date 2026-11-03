@@ -1,4 +1,4 @@
 # La Geste d'Artillac Cas A (1985) Infogrames
-# https://download.file-hunter.com/Games/MSX1/CAS/La%20Geste%20d'Artillac%20Cas%20A%20(1985)%20Infogrames.zip
 cas GESTE-A.CAS
 sha1 b3d982a9e0a6061b1da20d4af197600d782a19b0
+url https://download.file-hunter.com/Games/MSX1/CAS/La%20Geste%20d%27Artillac%20Cas%20A%20(1985)%20Infogrames.zip

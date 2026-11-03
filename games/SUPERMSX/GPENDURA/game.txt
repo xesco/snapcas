@@ -1,6 +1,5 @@
 # G.P. Endurance, the fourth game on the tape Super MSX n.22 (giugno 1989) -
-# cas_22 / SUPER22B.CAS, after Centauri (games/SUPERMSX/CENTAURI):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.22%20(giugno%201989)%20-%20cas_22.zip
+# cas_22 / SUPER22B.CAS, after Centauri (games/SUPERMSX/CENTAURI).
 # It is a copy of WEC Le Mans (Imagine), as edicola8bit lists it. It also has a
 # dump of its own (games/WEC-LE). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=22
@@ -8,4 +7,5 @@
 # Centauri.
 cas SUPER22.CAS
 sha1 87a47d93548a00c741d6ae3eab5af8d06959b618
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.22%20(giugno%201989)%20-%20cas_22.zip
 start ENDURA

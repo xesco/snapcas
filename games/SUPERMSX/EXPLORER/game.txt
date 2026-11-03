@@ -1,10 +1,10 @@
 # Explorer, the seventh game on the tape Super MSX n.1 (maggio 1987) - cas_1,
-# after Magus (games/SUPERMSX/MAGUS):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.1%20(maggio%201987)%20-%20cas_1.zip
+# after Magus (games/SUPERMSX/MAGUS).
 # It is a copy of King's Valley (Konami), as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=1
 # The load starts at the BASIC loader EXPLOR, as when the tape runs on after
 # Magus.
 cas SUPER-1.CAS
 sha1 33622e2e498ac0052ae70200435d222927b14ec0
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.1%20(maggio%201987)%20-%20cas_1.zip
 start EXPLOR

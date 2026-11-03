@@ -1,4 +1,4 @@
 # Nuclear Bowls (1986)(Zigurat Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Nuclear%20Bowls%20(1986)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas NUCLEAR.CAS
 sha1 4e1e4c17c2a55ab17b1eecd4c47e6bdbf2dc30f3
+url https://download.file-hunter.com/Games/MSX1/CAS/Nuclear%20Bowls%20(1986)(Zigurat%20Software)(es)%5BRUN%27CAS-%27%5D.zip

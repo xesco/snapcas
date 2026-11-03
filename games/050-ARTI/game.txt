@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 100-Artillero.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 050-ARTI.CAS
 sha1 98a52ed8abc2eedce3e62c927c5e27a1351dd692
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

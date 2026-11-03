@@ -1,4 +1,4 @@
 # Buck Rogers - Planet of Zoom (1983)(Sega)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Buck%20Rogers%20-%20Planet%20of%20Zoom%20(1983)(Sega)%5BBLOAD'CAS-'%2CR%5D.zip
 cas BUCK-ROG.CAS
 sha1 3454a11bf2e3858830f7ff96ab74b88a828a18bf
+url https://download.file-hunter.com/Games/MSX1/CAS/Buck%20Rogers%20-%20Planet%20of%20Zoom%20(1983)(Sega)%5BBLOAD%27CAS-%27%2CR%5D.zip

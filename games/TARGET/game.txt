@@ -1,4 +1,4 @@
 # Target Plus (1988)(Dinamic Software)(es)[gunstick][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Target%20Plus%20(1988)(Dinamic%20Software)(es)%5Bgunstick%5D%5BRUN'CAS-'%5D.zip
 cas TARGET.CAS
 sha1 061ee0b9cfb78a6537d0204a46105a7429097056
+url https://download.file-hunter.com/Games/MSX1/CAS/Target%20Plus%20(1988)(Dinamic%20Software)(es)%5Bgunstick%5D%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Pentagram (1986)(Ultimate Play The Game)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Pentagram%20(1986)(Ultimate%20Play%20The%20Game)%5BBLOAD'CAS-'%2CR%5D.zip
 cas PENTAGRA.CAS
 sha1 363b5a70d6f7b54ac47bc19b27f57b7712a08855
+url https://download.file-hunter.com/Games/MSX1/CAS/Pentagram%20(1986)(Ultimate%20Play%20The%20Game)%5BBLOAD%27CAS-%27%2CR%5D.zip

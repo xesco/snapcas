@@ -1,7 +1,7 @@
 # Air Pillow, the first game on the tape Super MSX n.4 (settembre 1987) - cas_4 /
-# super_msx_4_lato_B.cas:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.4%20(settembre%201987)%20-%20cas_4.zip
+# super_msx_4_lato_B.cas.
 # It is a copy of Penguin-Kun Wars (ASCII), as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=4
 cas SUPER4B.CAS
 sha1 b5e649d6018ade5789adb50be525e2713c314c6c
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.4%20(settembre%201987)%20-%20cas_4.zip

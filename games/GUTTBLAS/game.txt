@@ -1,4 +1,4 @@
 # Guttblaster (1988)(Eurosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Guttblaster%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
 cas GUTTBLAS.CAS
 sha1 c6f20b85b499652569e95d77eda78dfc172ab9aa
+url https://download.file-hunter.com/Games/MSX1/CAS/Guttblaster%20(1988)(Eurosoft)%5BRUN%27CAS-%27%5D.zip

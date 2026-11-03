@@ -1,12 +1,12 @@
 # Japan, the third game on the tape Super MSX n.20 (aprile 1989) - cas_20 /
-# SuperMSX20-LatoB.cas, after Ranatrac (games/SUPERMSX/RANATRAC):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.20%20(aprile%201989)%20-%20cas_20.zip
+# SuperMSX20-LatoB.cas, after Ranatrac (games/SUPERMSX/RANATRAC).
 # It is a copy of Ninja Princess (Sega), as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=20
 # The load starts at the BASIC loader JAPAN, as when the tape runs on after
 # Ranatrac.
 cas SUPERMOB.CAS
 sha1 42c1e6026fdcb866c0215eb0cab2661b5b807b9b
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.20%20(aprile%201989)%20-%20cas_20.zip
 start JAPAN
 
 # The capture reads the tape up to the next program's loader, so the rest of the

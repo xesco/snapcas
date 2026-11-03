@@ -1,6 +1,5 @@
 # Goblin Maze, the third game on the tape Super MSX n.17 (dicembre 1988) - cas_17
-# / super_msx_17_lato_B.cas, after Zexas Kid (games/SUPERMSX/ZEXASKID):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.17%20(dicembre%201988)%20-%20cas_17.zip
+# / super_msx_17_lato_B.cas, after Zexas Kid (games/SUPERMSX/ZEXASKID).
 # It is a copy of Chack'n Pop (Taito), as edicola8bit lists it. It also has a dump
 # of its own (games/CHACK-N). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=17
@@ -8,4 +7,5 @@
 # Kid.
 cas SUPER17B.CAS
 sha1 fa20084b1c0c70b4b144c7f9b0f54ebe21409bfb
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.17%20(dicembre%201988)%20-%20cas_17.zip
 start GOBLIN

@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 002-Black Jack.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 002-BLAC.CAS
 sha1 25412f5045bef736faffc0b44e6e12a768d3dd1b
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

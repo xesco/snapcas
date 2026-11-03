@@ -1,4 +1,4 @@
 # Scrabble(1986)[Leisure Games][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Scrabble(1986)%5BLeisure%20Games%5D%5BRUN'CAS-'%5D.zip
 cas SCRABBLE.CAS
 sha1 00fe335a68a1f0a1465bb0d195dfacd111b15aa1
+url https://download.file-hunter.com/Games/MSX1/CAS/Scrabble(1986)%5BLeisure%20Games%5D%5BRUN%27CAS-%27%5D.zip

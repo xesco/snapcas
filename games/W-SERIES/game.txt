@@ -1,4 +1,4 @@
 # W Series 4 (1983) (Hudson Soft)( Side A - Super Doors)[BLOAD'CAS',r]
-# https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%204%20(1983)%20(Hudson%20Soft)(%20Side%20A%20-%20Super%20Doors)%5BBLOAD'CAS'%2Cr%5D.zip
 cas W-SERIES.CAS
 sha1 beb6ca52d6241ae11944b5af667629301dacc517
+url https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%204%20(1983)%20(Hudson%20Soft)(%20Side%20A%20-%20Super%20Doors)%5BBLOAD%27CAS%27%2Cr%5D.zip

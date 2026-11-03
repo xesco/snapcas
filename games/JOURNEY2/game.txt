@@ -1,4 +1,4 @@
 # Journey to the Centre of the Earth (1985)(Bug-Byte Software)(Side B)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Journey%20to%20the%20Centre%20of%20the%20Earth%20(1985)(Bug-Byte%20Software)(Side%20B)%5BCLOAD%20%2B%20RUN%5D.zip
 cas JOURNEYB.CAS
 sha1 e7fcef867a7365a3f4c8b9be57e4f11f0d87abe2
+url https://download.file-hunter.com/Games/MSX1/CAS/Journey%20to%20the%20Centre%20of%20the%20Earth%20(1985)(Bug-Byte%20Software)(Side%20B)%5BCLOAD%20%2B%20RUN%5D.zip

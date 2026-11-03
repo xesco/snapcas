@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 088 - Rompeladrillos.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 088-ROMP.CAS
 sha1 5b7cb19a7626cc14cb1e893bbe489238ccecbf6a
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

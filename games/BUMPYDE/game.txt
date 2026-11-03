@@ -1,4 +1,4 @@
 # Bumpy (19xx)(Grupo de Trabajo Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Bumpy%20(19xx)(Grupo%20de%20Trabajo%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas BUMPYDE.CAS
 sha1 c855ace3dd9468869675ad840212b92279db3512
+url https://download.file-hunter.com/Games/MSX1/CAS/Bumpy%20(19xx)(Grupo%20de%20Trabajo%20Software)(es)%5BRUN%27CAS-%27%5D.zip

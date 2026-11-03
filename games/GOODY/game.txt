@@ -1,4 +1,4 @@
 # Goody (1987)(Opera Soft)(es)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Goody%20(1987)(Opera%20Soft)(es)%5BBLOAD'CAS-'%2CR%5D.zip
 cas GOODY.CAS
 sha1 6124f0b9fc800e4fa2e77006b8fecf5f787dc0aa
+url https://download.file-hunter.com/Games/MSX1/CAS/Goody%20(1987)(Opera%20Soft)(es)%5BBLOAD%27CAS-%27%2CR%5D.zip

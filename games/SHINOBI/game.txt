@@ -1,5 +1,5 @@
 # Shinobi (1989)(Virgin Games)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Shinobi%20(1989)(Virgin%20Games)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas SHINOBI.CAS
 side2 SHINOBIB.CAS
 sha1 06282a66e6df7eff9aac63403fe36136b947b219 dce8064dff08a21b6d3bcf0e468e9e2f1677b064
+url https://download.file-hunter.com/Games/MSX1/CAS/Shinobi%20(1989)(Virgin%20Games)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Shinobi%20(1989)(Virgin%20Games)(Side%20B)%5BRUN%27CAS-%27%5D.zip

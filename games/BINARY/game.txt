@@ -1,4 +1,4 @@
 # Binary Land (HoneyBee Soft) (Hudson Soft) (Japan) [BLOAD'CAS-',R] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Binary%20Land%20(HoneyBee%20Soft)%20(Hudson%20Soft)%20(Japan)%20%5BBLOAD'CAS-'%2CR%5D%20%5B_%5D.zip
 cas BINARY.CAS
 sha1 cd2e0204029aa134b95c2c43154110ece230161c
+url https://download.file-hunter.com/Games/MSX1/CAS/Binary%20Land%20(HoneyBee%20Soft)%20(Hudson%20Soft)%20(Japan)%20%5BBLOAD%27CAS-%27%2CR%5D%20%5B_%5D.zip

@@ -1,8 +1,8 @@
 # Bang Them, the first game on the tape Super MSX n.19 (febbraio 1989) - cas_19 /
-# super msx 19 lato A.cas, after the issue's intro:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.19%20(febbraio%201989)%20-%20cas_19.zip
+# super msx 19 lato A.cas, after the issue's intro.
 # It is a copy of Bomberman Special (Hudson Soft), as edicola8bit lists it.
 # Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=19
 cas SUPER19.CAS
 sha1 73b877417e260dab4595e3c05db4c72102e98601
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.19%20(febbraio%201989)%20-%20cas_19.zip

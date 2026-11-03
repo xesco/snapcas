@@ -1,4 +1,4 @@
 # French is Fun (1984)(CDS Microsystems)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/French%20is%20Fun%20(1984)(CDS%20Microsystems)%5BCLOAD%20%2B%20RUN%5D.zip
 cas FRENCRUN.CAS
 sha1 2d2f2977bc6be8e6cbc228784b38b4bfc8a9f167
+url https://download.file-hunter.com/Games/MSX1/CAS/French%20is%20Fun%20(1984)(CDS%20Microsystems)%5BCLOAD%20%2B%20RUN%5D.zip

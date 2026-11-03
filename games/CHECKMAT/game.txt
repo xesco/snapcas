@@ -1,4 +1,4 @@
 # Checkmate!(1985)(Toshiba)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Checkmate!(1985)(Toshiba)%5BRUN'CAS-'%5D.zip
 cas CHECKMAT.CAS
 sha1 cd7c57d40cf671c6def911d2124c543b610d8571
+url https://download.file-hunter.com/Games/MSX1/CAS/Checkmate!(1985)(Toshiba)%5BRUN%27CAS-%27%5D.zip

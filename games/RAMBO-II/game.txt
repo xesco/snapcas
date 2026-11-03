@@ -1,5 +1,5 @@
 # Rambo III (1988)(Ocean Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Rambo%20III%20(1988)(Ocean%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas RAMBO-II.CAS
 side2 RAMBOB.CAS
 sha1 afa0979d507c26d5706cabc525a86cf3ac53ffa1 d646eaeb8aa0db8ffbb319d7c5d227d3ef18b6c4
+url https://download.file-hunter.com/Games/MSX1/CAS/Rambo%20III%20(1988)(Ocean%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Rambo%20III%20(1988)(Ocean%20Software)(Side%20B)%5BBLOAD%27CAS-%27%2CR%5D.zip

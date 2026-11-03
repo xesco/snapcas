@@ -1,4 +1,4 @@
 # Star Fighter (Battleship Clapton II Hack) (1986)(Visiogame)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Star%20Fighter%20(Battleship%20Clapton%20II%20Hack)%20(1986)(Visiogame)%5BRUN'CAS-'%5D.zip
 cas STARII.CAS
 sha1 a0ab540788173fbb9514420397abd44aeb224a42
+url https://download.file-hunter.com/Games/MSX1/CAS/Star%20Fighter%20(Battleship%20Clapton%20II%20Hack)%20(1986)(Visiogame)%5BRUN%27CAS-%27%5D.zip

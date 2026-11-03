@@ -1,4 +1,4 @@
 # Ke Rulen los Petas (1989)(Iber Soft)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Ke%20Rulen%20los%20Petas%20(1989)(Iber%20Soft)(es)%5BRUN'CAS-'%5D.zip
 cas KE-RULEN.CAS
 sha1 dd3975b1c921898665db07157d6883ef54287ecc
+url https://download.file-hunter.com/Games/MSX1/CAS/Ke%20Rulen%20los%20Petas%20(1989)(Iber%20Soft)(es)%5BRUN%27CAS-%27%5D.zip

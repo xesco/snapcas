@@ -1,4 +1,4 @@
 # Super Pachinko (Columbia) (Japan) [BLOAD'CAS-',R] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20Pachinko%20(Columbia)%20(Japan)%20%5BBLOAD'CAS-'%2CR%5D%20%5B_%5D.zip
 cas SUPERCAS.CAS
 sha1 554212ea1dd98b69f52174e20fbd0b75ebebf18a
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20Pachinko%20(Columbia)%20(Japan)%20%5BBLOAD%27CAS-%27%2CR%5D%20%5B_%5D.zip

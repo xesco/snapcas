@@ -1,4 +1,4 @@
 # Turtles - Konami (1981)[MSX version by André de la Rocha]
-# https://download.file-hunter.com/Games/MSX1/CAS/Turtles%20-%20Konami%20(1981)%5BMSX%20version%20by%20Andr%C3%A9%20de%20la%20Rocha%5D.zip
 cas TURTLES.CAS
 sha1 31a1a19c52a04903e7b922c79aa9c9c7c4168f95
+url https://download.file-hunter.com/Games/MSX1/CAS/Turtles%20-%20Konami%20(1981)%5BMSX%20version%20by%20Andr%C3%A9%20de%20la%20Rocha%5D.zip

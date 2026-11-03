@@ -1,4 +1,4 @@
 # 7 Card Stud (1986)(Martech Games)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/7%20Card%20Stud%20(1986)(Martech%20Games)%5BRUN'CAS-'%5D.zip
 cas 7-CARD.CAS
 sha1 b23bdb26619f2fc8cb4ac95fe9185633ae7705cd
+url https://download.file-hunter.com/Games/MSX1/CAS/7%20Card%20Stud%20(1986)(Martech%20Games)%5BRUN%27CAS-%27%5D.zip

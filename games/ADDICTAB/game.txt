@@ -1,4 +1,4 @@
 # Addictaball (1988)(Alligata Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Addictaball%20(1988)(Alligata%20Software)%5BRUN'CAS-'%5D.zip
 cas ADDICTAB.CAS
 sha1 0da506f5717f24a9e91e98b694f5e406d27fcfd5
+url https://download.file-hunter.com/Games/MSX1/CAS/Addictaball%20(1988)(Alligata%20Software)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Future Knight (1986)(Gremlin Graphics Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Future%20Knight%20(1986)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas FUTURER.CAS
 sha1 320422bbfd54ee2fe59854537b2cebb0dfb34782
+url https://download.file-hunter.com/Games/MSX1/CAS/Future%20Knight%20(1986)(Gremlin%20Graphics%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
 # English Words (1986)(Aschcom)
-# https://download.file-hunter.com/Games/MSX1/CAS/English%20Words%20(1986)(Aschcom).zip
 cas ENGLISH.CAS
 sha1 1c1d279ed700455629bdd2f07ae4cae2d36aae7e
+url https://download.file-hunter.com/Games/MSX1/CAS/English%20Words%20(1986)(Aschcom).zip

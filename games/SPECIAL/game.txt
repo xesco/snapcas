@@ -1,4 +1,4 @@
 # Special Operations (1985)(MC Lothlorien)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Special%20Operations%20(1985)(MC%20Lothlorien)%5BRUN'CAS-'%5D.zip
 cas SPECIAL.CAS
 sha1 f56d3ada0170d6ef14980bd5e92ceae7f43d2f30
+url https://download.file-hunter.com/Games/MSX1/CAS/Special%20Operations%20(1985)(MC%20Lothlorien)%5BRUN%27CAS-%27%5D.zip

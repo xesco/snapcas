@@ -1,4 +1,4 @@
 # transball-en [Bload'cas-',r]
-# https://download.file-hunter.com/Games/MSX1/CAS/transball-en%20%5BBload'cas-'%2Cr%5D.zip
 cas TRANSBAL.CAS
 sha1 5d4ad020223fe353e1546c18c7b6540963f469e7
+url https://download.file-hunter.com/Games/MSX1/CAS/transball-en%20%5BBload%27cas-%27%2Cr%5D.zip

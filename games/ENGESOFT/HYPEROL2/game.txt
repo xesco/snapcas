@@ -1,8 +1,8 @@
 # Hyper Olympic 2 (1984)(Konami), the third game on Engesoft's MSXK-13 side A,
-# after Zanac (games/ZANAC) and Animals Wars (games/ENGESOFT/ANIMALSW):
-# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-13.zip
+# after Zanac (games/ZANAC) and Animals Wars (games/ENGESOFT/ANIMALSW).
 # The load starts at the BASIC loader OLIMP2, as when the tape runs on after
 # Animals Wars.
 cas ENGESO13.CAS
 sha1 1937a5d04d9bffa6a128bf75e84a8f330bcfc903
+url https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-13.zip
 start OLIMP2

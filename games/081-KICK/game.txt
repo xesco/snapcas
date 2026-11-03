@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 081-Kick It.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 081-KICK.CAS
 sha1 d78f960a2a666675d6ec04a7d9bb46de7afeb344
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

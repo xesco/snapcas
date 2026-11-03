@@ -1,4 +1,4 @@
 # Micky-Lucky (MSX Magazine, 1985)
-# https://download.file-hunter.com/Games/MSX1/CAS/Micky-Lucky%20(MSX%20Magazine%2C%201985).zip
 cas 047-MICK.CAS
 sha1 f296572d10c1bc03dbe4b056f0380d75a3b81d3b
+url https://download.file-hunter.com/Games/MSX1/CAS/Micky-Lucky%20(MSX%20Magazine%2C%201985).zip

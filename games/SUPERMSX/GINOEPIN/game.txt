@@ -1,8 +1,8 @@
 # Gino e Pino, the first game on the tape Super MSX n.5 (ottobre 1987) - cas_5 /
-# SUPER05A.CAS:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.5%20(ottobre%201987)%20-%20cas_5.zip
+# SUPER05A.CAS.
 # It is a copy of Head over Heels (Ocean), as edicola8bit lists it. It also has a
 # dump of its own (games/HEAD-OVE). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=5
 cas SUPER-05.CAS
 sha1 25f7d994142c3cfc1bef67cd8201324eb872f916
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.5%20(ottobre%201987)%20-%20cas_5.zip

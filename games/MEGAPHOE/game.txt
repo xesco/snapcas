@@ -1,4 +1,4 @@
 # Megaphoenix (1991)(Dinamic Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Megaphoenix%20(1991)(Dinamic%20Software)%5BRUN'CAS-'%5D.zip
 cas MEGAPHOE.CAS
 sha1 caaaebd19890285d696e55e61c5ab2a79450b343
+url https://download.file-hunter.com/Games/MSX1/CAS/Megaphoenix%20(1991)(Dinamic%20Software)%5BRUN%27CAS-%27%5D.zip

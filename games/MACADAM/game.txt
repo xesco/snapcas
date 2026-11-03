@@ -1,4 +1,4 @@
 # Macadam Bumper (1985)(Players Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Macadam%20Bumper%20(1985)(Players%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas MACADAM.CAS
 sha1 90893daf8ce71deb64d6c2e7ee2b09589193f5dc
+url https://download.file-hunter.com/Games/MSX1/CAS/Macadam%20Bumper%20(1985)(Players%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

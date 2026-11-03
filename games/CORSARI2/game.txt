@@ -1,4 +1,4 @@
 # Corsarios (1989)(Opera Soft)(es)(Side B)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Corsarios%20(1989)(Opera%20Soft)(es)(Side%20B)%5BBLOAD'CAS-'%2CR%5D.zip
 cas CORSARIB.CAS
 sha1 eaab0f397d4c1ad44f1c5d31b23deb5b6184478c
+url https://download.file-hunter.com/Games/MSX1/CAS/Corsarios%20(1989)(Opera%20Soft)(es)(Side%20B)%5BBLOAD%27CAS-%27%2CR%5D.zip

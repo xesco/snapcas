@@ -1,4 +1,4 @@
 # Tutor (1985)(Sony)(es)(Side B)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Tutor%20(1985)(Sony)(es)(Side%20B)%5BCLOAD%20%2B%20RUN%5D.zip
 cas TUTORB.CAS
 sha1 816e63bfa8ef520b60455a004da0197deb8f1513
+url https://download.file-hunter.com/Games/MSX1/CAS/Tutor%20(1985)(Sony)(es)(Side%20B)%5BCLOAD%20%2B%20RUN%5D.zip

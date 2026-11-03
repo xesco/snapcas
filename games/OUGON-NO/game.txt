@@ -1,4 +1,4 @@
 # Ougon no Haka. Golden Tomb. Mystery of Egypt (1984)(Magical Zoo)(ja)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Ougon%20no%20Haka.%20Golden%20Tomb.%20Mystery%20of%20Egypt%20(1984)(Magical%20Zoo)(ja)%5BCLOAD%20%2B%20RUN%5D.zip
 cas OUGON-NO.CAS
 sha1 bab4f9989a6c81d1b560b8ce413b4b5f1ca503b9
+url https://download.file-hunter.com/Games/MSX1/CAS/Ougon%20no%20Haka.%20Golden%20Tomb.%20Mystery%20of%20Egypt%20(1984)(Magical%20Zoo)(ja)%5BCLOAD%20%2B%20RUN%5D.zip

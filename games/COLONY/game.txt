@@ -1,4 +1,4 @@
 # Colony (1987)(Bulldog)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Colony%20(1987)(Bulldog)%5BRUN'CAS-'%5D.zip
 cas COLONY.CAS
 sha1 897ca7eb70da01e1e029333609537d7500d5c22a
+url https://download.file-hunter.com/Games/MSX1/CAS/Colony%20(1987)(Bulldog)%5BRUN%27CAS-%27%5D.zip

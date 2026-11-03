@@ -1,4 +1,4 @@
 # Tokyo Gang (1990)(G.LL. Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Tokyo%20Gang%20(1990)(G.LL.%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas TOKYO-GA.CAS
 sha1 5cf98f34f0bc1750468b92cb9e6a040027fb8120
+url https://download.file-hunter.com/Games/MSX1/CAS/Tokyo%20Gang%20(1990)(G.LL.%20Software)(es)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Forbidden Fruit (1985)(Mind Games Espana)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Forbidden%20Fruit%20(1985)(Mind%20Games%20Espana)%5BCLOAD%20%2B%20RUN%5D.zip
 cas FORBIDDE.CAS
 sha1 517b2874883a1f5d2a9d856ffd780e5c674b4a59
+url https://download.file-hunter.com/Games/MSX1/CAS/Forbidden%20Fruit%20(1985)(Mind%20Games%20Espana)%5BCLOAD%20%2B%20RUN%5D.zip

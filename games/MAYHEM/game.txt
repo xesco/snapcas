@@ -1,4 +1,4 @@
 # Mayhem (1985)(Mr. Micro)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Mayhem%20(1985)(Mr.%20Micro)%5BBLOAD'CAS-'%2CR%5D.zip
 cas MAYHEM.CAS
 sha1 50b4e7c6aa93778e39fd34733ff12c98cd018791
+url https://download.file-hunter.com/Games/MSX1/CAS/Mayhem%20(1985)(Mr.%20Micro)%5BBLOAD%27CAS-%27%2CR%5D.zip

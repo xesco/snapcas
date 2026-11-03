@@ -1,4 +1,4 @@
 # Tres Luces de Glaurung, Las (1986)(Erbe Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Tres%20Luces%20de%20Glaurung%2C%20Las%20(1986)(Erbe%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas TRES-LUC.CAS
 sha1 e6f8e2c5a8dcb002b13d88da710478374e2b90a3
+url https://download.file-hunter.com/Games/MSX1/CAS/Tres%20Luces%20de%20Glaurung%2C%20Las%20(1986)(Erbe%20Software)(es)%5BRUN%27CAS-%27%5D.zip

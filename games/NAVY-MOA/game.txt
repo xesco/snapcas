@@ -1,4 +1,4 @@
 # Navy Moves (1988)(Dinamic Software)(es)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Navy%20Moves%20(1988)(Dinamic%20Software)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas NAVY-MOA.CAS
 sha1 4b5c1ae8a19573579fd21122ceda7fc19e348598
+url https://download.file-hunter.com/Games/MSX1/CAS/Navy%20Moves%20(1988)(Dinamic%20Software)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip

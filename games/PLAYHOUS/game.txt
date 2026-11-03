@@ -1,4 +1,4 @@
 # Playhouse Strippoker (1988)(Eurosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Playhouse%20Strippoker%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
 cas PLAYHOUS.CAS
 sha1 edf1f4463ab427377bb38557b59b3ddc8951076d
+url https://download.file-hunter.com/Games/MSX1/CAS/Playhouse%20Strippoker%20(1988)(Eurosoft)%5BRUN%27CAS-%27%5D.zip

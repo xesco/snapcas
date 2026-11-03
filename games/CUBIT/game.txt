@@ -1,4 +1,4 @@
 # Cubit (1986)(Mr. Micro)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Cubit%20(1986)(Mr.%20Micro)%5BBLOAD'CAS-'%2CR%5D.zip
 cas CUBIT.CAS
 sha1 4cf1dadd98cc9b827858da606720e392ead97d75
+url https://download.file-hunter.com/Games/MSX1/CAS/Cubit%20(1986)(Mr.%20Micro)%5BBLOAD%27CAS-%27%2CR%5D.zip

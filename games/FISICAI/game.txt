@@ -1,4 +1,4 @@
 # Fisica I - Magnitudes (1986)(Sony)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Fisica%20I%20-%20Magnitudes%20(1986)(Sony)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas FISICAI.CAS
 sha1 588244ff02eac0d01f135e82fd5ee83de4ec6f95
+url https://download.file-hunter.com/Games/MSX1/CAS/Fisica%20I%20-%20Magnitudes%20(1986)(Sony)(es)%5BCLOAD%20%2B%20RUN%5D.zip

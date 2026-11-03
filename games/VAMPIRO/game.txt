@@ -1,4 +1,4 @@
 # Vampiro (1987)(Manhattan Transfer)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Vampiro%20(1987)(Manhattan%20Transfer)(es)%5BRUN'CAS-'%5D.zip
 cas VAMPIRO.CAS
 sha1 c1ee687c809e53a89a74ffb7f56816cf90bde425
+url https://download.file-hunter.com/Games/MSX1/CAS/Vampiro%20(1987)(Manhattan%20Transfer)(es)%5BRUN%27CAS-%27%5D.zip

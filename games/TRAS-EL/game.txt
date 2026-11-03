@@ -1,4 +1,4 @@
 # Tras El Unicornio (1987)(Azimut Soft)
-# https://download.file-hunter.com/Games/MSX1/CAS/Tras%20El%20Unicornio%20(1987)(Azimut%20Soft).zip
 cas TRAS-EL.CAS
 sha1 5df91f679465a789efd5773c8f1cc75aa8166a4b
+url https://download.file-hunter.com/Games/MSX1/CAS/Tras%20El%20Unicornio%20(1987)(Azimut%20Soft).zip

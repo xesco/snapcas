@@ -1,4 +1,4 @@
 # World Cup Soccer (1986)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/World%20Cup%20Soccer%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas WORLD-CU.CAS
 sha1 4b4b0e258d0cc925e025de26aee6b5195cf69a10
+url https://download.file-hunter.com/Games/MSX1/CAS/World%20Cup%20Soccer%20(1986)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

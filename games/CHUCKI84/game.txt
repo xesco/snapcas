@@ -1,4 +1,4 @@
 # Chuckie Egg (1984)(A & F Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Chuckie%20Egg%20(1984)(A%20%26%20F%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas CHUCKI84.CAS
 sha1 e6e439418bbdd9897caf15f51d59074eeb30f4c2
+url https://download.file-hunter.com/Games/MSX1/CAS/Chuckie%20Egg%20(1984)(A%20%26%20F%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

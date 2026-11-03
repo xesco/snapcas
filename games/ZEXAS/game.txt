@@ -1,4 +1,4 @@
 # Zexas (1984)(dB-Soft)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Zexas%20(1984)(dB-Soft)%5BCLOAD%20%2B%20RUN%5D.zip
 cas ZEXAS.CAS
 sha1 8f8abbe7675449d00c3fac8179aaf5a3e6c8bdad
+url https://download.file-hunter.com/Games/MSX1/CAS/Zexas%20(1984)(dB-Soft)%5BCLOAD%20%2B%20RUN%5D.zip

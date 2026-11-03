@@ -1,4 +1,4 @@
 # Otto e Trenta (1985)(Melchioni Informatica)(it)
-# https://download.file-hunter.com/Games/MSX1/CAS/Otto%20e%20Trenta%20(1985)(Melchioni%20Informatica)(it).zip
 cas OTTO-E.CAS
 sha1 ab716136962f06be2a8e8b5c0f9942515190007c
+url https://download.file-hunter.com/Games/MSX1/CAS/Otto%20e%20Trenta%20(1985)(Melchioni%20Informatica)(it).zip

@@ -1,4 +1,4 @@
 # Mision Rescate (1986)(Anaya Multimedia)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Mision%20Rescate%20(1986)(Anaya%20Multimedia)(es)%5BRUN'CAS-'%5D.zip
 cas MISION.CAS
 sha1 b057046c1ad2c36a87f6b334d986e570c318b712
+url https://download.file-hunter.com/Games/MSX1/CAS/Mision%20Rescate%20(1986)(Anaya%20Multimedia)(es)%5BRUN%27CAS-%27%5D.zip

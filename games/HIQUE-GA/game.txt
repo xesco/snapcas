@@ -1,4 +1,4 @@
 # Game Pack 1 (Aackosoft - Eaglesoft)[BASIC] / Hique - Game Pack 1 (Aackosoft - Eaglesoft) [RUN'CAS-'] [_].cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%201%20(Aackosoft%20-%20Eaglesoft)%5BBASIC%5D.zip
 cas HIQUE-GA.CAS
 sha1 549ff55060cd1a6b20b36c34edae8e9526ff620e
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%201%20(Aackosoft%20-%20Eaglesoft)%5BBASIC%5D.zip

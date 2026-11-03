@@ -1,3 +1,0 @@
-# sm221_a
-cas SM-221-A.CAS
-sha1 d122e3c80cce689efe28dbb4734f411f6487ed98

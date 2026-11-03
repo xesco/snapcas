@@ -1,4 +1,4 @@
 # Konami's Soccer (1985)(Konami)[h Onaki][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Konami's%20Soccer%20(1985)(Konami)%5Bh%20Onaki%5D%5BRUN'CAS-'%5D.zip
 cas KONAMI.CAS
 sha1 78b8107eb53972def0092d531e7a10e5ce217577
+url https://download.file-hunter.com/Games/MSX1/CAS/Konami%27s%20Soccer%20(1985)(Konami)%5Bh%20Onaki%5D%5BRUN%27CAS-%27%5D.zip

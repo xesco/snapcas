@@ -1,4 +1,4 @@
 # Hunchback (1984)(Ocean Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Hunchback%20(1984)(Ocean%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas HUNCHBAC.CAS
 sha1 f9b746dc4875dc418ba2e2cb4d07703852a1edaa
+url https://download.file-hunter.com/Games/MSX1/CAS/Hunchback%20(1984)(Ocean%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

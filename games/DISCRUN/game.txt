@@ -1,4 +1,4 @@
 # Disc Warrior (1984)(Micro Cabin)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Disc%20Warrior%20(1984)(Micro%20Cabin)%5BCLOAD%20%2B%20RUN%5D.zip
 cas DISCRUN.CAS
 sha1 fa0ae8d84be7ebb8844e7924f5ffbab85825d2c4
+url https://download.file-hunter.com/Games/MSX1/CAS/Disc%20Warrior%20(1984)(Micro%20Cabin)%5BCLOAD%20%2B%20RUN%5D.zip

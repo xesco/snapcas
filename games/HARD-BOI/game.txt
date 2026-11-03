@@ -1,4 +1,4 @@
 # Hard Boiled (1987)(Methodic Solutions)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Hard%20Boiled%20(1987)(Methodic%20Solutions)%5BRUN'CAS-'%5D.zip
 cas HARD-BOI.CAS
 sha1 0917fc884fea3ce297982b9c6f5e93a932e16f06
+url https://download.file-hunter.com/Games/MSX1/CAS/Hard%20Boiled%20(1987)(Methodic%20Solutions)%5BRUN%27CAS-%27%5D.zip

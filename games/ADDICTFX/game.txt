@@ -1,4 +1,4 @@
 # Addictaball (1988)(Alligata)(GB)[RUN'CAS-']-FX3
-# https://download.file-hunter.com/Games/MSX1/CAS/Addictaball%20(1988)(Alligata)(GB)%5BRUN'CAS-'%5D-FX3.zip
 cas ADDICTFX.CAS
 sha1 1d4d36d2cd34027ebdf8146ce324c7ac74b6951d
+url https://download.file-hunter.com/Games/MSX1/CAS/Addictaball%20(1988)(Alligata)(GB)%5BRUN%27CAS-%27%5D-FX3.zip

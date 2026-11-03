@@ -1,5 +1,5 @@
 # Biotech, the first game on Hudson Soft's W Series 1 side A, W Series 1 (1983)
-# (Hudson Soft)[Side A - Biotech, Killer Station][BLOAD'CAS-',R]:
-# https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%201%20(1983)%20(Hudson%20Soft)%5BSide%20A%20-%20Biotech%2C%20Killer%20Station%5D%5BBLOAD'CAS-'%2CR%5D.zip
+# (Hudson Soft)[Side A - Biotech, Killer Station][BLOAD'CAS-',R].
 cas W-SERIE1.CAS
 sha1 eb28b4de3b276b20d16160f354c98be21b99572c
+url https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%201%20(1983)%20(Hudson%20Soft)%5BSide%20A%20-%20Biotech%2C%20Killer%20Station%5D%5BBLOAD%27CAS-%27%2CR%5D.zip

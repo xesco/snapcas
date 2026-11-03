@@ -65,8 +65,36 @@ class MachineFile(unittest.TestCase):
         self.assertEqual(game.snapshot_at, 10)
 
 
+class UrlLine(unittest.TestCase):
+    def read(self, text):
+        folder = tempfile.mkdtemp()
+        with open(os.path.join(folder, "game.txt"), "w") as f:
+            f.write(text)
+        return gamefile.read_game(folder)
+
+    def test_a_link_for_each_side(self):
+        game = self.read("cas A.CAS\nside2 B.CAS\nurl https://example.org/a.zip https://example.org/b.ZIP\n")
+        self.assertEqual(game.urls, ["https://example.org/a.zip", "https://example.org/b.ZIP"])
+
+    def test_a_link_missing_for_side_2_is_refused(self):
+        with self.assertRaisesRegex(gamefile.GameFileError, "a link for each side"):
+            self.read("cas A.CAS\nside2 B.CAS\nurl https://example.org/a.zip\n")
+
+    def test_a_link_that_is_not_https_to_a_zip_is_refused(self):
+        with self.assertRaisesRegex(gamefile.GameFileError, "https links to zip files"):
+            self.read("cas A.CAS\nurl http://example.org/a.zip\n")
+
+
 @unittest.skipUnless(os.path.isdir(GAMES), "no games/ folder")
 class ShippedGameFiles(unittest.TestCase):
+    def test_each_game_file_links_its_zips_on_file_hunter(self):
+        for name in game_names():
+            with self.subTest(game=name):
+                game = gamefile.read_game(os.path.join(GAMES, name))
+                self.assertTrue(game.urls)
+                for url in game.urls:
+                    self.assertTrue(url.startswith("https://download.file-hunter.com/Games/MSX1/CAS/"), url)
+
     def test_every_game_file_reads_on_each_machine(self):
         for name in game_names():
             for machine in ("phc28s-ram64k-carnivore2", "vg8020-carnivore2"):

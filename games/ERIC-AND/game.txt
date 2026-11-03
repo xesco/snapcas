@@ -1,4 +1,4 @@
 # Eric and the Floaters (1983)(Hudson Soft)
-# https://download.file-hunter.com/Games/MSX1/CAS/Eric%20and%20the%20Floaters%20(1983)(Hudson%20Soft).zip
 cas ERIC-AND.CAS
 sha1 430fad1f2a3378d4e5a645ac58d1fddd9006fdd3
+url https://download.file-hunter.com/Games/MSX1/CAS/Eric%20and%20the%20Floaters%20(1983)(Hudson%20Soft).zip

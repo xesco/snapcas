@@ -1,4 +1,4 @@
 # Vacuumania (1984)(PSS)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Vacuumania%20(1984)(PSS)%5BBLOAD'CAS-'%2CR%5D.zip
 cas VACUUMAN.CAS
 sha1 fbaa2186e4438b4be84b3a45c604a3dcf873c04a
+url https://download.file-hunter.com/Games/MSX1/CAS/Vacuumania%20(1984)(PSS)%5BBLOAD%27CAS-%27%2CR%5D.zip

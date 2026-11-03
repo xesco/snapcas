@@ -1,4 +1,4 @@
 # Solo (1989)(Opera Soft)(es)[gunstick][BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Solo%20(1989)(Opera%20Soft)(es)%5Bgunstick%5D%5BBLOAD'CAS-'%2CR%5D.zip
 cas SOLO.CAS
 sha1 2c70527216de2f977e1a18fa2879d4e03e29c279
+url https://download.file-hunter.com/Games/MSX1/CAS/Solo%20(1989)(Opera%20Soft)(es)%5Bgunstick%5D%5BBLOAD%27CAS-%27%2CR%5D.zip

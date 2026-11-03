@@ -19,7 +19,7 @@ game starts.
   example to load the next level. `snapcas` keeps the rest of the tape in the `.SNP`
   file. It stops and goes on where the game wants. It turns the tape over to side B
   by itself. You can also wind it back with a key ([Tape keys](#tape-keys)).
-- **Know 1,322 games.** The `games/` folder has a file for each game. The file tells
+- **Know 1,545 games.** The `games/` folder has a file for each game. The file tells
   `snapcas` how to make the game's `.SNP` file, and where to download the game.
 
 ## What you need

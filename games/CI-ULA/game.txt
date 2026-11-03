@@ -1,4 +1,4 @@
 # Ci-U-Than Trilogy I - La Diosa de Cozumel (1990)(Aventuras AD)(es)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Ci-U-Than%20Trilogy%20I%20-%20La%20Diosa%20de%20Cozumel%20(1990)(Aventuras%20AD)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas CI-ULA.CAS
 sha1 a8b680e97aa8257acfe948e95dbf240e4daa065a
+url https://download.file-hunter.com/Games/MSX1/CAS/Ci-U-Than%20Trilogy%20I%20-%20La%20Diosa%20de%20Cozumel%20(1990)(Aventuras%20AD)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip

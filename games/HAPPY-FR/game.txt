@@ -1,4 +1,4 @@
 # Happy Fret (1985)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Happy%20Fret%20(1985)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas HAPPY-FR.CAS
 sha1 4e67433fb83395c487e1283ce5105bbb44da5220
+url https://download.file-hunter.com/Games/MSX1/CAS/Happy%20Fret%20(1985)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Jewels of Darkness I - Colossal Adventure v2 (1986)(Level 9 Computing)[a2 - Protected][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Jewels%20of%20Darkness%20I%20-%20Colossal%20Adventure%20v2%20(1986)(Level%209%20Computing)%5Ba2%20-%20Protected%5D%5BRUN'CAS-'%5D.zip
 cas JEWELS86.CAS
 sha1 04097143729e26b20b28d9fcbe49f5449e0a3351
+url https://download.file-hunter.com/Games/MSX1/CAS/Jewels%20of%20Darkness%20I%20-%20Colossal%20Adventure%20v2%20(1986)(Level%209%20Computing)%5Ba2%20-%20Protected%5D%5BRUN%27CAS-%27%5D.zip

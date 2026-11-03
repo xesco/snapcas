@@ -1,4 +1,4 @@
 # Hustler (1984)(Bubblebus Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Hustler%20(1984)(Bubblebus%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas HUSTLER.CAS
 sha1 3acf981a568c9b92bfab805c9a11afae52855c65
+url https://download.file-hunter.com/Games/MSX1/CAS/Hustler%20(1984)(Bubblebus%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

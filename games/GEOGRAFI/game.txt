@@ -1,4 +1,4 @@
 # Geografia de Espana (1985)(Advance)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Geografia%20de%20Espana%20(1985)(Advance)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas GEOGRAFI.CAS
 sha1 fb396cd72d3e8817cdb44383298d49a57c62f460
+url https://download.file-hunter.com/Games/MSX1/CAS/Geografia%20de%20Espana%20(1985)(Advance)(es)%5BCLOAD%20%2B%20RUN%5D.zip

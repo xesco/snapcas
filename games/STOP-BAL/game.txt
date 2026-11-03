@@ -1,4 +1,4 @@
 # Stop Ball (1987)(Dro Soft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Stop%20Ball%20(1987)(Dro%20Soft)%5BRUN'CAS-'%5D.zip
 cas STOP-BAL.CAS
 sha1 289c866939d145e19b88aea2598d564770dce479
+url https://download.file-hunter.com/Games/MSX1/CAS/Stop%20Ball%20(1987)(Dro%20Soft)%5BRUN%27CAS-%27%5D.zip

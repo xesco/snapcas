@@ -1,5 +1,5 @@
 # Budokan (1991)(Dro Soft)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Budokan%20(1991)(Dro%20Soft)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas BUDOKAN.CAS
 side2 BUDOKANB.CAS
 sha1 0029860fff04a811b90124116d0ba10c882f3251 b4ee74e98effa9e226c46be52f73d58c66ce1ca2
+url https://download.file-hunter.com/Games/MSX1/CAS/Budokan%20(1991)(Dro%20Soft)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Budokan%20(1991)(Dro%20Soft)(Side%20B)%5BRUN%27CAS-%27%5D.zip

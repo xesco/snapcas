@@ -1,4 +1,4 @@
 # Emerald Isle (1985)(Level 9 Computing)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Emerald%20Isle%20(1985)(Level%209%20Computing)%5BRUN'CAS-'%5D.zip
 cas EMERALD.CAS
 sha1 c7c1cd858290143ad0eb9c35990da35347709e62
+url https://download.file-hunter.com/Games/MSX1/CAS/Emerald%20Isle%20(1985)(Level%209%20Computing)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Police Dog (1984)(Hudson Soft)
-# https://download.file-hunter.com/Games/MSX1/CAS/Police%20Dog%20(1984)(Hudson%20Soft).zip
 cas POLICE.CAS
 sha1 e6ecb52f26d73a4797fca37d467badc601a7f0ff
+url https://download.file-hunter.com/Games/MSX1/CAS/Police%20Dog%20(1984)(Hudson%20Soft).zip

@@ -1,4 +1,4 @@
 # Mundo Perdido, El (1988)(Topo Soft)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Mundo%20Perdido%2C%20El%20(1988)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
 cas MUNDO-PE.CAS
 sha1 e86f57e30447dc1cbf976bf3450254a5cb1cbb52
+url https://download.file-hunter.com/Games/MSX1/CAS/Mundo%20Perdido%2C%20El%20(1988)(Topo%20Soft)(es)%5BRUN%27CAS-%27%5D.zip

@@ -186,11 +186,11 @@ the image is for, so the line names only the variant.
 
 A game file holds one setting per line: a key, a space and a value. A line that
 starts with `#` is a comment, and blank lines are ignored. In the shipped game
-files, each line after `cas`, `side2`, `sha1` and `name` has its own comment above
-it, which says why the line is there, and a blank line before the comment. Times are
-decimal emulated seconds from the moment the load command is typed. Addresses and
-bytes are hexadecimal. Only `cas` is required. This example is for Gauntlet, which
-loads its levels from the tape's second side:
+files, each line after `cas`, `side2`, `sha1`, `url` and `name` has its own comment
+above it, which says why the line is there, and a blank line before the comment.
+Times are decimal emulated seconds from the moment the load command is typed.
+Addresses and bytes are hexadecimal. Only `cas` is required. This example is for
+Gauntlet, which loads its levels from the tape's second side:
 
 ```
 cas GAUNTLET.CAS
@@ -206,6 +206,7 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 | `load` | The load command, for a tape whose first block is not standard, quoted: `load 'RUN"CAS:"'` ([Tape files](#tape-files)) | From the first block's type | `game.txt` |
 | `start` | The name of a file on side 1, such as `start SKY`, for a game that is not the tape's first program: the load starts at the first file with that name ([A game later on the tape](#a-game-later-on-the-tape)) | The tape's start | `game.txt` |
 | `sha1` | The SHA-1 of `cas`, then that of `side2` | None | `game.txt` |
+| `url` | The https link to the zip file that holds `cas`, then the link to the zip that holds `side2`, from which a tape is downloaded and found in its zip by its `sha1`. An apostrophe in a link is written `%27`, because the game file's lines are split as a shell splits words | None | `game.txt` |
 | `name` | `<GAME>`, up to 8 letters and digits | The folder name in upper case, cut to 8 letters and digits | `game.txt` |
 | `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None | `game.txt` |
 | `continue` | A key name that the capture tries before space and Return, to continue a load that waits for a key | None | `game.txt` |
@@ -249,19 +250,25 @@ compilation's programs are the exception: each has a game file of its own, in a
 folder named after the program's game, inside a folder named after the collection,
 such as `games/ENGESOFT/ATHLETIC/`
 ([A game later on the tape](#a-game-later-on-the-tape)). Each game file starts with
-two comments: the game's File-Hunter name, and the link to its zip in File-Hunter's
-MSX1 CAS folder, which a few games lack because the folder does not list them. The
-game file then has the `sha1` of its dumps, which finds a dump whatever its file
-name. A side B, a later tape of a set or an expansion, which the collection's
+a comment, the game's File-Hunter name. It then has the `sha1` of its dumps, which
+finds a dump whatever its file name, and a `url` line with the links to its zips in
+File-Hunter's MSX1 CAS folder. A side 2 is a zip of its own there, as Gauntlet's
+Side B is. A side B, a later tape of a set or an expansion, which the collection's
 `SIDES.TXT` lists, needs a tape before it, so it has no game file of its own. A dump
 that File-Hunter marks `[b]`, a bad dump, has no game file either, and a game with a
-better dump uses that one. Its `side2` lines pair the Side A and Side B files of a
-game, its `continue` lines come from the key that the capture reports, its
-`service no` lines from games played to their end, and its `patch` lines from
-`check.py` and from traces of failed loads. The lines that hold only on one machine
-are in that machine's game file ([Game file](#game-file)), and the other game files
-hold on any machine. It also ships these machine files, each checked with `check.py`
-and a single-load game, with the number of machine's game files that each has:
+better dump uses that one. A dump that File-Hunter lists more than once for one
+release has one game file: Swing Man (Spectravideo) is listed as Swing Man, as Swing
+Man (Side A) and under its catalogue number, SM-221, all with the same SHA-1, and
+only `games/SWING-MA/` holds it. A dump in two releases, such as a Turbo Pack
+program that is also its game's own tape, keeps a game file for each, as a
+compilation's program does ([A game later on the tape](#a-game-later-on-the-tape)).
+Its `side2` lines pair the Side A and Side B files of a game, its `continue` lines
+come from the key that the capture reports, its `service no` lines from games played
+to their end, and its `patch` lines from `check.py` and from traces of failed loads.
+The lines that hold only on one machine are in that machine's game file
+([Game file](#game-file)), and the other game files hold on any machine. It also
+ships these machine files, each checked with `check.py` and a single-load game, with
+the number of machine's game files that each has:
 
 | File | Configuration | Machine's game files |
 |---|---|---|
@@ -385,9 +392,9 @@ Athletic Land, the second program on Engesoft's MSXK-06 side A. A magazine renam
 the commercial games that it copied, and such a program's folder takes the
 magazine's title, which its title screen shows: Super MSX's Attila is a copy of
 Knightmare, in `games/SUPERMSX/ATTILA/`. The game file's first comment names the
-game, the compilation and the program's place on it, and the second comment links
-the compilation's zip. A loader's file name, such as ATLET, seldom gives the title,
-so the title comes from a list of the tape's contents. Each program has its own
+game, the compilation and the program's place on it, and its `url` line links the
+compilation's zip. A loader's file name, such as ATLET, seldom gives the title, so
+the title comes from a list of the tape's contents. Each program has its own
 machine's game files, because each program has its own loader. Athletic Land's
 capture runs without the disk system only on the Sanyo PHC-28S, and Kung-Fu
 Master's, before it on the tape, on the PHC-28S and on the Philips VG-8020. A

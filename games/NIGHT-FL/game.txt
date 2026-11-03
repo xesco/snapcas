@@ -1,4 +1,4 @@
 # Night Flight (1982)(Nippon Columbia - Colpax - Universal)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Night%20Flight%20(1982)(Nippon%20Columbia%20-%20Colpax%20-%20Universal)%5BBLOAD'CAS-'%2CR%5D.zip
 cas NIGHT-FL.CAS
 sha1 b8cb1aafbd66081e05e6c64097c1e072bac20be7
+url https://download.file-hunter.com/Games/MSX1/CAS/Night%20Flight%20(1982)(Nippon%20Columbia%20-%20Colpax%20-%20Universal)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
 # Mask III - Venom Strikes Back (1988)(Gremlin Graphics Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Mask%20III%20-%20Venom%20Strikes%20Back%20(1988)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas MASK-III.CAS
 sha1 3d231cd1d83f14695ff6afce873644e89f129075
+url https://download.file-hunter.com/Games/MSX1/CAS/Mask%20III%20-%20Venom%20Strikes%20Back%20(1988)(Gremlin%20Graphics%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

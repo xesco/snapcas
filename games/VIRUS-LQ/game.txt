@@ -1,4 +1,4 @@
 # Virus LQP-79 (2018) (Pentacour) [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Virus%20LQP-79%20(2018)%20(Pentacour)%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas VIRUS-LQ.CAS
 sha1 980a487053406a39b8191356554009fbada4b70c
+url https://download.file-hunter.com/Games/MSX1/CAS/Virus%20LQP-79%20(2018)%20(Pentacour)%20%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,6 +1,5 @@
 # Hockey, the second game on the tape Super MSX n.16 (novembre 1988) - cas_16 /
-# super_msx_16_lato_B.cas, after Blocks (games/SUPERMSX/BLOCKS):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.16%20(novembre%201988)%20-%20cas_16.zip
+# super_msx_16_lato_B.cas, after Blocks (games/SUPERMSX/BLOCKS).
 # It is a copy of Slapshot, as edicola8bit lists it. It also has a dump of its own
 # (games/SLAPSHOT). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=16
@@ -8,4 +7,5 @@
 # Blocks.
 cas SUPER16B.CAS
 sha1 c7a5fb199e82e0f7380b23de2a2d61138736f99c
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.16%20(novembre%201988)%20-%20cas_16.zip
 start HOCKEY

@@ -1,8 +1,8 @@
 # Erase, the third program on Technopolis Soft's For MSX Special, after Jama
-# (games/FORMSXSP/JAMA):
-# https://download.file-hunter.com/Games/MSX1/CAS/For%20MSX%20Special%20(1985)(Technopolis%20Soft).zip
+# (games/FORMSXSP/JAMA).
 # The title comes from the program's name on the tape (ERASE). The load starts at
 # that BASIC program, as when the tape runs on after Jama.
 cas FOR-MSX.CAS
 sha1 81ea6916b986dbe9e88d8e7d130526152e43b776
+url https://download.file-hunter.com/Games/MSX1/CAS/For%20MSX%20Special%20(1985)(Technopolis%20Soft).zip
 start ERASE

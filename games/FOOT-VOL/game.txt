@@ -1,4 +1,4 @@
 # Foot Volley (1986)(Players Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Foot%20Volley%20(1986)(Players%20Software)%5BRUN'CAS-'%5D.zip
 cas FOOT-VOL.CAS
 sha1 57f6a7a01dbae318a678a7fbe54f0fb42e305d5c
+url https://download.file-hunter.com/Games/MSX1/CAS/Foot%20Volley%20(1986)(Players%20Software)%5BRUN%27CAS-%27%5D.zip

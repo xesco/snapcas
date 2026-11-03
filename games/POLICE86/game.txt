@@ -1,4 +1,4 @@
 # Police Academy (1986)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Police%20Academy%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas POLICE86.CAS
 sha1 f97532b2715cc4c1c7b0da92e30505b2be7c07b2
+url https://download.file-hunter.com/Games/MSX1/CAS/Police%20Academy%20(1986)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

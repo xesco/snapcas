@@ -1,4 +1,4 @@
 # Mythos (1990)(Opera Soft)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Mythos%20(1990)(Opera%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
 cas MYTHOS.CAS
 sha1 7f3ec47ecacdf4e50649f25ba1f26593b4e05981
+url https://download.file-hunter.com/Games/MSX1/CAS/Mythos%20(1990)(Opera%20Soft)%5BBLOAD%27CAS-%27%2CR%5D.zip

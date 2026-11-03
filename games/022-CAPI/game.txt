@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 044-Capitales de Espa+a.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 022-CAPI.CAS
 sha1 7d2fedf10694f13b232aad1bedab91a31f425dd6
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

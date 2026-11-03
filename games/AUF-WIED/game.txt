@@ -1,4 +1,4 @@
 # Auf Wiedersehen Monty (1987)(Gremlin Graphics Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Auf%20Wiedersehen%20Monty%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas AUF-WIED.CAS
 sha1 5545bcd67c665036b4020fe8f0fbef0023e86ee8
+url https://download.file-hunter.com/Games/MSX1/CAS/Auf%20Wiedersehen%20Monty%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

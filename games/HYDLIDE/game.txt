@@ -1,4 +1,4 @@
 # Hydlide (1985)(T&E Soft)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Hydlide%20(1985)(T%26E%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
 cas HYDLIDE.CAS
 sha1 06e99a4bfb2b54b9aba3f7ec2b42d7c1317ff53f
+url https://download.file-hunter.com/Games/MSX1/CAS/Hydlide%20(1985)(T%26E%20Soft)%5BBLOAD%27CAS-%27%2CR%5D.zip

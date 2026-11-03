@@ -1,4 +1,4 @@
 # Harry Fox Yki no Maoh (1985)(Micro Cabin)(ja)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Harry%20Fox%20Yki%20no%20Maoh%20(1985)(Micro%20Cabin)(ja)%5BBLOAD'CAS-'%2CR%5D.zip
 cas HARRY-FO.CAS
 sha1 3ed7bfc036f1561d789fedc9ab86e5bdc65be01e
+url https://download.file-hunter.com/Games/MSX1/CAS/Harry%20Fox%20Yki%20no%20Maoh%20(1985)(Micro%20Cabin)(ja)%5BBLOAD%27CAS-%27%2CR%5D.zip

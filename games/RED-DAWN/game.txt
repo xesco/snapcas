@@ -1,4 +1,4 @@
 # Red Dawn (1988)(Eurosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Red%20Dawn%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
 cas RED-DAWN.CAS
 sha1 a676b43f5cb62a36c54dc6c85a62b49b8f7b2555
+url https://download.file-hunter.com/Games/MSX1/CAS/Red%20Dawn%20(1988)(Eurosoft)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Neuras (2021)(Inufuto)
-# https://download.file-hunter.com/Games/MSX1/CAS/Neuras%20(2021)(Inufuto).zip
 cas NEURAS.CAS
 sha1 a9e28f0c9537a623d1bef7fcbf54701223882190
+url https://download.file-hunter.com/Games/MSX1/CAS/Neuras%20(2021)(Inufuto).zip

@@ -1,4 +1,4 @@
 # Iron of the War (19xx)(Mind Games Espana)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Iron%20of%20the%20War%20(19xx)(Mind%20Games%20Espana)(es)%5BRUN'CAS-'%5D.zip
 cas IRON-OF.CAS
 sha1 55f6aff0d119da9e12dc5f776a2704ce6c772111
+url https://download.file-hunter.com/Games/MSX1/CAS/Iron%20of%20the%20War%20(19xx)(Mind%20Games%20Espana)(es)%5BRUN%27CAS-%27%5D.zip

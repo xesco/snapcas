@@ -1,8 +1,8 @@
 # Berretti Verdi, the first game on the tape Super MSX n.21 (maggio 1989) - cas_21
-# / super_msx_21_lato_B.cas:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.21%20(maggio%201989)%20-%20cas_21.zip
+# / super_msx_21_lato_B.cas.
 # It is a copy of Operation Wolf (Ocean), as edicola8bit lists it. It also has a
 # dump of its own (games/OPERATIO). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=21
 cas SUPER21B.CAS
 sha1 cd9b8f5a31c18e9ee35ba3a9e6e6dcc10c2e693e
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.21%20(maggio%201989)%20-%20cas_21.zip
