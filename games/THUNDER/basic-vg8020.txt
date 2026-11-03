@@ -1,8 +1,0 @@
-# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
-
-# The game fills memory with PUSH over the tape service's part of page 3, and
-# reads side 2 during play, so the whole service goes into T0. T0 needs the
-# game's page 0 RAM outside DOS's mapper, so the capture runs without the
-# Carnivore2.
-capture basic/vg8020-nodisk
-service t0

@@ -3,8 +3,8 @@
 #   make        print this help
 #   make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN
 #   make test   run the tests in openMSX
-#   make try    start openMSX as advanced/phc28s, with SNAPCAS.COM and the images
-#               in out/try/ on its disk: MACHINE= and FILES= change them
+#   make try    start openMSX as phc28s-ram64k-carnivore2, with SNAPCAS.COM and
+#               the images in out/try/ on its disk: MACHINE= and FILES= change them
 #
 # The tests read the tape files from CAS_DIR, by default tapes/, and MSX-DOS's
 # system files from DOS_DIR, by default dos/, with msxdos1/ and msxdos2/: git
@@ -12,10 +12,12 @@
 # skipped when the folders do not exist.
 #
 # The Makefile downloads its tools into out/, each pinned by version and SHA-256:
-# the sjasmplus assembler's source, which it builds, and Nextor's NEXTOR.SYS and
-# COMMAND2.COM for the test disks. The tests run openMSX 22.0 from the path, in
-# a home of their own, out/openmsx-home, with a link to the system ROMs, so that
-# they leave the user's openMSX settings alone.
+# the sjasmplus assembler's source, which it builds, Nextor's NEXTOR.SYS and
+# COMMAND2.COM for the test disks, and two cartridges' firmware: the SD Mapper's
+# SDMAPPER.ROM and Nextor's ROM for the MegaFlashROM SCC+ SD. The tests run
+# openMSX 22.0 from the path, in a home of their own, out/openmsx-home, whose
+# system ROMs are a link to the user's and that firmware, so that they leave the
+# user's openMSX settings alone.
 
 SJASMPLUS_VERSION := 1.24.0
 SYSTEMROMS ?= $(HOME)/.openMSX/share/systemroms
@@ -26,7 +28,7 @@ OPENMSX_SHARE ?= $(firstword $(wildcard $(OPENMSX_BIN)../openMSX.app/Contents/Re
                    $(OPENMSX_BIN)../Resources/share /usr/share/openmsx /usr/local/share/openmsx))
 CAS_DIR ?= tapes
 COLLECTION_DIR ?= $(CAS_DIR)/collection
-COLLECTION_MACHINES ?= advanced/phc28s basic/vg8020
+COLLECTION_MACHINES ?= phc28s-ram64k-carnivore2 vg8020-carnivore2
 COLLECTION_WORKERS ?= 11
 COLLECTION_FULL ?=
 DOS_DIR ?= dos
@@ -43,14 +45,14 @@ help:
 	@echo "            tape files, the TSX files in tsx/, and DOS_DIR=, by default dos/,"
 	@echo "            MSX-DOS's system files"
 	@echo "make collection  capture, build and check every game file of games/ on"
-	@echo "            COLLECTION_MACHINES, by default advanced/phc28s and basic/vg8020,"
-	@echo "            with the CAS files of COLLECTION_DIR, by default CAS_DIR/collection,"
-	@echo "            into out/test/step9/collection/<machine>.txt: takes hours. A game"
-	@echo "            file whose inputs and the code are unchanged keeps its last result,"
-	@echo "            unless COLLECTION_FULL=1. COLLECTION_WORKERS=, by default 11, runs"
-	@echo "            that many at once"
-	@echo "make try    start openMSX as advanced/phc28s with SNAPCAS.COM and the images"
-	@echo "            in out/try/ on its disk: MACHINE= and FILES= change them"
+	@echo "            COLLECTION_MACHINES, by default phc28s-ram64k-carnivore2 and"
+	@echo "            vg8020-carnivore2, with the CAS files of COLLECTION_DIR, by default"
+	@echo "            CAS_DIR/collection, into out/test/step9/collection/<machine>.txt:"
+	@echo "            takes hours. A game file whose inputs and the code are unchanged"
+	@echo "            keeps its last result, unless COLLECTION_FULL=1."
+	@echo "            COLLECTION_WORKERS=, by default 11, runs that many at once"
+	@echo "make try    start openMSX as phc28s-ram64k-carnivore2 with SNAPCAS.COM and the"
+	@echo "            images in out/try/ on its disk: MACHINE= and FILES= change them"
 	@echo "make clean  remove the built files and the test output"
 
 all: bin/SNAPCAS.COM bin/SERVICE.BIN
@@ -86,9 +88,46 @@ $(DL)/sjasmplus-$(SJASMPLUS_VERSION)-src.tar.xz:
 $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM &:
 	python3 -I tools/fetch.py https://github.com/Konamiman/Nextor/releases/download/v2.1.0/tools.zip 5792ff3fe7ab684b8afd405cdd898e25f6efdb84ca1f2cb9ac1428cc848d924e $(NEXTOR) NEXTOR.SYS COMMAND2.COM
 
-$(EMU_HOME)/share/systemroms:
-	mkdir -p $(EMU_HOME)/share
+# The test home's system ROMs: a link to the user's, and the firmware below in
+# a folder of snapcas's own. openMSX finds a ROM by its SHA-1 in either. An
+# older test home had the link in place of the folder.
+SYSTEMROMS_LINK := $(EMU_HOME)/share/systemroms/user
+$(SYSTEMROMS_LINK):
+	if [ -L $(EMU_HOME)/share/systemroms ]; then rm $(EMU_HOME)/share/systemroms; fi
+	mkdir -p $(dir $@)
 	ln -sfn $(SYSTEMROMS) $@
+
+# The SD Mapper v1's firmware, Nextor with its driver 1.0.7, which openMSX's
+# SD_Mapper_v1 loads into its flash.
+SDMAPPER_ROM := $(EMU_HOME)/share/systemroms/snapcas/SDMAPPER.ROM
+$(SDMAPPER_ROM): | $(SYSTEMROMS_LINK)
+	python3 -I tools/fetch.py https://github.com/fbelavenuto/msxsdmapper/releases/download/v1.0.7/SDMAPPER.ROM 4371c4094756672f78b295dbfb753cb6a3011e7fdb11348249be1bc36fbd061b $@
+
+# The MegaFlashROM SCC+ SD with only Nextor in its flash, for fsa1-mfrsd and
+# hbf1xd-mfrsd: openMSX's stock flash also holds a ROM disk, whose AUTOEXEC.BAT
+# starts a file manager on an MSX2. The flash is 8 MB of FFh with Nextor's ROM
+# at 700000h, where the cartridge's subslot 3, its SD interface, reads it.
+MFR_NEXTOR := $(DL)/Nextor-2.1.4.MegaFlashSDSCC.1-slot.ROM
+$(MFR_NEXTOR):
+	python3 -I tools/fetch.py https://github.com/Konamiman/Nextor/releases/download/v2.1.4/Nextor-2.1.4.MegaFlashSDSCC.1-slot.ROM 5e1ab82af74b84e46636a14c592ac9d97a1515feb1104fb38d46152b16e57cb1 $@
+
+MFR_FLASH := $(EMU_HOME)/share/systemroms/snapcas/MFRSD-Nextor-2.1.4.ROM
+MFR_FLASH_SHA1 := ea48fb3d4f73a9046bfe82a3c94d738b6a903b4e
+$(MFR_FLASH): $(MFR_NEXTOR) | $(SYSTEMROMS_LINK)
+	mkdir -p $(dir $@)
+	python3 -I -c "import sys; d = open(sys.argv[1], 'rb').read(); f = bytearray(b'\xff' * 0x800000); f[0x700000:0x700000 + len(d)] = d; open(sys.argv[2], 'wb').write(f)" $< $@.tmp
+	python3 -I -c "import hashlib, sys; sys.exit(hashlib.sha1(open(sys.argv[1], 'rb').read()).hexdigest() != sys.argv[2])" $@.tmp $(MFR_FLASH_SHA1)
+	mv $@.tmp $@
+
+MFR_NEXTOR_EXT := $(EMU_HOME)/share/extensions/MegaFlashROM_SCC+_SD_Nextor.xml
+$(MFR_NEXTOR_EXT): $(MFR_FLASH)
+	mkdir -p $(dir $@)
+	sed 's|<sha1>1621f623b834dc57cb2983f30b36bcc3ac56cafd</sha1>|<sha1>$(MFR_FLASH_SHA1)</sha1>|; s|<sramname>megaflashromsccplussd.sram</sramname>|<sramname>megaflashromsccplussd-nextor.sram</sramname>|; s|<name>MegaFlashROM SCC+ SD</name>|<name>MegaFlashROM SCC+ SD with Nextor only</name>|' $(OPENMSX_SHARE)/extensions/MegaFlashROM_SCC+_SD.xml > $@.tmp
+	grep -q '$(MFR_FLASH_SHA1)' $@.tmp
+	grep -q 'megaflashromsccplussd-nextor.sram' $@.tmp
+	mv $@.tmp $@
+
+FIRMWARE := $(SYSTEMROMS_LINK) $(SDMAPPER_ROM) $(MFR_NEXTOR_EXT)
 
 # test/nms8250-512k: openMSX's NMS 8250 with its mapper at 512 KB, which
 # Moonwalker's 236 KB tape needs.
@@ -99,7 +138,7 @@ $(NMS8250_512K):
 	grep -q '<size>512</size>' $@.tmp
 	mv $@.tmp $@
 
-# basic/picoverse: a 192 KB memory mapper cartridge, the PicoVerse's mapper.
+# vg8020-picoverse: a 192 KB memory mapper cartridge, the PicoVerse's mapper.
 RAM192K := $(EMU_HOME)/share/extensions/ram192k.xml
 $(RAM192K):
 	mkdir -p $(dir $@)
@@ -107,22 +146,22 @@ $(RAM192K):
 	grep -q '<size>192</size>' $@.tmp
 	mv $@.tmp $@
 
-test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(NMS8250_512K) $(RAM192K)
+test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I tests/run.py
 
 # The run over every shipped game file (docs/PLAN.md, step 9), apart from make
 # test because it takes hours.
-collection: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms $(RAM192K)
+collection: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  COLLECTION_DIR=$(abspath $(COLLECTION_DIR)) COLLECTION_MACHINES="$(COLLECTION_MACHINES)" \
 	  COLLECTION_WORKERS=$(COLLECTION_WORKERS) COLLECTION_FULL=$(COLLECTION_FULL) \
 	  python3 -I -m unittest discover -s tests -p test_step9.py -k Collection -v
 
-MACHINE ?= advanced/phc28s
+MACHINE ?= phc28s-ram64k-carnivore2
 FILES ?= bin/SNAPCAS.COM $(wildcard $(OUT)/try/*.SNP)
 
-try: bin/SNAPCAS.COM $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(EMU_HOME)/share/systemroms
+try: bin/SNAPCAS.COM $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) python3 -I tools/run.py $(MACHINE) --dos $(NEXTOR) $(FILES)
 
 clean:

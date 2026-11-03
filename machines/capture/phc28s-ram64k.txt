@@ -1,0 +1,6 @@
+# Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1, without a disk system: the
+# capture variant of phc28s-ram64k-carnivore2 without the Carnivore2, for a game
+# that crashes when a disk system is present. The capture uses no disk, but a
+# machine file needs this line.
+openmsx -machine Sanyo_PHC-28S -ext ram64k
+disk hda

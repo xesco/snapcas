@@ -1,9 +1,0 @@
-# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
-
-# The capture runs without the Carnivore2. MAD1, whose code is Alexis's ALEX1,
-# searches RAM for page 1 only and copies its half of the game's ROM image there,
-# and MAD2 loads the other half at 8000h, into whatever page 2 holds. The game
-# then selects page 1's slot in page 2 as well. With the Carnivore2, BASIC's page 2
-# is its mapper, so the second half is not where the game looks, and the screen
-# stays black. Without it, pages 1 and 2 are the RAM cartridge.
-capture advanced/phc28s-nodisk

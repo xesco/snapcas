@@ -1,7 +1,8 @@
 """Run openMSX for the snapcas tools: machine files, disk images and Tcl scripts.
 
 A machine file (docs/DESIGN.md, Machine file) names the openMSX arguments, the
-command that inserts a disk image, and the keys that pass a boot menu. The tools
+command that inserts a disk image and its size, the keys that pass a boot menu or
+that are held from power-on, and the machine's capture variants. The tools
 drive openMSX with a Tcl script that it runs with the throttle, the renderer and
 the sound off, and read results from files that the script writes.
 """
@@ -13,6 +14,8 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MACHINES = os.path.join(os.path.dirname(HERE), "machines")
+# The capture variants, which only the capture runs on.
+VARIANTS = os.path.join(MACHINES, "capture")
 
 # The special keys of the MSX keyboard matrix, rows 6 to 8 (DESIGN.md, Key
 # names): name -> (row, bit).
@@ -38,21 +41,30 @@ class MachineError(Exception):
 
 
 class Machine:
-    def __init__(self, path, args, disk, boot, dos):
+    def __init__(self, path, args, disk, disk_size, boot, dos, variants):
         self.path = path
         self.args = args  # openMSX arguments, without the program name
         self.disk = disk  # command that inserts a disk image, such as hda
+        self.disk_size = disk_size  # the disk image's KB, 720 or 360
         self.boot = boot  # [(text, key)], matched in order
         self.dos = dos    # (prompt, drive) when DOS boots from the machine's own disk
+        self.variants = variants  # the capture variants' names, in the order to try them
 
 
 def machine_path(machine):
-    """The machine file of a machine, a path below machines/ without .txt."""
+    """The machine file of a machine: its name, such as phc28s-ram64k-carnivore2,
+    or a test machine's path below machines/, such as test/nms8250-128k."""
     return os.path.join(MACHINES, machine + ".txt")
 
 
+def variant_path(variant):
+    """The machine file of a capture variant, such as phc28s-ram64k."""
+    return os.path.join(VARIANTS, variant + ".txt")
+
+
 def read_machine(path):
-    args, disk, boot, dos = None, None, [], None
+    args, disk, disk_size, boot, dos, variants = None, None, 720, [], None, []
+    holds = []
     with open(path) as f:
         for number, line in enumerate(f, 1):
             words = shlex.split(line, comments=True)
@@ -61,17 +73,31 @@ def read_machine(path):
             where = f"{path}:{number}"
             if words[0] == "openmsx" and args is None:
                 args = words[1:]
-            elif words[0] == "disk" and disk is None and len(words) == 2:
+            elif words[0] == "disk" and disk is None and len(words) in (2, 3):
+                if len(words) == 3:
+                    if words[2] not in ("360", "720"):
+                        raise MachineError(f"{where}: a disk is 360 or 720 KB")
+                    disk_size = int(words[2])
                 disk = words[1]
             elif words[0] == "boot" and len(words) == 3 and words[2] in KEYS:
                 boot.append((words[1], words[2]))
+            elif words[0] == "hold" and len(words) == 3 and words[1] in KEYS and re.fullmatch(r"\d+", words[2]):
+                holds.append(press(words[1], int(words[2])))
             elif words[0] == "dos" and dos is None and len(words) == 3 and re.fullmatch(r"[A-H]", words[2]):
                 dos = (words[1], words[2])
+            elif words[0] == "variant" and len(words) == 2:
+                if not os.path.isfile(variant_path(words[1])):
+                    raise MachineError(f"{where}: {variant_path(words[1])} does not exist")
+                variants.append(words[1])
             else:
                 raise MachineError(f"{where}: cannot read this line")
     if args is None or disk is None:
         raise MachineError(f"{path}: needs one openmsx line and one disk line")
-    return Machine(path, args, disk, boot, dos)
+    # A key held from power-on goes down before the BIOS reads the keyboard,
+    # so it is an openMSX command at startup in every run of the machine.
+    for hold in holds:
+        args += ["-command", hold]
+    return Machine(path, args, disk, disk_size, boot, dos, variants)
 
 
 def tcl_word(text):
@@ -134,16 +160,17 @@ def run(args, script, timeout):
         os.unlink(path)
 
 
-def make_disk(image, files):
-    """Writes a 720 KB disk image without a partition table that holds the
-    files. Nextor reads such a device from its first sector, and MSX-DOS 1 and
-    MSX-DOS 2 read it as a floppy disk."""
+def make_disk(image, files, size=720):
+    """Writes a disk image of size KB, 720 or 360 for a single-sided drive,
+    without a partition table, that holds the files. Nextor reads such a device
+    from its first sector, and MSX-DOS 1 and MSX-DOS 2 read it as a floppy
+    disk."""
     image = os.path.abspath(image)
     os.makedirs(os.path.dirname(image), exist_ok=True)
     if os.path.exists(image):
         os.unlink(image)
     result = image + ".txt"
-    lines = [f"diskmanipulator create {tcl_word(image)} 720",
+    lines = [f"diskmanipulator create {tcl_word(image)} {size}",
              f"virtual_drive {tcl_word(image)}"]
     lines += [f"diskmanipulator import virtual_drive {tcl_word(os.path.abspath(p))}"
               for p in files]

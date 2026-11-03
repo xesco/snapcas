@@ -12,7 +12,7 @@ import test_step4  # noqa: E402
 import test_step9  # noqa: E402
 
 COLLECTION = os.path.join(test_step4.CAS_DIR, "collection")
-MACHINE = "advanced/phc28s"
+MACHINE = "phc28s-ram64k-carnivore2"
 WORK = os.path.join(ROOT, "out", "test", "step18")
 
 # The game files that BasicErrors checks: Field Master without its patch line,

@@ -1,0 +1,8 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The capture runs without the Carnivore2. The loader's program "slots" makes the
+# slot register value for the game by copying page 2's slot into page 1's field,
+# and the game expects RAM there. With the Carnivore2, BASIC's page 2 is its mapper
+# in slot 2-2, whose subslot page 1 does not select, and the game resets the
+# machine. Without it, pages 1 to 3 are the RAM cartridge in slot 1.
+capture phc28s-ram64k

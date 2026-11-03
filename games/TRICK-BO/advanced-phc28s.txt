@@ -1,7 +1,0 @@
-# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
-
-# The capture runs without the Carnivore2, so without a disk system. The game
-# keeps its variables at E000h and above and its stack at the top of RAM, over the
-# work area that a disk system keeps below F380h, and with Nextor it hangs with its
-# interrupts off. Without it the game reaches its menu.
-capture advanced/phc28s-nodisk

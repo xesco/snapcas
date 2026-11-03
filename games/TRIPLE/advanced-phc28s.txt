@@ -1,6 +1,0 @@
-# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
-
-# The capture runs without the Carnivore2. With it, BASIC stops at "Syntax error in
-# 65" after F3.CM, which the loader puts at DEA8h to E006h and runs, by a cause not
-# yet traced. Without it the game loads.
-capture advanced/phc28s-nodisk

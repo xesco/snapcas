@@ -2,8 +2,7 @@
 
 A game file holds one setting per line: a key, a space and a value. A line that
 starts with # is a comment, and blank lines are ignored. A machine's game file beside
-game.txt, named after the machine file with - for /, adds the lines that fit only
-that machine.
+game.txt, named after the machine file, adds the lines that fit only that machine.
 """
 import os
 import re
@@ -109,8 +108,8 @@ def out_folder(machine, folder):
 
 
 def machine_file(folder, machine):
-    """The path of a machine's file in a game's folder: advanced/phc28s has
-    advanced-phc28s.txt."""
+    """The path of a machine's file in a game's folder: phc28s-ram64k-carnivore2 has
+    phc28s-ram64k-carnivore2.txt, and a test machine's path has - for /."""
     return os.path.join(folder, machine.replace("/", "-") + ".txt")
 
 

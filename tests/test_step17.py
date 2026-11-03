@@ -17,7 +17,7 @@ import test_step9  # noqa: E402
 
 COLLECTION = os.path.join(test_step4.CAS_DIR, "collection")
 WORK = os.path.join(ROOT, "out", "test", "step17")
-MACHINE = "advanced/phc28s"
+MACHINE = "phc28s-ram64k-carnivore2"
 
 
 class ServiceLine(unittest.TestCase):
@@ -41,9 +41,9 @@ class ServiceLine(unittest.TestCase):
 
     def test_the_machines_service_line_replaces_game_txts(self):
         self.write("game.txt", "cas GAME.CAS", "service no")
-        self.write("advanced-phc28s.txt", "service t0")
-        self.assertEqual(gamefile.read_game(self.folder, "advanced/phc28s").service, "t0")
-        self.assertEqual(gamefile.read_game(self.folder, "basic/vg8020").service, "no")
+        self.write("phc28s-ram64k-carnivore2.txt", "service t0")
+        self.assertEqual(gamefile.read_game(self.folder, "phc28s-ram64k-carnivore2").service, "t0")
+        self.assertEqual(gamefile.read_game(self.folder, "vg8020-carnivore2").service, "no")
 
 
 def build_game(name, shipped, extra):

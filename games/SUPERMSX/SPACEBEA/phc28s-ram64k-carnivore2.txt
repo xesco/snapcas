@@ -1,0 +1,7 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The game sets its stack pointer to 0000h, so its pushes write FFFFh, which is
+# the subslot register when page 3 is the Carnivore2's RAM. The capture runs
+# without the Carnivore2, where page 3 is the internal RAM in slot 0, which is not
+# expanded, so FFFFh is RAM.
+capture phc28s-ram64k

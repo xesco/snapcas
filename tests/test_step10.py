@@ -49,10 +49,10 @@ def read(folder, machine, name):
 # of the machine's game file. setUpModule runs them at once, and the tests
 # read their results.
 RUNS = {
-    "sootland": ("SOOTLAND", "advanced/phc28s", ["capture advanced/phc28s-nodisk"]),
-    "finderin": ("FINDERIN", "basic/vg8020", ["capture basic/vg8020-nodisk"]),
-    "chase-h": ("CHASE-H", "advanced/phc28s", []),
-    "sootland-variant": ("SOOTLAND", "advanced/hbf700p", []),
+    "sootland": ("SOOTLAND", "phc28s-ram64k-carnivore2", ["capture phc28s-ram64k"]),
+    "finderin": ("FINDERIN", "vg8020-carnivore2", ["capture vg8020"]),
+    "chase-h": ("CHASE-H", "phc28s-ram64k-carnivore2", []),
+    "sootland-variant": ("SOOTLAND", "hbf700p-ram512k-msxdos2", []),
 }
 RESULTS = {}
 
@@ -80,19 +80,19 @@ class SlotPatches(unittest.TestCase):
         folder, result = RESULTS["sootland"]
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("patch side1:24E 3E FC D3 A8 > 3E 14 D3 A8",
-                      read(folder, "advanced/phc28s", "snap/patches.txt"))
+                      read(folder, "phc28s-ram64k-carnivore2", "snap/patches.txt"))
 
     @unittest.skipUnless(has("FINDERIN.CAS"), "COLLECTION_DIR holds no FINDERIN.CAS")
     def test_the_capture_and_the_scan_patch_finders_keepers_wslreg_calls(self):
         folder, result = RESULTS["finderin"]
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        patches = read(folder, "basic/vg8020", "snap/patches.txt")
+        patches = read(folder, "vg8020-carnivore2", "snap/patches.txt")
         for line in ("patch side1:1B37 3E A8 CD 3B 01 > 3E FC CD 3B 01",
                      "patch side1:1B47 3E A0 CD 3B 01 > 3E F0 CD 3B 01",
                      "patch side1:402E 3E A8 CD 3B 01 > 3E FC CD 3B 01"):
             self.assertIn(line, patches)
         self.assertIn("3E A0 CD 3B 01 > 3E F0 CD 3B 01  fixed slot value",
-                      read(folder, "basic/vg8020", "scan.txt"))
+                      read(folder, "vg8020-carnivore2", "scan.txt"))
 
 
 class WithoutPage3(unittest.TestCase):
@@ -100,7 +100,7 @@ class WithoutPage3(unittest.TestCase):
     def test_chase_hq_gets_the_mode_without_a_part_in_page_3(self):
         folder, result = RESULTS["chase-h"]
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("The tape service has no part in page 3", read(folder, "advanced/phc28s", "scan.txt"))
+        self.assertIn("The tape service has no part in page 3", read(folder, "phc28s-ram64k-carnivore2", "scan.txt"))
 
 
 class Variants(unittest.TestCase):
@@ -109,7 +109,7 @@ class Variants(unittest.TestCase):
     def test_snapcas_py_finds_sootlands_capture_variant(self):
         folder, result = RESULTS["sootland-variant"]
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("capture advanced/hbf700p-noram", result.stdout)
+        self.assertIn("capture hbf700p-msxdos2", result.stdout)
 
 
 if __name__ == "__main__":

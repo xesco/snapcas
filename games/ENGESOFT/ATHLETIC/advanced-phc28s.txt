@@ -1,7 +1,0 @@
-# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
-
-# The capture runs without the Carnivore2, so without a disk system. With the
-# disk system the snapshot comes while the loader still runs, and the loader then
-# writes the tape service's part of page 3 (FCEAh, and FD53h to FD6Ch from code
-# at F240h). Without it the snapshot comes after the game has started.
-capture advanced/phc28s-nodisk

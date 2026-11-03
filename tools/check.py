@@ -123,7 +123,7 @@ def main():
         f.write(f"SNAPCAS {game.name}\r\n")
     disk = os.path.join(check_dir, "disk.dsk")
     try:
-        msx.make_disk(disk, dos + [os.path.join(ROOT, "bin", "SNAPCAS.COM"), image, autoexec])
+        msx.make_disk(disk, dos + [os.path.join(ROOT, "bin", "SNAPCAS.COM"), image, autoexec], machine.disk_size)
     except RuntimeError as e:
         print(f"check.py: {e}", file=sys.stderr)
         return 2

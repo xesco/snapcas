@@ -34,7 +34,7 @@ def main():
     folder = os.path.join(ROOT, "out", "run", args.machine)
     os.makedirs(folder, exist_ok=True)
     disk = os.path.join(folder, "disk.dsk")
-    msx.make_disk(disk, sorted(glob.glob(os.path.join(args.dos, "*"))) + args.files)
+    msx.make_disk(disk, sorted(glob.glob(os.path.join(args.dos, "*"))) + args.files, machine.disk_size)
     print(f"{disk}: {', '.join(os.path.basename(f) for f in args.files)}")
     return subprocess.run(["openmsx", *machine.args, f"-{machine.disk}", disk]).returncode
 

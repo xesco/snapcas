@@ -1,9 +1,0 @@
-# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
-
-# The capture runs without the Carnivore2, because the game fails in a capture
-# with it in slot 1.
-capture basic/nms8250-nocarnivore2
-
-# The snapshot comes after BASIC's PLAY music, as on the PHC-28S
-# (advanced-phc28s.txt).
-snapshot at 170

@@ -1,0 +1,9 @@
+# Panasonic FS-A1, an MSX2 with 64 KB and no memory mapper, with a MegaFlashROM SCC+
+# SD whose flash holds only Nextor 2.1.4, as the Makefile makes it: its 512 KB
+# memory mapper and Nextor on its SD cards. openMSX's stock flash also holds a ROM
+# disk, whose AUTOEXEC.BAT starts a file manager on an MSX2. The disk goes in its
+# first SD card slot. DEL held from power-on skips the FS-A1's Desk Pac menu, which
+# would start in place of BASIC.
+openmsx -machine Panasonic_FS-A1 -ext MegaFlashROM_SCC+_SD_Nextor
+disk hda
+hold del 6

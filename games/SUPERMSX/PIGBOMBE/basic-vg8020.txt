@@ -1,6 +1,0 @@
-# Lines for the Philips VG-8020 with a Carnivore2 in slot 1.
-
-# The game's stack reaches FFFFh, which is the subslot register when page 3
-# is the Carnivore2's RAM, so the capture runs without the Carnivore2, where
-# FFFFh is RAM.
-capture basic/vg8020-nodisk

@@ -1,0 +1,7 @@
+# Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1 (Fabio
+# Belavenuto): its 512 KB memory mapper and Nextor on its SD cards. openMSX needs
+# its firmware, SDMAPPER.ROM 1.0.7, which the Makefile downloads. The disk goes in
+# its first SD card slot.
+openmsx -machine Gradiente_Expert_XP-800 -ext SD_Mapper_v1
+disk hda
+variant xp800

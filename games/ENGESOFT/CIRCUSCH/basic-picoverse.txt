@@ -1,5 +1,0 @@
-# Lines for a Philips VG-8020 with a PicoVerse-like cartridge.
-
-# The capture runs without the cartridge, in the VG-8020's own RAM, so the image
-# needs fewer free mapper segments than Nextor leaves in 192 KB.
-capture basic/picoverse-nomapper

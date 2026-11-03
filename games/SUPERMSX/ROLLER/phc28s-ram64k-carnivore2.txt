@@ -1,0 +1,6 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The capture runs without the Carnivore2. With it, the program's LOADER, which
+# searches RAM through ENASLT, returns to BASIC, which stops at "Syntax error in
+# 70". Without it, the game starts.
+capture phc28s-ram64k

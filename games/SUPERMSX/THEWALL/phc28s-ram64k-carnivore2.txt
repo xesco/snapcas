@@ -1,0 +1,13 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# The capture runs without the Carnivore2. With it, the magazine intro's LOADER,
+# which searches RAM through ENASLT, returns to BASIC, which stops at "Syntax error
+# in 100". Without it, WALL loads.
+
+# WALL's own LOADER, at DD00h, makes the slot register value for the game from
+# BASIC's: page 2's slot in page 0 and page 3's in page 1, with AND F0h, LD B,A,
+# four RLCAs and OR B. Without the Carnivore2, page 3 is the internal RAM in slot
+# 0, which has the ROM in page 1, and the game halts. The patch loads 15h in their
+# place: slot 1, the RAM cartridge, in pages 0 to 2, and slot 0 in page 3.
+capture phc28s-ram64k
+patch side1:3896 E6 F0 47 07 07 07 07 B0 > 3E 15 00 00 00 00 00 00

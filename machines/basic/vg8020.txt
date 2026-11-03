@@ -1,3 +1,0 @@
-openmsx -machine Philips_VG_8020 -ext Carnivore2
-disk hda
-boot "DefConfig" space

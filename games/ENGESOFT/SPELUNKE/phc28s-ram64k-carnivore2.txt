@@ -1,0 +1,14 @@
+# Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
+
+# Spelunker's loader, in each half of the ROM, selects RAM by BASIC's slot
+# register: FCh after F0h, for RAM in slot 3, or else A8h, for RAM in slot 2.
+# The PHC-28S keeps BASIC's page 3 in slot 0 and its RAM for pages 1 and 2 in
+# slot 1, where the patches put the ROM: 14h, and 10h, BASIC's own value, in
+# place of A0h when the first half returns. A JR comes between LD A,n and the
+# CALL of WSLREG, so the capture's slot patches do not find these. Without
+# the Carnivore2, BASIC keeps page 3 in slot 0, as the patches expect, so the
+# capture runs without it.
+capture phc28s-ram64k
+patch side1:4184 3E A8 > 3E 14
+patch side1:419F 3E A0 > 3E 10
+patch side1:81FB 3E A8 > 3E 14

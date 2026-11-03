@@ -1,4 +1,0 @@
-# Sony HB-F700P, an MSX2 with a 256 KB mapper and an expanded slot 0, with a 512 KB
-# memory mapper cartridge, under MSX-DOS 2. MSX-DOS 2 takes the larger mapper.
-openmsx -machine Sony_HB-F700P -ext ram512k -ext msxdos2
-disk diska

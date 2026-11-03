@@ -43,9 +43,10 @@ in [PLAN.md](PLAN.md).
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
 | `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm` ([SERVICE.BIN](#servicebin)) |
 
-The `bin/` files are built with sjasmplus 1.24.0 and shipped. `<machine>` is a path
-below `machines/` without `.txt`, such as `basic/vg8020`. Each game is processed by
-four commands, in this order:
+The `bin/` files are built with sjasmplus 1.24.0 and shipped. `<machine>` is a
+machine file's name below `machines/` without `.txt`, such as `vg8020-carnivore2`
+([Machine file](#machine-file)). Each game is processed by four commands, in this
+order:
 
 1. `tools/capture.py <game> <machine> --tapes <dir>` loads the game in `openMSX` and
    saves the snapshot ([Capture](#capture)). `<dir>` holds the user's tape files,
@@ -64,8 +65,8 @@ four commands, in this order:
 
 `tools/snapcas.py <game> <machine> --tapes <dir> [--dos <dir>]` makes the image in
 one command: it runs steps 1 and 2, and step 3 when `--dos` is given. When a step
-fails and the game file names no `capture` machine, it runs these steps again on
-each capture variant of the machine, in the order of their names
+fails and the game file names no capture variant, it runs these steps again on each
+capture variant that the machine file lists, in the order of its `variant` lines
 ([Machine file](#machine-file)). A failed capture counts too, because a loader that
 trips over a cartridge can crash during the capture. It keeps the first image that
 passes, and prints the `capture` line that made it, for the machine's game file.
@@ -124,44 +125,62 @@ file's `patch` lines are not automatic patches, and the build applies them
 
 ## Machine file
 
-A machine file holds one `openmsx` line, one `disk` line, any number of `boot` lines
-and at most one `dos` line, as in this example for a Sanyo PHC-28S with a RAM
+A machine file describes one MSX and the cartridges in its slots. It holds one
+`openmsx` line, one `disk` line, any number of `boot` lines, at most one `dos` line
+and any number of `variant` lines, as in this example for a Sanyo PHC-28S with a RAM
 cartridge and a Carnivore2:
 
 ```
+# Sanyo PHC-28S, an MSX1 with 16 KB, with a 64 KB RAM cartridge in slot 1 and a
+# Carnivore2 in slot 2, under Nextor.
 openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2
 disk hda
 boot "DefConfig" space
+variant phc28s-ram64k
+variant phc28s-empty-carnivore2
 ```
 
 | Line | Meaning |
 |---|---|
 | `openmsx` | The `openMSX` arguments that reproduce the machine |
-| `disk` | The `openMSX` command that inserts `check.py`'s disk image, such as `hda` for an IDE interface or `diska` for a floppy drive |
+| `disk` | The `openMSX` command that inserts `check.py`'s disk image, such as `hda` for an IDE interface or an SD card, or `diska` for a floppy drive. Then, optionally, the image's size in KB: 720, the default, or 360 for a single-sided drive, as the Philips VG-8235 has |
 | `boot` | A text on the screen during boot and the key to press when it appears. Each key has its own line, matched in order. A menu can show its text before it reads the keyboard, so the key is pressed again each second while the text stays, up to 10 times |
+| `hold` | A key held down from power-on, and the emulated seconds it is held, such as `hold del 6`. It is for a machine whose firmware starts a program in a graphics mode in place of BASIC, whose screen `boot` cannot read: the Panasonic FS-A1 starts its Desk Pac menu unless DEL is held |
 | `dos` | For a machine that boots MSX-DOS from a disk of its own, as the MegaFlashROM SCC+ SD boots from the ROM disk in its flash: DOS's prompt, such as `A:\>`, and the drive letter of `check.py`'s disk. When the prompt appears, the capture types `BASIC`, because it loads the game from BASIC, and the check types that drive and `AUTOEXEC` |
+| `variant` | The name of one of the machine's capture variants. `tools/snapcas.py` tries the variants in the order of these lines |
 
 `openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
 the `-ext` options sets the slots, and it must match the real machine's. `boot`
 lines pass a cartridge's boot menu, such as the Carnivore2's. The tools read the
 screen with `get_screen`, so such a menu must be in a text mode. A line that starts
-with `#` is a comment.
+with `#` is a comment, and the file's first comment says what the machine is.
+
+A machine file's name says what the file describes: the model, then each cartridge
+in slot order, with `empty` for an empty slot before a cartridge. A cartridge's name
+is `openMSX`'s name for it in lower case, such as `ram64k` or `carnivore2`, or a
+short form of a long one, such as `sunriseide` and `mfrsd`. The PicoVerse is
+`picoverse`, though two of `openMSX`'s cartridges stand in for it. So
+`phc28s-ram64k-carnivore2` is a Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1
+and a Carnivore2 in slot 2, and two setups of one model have two names.
 
 Machine files are of three kinds, each in its own place:
 
 | Kind | Where | What it is |
 |---|---|---|
-| A user's machine | `machines/basic/` and `machines/advanced/` | A real machine that the images are made for, given as the command's `<machine>` |
-| A capture variant | Beside its machine, named after it and the cartridge it leaves out, such as `advanced/phc28s-nodisk` | The same machine with one cartridge fewer, for a game whose loader trips over that cartridge, or whose image needs fewer free mapper segments when the game runs in the machine's own RAM. A game's `capture` line names it |
-| A test machine | `machines/test/` | A machine that only the tests use |
+| A user's machine | `machines/` | A real machine that the images are made for, given as the command's `<machine>` |
+| A capture variant | `machines/capture/` | The same machine with fewer cartridges, for a game whose loader trips over a cartridge, or whose image needs fewer free mapper segments when the game runs in the machine's own RAM. A game's `capture` line names it |
+| A test machine | `machines/test/`, given as `test/<name>` | A machine that only the tests use |
 
-A capture variant only takes a cartridge away: it keeps the machine's ROMs and every
+A capture variant only takes cartridges away: it keeps the machine's ROMs and every
 other cartridge in its slot. The image built from its snapshot is still for the
 user's machine and is checked there, so the restorer finds the RAM pages in the
-slots that the snapshot names. Its first line, a comment, says which cartridge it
-leaves out and why. The capture variants of a machine are the machine files beside
-it whose names start with the machine's name and `-`, so `tools/snapcas.py` finds
-them without a list.
+slots that the snapshot names. A variant's name follows the same rule as a
+machine's, so it names the cartridges that the variant holds, and not those that it
+leaves out. So two machines whose variants hold the same cartridges share one
+variant: the VG-8020 with a Carnivore2 and the VG-8020 with a PicoVerse both list
+`vg8020`. The variant's first comment says which machines list it and why. A game's
+`capture` line is in the machine's game file, which already names the machine that
+the image is for, so the line names only the variant.
 
 ## Game file
 
@@ -209,15 +228,15 @@ from a tape file's SHA-1.
 
 `game.txt` describes the game and its tape, and holds on every machine. A game's
 folder can also hold a machine's game file: a game file for one machine, named after
-that machine file with `-` in place of `/`, such as `advanced-phc28s.txt` for
-`advanced/phc28s`. The tools read it after `game.txt` when they capture, build or
-check for that machine. Its lines add to those of `game.txt`, and a value that both
-give is the machine's game file's. It holds the lines that depend on where the
-machine's RAM and cartridges are:
+that machine file, such as `phc28s-ram64k-carnivore2.txt` for
+`phc28s-ram64k-carnivore2`. The tools read it after `game.txt` when they capture,
+build or check for that machine. Its lines add to those of `game.txt`, and a value
+that both give is the machine's game file's. It holds the lines that depend on where
+the machine's RAM and cartridges are:
 
 | Line | Why it depends on the machine |
 |---|---|
-| `capture` | It names one of the machine's capture variants ([Machine file](#machine-file)) |
+| `capture` | It names one of the capture variants that the machine file lists ([Machine file](#machine-file)) |
 | A patch of a slot register's value | The value names slots. Sootland writes FCh to the slot register, for RAM in slot 3, and crashes on the Sanyo PHC-28S. Without Nextor, that machine's BASIC keeps page 3 in the internal RAM, slot 0, and the RAM cartridge in slot 1 holds pages 0 to 2, so a patch to 14h keeps page 3 there and selects slot 1 for pages 1 and 2. The capture makes such a patch itself for a fixed value ([Slot patches](#slot-patches)), so a game file needs one only for a value that the game computes |
 | A `snapshot` that a real machine needs | Tokyo Nampa Street's snapshot comes after its music only because of the real PHC-28S ([Limits](#limits)) |
 
@@ -240,34 +259,40 @@ better dump uses that one. Its `side2` lines pair the Side A and Side B files of
 game, its `continue` lines come from the key that the capture reports, its
 `service no` lines from games played to their end, and its `patch` lines from
 `check.py` and from traces of failed loads. The lines that hold only on one machine
-are in the game's machine's game file ([Game file](#game-file)): 36 games have one
-for the Sanyo PHC-28S, `advanced-phc28s.txt`, 68 for the Philips VG-8020,
-`basic-vg8020.txt`, 46 for the Philips NMS 8250, `basic-nms8250.txt`, 9 for the Sony
-HB-F700P, `advanced-hbf700p.txt`, and 51 for the PicoVerse-like `basic/picoverse`,
-`basic-picoverse.txt`. The other game files hold on any machine. It also ships these
-machine files, each checked with `check.py` and a single-load game:
+are in that machine's game file ([Game file](#game-file)), and the other game files
+hold on any machine. It also ships these machine files, each checked with `check.py`
+and a single-load game, with the number of machine's game files that each has:
 
-| File | Configuration |
-|---|---|
-| `basic/vg8020` | Philips VG-8020: an MSX1 with 64 KB and a Carnivore2 |
-| `basic/nms8250` | Philips NMS 8250: an MSX2 with its own 128 KB and a floppy drive, and a Carnivore2 under Nextor, for the cartridge with a mapper and a disk interface that most MSX2 owners use |
-| `basic/msx2ide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. Its own 128 KB leave Nextor too few free segments |
-| `basic/picoverse` | Philips VG-8020 with a Sunrise IDE interface under Nextor and a 192 KB memory mapper, as the PicoVerse cartridge has them. `openMSX` has no PicoVerse, so these two cartridges stand in for it, and the Makefile makes the 192 KB mapper from `openMSX`'s 512 KB one |
-| `advanced/phc28s` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 |
-| `advanced/mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup, which boots MSX-DOS from the ROM disk in its flash, with the check's disk in SD card slot 1 as drive B: |
-| `advanced/hbf700p` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. Its own mapper holds 256 KB |
-
-It also ships these capture variants ([Machine file](#machine-file)), which the
-games' `capture` lines name:
-
-| File | Leaves out | Used by |
+| File | Configuration | Machine's game files |
 |---|---|---|
-| `advanced/phc28s-nodisk` | The Carnivore2, and so Nextor | 20 games that crash when a disk system is present, or that select RAM by fixed slot values |
-| `advanced/phc28s-noslot1` | The RAM cartridge in slot 1 | 10 games whose loader trips over it |
-| `basic/vg8020-nodisk` | The Carnivore2, and so Nextor | 67 games that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
-| `basic/nms8250-nocarnivore2` | The Carnivore2, and so Nextor | 46 games that fail in a capture with the Carnivore2 in slot 1 |
-| `basic/picoverse-nomapper` | The PicoVerse-like cartridge, and so its mapper and Nextor | 51 games whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go straight to their slot, without holding segments |
-| `advanced/hbf700p-noram` | The RAM cartridge in slot 1 | 8 games of the collection, Sootland among them, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch ([The RAM search patch](#the-ram-search-patch)) |
+| `vg8020-carnivore2` | Philips VG-8020: an MSX1 with 64 KB and a Carnivore2 | 123 |
+| `nms8250-carnivore2` | Philips NMS 8250: an MSX2 with its own 128 KB and a floppy drive, and a Carnivore2 under Nextor, for the cartridge with a mapper and a disk interface that most MSX2 owners use | 54 |
+| `nms8245-ram512k-sunriseide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. Its own 128 KB leave Nextor too few free segments | 0 |
+| `vg8020-picoverse` | Philips VG-8020 with a Sunrise IDE interface under Nextor and a 192 KB memory mapper, as the PicoVerse cartridge has them. `openMSX` has no PicoVerse, so these two cartridges stand in for it, and the Makefile makes the 192 KB mapper from `openMSX`'s 512 KB one | 54 |
+| `phc28s-ram64k-carnivore2` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 | 89 |
+| `hb75p-mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup, which boots MSX-DOS from the ROM disk in its flash, with the check's disk in SD card slot 1 as drive B: | 0 |
+| `hbf700p-ram512k-msxdos2` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. Its own mapper holds 256 KB | 8 |
+| `vg8020-sdmapper` | Philips VG-8020 with an SD Mapper v1: its 512 KB mapper and Nextor on its SD cards. The Makefile downloads the cartridge's firmware, `SDMAPPER.ROM` 1.0.7, which `openMSX` needs | 0 |
+| `xp800-sdmapper` | Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1, as `vg8020-sdmapper` | 0 |
+| `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4, which the Makefile makes. `openMSX`'s stock flash also holds a ROM disk, whose `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, which skips the FS-A1's Desk Pac menu | 0 |
+| `hbf1xd-mfrsd` | Sony HB-F1XD: an MSX2 with 64 KB, no mapper and a floppy drive, with the MegaFlashROM SCC+ SD of `fsa1-mfrsd` | 0 |
+| `vg8235` | Philips VG-8235: an MSX2 with a 128 KB mapper and a single-sided floppy drive, without cartridges. It boots MSX-DOS 1 from a 360 KB disk | 0 |
+
+It also ships these capture variants in `machines/capture/`
+([Machine file](#machine-file)), which the games' `capture` lines name. A row is a
+variant and a machine that lists it, and its count is the number of that machine's
+game files whose `capture` line names the variant:
+
+| Variant | Machine | Leaves out | Used by |
+|---|---|---|---|
+| `phc28s-ram64k` | `phc28s-ram64k-carnivore2` | The Carnivore2, and so Nextor | 69 game files that crash when a disk system is present, or that select RAM by fixed slot values |
+| `phc28s-empty-carnivore2` | `phc28s-ram64k-carnivore2` | The RAM cartridge in slot 1 | 9 game files whose loader trips over it |
+| `vg8020` | `vg8020-carnivore2` | The Carnivore2, and so Nextor | 121 game files that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
+| `vg8020` | `vg8020-picoverse` | The PicoVerse-like cartridge, and so its mapper and Nextor | 54 game files whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go straight to their slot, without holding segments |
+| `nms8250` | `nms8250-carnivore2` | The Carnivore2, and so Nextor | 54 game files that fail in a capture with the Carnivore2 in slot 1 |
+| `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 8 game files, Sootland among them, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch ([The RAM search patch](#the-ram-search-patch)) |
+| `vg8020` | `vg8020-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
+| `xp800` | `xp800-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 
 ## Tape files
 
@@ -988,9 +1013,9 @@ service into T0, and nothing of it stays in page 3. `build.py` also takes this m
 itself when no part of page 3 has room at the snapshot, so a game file needs
 `service t0` only for a game whose page 3 is free at the snapshot but not in a later
 load, as Moonwalker's is. The line goes in the game file of each machine that needs
-it: Moonwalker's is in `advanced-phc28s.txt`. The service's part of page 3 exists
-only because the service switches page 0 while it runs, so this mode removes the
-three switches:
+it: Moonwalker's is in `phc28s-ram64k-carnivore2.txt`. The service's part of page 3
+exists only because the service switches page 0 while it runs, so this mode removes
+the three switches:
 
 | Switch | Without a part in page 3 |
 |---|---|
@@ -1258,6 +1283,8 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 
 | Decision | Reason |
 |---|---|
+| A machine file named after its model and cartridges, such as `phc28s-ram64k-carnivore2` | A machine file is a model and the cartridges in its slots, and two setups of one model need two names. The first names, such as `advanced/phc28s`, named only the model, and folders split the machines by how hard they are to set up ([Machine file](#machine-file)) |
+| A capture variant named after the cartridges that it holds, in `machines/capture/`, and listed by the machine file's `variant` lines | The first variants were named after their machine and the cartridge that they leave out, such as `advanced/phc28s-nodisk`, and the tools found them by that prefix. With the new machine names, that rule gives names such as `phc28s-ram64k-carnivore2-nocarnivore2`. A name that lists the cartridges says what the capture ran on, and one variant can serve two machines, as `vg8020` does ([Machine file](#machine-file)) |
 | One reader for each tape format, and a format-neutral tape model for the rest of the code | A TSX file holds the turbo blocks that a CAS file cannot, so converting it to CAS would lose the games that need TSX. Teaching each tool both formats would mix them in every tool, while the model keeps each format in one file ([Tape files](#tape-files)) |
 | A game file for each program of a compilation, named after its game | A player looks for a game by its name, and an image named after the tape holds only the tape's first program. One game file for the tape, with a line for each program, would keep the tape's `cas` and `sha1` lines in one place, but it needs game files with sections and changes to every tool and to the collection's cache, to save two lines for each program ([A game later on the tape](#a-game-later-on-the-tape)) |
 | Every program of a compilation in the collection's folder, even when the game has a dump of its own | A compilation's copy can differ from that dump: of 112 such programs on the Engesoft and Super MSX tapes, none had game blocks that equal the dump's, because the magazines renamed the games and changed their title screens. A folder for each collection keeps their names, such as `GOLF` or `STAR`, apart from the games of `games/`. This replaces the rule that gave such a program no game file |
@@ -1310,9 +1337,9 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 - Without a part in page 3, T0 has no room for `TAPIN`'s skip of a header and of
   side 1's padding, so a game that reads on with `TAPIN` into the next block or side
   gets the header's bytes in that mode.
-- The shipped machine's game files, `advanced-phc28s.txt` and `basic-vg8020.txt`,
-  hold only on their machine. On another machine, the games that have one may need a
-  machine's game file of their own for that machine.
+- The shipped machine's game files, `phc28s-ram64k-carnivore2.txt` and
+  `vg8020-carnivore2.txt`, hold only on their machine. On another machine, the games
+  that have one may need a machine's game file of their own for that machine.
 - A game in the mode without a part in page 3 has only the automatic tape, because
   T0 has no room for the manual tape ([The manual tape](#the-manual-tape)).
 - With `/M`, a game that stops the motor between two loads without a message on the
