@@ -100,63 +100,26 @@ GAUNTLET   Gauntlet (1986)(US Gold)(Side A)[RUN'CAS-']
 1 game
 
 $ python3 snapcas.py --machines
+fsa1-mfrsd                  Panasonic FS-A1 with a MegaFlashROM SCC+ SD
 hb75p-mfrsd                 Sony HB-75P with a MegaFlashROM SCC+ SD
+hbf1xd-mfrsd                Sony HB-F1XD with a MegaFlashROM SCC+ SD
 hbf700p-ram512k-msxdos2     Sony HB-F700P with a 512 KB RAM cartridge and MSX-DOS 2
 nms8245-ram512k-sunriseide  Philips NMS 8245 with a 512 KB RAM cartridge and a Sunrise IDE
 nms8250-carnivore2          Philips NMS 8250 with a Carnivore2
 phc28s-ram64k-carnivore2    Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2
 vg8020-carnivore2           Philips VG-8020 with a Carnivore2
 vg8020-picoverse            Philips VG-8020 with a PicoVerse
+vg8020-sdmapper             Philips VG-8020 with an SD Mapper
+vg8235                      Philips VG-8235, without cartridges
+xp800-sdmapper              Gradiente Expert XP-800 with an SD Mapper
 ```
 
 ## Machine names
 
-A machine file describes a machine and its cartridges, so its name says both: the
-model, then each cartridge in slot order, in `openMSX`'s names for them in lower
-case, with `empty` for an empty slot before a cartridge. The user machines are in
-`machines/`, and the `basic/` and `advanced/` folders go:
-
-| Today | Name | What it is |
-|---|---|---|
-| `advanced/phc28s` | `phc28s-ram64k-carnivore2` | Sanyo PHC-28S, a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2 |
-| `basic/vg8020` | `vg8020-carnivore2` | Philips VG-8020 and a Carnivore2 |
-| `basic/nms8250` | `nms8250-carnivore2` | Philips NMS 8250 and a Carnivore2 |
-| `basic/msx2ide` | `nms8245-ram512k-sunriseide` | Philips NMS 8245, a 512 KB RAM cartridge and a Sunrise IDE |
-| `basic/picoverse` | `vg8020-picoverse` | Philips VG-8020 and a PicoVerse, for which two cartridges stand in |
-| `advanced/mfrsd` | `hb75p-mfrsd` | Sony HB-75P and a MegaFlashROM SCC+ SD |
-| `advanced/hbf700p` | `hbf700p-ram512k-msxdos2` | Sony HB-F700P, a 512 KB RAM cartridge and an MSX-DOS 2 cartridge |
-
-A capture variant is named in the same way, after the cartridges that it holds, and
-not after the cartridge that it leaves out. The variants are in `machines/capture/`,
-so `--machines` lists only the machines that a user can pick. Each machine file
-lists its variants with `variant` lines, in the order in which `snapcas` tries them:
-
-```
-# Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2
-openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2
-disk hda
-boot "DefConfig" space
-variant phc28s-ram64k
-variant phc28s-empty-carnivore2
-```
-
-| Machine | Its variants | Today |
-|---|---|---|
-| `phc28s-ram64k-carnivore2` | `phc28s-ram64k`, `phc28s-empty-carnivore2` | `advanced/phc28s-nodisk`, `advanced/phc28s-noslot1` |
-| `vg8020-carnivore2` | `vg8020` | `basic/vg8020-nodisk` |
-| `nms8250-carnivore2` | `nms8250` | `basic/nms8250-nocarnivore2` |
-| `vg8020-picoverse` | `vg8020` | `basic/picoverse-nomapper` |
-| `hbf700p-ram512k-msxdos2` | `hbf700p-msxdos2` | `advanced/hbf700p-noram` |
-
-A variant names one `openMSX` setup, so two machines that leave out their cartridges
-share it, as both VG-8020 machines share `vg8020`. A game's `capture` line, such as
-`capture phc28s-ram64k`, is in the machine's game file, which names the machine the
-image is for, so the line needs no machine of its own. A machine's game file takes
-the machine's name, such as `games/X/phc28s-ram64k-carnivore2.txt`.
-
-The rename changes about 220 machine game files and their `capture` lines, the
-Makefile, the tests, DESIGN.md and the README. The collection's results are kept by
-machine name, so its next run checks every game file again.
+A machine's name is its model and then its cartridges in slot order, such as
+`phc28s-ram64k-carnivore2`, and its capture variants are named in the same way
+([DESIGN.md, Machine file][machine]). These names are in place already, so the
+command needs no change of its own to them.
 
 ## Download
 
@@ -214,8 +177,6 @@ at the first copy that differs. It never deletes a file on the card.
 | Decision | Rejected | Why |
 |---|---|---|
 | The main use is `snapcas.py <game> <machine>`, with no subcommand, and the lists are options | Subcommands, such as `make`, `list` and `download` | The main use is one line of two words. A separate download step adds nothing, because the main use downloads what it needs |
-| A machine named by its model and cartridges, such as `phc28s-ram64k-carnivore2` | The model alone, such as `phc28s` | A machine file is a model and its cartridges, and two machines of one model need two names |
-| A capture variant named by the cartridges that it holds, in `machines/capture/`, and listed by `variant` lines | A variant named after its machine and the cartridge it leaves out, found by that prefix | A name such as `phc28s-ram64k-carnivore2-nocarnivore2` is hard to read, and one variant can serve two machines |
 | A machine given by a start of its name, such as `phc28s` | Only the full name | The user types the short part, and a start that matches several machines stops the command |
 | The game by its folder, or by a text that matches one game | Only the folder | The user knows the title. Several matches stop the command, so it never makes the wrong game |
 | One command, `snapcas.py`, at the repository's top. It takes over `tools/snapcas.py`, whose steps it runs | A new command beside `tools/snapcas.py` | Two commands that make an image would need two sets of docs and tests |
