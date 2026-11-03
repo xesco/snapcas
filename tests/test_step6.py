@@ -1,5 +1,5 @@
 """Step 6 (docs/PLAN.md): the scan's patterns, on bytes made for each case,
-and the scan of each file of CAS_DIR that needs the tape service (DESIGN.md,
+and the scan of each tape of the corpus that needs the tape service (DESIGN.md,
 Scan)."""
 import concurrent.futures
 import hashlib
@@ -23,6 +23,15 @@ WORK = os.path.join(ROOT, "out", "test", "step6")
 
 # Side 2 files, by the side 1 file of their game.
 SIDE2 = {"GAUNTLET.CAS": "GAUNTLEB.CAS", "TOUR-91.CAS": "TOUR-91B.CAS", "SOOTLAND.CAS": "SOOTLANB.CAS"}
+
+# The corpus that Corpus scans: side 1 of each of its games, whose files are
+# in CAS_DIR with the tapes of the other tests.
+CORPUS = ("022-MOON.CAS", "ABADIA.CAS", "ABU-SIMB.CAS", "AMOTO-S.CAS", "BATMAN.CAS", "BESTIAL.CAS", "CALDERO.CAS",
+          "CAMELOT.CAS", "CHICAGO.CAS", "COBRA-S.CAS", "COMPUTAD.CAS", "DESPERAD.CAS", "DUSTIN.CAS", "FERNANDO.CAS",
+          "FREDDY.CAS", "GAUNTLET.CAS", "GHOSTB85.CAS", "ITALIA.CAS", "JET-BOMB.CAS", "KNIGHTMA.CAS", "LIVINGST.CAS",
+          "MAD-MIDE.CAS", "MAD-MIX.CAS", "MOONWALK.CAS", "MORTADEL.CAS", "MOTORIST.CAS", "NONAMED.CAS",
+          "SIR-FRED.CAS", "SOOTLAND.CAS", "TETRIS.CAS", "THING-BO.CAS", "TOUR-91.CAS", "TUAREG.CAS", "TURBO-GI.CAS",
+          "WORLD-CU.CAS", "YIE-AR.CAS", "YIE-ARII.CAS", "ZANAC.CAS")
 
 # The findings confirmed by hand, by file.
 CONFIRMED = {
@@ -115,7 +124,7 @@ def scan_file(cas, prefix="scan-"):
         result = test_step4.tool(step, folder, MACHINE, "--tapes", CAS_DIR)
         if result.returncode != 0:
             return f"{step}: {result.stderr.strip()}"
-    with open(os.path.join(ROOT, "out", MACHINE, name, "scan.txt")) as f:
+    with open(os.path.join(WORK, "games", name, MACHINE, "scan.txt")) as f:
         text = f.read()
     return None if text.startswith("No tape service") else text
 
@@ -124,9 +133,8 @@ def scan_file(cas, prefix="scan-"):
 class Corpus(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
-        files = sorted(f for f in os.listdir(CAS_DIR)
-                       if f.upper().endswith(".CAS") and f not in SIDE2.values())
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
+        files = [f for f in CORPUS if os.path.isfile(os.path.join(CAS_DIR, f))]
         with concurrent.futures.ThreadPoolExecutor(6) as pool:
             cls.scans = dict(zip(files, pool.map(scan_file, files)))
         with open(os.path.join(WORK, "report.txt"), "w") as f:
@@ -165,14 +173,14 @@ def play(cas):
         return report, {}
     inputs, seconds = PLAYS[cas]
     test_step5.PLAYS[name] = (name, inputs, seconds, {})
-    return report, test_step5.play(name)
+    return report, test_step5.play(name, os.path.join(WORK, "games"))
 
 
 @unittest.skipUnless(os.path.isdir(CAS_DIR), "CAS_DIR names no folder of CAS files")
 class Stubs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
         with concurrent.futures.ThreadPoolExecutor(3) as pool:
             cls.plays = dict(zip(PLAYS, pool.map(play, PLAYS)))
 
@@ -190,7 +198,7 @@ class Stubs(unittest.TestCase):
 class WithoutAPartInPage3(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
         folder = os.path.join(WORK, "games", "t0-moonwalk")
         os.makedirs(folder, exist_ok=True)
         with open(os.path.join(folder, "game.txt"), "w") as f:
@@ -203,7 +211,7 @@ class WithoutAPartInPage3(unittest.TestCase):
                 return
         cls.report = test_step4.tool("check.py", folder, MACHINE, "--dos", test_step4.NEXTOR).stdout
         test_step5.PLAYS["t0-moonwalk"] = ("t0-moonwalk", ["space"] * 3, 120, {}, True)
-        cls.values = test_step5.play("t0-moonwalk") if cls.report.startswith("point 1: pass") else {}
+        cls.values = test_step5.play("t0-moonwalk", os.path.join(WORK, "games")) if cls.report.startswith("point 1: pass") else {}
 
     def test_moonwalker_loads_its_main_game_through_t0(self):
         self.assertIsNone(self.error)
@@ -244,16 +252,16 @@ patch side1:024E 3E FC D3 A8 > 3E 14 D3 A8
 class PatchedTape(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
         cls.report = capture_build_check("patched-sootland", SOOTLAND, CAS_DIR)
-        snap = os.path.join(ROOT, "out", MACHINE, "patched-sootland", "snap")
+        snap = os.path.join(WORK, "games", "patched-sootland", MACHINE, "snap")
         with open(os.path.join(snap, "log.txt")) as f:
             cls.log = f.read()
         with open(os.path.join(snap, "state.txt")) as f:
             cls.state = dict(line.split(" ", 1) for line in f.read().splitlines())
 
     def test_the_capture_loads_the_patched_tape(self):
-        with open(os.path.join(ROOT, "out", MACHINE, "patched-sootland", "snap", "side1.cas"), "rb") as f:
+        with open(os.path.join(WORK, "games", "patched-sootland", MACHINE, "snap", "side1.cas"), "rb") as f:
             self.assertEqual(f.read()[0x24E:0x252], bytes.fromhex("3E 14 D3 A8"))
 
     def test_the_capture_turns_the_tape_over(self):
@@ -289,7 +297,7 @@ def borrow_tape():
 class BorrowedBySlot(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
         tapes = os.path.join(WORK, "tapes")
         os.makedirs(tapes, exist_ok=True)
         with open(os.path.join(tapes, "BORROW.CAS"), "wb") as f:
@@ -303,12 +311,12 @@ class BorrowedBySlot(unittest.TestCase):
         cls.header = b""
         cls.values = {}
         if cls.report.startswith("point 1: pass"):
-            with open(os.path.join(ROOT, "out", MACHINE, "t0-borrow", "T0BORROW.SNP"), "rb") as f:
+            with open(os.path.join(WORK, "games", "t0-borrow", MACHINE, "T0BORROW.SNP"), "rb") as f:
                 cls.header = f.read(64)
             symbols = borrow_symbols()
             test_step5.PLAYS["t0-borrow"] = ("t0-borrow", [], 90,
                                              {"passed": symbols["passed"], "failed": symbols["failed"]}, True)
-            cls.values = test_step5.play("t0-borrow")
+            cls.values = test_step5.play("t0-borrow", os.path.join(WORK, "games"))
 
     def test_tapin_borrows_page_2_outside_the_mapper(self):
         self.assertTrue(self.report.startswith("point 1: pass"), self.report)

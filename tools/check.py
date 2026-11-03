@@ -6,7 +6,7 @@ Usage: check.py <game> <machine> --dos <dir>
 
 <game> and <machine> are as for capture.py. <dir> holds the DOS system files:
 NEXTOR.SYS and COMMAND2.COM, MSXDOS2.SYS and COMMAND2.COM, or MSXDOS.SYS and
-COMMAND.COM. The report goes to out/<machine>/<game>/check/report.txt.
+COMMAND.COM. The report goes to check/report.txt in the game's work folder.
 
 Exit status: 0 when the check passes, 1 for an error in the input files, 2
 when openMSX fails, 3 when the check fails.
@@ -106,7 +106,7 @@ def main():
             raise OSError(f"{args.dos}: no DOS system files")
         out = gamefile.out_folder(args.machine, folder)
         snap = os.path.join(out, "snap")
-        image = os.path.join(out, f"{game.name}.SNP")
+        image = gamefile.image_path(args.machine, folder, game.name)
         state = build.read_state(snap)
         if not os.path.exists(image):
             raise OSError(f"{image}: no image; run build.py first")

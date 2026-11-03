@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step4  # noqa: E402
 import test_step9  # noqa: E402
 
-COLLECTION = os.path.join(test_step4.CAS_DIR, "collection")
+COLLECTION = test_step4.CAS_DIR
 WORK = os.path.join(ROOT, "out", "test", "step16")
 
 # The game files that Reboots checks, as name: the shipped game file's folder
@@ -66,7 +66,7 @@ TAPES = ("SUPER-09.CAS", "SUPERMOB.CAS", "ENCHANTE.CAS", "016-ROBE.CAS", "SUPERM
 class Reboots(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
         with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
             cls.reports = dict(zip(GAMES, pool.map(check, GAMES)))
 

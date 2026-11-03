@@ -51,6 +51,26 @@ class Machine:
         self.variants = variants  # the capture variants' names, in the order to try them
 
 
+def user_machines():
+    """The names of the user machines, the machine files in machines/ itself,
+    in order (DESIGN.md, Machine file)."""
+    return sorted(f[:-4] for f in os.listdir(MACHINES)
+                  if f.endswith(".txt") and os.path.isfile(os.path.join(MACHINES, f)))
+
+
+def description(path):
+    """What a machine file says that the machine is: its first comment's first
+    sentence, up to its first full stop or colon, on one line."""
+    lines = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            if not line.startswith("#"):
+                break
+            lines.append(line[1:].strip())
+    text = " ".join(lines)
+    return re.split(r"[.:](?:\s|$)", text, maxsplit=1)[0]
+
+
 def machine_path(machine):
     """The machine file of a machine: its name, such as phc28s-ram64k-carnivore2,
     or a test machine's path below machines/, such as test/nms8250-128k."""
@@ -156,6 +176,19 @@ def run(args, script, timeout):
              "-command", "set renderer none; set throttle off; set mute on"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             timeout=timeout, check=False)
+    finally:
+        os.unlink(path)
+
+
+def run_window(args, script):
+    """Runs openMSX with its window and the user's settings, sound included,
+    the given arguments and Tcl script text, until the user closes it, and
+    returns its exit status."""
+    with tempfile.NamedTemporaryFile("w", suffix=".tcl", delete=False) as f:
+        f.write(tcl("tcl/prelude.tcl") + script)
+        path = f.name
+    try:
+        return subprocess.run(["openmsx", *args, "-script", path]).returncode
     finally:
         os.unlink(path)
 

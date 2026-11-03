@@ -1,4 +1,11 @@
-/out/
-/tapes/
-/dos/
 __pycache__/
+/custom/*
+!/custom/README.md
+/downloads/*
+!/downloads/README.md
+/dos/*
+!/dos/README.md
+/images/*
+!/images/README.md
+/out/*
+!/out/README.md

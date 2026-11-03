@@ -26,30 +26,50 @@ game starts.
 
 - An MSX with a memory mapper and a disk system, such as MSX-DOS or Nextor.
 - A computer with Python 3 and the emulator `openMSX`.
-- The game's CAS or TSX file.
+- A network connection, from which `snapcas` downloads the game's tape file from
+  File-Hunter, or the tape file itself, a CAS or TSX file.
 
 ## Get started
 
 This example makes Gauntlet for a Sanyo PHC-28S.
 
-1. Find Gauntlet in `games/GAUNTLET/game.txt`. Its first lines have the link to
-   download `GAUNTLET.CAS`. Put the file in a folder, for example `~/tapes`.
-2. Find your MSX in the `machines/` folder. A file's name is the MSX's model, then
-   its cartridges in slot order. A Sanyo PHC-28S with a 64 KB RAM cartridge in slot
-   1 and a Carnivore2 in slot 2 is `machines/phc28s-ram64k-carnivore2.txt`. You will
-   call it `phc28s-ram64k-carnivore2`.
+1. Find the game:
+
+   ```
+   ./snapcas.py list gauntlet
+   ```
+
+   It shows `GAUNTLET`, the folder of `games/GAUNTLET/game.txt`, and the File-Hunter
+   file that the game comes from.
+2. Find your MSX:
+
+   ```
+   ./snapcas.py machines
+   ```
+
+   A machine's name is the MSX's model, then its cartridges in slot order. A Sanyo
+   PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2 is
+   `phc28s-ram64k-carnivore2`. Give the whole name, because each cartridge changes
+   the image.
 3. Make the `.SNP` file:
 
    ```
-   python3 tools/snapcas.py GAUNTLET phc28s-ram64k-carnivore2 --tapes ~/tapes
+   ./snapcas.py snap gauntlet phc28s-ram64k-carnivore2
    ```
 
-   You get `out/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`.
+   It downloads the game's two tape files from File-Hunter into the `downloads/`
+   folder, `GAUNTLET.CAS` and `GAUNTLEB.CAS`, unless they are there. You get
+   `images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`.
 4. Copy `bin/SNAPCAS.COM` and `GAUNTLET.SNP` to your MSX's disk. On the MSX, type:
 
    ```
    SNAPCAS GAUNTLET
    ```
+
+   To put all your images for an MSX on its SD card at once, run
+   `./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX` with the card's folder.
+   On the MSX, go to the game's letter first: `CD \SNAPCAS\G`, then
+   `\BIN\SNAPCAS GAUNTLET` ([CLI.md, Sync a card](docs/CLI.md#sync-a-card)).
 
 ## Tape keys
 
@@ -89,10 +109,13 @@ press GRAPH or CODE to wind the tape back. With a few games, `/M` does not work.
 | Folder | What it holds |
 |---|---|
 | `games/` | A game file for each MSX1 CAS game, without the game itself |
+| `custom/` | Your own games, each with its game file and its tapes ([custom/README.md](custom/README.md)) |
 | `machines/` | One file for each MSX with its cartridges |
 | `tools/` | The programs that make `.SNP` files |
 | `bin/` | `SNAPCAS.COM`, which starts a `.SNP` file on your MSX |
-| `out/` | The `.SNP` files that you make |
+| `downloads/` | The tape files that `snapcas` downloads from File-Hunter |
+| `images/` | The `.SNP` files that you make, one folder per MSX |
+| `out/` | The files that `snapcas` makes on the way, which you do not need |
 | `docs/`, `src/`, `tests/` | The project's documents, source code and tests |
 
 ## Learn more

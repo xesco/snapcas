@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step4  # noqa: E402
 import test_step9  # noqa: E402
 
-COLLECTION = os.path.join(test_step4.CAS_DIR, "collection")
+COLLECTION = test_step4.CAS_DIR
 WORK = os.path.join(ROOT, "out", "test", "step17")
 MACHINE = "phc28s-ram64k-carnivore2"
 
@@ -79,7 +79,7 @@ GAMES = {
 class Builds(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
         with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
             cls.results = dict(zip(GAMES, pool.map(lambda n: build_game(n, *GAMES[n]), GAMES)))
 

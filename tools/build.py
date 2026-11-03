@@ -3,9 +3,9 @@
 
 Usage: build.py <game> <machine> --tapes <dir> [--service <file>]
 
-<game> and <machine> are as for capture.py. The image goes to
-out/<machine>/<game>/<GAME>.SNP, with scan.txt beside it. --service names the
-SERVICE.BIN to use, by default bin/SERVICE.BIN.
+<game> and <machine> are as for capture.py. The image, <GAME>.SNP, scan.txt and
+build.txt go to the game's work folder (gamefile.out_folder). --service names
+the SERVICE.BIN to use, by default bin/SERVICE.BIN.
 
 Exit status: 0 on success, 1 for an error in the input files.
 """
@@ -677,7 +677,7 @@ def main():
     except (OSError, gamefile.GameFileError, BuildError, tape.TapeError) as e:
         print(f"build.py: {e}", file=sys.stderr)
         return 1
-    image = os.path.join(out, f"{game.name}.SNP")
+    image = gamefile.image_path(args.machine, folder, game.name)
     with open(image, "wb") as f:
         f.write(header)
         for chunk in data:

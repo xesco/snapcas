@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step2  # noqa: E402
 
 CAS_DIR = test_step2.CAS_DIR
-NEXTOR = os.environ.get("NEXTOR_DIR", os.path.join(ROOT, "out", "dl", "nextor"))
+NEXTOR = os.environ.get("NEXTOR_DIR", os.path.join(ROOT, "dos", "nextor"))
 DOS_DIR = os.environ.get("DOS_DIR", os.path.join(ROOT, "dos"))
 WORK = os.path.join(ROOT, "out", "test", "step4")
 
@@ -52,6 +52,13 @@ MACHINES = {
 def tool(name, *args):
     return subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", name), *args],
                           capture_output=True, text=True)
+
+
+def command(*args):
+    """Runs the snapcas command, snapcas.py at the repository's top, with the
+    tests' tapes in place of downloads/."""
+    return subprocess.run([sys.executable, "-I", os.path.join(ROOT, "snapcas.py"), *args],
+                          capture_output=True, text=True, env=dict(os.environ, SNAPCAS_DOWNLOADS=CAS_DIR))
 
 
 def restore(game, machine):

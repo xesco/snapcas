@@ -3,21 +3,20 @@
 #   make        print this help
 #   make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN
 #   make test   run the tests in openMSX
-#   make try    start openMSX as phc28s-ram64k-carnivore2, with SNAPCAS.COM and
-#               the images in out/try/ on its disk: MACHINE= and FILES= change them
+#   make games  make and check every shipped game file's image on MACHINE=
 #
-# The tests read the tape files from CAS_DIR, by default tapes/, and MSX-DOS's
-# system files from DOS_DIR, by default dos/, with msxdos1/ and msxdos2/: git
-# ignores both, because snapcas cannot ship them. The tests that need them are
-# skipped when the folders do not exist.
+# The tests read their tape files from tests/tapes/, and MSX-DOS's system files
+# from DOS_DIR, by default dos/, with msxdos1/ and msxdos2/: git ignores dos/,
+# because snapcas cannot ship MSX-DOS. The tests that need it are skipped when
+# the folders do not exist.
 #
-# The Makefile downloads its tools into out/, each pinned by version and SHA-256:
-# the sjasmplus assembler's source, which it builds, Nextor's NEXTOR.SYS and
-# COMMAND2.COM for the test disks, and two cartridges' firmware: the SD Mapper's
-# SDMAPPER.ROM and Nextor's ROM for the MegaFlashROM SCC+ SD. The tests run
-# openMSX 22.0 from the path, in a home of their own, out/openmsx-home, whose
-# system ROMs are a link to the user's and that firmware, so that they leave the
-# user's openMSX settings alone.
+# The Makefile downloads Nextor's NEXTOR.SYS and COMMAND2.COM into dos/nextor/,
+# and its tools into out/cache/, each pinned by version and SHA-256: the sjasmplus
+# assembler's source, which it builds, and two cartridges' firmware: the SD
+# Mapper's SDMAPPER.ROM and Nextor's ROM for the MegaFlashROM SCC+ SD. The tests
+# run openMSX 22.0 from the path, in a home of their own, out/cache/openmsx-home,
+# whose system ROMs are a link to the user's and that firmware, so that they
+# leave the user's openMSX settings alone.
 
 SJASMPLUS_VERSION := 1.24.0
 SYSTEMROMS ?= $(HOME)/.openMSX/share/systemroms
@@ -26,33 +25,19 @@ SYSTEMROMS ?= $(HOME)/.openMSX/share/systemroms
 OPENMSX_BIN := $(dir $(realpath $(shell command -v openmsx)))
 OPENMSX_SHARE ?= $(firstword $(wildcard $(OPENMSX_BIN)../openMSX.app/Contents/Resources/share \
                    $(OPENMSX_BIN)../Resources/share /usr/share/openmsx /usr/local/share/openmsx))
-CAS_DIR ?= tapes
-COLLECTION_DIR ?= $(CAS_DIR)/collection
-COLLECTION_MACHINES ?= phc28s-ram64k-carnivore2 vg8020-carnivore2
-COLLECTION_WORKERS ?= 11
-COLLECTION_FULL ?=
 DOS_DIR ?= dos
 
 OUT       := out
-DL        := $(OUT)/dl
-SJASMPLUS := $(OUT)/tools/sjasmplus
-NEXTOR    := $(DL)/nextor
-EMU_HOME  := $(OUT)/openmsx-home
+CACHE     := $(OUT)/cache
+DL        := $(CACHE)/dl
+SJASMPLUS := $(CACHE)/tools/sjasmplus
+NEXTOR    := $(DOS_DIR)/nextor
+EMU_HOME  := $(CACHE)/openmsx-home
 
 help:
 	@echo "make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN"
-	@echo "make test   run the tests in openMSX: CAS_DIR=, by default tapes/, holds the"
-	@echo "            tape files, the TSX files in tsx/, and DOS_DIR=, by default dos/,"
-	@echo "            MSX-DOS's system files"
-	@echo "make collection  capture, build and check every game file of games/ on"
-	@echo "            COLLECTION_MACHINES, by default phc28s-ram64k-carnivore2 and"
-	@echo "            vg8020-carnivore2, with the CAS files of COLLECTION_DIR, by default"
-	@echo "            CAS_DIR/collection, into out/test/step9/collection/<machine>.txt:"
-	@echo "            takes hours. A game file whose inputs and the code are unchanged"
-	@echo "            keeps its last result, unless COLLECTION_FULL=1."
-	@echo "            COLLECTION_WORKERS=, by default 11, runs that many at once"
-	@echo "make try    start openMSX as phc28s-ram64k-carnivore2 with SNAPCAS.COM and the"
-	@echo "            images in out/try/ on its disk: MACHINE= and FILES= change them"
+	@echo "make test   run the tests"
+	@echo "make games  check every game in downloads"
 	@echo "make clean  remove the built files and the test output"
 
 all: bin/SNAPCAS.COM bin/SERVICE.BIN
@@ -75,11 +60,11 @@ $(OUT)/borrow.bin: tests/borrow.asm $(SJASMPLUS)
 	$(SJASMPLUS) --nologo --raw=$@ --sym=$(OUT)/borrow.sym $<
 
 $(SJASMPLUS): $(DL)/sjasmplus-$(SJASMPLUS_VERSION)-src.tar.xz
-	rm -rf $(OUT)/tools/src
-	mkdir -p $(OUT)/tools/src
-	tar -xJf $< -C $(OUT)/tools/src
-	$(MAKE) -C $(OUT)/tools/src/sjasmplus-$(SJASMPLUS_VERSION)
-	cp $(OUT)/tools/src/sjasmplus-$(SJASMPLUS_VERSION)/sjasmplus $@
+	rm -rf $(CACHE)/tools/src
+	mkdir -p $(CACHE)/tools/src
+	tar -xJf $< -C $(CACHE)/tools/src
+	$(MAKE) -C $(CACHE)/tools/src/sjasmplus-$(SJASMPLUS_VERSION)
+	cp $(CACHE)/tools/src/sjasmplus-$(SJASMPLUS_VERSION)/sjasmplus $@
 
 $(DL)/sjasmplus-$(SJASMPLUS_VERSION)-src.tar.xz:
 	python3 -I tools/fetch.py https://github.com/z00m128/sjasmplus/releases/download/v$(SJASMPLUS_VERSION)/sjasmplus-$(SJASMPLUS_VERSION)-src.tar.xz 0b5013f07e8d8505f9e296529655668b6fdf0268625c19e883b0fff484e209f1 $@
@@ -147,24 +132,19 @@ $(RAM192K):
 	mv $@.tmp $@
 
 test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(RAM192K)
-	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
+	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I tests/run.py
 
-# The run over every shipped game file (docs/PLAN.md, step 9), apart from make
-# test because it takes hours.
-collection: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K)
-	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) CAS_DIR=$(abspath $(CAS_DIR)) DOS_DIR=$(abspath $(DOS_DIR)) \
-	  COLLECTION_DIR=$(abspath $(COLLECTION_DIR)) COLLECTION_MACHINES="$(COLLECTION_MACHINES)" \
-	  COLLECTION_WORKERS=$(COLLECTION_WORKERS) COLLECTION_FULL=$(COLLECTION_FULL) \
-	  python3 -I -m unittest discover -s tests -p test_step9.py -k Collection -v
-
 MACHINE ?= phc28s-ram64k-carnivore2
-FILES ?= bin/SNAPCAS.COM $(wildcard $(OUT)/try/*.SNP)
+DOS ?= $(NEXTOR)
+FULL ?=
 
-try: bin/SNAPCAS.COM $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE)
-	OPENMSX_HOME=$(abspath $(EMU_HOME)) python3 -I tools/run.py $(MACHINE) --dos $(NEXTOR) $(FILES)
+# The run over every shipped game file on a machine (docs/DESIGN.md, The games
+# run), apart from make test because it takes hours.
+games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K)
+	OPENMSX_HOME=$(abspath $(EMU_HOME)) python3 -I tools/games.py $(MACHINE) --dos $(DOS) $(if $(FULL),--full)
 
 clean:
 	rm -rf bin $(OUT)/test
 
-.PHONY: help all test collection try clean
+.PHONY: help all test games clean

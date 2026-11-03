@@ -7,16 +7,17 @@ one starts, and the whole test suite runs with one command, `make test`.
 
 ## Test setup
 
-The build pins its tools, and the tests read the CAS files and the MSX-DOS system
-files from two folders that the user names, because `snapcas` cannot ship them.
+The build pins its tools. The tests read their tape files from `tests/tapes/`, in
+git, and the MSX-DOS system files from a folder that the user names, because
+`snapcas` cannot ship MSX-DOS.
 
 | Item | Value |
 |---|---|
 | Assembler | sjasmplus 1.24.0, downloaded and built by the Makefile, checked by SHA-256 |
 | Emulator | `openMSX` 22.0, on the path, with the system ROMs of the test machines and of the `msxdos2` cartridge |
 | Python | Python 3, standard library only |
-| `CAS_DIR` | Make variable: the folder of the user's tape files, by default `tapes/`, which git ignores. Its `tsx/` folder holds the TSX files of step 15 |
-| Nextor | `NEXTOR.SYS` 2.11 and `COMMAND2.COM` 2.44 from Nextor 2.1.0's `tools.zip`, downloaded by the Makefile into `out/dl/nextor/`, checked by SHA-256 |
+| Tapes | `tests/tapes/`: the corpus, the TSX files of step 15, and the collection's tapes that the other steps name |
+| Nextor | `NEXTOR.SYS` 2.11 and `COMMAND2.COM` 2.44 from Nextor 2.1.0's `tools.zip`, downloaded by the Makefile into `dos/nextor/`, checked by SHA-256 |
 | `DOS_DIR` | Make variable: a folder with `msxdos2/` (`MSXDOS2.SYS`, `COMMAND2.COM`) and `msxdos1/` (`MSXDOS.SYS`, `COMMAND.COM`), by default `dos/`, which git ignores |
 
 The test machines are the seven shipped machines and three machine files that only
@@ -214,24 +215,23 @@ check a single-load game on each of the seven shipped machines, then capture, bu
 and check every game file on `phc28s-ram64k-carnivore2` and `vg8020-carnivore2`, and
 write a report of passes and failures.
 
-That run, `make collection`, takes hours, so it keeps a cache beside each machine's
-report: each game file's result, with a hash of its inputs. The inputs are the
-game's folder, its CAS files, the machine files that it runs on, and `bin/` and
-`tools/`. A game file whose hash is unchanged keeps its result, so a run after a fix
-to game files reruns only those, and a change to the code reruns all.
-`COLLECTION_FULL=1` reruns every game file. The run does 11 at once, because the
-efficiency cores of the Mac where it runs count as well.
+That run, `make games MACHINE=<machine>` since step 24, takes hours, so it keeps a
+cache beside each machine's report: each game file's result, with a hash of its
+inputs. The inputs are the game's folder, its tape files, the machine files that it
+runs on, and `bin/` and `tools/`. A game file whose hash is unchanged keeps its
+result, so a run after a fix to game files reruns only those, and a change to the
+code reruns all. `FULL=1` reruns every game file. The run does 11 at once, because
+the efficiency cores of the Mac where it runs count as well.
 
 Some game files fail on a machine in `openMSX` itself, without `snapcas`: a plain
 load of the tape, with the same machine and no capture code, fails there too. Those
 are not failures of `snapcas`, so `tests/openmsx-failures.txt` lists them, with the
-machine, the game file's folder and what fails, to try again at the end. The run's
-test passes when every game file that fails is in that list, and it names the
-others. A listed game file that passes is only noted, for its line to go, because an
+machine, the game file's folder and what fails, to try again at the end. The run
+passes when every game file that fails is in that list, and it names the others. A listed game file that passes is only noted, for its line to go, because an
 `openMSX` failure can come and go. A patch line can still make such a game work
 later. The game files that load in a plain `openMSX` but fail with `snapcas` are its
 own failures, to fix, and `tests/snapcas-failures.txt` lists them in the same form.
-The test does not pass them, so they show until they are fixed.
+The run does not pass them, so they show until they are fixed.
 
 From 1 November 2026 the work focuses on two machines: `phc28s-ram64k-carnivore2`,
 the user's own, and `vg8020-carnivore2`, the plain MSX1. On the other five the
@@ -245,7 +245,7 @@ machine needs as few game files of its own as possible. It adds the slot patches
 the capture and of the scan ([Slot patches](DESIGN.md#slot-patches)), the mode
 without a part in page 3 when page 3 has no room
 ([Without a part in page 3](DESIGN.md#without-a-part-in-page-3)), and the tries of
-`tools/snapcas.py` on the capture variants
+`snapcas.py make` on the capture variants
 ([Files and commands](DESIGN.md#files-and-commands)). The tests check each fix on a
 game that needed it by hand, without its line: Sootland and Finders Keepers for the
 slot patches, Chase H.Q. for the mode, and Sootland on the HB-F700P for the
@@ -259,8 +259,8 @@ files that a machine still needs.
 The user runs the corpus on the Sanyo PHC-28S with the Sony HBM-64 in slot 1 and the
 Carnivore2 in slot 2, and the results go in this page, with the machine and
 cartridges named. A failure that `openMSX` does not show goes in the design's limits
-until it is understood. `make try` starts `openMSX` with the same machine and the
-same files, to compare.
+until it is understood. `./snapcas.py try <game> <machine>` starts `openMSX` with
+the same machine and the image, to compare.
 
 | Date | Machine | Images | Result |
 |---|---|---|---|
@@ -403,7 +403,7 @@ boot screen.
 This step names each machine file after its model and its cartridges, in slot order,
 and moves the capture variants to `machines/capture/` under names of the same form
 ([Machine file](DESIGN.md#machine-file)). Each machine file lists its variants with
-`variant` lines, which `tools/snapcas.py` reads instead of finding the variants by
+`variant` lines, which `snapcas.py make` reads instead of finding the variants by
 their names. The machine's game files take the machines' new names, and their
 `capture` lines the variants' new names. The `openmsx` lines stay as they were, so
 the images do not change.
@@ -412,7 +412,7 @@ the images do not change.
 |---|---|
 | Every shipped machine's game file | Its name is a machine file's name |
 | Every shipped `capture` line | It names a variant that its machine file lists |
-| Sootland on `hbf700p-ram512k-msxdos2`, without a `capture` line | `tools/snapcas.py` tries the variants that the machine file lists, and prints `capture hbf700p-msxdos2` |
+| Sootland on `hbf700p-ram512k-msxdos2`, without a `capture` line | `snapcas.py make` tries the variants that the machine file lists, and prints `capture hbf700p-msxdos2` |
 | The collection on `phc28s-ram64k-carnivore2` and `vg8020-carnivore2` | Every game file passes, as before the rename |
 
 ## Step 20: the release machines
@@ -455,3 +455,116 @@ copies of a release under several names ([Shipped files](DESIGN.md#shipped-files
 | A game file with side 2 and one link, or with a link that is not https to a zip | The game file is refused with an error |
 | Every shipped game file | Each links its zips on File-Hunter |
 | Side 2 of Gauntlet, Meganova and Strip Poker II+, downloaded once | Each side 2's zip holds the file with the game file's SHA-1 |
+
+## Step 22: the command
+
+This step adds the `snapcas` command, `snapcas.py` at the repository's top, with its
+three verbs ([CLI.md](CLI.md)). The file is executable, so macOS and Linux run it as
+`./snapcas.py`, and without arguments it prints its help.
+
+| Verb | What this step gives it |
+|---|---|
+| `list` | It lists the games whose folder or title holds a text. A game's title names the File-Hunter file that it comes from: a game's File-Hunter name, its zip's name or the zip's name, `/` and the CAS file in it, and a compilation's program's zip's name, `/` and the program's name, the text before its first comment's first comma |
+| `machines` | It lists the user machines, each with the first sentence of its machine file's first comment |
+| `make` | It takes over `tools/snapcas.py`, which goes: capture, build, `--check`, and the tries of the capture variants. It finds the game by its folder or by a text, and the machine by a start of its name. The download and `--to` come in later steps |
+
+| Test | What it proves |
+|---|---|
+| `list wall` | It lists the three games whose folder or title holds "wall", and their number |
+| `list` with a text in mixed case | A text matches in any case |
+| `list` on Gauntlet, Aritmo, Africa Film and Athletic Land | Each game's title names its File-Hunter file: a zip, a CAS file in a zip, or a compilation's zip and the program |
+| `list "super msx n.23"` | A compilation's name finds its programs |
+| `list` without a text | It lists every game file |
+| `machines` | It lists the user machines and no capture variant or test machine, each with its first sentence |
+| `make wall phc28s` and `make gauntlet vg8020` | A text that several games match, or a start that several machines' names have, lists them and stops with status 1 |
+| `make` with a game or a machine that nothing matches, or `--dos` without `--check` | The command stops with status 1 |
+| No arguments, or `make` alone | The command prints its help |
+| An unknown verb | The command stops with status 1, as the tools do for an error in their input |
+| `snapcas.py`'s mode | The file is executable |
+| Step 9's single-load game and step 10's runs, through `make` | `make` makes and checks images, and finds a capture variant, as `tools/snapcas.py` did |
+
+## Step 23: the download
+
+This step makes `snapcas.py make` download the game's tape files that are not in the
+tapes folder ([CLI.md, Download](CLI.md#download)), with `tools/download.py`. For
+each side, it downloads the zip that the `url` line links, finds the file whose
+SHA-1 the `sha1` line gives, and saves it under the name that the `cas` or `side2`
+line gives. A file of that name with another SHA-1 stops the command and stays.
+
+| Test | What it proves |
+|---|---|
+| A game with two sides, each in a zip of its own, one of them with another file | Each side is found by its SHA-1 and saved under the game file's name |
+| The same game again | A tape already in the folder is not downloaded again |
+| A file in the folder with another SHA-1 | The command stops, and the file stays |
+| A zip without the side's SHA-1 | The command stops and writes nothing |
+| A game file without a `url` line | The command names the file to put in the folder, with its SHA-1 |
+| Gauntlet on `phc28s-ram64k-carnivore2`, by hand, into an empty folder | Both sides come from File-Hunter with the game file's SHA-1s, and the image builds |
+
+The tests replace the network with zips that they make, so they run offline.
+
+## Step 24: the folders
+
+This step gives each kind of file a folder of its own, so that the tests, the games
+run and the user's images share no folder:
+
+| Folder | Holds |
+|---|---|
+| `tests/tapes/` | The tests' 61 tape files, in git, in place of `CAS_DIR` and its `tsx/` and `collection/` folders |
+| `downloads/` | The tapes that `snapcas.py snap` downloads, which the games run reads without downloading, in place of `--tapes` and `tapes/` |
+| `images/<machine>/<game>/` | The image of a shipped game, which `snap` moves there when every step passes, in place of `out/<machine>/<game>/` |
+| `out/work/<machine>/<game>/` | The snapshot, the image until `snap` moves it, the check and the build's reports. A game folder of the tests holds its own, `<folder>/<machine>/`, below `out/test/` |
+| `out/cache/` | The tools that the Makefile downloads and builds, and the test home of `openMSX` |
+| `dos/nextor/` | Nextor's files, in place of `out/dl/nextor/` |
+
+The run over every game file moves from the tests to `tools/games.py`, and
+`make games MACHINE=<machine>` replaces `make collection`
+([DESIGN.md, The games run](DESIGN.md#the-games-run)). The step moved the 1,850
+tapes of `tapes/collection/` into `downloads/`, after checking that each of the
+1,601 tapes that the game files name has its game file's SHA-1.
+
+The command's verb `make` becomes `snap`, as in `./snapcas.py snap gauntlet phc28s`,
+so that it no longer shares its name with the Makefile's `make test` and
+`make games`. `make try`, which put every image of `out/try/` on one disk, becomes
+`./snapcas.py try <game> <machine>`, which starts one game's image and types its
+command, and `tools/run.py` goes. A game and a machine are given by their names, as
+`list` and `machines` show them. A name that is not a game's or a machine's stops
+the command, where step 22 chose the one game or machine that the text matched.
+
+| Test | What it proves |
+|---|---|
+| `make test` | The tests find every tape in `tests/tapes/`, and `make` finds them there through `SNAPCAS_DOWNLOADS` |
+| Corpus | The scan reads the 38 tapes of its list, and not the other tapes of `tests/tapes/` |
+| Temptations on `phc28s-ram64k-carnivore2` with `--check`, by hand | The image goes to `images/`, the work files to `out/work/`, and each point of the check passes |
+
+## Step 25: custom games
+
+This step adds `custom/`, the user's own games, for games that `snapcas` does not
+ship and for the user's own dumps of a tape ([CLI.md, Your own games](CLI.md#your-own-games)).
+A custom game's folder holds its `game.txt` and its tape files, and its name is
+`custom/<game>`. `snap` reads its tapes from the folder and never downloads them,
+and its image and work files go below `custom/` in `images/<machine>/` and
+`out/work/<machine>/`. Git keeps only `custom/README.md`.
+
+| Test | What it proves |
+|---|---|
+| A folder of the tests' own `custom/` with a game file, and one without | Only the folder with a `game.txt` is a custom game |
+| `CUSTOM/mygame` | The name finds the game's folder in any case |
+| `list custom` | The game shows with its title |
+| The tapes, the work folder and the image | The tapes are the game's folder, and the work folder and image are below `custom/` |
+| Gauntlet | A shipped game is no custom game: its tapes come from `downloads/` |
+| A custom game made from `FREDDY.CAS` on `phc28s-ram64k-carnivore2` with `--check`, by hand | `snap` passes, and the image goes to `images/phc28s-ram64k-carnivore2/custom/ZZFREDDY/` |
+
+## Step 26: sync a card
+
+This step adds `snapcas.py sync <machine> <destination>`, which copies the
+machine's images and `SNAPCAS.COM` to a card, in place of `snap`'s `--to` option
+([CLI.md, Sync a card](CLI.md#sync-a-card)). It copies only the new and changed
+files, reads each copy back, and deletes nothing on the card.
+
+| Test | What it proves |
+|---|---|
+| A game, a compilation's program, a custom game and a name that starts with a digit | Each file goes to its letter's folder, and `SNAPCAS.COM` to `BIN/` |
+| A second sync after one image changed, with a file of the user's own on the card | Only the changed image is copied, and the user's file stays |
+| The card's `SNAPCAS` or `BIN` folder as the destination | The command stops and asks for the card's top folder |
+| Two images for one place on the card | The command stops |
+| `phc28s-ram64k-carnivore2` into an empty folder, twice, by hand | The first sync copies 1,546 files and the second none |

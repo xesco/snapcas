@@ -98,12 +98,12 @@ class Images(unittest.TestCase):
         with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
             list(pool.map(capture, GAMES))
         for game, (cas, machine) in GAMES.items():
-            snap = os.path.join(ROOT, "out", machine, folder_name(game), "snap")
+            snap = os.path.join(WORK, "games", folder_name(game), machine, "snap")
             result = run_build(game, machine)
             if result.returncode != 0:
                 raise AssertionError(f"{game}: {result.stderr}")
             name = build.gamefile.default_name(folder_name(game))
-            with open(os.path.join(ROOT, "out", machine, folder_name(game), f"{name}.SNP"), "rb") as f:
+            with open(os.path.join(WORK, "games", folder_name(game), machine, f"{name}.SNP"), "rb") as f:
                 cls.images[game] = (f.read(), build.read_state(snap), snap)
 
     def header(self, image):

@@ -7,10 +7,19 @@ game.txt, named after the machine file, adds the lines that fit only that machin
 import os
 import re
 import shlex
+import urllib.parse
 
 from msx import KEYS
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# The tape files that snapcas.py snap downloads, and the images that it moves
+# there from the work folders.
+# The tests set SNAPCAS_DOWNLOADS to their own tapes, so that make finds them
+# there and downloads nothing.
+DOWNLOADS = os.environ.get("SNAPCAS_DOWNLOADS", os.path.join(ROOT, "downloads"))
+IMAGES = os.path.join(ROOT, "images")
+# The user's own game files, each with its tape files, which git ignores.
+CUSTOM = os.path.join(ROOT, "custom")
 
 
 class GameFileError(Exception):
@@ -89,23 +98,115 @@ def number(text, where):
     return value
 
 
+def game_names():
+    """The game files' folders below games/, in order: a game's, or a
+    compilation's program's in its collection's folder, such as SUPERMSX/GOLF,
+    for a folder without a game.txt (DESIGN.md, A game later on the tape)."""
+    games = os.path.join(ROOT, "games")
+    names = []
+    for name in sorted(os.listdir(games)):
+        if os.path.isfile(os.path.join(games, name, "game.txt")):
+            names.append(name)
+        elif os.path.isdir(os.path.join(games, name)):
+            names += [f"{name}/{n}" for n in sorted(os.listdir(os.path.join(games, name)))
+                      if os.path.isdir(os.path.join(games, name, n))]
+    return names
+
+
+def custom_names():
+    """The custom games' names, custom/<game>, for each folder of custom/ that
+    holds a game.txt, in order."""
+    if not os.path.isdir(CUSTOM):
+        return []
+    return [f"custom/{name}" for name in sorted(os.listdir(CUSTOM))
+            if os.path.isfile(os.path.join(CUSTOM, name, "game.txt"))]
+
+
+def title(folder):
+    """A game's title, which names the File-Hunter file that it comes from
+    (DESIGN.md, Shipped files): a game's first comment line, its File-Hunter
+    name, which is its zip's name or the zip's name, / and the CAS file in it.
+    A compilation's program's first comment names the program before its first
+    comma, as in "Africa Film, the fourth game on the tape Super MSX n.23", so
+    its title is its zip's name, from its url line, / and that name. Or "" for
+    a game file that starts with no comment."""
+    with open(os.path.join(folder, "game.txt"), encoding="utf-8") as f:
+        lines = f.read().splitlines()
+    comments = []
+    for line in lines:
+        if not line.startswith("#"):
+            break
+        comments.append(line[1:].strip())
+    zips = next((line.split()[1:] for line in lines if line.startswith("url ")), [])
+    if not comments:
+        return ""
+    # A compilation's program's folder is two levels below games/.
+    below = os.path.relpath(os.path.abspath(folder), os.path.join(ROOT, "games"))
+    if not below.startswith("..") and os.sep in below:
+        program = " ".join(comments).split(",", 1)[0]
+        if zips:
+            return zip_name(zips[0]) + " / " + program
+        return program
+    return comments[0]
+
+
+def zip_name(url):
+    """The name of the zip file that a url links, without .zip."""
+    return urllib.parse.unquote(url.rsplit("/", 1)[1]).rsplit(".", 1)[0]
+
+
 def game_folder(game):
-    """The folder of a game: a folder's path, or a folder below games/, such as
-    ABADIA or a compilation's program, SUPERMSX/GOLF."""
+    """The folder of a game: a folder's path, a custom game's name, such as
+    custom/MYGAME, or a folder below games/, such as ABADIA or a compilation's
+    program, SUPERMSX/GOLF."""
     if os.path.isdir(game):
         return os.path.abspath(game)
+    if game.lower().startswith("custom/"):
+        return os.path.join(CUSTOM, game.split("/", 1)[1])
     return os.path.join(ROOT, "games", game)
 
 
-def out_folder(machine, folder):
-    """The output folder, out/<machine>/<game>/, of the game in folder: <game>
-    is its path below games/, so that two collections' programs of the same name
-    stay apart, or the folder's name for a folder elsewhere."""
+def game_key(folder):
+    """The game's name below images/<machine>/ and out/work/<machine>/: a
+    shipped game's path below games/, such as GAUNTLET or SUPERMSX/GOLF, a
+    custom game's custom/<game>, or None for a folder elsewhere."""
     folder = os.path.abspath(folder)
     games = os.path.join(ROOT, "games")
     if os.path.commonpath([folder, games]) == games:
-        return os.path.join(ROOT, "out", machine, os.path.relpath(folder, games))
-    return os.path.join(ROOT, "out", machine, os.path.basename(folder))
+        return os.path.relpath(folder, games)
+    if os.path.commonpath([folder, CUSTOM]) == CUSTOM:
+        return "custom/" + os.path.relpath(folder, CUSTOM)
+    return None
+
+
+def is_custom(folder):
+    """Whether the game in folder is a custom game, whose tapes are beside its
+    game.txt."""
+    return (game_key(folder) or "").startswith("custom/")
+
+
+def out_folder(machine, folder):
+    """The work folder of the game in folder: its snapshot, its image, its check
+    and the build's reports. A shipped or custom game's is
+    out/work/<machine>/<game>/, where <game> is its game_key, so that two
+    collections' programs of the same name stay apart. A game folder elsewhere,
+    as the tests make, holds its own, <folder>/<machine>/."""
+    key = game_key(folder)
+    if key is None:
+        return os.path.join(os.path.abspath(folder), machine)
+    return os.path.join(ROOT, "out", "work", machine, key)
+
+
+def image_path(machine, folder, name):
+    """The image that build.py writes, <name>.SNP in the game's work folder."""
+    return os.path.join(out_folder(machine, folder), f"{name}.SNP")
+
+
+def published_path(machine, folder, name):
+    """A shipped or custom game's image that snapcas.py snap moves to
+    images/<machine>/<game>/<name>.SNP, or None for a game folder elsewhere."""
+    key = game_key(folder)
+    return None if key is None else os.path.join(IMAGES, machine, key, f"{name}.SNP")
 
 
 def machine_file(folder, machine):

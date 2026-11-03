@@ -1,5 +1,5 @@
 # Sony HB-F1XD, an MSX2 with 64 KB, no memory mapper and a floppy drive, with a
-# MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4, as the Makefile makes it:
+# MegaFlashROM SCC+ SD. Its flash holds only Nextor 2.1.4, as the Makefile makes it:
 # its 512 KB memory mapper and Nextor on its SD cards. openMSX's stock flash also
 # holds a ROM disk, whose AUTOEXEC.BAT starts a file manager on an MSX2. The disk
 # goes in its first SD card slot.

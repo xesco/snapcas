@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step4  # noqa: E402
 import test_step9  # noqa: E402
 
-COLLECTION = os.path.join(test_step4.CAS_DIR, "collection")
+COLLECTION = test_step4.CAS_DIR
 MACHINE = "phc28s-ram64k-carnivore2"
 WORK = os.path.join(ROOT, "out", "test", "step18")
 
@@ -44,7 +44,7 @@ def check(game):
 class BasicErrors(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
         with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
             cls.reports = dict(zip(GAMES, pool.map(check, GAMES)))
 

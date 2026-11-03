@@ -6,7 +6,7 @@ Usage: capture.py <game> <machine> --tapes <dir> [--capture <variant>]
 
 <game> is a folder below games/, or the path of a folder, that holds
 game.txt. <machine> is a machine file's name below machines/ without .txt.
-<dir> holds the tape files. The snapshot goes to out/<machine>/<game>/snap/. A
+<dir> holds the tape files. The snapshot goes to snap/ in the game's work folder. A
 game file's capture line, or --capture, names a capture variant in
 machines/capture/ to load the game on: the user's machine without a cartridge
 that the game's loader trips over.

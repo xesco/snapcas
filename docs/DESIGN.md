@@ -33,24 +33,37 @@ in [PLAN.md](PLAN.md).
 | `machines/<machine>.txt` | A person, once per machine | How to start the machine in `openMSX` |
 | `games/<game>/game.txt` | A person or an LLM | The game's settings that hold on every machine |
 | `games/<game>/<machine>.txt` | A person or an LLM, for a game that needs it | The game's settings that hold only on one machine, named after the machine file with `-` for `/` ([Game file](#game-file)) |
-| `games/<collection>/<game>/` | A person or an LLM | A compilation's program, with the same files as a game's folder. Its output goes to `out/<machine>/<collection>/<game>/` ([A game later on the tape](#a-game-later-on-the-tape)) |
-| `out/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
-| `out/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image |
-| `out/<machine>/<game>/<GAME>.RPL` | `tools/build.py` | The replay |
-| `out/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
-| `out/<machine>/<game>/build.txt` | `tools/build.py` | What the check takes from the build: the RAM bytes that the build patched, under each RAM file of their segment, the tape service's part of page 3, and the address of its tape position `C_POS` ([Check](#check)) |
-| `out/<machine>/<game>/check/` | `tools/check.py` | The check's report and savestates |
+| `games/<collection>/<game>/` | A person or an LLM | A compilation's program, with the same files as a game's folder. Its `<game>` below `images/<machine>/` and `out/work/<machine>/` is `<collection>/<game>` ([A game later on the tape](#a-game-later-on-the-tape)) |
+| `custom/<game>/` | The user | A custom game: its `game.txt` and its tape files, which `snap` reads from the folder without downloading them. Its `<game>` below `images/<machine>/` and `out/work/<machine>/` is `custom/<game>` ([CLI.md, Your own games](CLI.md#your-own-games)) |
+| `downloads/<TAPE>` | `snapcas.py snap` | The tape files that it downloads from File-Hunter, each checked against its game file's SHA-1 ([CLI.md, Download](CLI.md#download)) |
+| `tests/tapes/<TAPE>` | The developers | The tape files of the tests, in git |
+| `images/<machine>/<game>/<GAME>.SNP` | `snapcas.py snap` | The image, which `snap` moves from the work folder when every step passes |
+| `images/<machine>/<game>/<GAME>.RPL` | `snapcas.py snap` | The replay, beside the image |
+| `out/work/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image, until `snap` moves it |
+| `out/work/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
+| `out/work/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
+| `out/work/<machine>/<game>/build.txt` | `tools/build.py` | What the check takes from the build: the RAM bytes that the build patched, under each RAM file of their segment, the tape service's part of page 3, and the address of its tape position `C_POS` ([Check](#check)) |
+| `out/work/<machine>/<game>/check/` | `tools/check.py` | The check's report and savestates |
+| `out/work/<machine>/<game>/try/` | `tools/try.py` | The disk of `snapcas.py try` |
+| `out/games/<machine>.txt` | `tools/games.py` | The result of each game file on the machine ([The games run](#the-games-run)) |
+| `dos/` | The user, and the Makefile for `dos/nextor/` | The DOS system files of the checks: `msxdos1/`, `msxdos2/` and `nextor/` |
+| `out/cache/` | The Makefile | The tools that it downloads and builds, and the test home of `openMSX` |
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
 | `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm` ([SERVICE.BIN](#servicebin)) |
 
-The `bin/` files are built with sjasmplus 1.24.0 and shipped. `<machine>` is a
-machine file's name below `machines/` without `.txt`, such as `vg8020-carnivore2`
-([Machine file](#machine-file)). Each game is processed by four commands, in this
-order:
+The `bin/` files are built with sjasmplus 1.24.0 and shipped. Git keeps only a
+short `README.md` in `custom/`, `downloads/`, `dos/`, `images/` and `out/`, and
+ignores the rest of them. `out/work/<machine>/<game>/` is a shipped or custom game's
+work folder. A game folder elsewhere, as the tests make below `out/test/`, holds its
+own work folder, `<folder>/<machine>/`, so the tests write nothing to `out/work/` or
+`images/`. `<machine>` is a machine file's name below `machines/` without `.txt`,
+such as `vg8020-carnivore2` ([Machine file](#machine-file)). Each game is processed
+by four commands, in this order:
 
 1. `tools/capture.py <game> <machine> --tapes <dir>` loads the game in `openMSX` and
-   saves the snapshot ([Capture](#capture)). `<dir>` holds the user's tape files,
-   CAS or TSX ([Tape files](#tape-files)).
+   saves the snapshot ([Capture](#capture)). `<dir>` holds the tape files, CAS or
+   TSX ([Tape files](#tape-files)): `downloads/` for `snapcas.py snap`, and
+   `tests/tapes/` for the tests.
 2. `tools/build.py <game> <machine> --tapes <dir>` writes the image and `scan.txt`
    ([Build](#build)), and prints `<GAME>`.
 3. `tools/check.py <game> <machine> --dos <dir>` runs the restorer in `openMSX` and
@@ -63,21 +76,52 @@ order:
    ([Tape speed and sound](#tape-speed-and-sound)). With `/M`, the tape moves only
    when the player presses a key ([The manual tape](#the-manual-tape)).
 
-`tools/snapcas.py <game> <machine> --tapes <dir> [--dos <dir>]` makes the image in
-one command: it runs steps 1 and 2, and step 3 when `--dos` is given. When a step
-fails and the game file names no capture variant, it runs these steps again on each
-capture variant that the machine file lists, in the order of its `variant` lines
-([Machine file](#machine-file)). A failed capture counts too, because a loader that
-trips over a cartridge can crash during the capture. It keeps the first image that
-passes, and prints the `capture` line that made it, for the machine's game file.
-Otherwise it makes the image of the game file's own lines again, and exits with the
-status of the first step that failed. `capture.py`'s `--capture <variant>` names the
-variant, in place of the game file's `capture` line.
+`./snapcas.py snap <game> <machine> [--check [--dos <dir>]]`, the `snapcas` command
+at the repository's top ([CLI.md](CLI.md)), makes the image in one command. It
+downloads the game's tape files that are missing from `downloads/`, then runs steps
+1 and 2 with `--tapes downloads/`, and step 3 with `--check`, with Nextor's files
+from `dos/nextor/` unless `--dos` gives others. When every step passes, it moves a
+shipped game's image to `images/`. The tests set `SNAPCAS_DOWNLOADS`
+to `tests/tapes/`, so that `snap` finds their tapes there and downloads nothing.
+When a step fails and the game file names no capture variant, it runs these steps
+again on each capture variant that the machine file lists, in the order of its
+`variant` lines ([Machine file](#machine-file)). A failed capture counts too,
+because a loader that trips over a cartridge can crash during the capture. It keeps
+the first image that passes, and prints the `capture` line that made it, for the
+machine's game file. Otherwise it makes the image of the game file's own lines
+again, and exits with the status of the first step that failed. `capture.py`'s
+`--capture <variant>` names the variant, in place of the game file's `capture` line.
 
 The tools are Python 3 programs that require only Python 3 and `openMSX` 22.0, so
 they run on macOS, Linux and Windows. They print errors on standard error, naming
 the file and the problem, and exit with 0 on success, 1 for an error in the input
 files, 2 when `openMSX` fails or a wait times out, and 3 when a check fails.
+
+### The games run
+
+`make games MACHINE=<machine>` runs `tools/games.py`, which checks that every
+shipped game file makes a working image on the machine. It is not part of
+`make test`, because it takes hours, and it reads none of the tests' tapes. It does
+these steps:
+
+1. It looks for each game file's tapes in `downloads/`, where `snap` puts them. It
+   downloads nothing, because a download of the whole collection would load
+   File-Hunter, one person's site. A game file whose tape is missing gets that as its
+   result.
+2. It captures, builds and checks each game file, 11 at once by default, because
+   `openMSX` keeps about one core busy. The check always runs, with Nextor's files
+   unless `DOS=` names others.
+3. It writes one line per game file to `out/games/<machine>.txt`: the folder, a tab
+   and the first line of the check's report, the failed point with its first line,
+   or the failed step's error.
+4. It compares the failures with `tests/openmsx-failures.txt`, which lists the game
+   files that fail in `openMSX` itself, and exits with 3 when another game file
+   fails.
+
+A game file keeps its last result while its inputs are unchanged: its folder, its
+tapes, the machine files that it runs on, `bin/` and `tools/`. A cache beside the
+results, `<machine>.txt.cache`, holds the inputs' hash of each, and `FULL=1` gives
+every game file a new result.
 
 ### The tools' code
 
@@ -86,8 +130,8 @@ The commands share their code through modules, and the Tcl that runs inside
 
 | File | Holds |
 |---|---|
-| `tools/gamefile.py` | Reads game files. Finds a game's folder from a name below `games/`, such as `ABADIA` or `SUPERMSX/GOLF`, or from a path, and the game's output folder, `out/<machine>/<game>/`, with the same name below `out/<machine>/` |
-| `tools/msx.py` | Reads machine files and finds one from its name. Starts `openMSX` with a Tcl script, gives its home folder, where it writes savestates, and makes disk images |
+| `tools/gamefile.py` | Reads game files, and lists the game files' folders and their titles. Finds a game's folder from a name below `games/`, such as `ABADIA` or `SUPERMSX/GOLF`, or from a path, and the game's work folder and the place of its image in `images/` |
+| `tools/msx.py` | Reads machine files, finds one from its name, and lists the user machines with what each is. Starts `openMSX` with a Tcl script, gives its home folder, where it writes savestates, and makes disk images |
 | `tools/cas.py`, `tools/tsx.py`, `tools/tape.py` | The readers of CAS and TSX files, and the tape model and the tape service's tape, which the rest of the code uses ([Tape files](#tape-files)) |
 | `tools/patches/` | The automatic patches, one file for each kind, as below |
 | `tools/tcl/prelude.tcl` | The procedures that every `openMSX` run gets: reading the screen, passing the boot menu, and typing at DOS's prompt |
@@ -95,7 +139,10 @@ The commands share their code through modules, and the Tcl that runs inside
 | `tools/tcl/capture.tcl` | The capture's steps ([Capture](#capture)) |
 | `tools/tcl/check.tcl` | The check ([Check](#check)) |
 | `tools/relocs.py` | The offsets that `build.py` changes to move `SERVICE.BIN`'s page 3 part ([SERVICE.BIN](#servicebin)) |
-| `tools/fetch.py`, `tools/run.py` | The download of the test setup's files, and the `openMSX` run of `make try` |
+| `tools/download.py` | The download of a game's tape files from its `url` line, for `snapcas.py snap` ([CLI.md](CLI.md)) |
+| `tools/games.py` | The games run of `make games` ([The games run](#the-games-run)) |
+| `tools/fetch.py` | The download of the test setup's files |
+| `tools/try.py` | The `openMSX` run of `snapcas.py try`, with its window, which types the restorer's command ([CLI.md, Try an image](CLI.md#try-an-image)) |
 
 An automatic patch is a change that the tools make to a game without a line in its
 game file. Each kind of automatic patch is one file in `tools/patches/`:
@@ -147,7 +194,7 @@ variant phc28s-empty-carnivore2
 | `boot` | A text on the screen during boot and the key to press when it appears. Each key has its own line, matched in order. A menu can show its text before it reads the keyboard, so the key is pressed again each second while the text stays, up to 10 times |
 | `hold` | A key held down from power-on, and the emulated seconds it is held, such as `hold del 6`. It is for a machine whose firmware starts a program in a graphics mode in place of BASIC, whose screen `boot` cannot read: the Panasonic FS-A1 starts its Desk Pac menu unless DEL is held |
 | `dos` | For a machine that boots MSX-DOS from a disk of its own, as the MegaFlashROM SCC+ SD boots from the ROM disk in its flash: DOS's prompt, such as `A:\>`, and the drive letter of `check.py`'s disk. When the prompt appears, the capture types `BASIC`, because it loads the game from BASIC, and the check types that drive and `AUTOEXEC` |
-| `variant` | The name of one of the machine's capture variants. `tools/snapcas.py` tries the variants in the order of these lines |
+| `variant` | The name of one of the machine's capture variants. `snapcas.py snap` tries the variants in the order of these lines |
 
 `openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
 the `-ext` options sets the slots, and it must match the real machine's. `boot`
@@ -200,8 +247,8 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 
 | Key | Value | Default | File |
 |---|---|---|---|
-| `cas` | The CAS file of side 1, in the `--tapes` folder. A game file has `cas` or `tsx` | | `game.txt` |
-| `tsx` | The TSX file of side 1, in the `--tapes` folder ([Tape files](#tape-files)) | | `game.txt` |
+| `cas` | The CAS file of side 1, in the tapes folder. A game file has `cas` or `tsx` | | `game.txt` |
+| `tsx` | The TSX file of side 1, in the tapes folder ([Tape files](#tape-files)) | | `game.txt` |
 | `side2` | The file of side 2, in side 1's format | None | `game.txt` |
 | `load` | The load command, for a tape whose first block is not standard, quoted: `load 'RUN"CAS:"'` ([Tape files](#tape-files)) | From the first block's type | `game.txt` |
 | `start` | The name of a file on side 1, such as `start SKY`, for a game that is not the tape's first program: the load starts at the first file with that name ([A game later on the tape](#a-game-later-on-the-tape)) | The tape's start | `game.txt` |
