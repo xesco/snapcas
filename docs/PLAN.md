@@ -75,7 +75,7 @@ proves the assembler, the disk image, the boot keys and the screen reading.
 ## Step 2: capture
 
 This step writes `tools/capture.py`: capture steps 1 to 6, the RAM rules and the
-snapshot files ([Capture](DESIGN.md#capture)), and the machine file
+snapshot files ([Capture](INTERNALS.md#capture)), and the machine file
 `nms8250-carnivore2`. The tests capture the single-load files of the corpus, all on
 `phc28s-ram64k-carnivore2` except `ABADIA.CAS` on `nms8250-carnivore2`, and check:
 
@@ -101,7 +101,7 @@ wrong.
 ## Step 4: restorer and check
 
 This step writes `SNAPCAS.COM` without the tape service, restorer steps 1 to 7
-([Restorer](DESIGN.md#restorer)), `tools/check.py`, and the machine files of its
+([Restorer](INTERNALS.md#restorer)), `tools/check.py`, and the machine files of its
 tests. The tests capture, build and check each single-load file of the corpus, first
 on `phc28s-ram64k-carnivore2`, then on `vg8020-carnivore2`, `nms8250-carnivore2`,
 `hbf700p-ram512k-msxdos2`, `test/nms8250-128k` and `test/nms8250-dos1`. Check point
@@ -124,8 +124,8 @@ The test leaves out the games that fail in `openMSX` itself.
 ## Step 5: tape service
 
 This step adds the tape service to `src/service.asm`, `build.py` and `SNAPCAS.COM`
-([Tape service](DESIGN.md#tape-service)), and the game file's `patch` lines to
-`build.py` ([Game file](DESIGN.md#game-file)), which the scan of step 6 builds on.
+([Tape service](INTERNALS.md#tape-service)), and the game file's `patch` lines to
+`build.py` ([Game file](FILES.md#game-file)), which the scan of step 6 builds on.
 The tests capture, build and check two files on `phc28s-ram64k-carnivore2`:
 `COMPUTAD.CAS`, and `GAUNTLET.CAS` with `GAUNTLEB.CAS` as side 2. Each test checks
 that `service` is 1 in `state.txt`. For Computad, the Tcl script then presses space,
@@ -140,7 +140,7 @@ checks that the main game loads to side 1's end and that a level loads from side
 
 ## Step 6: scan
 
-This step adds the scan and its patches ([Scan](DESIGN.md#scan)). Python unit tests
+This step adds the scan and its patches ([Scan](INTERNALS.md#scan)). Python unit tests
 check each of the scan's patterns on bytes made for it. The corpus test captures
 each file of `CAS_DIR` on `phc28s-ram64k-carnivore2`, with a side 2 file as the side
 2 of its game, builds the files that need the tape service, and writes every
@@ -156,13 +156,13 @@ The step also takes the tests that need the scan:
 | `TOUR-91.CAS` | `phc28s-ram64k-carnivore2` | That the game's stub reaches the tape service at its next load |
 | `MAD-MIDE.CAS` | `phc28s-ram64k-carnivore2` | The same |
 | `DESPERAD.CAS` | `phc28s-ram64k-carnivore2` | The same, for a loader that selects the ROM in page 0 itself, with `IN A,(0A8h) / AND 0FCh / OR 00h / OUT (0A8h),A` |
-| `MOONWALK.CAS` | `phc28s-ram64k-carnivore2` | With `service t0`, its snapshot in the intro and a `patch` line that makes its loader select DOS's mapper: that the main game loads through T0, to the end of its 22 KB block ([Without a part in page 3](DESIGN.md#without-a-part-in-page-3)) |
-| `SOOTLAND.CAS` | `phc28s-ram64k-carnivore2`, captured on `phc28s-ram64k` | With a `side1` patch of the slot register's value that its loader writes: that the capture loads the patched tape, and turns the tape over to side 2 when the game reads past side 1's end ([Game file](DESIGN.md#game-file), [Capture](DESIGN.md#capture)) |
+| `MOONWALK.CAS` | `phc28s-ram64k-carnivore2` | With `service t0`, its snapshot in the intro and a `patch` line that makes its loader select DOS's mapper: that the main game loads through T0, to the end of its 22 KB block ([Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)) |
+| `SOOTLAND.CAS` | `phc28s-ram64k-carnivore2`, captured on `phc28s-ram64k` | With a `side1` patch of the slot register's value that its loader writes: that the capture loads the patched tape, and turns the tape over to side 2 when the game reads past side 1's end ([Game file](FILES.md#game-file), [Capture](INTERNALS.md#capture)) |
 | `tests/borrow.asm`, which the test writes to a CAS file with a block of the bytes 0 to 255 | `phc28s-ram64k-carnivore2` | With `service t0` and a `patch` line that makes it select DOS's mapper in page 0: that `TAPIN` borrows page 2, which holds the RAM cartridge in slot 1 and the stack, through the slot register, and reads the block right |
 
 ## Step 7: replay
 
-This step adds the replay ([Replay](DESIGN.md#replay)): the recording in
+This step adds the replay ([The replay's design](PLAN.md#the-replays-design)): the recording in
 `capture.py`, the stream and its compression in `build.py`, and the playing with
 `/R` in `SNAPCAS.COM`. The tests check:
 
@@ -189,10 +189,70 @@ This step adds the replay ([Replay](DESIGN.md#replay)): the recording in
 The step also reports the size of each `.RPL` file of the corpus, compressed and
 not, to judge the compression.
 
+### The replay's design
+
+The replay shows the load on the real machine as it happened in the capture: BASIC's
+screen with the load command being typed, the loading screens being drawn, their
+music, the game's own pauses and its waits for a key, and the cassette motor's
+relay. Nothing of the loader runs again: the replay is a recording, played before
+the restore, so it works for every game whose capture works. It is optional, in its
+own file, `<GAME>.RPL`, and runs only with `/R`.
+
+The capture records it from just before it types the load command to the snapshot,
+in `snap/replay.log`. The log starts with the VDP's state at that moment: VRAM, the
+registers and, on a V9938, the palette. Then it holds one line per write: the frame,
+the port and the value. A frame is one VDP interrupt period of the machine, 1/50 or
+1/60 of a second. It logs:
+
+- Each write to the VDP's ports 98h to 9Bh and the PSG's ports A0h and A1h, from
+  write watchpoints.
+- Each change of the cassette motor and keyclick bits of PPI port C, bits 4 and 7,
+  as a bit set or reset on port ABh, so that the replay does not touch the keyboard
+  row bits.
+- Each wait that a key continued ([INTERNALS.md, Capture](INTERNALS.md#capture), step 5), as the frames of the
+  wait's first 30 seconds, kept aside before the rewind, and the key.
+- The frame of the load command's RETURN.
+
+A rewind truncates the log to its length at the saved moment, as it puts back the
+rest of the logged state.
+
+`build.py` turns the log into a stream of commands
+([FORMATS.md, Replay stream](FORMATS.md#replay-stream)) and compresses it in chunks
+with the LZ4 block format. The restorer, after step 2, plays the stream with
+interrupts off while it writes and on while it waits for the next frame:
+
+- It writes the first state with the display blanked, so the screen shows BASIC as
+  it was in the capture. It then types the command as the capture did, and at the
+  command's RETURN it waits until the player presses RETURN, as on a cassette
+  machine.
+- Before it plays, it reads `<GAME>.RPL` with its own FCB into the segments of DOS's
+  mapper that step 2 leaves free, 16 KB each, and then plays from RAM. A DOS read
+  during the replay would stop the frames and the sound, longest on a floppy disk.
+  When the file needs more segments than are free, it fills them, and as it plays it
+  reads the next chunks ahead into the segments that it has played, at frames in
+  which the motor bit is off, when a tape is silent too.
+- It writes VRAM no faster than one byte every 29 cycles, 8 µs, which an MSX1 VDP
+  needs during the display.
+- At a wait, it plays the wait's frames in a loop until a key is pressed.
+- `/R2` to `/R9` play 2 to 9 frames for each frame that it waits.
+- While the motor runs at `/R` speed, it toggles the keyclick bit in each frame's
+  spare time at 1200 Hz for a 0 bit and 2400 Hz for a 1 bit, from the stream's own
+  bytes, so that the load sounds like a tape.
+
+When the replay ends, VRAM, the VDP's registers and the PSG's registers hold their
+values at the snapshot, and the restore goes on with step 3.
+
+A game with the tape service then loads the rest of its tape during play. So that
+the whole session loads at one speed, `/R` alone also sets the tape service to the
+capture's speed ([The tape speed's design](#the-tape-speeds-design)). `build.py` finds
+that speed, 1200 or 2400 baud, from the times of the `TAPIN` calls in the capture's
+log and writes it in the replay's header. `/T1200` or `/T2400` with `/R` sets the
+speed instead.
+
 ## Step 8: tape speed and sound
 
 This step adds `/T1200` and `/T2400` to `SNAPCAS.COM` and the tape's speed and sound
-to the service ([Tape speed and sound](DESIGN.md#tape-speed-and-sound)). The tests
+to the service ([The tape speed's design](PLAN.md#the-tape-speeds-design)). The tests
 restore Gauntlet on `phc28s-ram64k-carnivore2` with each option, play it to the main
 game's load as in step 5, and check:
 
@@ -205,12 +265,49 @@ game's load as in step 5, and check:
 - That with `/R` alone the tape service runs at the speed in Gauntlet's replay
   header, and with `/R /T2400` at 2400 baud.
 
+### The tape speed's design
+
+By default the tape service returns each byte as soon as the game asks for it, so a
+load takes a moment. For the experience of a real tape, `SNAPCAS <GAME> /T1200` or
+`/T2400` makes a game load at that speed, with the tape's sound. The restorer writes
+the speed at 0062h in the code segment, and the service then works as a tape at that
+speed:
+
+- `TAPIN` plays each byte that it returns as the tape holds it, on the keyclick bit,
+  PPI port C bit 7, which the MSX sends to its sound output: a start bit 0, the 8
+  data bits from bit 0 up, and 2 stop bits 1 (MSX Red Book, chapter 4).
+- `TAPION` plays the leader tone before each header that it finds, as long as the
+  BIOS's `TAPOON` writes it: the long one before a block that starts with a file
+  type's 10 bytes ([FORMATS.md, CAS data](FORMATS.md#cas-data)), the short one
+  before the others.
+- `TAPION` starts the motor and `TAPIOF` stops it, and `STMOTR` switches it, as the
+  BIOS's routines do, through the motor relay, PPI port C bit 4. So the relay clicks
+  when the tape starts and stops.
+
+Each bit is one or two cycles of a square wave:
+
+| Speed | Bit 0 | Bit 1 | A byte's 11 bits |
+|---|---|---|---|
+| 1200 baud | One cycle of 1200 Hz | Two cycles of 2400 Hz | 9.2ms |
+| 2400 baud | One cycle of 2400 Hz | Two cycles of 4800 Hz | 4.6ms |
+
+The sound is the wait, so a byte takes as long as on the tape, plus the game's own
+code between two bytes. The service writes the keyclick bit back to its value before
+the byte. The keys and the flash work as at the fast speed.
+
+`/T1200` and `/T2400` act only through the tape service, so they change nothing for
+a game without it, and the restorer then says so before the restore. Such a game
+loaded completely before the snapshot, and the experience of its load comes from the
+replay, which plays the load at the capture's speed with the sound of a tape
+([The replay's design](#the-replays-design)). The two combine: with `/R /T1200`, the replay shows the first
+load, and the game's later loads come from the tape service at 1200 baud.
+
 ## Step 9: shipped files
 
 This step writes the last two machine files, `nms8245-ram512k-sunriseide` and
 `hb75p-mfrsd`, with the machine file's `dos` line that the second needs, and the
 game files for the collection, by running the capture over `CAS_DIR` on
-`phc28s-ram64k-carnivore2` ([Shipped files](DESIGN.md#shipped-files)). The tests
+`phc28s-ram64k-carnivore2` ([Shipped files](FILES.md#shipped-files)). The tests
 check a single-load game on each of the seven shipped machines, then capture, build
 and check every game file on `phc28s-ram64k-carnivore2` and `vg8020-carnivore2`, and
 write a report of passes and failures.
@@ -242,15 +339,15 @@ later.
 
 This step makes the fixes that the game files hold by hand automatic, so that a new
 machine needs as few game files of its own as possible. It adds the slot patches of
-the capture and of the scan ([Slot patches](DESIGN.md#slot-patches)), the mode
+the capture and of the scan ([Slot patches](INTERNALS.md#slot-patches)), the mode
 without a part in page 3 when page 3 has no room
-([Without a part in page 3](DESIGN.md#without-a-part-in-page-3)), and the tries of
+([Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)), and the tries of
 `snapcas.py make` on the capture variants
 ([Files and commands](DESIGN.md#files-and-commands)). The tests check each fix on a
 game that needed it by hand, without its line: Sootland and Finders Keepers for the
 slot patches, Chase H.Q. for the mode, and Sootland on the HB-F700P for the
 variants. La Abadia del Crimen was the variants' test until the RAM search patch
-fixed its load ([The RAM search patch](DESIGN.md#the-ram-search-patch)). The
+fixed its load ([The RAM search patch](INTERNALS.md#the-ram-search-patch)). The
 collection then runs on all seven shipped machines, and the report lists the game
 files that a machine still needs.
 
@@ -269,18 +366,19 @@ the same machine and the image, to compare.
 | 2026-10-29 | The same | `KNIGHTMA.SNP`, with `snapshot at 130`, and the 31 images of the step 4 batch | All run |
 | 2026-10-29 | The same | `GAUNTLET.SNP`, with `GAUNTLEB.CAS` as side 2, from step 5 | The main game and its levels load from the tape service, side 2 included, and the side's colour shows at the turn-over |
 | 2026-10-29 | The same | `MOONWALK.SNP`, with `service t0`, from step 6 | The game loads through T0 and plays. The loading messages show a few wrong pixels, likely VRAM writes that come faster than the VDP accepts, because the tape service returns a byte much sooner than a tape; step 8's `/T1200` is to confirm it |
-| 2026-10-31 | The same | `KNIGHT1.SNP`, from step 10 | Knight Orc hung after its first letter, because the scan had patched the `3E EF` of the address in `LD A,(EF3Eh)`. It plays since the scan skips a `3E` that can be an operand ([Slot patches](DESIGN.md#slot-patches)) |
+| 2026-10-31 | The same | `KNIGHT1.SNP`, from step 10 | Knight Orc hung after its first letter, because the scan had patched the `3E EF` of the address in `LD A,(EF3Eh)`. It plays since the scan skips a `3E` that can be an operand ([Slot patches](INTERNALS.md#slot-patches)) |
 | 2026-10-31 | The same | `GHOSTBUS.SNP`, from step 10 | Ghostbusters II loads, and its menu starts with SPACE, or with the fire button of a joystick in port 2. The menu reads PSG register 14 without selecting a port, and the BIOS's interrupt routine leaves port 2 selected on this machine, so a load from tape behaves the same |
 | 2026-10-31 | The same | `NAVYMOV.SNP`, from step 10 | Navy Moves plays with the keyboard. With 2-JOYSTICK, the jet-ski jumped by itself and did not obey, as with the plain tape in `openMSX`. Two `patch` lines in `games/NAVY-MOV/game.txt` fix the game: its joystick controls now point at the joystick's row, and a sound effect no longer clears bit 7 of PSG register 7. The joystick then works in port 1, the only port that the game reads |
 | 2026-10-31 | The same | `ALTERED.SNP`, from step 10 | Altered Beast hung with a yellow screen after side B's load: the game keeps its variables at FCE1h to FCE4h, where the service's entries are. With `service t0` and five `patch` lines in `games/ALTERED/phc28s-ram64k-carnivore2.txt`, which send its loader's stub to T0, side B loads and the game plays. The wait of about 25 seconds before the prompt to turn the tape over is the game's own, as with the plain tape in `openMSX` |
 | 2026-10-31 | The same | `OUTRUN.SNP`, `OPERATIO.SNP` and `DONKECAS.SNP`, from step 10, with the scan's slot patches | Out Run, Operation Wolf and Donkey Kong run |
-| 2026-11-02 | The same | `ENGESOFT\ATHLETIC.SNP`, `SUPERMSX\VERTIGO.SNP` and `SUPERMSX\ALIENS.SNP`, `D\DAMBUST.SNP`, `ENGESOFT\HYPERSP3.SNP` and `K\KONAMI.SNP`, from step 16's collection run | Athletic Land and Vertigo run. Aliens and Dam Busters reboot to the boot screen and Hyper Sports 3 into DOS, as point 3 reports. Konami's Soccer reboots into DOS, though `openMSX`'s check passed it, which led to point 3's third sign ([Check](DESIGN.md#check)) |
-| 2026-11-02 | The same | `K\KONAMI.SNP`, `B\BUDOKAN.SNP`, `B\BEACHHE.SNP`, `M\MDROID.SNP` and `SUPERMSX\ALIENS.SNP`, with the fixes for loaders that take page 3's slot for the other pages ([Page 3's slot for the other pages](DESIGN.md#page-3s-slot-for-the-other-pages)) | All five run. Konami's Soccer flashes its title until a key, and Budokan is silent at its menu, as they are in `openMSX` |
+| 2026-11-02 | The same | `ENGESOFT\ATHLETIC.SNP`, `SUPERMSX\VERTIGO.SNP` and `SUPERMSX\ALIENS.SNP`, `D\DAMBUST.SNP`, `ENGESOFT\HYPERSP3.SNP` and `K\KONAMI.SNP`, from step 16's collection run | Athletic Land and Vertigo run. Aliens and Dam Busters reboot to the boot screen and Hyper Sports 3 into DOS, as point 3 reports. Konami's Soccer reboots into DOS, though `openMSX`'s check passed it, which led to point 3's third sign ([Check](INTERNALS.md#check)) |
+| 2026-11-02 | The same | `K\KONAMI.SNP`, `B\BUDOKAN.SNP`, `B\BEACHHE.SNP`, `M\MDROID.SNP` and `SUPERMSX\ALIENS.SNP`, with the fixes for loaders that take page 3's slot for the other pages ([Page 3's slot for the other pages](INTERNALS.md#page-3s-slot-for-the-other-pages)) | All five run. Konami's Soccer flashes its title until a key, and Budokan is silent at its menu, as they are in `openMSX` |
+| 2026-11-03 | The same | The 1,545 images of `phc28s-ram64k-carnivore2`, copied to the card with `sync`, and `G\GAUNTLET.SNP` played | `CD \SNAPCAS\G` and `\BIN\SNAPCAS GAUNTLET` start the game from the card's layout. After a game over, CODE held at the side B prompt loads level 1 at once. Without it, the automatic tape reads on through the rest of side B, about 10 seconds, before it wraps to side B's start |
 
 ## Step 12: the tools' code
 
 This step moves the tools' code into the files of
-[The tools' code](DESIGN.md#the-tools-code), and does not change what the tools do.
+[The tools' code](INTERNALS.md#the-tools-code), and does not change what the tools do.
 It splits `build()` and `service_segments()` into the build's steps. The proof is
 that the outputs stay the same, byte for byte:
 
@@ -293,7 +391,7 @@ that the outputs stay the same, byte for byte:
 ## Step 13: the check's guard of page 3
 
 This step adds to the check's point 2 the watch on the tape service's part of page 3
-([Check](DESIGN.md#check)), after Altered Beast wrote its variables over the
+([Check](INTERNALS.md#check)), after Altered Beast wrote its variables over the
 service's entries on the real machine. The collection reports point 2's failure in
 place of point 1's line:
 
@@ -312,7 +410,7 @@ those loaders cut off their own code ([Step 14](#step-14-the-ram-search-patch)).
 
 This step adds the capture's watch for a slot register write that cuts off the code
 that made it, and the patch of the RAM search that Mot's loader and many Opera Soft
-loaders share ([The RAM search patch](DESIGN.md#the-ram-search-patch)). Mot and
+loaders share ([The RAM search patch](INTERNALS.md#the-ram-search-patch)). Mot and
 Satan's game files took the tape of their part 2 for a side 2. Each part now has a
 game file of its own, and Mot's demo has its own as well.
 
@@ -326,7 +424,7 @@ game file of its own, and Mot's demo has its own as well.
 ## Step 15: TSX tape files
 
 This step adds the reader of TSX files and the tape model, and moves the code that
-reads CAS files behind the model ([Tape files](DESIGN.md#tape-files)). The tools'
+reads CAS files behind the model ([Tape files](INTERNALS.md#tape-files)). The tools'
 `--cas` folder becomes `--tapes`, because it holds both formats, and the game file
 gets the keys `tsx` and `load`. The tests use TSX files from the collection that the
 TSX experiment loaded, each chosen for a case of the design, from the `tsx/` folder
@@ -342,7 +440,7 @@ length of the tape:
 | A tape of TSX bytes with a turbo block after the snapshot's time | The build stops with an error that names the block, unless the game file has `service no` |
 | A patch line at an offset in a TSX file | The capture loads the patched file |
 | A CAS file whose block headers are off the grid of 8 bytes | The reader finds each block, as `openMSX` does |
-| Sky Jaguar with `start SKY`, from the Engesoft tape after Circus Charlie | The load starts at a later file, from a copy whose blocks are back on the grid, and the image passes the check ([A game later on the tape](DESIGN.md#a-game-later-on-the-tape)) |
+| Sky Jaguar with `start SKY`, from the Engesoft tape after Circus Charlie | The load starts at a later file, from a copy whose blocks are back on the grid, and the image passes the check ([A game later on the tape](INTERNALS.md#a-game-later-on-the-tape)) |
 | The collection on `phc28s-ram64k-carnivore2` and `vg8020-carnivore2` | The CAS game files keep their results behind the model |
 
 ## Step 16: the check's reboot point
@@ -351,7 +449,7 @@ This step adds point 3 to the check: a reboot of the machine during the 60 secon
 after the restore fails it, shown by `SNAPCAS.COM` starting again or by
 `MSX  system`, the MSX1 BIOS's boot screen, on the screen at two or more savestates,
 or by no reset in the check where the capture's log shows one after the snapshot
-([Check](DESIGN.md#check)). The breakpoint at the start of the BIOS's reset routine
+([Check](INTERNALS.md#check)). The breakpoint at the start of the BIOS's reset routine
 while page 0 selects the main ROM notes each reset in the report, and it is set
 after point 1, because the check's own boot passes there.
 
@@ -372,8 +470,8 @@ after point 1, because the check's own boot passes there.
 
 This step makes the game file's `service` line one value, `no`, `at xxE1` or `t0`,
 which a machine's game file replaces, and makes `rom keep` with the mode without a
-part in page 3 an error ([Game file](DESIGN.md#game-file),
-[Without a part in page 3](DESIGN.md#without-a-part-in-page-3)). `build.py` takes
+part in page 3 an error ([Game file](FILES.md#game-file),
+[Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)). `build.py` takes
 the game file's settings as one value instead of a parameter for each.
 
 | Test | What it proves |
@@ -388,7 +486,7 @@ the game file's settings as one value instead of a parameter for each.
 ## Step 18: the check's BASIC error point
 
 This step adds point 4 to the check: a BASIC error message on the screen at one of
-the savestates fails it ([Check](DESIGN.md#check)). The messages are BASIC's, and
+the savestates fails it ([Check](INTERNALS.md#check)). The messages are BASIC's, and
 the check reads the screen's text at each savestate, as point 3 reads it for the
 boot screen.
 
@@ -402,7 +500,7 @@ boot screen.
 
 This step names each machine file after its model and its cartridges, in slot order,
 and moves the capture variants to `machines/capture/` under names of the same form
-([Machine file](DESIGN.md#machine-file)). Each machine file lists its variants with
+([Machine file](FILES.md#machine-file)). Each machine file lists its variants with
 `variant` lines, which `snapcas.py make` reads instead of finding the variants by
 their names. The machine's game files take the machines' new names, and their
 `capture` lines the variants' new names. The `openmsx` lines stay as they were, so
@@ -419,7 +517,7 @@ the images do not change.
 
 This step adds five machine files for the setups that users most probably own, from
 the 2026 MSX survey on msx.org and owners' threads there
-([Shipped files](DESIGN.md#shipped-files)): `vg8020-sdmapper`, `xp800-sdmapper`,
+([Shipped files](FILES.md#shipped-files)): `vg8020-sdmapper`, `xp800-sdmapper`,
 `fsa1-mfrsd`, `hbf1xd-mfrsd` and `vg8235`. The machine file gets two lines for them:
 
 | Line | Why |
@@ -440,14 +538,14 @@ Nextor only, because the stock flash's ROM disk starts a file manager on an MSX2
 
 This step is the first of the `snapcas` command's ([CLI.md](CLI.md)). It adds the
 game file's `url` line, the links to the zips that hold a game's sides
-([Game file](DESIGN.md#game-file)), which the command downloads. A one-off script
+([Game file](FILES.md#game-file)), which the command downloads. A one-off script
 filled the lines from File-Hunter's listing of its MSX1 CAS folder and the
 collection's lists of its files, and removed the link comments, which had no side
 2's link. An apostrophe in a link is written `%27`, because the game file's lines
 are split as a shell splits words, which would take it for a quote. The 8 game files
 without a link, in the `SM-` folders, were copies of Spectravideo's Swing Man,
 Cryptic Cube and Roulette under their catalogue numbers, so they went, with 13 other
-copies of a release under several names ([Shipped files](DESIGN.md#shipped-files)).
+copies of a release under several names ([Shipped files](FILES.md#shipped-files)).
 
 | Test | What it proves |
 |---|---|
@@ -518,7 +616,7 @@ run and the user's images share no folder:
 
 The run over every game file moves from the tests to `tools/games.py`, and
 `make games MACHINE=<machine>` replaces `make collection`
-([DESIGN.md, The games run](DESIGN.md#the-games-run)). The step moved the 1,850
+([INTERNALS.md, The games run](INTERNALS.md#the-games-run)). The step moved the 1,850
 tapes of `tapes/collection/` into `downloads/`, after checking that each of the
 1,601 tapes that the game files name has its game file's SHA-1.
 

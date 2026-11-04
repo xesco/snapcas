@@ -1,4 +1,5 @@
-"""The reader of CAS files (docs/DESIGN.md, CAS data and Tape files).
+"""The reader of CAS files (docs/FORMATS.md, CAS data, and docs/INTERNALS.md,
+Tape files).
 
 A CAS file is a sequence of blocks, each after the 8-byte header, and every
 block is one that the BIOS's tape routines read. Most files put each header at

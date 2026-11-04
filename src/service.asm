@@ -1,4 +1,4 @@
-; SERVICE.BIN: the code that tools/build.py writes into images (docs/DESIGN.md,
+; SERVICE.BIN: the code that tools/build.py writes into images (docs/FORMATS.md,
 ; SERVICE.BIN). It is never run as it is: build.py and the restorer fill in
 ; the operands and the data that are 0 here.
 ;
@@ -23,7 +23,7 @@ VERSION equ 12
         dw relocs, 0                    ; part 7: the bytes that move with page 3,
                                         ; which tools/relocs.py appends
 
-; The tail (DESIGN.md, Tail): the restore's last code, written below the game's
+; The tail (FORMATS.md, Tail): the restore's last code, written below the game's
 ; stack pointer. It selects the game's memory in the worker's page and the slot
 ; register, writes the subslot register of DOS's mapper's slot when the worker
 ; could not, loads AF and SP, and jumps to the game.
@@ -70,7 +70,7 @@ t_tapout:                       ; 1A19h, TAPOUT: the tape cannot be written
         scf
         ret
 ; STMOTR and TAPIOF stop the manual tape, which waits for the player's key at
-; the next read (DESIGN.md, The manual tape). STMOTR with A = 1 starts the
+; the next read (INTERNALS.md, The manual tape). STMOTR with A = 1 starts the
 ; motor and leaves it. The automatic tape ignores E_STOP.
 stmotr:
         cp 1
@@ -256,7 +256,7 @@ fields_end:
 ; ---- T0 without a part in page 3, from 19DDh to 1B44h ----
 ;
 ; T0's routines and data, for a game whose page 3 has no room for the service
-; (DESIGN.md, Without a part in page 3). The game reaches T0 through DOS's
+; (INTERNALS.md, Without a part in page 3). The game reaches T0 through DOS's
 ; mapper in page 0, where mapper register FCh holds T0, and build.py points the
 ; jump table's entries from 00E1h to 00F3h at the routines here.
 
@@ -290,7 +290,7 @@ D_VDP1  equ T_BORDER+7
 D_TWO   equ T_BORDER+9
 
 ; T0 has no room for the manual tape, so the tape is automatic in this mode
-; (DESIGN.md, The manual tape).
+; (INTERNALS.md, The manual tape).
 tapiof:                         ; TAPIOF and TAPOOF, as the BIOS's
 tapoof:
         ei

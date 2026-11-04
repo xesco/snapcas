@@ -1,5 +1,5 @@
 """Step 10 (docs/PLAN.md): the automatic fixes, each on a game that needed a
-game file line by hand, without that line (DESIGN.md, Slot patches, Without a
+game file line by hand, without that line (INTERNALS.md, Slot patches, Without a
 part in page 3, and Files and commands)."""
 import concurrent.futures
 import os

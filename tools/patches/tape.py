@@ -1,4 +1,4 @@
-"""The tape's automatic patches (docs/DESIGN.md, Scan): code that reaches the
+"""The tape's automatic patches (docs/INTERNALS.md, Scan): code that reaches the
 tape without going through T0.
 
 A finding that can be patched sends its call or stub to the entries in page 3,

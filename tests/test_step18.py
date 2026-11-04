@@ -1,5 +1,5 @@
 """Step 18 (docs/PLAN.md): the check's point 4, which fails a game that stops at
-a BASIC error after the restore (DESIGN.md, Check, point 4)."""
+a BASIC error after the restore (INTERNALS.md, Check, point 4)."""
 import concurrent.futures
 import os
 import shutil

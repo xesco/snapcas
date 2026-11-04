@@ -139,7 +139,7 @@ MACHINE ?= phc28s-ram64k-carnivore2
 DOS ?= $(NEXTOR)
 FULL ?=
 
-# The run over every shipped game file on a machine (docs/DESIGN.md, The games
+# The run over every shipped game file on a machine (docs/INTERNALS.md, The games
 # run), apart from make test because it takes hours.
 games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) python3 -I tools/games.py $(MACHINE) --dos $(DOS) $(if $(FULL),--full)

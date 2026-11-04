@@ -38,8 +38,12 @@ import msx  # noqa: E402
 # The DOS files that snap --check uses without --dos: Nextor's, which make test
 # downloads (Makefile).
 NEXTOR = os.path.join(ROOT, "dos", "nextor")
+# Nextor 2.1.0's tools.zip, which holds NEXTOR.SYS 2.11 and COMMAND2.COM 2.44,
+# and its SHA-256: the Makefile pins the same file.
+NEXTOR_ZIP = ("https://github.com/Konamiman/Nextor/releases/download/v2.1.0/tools.zip",
+              "5792ff3fe7ab684b8afd405cdd898e25f6efdb84ca1f2cb9ac1428cc848d924e")
 
-# What each point of check.py's report checks (DESIGN.md, Check).
+# What each point of check.py's report checks (INTERNALS.md, Check).
 POINTS = {"1": "the restored machine equals the snapshot",
           "2": "the game does not write to the tape service in page 3",
           "3": "the machine does not reboot",
@@ -97,6 +101,27 @@ def step(name, *args):
     return subprocess.run([sys.executable, "-I", os.path.join(TOOLS, name), *args]).returncode
 
 
+def quiet_step(name, *args):
+    """Runs one of the tools with its output kept, and shows the output only
+    when the tool fails. Returns its exit status and its standard output."""
+    result = subprocess.run([sys.executable, "-I", os.path.join(TOOLS, name), *args], capture_output=True, text=True)
+    if result.returncode != 0:
+        sys.stdout.write(result.stdout)
+        sys.stderr.write(result.stderr)
+    return result.returncode, result.stdout
+
+
+def nextor():
+    """Downloads Nextor's DOS files into dos/nextor/ when they are missing, and
+    returns the folder."""
+    if all(os.path.isfile(os.path.join(NEXTOR, f)) for f in ("NEXTOR.SYS", "COMMAND2.COM")):
+        return NEXTOR
+    print(f"download  Nextor 2.1.0's NEXTOR.SYS and COMMAND2.COM into {os.path.relpath(NEXTOR, ROOT)}/", flush=True)
+    if step("fetch.py", *NEXTOR_ZIP, NEXTOR, "NEXTOR.SYS", "COMMAND2.COM") != 0:
+        raise Choice("Nextor's files could not be downloaded; --dos <dir> names other DOS files")
+    return NEXTOR
+
+
 def tapes_folder(game):
     """The folder of the game's tapes: a custom game's own folder, or
     downloads/."""
@@ -108,12 +133,17 @@ def steps(args, game, machine, variant=None):
     exit status of the first step that fails, or 0."""
     extra = ["--capture", variant] if variant else []
     tapes = ["--tapes", tapes_folder(game)]
-    for name, options in (("capture.py", [*tapes, *extra]), ("build.py", tapes)):
-        status = step(name, game, machine, *options)
-        if status != 0:
-            return status
+    status, _ = quiet_step("capture.py", game, machine, *tapes, *extra)
+    if status != 0:
+        return status
+    print("capture   done", flush=True)
+    status, output = quiet_step("build.py", game, machine, *tapes)
+    if status != 0:
+        return status
+    # build.py prints <GAME>: <image>: <what the image holds>.
+    print("build     done: " + output.strip().rsplit(": ", 1)[-1], flush=True)
     if args.check:
-        return check(game, machine, args.dos or NEXTOR)
+        return check(game, machine, args.dos)
     return 0
 
 
@@ -154,8 +184,9 @@ def snap(args):
         machine = find_machine(args.machine)
         if args.dos and not args.check:
             raise Choice("--dos gives the DOS files for --check")
-        if args.check and not args.dos and not os.path.isfile(os.path.join(NEXTOR, "NEXTOR.SYS")):
-            raise Choice(f"--check needs --dos <dir>, or Nextor's files in {NEXTOR}, which make test downloads")
+        print(f"{gamefile.title(game) or os.path.basename(game)} for {machine}", flush=True)
+        if args.check and not args.dos:
+            args.dos = nextor()
         if not gamefile.is_custom(game):
             download.tapes(gamefile.read_game(game, machine), gamefile.DOWNLOADS)
     except (Choice, OSError, gamefile.GameFileError, download.DownloadError) as e:
@@ -190,12 +221,11 @@ def try_game(args):
     try:
         game = find_game(args.game)
         machine = find_machine(args.machine)
-        if not args.dos and not os.path.isfile(os.path.join(NEXTOR, "NEXTOR.SYS")):
-            raise Choice(f"try needs --dos <dir>, or Nextor's files in {NEXTOR}, which make test downloads")
+        dos = args.dos or nextor()
     except Choice as e:
         print(f"snapcas.py: {e}", file=sys.stderr)
         return 1
-    return step("try.py", game, machine, "--dos", args.dos or NEXTOR)
+    return step("try.py", game, machine, "--dos", dos)
 
 
 def sync_card(args):

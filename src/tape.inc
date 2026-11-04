@@ -1,4 +1,4 @@
-;; The tape service's routines (DESIGN.md, Tape service), which service.asm
+;; The tape service's routines (INTERNALS.md, Tape service), which service.asm
 ;; assembles twice: in the code segment, which runs in page 0 and reads the
 ;; tape through the reader in page 3, and in T0 for the mode without a part in
 ;; page 3 (T0MODE), which reads the tape through a borrowed page 1 or 2. The
@@ -213,7 +213,7 @@ next_byte:
 ; shows only the border. It then writes the game's registers 7 and 1 again.
 ; The VDP's registers cannot be read, so D_BORDER and D_SCREEN point to the
 ; game's values: RG7SAV and RG1SAV, or D_VDP7 and D_VDP1 for a game that does
-; not keep them (DESIGN.md, Tape service).
+; not keep them (INTERNALS.md, Tape service).
 mark:
         in a,(99h)              ; also resets the VDP's register latch
         ld hl,(D_SCREEN)
@@ -348,7 +348,7 @@ lt24:
 
         if !T0MODE
 ; The manual tape stops at the last side's end, and at side 1's end until
-; RETURN goes on to side 2 (DESIGN.md, The manual tape).
+; RETURN goes on to side 2 (INTERNALS.md, The manual tape).
 wrap_manual:
         ld de,D_TOTAL
         call on_side1.pos

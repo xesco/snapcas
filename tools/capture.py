@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Load a cassette game in openMSX and save its snapshot (docs/DESIGN.md,
+"""Load a cassette game in openMSX and save its snapshot (docs/INTERNALS.md,
 Capture).
 
 Usage: capture.py <game> <machine> --tapes <dir> [--capture <variant>]
@@ -49,7 +49,7 @@ def key_tcl(kind, value):
 def load_command(game, data):
     """The load command: the game file's load line, or else the type of the
     first block of the tape file's bytes, which must be a standard block then
-    (DESIGN.md, Tape files). None when neither gives one."""
+    (INTERNALS.md, Tape files). None when neither gives one."""
     if game.load:
         return game.load
     blocks = tape.read(game.tape, data)
@@ -60,7 +60,7 @@ def load_command(game, data):
 
 def settings(game, machine, tape_path, data, snap, side2_path=None, side2=b""):
     """The Tcl settings. data and side2 are the tape files' bytes, of which
-    the capture uses the tape service's tapes (DESIGN.md, Tape files)."""
+    the capture uses the tape service's tapes (INTERNALS.md, Tape files)."""
     keys = [(t, key_tcl(kind, value)) for t, kind, value in game.keys]
     tries = ([game.continue_key] if game.continue_key else []) + ["space", "return"]
     command = load_command(game, data)
@@ -176,7 +176,7 @@ def main():
     procedures = (patches.slots.tcl_settings() + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/capture.tcl")
                   + msx.tcl("patches/slots.tcl") + patches.ramsearch.tcl_settings()
                   + msx.tcl("patches/ramsearch.tcl"))
-    # The patches of the tape that the capture finds (DESIGN.md, Slot patches,
+    # The patches of the tape that the capture finds (INTERNALS.md, Slot patches,
     # The RAM search patch): each one stops the capture, which runs again on the
     # patched tape.
     found = []
@@ -196,7 +196,7 @@ def main():
         print(result, file=sys.stderr)
         return 2
     with open(os.path.join(snap, "patches.txt"), "w") as f:
-        f.write("# The capture's patches of the tape (docs/DESIGN.md, Slot patches, The RAM search patch).\n")
+        f.write("# The capture's patches of the tape (docs/INTERNALS.md, Slot patches, The RAM search patch).\n")
         f.writelines(p.line + "\n" for p in found)
     print(snap)
     return 0

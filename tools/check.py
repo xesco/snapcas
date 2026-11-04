@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a game's restorer in openMSX and check the restore (docs/DESIGN.md,
+"""Run a game's restorer in openMSX and check the restore (docs/INTERNALS.md,
 Check).
 
 Usage: check.py <game> <machine> --dos <dir>
@@ -29,7 +29,7 @@ TIMEOUT = 600  # real seconds for one check
 
 
 def read_facts(out):
-    """build.txt's facts (DESIGN.md, Check): the service flag, the patched
+    """build.txt's facts (INTERNALS.md, Check): the service flag, the patched
     ranges, and the tape service's part, moved part and C_POS's address, each
     as a Tcl list, empty when the image has none."""
     facts = {"service": "0", "patched": [], "part": "", "moved": "", "cpos": "0"}
@@ -46,7 +46,7 @@ def read_facts(out):
 
 def capture_reset(snap):
     """The seconds from the snapshot to the first reset that the capture's log
-    holds in the 60 seconds after it, or "" (DESIGN.md, Check, point 3)."""
+    holds in the 60 seconds after it, or "" (INTERNALS.md, Check, point 3)."""
     snapshot = None
     with open(os.path.join(snap, "log.txt")) as f:
         for line in f:

@@ -1,5 +1,5 @@
 """Step 15 (docs/PLAN.md): TSX tape files, read into the tape model
-(DESIGN.md, Tape files and TSX data)."""
+(INTERNALS.md, Tape files, and FORMATS.md, TSX data)."""
 import concurrent.futures
 import os
 import shutil

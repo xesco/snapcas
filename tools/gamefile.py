@@ -1,4 +1,4 @@
-"""Game files (docs/DESIGN.md, Game file).
+"""Game files (docs/FILES.md, Game file).
 
 A game file holds one setting per line: a key, a space and a value. A line that
 starts with # is a comment, and blank lines are ignored. A machine's game file beside
@@ -101,7 +101,7 @@ def number(text, where):
 def game_names():
     """The game files' folders below games/, in order: a game's, or a
     compilation's program's in its collection's folder, such as SUPERMSX/GOLF,
-    for a folder without a game.txt (DESIGN.md, A game later on the tape)."""
+    for a folder without a game.txt (INTERNALS.md, A game later on the tape)."""
     games = os.path.join(ROOT, "games")
     names = []
     for name in sorted(os.listdir(games)):
@@ -124,7 +124,7 @@ def custom_names():
 
 def title(folder):
     """A game's title, which names the File-Hunter file that it comes from
-    (DESIGN.md, Shipped files): a game's first comment line, its File-Hunter
+    (FILES.md, Shipped files): a game's first comment line, its File-Hunter
     name, which is its zip's name or the zip's name, / and the CAS file in it.
     A compilation's program's first comment names the program before its first
     comma, as in "Africa Film, the fourth game on the tape Super MSX n.23", so
@@ -305,7 +305,7 @@ def read_game(folder, machine=None):
     if game.urls and len(game.urls) != (2 if game.side2 else 1):
         raise GameFileError(f"{path}: url takes a link for each side")
     # rom keep leaves the game only the entries in page 3, which service t0
-    # removes (DESIGN.md, Game file).
+    # removes (FILES.md, Game file).
     if game.rom_keep and game.service == "t0":
         raise GameFileError(f"{folder}: rom keep needs the tape service's part of page 3, so it cannot "
                             "go with service t0")

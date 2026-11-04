@@ -53,7 +53,7 @@ copy      Gauntlet (1986)(US Gold)(Side A)[RUN'CAS-'].cas to downloads/GAUNTLET.
 download  Gauntlet (1986)(US Gold)(Side B)[RUN'CAS-'].zip from download.file-hunter.com
 copy      Gauntlet (1986)(US Gold)(Side B)[RUN'CAS-'].cas to downloads/GAUNTLEB.CAS, sha1 ok
 capture   done
-build     done
+build     done: 14 records, 52 port writes, up to 14 free mapper segments
 image     images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP
 ```
 
@@ -152,7 +152,7 @@ xp800-sdmapper              Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB
 
 A machine's name is its model and then its cartridges in slot order, such as
 `phc28s-ram64k-carnivore2`, and its capture variants are named in the same way
-([DESIGN.md, Machine file][machine]). These names are in place already, so the
+([FILES.md, Machine file][machine]). These names are in place already, so the
 command needs no change of its own to them.
 
 ## Download
@@ -167,7 +167,7 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 url https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20B)%5BRUN%27CAS-%27%5D.zip
 ```
 
-The `url` lines are in place ([DESIGN.md, Game file][gamefile]): each of the 1545
+The `url` lines are in place ([FILES.md, Game file][gamefile]): each of the 1545
 shipped game files has one.
 
 For each side, the command does these steps:
@@ -272,11 +272,11 @@ CD \SNAPCAS\G
 - Tapes from any site other than File-Hunter, and TSX files.
 - A package for pip, or a program built for each OS.
 - A machine file made by the command: a new machine is still described by hand
-  ([DESIGN.md, Machine file][machine]).
+  ([FILES.md, Machine file][machine]).
 - A record of the games tested on real hardware.
 
 [files]: DESIGN.md#files-and-commands
-[check]: DESIGN.md#check
-[machine]: DESIGN.md#machine-file
-[gamefile]: DESIGN.md#game-file
-[gamesrun]: DESIGN.md#the-games-run
+[check]: INTERNALS.md#check
+[machine]: FILES.md#machine-file
+[gamefile]: FILES.md#game-file
+[gamesrun]: INTERNALS.md#the-games-run

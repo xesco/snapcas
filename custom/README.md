@@ -12,7 +12,7 @@ custom/MYGAME/MYGAME.CAS
 ```
 
 The game file needs one line, which names side 1's tape. The other lines are those
-of a shipped game's file ([DESIGN.md, Game file](../docs/DESIGN.md#game-file)):
+of a shipped game's file ([FILES.md, Game file](../docs/FILES.md#game-file)):
 
 ```
 cas MYGAME.CAS

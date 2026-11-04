@@ -1,5 +1,5 @@
 """Step 9 (docs/PLAN.md): the shipped game files, and a game's file for one
-machine beside its game.txt (DESIGN.md, Game file and Shipped files)."""
+machine beside its game.txt (FILES.md, Game file and Shipped files)."""
 import concurrent.futures
 import os
 import sys

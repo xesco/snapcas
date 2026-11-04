@@ -1,6 +1,6 @@
 """Run openMSX for the snapcas tools: machine files, disk images and Tcl scripts.
 
-A machine file (docs/DESIGN.md, Machine file) names the openMSX arguments, the
+A machine file (docs/FILES.md, Machine file) names the openMSX arguments, the
 command that inserts a disk image and its size, the keys that pass a boot menu or
 that are held from power-on, and the machine's capture variants. The tools
 drive openMSX with a Tcl script that it runs with the throttle, the renderer and
@@ -17,7 +17,7 @@ MACHINES = os.path.join(os.path.dirname(HERE), "machines")
 # The capture variants, which only the capture runs on.
 VARIANTS = os.path.join(MACHINES, "capture")
 
-# The special keys of the MSX keyboard matrix, rows 6 to 8 (DESIGN.md, Key
+# The special keys of the MSX keyboard matrix, rows 6 to 8 (FILES.md, Key
 # names): name -> (row, bit).
 KEYS = {}
 for _row, _names in (
@@ -53,7 +53,7 @@ class Machine:
 
 def user_machines():
     """The names of the user machines, the machine files in machines/ itself,
-    in order (DESIGN.md, Machine file)."""
+    in order (FILES.md, Machine file)."""
     return sorted(f[:-4] for f in os.listdir(MACHINES)
                   if f.endswith(".txt") and os.path.isfile(os.path.join(MACHINES, f)))
 

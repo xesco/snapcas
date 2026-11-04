@@ -1,5 +1,5 @@
 """Step 6 (docs/PLAN.md): the scan's patterns, on bytes made for each case,
-and the scan of each tape of the corpus that needs the tape service (DESIGN.md,
+and the scan of each tape of the corpus that needs the tape service (INTERNALS.md,
 Scan)."""
 import concurrent.futures
 import hashlib
@@ -150,7 +150,7 @@ class Corpus(unittest.TestCase):
                     self.assertIn(line + "\n", text)
 
 
-# Moonwalker, with the tape service in T0 (DESIGN.md, Without a part in page
+# Moonwalker, with the tape service in T0 (INTERNALS.md, Without a part in page
 # 3): its game file, and the inputs from the intro to the main game's load.
 MOONWALKER = """cas MOONWALK.CAS
 sha1 1787776aeef9420ebb35c3ecb879a7c9a556a512
@@ -266,7 +266,7 @@ class PatchedTape(unittest.TestCase):
 
     def test_the_capture_turns_the_tape_over(self):
         # The game reads on past side 1's end, so side 2 goes in, and the
-        # tape position goes on in side 2 (DESIGN.md, Capture, step 4).
+        # tape position goes on in side 2 (INTERNALS.md, Capture, step 4).
         self.assertTrue(self.report.startswith("point 1: pass"), self.report)
         self.assertIn("side 2 inserted", self.log)
         with open(os.path.join(CAS_DIR, "SOOTLAND.CAS"), "rb") as f:
@@ -281,7 +281,7 @@ def borrow_symbols():
 
 def borrow_tape():
     """tests/borrow.asm as a binary file on tape, then a block of the bytes 0
-    to 255 (DESIGN.md, CAS data)."""
+    to 255 (FORMATS.md, CAS data)."""
     with open(os.path.join(ROOT, "out", "borrow.bin"), "rb") as f:
         code = f.read()
     start = borrow_symbols()["start"]

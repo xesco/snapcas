@@ -115,10 +115,40 @@ press GRAPH or CODE to wind the tape back. With a few games, `/M` does not work.
 | `bin/` | `SNAPCAS.COM`, which starts a `.SNP` file on your MSX |
 | `downloads/` | The tape files that `snapcas` downloads from File-Hunter |
 | `images/` | The `.SNP` files that you make, one folder per MSX |
+| `dos/` | The DOS files that the checks boot ([dos/README.md](dos/README.md)) |
 | `out/` | The files that `snapcas` makes on the way, which you do not need |
 | `docs/`, `src/`, `tests/` | The project's documents, source code and tests |
 
+## Build and test
+
+The Makefile builds `snapcas` and runs its checks. You need it only to change
+`snapcas`, because `bin/` already holds the built files.
+
+| Command | What it does |
+|---|---|
+| `make all` | Builds `bin/SNAPCAS.COM` and `bin/SERVICE.BIN`. It downloads the sjasmplus assembler's source into `out/cache/` and builds it first |
+| `make test` | Runs the tests in `openMSX`, in about 2 minutes, with the tape files of `tests/tapes/`. It downloads Nextor's files into `dos/nextor/` and the cartridges' firmware into `out/cache/` |
+| `make games` | Makes and checks the image of every game in `games/` on one MSX, with the tape files of `downloads/`. It downloads no tape, so a game whose tape is missing fails |
+| `make clean` | Removes `bin/` and `out/test/` |
+
+The tests that need MSX-DOS 1 or MSX-DOS 2 look for its files in `dos/msxdos1/` and
+`dos/msxdos2/` ([dos/README.md](dos/README.md)), and are skipped without them.
+`DOS_DIR=` names another folder for them.
+
+`make games` takes these settings:
+
+| Setting | What it does | Default |
+|---|---|---|
+| `MACHINE=` | The MSX, as `./snapcas.py machines` lists it | `phc28s-ram64k-carnivore2` |
+| `DOS=` | The folder of the DOS files that the check boots | `dos/nextor` |
+| `FULL=1` | Runs every game again. Otherwise a game keeps its last result while its files and the code are unchanged | Off |
+
+The results go to `out/games/<machine>.txt`, one line per game. The command fails
+when a game fails that `tests/openmsx-failures.txt` does not list, because that list
+holds the games that fail in `openMSX` itself. A first run takes hours.
+
 ## Learn more
 
-[DESIGN.md](docs/DESIGN.md) explains how `snapcas` works, what it cannot do yet, and
-how to describe a new MSX.
+[DESIGN.md](docs/DESIGN.md) explains how `snapcas` works and what it cannot do yet.
+[FILES.md](docs/FILES.md) shows how to describe a new MSX or a game, and
+[FORMATS.md](docs/FORMATS.md) defines the image and the other files byte by byte.

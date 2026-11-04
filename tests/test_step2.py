@@ -24,7 +24,7 @@ GAMES = {
     "abadia": ("ABADIA.CAS", "test/nms8250-128k"),
 }
 
-# The names of state.txt (DESIGN.md, Snapshot files).
+# The names of state.txt (FORMATS.md, Snapshot files).
 NAMES = ([r for r in "af bc de hl af2 bc2 de2 hl2 ix iy sp pc i im iff a8 ppic".split()]
          + [f"sub{n}" for n in range(4)] + ["fc", "fd", "fe", "ff"]
          + [f"psg{n}" for n in range(16)] + ["psgsel", "vramptr", "vramwrite",

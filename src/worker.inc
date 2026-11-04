@@ -1,4 +1,4 @@
-; The worker (docs/DESIGN.md, Restorer): the part of the restorer that runs in
+; The worker (docs/INTERNALS.md, Restorer): the part of the restorer that runs in
 ; page 1 or 2 while it changes the other pages. snapcas.asm assembles it twice,
 ; for WBASE 4000h and 8000h, and copies the copy it needs to that page. The
 ; worker keeps its stack in its own page.

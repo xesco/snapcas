@@ -1,4 +1,4 @@
-"""The RAM search patch (docs/DESIGN.md, The RAM search patch): a loader's
+"""The RAM search patch (docs/INTERNALS.md, The RAM search patch): a loader's
 search for RAM that selects the slot it finds in page 3, where the loader runs.
 patches/ramsearch.tcl is the capture's watch. The kind works only in the
 capture, so it has no find()."""

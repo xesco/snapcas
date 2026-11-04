@@ -1,5 +1,5 @@
 """Step 17 (docs/PLAN.md): one service setting for a game, and rom keep
-without the mode without a part in page 3 (DESIGN.md, Game file, Without a
+without the mode without a part in page 3 (FILES.md, Game file, Without a
 part in page 3)."""
 import concurrent.futures
 import os

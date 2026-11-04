@@ -1,4 +1,4 @@
-; The tape service's fixed places (docs/DESIGN.md, Tape service), for
+; The tape service's fixed places (docs/INTERNALS.md, Tape service), for
 ; service.asm and the restorer.
 
 ; The service's part of page 3, by default from FCE1h in SLTATR to the end of
@@ -32,15 +32,15 @@ C_VDP7    equ 005Dh     ; build.py: the snapshot's VDP register 7
 C_SIDE    equ 005Eh     ; build.py: 0 while the position is on side 1, 1 on side 2
 C_SCREEN  equ 005Fh     ; build.py: where the game's VDP register 1 is, 2 bytes
 C_VDP1    equ 0061h     ; build.py: the snapshot's VDP register 1
-C_SPEED   equ 0062h     ; the tape speed (DESIGN.md, Tape speed and sound), 0
+C_SPEED   equ 0062h     ; the tape speed (PLAN.md, The tape speed's design), 0
 C_TWO     equ 0063h     ; build.py: 1 when the tape has a side 2
 C_SAVE    equ 0064h     ; TAPIN's position while it looks for a header, 3 bytes
 C_S1REAL  equ 0067h     ; build.py: side 1's end before its padding to a
                         ; multiple of 8, with a side 2, otherwise C_S1END's
 C_MODE    equ 006Ah     ; restorer: 1 for the manual tape of /M, 0 for the
-                        ; automatic tape (DESIGN.md, The manual tape)
+                        ; automatic tape (INTERNALS.md, The manual tape)
 
-; T0 in the mode without a part in page 3 (DESIGN.md, Without a part in page 3):
+; T0 in the mode without a part in page 3 (INTERNALS.md, Without a part in page 3):
 ; its data, then its routines, from 19DDh to 1B44h.
 T_POS     equ 19DDh     ; build.py: the tape position at the snapshot, 3 bytes
 T_S1END   equ 19E0h     ; build.py: side 1's end, 3 bytes

@@ -1,5 +1,5 @@
 """Step 3 (docs/PLAN.md): the image, from the snapshots of step 2, checked
-against the design's tables (DESIGN.md, Formats)."""
+against the format's tables (FORMATS.md)."""
 import concurrent.futures
 import os
 import struct

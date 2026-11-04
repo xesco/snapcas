@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Make and check every shipped game file's image on a machine (docs/DESIGN.md,
+"""Make and check every shipped game file's image on a machine (docs/INTERNALS.md,
 The games run).
 
 Usage: games.py <machine> [--dos <dir>] [--full] [--workers <n>]

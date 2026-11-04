@@ -1,5 +1,5 @@
 """Step 16 (docs/PLAN.md): the check's point 3, which fails a reboot of the
-machine after the restore (DESIGN.md, Check, point 3)."""
+machine after the restore (INTERNALS.md, Check, point 3)."""
 import concurrent.futures
 import os
 import shutil

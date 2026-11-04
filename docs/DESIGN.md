@@ -24,7 +24,7 @@ in [PLAN.md](PLAN.md).
 | T0 | A RAM copy of the BIOS's page 0 whose tape routines call the tape service's ([Tape service](#tape-service)) |
 | Code segment | The segment that holds the tape service's routines, then the start of the tape |
 | Service segment | A segment that holds T0, the code segment, or the rest of the tape |
-| Replay | `<GAME>.RPL`, a recording of the load's screen and sound that the restorer can play before the restore ([Replay](#replay)) |
+| Replay | `<GAME>.RPL`, a recording of the load's screen and sound that the restorer can play before the restore ([PLAN.md, The replay's design](PLAN.md#the-replays-design)) |
 
 ## Files and commands
 
@@ -32,33 +32,33 @@ in [PLAN.md](PLAN.md).
 |---|---|---|
 | `machines/<machine>.txt` | A person, once per machine | How to start the machine in `openMSX` |
 | `games/<game>/game.txt` | A person or an LLM | The game's settings that hold on every machine |
-| `games/<game>/<machine>.txt` | A person or an LLM, for a game that needs it | The game's settings that hold only on one machine, named after the machine file with `-` for `/` ([Game file](#game-file)) |
-| `games/<collection>/<game>/` | A person or an LLM | A compilation's program, with the same files as a game's folder. Its `<game>` below `images/<machine>/` and `out/work/<machine>/` is `<collection>/<game>` ([A game later on the tape](#a-game-later-on-the-tape)) |
+| `games/<game>/<machine>.txt` | A person or an LLM, for a game that needs it | The game's settings that hold only on one machine, named after the machine file with `-` for `/` ([FILES.md, Game file](FILES.md#game-file)) |
+| `games/<collection>/<game>/` | A person or an LLM | A compilation's program, with the same files as a game's folder. Its `<game>` below `images/<machine>/` and `out/work/<machine>/` is `<collection>/<game>` ([INTERNALS.md, A game later on the tape](INTERNALS.md#a-game-later-on-the-tape)) |
 | `custom/<game>/` | The user | A custom game: its `game.txt` and its tape files, which `snap` reads from the folder without downloading them. Its `<game>` below `images/<machine>/` and `out/work/<machine>/` is `custom/<game>` ([CLI.md, Your own games](CLI.md#your-own-games)) |
 | `downloads/<TAPE>` | `snapcas.py snap` | The tape files that it downloads from File-Hunter, each checked against its game file's SHA-1 ([CLI.md, Download](CLI.md#download)) |
 | `tests/tapes/<TAPE>` | The developers | The tape files of the tests, in git |
 | `images/<machine>/<game>/<GAME>.SNP` | `snapcas.py snap` | The image, which `snap` moves from the work folder when every step passes |
-| `images/<machine>/<game>/<GAME>.RPL` | `snapcas.py snap` | The replay, beside the image |
+| `images/<machine>/<game>/<GAME>.RPL` | `snapcas.py snap` | The replay, beside the image, once the replay is built |
 | `out/work/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image, until `snap` moves it |
 | `out/work/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
 | `out/work/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
 | `out/work/<machine>/<game>/build.txt` | `tools/build.py` | What the check takes from the build: the RAM bytes that the build patched, under each RAM file of their segment, the tape service's part of page 3, and the address of its tape position `C_POS` ([Check](#check)) |
 | `out/work/<machine>/<game>/check/` | `tools/check.py` | The check's report and savestates |
 | `out/work/<machine>/<game>/try/` | `tools/try.py` | The disk of `snapcas.py try` |
-| `out/games/<machine>.txt` | `tools/games.py` | The result of each game file on the machine ([The games run](#the-games-run)) |
+| `out/games/<machine>.txt` | `tools/games.py` | The result of each game file on the machine ([INTERNALS.md, The games run](INTERNALS.md#the-games-run)) |
 | `dos/` | The user, and the Makefile for `dos/nextor/` | The DOS system files of the checks: `msxdos1/`, `msxdos2/` and `nextor/` |
 | `out/cache/` | The Makefile | The tools that it downloads and builds, and the test home of `openMSX` |
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
-| `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm` ([SERVICE.BIN](#servicebin)) |
+| `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm` ([FORMATS.md, SERVICE.BIN](FORMATS.md#servicebin)) |
 
-The `bin/` files are built with sjasmplus 1.24.0 and shipped. Git keeps only a
-short `README.md` in `custom/`, `downloads/`, `dos/`, `images/` and `out/`, and
-ignores the rest of them. `out/work/<machine>/<game>/` is a shipped or custom game's
-work folder. A game folder elsewhere, as the tests make below `out/test/`, holds its
-own work folder, `<folder>/<machine>/`, so the tests write nothing to `out/work/` or
+The `bin/` files are built with sjasmplus 1.24.0 and shipped. Git keeps only a short
+`README.md` in `custom/`, `downloads/`, `dos/`, `images/` and `out/`, and ignores
+the rest of them. `out/work/<machine>/<game>/` is a shipped or custom game's work
+folder. A game folder elsewhere, as the tests make below `out/test/`, holds its own
+work folder, `<folder>/<machine>/`, so the tests write nothing to `out/work/` or
 `images/`. `<machine>` is a machine file's name below `machines/` without `.txt`,
-such as `vg8020-carnivore2` ([Machine file](#machine-file)). Each game is processed
-by four commands, in this order:
+such as `vg8020-carnivore2` ([FILES.md, Machine file](FILES.md#machine-file)). Each
+game is processed by four commands, in this order:
 
 1. `tools/capture.py <game> <machine> --tapes <dir>` loads the game in `openMSX` and
    saves the snapshot ([Capture](#capture)). `<dir>` holds the tape files, CAS or
@@ -70,1279 +70,122 @@ by four commands, in this order:
    verifies the restore ([Check](#check)). `<dir>` holds the user's DOS system
    files.
 4. The user copies `SNAPCAS.COM` and `<GAME>.SNP` to a disk of the real machine and
-   runs `SNAPCAS <GAME>`. With `<GAME>.RPL` beside them, `SNAPCAS <GAME> /R` first
-   shows the load as it happened in the capture. With `/T1200` or `/T2400`, a game
-   with the tape service loads at that speed, with the sound of the tape
-   ([Tape speed and sound](#tape-speed-and-sound)). With `/M`, the tape moves only
-   when the player presses a key ([The manual tape](#the-manual-tape)).
+   runs `SNAPCAS <GAME>`. The replay, `/R`, and the tape speed, `/T1200` and
+   `/T2400`, are planned ([PLAN.md](PLAN.md), steps 7 and 8). With `/M`, the tape
+   moves only when the player presses a key
+   ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)).
 
 `./snapcas.py snap <game> <machine> [--check [--dos <dir>]]`, the `snapcas` command
 at the repository's top ([CLI.md](CLI.md)), makes the image in one command. It
 downloads the game's tape files that are missing from `downloads/`, then runs steps
 1 and 2 with `--tapes downloads/`, and step 3 with `--check`, with Nextor's files
-from `dos/nextor/` unless `--dos` gives others. When every step passes, it moves a
-shipped game's image to `images/`. The tests set `SNAPCAS_DOWNLOADS`
-to `tests/tapes/`, so that `snap` finds their tapes there and downloads nothing.
-When a step fails and the game file names no capture variant, it runs these steps
-again on each capture variant that the machine file lists, in the order of its
-`variant` lines ([Machine file](#machine-file)). A failed capture counts too,
-because a loader that trips over a cartridge can crash during the capture. It keeps
-the first image that passes, and prints the `capture` line that made it, for the
-machine's game file. Otherwise it makes the image of the game file's own lines
-again, and exits with the status of the first step that failed. `capture.py`'s
-`--capture <variant>` names the variant, in place of the game file's `capture` line.
+from `dos/nextor/` unless `--dos` gives others. It downloads Nextor's files there
+first when they are missing, pinned by SHA-256 as the Makefile pins them. When every
+step passes, it moves a shipped game's image to `images/`. The tests set
+`SNAPCAS_DOWNLOADS` to `tests/tapes/`, so that `snap` finds their tapes there and
+downloads nothing. When a step fails and the game file names no capture variant, it
+runs these steps again on each capture variant that the machine file lists, in the
+order of its `variant` lines ([FILES.md, Machine file](FILES.md#machine-file)). A
+failed capture counts too, because a loader that trips over a cartridge can crash
+during the capture. It keeps the first image that passes, and prints the `capture`
+line that made it, for the machine's game file. Otherwise it makes the image of the
+game file's own lines again, and exits with the status of the first step that
+failed. `capture.py`'s `--capture <variant>` names the variant, in place of the game
+file's `capture` line.
 
 The tools are Python 3 programs that require only Python 3 and `openMSX` 22.0, so
 they run on macOS, Linux and Windows. They print errors on standard error, naming
 the file and the problem, and exit with 0 on success, 1 for an error in the input
 files, 2 when `openMSX` fails or a wait times out, and 3 when a check fails.
 
-### The games run
+The games run, `make games`, and the map of the tools' code are in
+[INTERNALS.md](INTERNALS.md#the-games-run).
 
-`make games MACHINE=<machine>` runs `tools/games.py`, which checks that every
-shipped game file makes a working image on the machine. It is not part of
-`make test`, because it takes hours, and it reads none of the tests' tapes. It does
-these steps:
+## Machine and game files
 
-1. It looks for each game file's tapes in `downloads/`, where `snap` puts them. It
-   downloads nothing, because a download of the whole collection would load
-   File-Hunter, one person's site. A game file whose tape is missing gets that as its
-   result.
-2. It captures, builds and checks each game file, 11 at once by default, because
-   `openMSX` keeps about one core busy. The check always runs, with Nextor's files
-   unless `DOS=` names others.
-3. It writes one line per game file to `out/games/<machine>.txt`: the folder, a tab
-   and the first line of the check's report, the failed point with its first line,
-   or the failed step's error.
-4. It compares the failures with `tests/openmsx-failures.txt`, which lists the game
-   files that fail in `openMSX` itself, and exits with 3 when another game file
-   fails.
+A machine file describes one MSX and its cartridges, and a game file describes one
+game and its tape. [FILES.md](FILES.md) defines both and lists the shipped files.
 
-A game file keeps its last result while its inputs are unchanged: its folder, its
-tapes, the machine files that it runs on, `bin/` and `tools/`. A cache beside the
-results, `<machine>.txt.cache`, holds the inputs' hash of each, and `FULL=1` gives
-every game file a new result.
+## How it works
 
-### The tools' code
+An image passes through the parts below. Each section says what its part does and
+why, and [INTERNALS.md](INTERNALS.md) gives each part step by step.
 
-The commands share their code through modules, and the Tcl that runs inside
-`openMSX` is in files of its own:
+### Tape files
 
-| File | Holds |
+`snapcas` reads two formats of tape file, CAS and TSX. A CAS file holds only the
+blocks that the BIOS's tape routines read, so a tape whose loader reads its own
+format, as a turbo loader does, needs a TSX file, which holds any MSX tape. Each
+format has its own reader, which turns the file into the tape model, the file's
+blocks in tape order. The capture, the build, the patches and the check work only on
+the model, so a new format needs only a new reader
+([INTERNALS.md, Tape files](INTERNALS.md#tape-files)).
+
+### Capture
+
+`tools/capture.py` loads the game in `openMSX`, on a copy of the user's machine,
+from its own cassette player. It first removes the disk system's hooks and work
+area, so that the game loads as on a cassette machine, then types the load command,
+presses a key when the load waits for one, and follows the tape position as the tape
+service would keep it. It patches the code that would select a slot that holds
+nothing on this machine. It takes the snapshot at an interrupt's entry, when the
+CPU's state is complete and the bytes below the stack pointer are free
+([INTERNALS.md, Capture](INTERNALS.md#capture)).
+
+### Build
+
+`tools/build.py` turns the snapshot into the image: the RAM pages, VRAM, the port
+writes that restore the PSG, PPI and VDP, and the tail, the restore's last code. A
+game that reads its tape during play also gets the tape service, built from the ROM,
+the tape files and `SERVICE.BIN`, and a scan that sends the game's own tape calls to
+it ([INTERNALS.md, Build](INTERNALS.md#build)).
+
+### Restorer
+
+`SNAPCAS.COM` runs on the real machine under MSX-DOS 1, MSX-DOS 2 or Nextor. It
+checks that the machine fits the image, by the ROMs' checksums and DOS's mapper, and
+reads each record into its slot and segment while DOS still runs. A RAM page that
+belongs in one of DOS's own segments waits in a holding segment. The restorer then
+stops DOS, performs the port writes, copies the held pages into place, and jumps to
+the tail, which starts the game ([INTERNALS.md, Restorer](INTERNALS.md#restorer)).
+
+### Tape service
+
+A game that loads more of its tape during play reads it from the tape service, which
+keeps the rest of the tape in mapper segments. T0, a copy of the BIOS's page 0 whose
+tape routines call the service, replaces the ROM in page 0, and entries in page 3
+serve the code that goes around T0. By default the tape turns over and rewinds by
+itself. With `/M` it stops where a real tape stops, and waits for the player's key.
+GRAPH goes back to side 1's start and CODE to side 2's. A game that needs all of its
+page 3 gets the whole service in T0
+([INTERNALS.md, Tape service](INTERNALS.md#tape-service)).
+
+### Check
+
+`tools/check.py` runs the restorer in `openMSX`, on a disk with DOS, `SNAPCAS.COM`
+and the image, and lets the game run for 60 seconds. The image fails on any of four
+points:
+
+| Point | The image fails when |
 |---|---|
-| `tools/gamefile.py` | Reads game files, and lists the game files' folders and their titles. Finds a game's folder from a name below `games/`, such as `ABADIA` or `SUPERMSX/GOLF`, or from a path, and the game's work folder and the place of its image in `images/` |
-| `tools/msx.py` | Reads machine files, finds one from its name, and lists the user machines with what each is. Starts `openMSX` with a Tcl script, gives its home folder, where it writes savestates, and makes disk images |
-| `tools/cas.py`, `tools/tsx.py`, `tools/tape.py` | The readers of CAS and TSX files, and the tape model and the tape service's tape, which the rest of the code uses ([Tape files](#tape-files)) |
-| `tools/patches/` | The automatic patches, one file for each kind, as below |
-| `tools/tcl/prelude.tcl` | The procedures that every `openMSX` run gets: reading the screen, passing the boot menu, and typing at DOS's prompt |
-| `tools/tcl/memory.tcl` | The procedures that the capture and the check share: EXPTBL, a slot ID's primary slot and subslot, whether page 0 selects a slot, a 16-bit word in memory, the CPU's view of memory with a slot selected, the tests of RAM and of a mapper, and the read of VRAM |
-| `tools/tcl/capture.tcl` | The capture's steps ([Capture](#capture)) |
-| `tools/tcl/check.tcl` | The check ([Check](#check)) |
-| `tools/relocs.py` | The offsets that `build.py` changes to move `SERVICE.BIN`'s page 3 part ([SERVICE.BIN](#servicebin)) |
-| `tools/download.py` | The download of a game's tape files from its `url` line, for `snapcas.py snap` ([CLI.md](CLI.md)) |
-| `tools/games.py` | The games run of `make games` ([The games run](#the-games-run)) |
-| `tools/fetch.py` | The download of the test setup's files |
-| `tools/try.py` | The `openMSX` run of `snapcas.py try`, with its window, which types the restorer's command ([CLI.md, Try an image](CLI.md#try-an-image)) |
-
-An automatic patch is a change that the tools make to a game without a line in its
-game file. Each kind of automatic patch is one file in `tools/patches/`:
-
-| File | Kind |
-|---|---|
-| `tape.py` | The calls, stubs and entries of the tape routines, sent to the entries in page 3, and the readers of the cassette signal, which are only listed ([Scan](#scan)) |
-| `slots.py` | The fixed slot values that name a slot that holds nothing, the slot map, and the capture's patches of the tape ([Slot patches](#slot-patches)) |
-| `slots.tcl` | The capture's watch on the slot register ([Slot patches](#slot-patches)) |
-| `ramsearch.py` | The bytes of the loader's RAM search and its patch ([The RAM search patch](#the-ram-search-patch)) |
-| `ramsearch.tcl` | The capture's watch for a slot register write that cuts off the code that made it ([The RAM search patch](#the-ram-search-patch)) |
-
-The Python file of each kind has a function, `find(data, context)`, that returns the
-kind's findings in data. A finding is the code found, its offset, what it is, and
-its patched bytes, and `tools/patches/finding.py` defines it. The context holds the
-page of the entries, the slot map, and whether the image has the tape service.
-`tools/patches/__init__.py` lists the kinds in the order that the scan runs them,
-and holds the two things that all kinds share: the patch of the bytes and the text
-of `scan.txt`. So a new kind is a new file and a line in that list. A kind that also
-works in the capture has a Tcl file of the same name, which `capture.py` loads after
-`capture.tcl`. A kind that works only in the capture has no `find` and is not in the
-list, because the loader that it patches has finished by the snapshot. Data that
-both files of a kind need, such as the opcodes of [Slot patches](#slot-patches), is
-in the Python file only, and `capture.py` writes it into the Tcl settings. A game
-file's `patch` lines are not automatic patches, and the build applies them
-([Game file](#game-file)).
-
-## Machine file
-
-A machine file describes one MSX and the cartridges in its slots. It holds one
-`openmsx` line, one `disk` line, any number of `boot` lines, at most one `dos` line
-and any number of `variant` lines, as in this example for a Sanyo PHC-28S with a RAM
-cartridge and a Carnivore2:
-
-```
-# Sanyo PHC-28S, an MSX1 with 16 KB, with a 64 KB RAM cartridge in slot 1 and a
-# Carnivore2 in slot 2, under Nextor.
-openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2
-disk hda
-boot "DefConfig" space
-variant phc28s-ram64k
-variant phc28s-empty-carnivore2
-```
-
-| Line | Meaning |
-|---|---|
-| `openmsx` | The `openMSX` arguments that reproduce the machine |
-| `disk` | The `openMSX` command that inserts `check.py`'s disk image, such as `hda` for an IDE interface or an SD card, or `diska` for a floppy drive. Then, optionally, the image's size in KB: 720, the default, or 360 for a single-sided drive, as the Philips VG-8235 has |
-| `boot` | A text on the screen during boot and the key to press when it appears. Each key has its own line, matched in order. A menu can show its text before it reads the keyboard, so the key is pressed again each second while the text stays, up to 10 times |
-| `hold` | A key held down from power-on, and the emulated seconds it is held, such as `hold del 6`. It is for a machine whose firmware starts a program in a graphics mode in place of BASIC, whose screen `boot` cannot read: the Panasonic FS-A1 starts its Desk Pac menu unless DEL is held |
-| `dos` | For a machine that boots MSX-DOS from a disk of its own, as the MegaFlashROM SCC+ SD boots from the ROM disk in its flash: DOS's prompt, such as `A:\>`, and the drive letter of `check.py`'s disk. When the prompt appears, the capture types `BASIC`, because it loads the game from BASIC, and the check types that drive and `AUTOEXEC` |
-| `variant` | The name of one of the machine's capture variants. `snapcas.py snap` tries the variants in the order of these lines |
-
-`openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
-the `-ext` options sets the slots, and it must match the real machine's. `boot`
-lines pass a cartridge's boot menu, such as the Carnivore2's. The tools read the
-screen with `get_screen`, so such a menu must be in a text mode. A line that starts
-with `#` is a comment, and the file's first comment says what the machine is.
-
-A machine file's name says what the file describes: the model, then each cartridge
-in slot order, with `empty` for an empty slot before a cartridge. A cartridge's name
-is `openMSX`'s name for it in lower case, such as `ram64k` or `carnivore2`, or a
-short form of a long one, such as `sunriseide` and `mfrsd`. The PicoVerse is
-`picoverse`, though two of `openMSX`'s cartridges stand in for it. So
-`phc28s-ram64k-carnivore2` is a Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1
-and a Carnivore2 in slot 2, and two setups of one model have two names.
-
-Machine files are of three kinds, each in its own place:
-
-| Kind | Where | What it is |
-|---|---|---|
-| A user's machine | `machines/` | A real machine that the images are made for, given as the command's `<machine>` |
-| A capture variant | `machines/capture/` | The same machine with fewer cartridges, for a game whose loader trips over a cartridge, or whose image needs fewer free mapper segments when the game runs in the machine's own RAM. A game's `capture` line names it |
-| A test machine | `machines/test/`, given as `test/<name>` | A machine that only the tests use |
-
-A capture variant only takes cartridges away: it keeps the machine's ROMs and every
-other cartridge in its slot. The image built from its snapshot is still for the
-user's machine and is checked there, so the restorer finds the RAM pages in the
-slots that the snapshot names. A variant's name follows the same rule as a
-machine's, so it names the cartridges that the variant holds, and not those that it
-leaves out. So two machines whose variants hold the same cartridges share one
-variant: the VG-8020 with a Carnivore2 and the VG-8020 with a PicoVerse both list
-`vg8020`. The variant's first comment says which machines list it and why. A game's
-`capture` line is in the machine's game file, which already names the machine that
-the image is for, so the line names only the variant.
-
-## Game file
-
-A game file holds one setting per line: a key, a space and a value. A line that
-starts with `#` is a comment, and blank lines are ignored. In the shipped game
-files, each line after `cas`, `side2`, `sha1`, `url` and `name` has its own comment
-above it, which says why the line is there, and a blank line before the comment.
-Times are decimal emulated seconds from the moment the load command is typed.
-Addresses and bytes are hexadecimal. Only `cas` is required. This example is for
-Gauntlet, which loads its levels from the tape's second side:
-
-```
-cas GAUNTLET.CAS
-side2 GAUNTLEB.CAS
-sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d6400b3
-```
-
-| Key | Value | Default | File |
-|---|---|---|---|
-| `cas` | The CAS file of side 1, in the tapes folder. A game file has `cas` or `tsx` | | `game.txt` |
-| `tsx` | The TSX file of side 1, in the tapes folder ([Tape files](#tape-files)) | | `game.txt` |
-| `side2` | The file of side 2, in side 1's format | None | `game.txt` |
-| `load` | The load command, for a tape whose first block is not standard, quoted: `load 'RUN"CAS:"'` ([Tape files](#tape-files)) | From the first block's type | `game.txt` |
-| `start` | The name of a file on side 1, such as `start SKY`, for a game that is not the tape's first program: the load starts at the first file with that name ([A game later on the tape](#a-game-later-on-the-tape)) | The tape's start | `game.txt` |
-| `sha1` | The SHA-1 of `cas`, then that of `side2` | None | `game.txt` |
-| `url` | The https link to the zip file that holds `cas`, then the link to the zip that holds `side2`, from which a tape is downloaded and found in its zip by its `sha1`. An apostrophe in a link is written `%27`, because the game file's lines are split as a shell splits words | None | `game.txt` |
-| `name` | `<GAME>`, up to 8 letters and digits | The folder name in upper case, cut to 8 letters and digits | `game.txt` |
-| `keys` | A time, then a key name ([Key names](#key-names)) held for 0.1 seconds, or a text in quotes that `openMSX` types. Each press has its own line | None | `game.txt` |
-| `continue` | A key name that the capture tries before space and Return, to continue a load that waits for a key | None | `game.txt` |
-| `snapshot` | `at` and a time, at which the capture takes the snapshot: for a game that asks the player to stop the tape, the moment it asks, because `openMSX`'s tape runs on and the tape service serves every later load | Found by the capture | `game.txt` |
-| `capture` | A capture variant of the machine, on which the capture loads the game ([Machine file](#machine-file)) | The command's machine file | The machine's game file |
-| `service` | `no` for a game that never reads the rest of its tape, though blocks of it stay unread. A game can read them only at its end, so `no` is for a game that someone has played to its end. A compilation's program also takes `no` when its capture reads the tape up to the next program's loader, because the blocks after it are the later programs' ([A game later on the tape](#a-game-later-on-the-tape)). Or `at` and an address xxE1h in page 3, where the tape service's part of page 3 goes ([Build](#build)). Or `t0`, for the tape service without a part in page 3 ([Without a part in page 3](#without-a-part-in-page-3)). A file holds at most one `service` line, and `capture.py` and `build.py` stop with an error at a second one. A machine's game file's line replaces `game.txt`'s, as with any key that both give | Found by the capture, and by `build.py` | `game.txt`, or the machine's game file for a line that holds only on that machine, as the 8 shipped `t0` lines do |
-| `patch` | A place, the old bytes, `>`, the new bytes: `patch page3:215F CD E1 00 > CD E1 FC` | None | `game.txt`, and a patch of a slot register's value the machine's game file |
-| `rom` | `keep` for a game that must find the ROM in page 0 at the snapshot's slot: T0 does not replace the ROM, and the game reaches the tape service only through calls patched to the entries in page 3. So `rom keep` needs the part in page 3: a game file with `rom keep` and `service t0` is an error, and `build.py` stops when it would take the mode without a part in page 3 itself ([Without a part in page 3](#without-a-part-in-page-3)) | T0 replaces the ROM when the restorer's rule allows it | `game.txt` |
-
-A place is a RAM page as `page<n>:<offset>`, which names the RAM page that the
-snapshot selects in page n, 0 to 3, and the offset from that page's start. A place
-can also be on the tape, as `side1:<offset>` or `side2:<offset>`, an offset in the
-tape file. A patch on the tape changes the tape that the capture loads and that the
-tape service serves, so it also reaches the code that the capture runs. Neither form
-names a slot, so a patch line holds on every machine that the game runs on, unless
-its new bytes are a slot register's value. A patch fits only the dump that it was
-made for, so `capture.py` and `build.py` stop with an error when the old bytes
-differ, or when the game file has `patch` lines and `sha1` is missing or differs
-from a tape file's SHA-1.
-
-`game.txt` describes the game and its tape, and holds on every machine. A game's
-folder can also hold a machine's game file: a game file for one machine, named after
-that machine file, such as `phc28s-ram64k-carnivore2.txt` for
-`phc28s-ram64k-carnivore2`. The tools read it after `game.txt` when they capture,
-build or check for that machine. Its lines add to those of `game.txt`, and a value
-that both give is the machine's game file's. It holds the lines that depend on where
-the machine's RAM and cartridges are:
-
-| Line | Why it depends on the machine |
-|---|---|
-| `capture` | It names one of the capture variants that the machine file lists ([Machine file](#machine-file)) |
-| A patch of a slot register's value | The value names slots. Sootland writes FCh to the slot register, for RAM in slot 3, and crashes on the Sanyo PHC-28S. Without Nextor, that machine's BASIC keeps page 3 in the internal RAM, slot 0, and the RAM cartridge in slot 1 holds pages 0 to 2, so a patch to 14h keeps page 3 there and selects slot 1 for pages 1 and 2. The capture makes such a patch itself for a fixed value ([Slot patches](#slot-patches)), so a game file needs one only for a value that the game computes |
-| A `snapshot` that a real machine needs | Tokyo Nampa Street's snapshot comes after its music only because of the real PHC-28S ([Limits](#limits)) |
-
-## Shipped files
-
-The repository ships a game file for each game of File-Hunter's MSX CAS collection
-in `games/`, in a folder named after the short name of its side 1 CAS file, such as
-`games/ABADIA/` for `ABADIA.CAS`. The folder name then also names the image. A
-compilation's programs are the exception: each has a game file of its own, in a
-folder named after the program's game, inside a folder named after the collection,
-such as `games/ENGESOFT/ATHLETIC/`
-([A game later on the tape](#a-game-later-on-the-tape)). Each game file starts with
-a comment, the game's File-Hunter name. It then has the `sha1` of its dumps, which
-finds a dump whatever its file name, and a `url` line with the links to its zips in
-File-Hunter's MSX1 CAS folder. A side 2 is a zip of its own there, as Gauntlet's
-Side B is. A side B, a later tape of a set or an expansion, which the collection's
-`SIDES.TXT` lists, needs a tape before it, so it has no game file of its own. A dump
-that File-Hunter marks `[b]`, a bad dump, has no game file either, and a game with a
-better dump uses that one. A dump that File-Hunter lists more than once for one
-release has one game file: Swing Man (Spectravideo) is listed as Swing Man, as Swing
-Man (Side A) and under its catalogue number, SM-221, all with the same SHA-1, and
-only `games/SWING-MA/` holds it. A dump in two releases, such as a Turbo Pack
-program that is also its game's own tape, keeps a game file for each, as a
-compilation's program does ([A game later on the tape](#a-game-later-on-the-tape)).
-Its `side2` lines pair the Side A and Side B files of a game, its `continue` lines
-come from the key that the capture reports, its `service no` lines from games played
-to their end, and its `patch` lines from `check.py` and from traces of failed loads.
-The lines that hold only on one machine are in that machine's game file
-([Game file](#game-file)), and the other game files hold on any machine. It also
-ships these machine files, each checked with `check.py` and a single-load game, with
-the number of machine's game files that each has:
-
-| File | Configuration | Machine's game files |
-|---|---|---|
-| `vg8020-carnivore2` | Philips VG-8020: an MSX1 with 64 KB and a Carnivore2 | 123 |
-| `nms8250-carnivore2` | Philips NMS 8250: an MSX2 with its own 128 KB and a floppy drive, and a Carnivore2 under Nextor, for the cartridge with a mapper and a disk interface that most MSX2 owners use | 54 |
-| `nms8245-ram512k-sunriseide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. Its own 128 KB leave Nextor too few free segments | 0 |
-| `vg8020-picoverse` | Philips VG-8020 with a Sunrise IDE interface under Nextor and a 192 KB memory mapper, as the PicoVerse cartridge has them. `openMSX` has no PicoVerse, so these two cartridges stand in for it, and the Makefile makes the 192 KB mapper from `openMSX`'s 512 KB one | 54 |
-| `phc28s-ram64k-carnivore2` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 | 89 |
-| `hb75p-mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup, which boots MSX-DOS from the ROM disk in its flash, with the check's disk in SD card slot 1 as drive B: | 0 |
-| `hbf700p-ram512k-msxdos2` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. Its own mapper holds 256 KB | 8 |
-| `vg8020-sdmapper` | Philips VG-8020 with an SD Mapper v1: its 512 KB mapper and Nextor on its SD cards. The Makefile downloads the cartridge's firmware, `SDMAPPER.ROM` 1.0.7, which `openMSX` needs | 0 |
-| `xp800-sdmapper` | Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1, as `vg8020-sdmapper` | 0 |
-| `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4, which the Makefile makes. `openMSX`'s stock flash also holds a ROM disk, whose `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, which skips the FS-A1's Desk Pac menu | 0 |
-| `hbf1xd-mfrsd` | Sony HB-F1XD: an MSX2 with 64 KB, no mapper and a floppy drive, with the MegaFlashROM SCC+ SD of `fsa1-mfrsd` | 0 |
-| `vg8235` | Philips VG-8235: an MSX2 with a 128 KB mapper and a single-sided floppy drive, without cartridges. It boots MSX-DOS 1 from a 360 KB disk | 0 |
-
-It also ships these capture variants in `machines/capture/`
-([Machine file](#machine-file)), which the games' `capture` lines name. A row is a
-variant and a machine that lists it, and its count is the number of that machine's
-game files whose `capture` line names the variant:
-
-| Variant | Machine | Leaves out | Used by |
-|---|---|---|---|
-| `phc28s-ram64k` | `phc28s-ram64k-carnivore2` | The Carnivore2, and so Nextor | 69 game files that crash when a disk system is present, or that select RAM by fixed slot values |
-| `phc28s-empty-carnivore2` | `phc28s-ram64k-carnivore2` | The RAM cartridge in slot 1 | 9 game files whose loader trips over it |
-| `vg8020` | `vg8020-carnivore2` | The Carnivore2, and so Nextor | 121 game files that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
-| `vg8020` | `vg8020-picoverse` | The PicoVerse-like cartridge, and so its mapper and Nextor | 54 game files whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go straight to their slot, without holding segments |
-| `nms8250` | `nms8250-carnivore2` | The Carnivore2, and so Nextor | 54 game files that fail in a capture with the Carnivore2 in slot 1 |
-| `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 8 game files, Sootland among them, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch ([The RAM search patch](#the-ram-search-patch)) |
-| `vg8020` | `vg8020-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
-| `xp800` | `xp800-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
-
-## Tape files
-
-`snapcas` reads two formats of tape file, CAS and TSX. A CAS file holds only blocks
-in the format that the BIOS's tape routines read, so a tape whose loader reads its
-own format, as a turbo loader does, has no CAS file. A TSX file holds any MSX tape,
-the turbo loaders' blocks included ([TSX data](#tsx-data)). In a collection of 2354
-TSX files, 327 hold blocks that a CAS file cannot hold. Of the first 125 of them,
-123 played to their end in `openMSX` on the Sanyo PHC-28S, 3 of them with a reset.
-
-Each format has its own reader, and no other code reads a tape file. A reader turns
-a file into the tape model, which the capture, the build, the patches and the check
-use:
-
-| File | Holds |
-|---|---|
-| `tools/cas.py` | The reader of CAS files ([CAS data](#cas-data)) |
-| `tools/tsx.py` | The reader of TSX files ([TSX data](#tsx-data)) |
-| `tools/tape.py` | The tape model, and the choice of the reader by the file's extension |
-
-The tape model is the file's blocks in tape order, and each block has these fields:
-
-| Field | What it is |
-|---|---|
-| Kind | Standard: a block that the BIOS's `TAPION` and `TAPIN` read. Non-standard: a block in any other format, such as a turbo loader's |
-| Data | The block's bytes |
-| Offset | The offset of the data's first byte in the file |
-| Time | The seconds at which `openMSX`'s cassette player reaches the block and leaves it, from a TSX file's pulses. A CAS file holds only standard blocks, which the capture follows by `TAPIN`, so its blocks have no time |
-
-`openMSX` plays the file itself, in either format, so the game loads as from its
-real tape. The rest works on the model:
-
-1. The load command comes from the type in the first block's 10 bytes: D0h, D3h or
-   EAh ([CAS data](#cas-data)). A tape whose first block is not standard needs the
-   game file's `load` line.
-2. The tape position is an offset in the tape service's tape: the standard blocks,
-   each after the 8-byte header `1F A6 DE BA CC 13 7D 74` at an offset that is a
-   multiple of 8. A CAS file whose headers are at multiples of 8 has that layout, so
-   its positions stay its offsets. The capture follows standard blocks by the
-   `TAPION` and `TAPIN` breakpoints, as for a CAS file, and non-standard blocks by
-   the player's time: a block is read when `cassetteplayer getpos` passes its end.
-3. A patch's place, `side1:` or `side2:` and an offset, is an offset in the tape
-   file, of either format, because both formats keep a block's bytes as they are.
-   The capture's watches search the files' bytes in the same way
-   ([Slot patches](#slot-patches)). A patch in a block whose loader checks a sum
-   must fix the sum, as it must in a CAS file.
-4. The build writes the standard blocks after the snapshot's position into the tape
-   service's tape. A non-standard block after that position is one that the game
-   reads with its own loader during play, which the tape service cannot serve, so
-   the build stops with an error that names the block, unless the game file has
-   `service no`.
-
-### A game later on the tape
-
-A compilation holds several programs on one side, each with its own loader, and a
-player reaches a later one by letting the tape run on and typing its load command
-again. Engesoft's MSXF-07 has Circus Charlie and then Sky Jaguar on side B. The game
-file's `start` line names the later program's first file, and the load starts there:
-
-1. The capture plays a copy of side 1 that begins at the first file with that name,
-   with the game file's patch lines applied to the original first, so that their
-   offsets and the SHA-1 lines stay those of the downloaded file. The capture's own
-   patches ([Slot patches](#slot-patches)) have offsets in the copy, which is the
-   file it plays. The build makes the same copy, so the tape service's tape and its
-   positions begin there too.
-2. A CAS file's copy is the tape service's tape of the blocks from the named file's
-   own block on, so its headers are at multiples of 8 even where the original's are
-   not, as on the tape with Sky Jaguar. The capture stops with an error when the
-   name is not a file's own block, but bytes inside one.
-3. A TSX file's copy keeps the file's first 10 bytes and begins at the block that
-   holds the file's header. The capture stops with an error when the header is not
-   at that block's start.
-4. The load command comes from the named file's type, unless the game file has
-   `load`. The capture stops with an error when side 1 has no file with that name.
-
-The shipped files give each program of a compilation a game file of its own, so that
-each image is named after its game and not after the tape, which holds more than one
-game. The game files of one collection share a folder named after it, such as
-`games/ENGESOFT/` for Engesoft's tapes and `games/SUPERMSX/` for the 27 issues of
-the magazine Super MSX:
-
-| Program | Its game file |
-|---|---|
-| The tape's first program | `cas` and `sha1`, without `start`. A magazine's intro belongs to it, because the intro loads that program itself |
-| A later program | `cas`, `sha1` and `start` |
-| A program that File-Hunter also has as a dump of its own | A game file in the collection's folder as well, as Exerion on Engesoft's MSXK-06 has beside `games/EXERION/`, because a tape's copy can differ from that dump. An earlier rule gave it none ([Decisions](#decisions)) |
-
-Each program's folder is named after its game, as `games/ENGESOFT/ATHLETIC/` is for
-Athletic Land, the second program on Engesoft's MSXK-06 side A. A magazine renamed
-the commercial games that it copied, and such a program's folder takes the
-magazine's title, which its title screen shows: Super MSX's Attila is a copy of
-Knightmare, in `games/SUPERMSX/ATTILA/`. The game file's first comment names the
-game, the compilation and the program's place on it, and its `url` line links the
-compilation's zip. A loader's file name, such as ATLET, seldom gives the title, so
-the title comes from a list of the tape's contents. Each program has its own
-machine's game files, because each program has its own loader. Athletic Land's
-capture runs without the disk system only on the Sanyo PHC-28S, and Kung-Fu
-Master's, before it on the tape, on the PHC-28S and on the Philips VG-8020. A
-program that is not a game also has a game file, as De Demo's programs have.
-
-## Capture
-
-`tools/capture.py` runs `openmsx` with the machine file's arguments, or those of the
-game file's `capture` machine, and a Tcl script made from the game file, with the
-throttle, the renderer and the sound off. All times are emulated seconds, counted
-across the rewinds of step 5. The script writes the snapshot to `snap/`, with its
-log in `snap/log.txt`, or the log and `snap/error.txt` when a `boot` text or BASIC's
-`Ok` does not appear within 120 seconds, the load runs for more than 3,600 seconds,
-or step 5 restarts more than 20 times. It performs the following steps:
-
-1. Starts a write watchpoint on port A0h, which keeps the PSG register selected
-   last, boots the machine with no disk, presses the `boot` keys, and waits for
-   BASIC's `Ok`, then 10 seconds more, as a person would. A disk system can still be
-   busy just after `Ok`: on the Sanyo PHC-28S with a Carnivore2, Moonrider loads
-   when the load starts 9 seconds after the boot menu, and stops when it starts
-   after 5.
-2. Stops with an error unless the ROM's byte at 002Dh is 0 (MSX1) or 1 (MSX2), and
-   reads `EXPTBL` at FCC1h and `EXBRSA` at FAF8h, the slot IDs of the ROMs, once,
-   because a game can overwrite page 3. It then removes the disk system from page 3
-   with `debug write`. It writes RET (C9h) in every hook from FD9Ah to FFC9h and at
-   `EXTBIO`, `DISINT` and `ENAINT`, so that nothing calls the disk system. It writes
-   00h at F37Dh, which some loaders read to refuse to run with a disk system. It
-   writes zeros from FCC9h to FD88h, `SLTATR` and `SLTWRK`, so that no extension ROM
-   claims them and the tape service can use them. It then types `CLEAR200,&HF380`,
-   which sets `HIMEM` to a cassette machine's F380h, and writes the slot map
-   ([Slot patches](#slot-patches)).
-3. Inserts the tape file of side 1, with the game file's `side1` patches written
-   into a copy in `snap/`, into the cassette player, notes the slots selected in
-   each page, and types the load command for the first header's type
-   ([CAS data](#cas-data)): `BLOAD"CAS:",R`, `CLOAD`, or `RUN"CAS:"`. After `CLOAD`,
-   it types `RUN` when the motor has stopped for 1 second. When the game file has
-   `side2` and the game reads past side 1's end, by a `TAPION` call at its end or
-   with the motor on there, the capture inserts side 2 at its start, as a player
-   turns the tape over, and the tape position goes on in side 2. The replay's
-   recording starts just before the command is typed ([Replay](#replay)).
-4. Presses the `keys`, and logs these events with their times:
-   - The tape position, kept as the tape service would keep it, from breakpoints at
-     the addresses that the jump table entries 00E1h and 00E4h jump to, `TAPION` and
-     `TAPIN`, while page 0 selects the main ROM.
-   - Each slot and subslot selected in a page, from write watchpoints on port A8h
-     and on FFFFh, and each write to port A8h that selects a slot that holds nothing
-     ([Slot patches](#slot-patches)).
-   - Each start and stop of the cassette motor.
-   - The start of the BIOS's reset routine, where 0000h's `DI / JP` jumps, while
-     page 0 selects the main ROM. A loader can also jump there itself, as Alien 8's
-     does. The capture logs the reset and goes on, because a loader can reset the
-     machine on purpose: a loader that copies a ROM game into RAM resets it, and the
-     BIOS's search for cartridges at the reset finds the copy and starts it. The
-     Goonies's snapshot is taken during that start, and the restored machine
-     finishes it. A loader that crashes into a reset makes an image of a reboot,
-     which writes the tape service's part of page 3, so the check's point 2 or point
-     3 fails ([Check](#check)): 30 collection tapes on the PHC-28S did, most of them
-     through the loader that [The RAM search patch](#the-ram-search-patch) now
-     fixes. The capture stopped at every reset for a time, which failed 37 game
-     files on the PHC-28S, among them The Goonies, KONAMI and KNIGHTMA, whose images
-     pass the check and show the game.
-5. Polls bit 4 of PPI port C, the cassette motor (0 = on), every 0.1 seconds. When
-   the motor has been off, or the player has been at the tape's end
-   (`cassetteplayer getpos` at least `getlength` minus 0.01), for 1 second, it saves
-   the machine with `savestate`. The wait ends when that has lasted 30 seconds and
-   the last `keys` time has passed, because a game can pause its own load: Moonrider
-   pauses for 16 seconds. With `snapshot at`, the capture instead waits for that
-   time and goes to step 6. Otherwise it goes back to the saved moment with
-   `loadstate`, and proceeds:
-   - If side 1 is read, it goes to step 6. Side 1 is read when the `TAPION` and
-     `TAPIN` breakpoints fired and every block after the tape position is under 16
-     bytes or equal to a block before it. The tape service's tape pads each block to
-     a multiple of 8 bytes, so a block counts as read when at most 7 bytes of it are
-     left.
-   - Otherwise it tries the game file's `continue` key, then space, then Return,
-     each from the saved moment and held for 0.5 seconds, because a loader can read
-     the keyboard rarely. If the motor starts within 10 seconds of a key, and the
-     tape is not at its end, the load was waiting for that key: the capture logs the
-     key and restarts step 5. If no key starts it, the rest is loaded during play,
-     and it goes to step 6 from the saved moment.
-
-   `loadstate` restores the machine but neither the script's variables nor its
-   timers, so each time the capture also restores its logged state from the saved
-   moment and schedules again its polling and the `keys` that come after that
-   moment.
-6. Takes the snapshot when the CPU next accepts an interrupt while no VDP command is
-   running (status register 2, bit 0, is 0) and both VDP latches are empty. A probe
-   breakpoint on `z80.acceptIRQ` marks the acceptance, and a breakpoint at the
-   handler's address, 0038h in interrupt modes 0 and 1 or the word at I × 256 + FFh
-   in mode 2, takes the snapshot there: the return address is pushed and interrupts
-   are off. When no such interrupt comes within 1 second, it takes the snapshot
-   where the CPU is. It stops with an error when the CPU is then halted, which
-   `openMSX` shows as a program counter just after a HALT (76h) that does not move.
-   When the game gets the tape service and the CPU is in the BIOS's tape code, T0
-   replaces that code, so the snapshot goes back to the last `TAPION` call's entry,
-   with the program counter at its jump table entry, 00E1h. The call has not run
-   there, so the restored game makes it to the tape service. Saint Dragon reads its
-   tape with interrupts off, and Thunder Blade waits in `TAPION` for side 2, so
-   their snapshots come this way. The CPU is in the tape code when the main ROM is
-   in page 0 and the program counter is in 19DDh to 1B44h, or is below 4000h with
-   one of the 8 words on top of the stack in that range, as in `BREAKX`, which the
-   tape code calls. The capture saves the machine at each `TAPION` call's entry for
-   this, and a rewind of step 5 puts back the entry saved with its moment.
-
-The game gets the tape service when the `TAPION` and `TAPIN` breakpoints fired and
-either side 1 is not read or the game file has `side2`, unless the game file has
-`service no`. A load that waits for a choice that no key makes, such as Gauntlet's
-joystick choice of players, gets its snapshot at that screen after the key tries of
-step 5. The player chooses on the real machine, and the tape service supplies the
-rest.
-
-### RAM
-
-The capture reads memory through the CPU's view, the `memory` debuggable, after it
-selects a slot in a page with `debug write` on port A8h and, in a slot that `EXPTBL`
-marks expanded, on FFFFh while page 3 selects that slot, and writes both back
-afterwards. This works for every device, including those that expand their slot
-themselves, such as the Carnivore2. The snapshot keeps each page that holds RAM and
-was selected at step 3, during the load or at the snapshot. The capture reads these
-pages first and tests them afterwards, so a write that switches a ROM's bank or
-overwrites a segment changes nothing it keeps:
-
-- A page holds RAM when the byte at its first address takes a written value and its
-  complement.
-- A RAM page is in a mapper when two different marker bytes, written at its first
-  address under two values of its mapper register, each read back under their own
-  value after both are written.
-- The mapper's size comes from the count that the restorer uses under MSX-DOS 1
-  ([Restorer](#restorer), step 2). A page's segment is its mapper register's value
-  modulo that size.
-
-### Slot patches
-
-A game that writes a fixed value to the slot register expects its RAM in the slots
-of the machine that it was written for. Sootland writes FCh, for RAM in slot 3, and
-crashes on the Sanyo PHC-28S, whose slot 3 holds nothing. The capture finds such
-writes itself and patches each value to the slots that hold the machine's RAM, so
-that no game file needs a line for them. It does this in four parts:
-
-1. At step 3, before it types the load command, the capture tests each page of each
-   primary slot, and of each subslot of an expanded slot, and writes the slot map,
-   `snap/slots.txt`. A page holds RAM by the test of [RAM](#ram). A page holds
-   nothing when it does not hold RAM and its first 256 bytes all read FFh.
-2. A value's field for a page names a slot. When that slot holds nothing in the
-   page, the patch replaces the field with the slot that the table below gives. A
-   field that names a slot that holds RAM or ROM stays. An expanded slot never
-   counts as holding nothing, because its subslot register belongs to the game, and
-   it counts as RAM in a page when the subslot that its register selects there at
-   step 3 holds RAM. A field with no RAM slot for its page stays, and the write is
-   only logged.
-3. At step 4, the write watchpoint on port A8h tests each value against the slot
-   map. A value whose field names a slot that holds nothing makes the capture log
-   the write, the address of its `OUT` and the new value. When the code that set the
-   value is one of the forms in the second table below, and its bytes with the 8
-   bytes before them, or else with the 8 bytes after them, occur once in a tape
-   file, the capture stops. The bytes after them serve a loader that copies a
-   routine to RAM without the bytes before it, as Sootland's does. `capture.py` then
-   adds a patch of n on the tape to `snap/patches.txt` and runs the capture again
-   from step 1, up to 16 times. Otherwise the capture goes on, and the logged write
-   is for a `patch` line by hand.
-4. The build's scan ([Scan](#scan)) looks for the same code with such a value in the
-   snapshot's RAM pages and in the tape's unread blocks, for code that runs only
-   while the game is played.
-
-| Page | The slot that replaces one that holds nothing |
-|---|---|
-| 2 or 3 | The slot that BASIC selects in that page at step 3 |
-| 0 or 1 | The slot that holds RAM in that page. Of several, the slot of page 2 at step 3 when it holds RAM there, or else the lowest |
-
-Sootland's FCh names slot 0 for page 0, which holds the ROM, and slot 3 for pages 1
-to 3. On the PHC-28S without Nextor, BASIC selects slot 1 in page 2 and slot 0 in
-page 3, and slot 1 also holds RAM in page 1, so the patch writes 14h. The patches in
-`snap/patches.txt` change the tape after the game file's `patch` lines, and
-`build.py` applies them as well, so the tape service serves the tape that the
-capture loaded.
-
-The watch and the scan know two forms of the code that sets a fixed value:
-
-| Code | Bytes | Where the watch finds it |
-|---|---|---|
-| `LD A,n / OUT (0A8h),A` | `3E n D3 A8` | Its last byte is the last byte of the write's `OUT` |
-| `LD A,n / CALL 013Bh`, a call of the BIOS's `WSLREG`, which writes A to the slot register | `3E n CD 3B 01` | When the write's `OUT` is in the main ROM, its last byte is the byte before the return address on top of the stack. The capture reads that address in the slot that page 3 selected before the write, because the write can change page 3. Finders Keepers selects RAM in slot 2 this way |
-
-The bytes of a form can also be the end of a longer instruction. Knight Orc reads
-its slot values from RAM with `LD A,(EF3Eh) / OUT (0A8h),A`, `3A 3E EF D3 A8`, whose
-last four bytes are the first form with n = EFh. A patch of that n changes the
-address, so the game reads a wrong value and hangs. So the watch and the scan skip
-code whose `3E` can be an operand:
-
-| Byte | Opcodes |
-|---|---|
-| The byte before `3E` | Those of an instruction with a one-byte operand: `06 0E 16 1E 26 2E 36 3E C6 CE D6 DE E6 EE F6 FE D3 DB 10 18 20 28 30 38`, or with a two-byte operand, as below |
-| The second byte before `3E` | Those of an instruction with a two-byte operand: `01 11 21 31 22 2A 32 3A C2 C3 C4 CA CC CD D2 D4 DA DC E2 E4 EA EC F2 F4 FA FC` |
-
-A real `LD A,n` after an operand that has the value of such an opcode is skipped as
-well, and needs a `patch` line by hand.
-
-### The RAM search patch
-
-Some loaders search for RAM in pages 0 and 1 themselves, from code in page 3. Mot's
-loader tries each slot ID from 15 down to 0 through the BIOS's `WRSLT` and `RDSLT`,
-and marks each ID from 4 up as the ID of an expanded slot. To select the slot that
-it finds, the loader writes the slot's subslot register at FFFFh, so it selects that
-primary slot in page 3, where its own code runs. That works when the RAM of page 3
-is in the same primary slot, as on the VG-8020, whose RAM is all in slot 3. On the
-Sanyo PHC-28S, the RAM of page 3 is in slot 0 and the HBM-64's RAM is in slot 1, so
-the loader's code is gone after the write. The capture finds this itself, in two
-parts:
-
-1. At step 4, the write watchpoint on port A8h tests each write from code in page 3
-   that selects another primary slot in page 3. When the 4 bytes after the write's
-   `OUT` differ in that slot, the write cuts off the code that made it, and the
-   capture logs it.
-2. When the loader's search, below, occurs in the tape files, the capture stops.
-   `capture.py` then adds a patch of each copy to `snap/patches.txt` and runs the
-   capture again, as for a slot patch. Each copy cuts off its code on this machine,
-   and a copy on side 2 or in a compilation's later game runs after the snapshot, as
-   the second copy on Made in Spain's tape does. The patched loader selects the slot
-   that it finds through the slot register only. Otherwise the logged write is for a
-   `patch` line by hand.
-
-| Code | Bytes | Patch |
-|---|---|---|
-| `LD A,B / DEC A / CP 4 / JR C,+2 / SET 7,A`: the slot ID from the search's count, with the expanded slot's mark from 4 up | `78 3D FE 04 38 02 CB FF` | `SET 7,A` to two `NOP`s, `00 00` |
-
-In the test collection, 70 tapes have this search, many of them from Opera Soft. A
-machine whose RAM for page 3 is in the same primary slot never gets the patch,
-because the write keeps the loader's code. *To verify:* the patch on a machine where
-the RAM that the loader finds is in an expanded slot other than the slot of page 3.
-The patched loader then selects the subslot that the slot's register already
-selects.
-
-### Page 3's slot for the other pages
-
-Many loaders take for granted that the slot of page 3's RAM also holds RAM in pages
-0 to 2, as it does on a machine with 64 KB in one slot, such as the Philips VG-8020.
-The Sanyo PHC-28S keeps its own 16 KB in slot 0, in page 3 only, beside the ROM in
-pages 0 and 1, and its RAM cartridge in slot 1. With the Carnivore2, BASIC takes
-pages 2 and 3 from the Carnivore2's mapper in slot 2-2 instead. Such a loader then
-copies the game into the ROM or into a subslot that the other pages do not select,
-and the game crashes into a reset, or starts in BASIC's ROM, which stops at an error
-([Check](#check), point 4). The loaders seen so far take one of these forms:
-
-| Form | Games | Fix in the PHC-28S's game file |
-|---|---|---|
-| `BIT 7,A` / `SET 3,A` / `BIT 6,A` / `SET 2,A`: page 1's bits of the slot register from page 3's | Circus Charlie and Hyper Sports 3 from Engesoft, and M-Droid's `core` | A patch that makes the routine select slot 1, the RAM cartridge, in page 1 |
-| The same routine as text, in a BASIC loader's `DATA` lines | M-Droid | A patch of the text |
-| A fixed value for pages 1 to 3, chosen by page 3's slot | Beach-Head: 54h for page 3 in slot 0 or 1 | A patch to 14h, and the capture without the Carnivore2 |
-| Page 2's slot copied into page 1's bits | Budokan, Michel Futbol Master's side B, Professional Tennis Simulator and Arquimedes XXI, whose program is `slots`, with two dumps each of Michel Futbol Master and Professional Tennis Simulator. Night Shade from Engesoft, whose NIGHT and SHADE end with the copy. Konami's Soccer, whose MUNDIA parts OR the slot register with itself shifted right by two bits | The capture without the Carnivore2, where pages 1 to 3 are the RAM cartridge |
-| A search for RAM in page 1 only, and a ROM image read into page 1 there and into BASIC's page 2, after which the game selects page 1's slot in page 2 | From Super MSX: Aliens, Star and Worm, whose loader is LOADER, and American Football, Japan, Xerider, The Karate Kid, Alexis, Guardic and Mad Driver, whose loader is two parts. Also Dam Busters, and the second half of Hyper Sports 3 | The capture without the Carnivore2, where pages 1 and 2 are the RAM cartridge |
-| A shorter variant of `slots` that keeps the slots it finds | Underground | The capture without the Carnivore2. Which value leads the game to its reset is not known |
-| Pages 2 and 3's slots copied into pages 0 and 1: `AND F0h`, then four `RLCA`s, `RRCA`s or `SRA A`s of the slot register's value, then `OR` with the first, with `AND 0Fh` before it after `RRCA`s or `SRA A`s | The Wall from Super MSX 7, whose LOADER is at DD00h. Each part of a tape made by CasLink3: Hang-On, Lunar Ball and Quartet. Level 9's adventures, which read their A-code in pages 0 and 1: Emerald Isle, Red Moon, Time and Magik II, Return to Eden, Silicon Dreams II, The Worm in Paradise, and the four parts of The Secret Diary of Adrian Mole | A patch to `LD A,15h`, and the capture without the Carnivore2 |
-
-The fixes are lines in the game files, not a patch that the capture makes itself,
-because the forms differ. A search of the test collection found the first form in
-the code of four tapes only, each of whose game files already has its line, and the
-other forms in one to three games each, apart from CasLink3's and Level 9's.
-CasLink3's form is in 60 tapes, but its parts also copy the subslot register's
-fields of pages 2 and 3 to pages 0 and 1. With the Carnivore2, pages 2 and 3 are its
-mapper, so pages 0 and 1 get the mapper too, and the capture needs no patch. Only
-the games that need the capture without the Carnivore2 for another reason need one.
-Level 9's code copies the slot register only, so its games need the capture without
-the Carnivore2, and the patch on the PHC-28S, though Erik the Viking, which has the
-same code, works with the Carnivore2. The capture's own patches cover the forms that
-repeat over many tapes ([Slot patches](#slot-patches),
-[The RAM search patch](#the-ram-search-patch)).
-
-### Snapshot files
-
-| File | Contents |
-|---|---|
-| `ram/<ps>-<ss>-<page>-<seg>.bin` | 16 KB for each RAM page kept, by primary slot, subslot (`x` when not expanded), page and segment (`x` when not in a mapper) |
-| `rom.bin` | 32 KB: pages 0 and 1 of the main ROM, from the slot that `EXPTBL` names |
-| `subrom.bin` | 16 KB on an MSX2: the sub-ROM, from the slot that `EXBRSA` names |
-| `vram.bin` | The `physical VRAM` debuggable: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938. With a V9938, the capture reads it with bit 3 of register 8, VR, set for the read, because `openMSX` shows it through VR's addressing: a game that clears VR, as Boulder Dash does with an MSX1 write to register 8, would otherwise give a view that the restorer's linear writes do not reproduce |
-| `state.txt` | One `name value` per line, values in hexadecimal, as below |
-| `replay.log` | The VDP, PSG and cassette writes of the load, for the replay ([Replay](#replay)) |
-| `side1.cas` | Side 1 with the game file's `side1` patches and those of `patches.txt`, when there are any: the tape that the capture loads |
-| `slots.txt` | The slot map: for each page of each slot and subslot, whether it holds RAM, ROM or nothing ([Slot patches](#slot-patches)) |
-| `patches.txt` | The slot patches on the tape that the capture found, as `patch` lines |
-| `log.txt` | The logged events and the capture's decisions, in time order: each stop of the load with the screen's text, the key that continued it, each mapper's size, and how the snapshot was taken. Its last line names the `continue` key that worked |
-
-| `state.txt` names | Source in `openMSX` |
-|---|---|
-| `af`, `bc`, `de`, `hl`, `af2`, `bc2`, `de2`, `hl2`, `ix`, `iy`, `sp`, `pc`, `i`, `im` | `reg` |
-| `iff` | Bit 0 of `reg IFF`: 1 when interrupts are on |
-| `a8`, `ppic` | `debug read` on ports A8h and AAh |
-| `sub0` to `sub3`, `-` when not expanded | For a slot that `EXPTBL` marks expanded, the byte at FFFFh, inverted, read while page 3 selects that slot |
-| `fc` to `ff`, `-` without a mapper | `MSX Memory Mapper I/O`: the values written, which each mapper masks to its size |
-| `vdp0` to `vdp23`, `vdp32` to `vdp45` | `VDP regs`, which holds only 0 to 7 with an MSX1 VDP |
-| `pal0` to `pal15` | `VDP palette` |
-| `vramptr` | `VRAM pointer`, 14 bits, with bits 14 to 16 from register 14 |
-| `vramwrite` | `VRAM access status`: 1 after a write setup, 0 after a read setup |
-| `psg0` to `psg15`, `psgsel` | `PSG regs`, and the port A0h watchpoint |
-| `tapepos`, `service` | The tape position in side 1, and 1 when the game gets the tape service |
-| `tapetime`, `tapeside` | The player's position in seconds and its side, 1 or 2, for the non-standard blocks that the game has read ([Tape files](#tape-files)) |
-
-## Build
-
-`tools/build.py` writes the image ([Formats](#formats)). It:
-
-- Stores each 16 KB block of `vram.bin`, as a block of zeros when it holds only
-  zeros, and each RAM page, once for a segment that two pages select.
-- Turns the PSG, PPI and VDP state into a list of port writes, in the order that the
-  restorer performs them ([Port writes](#port-writes)).
-- Writes the tail, from `SERVICE.BIN`, into the 26 bytes below the stack pointer. At
-  an interrupt's entry these bytes are free, because the handler that runs next
-  pushes onto them. When they cross a page boundary, the tail goes into the 26 bytes
-  below that boundary instead, which are further below the stack pointer and as
-  free. It stops with an error when the bytes go below 0000h, include FFFFh, or are
-  not in a RAM page that the snapshot keeps.
-- Finds the RAM page that the snapshot selects in a page by its slot, and in a
-  memory mapper also by the segment that the page's mapper register selects, because
-  a game can select one segment in two pages, as Double Dragon does.
-- Applies the patches of `snap/patches.txt` to the tape, and runs the scan's search
-  for slot values on every image ([Slot patches](#slot-patches)).
-- With the tape service, builds T0, the code segment and the other tape segments
-  from `rom.bin`, the tape files and `SERVICE.BIN`, writes the service's part of
-  page 3 into the game's page 3, with the snapshot's value of mapper register FCh at
-  FCF9h, runs the scan, and applies the scan's patches and the `patch` lines
-  ([Tape service](#tape-service)). When no part of page 3 has room for the service's
-  part, it uses the mode without a part in page 3, as `service t0` does
-  ([Without a part in page 3](#without-a-part-in-page-3)). It stops with an error
-  when the service's part of page 3 holds the tail, or when the code segment and the
-  tape need more than 64 segments.
-- Puts the service's part of page 3 at FCE1h when FCC9h to FD88h are zero at the
-  snapshot, as the capture leaves them. A game can use that area itself, as
-  Moonwalker does for its code. The part then goes to xxE1h of the highest page xx
-  below the BIOS's work area at F380h whose 168 bytes from there are zero, or to the
-  game file's `service at`. Zeros at the snapshot can still be a buffer that the
-  game fills later, so a moved part is checked by playing to the game's next load.
-  The part moves by its page alone: the entries keep their low bytes, E1h to F3h,
-  and the scan's patches write xxh instead of FCh. `build.py` adds xx minus FCh to
-  each byte that `SERVICE.BIN`'s last part lists, and writes xx in the image's
-  header ([SERVICE.BIN](#servicebin)).
-- Prints the most mapper segments that the image can require.
-
-It stops with an error when the version byte of `SERVICE.BIN` is not the one it
-expects.
-
-## Restorer
-
-`SNAPCAS.COM` runs under MSX-DOS 1, MSX-DOS 2 or Nextor. Its code and data stay
-below 4000h, and it holds the worker twice, assembled to run in pages 1 and 2. It
-keeps DOS's stack, in page 3, because MSX-DOS 2's mapper routines page the DOS
-kernel into page 0. It uses a stack in page 0 only while it selects another slot in
-page 3, and the worker keeps its own stack in its own page. Under MSX-DOS 2 and
-Nextor, it selects segments in pages 1 and 2 with `PUT_P1` and `PUT_P2`, and learns
-DOS's segments with `GET_P0` to `GET_P3`. Under MSX-DOS 1, it writes the mapper
-registers, and DOS's segments are 3, 2, 1 and 0. It performs the following steps,
-and until step 4 it can stop with a message and return to DOS:
-
-1. Opens `<GAME>.SNP`, whose name DOS has placed in the FCB at 005Ch, with the
-   extension set to SNP. Without a name, it prints its usage. It reads the image's
-   first 4,096 bytes with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`, and
-   checks:
-   - That the image starts with `SNAPCAS` and the format's number of this
-     `SNAPCAS.COM` ([Image](#image)). An image with another number gets a message
-     that it was made for another version of `SNAPCAS.COM`.
-   - That `RAMAD0` to `RAMAD3` name one slot, DOS's mapper.
-   - That the CRC-16 of the main ROM and of the sub-ROM equal the image's. The
-     worker reads them in page 2, with pages 0 and 1 selecting the ROM.
-   - That page 1 or page 2, other than the tail's page, can hold the worker at the
-     end. When DOS's mapper is in an expanded slot, the worker must keep the
-     mapper's subslot in its page while it writes that slot's subslot register. The
-     restorer takes the first of these:
-     - A page whose bits in the snapshot's subslot register of the slot already
-       select the mapper's subslot.
-     - When the snapshot's page 3 selects the slot, either page. The tail then
-       writes the slot's true subslot register at FFFFh.
-     - A page that does not select the slot at the snapshot. That page's bits of the
-       register then differ until the BIOS writes them again from `SLTTBL`.
-   - With the tape service, that no RAM page kept for page 0 is in DOS's mapper's
-     primary slot with another subslot.
-   - That each record's segment is within DOS's mapper's size.
-2. Allocates every free segment of DOS's mapper: under MSX-DOS 2 and Nextor with
-   `ALL_SEG` until it fails, and under MSX-DOS 1, segments 4 and up. MSX-DOS 1 gives
-   no count, so, with interrupts off and through page 2, the restorer saves the
-   first byte of segments 0 to 3, writes each segment's number into its first byte
-   from 255 down to 0, reads them back from 4 up to the first mismatch, and restores
-   the saved bytes. It then assigns the segments:
-   - A RAM page of DOS's mapper whose own segment is free, or is DOS's segment in
-     page 1 or 2, goes straight into it.
-   - Each other RAM page of DOS's mapper gets a holding segment, copied into its own
-     segment in step 6.
-   - Each service segment gets one of the segments left, and so does the worker,
-     which the restorer copies into its segment.
-
-      It stops when there are too few, naming the segments needed and free. Then,
-      with `/R`, it plays the replay ([Replay](#replay)).
-3. Reads the records in this order, through the FCB's random record field: the RAM
-   pages of slots other than DOS's mapper, the VRAM blocks, the service segments,
-   and the RAM pages of DOS's mapper. It places each one:
-   - A RAM page of another slot is read into page 2, or into page 1 for a target in
-     page 2. The worker selects the target slot in the target page, with only that
-     page's bits of the subslot register changed, sets the page's mapper register to
-     the record's segment when it has one, copies the page, reads it back, and
-     selects DOS's pages again, all with interrupts off. The worker runs in page 1,
-     with its stack there, for a target in page 0. The restorer itself copies to
-     pages 1 to 3. In an expanded slot, the copy of page 3 stops at FFFEh, because
-     FFFFh is the subslot register. A mismatch stops the restorer: the machine file
-     does not describe this machine.
-   - A VRAM block is read into page 2 and written to the VDP through ports 98h and
-     99h and register 14, with interrupts off and the display blanked by writing
-     register 1 with `RG1SAV`'s value, bit 6 clear and bit 7 from the snapshot's
-     value. That bit makes the VDP map VRAM as the game does: bit 7 of a TMS9918's
-     register 1 chooses its 4 KB or 16 KB mapping (TMS9918A data book, register 1).
-     The other bits stay DOS's, because a game's bit 5 of 0 turns off the VDP's
-     interrupt, and DOS needs that interrupt between the blocks. A block of zeros is
-     written without a read. DOS's text mode has no planar layout, so the bytes go
-     to VRAM as stored.
-   - A service segment or a RAM page of DOS's mapper is read into its segment
-     through page 1 or 2.
-
-   As the records arrive, it fills in the values that depend on the real machine, in
-   the records and in the registers that step 6 writes:
-   - In the tail: the worker's page's mapper register and its value, and the slot
-     register ([Tail](#tail)).
-   - With the tape service, in the code segment at 001Ah: the code segment, then the
-     other tape segments, at 0062h: 1 for `/T1200`, 2 for `/T2400`, with `/R` alone
-     the replay's speed, or otherwise 0, and at 006Ah: 1 for `/M`, or otherwise 0.
-   - With the tape service, in the game's page 3 at FCF6h: DOS's mapper's slot ID,
-     T0's segment and the code segment.
-   - With the tape service, when DOS's mapper is in an expanded slot, DOS's mapper's
-     subslot in the page 0 bits of that slot's subslot register, and in `SLTTBL` in
-     the game's page 3, so that the entry code can select T0.
-   - With the tape service, T0 replaces the ROM when the snapshot's page 0 selects
-     the main ROM, no RAM page kept for page 0 is in DOS's mapper, and the game file
-     has no `rom keep` line. Page 0's slot then becomes DOS's mapper, and mapper
-     register FCh and the byte at FCF9h become T0's segment.
-4. Waits until `JIFFY` has advanced by 180, so that a floppy drive's motor stops,
-   then disables interrupts. From this point on, it calls neither DOS nor the BIOS.
-5. Performs the port writes.
-6. The worker, in the page that step 1 found, with its stack in its own segment,
-   copies each holding segment into its own segment through the two other pages
-   below page 3. It then writes the subslot register of each expanded slot while
-   page 3 selects that slot, ending with the snapshot's page 3 slot, the mapper
-   registers of the three other pages, and the slot register with its own page still
-   selecting DOS's mapper. It loads every register except AF and SP, sets I and the
-   interrupt mode, and jumps to the tail.
-7. The tail writes the worker's page's mapper register, the slot register and, when
-   step 1 chose it, the subslot register of DOS's mapper's slot, loads AF and SP,
-   enables interrupts when IFF1 is set, and jumps to the program counter. The R
-   register is not restored.
-
-## Tape service
-
-The tape service keeps the tape in service segments, and has these parts:
-
-| Part | Location | Function |
-|---|---|---|
-| T0 | A service segment | The BIOS's page 0 with the service's stubs from 19DDh to 1B44h |
-| Code segment | A service segment | The routines, the tape position and the table of the tape's segments, then the start of the tape |
-| Tape data | The code segment, then the other service segments | Side 1, padded with zeros to a multiple of 8 bytes, by at least 1 byte when side 2 follows, then side 2 |
-| Entries | FCE1h to FCF5h, in `SLTATR`, unless the part moved ([Build](#build)) | One for each entry of the BIOS's tape jump table, from 00E1h to 00F5h, for code that goes around T0 |
-| Entry code | `SLTWRK`, after its data at FCF6h to FCFBh | Selects T0 in page 0, calls the routine, and selects the game's page 0 again |
-| Trampoline | `SLTWRK` | Selects the code segment in page 0, calls a routine there, and selects T0 again |
-| Reader | `SLTWRK` | `OUT (C),D / LD E,(HL) / OUT (C),B / RET`: reads a tape byte |
-
-`build.py` builds T0 from `rom.bin`, so it first checks that each jump table entry
-below jumps to its address, as in the standard MSX BIOS. The restorer's ROM check
-ensures that the real ROM equals `rom.bin`.
-
-| Entry | Routine | Address it must jump to |
-|---|---|---|
-| 00E1h | `TAPION` | 1A63h |
-| 00E4h | `TAPIN` | 1ABCh |
-| 00E7h | `TAPIOF` | 19E9h |
-| 00EAh | `TAPOON` | 19F1h |
-| 00EDh | `TAPOUT` | 1A19h |
-| 00F0h | `TAPOOF` | 19DDh, the start of the tape code |
-| 0018h | `OUTDO` | 1B45h, the first byte after the tape code |
-
-T0's stubs keep these addresses and leave the rest of the 360 bytes from 19DDh to
-1B44h free. `build.py` also points the jump table entry 00F3h, `STMOTR`, at its
-stub, because the BIOS's code, at 1384h on an MSX1 and 1387h on an MSX2, is outside
-that range. The stubs of `TAPION` and `TAPIN` call the code segment's routines
-through the trampoline, which is in page 3 because it changes page 0. The routines
-behave as the BIOS's: carry is clear on success and set when CTRL+STOP is held.
-
-| Routine | What it does |
-|---|---|
-| `TAPION` | Disables interrupts and moves the tape position past the next CAS header at a multiple of 8 bytes |
-| `TAPIN` | Disables interrupts, returns the byte at the tape position in A, and advances the position |
-| `TAPIOF` | Stops the manual tape ([The manual tape](#the-manual-tape)), enables interrupts and returns |
-| `TAPOOF` | Enables interrupts and returns |
-| `TAPOON`, `TAPOUT` | Return with carry set: the tape cannot be written |
-| `STMOTR` | Stops the manual tape when A is not 1, and returns |
-
-The code segment holds the service's data, its routines and then the tape, which
-starts at a multiple of 8 bytes. The tape position and the sides' starts and ends
-count bytes from the code segment's start, across the code segment and the tape
-segments after it. The code segment's fields are these:
-
-| Offset | Size | Field |
-|---|---|---|
-| 0000h | 6 | Jumps to `TAPION` and `TAPIN` |
-| 0006h | 3 | The tape position |
-| 0009h | 3 | Side 1's end, which is side 2's start |
-| 000Ch | 3 | Side 2's end, equal to side 1's end without a side 2 |
-| 000Fh | 3 | Side 1's start |
-| 0012h | 8 | The CAS header |
-| 001Ah | 64 | The code segment, then the other tape segments, filled in by the restorer |
-| 005Ah | 2 | The address of the game's value of VDP register 7: `RG7SAV`, F3E6h, when it equals the snapshot's register 7, otherwise 005Dh |
-| 005Ch | 1 | The frames in 0.1 second: 5 when bit 7 of the ROM's byte 002Bh is set, for 50 Hz, otherwise 6 |
-| 005Dh | 1 | The snapshot's VDP register 7 |
-| 005Eh | 1 | The side that the tape position is on: 0 for side 1, 1 for side 2, set by `build.py` from the position at the snapshot |
-| 005Fh | 2 | The address of the game's value of VDP register 1: `RG1SAV`, F3E0h, when it equals the snapshot's register 1, otherwise 0061h |
-| 0061h | 1 | The snapshot's VDP register 1 |
-| 0062h | 1 | The tape speed, filled in by the restorer: 0 for the fast load, 1 for 1200 baud, 2 for 2400 baud |
-| 0063h | 1 | 1 when the tape has a side 2, set by `build.py` |
-| 0064h | 3 | The tape position while `TAPIN` looks for a header |
-| 0067h | 3 | Side 1's end before its padding, set by `build.py` when the tape has a side 2, otherwise side 1's end |
-| 006Ah | 1 | The tape's mode, filled in by the restorer: 1 for the manual tape of `/M`, 0 for the automatic tape |
-| 006Bh | | The routines, then the tape |
-
-`TAPIN` reads a byte through the reader in page 3: with C = FCh, D the byte's
-segment and B the code segment, the reader selects the byte's segment in page 0,
-reads the byte at HL into E, and selects the code segment again. The entry code
-disables interrupts, switches to its own stack in `SLTWRK`, selects DOS's mapper and
-T0 in page 0, calls the routine, and selects the game's page 0 and stack again, with
-mapper register FCh set to the value at FCF9h. It returns with interrupts off,
-except after `TAPIOF` and `TAPOOF`.
-
-Each entry is a `CALL` to the entry code, 3 bytes long, so the entries have the low
-bytes of the jump table's entries, E1h to F3h. The entry code finds the routine from
-its return address's low byte, and a game that changes the low byte of a call, from
-`TAPION` to `TAPIN` and then `STMOTR`, reaches the matching entry. The entry code
-keeps its data before its code:
-
-| Address | Value |
-|---|---|
-| FCF6h | DOS's mapper's slot ID, filled in by the restorer |
-| FCF7h | T0's segment, filled in by the restorer |
-| FCF8h | The code segment, filled in by the restorer |
-| FCF9h | The game's mapper register FCh, from `build.py`, or T0's segment when T0 replaces the ROM |
-| FCFAh | 1 while the entry code runs, so that T0's `TAPIOF` and `TAPOOF` leave interrupts off |
-| FCFBh | 1 while the manual tape is stopped ([The manual tape](#the-manual-tape)): set by `build.py` when the motor is off at the snapshot, by `TAPIOF` and `STMOTR`, and when a read reaches a side's end |
-
-The tape position starts where the game stopped reading at the snapshot, and moves
-on these events. The routines read the keyboard matrix through the PPI.
-
-| Event | Automatic tape, the default | Manual tape, with `/M` |
-|---|---|---|
-| `TAPION` or `TAPIN` reads past side 1's end | Side 2's start, as when the player turns the tape over, or side 1's start when there is no side 2 | The tape stops at that end and waits for the player's key ([The manual tape](#the-manual-tape)) |
-| `TAPIN` reads in side 1's padding before side 2 | Side 2's start, and `TAPIN` returns FFh: the padding is not on the tape, and the read that waits while the player turns the tape over returns FFh in `openMSX`, which Saint Dragon's loader expects | The tape stops at side 1's end. After RETURN, the position is side 2's start and `TAPIN` returns FFh |
-| `TAPIN` reads at a multiple of 8 where a CAS header is | The byte after the header, because a header is a tone on the tape, which `TAPIN` waits through, as when a game reads on into the next block or side | The same |
-| `TAPION` or `TAPIN` reads past side 2's end | Side 2's start, as after a rewind | The tape stops at that end and waits for the player's key |
-| `TAPION` or `TAPIN` is called while the tape is stopped | The automatic tape never stops | The tape waits for the player's key |
-| `TAPION` is called while GRAPH is held | Side 1's start | Side 1's start, at any read that waits |
-| `TAPION` is called while CODE is held | Side 2's start, or side 1's start when there is no side 2 | The same, at any read that waits |
-
-The service shows a move of the tape with one flash of a colour over the whole
-screen for 0.1 second. GRAPH and CODE, and the automatic tape when it reaches side 2
-or goes back to a side's start, flash the colour of the side that the position moves
-to. RETURN on the manual tape flashes its own colour when the tape plays on, also
-when RETURN turns the tape over to side 2. The flash sets the border colour and
-blanks the display, which then shows only the border, because the border alone is
-thin and many screens crop it. Side 2 starts at side 1's end, so a read that reaches
-side 2 changes only the side at 005Eh, and that change shows the flash. The service
-counts the frames by the frame flag in the VDP's status register 0, then writes the
-game's VDP registers 7 and 1 back and goes on. The VDP's registers cannot be read,
-so the service takes the game's values from the addresses at 005Ah and 005Fh in the
-code segment. The colours are these:
-
-| Outcome | Border |
-|---|---|
-| Side 1's start | Light green, 3 |
-| Side 2's start | Light red, 9 |
-| RETURN plays on | Light yellow, 11 |
-
-### The manual tape
-
-By default the tape is automatic: it turns over and rewinds by itself, and the
-player needs no key. With `/M`, the tape service moves the tape only when the player
-asks, as a real tape moves only after the player presses PLAY, so the player follows
-what the game says on the screen. With `/R` and `/T1200`, it completes the
-experience of a real tape: the replay shows the first load, and each later load
-plays at tape speed after the player's key. The manual tape stops in these cases,
-and the byte at FCFBh records it:
-
-- The game stops the motor, with `TAPIOF`, or with `STMOTR` and A other than 1.
-- `TAPION` finds the motor off in PPI port C bit 4, because the game stopped it
-  without the service: through the BIOS in ROM, as Gauntlet calls `STMOTR` with
-  `rom keep`, or with its own write to the port. `TAPION` then starts the motor, as
-  the BIOS's does.
-- A read reaches side 1's end or side 2's end.
-- The motor is off at the snapshot, which `build.py` reads from PPI port C bit 4.
-
-While the motor runs, between the blocks of one load, the tape plays on and no read
-waits. A read that finds the tape stopped waits for one of these keys, which it
-reads in the keyboard matrix through the PPI:
-
-| Key | The tape |
-|---|---|
-| RETURN | Plays on from where it stopped. At side 1's end with a side 2, it goes on at side 2's start, as when the player turns the tape over. At side 2's end, or at side 1's end without a side 2, it waits on, because the tape holds nothing more |
-| GRAPH | Goes to side 1's start, as after a rewind |
-| CODE | Goes to side 2's start, or to side 1's start when there is no side 2 |
-| CTRL+STOP | The routine returns with carry set, as the BIOS's does, and the tape stays stopped |
-
-After GRAPH or CODE, the read that waited starts again at the new place, as a read
-does after a real rewind. So `TAPION` looks for a header from there, and `TAPIN`
-skips the header there and returns the byte after it.
-
-A key that is held when the read starts acts at once. So one press can answer both a
-game's own prompt and the tape: for "rewind the tape and press a key", the player
-presses CODE as the game's key and holds it until the game reads. The read goes on
-only when the key is released, so the game does not read it. 4x4 Off-Road Racing
-asks the player to stop the tape and press space: the tape has stopped by itself,
-because the game stops the motor, as openMSX shows, and at its next load the player
-presses RETURN to play on, or GRAPH or CODE to rewind.
-
-The manual tape's code takes 141 bytes more than T0's 360, so in the mode without a
-part in page 3 the tape stays automatic. With `/M`, `SNAPCAS` then says so before
-the restore, as it does for a game without the tape service, and goes on.
-
-### Without a part in page 3
-
-A game can use all of its page 3 over time, as Moonwalker does: its main game loads
-its code into FCC9h to FD88h, and no 168 bytes of its page 3 stay free from one load
-to the next. For such a game, the game file's `service t0` puts the whole tape
-service into T0, and nothing of it stays in page 3. `build.py` also takes this mode
-itself when no part of page 3 has room at the snapshot, so a game file needs
-`service t0` only for a game whose page 3 is free at the snapshot but not in a later
-load, as Moonwalker's is. The line goes in the game file of each machine that needs
-it: Moonwalker's is in `phc28s-ram64k-carnivore2.txt`. The service's part of page 3
-exists only because the service switches page 0 while it runs, so this mode removes
-the three switches:
-
-| Switch | Without a part in page 3 |
-|---|---|
-| The entry code selects T0 in page 0 | The game reaches T0 by slot. T0 stays in mapper register FCh for good, so page 0 shows T0 whenever the game selects DOS's mapper there, and T0's jump table, from 00E1h to 00F3h, is the only set of entries. When the snapshot has the ROM in page 0, the restorer selects T0 there instead, by the default mode's rule ([Restorer](#restorer)), so that BASIC's own `BLOAD`, which Tokyo Nampa Street uses for each scene, reaches T0 |
-| The trampoline selects the code segment | The routines run in T0: they, the tape position, the table of the tape's segments and the flash's data take the 360 bytes from 19DDh to 1B44h, which an assertion in `src/service.asm` checks. `src/tape.inc` holds the routines, which `service.asm` assembles in the code segment and in T0, and `build.py` points T0's jump table at T0's copy |
-| The reader selects the tape's segments in page 0 | `TAPIN` reads through page 2 or page 1, which `build.py` chooses: the first that is a page of a mapper at the snapshot, or else page 2. With interrupts off, it keeps the slot register's value in T0, selects DOS's mapper's slot in that page through the slot register and the byte's segment through FEh or FDh, reads the byte, and writes back the slot register and the snapshot's segment. It uses no stack meanwhile, so the page can hold the game's stack, as Tokyo Nampa Street's page 2 does. A game whose RAM is in a slot without a mapper, as Bronx's is on the Sanyo PHC-28S, can also lend its page. When the capture has no mapper at all, as a capture variant without the Carnivore2 has none, the game lends page 2, and `TAPIN` writes back segment 0, which only DOS's mapper sees |
-
-The tape takes at most 16 segments, 256 KB, and starts at the first tape segment.
-`TAPIOF` and `TAPOOF` enable interrupts, as the BIOS's do. The keys and the flash
-work as in the default mode.
-
-A game can use the mode only when these hold at the snapshot. Otherwise `build.py`
-stops with an error, or the restorer with a message for the last condition:
-
-| Condition | Why |
-|---|---|
-| No RAM page kept for page 0 is in DOS's mapper | T0 takes the game's mapper register FCh for good |
-| The game file has no `rom keep` | With `rom keep` the ROM stays in page 0, and this mode has no entries in page 3, so the game's tape calls reach the BIOS's own routines and not T0 |
-| When the borrowed page is in DOS's mapper, the game keeps its segment there from then on | `TAPIN` writes back the snapshot's segment |
-| When DOS's mapper's slot is expanded, the snapshot's subslot register of that slot selects the mapper in the borrowed page | The slot register alone then selects the mapper there. The restorer checks this, because only it knows DOS's mapper's slot. When the capture did not have that slot expanded, as a capture variant without the Carnivore2 does not, the game never wrote its subslot register, so the restorer sets the borrowed page's bits there to the mapper's subslot instead |
-
-Code that selects the ROM in page 0 itself and then calls the tape reaches the ROM,
-not T0, so the scan only lists its findings in this mode, and the game file sends
-that code to T0 with `patch` lines that make it select DOS's mapper in page 0.
-Moonwalker's loader computes the value that its stub writes to the slot register as
-`AND H / LD L,A`, the slot register with page 0's bits cleared, for slot 0. On the
-Sanyo PHC-28S the game keeps the slot register at A5h, so `LD L,0A6h` in their place
-selects slot 2, DOS's mapper. A game that writes FCh itself loses T0, and a game
-whose own page 0 RAM is in DOS's mapper, as Moonwalker's is on an NMS 8250, cannot
-use the mode.
-
-The restorer allocates T0 and the tape's segments as in the default mode, writes the
-table of the tape's segments and DOS's mapper's slot for the borrowed page into T0,
-and sets mapper register FCh to T0's segment, with DOS's mapper's subslot in the
-page 0 bits of its slot's subslot register and of `SLTTBL`. It writes nothing into
-the game's page 3. Bit 1 of the image's flags marks the mode ([Image](#image)).
-
-### Tape speed and sound
-
-By default the tape service returns each byte as soon as the game asks for it, so a
-load takes a moment. For the experience of a real tape, `SNAPCAS <GAME> /T1200` or
-`/T2400` makes a game load at that speed, with the tape's sound. The restorer writes
-the speed at 0062h in the code segment, and the service then works as a tape at that
-speed:
-
-- `TAPIN` plays each byte that it returns as the tape holds it, on the keyclick bit,
-  PPI port C bit 7, which the MSX sends to its sound output: a start bit 0, the 8
-  data bits from bit 0 up, and 2 stop bits 1 (MSX Red Book, chapter 4).
-- `TAPION` plays the leader tone before each header that it finds, as long as the
-  BIOS's `TAPOON` writes it: the long one before a block that starts with a file
-  type's 10 bytes ([CAS data](#cas-data)), the short one before the others.
-- `TAPION` starts the motor and `TAPIOF` stops it, and `STMOTR` switches it, as the
-  BIOS's routines do, through the motor relay, PPI port C bit 4. So the relay clicks
-  when the tape starts and stops.
-
-Each bit is one or two cycles of a square wave:
-
-| Speed | Bit 0 | Bit 1 | A byte's 11 bits |
-|---|---|---|---|
-| 1200 baud | One cycle of 1200 Hz | Two cycles of 2400 Hz | 9.2ms |
-| 2400 baud | One cycle of 2400 Hz | Two cycles of 4800 Hz | 4.6ms |
-
-The sound is the wait, so a byte takes as long as on the tape, plus the game's own
-code between two bytes. The service writes the keyclick bit back to its value before
-the byte. The keys and the flash work as at the fast speed.
-
-`/T1200` and `/T2400` act only through the tape service, so they change nothing for
-a game without it, and the restorer then says so before the restore. Such a game
-loaded completely before the snapshot, and the experience of its load comes from the
-replay, which plays the load at the capture's speed with the sound of a tape
-([Replay](#replay)). The two combine: with `/R /T1200`, the replay shows the first
-load, and the game's later loads come from the tape service at 1200 baud.
-
-### Scan
-
-With the tape service, `build.py` scans the snapshot's RAM pages and the unread
-blocks of both sides for code that reaches the tape without going through T0, and
-lists each finding in `scan.txt`, in a `patch` line's form, so that a finding in an
-unread block can be copied into the game file. A RAM page that the snapshot does not
-select in its page is named by its file in `ram/`. The scan runs after the game
-file's `patch` lines, and it patches the findings in the RAM pages. In an unread
-block it only lists them, for `patch` lines, because a loader usually checks a block
-against a sum stored at the block's end, and each loader computes that sum in its
-own way. The scan looks for this code:
-
-| Code | Bytes | Patch |
-|---|---|---|
-| A stub built with `TAPION`'s entry: `LD DE,00E1h / PUSH DE / LD DE,CDD9h / PUSH DE`, or the same with HL | `11 E1 00 D5 11 D9 CD D5`, or `21 E1 00 E5 21 D9 CD E5` | `E1 00` becomes `E1 FC` |
-| A call of a tape routine: `CALL 00E1h`, `CALL 00E4h`, `CALL 00E7h` or `CALL 00F3h`, `STMOTR`, which the manual tape needs for Gauntlet's stops ([The manual tape](#the-manual-tape)) | `CD E1 00`, `CD E4 00`, `CD E7 00` or `CD F3 00` | The call's `00` becomes `FC` |
-| An entry in HL before a call: `LD HL,00E1h` or `LD HL,00E4h`, then `CALL`, to a routine of the game's that selects the ROM in page 0 and jumps to HL | `21 E1 00 CD` or `21 E4 00 CD` | The `00` becomes `FC` |
-| A reader of the cassette signal: `IN A,(0A2h)`, then within 4 bytes `RLA`, `RLCA`, `BIT 7,A` or `AND 80h` | `DB A2`, then `17`, `07`, `CB 7F` or `E6 80` | None: listed, for a `patch` line that sends its callers to the service |
-| A reader of PSG register 14, whose bit 7 is the cassette signal and whose other bits are a joystick: `LD A,0Eh / OUT (0A0h),A / IN A,(0A2h)` | `3E 0E D3 A0 DB A2` | None: listed, as above, and also found in joystick code |
-| A fixed slot value: `LD A,n / OUT (0A8h),A` or `LD A,n / CALL 013Bh` ([Slot patches](#slot-patches)), with a field of n that names a slot that holds nothing | `3E n D3 A8` or `3E n CD 3B 01` | n becomes the value that [Slot patches](#slot-patches) gives |
-
-The stub stores `TAPION`'s address in RAM, and the game later changes its low byte
-to E4h for `TAPIN` and F3h for `STMOTR`, so the entries keep the BIOS's low bytes. A
-patched call goes to an entry in page 3, which selects T0 in page 0 whatever page 0
-holds. So the patch also serves a loader that selects the ROM in page 0 itself, from
-its own copy of the slot register. A stub that pushes 00EAh, `TAPOON`, writes the
-tape, and the scan leaves it alone. A patch in code that ran only during the load is
-harmless, but a call's 3 bytes can also be data, where the patch changes one byte.
-The search for fixed slot values runs on every image, with or without the tape
-service, because a game can select its slots at any time while it is played.
-
-## Replay
-
-The replay shows the load on the real machine as it happened in the capture: BASIC's
-screen with the load command being typed, the loading screens being drawn, their
-music, the game's own pauses and its waits for a key, and the cassette motor's
-relay. Nothing of the loader runs again: the replay is a recording, played before
-the restore, so it works for every game whose capture works. It is optional, in its
-own file, `<GAME>.RPL`, and runs only with `/R`.
-
-The capture records it from just before it types the load command to the snapshot,
-in `snap/replay.log`. The log starts with the VDP's state at that moment: VRAM, the
-registers and, on a V9938, the palette. Then it holds one line per write: the frame,
-the port and the value. A frame is one VDP interrupt period of the machine, 1/50 or
-1/60 of a second. It logs:
-
-- Each write to the VDP's ports 98h to 9Bh and the PSG's ports A0h and A1h, from
-  write watchpoints.
-- Each change of the cassette motor and keyclick bits of PPI port C, bits 4 and 7,
-  as a bit set or reset on port ABh, so that the replay does not touch the keyboard
-  row bits.
-- Each wait that a key continued ([Capture](#capture), step 5), as the frames of the
-  wait's first 30 seconds, kept aside before the rewind, and the key.
-- The frame of the load command's RETURN.
-
-A rewind truncates the log to its length at the saved moment, as it puts back the
-rest of the logged state.
-
-`build.py` turns the log into a stream of commands ([Replay stream](#replay-stream))
-and compresses it in chunks with the LZ4 block format. The restorer, after step 2,
-plays the stream with interrupts off while it writes and on while it waits for the
-next frame:
-
-- It writes the first state with the display blanked, so the screen shows BASIC as
-  it was in the capture. It then types the command as the capture did, and at the
-  command's RETURN it waits until the player presses RETURN, as on a cassette
-  machine.
-- Before it plays, it reads `<GAME>.RPL` with its own FCB into the segments of DOS's
-  mapper that step 2 leaves free, 16 KB each, and then plays from RAM. A DOS read
-  during the replay would stop the frames and the sound, longest on a floppy disk.
-  When the file needs more segments than are free, it fills them, and as it plays it
-  reads the next chunks ahead into the segments that it has played, at frames in
-  which the motor bit is off, when a tape is silent too.
-- It writes VRAM no faster than one byte every 29 cycles, 8 µs, which an MSX1 VDP
-  needs during the display.
-- At a wait, it plays the wait's frames in a loop until a key is pressed.
-- `/R2` to `/R9` play 2 to 9 frames for each frame that it waits.
-- While the motor runs at `/R` speed, it toggles the keyclick bit in each frame's
-  spare time at 1200 Hz for a 0 bit and 2400 Hz for a 1 bit, from the stream's own
-  bytes, so that the load sounds like a tape.
-
-When the replay ends, VRAM, the VDP's registers and the PSG's registers hold their
-values at the snapshot, and the restore goes on with step 3.
-
-A game with the tape service then loads the rest of its tape during play. So that
-the whole session loads at one speed, `/R` alone also sets the tape service to the
-capture's speed ([Tape speed and sound](#tape-speed-and-sound)). `build.py` finds
-that speed, 1200 or 2400 baud, from the times of the `TAPIN` calls in the capture's
-log and writes it in the replay's header. `/T1200` or `/T2400` with `/R` sets the
-speed instead.
-
-## Check
-
-`tools/check.py` makes a disk image with `openMSX`'s `diskmanipulator`: a 720 KB
-image without a partition table, which Nextor reads from its first sector and
-MSX-DOS reads as a floppy disk. It holds the `--dos` folder's files, `SNAPCAS.COM`,
-the image and an `AUTOEXEC.BAT` that runs `SNAPCAS <GAME>`. The folder holds
-`NEXTOR.SYS` and `COMMAND2.COM`, `MSXDOS2.SYS` and `COMMAND2.COM`, or `MSXDOS.SYS`
-and `COMMAND.COM`, which `snapcas` cannot ship. The check takes the bytes that the
-build patched, the tape service's part of page 3 and `C_POS`'s address from
-`build.txt`, which `build.py` writes beside the image, so that it judges the image
-by the build's own decisions and by the `SERVICE.BIN` that the build used.
-`check.py` boots the machine with that disk and the `boot` keys, and writes its
-report to `check/report.txt`:
-
-1. A breakpoint at the tail's last instruction, while the slot register and the
-   jump's target are the snapshot's, compares the machine with the snapshot. It must
-   fire within 120 seconds, and the report then holds the screen's text, which shows
-   a message of the restorer: the kept RAM pages, the stored VRAM blocks and the
-   registers must be equal. The exceptions are the tail's bytes, FCC9h to FD88h, the
-   tape service's part of page 3 when it moved, FFFFh in an expanded slot, the
-   patched bytes, R, PSG register 7's bits 7 and 6, PSG register 14, an input whose
-   value is the joystick lines and the cassette signal, the bits of the worker's
-   page in the subslot register of DOS's mapper's slot when that page does not
-   select the slot, and the values that restorer step 3 changes for the tape
-   service. A difference or a timeout fails the check.
-2. The game runs for 60 seconds, saved with `savestate` every 10 seconds as
-   `check/10s.oms` to `check/60s.oms`. `openMSX` loads such a savestate to show the
-   screen, because it takes screenshots only with a renderer. Meanwhile the game
-   must leave the tape service's part of page 3 alone, when the image has one. The
-   part's last bytes, from `e_sp` to the stack's top, do not count, because the
-   service sets them on each call before it reads them. A watchpoint on the part's
-   other addresses notes each write that the game makes there: from code outside the
-   part, while `E_INSIDE` is 0, so outside a call of the service, and while the slot
-   register and mapper register FFh select the snapshot's page 3. A write after the
-   service has read the tape to its end does not count either, because nothing calls
-   the service then: the check reads the service's tape position, `C_POS`, and the
-   tape's end, `C_TOTAL`, from the code segment that `E_CODE` names, and the tape is
-   read when at most 7 bytes are left, a block's padding. 7 Card Stud reads its last
-   block through the service and then keeps its variables at FD00h. The report then
-   adds `point 2: fail` and the writes, or else `point 2: pass`, and a failed point
-   2 fails the check. Altered Beast, after loading its side B, writes its variables
-   over the service's entries at FCE1h, and its next call of the tape hangs, so a
-   game that writes the part needs the mode without a part in page 3
-   ([Without a part in page 3](#without-a-part-in-page-3)). The point sees only the
-   writes of its 60 seconds, not those that come after a key, a level or another
-   side, as Altered Beast's do.
-3. During the same 60 seconds the restored machine must not reboot. Points 1 and 2
-   do not see a reboot: seven Super MSX images on the PHC-28S, and American Football
-   on the VG-8020, passed them and showed the boot screen or Nextor's 60 seconds
-   after the restore, as their loads do in plain `openMSX`. Any of three signs fails
-   the point:
-
-   | Sign | What it shows |
-   |---|---|
-   | `SNAPCAS.COM` starts again: the breakpoint at 0100h that reads RAMAD3 fires after the restore | A reset has booted DOS from the check's disk, and its `AUTOEXEC.BAT` runs the restorer again |
-   | The screen's text holds `MSX  system` at two or more of the six savestates | The machine stays on the MSX1 BIOS's boot screen, whose first line that is, or comes back to it in a loop of resets. A reset on purpose shows the boot screen for a few seconds before the game starts, so a single savestate can catch it: Raider, from Super MSX n.18, resets the VG-8020 6.2 seconds after the restore and shows its game at 60 seconds. BASIC's banner holds `MSX BASIC` instead, so a BASIC game whose restored screen still holds the banner does not count. The MSX2 BIOS draws its boot screen as graphics, so this sign holds only on an MSX1 |
-   | The capture's log holds a reset in the 60 seconds after the snapshot, and the check notes none | The restored game does not do what the loaded one did. Konami's Soccer and Budokan on the PHC-28S, captured with the Carnivore2, stay on a title or an empty screen for the 60 seconds, though their captures reset 8.7 and 7.8 seconds after the snapshot, and on a real PHC-28S Konami's Soccer's restored game does reset, into DOS |
-
-   The first signs were the tail's jump running a second time and
-   `Copyright 1983 by Microsoft` on the screen ([Decisions](#decisions)). The first
-   also fired when a game's own code passed the tail's jump address, within 0.4
-   seconds of the restore, as the code of Ci-U-Than Trilogy III and of Enchanted
-   does on the PHC-28S. The second also fired for games whose restored screen still
-   holds BASIC's banner with that line, such as Roberto Mate from Philips's Turbo
-   Pack A and Trick Boy.
-
-   The point judges where the machine ends, not the reset, because a loader can
-   reset the machine on purpose after the restore: Japan, from Super MSX n.20,
-   resets the VG-8020 0.8 seconds after it, and the BIOS's search for cartridges
-   finds the ROM copy in RAM and starts it. A breakpoint at the start of the BIOS's
-   reset routine, where 0000h's `DI / JP` jumps, while page 0 selects the main ROM,
-   as in the capture's log ([Capture](#capture)), notes each reset in the report
-   with its time, but a reset alone does not fail the point. The check reads EXPTBL,
-   for the main ROM's slot, when `SNAPCAS.COM` starts. It read it when the boot
-   steps ended at first, and on the PHC-28S the BIOS has not set it then, so the
-   breakpoint took the main ROM for slot 3-3 and missed every reset there, Aliens's
-   among them. The report adds `point 3: fail` and the sign, or else
-   `point 3: pass`, and a failed point 3 fails the check. A hang is not a reboot,
-   and point 3 does not see it: American Football, captured with the Carnivore2,
-   stops in the BIOS on the VG-8020 with its interrupts off. Its game file now
-   captures it without the Carnivore2
-   ([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)).
-4. During the same 60 seconds the game must not stop at a BASIC error. A BASIC
-   program, or a loader written in BASIC, that meets an error prints one of BASIC's
-   error messages, such as `Syntax error in 100`, and waits at `Ok`, in a text mode,
-   where `openMSX`'s `screen` reads it. The point fails when the screen's text holds
-   one of those messages at one of the savestates. Points 1 to 3 do not see such a
-   stop: a scan of the 60-second savestates of the collection's passing game files
-   found 17 runs on the PHC-28S and the VG-8020 that end at an error, among them
-   Field Master's `Overflow in 130` and three tapes of the CasLink3 loader, whose
-   `BLOAD` of the next part ends in `Syntax error`. A loader that stops at `Ok` on
-   purpose, and tells the player to press F5 or type `RUN`, as 12 tapes do, shows no
-   error message, so it passes. The report adds `point 4: fail` and the message, or
-   else `point 4: pass`, and a failed point 4 fails the check.
-
-Code that a game builds only when the player reaches a level is not visible to the
-scan or to the check. It appears as a hang during play, and a trace of that load in
-`openMSX` provides the `patch` line.
+| 1 | The restored machine differs from the snapshot: its RAM, its VRAM or its registers |
+| 2 | The game writes to the tape service's part of page 3 |
+| 3 | The machine reboots |
+| 4 | The game stops at a BASIC error |
+
+The check cannot see a game that hangs or shows garbage, so the real machine stays
+the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 
 ## Decisions
 
 | Decision | Reason |
 |---|---|
-| A machine file named after its model and cartridges, such as `phc28s-ram64k-carnivore2` | A machine file is a model and the cartridges in its slots, and two setups of one model need two names. The first names, such as `advanced/phc28s`, named only the model, and folders split the machines by how hard they are to set up ([Machine file](#machine-file)) |
-| A capture variant named after the cartridges that it holds, in `machines/capture/`, and listed by the machine file's `variant` lines | The first variants were named after their machine and the cartridge that they leave out, such as `advanced/phc28s-nodisk`, and the tools found them by that prefix. With the new machine names, that rule gives names such as `phc28s-ram64k-carnivore2-nocarnivore2`. A name that lists the cartridges says what the capture ran on, and one variant can serve two machines, as `vg8020` does ([Machine file](#machine-file)) |
+| A machine file named after its model and cartridges, such as `phc28s-ram64k-carnivore2` | A machine file is a model and the cartridges in its slots, and two setups of one model need two names ([FILES.md, Machine file](FILES.md#machine-file)) |
+| A capture variant named after the cartridges that it holds, in `machines/capture/`, and listed by the machine file's `variant` lines | A name that lists the cartridges says what the capture ran on, and one variant can serve two machines, as `vg8020` does ([FILES.md, Machine file](FILES.md#machine-file)) |
 | One reader for each tape format, and a format-neutral tape model for the rest of the code | A TSX file holds the turbo blocks that a CAS file cannot, so converting it to CAS would lose the games that need TSX. Teaching each tool both formats would mix them in every tool, while the model keeps each format in one file ([Tape files](#tape-files)) |
-| A game file for each program of a compilation, named after its game | A player looks for a game by its name, and an image named after the tape holds only the tape's first program. One game file for the tape, with a line for each program, would keep the tape's `cas` and `sha1` lines in one place, but it needs game files with sections and changes to every tool and to the collection's cache, to save two lines for each program ([A game later on the tape](#a-game-later-on-the-tape)) |
-| Every program of a compilation in the collection's folder, even when the game has a dump of its own | A compilation's copy can differ from that dump: of 112 such programs on the Engesoft and Super MSX tapes, none had game blocks that equal the dump's, because the magazines renamed the games and changed their title screens. A folder for each collection keeps their names, such as `GOLF` or `STAR`, apart from the games of `games/`. This replaces the rule that gave such a program no game file |
-| A reboot after the restore fails the check, and a reset alone does not | Points 1 and 2 compare the restore and watch page 3, so a game that crashes into a reboot after the restore passed them, as eight Super MSX images did. A first rule failed every reset after the restore, on the view that a loader resets on purpose only before the snapshot, as The Goonies's does. Japan, from Super MSX n.20, resets the VG-8020 after the restore and then starts, so the point now judges where the machine ends: DOS starting `SNAPCAS.COM` again, or the BIOS's boot screen ([Check](#check)). Its first signs, the tail's jump running again and `Copyright 1983 by Microsoft` on the screen, failed games that do not reboot: three whose code passes the tail's jump address, and games whose restored screen holds BASIC's banner. The capture only logs its resets, for the same reason |
+| A game file for each program of a compilation, named after its game | A player looks for a game by its name, and an image named after the tape holds only the tape's first program. One game file for the tape, with a line for each program, would keep the tape's `cas` and `sha1` lines in one place, but it needs game files with sections and changes to every tool and to the collection's cache, to save two lines for each program ([INTERNALS.md, A game later on the tape](INTERNALS.md#a-game-later-on-the-tape)) |
+| Every program of a compilation in the collection's folder, even when the game has a dump of its own | A compilation's copy can differ from that dump, because the magazines renamed the games and changed their title screens. A folder for each collection keeps their names, such as `GOLF` or `STAR`, apart from the games of `games/` |
+| A reboot after the restore fails the check, and a reset alone does not | Points 1 and 2 compare the restore and watch page 3, so a game that crashes into a reboot after the restore passes them. A loader can also reset the machine on purpose after the restore and then start the game, so the point judges where the machine ends: DOS starting `SNAPCAS.COM` again, or the BIOS's boot screen ([Check](#check)). The capture only logs its resets, for the same reason |
 | One `service` value for a game, and `rom keep` without the mode without a part in page 3 | `no`, `at` and `t0` choose between ways to serve the tape, so a game takes one of them, and the machine's game file can replace it as it replaces other keys. `rom keep` leaves the game only the entries in page 3, which that mode removes, so the two together give an image whose tape calls reach the BIOS. No shipped game file has both |
 | Restore a snapshot | The game's loader runs once, in `openMSX`, so its slot code, stubs and checks need no changes on the real machine |
 | Capture on a copy of the user's machine, with the disk system's hooks and work area removed | The snapshot holds the slots that the game selects on that machine, as when it loads from a real tape |
@@ -1351,18 +194,18 @@ scan or to the check. It appears as a hang during play, and a trace of that load
 | ROM checksums checked by the restorer | A snapshot runs only on the ROMs it was taken with, and `build.py` can build T0 from `rom.bin` |
 | Port writes, T0 and the tail made by `build.py` | The restorer copies records and fills in only the values that depend on the real machine |
 | One restorer for every image | The user updates one program, and DOS passes it the image's name |
-| A game file can name the machine for the capture | On the Sanyo PHC-28S, La Abadia del Crimen's loader took the RAM cartridge in slot 1 for an expanded slot and crashed, but loaded without it, until the RAM search patch fixed its load ([The RAM search patch](#the-ram-search-patch)). Its image ran with the cartridge in place, because the game never selects slot 1 again. Sootland's loader still trips over the HB-F700P's RAM cartridge |
+| A game file can name the machine for the capture | A loader can trip over a cartridge that the game itself never selects again, so the game loads without it, and its image runs with the cartridge in place. Sootland's loader trips over the HB-F700P's RAM cartridge |
 | Replay a recording of the load, not the load | Loading again on the real machine, through the tape service from the start, brings back what the snapshot avoids: loaders that go around T0 through their own slot code, loaders that use the page 0 RAM where T0 is, and loaders that trip over the machine's slots |
 | Tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
-| T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register. Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave the ROM there at the snapshot: Moonwalker and Time Out |
+| T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register |
 | `rom keep` in the game file, not a rule of the restorer | T0 in page 0 serves a BASIC program, whose tape calls are in the ROM and cannot be patched, but it changes the slot register's page 0 bits. Gauntlet's RAM search adds the slot that it finds to those bits, expecting the ROM's slot 0, and selects an empty slot |
 | Find the slot patches of the load by watching it, and not by a search of the whole tape | A search also changes bytes that are data or code that never runs, and a loader that checks a block's sum then fails to load it. A write that the watch sees runs, and selects a slot that holds nothing, so its patch is needed |
-| Scan the snapshot and the unread blocks | A search of the 1,653 files of File-Hunter's MSX CAS collection for files that leave over 10% and 2 KB unread in a test load and hold a rewind or play prompt found 62 files of 51 games. Of those games, 20 build stubs that T0 alone does not intercept |
+| Scan the snapshot and the unread blocks | Many games that load during play build stubs that T0 alone does not intercept |
 | The replay read into RAM before it plays | A disk read stops the frames and the tape's sound, and a compressed replay holds a few tens of KB, which fit in a few free segments |
 | The replay starts at BASIC's screen, before the load command | The player sees the command typed and presses RETURN, as on a cassette machine, and the screen is the capture's, so it fits the machine |
 | The tape speed as an option of `SNAPCAS`, fast by default | The player chooses at each run between a quick load and the experience of the tape, and the image stays the same |
 | Rewind the capture with `savestate` and `loadstate` | `openMSX`'s `reverse goto` replays the input recorded after its target, while each key try must start from the saved moment with no other input |
-| A tape with both sides, a wrap, and fixed keys for each side's start | In 41 of those 51 games the unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
+| A tape with both sides, a wrap, and fixed keys for each side's start | Most such games' unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
 | An automatic tape by default, and a manual one with `/M` | The automatic tape needs nothing from the player, and that is how most players want it. The manual tape follows what the game tells the player, as 4x4 Off-Road Racing does when it asks to stop the tape and later to rewind it, and with `/T1200` it avoids the wrap's reading of the rest of a side at tape speed |
 | GRAPH for side 1's start and CODE for side 2's | GRAPH and CODE alone type no character, BASIC ignores them, and games rarely read them, while STOP pauses a BASIC program, the function keys type text, and many games use SELECT in their menus. On a Japanese MSX, CODE's key is KANA, which also switches the kana lock |
 | RETURN to play on, and a read that goes on only when the key is released | RETURN is the key that a player presses without thinking. Games read it, so the service waits for its release, and the game, which does not run while the service waits, never sees it |
@@ -1377,15 +220,13 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   not run.
 - DOS's four pages must be in one memory mapper, with enough free segments for the
   image's holding and service segments and the worker. A game with a long tape needs
-  a large mapper: Moonwalker's 236 KB tape does not fit in an NMS 8250's 128 KB. The
-  PicoVerse's 192 KB mapper leaves Nextor 5 free segments, and 191 games need 6 to
-  32 for their tapes.
+  a large mapper.
 - A game with the tape service needs one of two things. Either its page 3 keeps 168
   bytes from an address xxE1h free for the service's part of page 3, at the snapshot
   and in every later load ([Build](#build)). Or the game meets the conditions of the
   mode without a part in page 3, which `build.py` takes when page 3 has no room, or
   the game file's `service t0` asks for
-  ([Without a part in page 3](#without-a-part-in-page-3)).
+  ([INTERNALS.md, Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)).
 - A game that reads the tape with its own code gets no tape service, so it runs only
   if it loads in a single pass.
 - Without a part in page 3, T0 has no room for `TAPIN`'s skip of a header and of
@@ -1395,237 +236,37 @@ scan or to the check. It appears as a hang during play, and a trace of that load
   `vg8020-carnivore2.txt`, hold only on their machine. On another machine, the games
   that have one may need a machine's game file of their own for that machine.
 - A game in the mode without a part in page 3 has only the automatic tape, because
-  T0 has no room for the manual tape ([The manual tape](#the-manual-tape)).
+  T0 has no room for the manual tape
+  ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)).
 - With `/M`, a game that stops the motor between two loads without a message on the
   screen still waits for RETURN, and the player sees no reason for the wait
-  ([The manual tape](#the-manual-tape)).
-- A slot value that the code of neither form in [Slot patches](#slot-patches) sets
-  gets no slot patch. The capture only logs its write, for a `patch` line by hand.
+  ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)).
+- A slot value that the code of neither form in
+  [INTERNALS.md, Slot patches](INTERNALS.md#slot-patches) sets gets no slot patch.
+  The capture only logs its write, for a `patch` line by hand.
 - A slot patch replaces only a field that names a slot that holds nothing, and with
   the slot that the slot map gives, so a game that needs another slot keeps its
-  `patch` lines by hand. Doki Doki Penguinland selects the RAM cartridge, slot 1, in
-  page 3, where the Sanyo PHC-28S without Nextor keeps its internal RAM. On the NMS
-  8250, BASIC's subslot register of slot 3 does not select RAM in pages 0 and 1 at
-  step 3, so the slot map has no slot for those pages, and Checkmate! and Finders
-  Keepers keep their lines there.
-- The replay is a recording: a loader that lets the player act while it loads shows
-  only what happened in the capture.
+  `patch` lines by hand.
+- The replay, once built, is a recording: a loader that lets the player act while it
+  loads shows only what happened in the capture.
 - A snapshot taken without an interrupt overwrites the 26 bytes below the stack
   pointer with the tail.
 - The tail needs 26 bytes below the stack pointer, in a RAM page that the snapshot
   keeps, or else 26 bytes below the start of the stack pointer's page. A game whose
-  stack pointer is below 26, as Breakout's 0004h is on the MFRSD machine, or whose
-  bytes there are not in a kept RAM page, gets no image: `build.py` stops
-  ([Tail](#tail)).
+  stack pointer is below 26, or whose bytes there are not in a kept RAM page, gets
+  no image: `build.py` stops ([FORMATS.md, Tail](FORMATS.md#tail)).
 - A game whose stack reaches FFFFh writes the subslot register when page 3 is an
   expanded slot, as the Carnivore2's RAM is in a capture on the VG-8020, and its
-  slots change under it. Super MSX n.17's side B sets its stack pointer to 0000h, so
-  its game file captures without the Carnivore2, where FFFFh is RAM, and takes its
-  snapshot at 125 seconds, when the stack pointer leaves room for the tail.
+  slots change under it.
 - Music that BASIC's `PLAY` statement is still playing at the snapshot does not
   resume on a real Sanyo PHC-28S, though it does in `openMSX`, and the cause is not
-  known. Tokyo Nampa Street then waits for its music to end and never does. Its game
-  file's `snapshot at` comes after the music, and with it the game runs on the real
-  machine.
-- Konami's Soccer, in its hacked dump `KONAMI.CAS`, resets the machine 8.7 seconds
-  after the snapshot in its capture on the Sanyo PHC-28S, with no key pressed. On a
-  real PHC-28S with the RAM cartridge in slot 1 and the Carnivore2 in slot 2, the
-  restored game resets too, and the BIOS boots Nextor into DOS, as it does in
-  `openMSX` on the VG-8020, and as the plain load does in `openMSX` on the PHC-28S.
-  In `openMSX`'s check on the PHC-28S, the restored game stays on its title screen
-  for the 60 seconds and never resets. Point 3's third sign fails the check for that
-  ([Check](#check)), and Budokan does the same, but why the restored machine does
-  not reset there is not known. Both captures reset because the loaders crash: they
-  copy page 2's slot into page 1's bits, and with the Carnivore2 page 2 is its
-  mapper's subslot
-  ([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)). Their
-  game files now capture them without the Carnivore2, where neither resets, and both
-  games run.
+  known. A game whose music must end gets a `snapshot at` after it.
+- A restored game can behave differently from its capture: Konami's Soccer and
+  Budokan reset in their captures on the PHC-28S and not in their checks, and why is
+  not known ([NOTES.md, Limits](NOTES.md#limits)).
 
 ## Formats
 
-### Image
-
-All numbers are little-endian, and the CRC-16 is CRC-16/CCITT-FALSE: polynomial
-1021h, initial value FFFFh, not reflected, no final XOR. The image holds 4,096 bytes
-of header and tables, padded with zeros, then the data of each record in table
-order, 16,384 bytes each, except a block of zeros, which holds none.
-
-| Offset | Size | Field |
-|---|---|---|
-| 0 | 8 | `SNAPCAS4`, which changes when the image's format changes |
-| 8 | 2 | CRC-16 of the main ROM's 32 KB |
-| 10 | 2 | CRC-16 of the sub-ROM's 16 KB, or 0 on an MSX1 |
-| 12 | 1 | Number of records |
-| 13 | 1 | Number of port writes |
-| 14 | 1 | Flags: bit 0 set for `rom keep`, bit 1 for `service t0` ([Game file](#game-file)) |
-| 15 | 1 | The page of the tape service's part of page 3, whose entries start at E1h of it: FCh unless it moved, or 0 without the tape service |
-| 16 | 24 | AF, BC, DE, HL, AF', BC', DE', HL', IX, IY, SP, PC |
-| 40 | 1 | I |
-| 41 | 1 | Interrupt mode |
-| 42 | 1 | IFF1: 1 when interrupts are on |
-| 43 | 1 | Slot register |
-| 44 | 4 | Subslot registers of slots 0 to 3, 0 when not expanded |
-| 48 | 4 | Mapper registers FCh to FFh |
-| 52 | 2 | Tail address |
-| 54 | 1 | The snapshot's VDP register 1 |
-| 55 | 1 | Without a part in page 3, the page that `TAPIN` borrows, 1 or 2, otherwise 0 |
-| 56 | 1 | Bit n set when slot n is not expanded in the capture |
-| 57 | 7 | Zero |
-| 64 | 4 per record | Record table |
-| 64 + 4 × records | 2 per port write | Port writes: port, value |
-
-| Record byte | 0 | 1 | 2 | 3 |
-|---|---|---|---|---|
-| RAM page in a mapper | 1 | Slot ID | Page | Segment |
-| RAM page not in a mapper | 2 | Slot ID | Page | 0 |
-| Service segment: T0 first, then the tape in order | 3 | 0 | 0 | 0 |
-| VRAM block | 4 | Block number, 0 to 7 | 0 | 0 |
-| VRAM block of zeros | 5 | Block number, 0 to 7 | 0 | 0 |
-
-### Tail
-
-| Offset | Bytes | Instruction |
-|---|---|---|
-| 0 | `3E nn` | `LD A,nn`: the snapshot's value of the worker's page's mapper register, filled in by the restorer |
-| 2 | `D3 nn` | `OUT (nn),A`: FDh or FEh, filled in by the restorer |
-| 4 | `3E nn` | `LD A,nn`: the slot register, filled in by the restorer |
-| 6 | `D3 A8` | `OUT (0A8h),A` |
-| 8 | `3E nn` | `LD A,nn`: the subslot register of DOS's mapper's slot, filled in by the restorer when the tail writes it |
-| 10 | `32 FF FF` or `00 00 00` | `LD (0FFFFh),A` when the tail writes that register, otherwise three `NOP`s |
-| 13 | `31 nn nn` | `LD SP,nnnn`: the tail's address plus 24 |
-| 16 | `F1` | `POP AF` |
-| 17 | `31 nn nn` | `LD SP,nnnn`: the snapshot's SP |
-| 20 | `FB` or `00` | `EI` when IFF1 is set, otherwise `NOP` |
-| 21 | `C3 nn nn` | `JP nnnn`: the snapshot's PC |
-| 24 | 2 bytes | AF |
-
-### Port writes
-
-`build.py` lists the writes in this order:
-
-1. For each PSG register from 0 to 15, its number to port A0h and its value to port
-   A1h, with register 7's bits 7 and 6 forced to 1 and 0, then `psgsel` to port A0h.
-2. PPI port C to port AAh.
-3. On a V9938: 0 to register 16, the 16 palette entries to port 9Ah, 2 bytes each in
-   the order that the `VDP palette` debuggable holds them, red and blue first, then
-   32 to register 17, for auto-increment, and registers 32 to 45 to port 9Bh.
-4. VDP registers 0 to 7, or 0 to 23, to port 99h, as a value and 80h plus the
-   register's number.
-5. The VRAM pointer to port 99h: its low byte, then its high bits with 40h for a
-   write setup. A read setup writes the pointer minus 1, because the VDP reads ahead
-   and advances the pointer. When the pointer's low 14 bits are 0, register 14 is
-   written again first, with its value minus 1.
-
-### SERVICE.BIN
-
-`SERVICE.BIN` starts with a table of its parts, and `build.py` reads only the parts
-that it names:
-
-| Offset | Size | Field |
-|---|---|---|
-| 0 | 1 | Version: 5. `build.py` stops with an error on any other |
-| 1 | 1 | Number of parts |
-| 2 | 4 per part | Each part's offset and length in the file, 2 bytes each |
-
-The parts hold the code that `build.py` places, with the operands and the data that
-`build.py` and the restorer fill in set to 0:
-
-| Part | What it holds |
-|---|---|
-| 0 | The tail ([Tail](#tail)) |
-| 1 | T0's stubs, for 19DDh to 1B44h ([Tape service](#tape-service)) |
-| 2 | The service's part of page 3, for FCE1h to FD88h |
-| 3 | The code segment's data and routines, from 0000h, up to the tape's start |
-| 4 | The addresses of `STMOTR`'s stub, of the tape position in the code segment, of the byte at FCF9h, of the marker's data in the code segment and of `e_sp` in page 3, with the most segments that the code segment and the tape can use, 2 bytes each |
-| 5 | T0's routines and data without a part in page 3, for 19DDh to 1B44h ([Without a part in page 3](#without-a-part-in-page-3)) |
-| 6 | The addresses of T0's routines for the jump table's entries from 00E1h to 00F3h, in their order, then of T0's tape position, borrowed page and flash's data, and the most segments of the tape, 2 bytes each |
-| 7 | The offsets in the file of the bytes that move with the part of page 3, 2 bytes each: the high bytes of the addresses in that part |
-
-The Makefile assembles `src/service.asm` twice, with the part of page 3 at FCE1h and
-at FBE1h, one page lower, and `tools/relocs.py` lists the bytes that differ as the
-last part. They differ by exactly 1, and the assembly at FCE1h is the file.
-
-### Replay stream
-
-`<GAME>.RPL` starts with `SNAPRPL1`, a byte with the frame rate, 50 or 60, a byte
-with the capture's tape speed, 1 for 1200 baud and 2 for 2400 baud, and a 2-byte
-count of chunks. Each chunk is a 2-byte compressed length and an LZ4 block that
-decompresses to at most 16,384 bytes. The decompressed stream is a sequence of
-commands:
-
-| Command | Bytes | Meaning |
-|---|---|---|
-| End of frame | `00` | Wait for the next frame |
-| Wait | `01 n` | Wait n more frames, 1 to 255 |
-| Port write | `02 port value` | Write the value to the port: 99h, 9Ah, 9Bh, A0h, A1h or ABh |
-| VRAM bytes | `03 n` and n bytes | Write n bytes, 1 to 255, to port 98h |
-| Wait's start | `04` | The frames of a wait for a key start here |
-| Wait's end | `05` | Play the frames since `04` again until a key is pressed |
-| RETURN | `06` | Wait until the player presses RETURN, at the load command's RETURN |
-| End | `FF` | The replay ends |
-
-The stream starts with the first state, as port writes and VRAM bytes. A `02 A0h`
-write and the `02 A1h` write after it are written together, with interrupts off, so
-that the BIOS's interrupt handler, which selects PSG registers 14 and 15 for the
-joysticks, cannot come between them.
-
-### CAS data
-
-A CAS file is a sequence of blocks, each starting with the 8-byte header
-`1F A6 DE BA CC 13 7D 74`. Most files put each header at an offset that is a
-multiple of 8, but 105 tapes of the test collection do not pad their blocks, among
-them Engesoft's and the Super MSX magazine's, and `openMSX` and `tools/cas.py` find
-a header at any offset. A file's first block holds 10 bytes of its type and a 6-byte
-name: D0h for a binary file loaded with `BLOAD"CAS:",R`, D3h for a BASIC program
-loaded with `CLOAD`, and EAh for an ASCII program loaded with `RUN"CAS:"`. The
-capture stops with an error when the first block has none of these types. The tape
-position is an offset in the tape service's tape ([Tape files](#tape-files)).
-
-### TSX data
-
-A TSX file is a TZX file, the tape format of the ZX Spectrum, with a block of its
-own for MSX, 4Bh (the makeTSX project's tutorial,
-github.com/nataliapc/makeTSX/wiki). It starts with `ZXTape!`, 1Ah and a 2-byte
-version, and then holds blocks, each an ID byte and its body (TZX format 1.20,
-worldofspectrum.net/TZXformat.html). `tools/tsx.py` reads the 12 blocks that the
-2354 files use, and stops with an error at any other: 10h, 11h and 4Bh hold bytes,
-15h a recording of the signal, 12h, 13h and 20h pulses and pauses, and 21h, 22h,
-30h, 32h and 35h groups and text. It counts each block's pulses and pauses in
-T-states of 3.5 MHz, the TZX format's clock, for the block's time, and the times end
-where `openMSX` ends the tape, within 0.01 seconds. Block 4Bh's body holds these
-fields:
-
-| Offset | Size | Field |
-|---|---|---|
-| 00h | 4 | The body's length after this field |
-| 04h | 2 | The pause after the block, in milliseconds |
-| 06h | 2 | The length of a pilot pulse, in T-states |
-| 08h | 2 | The number of pilot pulses: 30720 for a header's long tone at 1200 baud, 7680 for a data block's short one |
-| 0Ah | 2 | The length of a pulse of a 0 bit, in T-states |
-| 0Ch | 2 | The length of a pulse of a 1 bit, in T-states |
-| 0Eh | 1 | The pulses of a 0 bit in the high 4 bits, and of a 1 bit in the low 4 |
-| 0Fh | 1 | The start bits, their value, the stop bits, their value and the bit order: 54h for 1 start bit 0, 2 stop bits 1 and bit 0 first |
-| 10h | | The bytes |
-
-A 4Bh block in the BIOS's format is a standard block: 24h at 0Eh, 1 start bit 0, 2
-or more stop bits 1 and bit 0 first at 0Fh, a 1 bit's pulse half a 0 bit's, and a 0
-bit's pulse from that of 2400 baud less 15% to that of 1200 baud plus 15%. TAPION
-measures the header's tone to set its timing, so it reads the tapes that were
-recorded between the two speeds, and TAPIN waits for each start bit, so it reads
-After Burner's side B, whose blocks have 3 stop bits. Pico Pico's tape, recorded at
-about 1660 baud, loads through TAPION to its end in the capture. Any other block
-that holds bytes is a non-standard block. Of the 2354 TSX files above, 2027 hold
-only standard blocks, and their bytes are those of the collection's CAS files for
-the 792 tapes that both hold.
-
-### Key names
-
-The key names are the MSX keyboard matrix's special keys, which have the same place
-on every keyboard layout.
-
-| Row | Bit 0 | Bit 1 | Bit 2 | Bit 3 | Bit 4 | Bit 5 | Bit 6 | Bit 7 |
-|---|---|---|---|---|---|---|---|---|
-| 6 | `shift` | `ctrl` | `graph` | `caps` | `code` | `f1` | `f2` | `f3` |
-| 7 | `f4` | `f5` | `esc` | `tab` | `stop` | `bs` | `select` | `return` |
-| 8 | `space` | `home` | `ins` | `del` | `left` | `up` | `down` | `right` |
+The formats of the snapshot's files, the image, the tail, the port writes,
+`SERVICE.BIN`, the tape service's tables, the replay stream and the tape files are
+in [FORMATS.md](FORMATS.md).

@@ -1,4 +1,4 @@
-; A test game for the tape service without a part in page 3 (DESIGN.md,
+; A test game for the tape service without a part in page 3 (INTERNALS.md,
 ; Without a part in page 3), on the Sanyo PHC-28S with its RAM cartridge in
 ; slot 1: page 2 holds that cartridge's RAM, which is not in a mapper, and
 ; the stack, so TAPIN must borrow page 2 through the slot register, without
