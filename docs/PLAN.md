@@ -165,21 +165,10 @@ The step also takes the tests that need the scan:
 This step was to play a recording of the first load, its screen and its tape's sound,
 before the restore. It was dropped, and the steps after it keep their numbers.
 
-## Step 8: tape speed and sound
+## Step 8: tape speed and sound (dropped)
 
-This step adds `/T1200` and `/T2400` to `SNAPCAS.COM` and the tape's speed and sound
-to the service
-([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)). The tests
-restore Gauntlet on `phc28s-ram64k-carnivore2` through the check, with check.py's
-`--options`, play it to the main game's load as in step 5, and measure:
-
-| Test | What it proves |
-|---|---|
-| The time between two `TAPIN`s of one block | The main game's 34,341 bytes take their 11 bits each at the chosen speed, within 1%: 9.22 ms at 1200 baud and 4.57 ms at 2400 |
-| The same without an option | The load stays as fast as in step 5, 0.62 ms a byte |
-| The keyclick bit's edges for each byte, from a write watchpoint on port AAh | Each 0 bit toggles it twice and each 1 bit four times, but for the stop bits' quarter cycles that the gap between two bytes takes, for all 34,341 bytes, and it ends as it started |
-| The motor bit of port AAh | It is on at each byte and off after the load |
-| The time from `TAPION` to the block's first `TAPIN` | The short leader tone, about 1.6 seconds at either speed, before the main game's block |
+This step added `/T1200` and `/T2400`, which made the tape service's loads take a
+tape's time and play the tape's sound. It was dropped, and its code was removed.
 
 ## Step 9: shipped files
 

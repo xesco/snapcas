@@ -2,7 +2,7 @@
 """Run a game's restorer in openMSX and check the restore (docs/INTERNALS.md,
 Check).
 
-Usage: check.py <game> <machine> --dos <dir> [--options <text>]
+Usage: check.py <game> <machine> --dos <dir>
 
 <game> and <machine> are as for capture.py. <dir> holds the DOS system files:
 NEXTOR.SYS and COMMAND2.COM, MSXDOS2.SYS and COMMAND2.COM, or MSXDOS.SYS and
@@ -95,7 +95,6 @@ def main():
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
     parser.add_argument("machine", help="a machine file's path below machines/, without .txt")
     parser.add_argument("--dos", required=True, help="the folder that holds the DOS system files")
-    parser.add_argument("--options", default="", help="the restorer's options, such as /T1200, after the game's name")
     args = parser.parse_args()
 
     folder = gamefile.game_folder(args.game)
@@ -121,7 +120,7 @@ def main():
     os.makedirs(check_dir)
     autoexec = os.path.join(check_dir, "AUTOEXEC.BAT")
     with open(autoexec, "w", newline="") as f:
-        f.write(f"SNAPCAS {game.name} {args.options}".rstrip() + "\r\n")
+        f.write(f"SNAPCAS {game.name}\r\n")
     disk = os.path.join(check_dir, "disk.dsk")
     try:
         msx.make_disk(disk, dos + [os.path.join(ROOT, "bin", "SNAPCAS.COM"), image, autoexec], machine.disk_size)

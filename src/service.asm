@@ -7,7 +7,7 @@
 
         include "service.inc"
 
-VERSION equ 13
+VERSION equ 12
 
         org 0
 
@@ -69,32 +69,24 @@ t_tapoon:                       ; 19F1h, TAPOON: the tape cannot be written
 t_tapout:                       ; 1A19h, TAPOUT: the tape cannot be written
         scf
         ret
-; STMOTR and TAPIOF run the code segment's c_motor, through the trampoline,
-; with B as STMOTR's A: 0 stops the motor, 1 starts it and FFh switches it, and
-; TAPIOF stops it (INTERNALS.md, The manual tape, Tape speed and sound).
-; STMOTR keeps the caller's interrupts as they were, as the BIOS's does.
+; STMOTR and TAPIOF stop the manual tape, which waits for the player's key at
+; the next read (INTERNALS.md, The manual tape). STMOTR with A = 1 starts the
+; motor and leaves it. The automatic tape ignores E_STOP.
 stmotr:
-        ld b,a
-        ld a,i                  ; P/V: interrupts on
-        push af
-        call motor
-        pop af
-        ret po
-        ei
+        cp 1
+        ret z
+        ld a,1
+        ld (E_STOP),a
         ret
 tapiof:
-        ld b,0
-        call motor
+        ld a,1
+        ld (E_STOP),a
 tapoof:
         ld a,(E_INSIDE)         ; the entry code enables interrupts itself
         or a
         ret nz
         ei
         ret
-motor:
-        di
-        ld a,C_MOTOR
-        jp tramp
         ds 1A63h-$,0
 t_tapion:                       ; 1A63h, TAPION
         di
@@ -230,8 +222,6 @@ header: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h
         ds 6,0                  ; C_SAVE and C_S1REAL
         assert $ = C_MODE
         db 0
-        assert $ = C_MOTOR
-        jp c_motor
 
 T0MODE  equ 0
 D_POS   equ C_POS
@@ -251,7 +241,6 @@ D_SAVE  equ C_SAVE
 D_S1REAL equ C_S1REAL
 D_MODE  equ C_MODE
 D_STOP  equ E_STOP
-D_SPEED equ C_SPEED
         include "tape.inc"
 
         align 8,0               ; the tape starts at a multiple of 8
@@ -299,7 +288,6 @@ D_SIDE  equ T_BORDER+4
 D_SCREEN equ T_BORDER+5
 D_VDP1  equ T_BORDER+7
 D_TWO   equ T_BORDER+9
-D_SPEED equ T_BORDER+8
 
 ; T0 has no room for the manual tape, so the tape is automatic in this mode
 ; (INTERNALS.md, The manual tape).
