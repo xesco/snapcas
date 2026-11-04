@@ -24,7 +24,6 @@ in [PLAN.md](PLAN.md).
 | T0 | A RAM copy of the BIOS's page 0 whose tape routines call the tape service's ([Tape service](#tape-service)) |
 | Code segment | The segment that holds the tape service's routines, then the start of the tape |
 | Service segment | A segment that holds T0, the code segment, or the rest of the tape |
-| Replay | `<GAME>.RPL`, a recording of the load's screen and sound that the restorer can play before the restore ([PLAN.md, The replay's design](PLAN.md#the-replays-design)) |
 
 ## Files and commands
 
@@ -38,7 +37,6 @@ in [PLAN.md](PLAN.md).
 | `downloads/<TAPE>` | `snapcas.py snap` | The tape files that it downloads from File-Hunter, each checked against its game file's SHA-1 ([CLI.md, Download](CLI.md#download)) |
 | `tests/tapes/<TAPE>` | The developers | The tape files of the tests, in git |
 | `images/<machine>/<game>/<GAME>.SNP` | `snapcas.py snap` | The image, which `snap` moves from the work folder when every step passes |
-| `images/<machine>/<game>/<GAME>.RPL` | `snapcas.py snap` | The replay, beside the image, once the replay is built |
 | `out/work/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image, until `snap` moves it |
 | `out/work/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
 | `out/work/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
@@ -72,9 +70,8 @@ game is processed by four commands, in this order:
 4. The user copies `SNAPCAS.COM` and `<GAME>.SNP` to a disk of the real machine and
    runs `SNAPCAS <GAME>`. With `/T1200` or `/T2400`, a game with the tape service
    loads at that speed, with the sound of the tape
-   ([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)). The
-   replay, `/R`, is planned ([PLAN.md](PLAN.md), step 7). With `/M`, the tape
-   moves only when the player presses a key
+   ([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)). With
+   `/M`, the tape moves only when the player presses a key
    ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)).
 
 `./snapcas.py snap <game> <machine> [--check [--dos <dir>]]`, the `snapcas` command
@@ -198,14 +195,11 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 | Port writes, T0 and the tail made by `build.py` | The restorer copies records and fills in only the values that depend on the real machine |
 | One restorer for every image | The user updates one program, and DOS passes it the image's name |
 | A game file can name the machine for the capture | A loader can trip over a cartridge that the game itself never selects again, so the game loads without it, and its image runs with the cartridge in place. Sootland's loader trips over the HB-F700P's RAM cartridge |
-| Replay a recording of the load, with the tape's own bytes for its sound, not the load | Loading again on the real machine, through the tape service from the start, brings back what the snapshot avoids: loaders that go around T0 through their own slot code, loaders that use the page 0 RAM where T0 is, and loaders that trip over the machine's slots |
 | Tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register |
 | `rom keep` in the game file, not a rule of the restorer | T0 in page 0 serves a BASIC program, whose tape calls are in the ROM and cannot be patched, but it changes the slot register's page 0 bits. Gauntlet's RAM search adds the slot that it finds to those bits, expecting the ROM's slot 0, and selects an empty slot |
 | Find the slot patches of the load by watching it, and not by a search of the whole tape | A search also changes bytes that are data or code that never runs, and a loader that checks a block's sum then fails to load it. A write that the watch sees runs, and selects a slot that holds nothing, so its patch is needed |
 | Scan the snapshot and the unread blocks | Many games that load during play build stubs that T0 alone does not intercept |
-| The replay read into RAM before it plays | A disk read stops the frames and the tape's sound. A compressed replay holds the first load's tape bytes and its writes, tens of KB for most games, which fit in a few free segments |
-| The replay starts at BASIC's screen, before the load command | The player sees the command typed and presses RETURN, as on a cassette machine, and the screen is the capture's, so it fits the machine |
 | The tape speed as an option of `SNAPCAS`, fast by default | The player chooses at each run between a quick load and the experience of the tape, and the image stays the same |
 | Rewind the capture with `savestate` and `loadstate` | `openMSX`'s `reverse goto` replays the input recorded after its target, while each key try must start from the saved moment with no other input |
 | A tape with both sides, a wrap, and fixed keys for each side's start | Most such games' unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
@@ -250,8 +244,6 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 - A slot patch replaces only a field that names a slot that holds nothing, and with
   the slot that the slot map gives, so a game that needs another slot keeps its
   `patch` lines by hand.
-- The replay, once built, is a recording: a loader that lets the player act while it
-  loads shows only what happened in the capture.
 - A snapshot taken without an interrupt overwrites the 26 bytes below the stack
   pointer with the tail.
 - The tail needs 26 bytes below the stack pointer, in a RAM page that the snapshot
@@ -271,5 +263,5 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 ## Formats
 
 The formats of the snapshot's files, the image, the tail, the port writes,
-`SERVICE.BIN`, the tape service's tables, the replay stream and the tape files are
+`SERVICE.BIN`, the tape service's tables and the tape files are
 in [FORMATS.md](FORMATS.md).

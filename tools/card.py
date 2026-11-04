@@ -8,8 +8,8 @@ collection's name. A name that starts with a digit has the letter 0-9.
 """
 import os
 
-# The files of a game that go to the card, beside its image.
-SUFFIXES = (".SNP", ".RPL")
+# The files of a game that go to the card: its image.
+SUFFIXES = (".SNP",)
 
 
 class CardError(Exception):

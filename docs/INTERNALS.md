@@ -463,9 +463,7 @@ and until step 4 it can stop with a message and return to DOS:
    - Each service segment gets one of the segments left, and so does the worker,
      which the restorer copies into its segment.
 
-      It stops when there are too few, naming the segments needed and free. Then,
-      with `/R`, it will play the replay, once that is built
-      ([PLAN.md, The replay's design](PLAN.md#the-replays-design)).
+      It stops when there are too few, naming the segments needed and free.
 3. Reads the records in this order, through the FCB's random record field: the RAM
    pages of slots other than DOS's mapper, the VRAM blocks, the service segments,
    and the RAM pages of DOS's mapper. It places each one:
@@ -495,8 +493,8 @@ and until step 4 it can stop with a message and return to DOS:
    - In the tail: the worker's page's mapper register and its value, and the slot
      register ([FORMATS.md, Tail](FORMATS.md#tail)).
    - With the tape service, in the code segment at 001Ah: the code segment, then the
-     other tape segments, at 0062h: 1 for `/T1200`, 2 for `/T2400`, with `/R` alone
-     the replay's speed, or otherwise 0, and at 006Ah: 1 for `/M`, or otherwise 0.
+     other tape segments, at 0062h: 1 for `/T1200`, 2 for `/T2400`, or otherwise 0,
+     and at 006Ah: 1 for `/M`, or otherwise 0.
    - With the tape service, in the game's page 3 at FCF6h: DOS's mapper's slot ID,
      T0's segment and the code segment.
    - With the tape service, when DOS's mapper is in an expanded slot, DOS's mapper's
@@ -747,10 +745,7 @@ the motor's routine in the code segment through the trampoline, at `C_MOTOR`, an
 because T0 has no room for their code. So they change nothing for a game without the
 service, or in the mode without a part in page 3, and the restorer then says so
 before the restore. A game without the service loaded completely before the
-snapshot, and the replay will give it the experience of its load
-([PLAN.md, The replay's design](PLAN.md#the-replays-design)). The two will combine:
-with `/R /T1200`, the replay shows the first load, and the game's later loads come
-from the tape service at 1200 baud.
+snapshot.
 
 ### Scan
 

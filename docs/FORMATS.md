@@ -13,7 +13,6 @@ the tape files' formats. Why each holds what it holds is in [DESIGN.md](DESIGN.m
 | `subrom.bin` | 16 KB on an MSX2: the sub-ROM, from the slot that `EXBRSA` names |
 | `vram.bin` | The `physical VRAM` debuggable: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938. With a V9938, the capture reads it with bit 3 of register 8, VR, set for the read, because `openMSX` shows it through VR's addressing: a game that clears VR, as Boulder Dash does with an MSX1 write to register 8, would otherwise give a view that the restorer's linear writes do not reproduce |
 | `state.txt` | One `name value` per line, values in hexadecimal, as below |
-| `replay.log` | The VDP, PSG and cassette writes of the load, for the replay ([The replay's design](PLAN.md#the-replays-design)) |
 | `side1.cas` | Side 1 with the game file's `side1` patches and those of `patches.txt`, when there are any: the tape that the capture loads |
 | `slots.txt` | The slot map: for each page of each slot and subslot, whether it holds RAM, ROM or nothing ([INTERNALS.md, Slot patches](INTERNALS.md#slot-patches)) |
 | `patches.txt` | The slot patches on the tape that the capture found, as `patch` lines |
@@ -193,32 +192,6 @@ The parts hold the code that `build.py` places, with the operands and the data t
 The Makefile assembles `src/service.asm` twice, with the part of page 3 at FCE1h and
 at FBE1h, one page lower, and `tools/relocs.py` lists the bytes that differ as the
 last part. They differ by exactly 1, and the assembly at FCE1h is the file.
-
-## Replay stream
-
-`<GAME>.RPL` starts with `SNAPRPL1`, a byte with the frame rate, 50 or 60, a byte
-with the capture's tape speed, 1 for 1200 baud and 2 for 2400 baud, and a 2-byte
-count of chunks. Each chunk is a 2-byte compressed length and an LZ4 block that
-decompresses to at most 16,384 bytes. The decompressed stream is a sequence of
-commands:
-
-| Command | Bytes | Meaning |
-|---|---|---|
-| End of frame | `00` | Wait for the next frame |
-| Wait | `01 n` | Wait n more frames, 1 to 255 |
-| Port write | `02 port value` | Write the value to the port: 99h, 9Ah, 9Bh, A0h, A1h or ABh |
-| VRAM bytes | `03 n` and n bytes | Write n bytes, 1 to 255, to port 98h |
-| Wait's start | `04` | The frames of a wait for a key start here |
-| Wait's end | `05` | Play the frames since `04` again until a key is pressed |
-| RETURN | `06` | Wait until the player presses RETURN, at the load command's RETURN |
-| Tape bytes | `07 n` and n bytes | Play n bytes, 1 to 255, on the keyclick bit as the tape holds them, at the capture's speed: the bytes that `TAPIN` returned in this frame |
-| Leader tone | `08` | Play the leader tone until the frame ends: a frame in which the capture's tape played a block's leader |
-| End | `FF` | The replay ends |
-
-The stream starts with the first state, as port writes and VRAM bytes. A `02 A0h`
-write and the `02 A1h` write after it are written together, with interrupts off, so
-that the BIOS's interrupt handler, which selects PSG registers 14 and 15 for the
-joysticks, cannot come between them.
 
 ## CAS data
 

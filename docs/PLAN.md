@@ -160,104 +160,10 @@ The step also takes the tests that need the scan:
 | `SOOTLAND.CAS` | `phc28s-ram64k-carnivore2`, captured on `phc28s-ram64k` | With a `side1` patch of the slot register's value that its loader writes: that the capture loads the patched tape, and turns the tape over to side 2 when the game reads past side 1's end ([Game file](FILES.md#game-file), [Capture](INTERNALS.md#capture)) |
 | `tests/borrow.asm`, which the test writes to a CAS file with a block of the bytes 0 to 255 | `phc28s-ram64k-carnivore2` | With `service t0` and a `patch` line that makes it select DOS's mapper in page 0: that `TAPIN` borrows page 2, which holds the RAM cartridge in slot 1 and the stack, through the slot register, and reads the block right |
 
-## Step 7: replay
+## Step 7: replay (dropped)
 
-This step adds the replay ([The replay's design](PLAN.md#the-replays-design)): the
-recording in `capture.py`, the stream and its compression in `build.py`, and the
-playing with `/R` in `SNAPCAS.COM`. The tests check:
-
-- With Python unit tests, that the stream's commands and the LZ4 compression read
-  back what they wrote, and that a rewind truncates `replay.log`.
-- That after `SNAPCAS MOONRIDE /R` plays Moonrider's replay in `openMSX`, VRAM, the
-  VDP's registers and the PSG's registers equal the snapshot's, before the restore
-  goes on, and the same for the other single-load files of the corpus on
-  `phc28s-ram64k-carnivore2`.
-- That a wait for a key holds the replay until a key is pressed, with `ABADIA.CAS`
-  on `nms8250-carnivore2`.
-- That Moonrider's replay at `/R` takes the capture's time within 5%, and that it
-  makes no DOS call while it plays, from a breakpoint at 0005h, when the file fits
-  in the free segments.
-- That with fewer free segments than the file needs, the replay reads its other
-  chunks only at frames in which the motor bit is off.
-- That the replay plays each byte that the capture's `TAPIN` returned, in order,
-  with the keyclick bit's edges of its 11 bits at the tape's pitch, and the leader
-  tone where `TAPION` found a header, from write watchpoints on ports AAh and ABh,
-  and that the keyclick bit stays still while the motor bit is off.
-- That Moonrider's replay starts with VRAM and the VDP's registers as they were just
-  before the capture typed the load command, types the command, and waits at its
-  RETURN until RETURN is pressed.
-
-The step also reports the size of each `.RPL` file of the corpus, compressed and
-not, to judge the compression.
-
-### The replay's design
-
-The replay shows the load on the real machine as it happened in the capture: BASIC's
-screen with the load command being typed, the loading screens being drawn, their
-music, the game's own pauses and its waits for a key, the cassette motor's relay,
-and the tape's own sound. Nothing of the loader runs again: the replay is a
-recording, played before the restore, so it works for every game whose capture
-works. It is optional, in its own file, `<GAME>.RPL`, and runs only with `/R`.
-
-The capture records it from just before it types the load command to the snapshot,
-in `snap/replay.log`. The log starts with the VDP's state at that moment: VRAM, the
-registers and, on a V9938, the palette. Then it holds one line per write: the frame,
-the port and the value. A frame is one VDP interrupt period of the machine, 1/50 or
-1/60 of a second. It logs:
-
-- Each write to the VDP's ports 98h to 9Bh and the PSG's ports A0h and A1h, from
-  write watchpoints.
-- Each change of the cassette motor and keyclick bits of PPI port C, bits 4 and 7,
-  as a bit set or reset on port ABh, so that the replay does not touch the keyboard
-  row bits.
-- Each wait that a key continued ([INTERNALS.md, Capture](INTERNALS.md#capture),
-  step 5), as the frames of the wait's first 30 seconds, kept aside before the
-  rewind, and the key.
-- Each byte that `TAPIN` returns, and each header that `TAPION` finds, with its
-  tone, long or short
-  ([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)). These
-  are the tape's own bytes, in the frames where the loader read them.
-- The frame of the load command's RETURN.
-
-A rewind truncates the log to its length at the saved moment, as it puts back the
-rest of the logged state.
-
-`build.py` turns the log into a stream of commands
-([FORMATS.md, Replay stream](FORMATS.md#replay-stream)) and compresses it in chunks
-with the LZ4 block format. The restorer, after step 2, plays the stream with
-interrupts off while it writes and on while it waits for the next frame:
-
-- It writes the first state with the display blanked, so the screen shows BASIC as
-  it was in the capture. It then types the command as the capture did, and at the
-  command's RETURN it waits until the player presses RETURN, as on a cassette
-  machine.
-- Before it plays, it reads `<GAME>.RPL` with its own FCB into the segments of DOS's
-  mapper that step 2 leaves free, 16 KB each, and then plays from RAM. A DOS read
-  during the replay would stop the frames and the sound, longest on a floppy disk.
-  When the file needs more segments than are free, it fills them, and as it plays it
-  reads the next chunks ahead into the segments that it has played, at frames in
-  which the motor bit is off, when a tape is silent too.
-- It writes VRAM no faster than one byte every 29 cycles, 8 µs, which an MSX1 VDP
-  needs during the display.
-- At a wait, it plays the wait's frames in a loop until a key is pressed.
-- It plays the tape's sound from the tape's own bytes, as `TAPIN` returned them in
-  the capture, in the frames where the capture read them: each byte as `/T` plays
-  it, at the capture's speed, and the leader tone in the frames where `TAPION` found
-  a header. Between two bytes only the replay's own code runs, so the tone goes on
-  with almost no gap, which `/T` cannot give while the game runs between its calls.
-  A turbo loader's blocks, which its own code reads and not `TAPIN`, play without
-  the tape's sound.
-
-When the replay ends, VRAM, the VDP's registers and the PSG's registers hold their
-values at the snapshot, and the restore goes on with step 3.
-
-A game with the tape service then loads the rest of its tape during play. So that
-the whole session loads at one speed, `/R` alone also sets the tape service to the
-capture's speed
-([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)).
-`build.py` finds that speed, 1200 or 2400 baud, from the times of the `TAPIN` calls
-in the capture's log and writes it in the replay's header. `/T1200` or `/T2400` with
-`/R` sets the speed instead.
+This step was to play a recording of the first load, its screen and its tape's sound,
+before the restore. It was dropped, and the steps after it keep their numbers.
 
 ## Step 8: tape speed and sound
 
@@ -274,8 +180,6 @@ restore Gauntlet on `phc28s-ram64k-carnivore2` through the check, with check.py'
 | The keyclick bit's edges for each byte, from a write watchpoint on port AAh | Each 0 bit toggles it twice and each 1 bit four times, but for the stop bits' quarter cycles that the gap between two bytes takes, for all 34,341 bytes, and it ends as it started |
 | The motor bit of port AAh | It is on at each byte and off after the load |
 | The time from `TAPION` to the block's first `TAPIN` | The short leader tone, about 1.6 seconds at either speed, before the main game's block |
-
-With `/R`, the speed in Gauntlet's replay header waits for step 7.
 
 ## Step 9: shipped files
 

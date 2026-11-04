@@ -209,7 +209,7 @@ The files go to these places, so that no folder of the card holds every image:
 | File | On the card |
 |---|---|
 | `SNAPCAS.COM` | `BIN/SNAPCAS.COM` |
-| A game's image and replay | `SNAPCAS/<letter>/<GAME>.SNP` and `.RPL`, with `0-9` as the letter of a name that starts with a digit |
+| A game's image | `SNAPCAS/<letter>/<GAME>.SNP`, with `0-9` as the letter of a name that starts with a digit |
 | A compilation's program | `SNAPCAS/<letter>/<COLLECTION>/<GAME>.SNP`, with the letter of the collection's name |
 | A custom game's image | `SNAPCAS/C/CUSTOM/<GAME>.SNP`, as a program of a collection named `CUSTOM` |
 
