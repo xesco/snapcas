@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 062-Kitchen.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 030-KITC.CAS
 sha1 95e8ed9a52c75fd260db0aa91e4d583aeaebb7d2
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

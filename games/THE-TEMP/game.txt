@@ -1,4 +1,4 @@
 # The Temptation Of The Apartment Wife (1986)(Koei)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Temptation%20Of%20The%20Apartment%20Wife%20(1986)(Koei)%5BCLOAD%20%2B%20RUN%5D.zip
 cas THE-TEMP.CAS
 sha1 038e9a56baa747530fb0c44e23838973fc6c4703
+url https://download.file-hunter.com/Games/MSX1/CAS/The%20Temptation%20Of%20The%20Apartment%20Wife%20(1986)(Koei)%5BCLOAD%20%2B%20RUN%5D.zip

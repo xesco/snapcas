@@ -1,4 +1,4 @@
 # Kamikaze (1984)(Omega Systems)(jp)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Kamikaze%20(1984)(Omega%20Systems)(jp)%5BCLOAD%20%2B%20RUN%5D.zip
 cas KAMIKAZE.CAS
 sha1 56f04cf6b488c24c378a60dc5f68497de3221545
+url https://download.file-hunter.com/Games/MSX1/CAS/Kamikaze%20(1984)(Omega%20Systems)(jp)%5BCLOAD%20%2B%20RUN%5D.zip

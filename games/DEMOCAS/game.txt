@@ -1,4 +1,4 @@
 # Demo, De - Nederland (1985)(Philips)(nl)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Demo%2C%20De%20-%20Nederland%20(1985)(Philips)(nl)%5BRUN'CAS-'%5D.zip
 cas DEMOCAS.CAS
 sha1 05ec4334ab67d73248adcfee675bb8e492afd17d
+url https://download.file-hunter.com/Games/MSX1/CAS/Demo%2C%20De%20-%20Nederland%20(1985)(Philips)(nl)%5BRUN%27CAS-%27%5D.zip

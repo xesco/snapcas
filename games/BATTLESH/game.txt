@@ -1,4 +1,4 @@
 # Battleship Clapton II (1983)(T&E Soft)[BLOAD'CAS'-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Battleship%20Clapton%20II%20(1983)(T%26E%20Soft)%5BBLOAD'CAS'-'%2CR%5D.zip
 cas BATTLESH.CAS
 sha1 27662444b17bdf7b9fe404c421005bf35c3b0b26
+url https://download.file-hunter.com/Games/MSX1/CAS/Battleship%20Clapton%20II%20(1983)(T%26E%20Soft)%5BBLOAD%27CAS%27-%27%2CR%5D.zip

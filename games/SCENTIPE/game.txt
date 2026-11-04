@@ -1,4 +1,4 @@
 # Scentipede (1986)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Scentipede%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas SCENTIPE.CAS
 sha1 1f5e59a6008ab116769329b540564e780ef4a935
+url https://download.file-hunter.com/Games/MSX1/CAS/Scentipede%20(1986)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

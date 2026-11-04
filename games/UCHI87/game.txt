@@ -1,4 +1,4 @@
 # Uchi Mata (1987)(Martech Games)[Fixed][CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Uchi%20Mata%20(1987)(Martech%20Games)%5BFixed%5D%5BCLOAD%20%2B%20RUN%5D.zip
 cas UCHI87.CAS
 sha1 507f7d56c8574fcfe3c83638e151c5fb4bedba8a
+url https://download.file-hunter.com/Games/MSX1/CAS/Uchi%20Mata%20(1987)(Martech%20Games)%5BFixed%5D%5BCLOAD%20%2B%20RUN%5D.zip

@@ -1,4 +1,4 @@
 # Ortografia II - Verbos (19xx)(Mind Games Espana)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Ortografia%20II%20-%20Verbos%20(19xx)(Mind%20Games%20Espana)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas ORTOGRII.CAS
 sha1 8d9d9204d4935317a6f9a622b4f82256b37a7d06
+url https://download.file-hunter.com/Games/MSX1/CAS/Ortografia%20II%20-%20Verbos%20(19xx)(Mind%20Games%20Espana)(es)%5BCLOAD%20%2B%20RUN%5D.zip

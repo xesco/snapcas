@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 087-Panel Panique.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 087-PANE.CAS
 sha1 cd2a0ce449203fd94514cd52fe687254d9fe81f5
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

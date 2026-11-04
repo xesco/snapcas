@@ -1,4 +1,4 @@
 # Kaereltje Leert Wiskunde ~ Charlie's Maths Class - Compilation Tape 1 (ByteBusters) (Aackosoft - Eaglesoft) [RUN'CAS-'] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Kaereltje%20Leert%20Wiskunde%20~%20Charlie's%20Maths%20Class%20-%20Compilation%20Tape%201%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
 cas KAERELTJ.CAS
 sha1 946149b59f44cbdadadd7a6578b6ea17208a0c13
+url https://download.file-hunter.com/Games/MSX1/CAS/Kaereltje%20Leert%20Wiskunde%20~%20Charlie%27s%20Maths%20Class%20-%20Compilation%20Tape%201%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN%27CAS-%27%5D%20%5B_%5D.zip

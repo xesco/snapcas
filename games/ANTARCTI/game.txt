@@ -1,4 +1,4 @@
 # Antarctic Adventure (Microbyte) (Argentina) [RUN'CAS-'] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Antarctic%20Adventure%20(Microbyte)%20(Argentina)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
 cas ANTARCTI.CAS
 sha1 99bce6516c32a9ac43684a9da411539053294fa2
+url https://download.file-hunter.com/Games/MSX1/CAS/Antarctic%20Adventure%20(Microbyte)%20(Argentina)%20%5BRUN%27CAS-%27%5D%20%5B_%5D.zip

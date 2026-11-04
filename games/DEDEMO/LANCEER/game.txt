@@ -1,6 +1,6 @@
 # Lanceer, the first program on Philips's De Demo, Demo, De
 # (1985)(Philips)(nl)[position tape + RUN'CAS-']. It also has a dump of its own
-# (games/DEMONL):
-# https://download.file-hunter.com/Games/MSX1/CAS/Demo%2C%20De%20(1985)(Philips)(nl)%5Bposition%20tape%20%2B%20RUN'CAS-'%5D.zip
+# (games/DEMONL).
 cas DEMO85.CAS
 sha1 655b364d7608b25e1c77d983f202bdc7ecf73c3c
+url https://download.file-hunter.com/Games/MSX1/CAS/Demo%2C%20De%20(1985)(Philips)(nl)%5Bposition%20tape%20%2B%20RUN%27CAS-%27%5D.zip

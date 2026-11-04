@@ -1,4 +1,4 @@
 # Contabilidad (1985)(Sony)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Contabilidad%20(1985)(Sony)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas CONTABIL.CAS
 sha1 85b1f75bc97a81f89a36e4770b22f7244967f861
+url https://download.file-hunter.com/Games/MSX1/CAS/Contabilidad%20(1985)(Sony)(es)%5BCLOAD%20%2B%20RUN%5D.zip

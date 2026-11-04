@@ -1,4 +1,4 @@
 # Adel (1986)(Mind Games Espana)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Adel%20(1986)(Mind%20Games%20Espana)(es)%5BRUN'CAS-'%5D.zip
 cas ADEL.CAS
 sha1 15f77ed9617463b5e474b7f9ea91013061299649
+url https://download.file-hunter.com/Games/MSX1/CAS/Adel%20(1986)(Mind%20Games%20Espana)(es)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Chicken Chase (1986)(Bug-Byte Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Chicken%20Chase%20(1986)(Bug-Byte%20Software)%5BRUN'CAS-'%5D.zip
 cas CHICKEN.CAS
 sha1 910c2fd879757c5507cf69b1343ee7004ccb0abf
+url https://download.file-hunter.com/Games/MSX1/CAS/Chicken%20Chase%20(1986)(Bug-Byte%20Software)%5BRUN%27CAS-%27%5D.zip

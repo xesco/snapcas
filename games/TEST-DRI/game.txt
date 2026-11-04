@@ -1,4 +1,4 @@
 # Test Drive II - The Duel (1989)(Dro Soft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Test%20Drive%20II%20-%20The%20Duel%20(1989)(Dro%20Soft)%5BRUN'CAS-'%5D.zip
 cas TEST-DRI.CAS
 sha1 0507e7598cef39661d2dcfa3ac209bfe12e65801
+url https://download.file-hunter.com/Games/MSX1/CAS/Test%20Drive%20II%20-%20The%20Duel%20(1989)(Dro%20Soft)%5BRUN%27CAS-%27%5D.zip

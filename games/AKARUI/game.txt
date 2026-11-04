@@ -1,4 +1,4 @@
 # Akarui Nouen (1983) (Hudson Soft)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Akarui%20Nouen%20(1983)%20(Hudson%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
 cas AKARUI.CAS
 sha1 77dc0575ab795828c446a48c5fb2fcd2a4bb4413
+url https://download.file-hunter.com/Games/MSX1/CAS/Akarui%20Nouen%20(1983)%20(Hudson%20Soft)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
-# Procedures that every openMSX run gets (docs/DESIGN.md, The tools' code).
+# Procedures that every openMSX run gets (docs/INTERNALS.md, The tools' code).
 # tools/msx.py puts them before each script. screen returns the text screen
 # without its null characters, or nothing in a graphics mode, which get_screen
 # cannot read. boot waits for each boot text in turn and presses its key, then

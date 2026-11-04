@@ -1,4 +1,4 @@
 # Crazy Cars [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Crazy%20Cars%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas CRAZY-CA.CAS
 sha1 fceb7ba682ca9fc5ba1c63397e672506c6a14a9d
+url https://download.file-hunter.com/Games/MSX1/CAS/Crazy%20Cars%20%5BBLOAD%27CAS-%27%2CR%5D.zip

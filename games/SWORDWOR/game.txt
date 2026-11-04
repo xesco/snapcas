@@ -1,4 +1,4 @@
 # SwordWork (2026)(Inufuto)
-# https://download.file-hunter.com/Games/MSX1/CAS/SwordWork%20(2026)(Inufuto).zip
 cas SWORDWOR.CAS
 sha1 50f78f330b70f0b6804932f997cf51a9d90854de
+url https://download.file-hunter.com/Games/MSX1/CAS/SwordWork%20(2026)(Inufuto).zip

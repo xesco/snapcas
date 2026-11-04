@@ -1,4 +1,4 @@
 # Elidon (1986)(Aackosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Elidon%20(1986)(Aackosoft)%5BRUN'CAS-'%5D.zip
 cas ELIDON.CAS
 sha1 b920f43a83e457836f2b5dab69b774b2ba0ca94b
+url https://download.file-hunter.com/Games/MSX1/CAS/Elidon%20(1986)(Aackosoft)%5BRUN%27CAS-%27%5D.zip

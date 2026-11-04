@@ -1,4 +1,4 @@
 # The Secret Diary of Adrian Mole Aged 13¾ - Part III (1985)(Level 9 Computing)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Secret%20Diary%20of%20Adrian%20Mole%20Aged%2013%C2%BE%20-%20Part%20III%20(1985)(Level%209%20Computing)%5BRUN'CAS-'%5D.zip
 cas THE-SECR.CAS
 sha1 472ad0f818095023b7c1e7927964563cf0041724
+url https://download.file-hunter.com/Games/MSX1/CAS/The%20Secret%20Diary%20of%20Adrian%20Mole%20Aged%2013%C2%BE%20-%20Part%20III%20(1985)(Level%209%20Computing)%5BRUN%27CAS-%27%5D.zip

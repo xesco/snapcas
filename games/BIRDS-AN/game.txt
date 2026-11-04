@@ -1,4 +1,4 @@
 # Birds And Chairs (2017) [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Birds%20And%20Chairs%20(2017)%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas BIRDS-AN.CAS
 sha1 947ed0f510cbb5de231902619669d4a6c305b8c4
+url https://download.file-hunter.com/Games/MSX1/CAS/Birds%20And%20Chairs%20(2017)%20%5BBLOAD%27CAS-%27%2CR%5D.zip

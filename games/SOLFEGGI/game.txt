@@ -1,4 +1,4 @@
 # Game Pack 1 (Aackosoft - Eaglesoft)[BASIC] / Solfeggietto - Game Pack 1 (Aackosoft - Eaglesoft) [RUN'CAS-'] [_].cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%201%20(Aackosoft%20-%20Eaglesoft)%5BBASIC%5D.zip
 cas SOLFEGGI.CAS
 sha1 679c16b652b4ed86a6cba475aba22c9257e7d239
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%201%20(Aackosoft%20-%20Eaglesoft)%5BBASIC%5D.zip

@@ -1,4 +1,4 @@
 # Zipi y Zape (1989)(Dro Soft)(es)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Zipi%20y%20Zape%20(1989)(Dro%20Soft)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas ZIPI-Y.CAS
 sha1 5b606ad42c3b5586a925215324fee12f90161850
+url https://download.file-hunter.com/Games/MSX1/CAS/Zipi%20y%20Zape%20(1989)(Dro%20Soft)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip

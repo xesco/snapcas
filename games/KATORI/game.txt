@@ -1,4 +1,4 @@
 # Katori Sensō (Mosquito Wars)(UCHUDO)(1984)[BLOAD'CAS-',r]
-# https://download.file-hunter.com/Games/MSX1/CAS/Katori%20Sens%C5%8D%20(Mosquito%20Wars)(UCHUDO)(1984)%5BBLOAD'CAS-'%2Cr%5D.zip
 cas KATORI.CAS
 sha1 bbb20f86a737c55615cb8a6ef36ac0a42d5b9ffe
+url https://download.file-hunter.com/Games/MSX1/CAS/Katori%20Sens%C5%8D%20(Mosquito%20Wars)(UCHUDO)(1984)%5BBLOAD%27CAS-%27%2Cr%5D.zip

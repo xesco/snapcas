@@ -1,4 +1,4 @@
 # Biotech (1983) (Hudson Soft)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Biotech%20(1983)%20(Hudson%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
 cas BIOTECH.CAS
 sha1 272124b125ecdbd8959e23764593f4ae69a0e9b9
+url https://download.file-hunter.com/Games/MSX1/CAS/Biotech%20(1983)%20(Hudson%20Soft)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
 # Space Smugglers (1989)(MHT Ingenieros)(es)[gunstick][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Space%20Smugglers%20(1989)(MHT%20Ingenieros)(es)%5Bgunstick%5D%5BRUN'CAS-'%5D.zip
 cas SPACE-SM.CAS
 sha1 3caf09d2fc20c27bf0155277881774508627b8aa
+url https://download.file-hunter.com/Games/MSX1/CAS/Space%20Smugglers%20(1989)(MHT%20Ingenieros)(es)%5Bgunstick%5D%5BRUN%27CAS-%27%5D.zip

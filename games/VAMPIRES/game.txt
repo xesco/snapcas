@@ -1,4 +1,4 @@
 # Vampire's Empire (1988)(Dro Soft)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Vampire's%20Empire%20(1988)(Dro%20Soft)(es)%5BRUN'CAS-'%5D.zip
 cas VAMPIRES.CAS
 sha1 42827fc319bf027453c01f4258192dd33d431488
+url https://download.file-hunter.com/Games/MSX1/CAS/Vampire%27s%20Empire%20(1988)(Dro%20Soft)(es)%5BRUN%27CAS-%27%5D.zip

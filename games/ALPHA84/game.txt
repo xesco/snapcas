@@ -1,4 +1,4 @@
 # Alpha Blaster (1984)(Aackosoft)[a][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Alpha%20Blaster%20(1984)(Aackosoft)%5Ba%5D%5BRUN'CAS-'%5D.zip
 cas ALPHA84.CAS
 sha1 2deaf7dbad97f114d1c601b06e020c64bcf6007a
+url https://download.file-hunter.com/Games/MSX1/CAS/Alpha%20Blaster%20(1984)(Aackosoft)%5Ba%5D%5BRUN%27CAS-%27%5D.zip

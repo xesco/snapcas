@@ -1,6 +1,5 @@
 # Porte Aperte, the second game on the tape Super MSX n.14 (settembre 1988) -
-# cas_14 / super_msx_14_lato_A.cas, after Rabbit (games/SUPERMSX/RABBIT):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.14%20(settembre%201988)%20-%20cas_14.zip
+# cas_14 / super_msx_14_lato_A.cas, after Rabbit (games/SUPERMSX/RABBIT).
 # It is a copy of Keystone Kapers (Activision), as edicola8bit lists it. It also
 # has a dump of its own (games/KEYSTONE). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=14
@@ -8,4 +7,5 @@
 # Rabbit.
 cas SUPER14.CAS
 sha1 96dabf8c8d2e0200f4b36f322b65ac0c7df4c4fb
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.14%20(settembre%201988)%20-%20cas_14.zip
 start PORTE

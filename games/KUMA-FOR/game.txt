@@ -1,4 +1,4 @@
 # Kuma Forth (1984)(Kuma Computers)[CLEAR200,&H87FF + BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Kuma%20Forth%20(1984)(Kuma%20Computers)%5BCLEAR200%2C%26H87FF%20%2B%20BLOAD'CAS-'%2CR%5D.zip
 cas KUMA-FOR.CAS
 sha1 af4615d7af2cf36a6900a9d1a70a453cbd12442b
+url https://download.file-hunter.com/Games/MSX1/CAS/Kuma%20Forth%20(1984)(Kuma%20Computers)%5BCLEAR200%2C%26H87FF%20%2B%20BLOAD%27CAS-%27%2CR%5D.zip

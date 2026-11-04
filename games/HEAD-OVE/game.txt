@@ -1,4 +1,4 @@
 # Head over Heels (1987)(Erbe Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Head%20over%20Heels%20(1987)(Erbe%20Software)%5BRUN'CAS-'%5D.zip
 cas HEAD-OVE.CAS
 sha1 148b595f94248f95e35ab3cbad49e4408921a175
+url https://download.file-hunter.com/Games/MSX1/CAS/Head%20over%20Heels%20(1987)(Erbe%20Software)%5BRUN%27CAS-%27%5D.zip

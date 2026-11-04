@@ -1,9 +1,9 @@
-# The capture's watch on the slot register (docs/DESIGN.md, Slot patches).
+# The capture's watch on the slot register (docs/INTERNALS.md, Slot patches).
 # tools/capture.py loads it after capture.tcl, and sets ::operand1 and
 # ::operand2 from patches/slots.py's OPERAND_1 and OPERAND_2.
 
 # Writes a found patch's lines to newpatch.txt, which stops the capture so
-# that it runs again on the patched tape (DESIGN.md, Slot patches, The RAM
+# that it runs again on the patched tape (INTERNALS.md, Slot patches, The RAM
 # search patch). ramsearch.tcl, loaded after this file, writes there too.
 proc write_newpatch {lines} {
     set f [open [file join $::S(snap) newpatch.txt] w]
@@ -54,7 +54,7 @@ proc slot_map {} {
     }
     set f [open [file join $::S(snap) slots.txt] w]
     puts $f "# For each page: the primary slots that hold nothing there, and the slot"
-    puts $f "# that replaces them in a slot register value, or -1 (DESIGN.md, Slot patches)."
+    puts $f "# that replaces them in a slot register value, or -1 (INTERNALS.md, Slot patches)."
     foreach page {0 1 2 3} {
         lassign $::slots($page) empty with
         puts $f "page $page empty [expr {[llength $empty] ? [join $empty ,] : "-"}] with $with"

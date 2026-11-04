@@ -1,7 +1,7 @@
 # Karakter, the seventh program on Aackosoft's Game Pack 2, after Desert
-# (games/GAMEPAC2/DESERT):
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
+# (games/GAMEPAC2/DESERT).
 # The load starts at the BASIC loader KAR, as when the tape runs on after Desert.
 cas GAME-PAC.CAS
 sha1 e65f4e4dbabffd242081acc8d66b3ef107a9394c
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
 start KAR

@@ -1,4 +1,4 @@
 # Curro Jimenez (1989)(Zigurat Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Curro%20Jimenez%20(1989)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas CURRO-JI.CAS
 sha1 ea8ae1e3323fef1390a78f958636cc73f53b8a60
+url https://download.file-hunter.com/Games/MSX1/CAS/Curro%20Jimenez%20(1989)(Zigurat%20Software)(es)%5BRUN%27CAS-%27%5D.zip

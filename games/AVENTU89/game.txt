@@ -1,4 +1,4 @@
 # Aventura Original, La (1989)(Aventuras AD)(es)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Aventura%20Original%2C%20La%20(1989)(Aventuras%20AD)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas AVENTU89.CAS
 sha1 1632d89c396e311e74382a4a6fd87d5975f6add8
+url https://download.file-hunter.com/Games/MSX1/CAS/Aventura%20Original%2C%20La%20(1989)(Aventuras%20AD)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip

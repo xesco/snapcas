@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 096-Glider.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 046-GLID.CAS
 sha1 4c95923a15d2b19053550192293a1da4ffe5f4d3
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

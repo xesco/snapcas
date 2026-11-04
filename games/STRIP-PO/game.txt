@@ -1,5 +1,5 @@
 # Strip Poker II+ (1988)(Anco Software)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Strip%20Poker%20II%2B%20(1988)(Anco%20Software)%5BCLOAD%20%2B%20RUN%5D.zip
 cas STRIP-PO.CAS
 side2 STRIPB.CAS
 sha1 68a7ab7cbbcb6b8c8c1d10b75c88862afe4fe33d dbc12d5a6ac5e7dcf98dc238d0cb50c5d8507f60
+url https://download.file-hunter.com/Games/MSX1/CAS/Strip%20Poker%20II%2B%20(1988)(Anco%20Software)%5BCLOAD%20%2B%20RUN%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Strip%20Poker%20II%2B%20(1988)(Anco%20Software)(Side%20B)%5BCLOAD%20%2B%20RUN%5D.zip

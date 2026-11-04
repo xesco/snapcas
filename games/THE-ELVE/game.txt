@@ -1,4 +1,4 @@
 # The Elves of Maroland (2024)(Kame Soft)[Tape 1]
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Elves%20of%20Maroland%20(2024)(Kame%20Soft)%5BTape%201%5D.zip
 cas THE-ELVE.CAS
 sha1 d2c66f5a75c8803e432f71c05be3dbfaa3e57f1b
+url https://download.file-hunter.com/Games/MSX1/CAS/The%20Elves%20of%20Maroland%20(2024)(Kame%20Soft)%5BTape%201%5D.zip

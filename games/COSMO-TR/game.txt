@@ -1,5 +1,5 @@
 # Cosmo Traveler (1983)(Colpax)[Side A][BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Cosmo%20Traveler%20(1983)(Colpax)%5BSide%20A%5D%5BBLOAD'CAS-'%2CR%5D.zip
 cas COSMO-TR.CAS
 side2 COSMOB.CAS
 sha1 4a29a88a69b6868b47f7a11d6a1507172c6e371a 0e3f2fb4dcea4171d718386efce7c76a7317b2ca
+url https://download.file-hunter.com/Games/MSX1/CAS/Cosmo%20Traveler%20(1983)(Colpax)%5BSide%20A%5D%5BBLOAD%27CAS-%27%2CR%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Cosmo%20Traveler%20(1983)(Colpax)%5BSide%20B%5D%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
 # Deep Core Raider (P. Jenkinson) [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Deep%20Core%20Raider%20(P.%20Jenkinson)%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas DEEP-COR.CAS
 sha1 e0a02303a93f6d4e1006567fe69f6741f1220d0e
+url https://download.file-hunter.com/Games/MSX1/CAS/Deep%20Core%20Raider%20(P.%20Jenkinson)%20%5BBLOAD%27CAS-%27%2CR%5D.zip

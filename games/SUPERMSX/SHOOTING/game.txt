@@ -1,7 +1,6 @@
 # Shooting Flipper (edicola8bit spells it 'Snothing flipper'), the third game on
 # the tape Super MSX n.24 (ottobre 1989) - cas_24 / super24latoa.cas, after
-# Vertigo (games/SUPERMSX/VERTIGO):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.24%20(ottobre%201989)%20-%20cas_24.zip
+# Vertigo (games/SUPERMSX/VERTIGO).
 # It is a copy of Pinball Blaster (Eurosoft), as edicola8bit lists it. It also has
 # a dump of its own (games/PINBALL). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=24
@@ -9,4 +8,5 @@
 # Vertigo.
 cas SUPER-24.CAS
 sha1 770bfcfa7ee1722263f99a832d1348c89b8a950d
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.24%20(ottobre%201989)%20-%20cas_24.zip
 start SHOOTF

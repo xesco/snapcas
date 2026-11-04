@@ -1,4 +1,4 @@
 # Tritorn (1986)(Xain)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Tritorn%20(1986)(Xain)%5BCLOAD%20%2B%20RUN%5D.zip
 cas TRITORN.CAS
 sha1 2a6508ba47b2c439179b2461f894bbb6b63344f2
+url https://download.file-hunter.com/Games/MSX1/CAS/Tritorn%20(1986)(Xain)%5BCLOAD%20%2B%20RUN%5D.zip

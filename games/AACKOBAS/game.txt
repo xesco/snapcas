@@ -1,4 +1,4 @@
 # Aackobase II (1985)(Aackosoft)(nl)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Aackobase%20II%20(1985)(Aackosoft)(nl)%5BRUN'CAS-'%5D.zip
 cas AACKOBAS.CAS
 sha1 70f507bceed0f1f0a0c3a2953abc3348838fae3d
+url https://download.file-hunter.com/Games/MSX1/CAS/Aackobase%20II%20(1985)(Aackosoft)(nl)%5BRUN%27CAS-%27%5D.zip

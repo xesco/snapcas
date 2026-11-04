@@ -1,4 +1,4 @@
 # Desolator (1986)(Gremlin Graphics Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Desolator%20(1986)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas DESOLATO.CAS
 sha1 b877a2e45a8624beb1d1ca0f493641f5792d0018
+url https://download.file-hunter.com/Games/MSX1/CAS/Desolator%20(1986)(Gremlin%20Graphics%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

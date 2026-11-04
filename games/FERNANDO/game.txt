@@ -1,4 +1,4 @@
 # Fernando Martin Basket Master - Executive (1987)(Dinamic Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Fernando%20Martin%20Basket%20Master%20-%20Executive%20(1987)(Dinamic%20Software)%5BRUN'CAS-'%5D.zip
 cas FERNANDO.CAS
 sha1 fdfbb7199c3ec390015ead3839457ddc177f7e19
+url https://download.file-hunter.com/Games/MSX1/CAS/Fernando%20Martin%20Basket%20Master%20-%20Executive%20(1987)(Dinamic%20Software)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # HyperSports1[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/HyperSports1%5BBLOAD'CAS-'%2CR%5D.zip
 cas HYPERSPO.CAS
 sha1 6d9325d39daef4be1b6629053dcdfa50067ca6c5
+url https://download.file-hunter.com/Games/MSX1/CAS/HyperSports1%5BBLOAD%27CAS-%27%2CR%5D.zip

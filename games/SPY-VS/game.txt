@@ -1,4 +1,4 @@
 # Spy vs Spy II - The Island Caper (1987)(Databyte)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Spy%20vs%20Spy%20II%20-%20The%20Island%20Caper%20(1987)(Databyte)%5BRUN'CAS-'%5D.zip
 cas SPY-VS.CAS
 sha1 0939ae570d40348a9fae1413e0ec3bf56532b165
+url https://download.file-hunter.com/Games/MSX1/CAS/Spy%20vs%20Spy%20II%20-%20The%20Island%20Caper%20(1987)(Databyte)%5BRUN%27CAS-%27%5D.zip

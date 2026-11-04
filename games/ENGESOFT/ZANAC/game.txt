@@ -1,5 +1,5 @@
 # Zanac, the first game on Engesoft's MSXK-13 side A,
-# Engesoft MSXK-13 - Lado A.cas:
-# https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-13.zip
+# Engesoft MSXK-13 - Lado A.cas.
 cas ENGESO13.CAS
 sha1 1937a5d04d9bffa6a128bf75e84a8f330bcfc903
+url https://download.file-hunter.com/Games/MSX1/CAS/Engesoft%20msxk-13.zip

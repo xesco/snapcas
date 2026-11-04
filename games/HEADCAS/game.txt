@@ -1,4 +1,4 @@
 # Head over Heels (1987)(Ocean Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Head%20over%20Heels%20(1987)(Ocean%20Software)%5BRUN'CAS-'%5D.zip
 cas HEADCAS.CAS
 sha1 bd6e77a7c7b18f7cc33154028612d4ebe743b0ee
+url https://download.file-hunter.com/Games/MSX1/CAS/Head%20over%20Heels%20(1987)(Ocean%20Software)%5BRUN%27CAS-%27%5D.zip

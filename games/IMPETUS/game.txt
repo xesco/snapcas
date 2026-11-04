@@ -1,4 +1,4 @@
 # Impetus (2021)(Inufuto)
-# https://download.file-hunter.com/Games/MSX1/CAS/Impetus%20(2021)(Inufuto).zip
 cas IMPETUS.CAS
 sha1 427f5abe88af68a4be0084ae3f9e7f13b02d5b69
+url https://download.file-hunter.com/Games/MSX1/CAS/Impetus%20(2021)(Inufuto).zip

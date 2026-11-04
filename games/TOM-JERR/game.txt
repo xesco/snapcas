@@ -1,4 +1,4 @@
 # Tom & Jerry (1989)(Erbe Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Tom%20%26%20Jerry%20(1989)(Erbe%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas TOM-JERR.CAS
 sha1 fd23db3577a27b638d23100403b176e42482bd00
+url https://download.file-hunter.com/Games/MSX1/CAS/Tom%20%26%20Jerry%20(1989)(Erbe%20Software)(es)%5BRUN%27CAS-%27%5D.zip

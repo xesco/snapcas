@@ -1,4 +1,4 @@
 # Knight Tyme (1986)(Mastertronic Added Dimension)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Tyme%20(1986)(Mastertronic%20Added%20Dimension)%5BRUN'CAS-'%5D.zip
 cas KNIGHT86.CAS
 sha1 6b8be4ce5d554354ec77c67b9642fb60cbaf82ef
+url https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Tyme%20(1986)(Mastertronic%20Added%20Dimension)%5BRUN%27CAS-%27%5D.zip

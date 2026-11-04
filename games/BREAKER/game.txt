@@ -1,4 +1,4 @@
 # Breaker Breaker (1988)(Eurosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Breaker%20Breaker%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
 cas BREAKER.CAS
 sha1 ff3883acb51da7bb915480f1deeb7e4af68ae193
+url https://download.file-hunter.com/Games/MSX1/CAS/Breaker%20Breaker%20(1988)(Eurosoft)%5BRUN%27CAS-%27%5D.zip

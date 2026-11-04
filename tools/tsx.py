@@ -1,4 +1,5 @@
-"""The reader of TSX files (docs/DESIGN.md, TSX data and Tape files).
+"""The reader of TSX files (docs/FORMATS.md, TSX data, and docs/INTERNALS.md,
+Tape files).
 
 A TSX file is a TZX file with block 4Bh for MSX. The reader knows the blocks
 that the TSX files of the tests use, and stops at any other. Times count the

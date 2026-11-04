@@ -1,4 +1,4 @@
 # After the War (1989)(Dinamic Software)(es)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/After%20the%20War%20(1989)(Dinamic%20Software)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas AFTER-TH.CAS
 sha1 ac724291c33126b5617f47201c4372eec06eff05
+url https://download.file-hunter.com/Games/MSX1/CAS/After%20the%20War%20(1989)(Dinamic%20Software)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip

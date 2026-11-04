@@ -1,4 +1,4 @@
 # X-Racing (2019)(Brain Games)(v1.0.2)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/X-Racing%20(2019)(Brain%20Games)(v1.0.2)%5BBLOAD'CAS-'%2CR%5D.zip
 cas X-RACINV.CAS
 sha1 e78e841625293cb803a8bcc6befdb7b7060fb9dc
+url https://download.file-hunter.com/Games/MSX1/CAS/X-Racing%20(2019)(Brain%20Games)(v1.0.2)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,8 +1,8 @@
 # Saturn, the first game on the tape Super MSX n.8 (gennaio 1988) - cas_8 /
-# super_msx_8_lato_B.cas:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.8%20(gennaio%201988)%20-%20cas_8.zip
+# super_msx_8_lato_B.cas.
 # It is a copy of Super Cross Force (Spectravideo), as edicola8bit lists it.
 # Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=8
 cas SUPER8B.CAS
 sha1 d2959e683fea39cde0e8ce38a424fd83291305ea
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.8%20(gennaio%201988)%20-%20cas_8.zip

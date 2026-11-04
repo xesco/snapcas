@@ -1,4 +1,4 @@
 # Star Bowls (1991)(Zigurat Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Star%20Bowls%20(1991)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas STAR-BOW.CAS
 sha1 578b291bbe0e91c90f020b0b78ec58a1abce298f
+url https://download.file-hunter.com/Games/MSX1/CAS/Star%20Bowls%20(1991)(Zigurat%20Software)(es)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Miyuki Memorial Full Archive (.CAS, LP & Listing) / Miyuki Memorial Doors (1984)(Kitty Records)[CLOAD + RUN].cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Miyuki%20Memorial%20Full%20Archive%20(.CAS%2C%20LP%20%26%20Listing).zip
 cas MIYUKILP.CAS
 sha1 ca5180f9d7ff48ac0a3752ff0b4bb34c2f48298e
+url https://download.file-hunter.com/Games/MSX1/CAS/Miyuki%20Memorial%20Full%20Archive%20(.CAS%2C%20LP%20%26%20Listing).zip

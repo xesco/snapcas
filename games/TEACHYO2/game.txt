@@ -1,4 +1,4 @@
 # Teach Yourself Basic(1985)(Toshiba)(Side B)
-# https://download.file-hunter.com/Games/MSX1/CAS/Teach%20Yourself%20Basic(1985)(Toshiba)(Side%20B).zip
 cas TEACHB.CAS
 sha1 e5b0b2b89522b29ba630102ba940e4f94c97100e
+url https://download.file-hunter.com/Games/MSX1/CAS/Teach%20Yourself%20Basic(1985)(Toshiba)(Side%20B).zip

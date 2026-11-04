@@ -1,4 +1,4 @@
 # Cetus (1986)(Tynesoft)[CLOAD+RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Cetus%20(1986)(Tynesoft)%5BCLOAD%2BRUN%5D.zip
 cas CETUS.CAS
 sha1 52cc6301651997026a6cf0b3d85d6b27a454d44c
+url https://download.file-hunter.com/Games/MSX1/CAS/Cetus%20(1986)(Tynesoft)%5BCLOAD%2BRUN%5D.zip

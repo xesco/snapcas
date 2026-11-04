@@ -1,4 +1,4 @@
 # Mystery House (1983)(Micro Cabin)(ja)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Mystery%20House%20(1983)(Micro%20Cabin)(ja)%5BCLOAD%20%2B%20RUN%5D.zip
 cas MYSTERY.CAS
 sha1 820b1d8d118cb36ad3369b33d29d74327b7cf018
+url https://download.file-hunter.com/Games/MSX1/CAS/Mystery%20House%20(1983)(Micro%20Cabin)(ja)%5BCLOAD%20%2B%20RUN%5D.zip

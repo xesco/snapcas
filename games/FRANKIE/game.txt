@@ -1,4 +1,4 @@
 # Frankie (System 4, 1988)
-# https://download.file-hunter.com/Games/MSX1/CAS/Frankie%20(System%204%2C%201988).zip
 cas FRANKIE.CAS
 sha1 105b4e7b62b4c856e08ab81be59d6d89794dfe6f
+url https://download.file-hunter.com/Games/MSX1/CAS/Frankie%20(System%204%2C%201988).zip

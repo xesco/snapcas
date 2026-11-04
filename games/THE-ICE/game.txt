@@ -1,4 +1,4 @@
 # The Ice King (1986)(CDS Software)
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Ice%20King%20(1986)(CDS%20Software).zip
 cas THE-ICE.CAS
 sha1 28852520a0965508b2c4d4097426bee07baeadbf
+url https://download.file-hunter.com/Games/MSX1/CAS/The%20Ice%20King%20(1986)(CDS%20Software).zip

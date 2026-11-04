@@ -1,4 +1,4 @@
 # Army Moves (1987)(Dinamic Software)(es)(Side B)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Army%20Moves%20(1987)(Dinamic%20Software)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
 cas ARMYES.CAS
 sha1 84ea846dc67fafacf8b18970e9809594ccd16616
+url https://download.file-hunter.com/Games/MSX1/CAS/Army%20Moves%20(1987)(Dinamic%20Software)(es)(Side%20B)%5BRUN%27CAS-%27%5D.zip

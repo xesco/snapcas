@@ -1,4 +1,4 @@
 # Blitz Krieg (1985)(Omega System)
-# https://download.file-hunter.com/Games/MSX1/CAS/Blitz%20Krieg%20(1985)(Omega%20System).zip
 cas BLITZ-KR.CAS
 sha1 c84676aa3604f4150632161a4ee356eb7d75cc61
+url https://download.file-hunter.com/Games/MSX1/CAS/Blitz%20Krieg%20(1985)(Omega%20System).zip

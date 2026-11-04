@@ -1,4 +1,4 @@
 # Lorna (1990)(Topo Soft)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Lorna%20(1990)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
 cas LORNA.CAS
 sha1 f1f16f292b63ac526ca67bd6d32d89a41ab855da
+url https://download.file-hunter.com/Games/MSX1/CAS/Lorna%20(1990)(Topo%20Soft)(es)%5BRUN%27CAS-%27%5D.zip

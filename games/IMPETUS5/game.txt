@@ -1,4 +1,4 @@
 # Impetus+ (2025)(Inufuto)
-# https://download.file-hunter.com/Games/MSX1/CAS/Impetus%2B%20(2025)(Inufuto).zip
 cas IMPETUS5.CAS
 sha1 8fdfbbbd29812fe888a22d73a4b62854c87bcc50
+url https://download.file-hunter.com/Games/MSX1/CAS/Impetus%2B%20(2025)(Inufuto).zip

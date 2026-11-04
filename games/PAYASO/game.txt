@@ -1,4 +1,4 @@
 # Payaso Explorador, El (1986)(Anaya Multimedia)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Payaso%20Explorador%2C%20El%20(1986)(Anaya%20Multimedia)(es)%5BRUN'CAS-'%5D.zip
 cas PAYASO.CAS
 sha1 60eca88dfebba152534573006ff9ba8325cad65f
+url https://download.file-hunter.com/Games/MSX1/CAS/Payaso%20Explorador%2C%20El%20(1986)(Anaya%20Multimedia)(es)%5BRUN%27CAS-%27%5D.zip

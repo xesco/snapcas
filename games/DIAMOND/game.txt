@@ -1,4 +1,4 @@
 # Diamond Adventure (1983)(MicroCabin)(JP)[!][CLOAD+RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Diamond%20Adventure%20(1983)(MicroCabin)(JP)%5B!%5D%5BCLOAD%2BRUN%5D.zip
 cas DIAMOND.CAS
 sha1 fb786d5ac490830e8bb3b5a8d12e9cfdaa86923f
+url https://download.file-hunter.com/Games/MSX1/CAS/Diamond%20Adventure%20(1983)(MicroCabin)(JP)%5B!%5D%5BCLOAD%2BRUN%5D.zip

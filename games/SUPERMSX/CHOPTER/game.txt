@@ -1,6 +1,5 @@
 # Chopter, the third game on the tape Super MSX n.6 (novembre 1987) - cas_6 /
-# super_msx_6_lato_A.cas, after Granador (games/SUPERMSX/GRANADOR):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.6%20(novembre%201987)%20-%20cas_6.zip
+# super_msx_6_lato_A.cas, after Granador (games/SUPERMSX/GRANADOR).
 # It is a copy of Sea King, as edicola8bit lists it. It also has a dump of its own
 # (games/SEA-KING). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=6
@@ -8,4 +7,5 @@
 # Granador.
 cas SUPER6.CAS
 sha1 746a9e4da001d9c7b66abff263f5e0ec1c2facab
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.6%20(novembre%201987)%20-%20cas_6.zip
 start CHOPTE

@@ -1,6 +1,5 @@
 # Frog, the third game on the tape Super MSX n.10 (marzo 1988) - cas_10 /
-# super_msx_10_lato_A.cas, after Air Raid (games/SUPERMSX/AIRRAID):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.10%20(marzo%201988)%20-%20cas_10.zip
+# super_msx_10_lato_A.cas, after Air Raid (games/SUPERMSX/AIRRAID).
 # It is a copy of Booga-Boo (Quicksilva), as edicola8bit lists it. It also has a
 # dump of its own (games/BOOGA-BO). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=10
@@ -8,4 +7,5 @@
 # Raid.
 cas SUPER10.CAS
 sha1 abcfa7ab5dac0acf72619ac042d27626666d6a1e
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.10%20(marzo%201988)%20-%20cas_10.zip
 start FROG

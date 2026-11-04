@@ -1,4 +1,4 @@
 # Super Difficult Theseus (1985)(Login Soft)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20Difficult%20Theseus%20(1985)(Login%20Soft)%5BBLOAD'CAS-'%2CR%5D.zip
 cas SUPER-DI.CAS
 sha1 04a486dc32ca26cdcf7f20d3cef54e9872526f08
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20Difficult%20Theseus%20(1985)(Login%20Soft)%5BBLOAD%27CAS-%27%2CR%5D.zip

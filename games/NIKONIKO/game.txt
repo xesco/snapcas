@@ -1,4 +1,4 @@
 # Nikonikopun What Is It (1984)(NHK Gakuen)(ja)
-# https://download.file-hunter.com/Games/MSX1/CAS/Nikonikopun%20What%20Is%20It%20(1984)(NHK%20Gakuen)(ja).zip
 cas NIKONIKO.CAS
 sha1 d3cdfb45e748493ec718072fd56529213432ca5c
+url https://download.file-hunter.com/Games/MSX1/CAS/Nikonikopun%20What%20Is%20It%20(1984)(NHK%20Gakuen)(ja).zip

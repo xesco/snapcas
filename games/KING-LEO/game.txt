@@ -1,4 +1,4 @@
 # King Leonard (1986)(Mind Games Espana)(es)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/King%20Leonard%20(1986)(Mind%20Games%20Espana)(es)%5BBLOAD'CAS-'%2CR%5D.zip
 cas KING-LEO.CAS
 sha1 04e552fdb2b45de8110726a398295d418b047854
+url https://download.file-hunter.com/Games/MSX1/CAS/King%20Leonard%20(1986)(Mind%20Games%20Espana)(es)%5BBLOAD%27CAS-%27%2CR%5D.zip

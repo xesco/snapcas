@@ -1,4 +1,4 @@
 # Emilio Butragueno Futbol (1988)(Topo Soft - Ocean Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Emilio%20Butragueno%20Futbol%20(1988)(Topo%20Soft%20-%20Ocean%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas EMILIO.CAS
 sha1 55f6ab48bab11b5d88cb2df79e0c584b61864018
+url https://download.file-hunter.com/Games/MSX1/CAS/Emilio%20Butragueno%20Futbol%20(1988)(Topo%20Soft%20-%20Ocean%20Software)(es)%5BRUN%27CAS-%27%5D.zip

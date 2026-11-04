@@ -1,4 +1,4 @@
 # Draconic Throne (2017) (GW's Workshop) (1.02) [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Draconic%20Throne%20(2017)%20(GW's%20Workshop)%20(1.02)%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas DRACONIC.CAS
 sha1 d2de35292a71d80c41ad0a7cb3638fc945b7b335
+url https://download.file-hunter.com/Games/MSX1/CAS/Draconic%20Throne%20(2017)%20(GW%27s%20Workshop)%20(1.02)%20%5BBLOAD%27CAS-%27%2CR%5D.zip

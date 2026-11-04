@@ -1,5 +1,5 @@
 # SWIV (1991)(Dro Soft)(Side A)[needs 128k][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/SWIV%20(1991)(Dro%20Soft)(Side%20A)%5Bneeds%20128k%5D%5BRUN'CAS-'%5D.zip
 cas SWIVA.CAS
 side2 SWIVB.CAS
 sha1 5c6759b545d619c5fd600d1948504da40297b059 f4f97825cbf99652731199b8fcb8506538e691fc
+url https://download.file-hunter.com/Games/MSX1/CAS/SWIV%20(1991)(Dro%20Soft)(Side%20A)%5Bneeds%20128k%5D%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/SWIV%20(1991)(Dro%20Soft)(Side%20B)%5Bneeds%20128k%5D%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 075-Choper 1.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 075-CHOP.CAS
 sha1 36590f963c28fb3bd0570ef663fae9d90ebe923a
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

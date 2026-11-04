@@ -1,4 +1,4 @@
 # TT Racer (1987)(Methodic Solutions)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/TT%20Racer%20(1987)(Methodic%20Solutions)%5BRUN'CAS-'%5D.zip
 cas TT-RACER.CAS
 sha1 1f19b0e7823508de87d681291bd4a432edb5ec13
+url https://download.file-hunter.com/Games/MSX1/CAS/TT%20Racer%20(1987)(Methodic%20Solutions)%5BRUN%27CAS-%27%5D.zip

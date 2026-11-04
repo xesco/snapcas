@@ -1,4 +1,4 @@
 # The Keiba - Champion Soft (1986) [Push F5 After 2nd Load]
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Keiba%20-%20Champion%20Soft%20(1986)%20%5BPush%20F5%20After%202nd%20Load%5D.zip
 cas THE-KEIB.CAS
 sha1 f82ed3f78834a32bf9f4c1734115862759f23ccc
+url https://download.file-hunter.com/Games/MSX1/CAS/The%20Keiba%20-%20Champion%20Soft%20(1986)%20%5BPush%20F5%20After%202nd%20Load%5D.zip

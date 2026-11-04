@@ -1,7 +1,7 @@
 # Moonwalker (1989)(US Gold)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Moonwalker%20(1989)(US%20Gold)%5BRUN'CAS-'%5D.zip
 cas MOONWALK.CAS
 sha1 1787776aeef9420ebb35c3ecb879a7c9a556a512
+url https://download.file-hunter.com/Games/MSX1/CAS/Moonwalker%20(1989)(US%20Gold)%5BRUN%27CAS-%27%5D.zip
 
 # The capture takes its snapshot at 135 seconds, in the loader, before the main
 # game loads. At its own moment, the tape's end, the capture takes the snapshot

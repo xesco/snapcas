@@ -1,4 +1,4 @@
 # Reflex (1987)(Players Software)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Reflex%20(1987)(Players%20Software)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas REFLEX.CAS
 sha1 255bc42570f05355d54cfbc6fa4ebc43895aa403
+url https://download.file-hunter.com/Games/MSX1/CAS/Reflex%20(1987)(Players%20Software)(Side%20A)%5BRUN%27CAS-%27%5D.zip

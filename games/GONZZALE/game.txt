@@ -1,4 +1,4 @@
 # Gonzzalezz (1989)(Opera Soft)(es)(Side A)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Gonzzalezz%20(1989)(Opera%20Soft)(es)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
 cas GONZZALE.CAS
 sha1 f2747e44d02cd55c3eb7430ac2ab0e95c50c634f
+url https://download.file-hunter.com/Games/MSX1/CAS/Gonzzalezz%20(1989)(Opera%20Soft)(es)(Side%20A)%5BBLOAD%27CAS-%27%2CR%5D.zip

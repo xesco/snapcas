@@ -1,7 +1,7 @@
-# Procedures that the capture and the check share (docs/DESIGN.md, The tools'
+# Procedures that the capture and the check share (docs/INTERNALS.md, The tools'
 # code): the CPU's view of memory with a slot selected, and the read of VRAM.
 
-# The CPU's view of memory, after selecting a slot in a page (DESIGN.md, RAM).
+# The CPU's view of memory, after selecting a slot in a page (INTERNALS.md, RAM).
 
 # EXPTBL at FCC1h: bit 7 of each slot's byte is set when it is expanded. The
 # capture reads it once, in step 2, because a game can overwrite page 3.
@@ -140,7 +140,7 @@ proc read_with {a8 address n} {
 proc v9938 {} { expr {[debug size "physical VRAM"] > 0x4000} }
 
 # VRAM's cells. openMSX shows a V9938's VRAM through the addressing of
-# register 8's bit 3, VR, which a game can clear (DESIGN.md, Snapshot files),
+# register 8's bit 3, VR, which a game can clear (FORMATS.md, Snapshot files),
 # and the restorer writes the cells with VR set, so VR is set for the read.
 proc physical_vram {} {
     set size [debug size "physical VRAM"]

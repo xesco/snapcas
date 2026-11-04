@@ -1,4 +1,4 @@
 # Demand (1984)(Login Soft)
-# https://download.file-hunter.com/Games/MSX1/CAS/Demand%20(1984)(Login%20Soft).zip
 cas DEMAND.CAS
 sha1 a31b90d46d92616fe888f4f40836e8ffe629bd43
+url https://download.file-hunter.com/Games/MSX1/CAS/Demand%20(1984)(Login%20Soft).zip

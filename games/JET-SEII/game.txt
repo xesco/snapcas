@@ -1,4 +1,4 @@
 # Jet Set Willy II - The Final Frontier (1985)(Software Projects)[passworded][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Jet%20Set%20Willy%20II%20-%20The%20Final%20Frontier%20(1985)(Software%20Projects)%5Bpassworded%5D%5BRUN'CAS-'%5D.zip
 cas JET-SEII.CAS
 sha1 b2185384ec7b7cf9e50e7815a719719d1f540cb1
+url https://download.file-hunter.com/Games/MSX1/CAS/Jet%20Set%20Willy%20II%20-%20The%20Final%20Frontier%20(1985)(Software%20Projects)%5Bpassworded%5D%5BRUN%27CAS-%27%5D.zip

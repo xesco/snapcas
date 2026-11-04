@@ -1,4 +1,4 @@
 # Nick Neaker (1983)(Colpax)
-# https://download.file-hunter.com/Games/MSX1/CAS/Nick%20Neaker%20(1983)(Colpax).zip
 cas NICK-NEA.CAS
 sha1 8111c9ecbc43017bea4687fdf214ed4ccbcb5e40
+url https://download.file-hunter.com/Games/MSX1/CAS/Nick%20Neaker%20(1983)(Colpax).zip

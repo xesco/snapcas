@@ -1,4 +1,4 @@
-"""A finding of an automatic patch kind (docs/DESIGN.md, The tools' code)."""
+"""A finding of an automatic patch kind (docs/INTERNALS.md, The tools' code)."""
 
 
 class Finding:

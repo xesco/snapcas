@@ -1,4 +1,4 @@
 # Fharanx (1985)(Enix)[By Django][BLOAD'CAS-',r]
-# https://download.file-hunter.com/Games/MSX1/CAS/Fharanx%20(1985)(Enix)%5BBy%20Django%5D%5BBLOAD'CAS-'%2Cr%5D.zip
 cas FHARANX.CAS
 sha1 8a37933ce5bfa1f52a967a219722d54d91c7ab76
+url https://download.file-hunter.com/Games/MSX1/CAS/Fharanx%20(1985)(Enix)%5BBy%20Django%5D%5BBLOAD%27CAS-%27%2Cr%5D.zip

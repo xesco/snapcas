@@ -1,6 +1,5 @@
 # Painter, the second game on the tape Super MSX n.12 (Maggio 1988) - cas_12 /
-# super msx 12a.cas, after Far West (games/SUPERMSX/FARWES12):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.12%20(Maggio%201988)%20-%20cas_12.zip
+# super msx 12a.cas, after Far West (games/SUPERMSX/FARWES12).
 # It is a copy of Panel Panic, as edicola8bit lists it. It also has a dump of its
 # own (games/PANEL-PA). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=12
@@ -8,4 +7,5 @@
 # West.
 cas SUPER12.CAS
 sha1 f48fe66defe60f6182c6b8a3e4df6942d2e3bb6c
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.12%20(Maggio%201988)%20-%20cas_12.zip
 start PAINTE

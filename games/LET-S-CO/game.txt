@@ -1,4 +1,4 @@
 # Let's Computer (1984)(Melsoft & Three Quarter)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Let's%20Computer%20(1984)(Melsoft%20%26%20Three%20Quarter)%5BCLOAD%20%2B%20RUN%5D.zip
 cas LET-S-CO.CAS
 sha1 a177cadb45915c49b32695768619a00f2580f896
+url https://download.file-hunter.com/Games/MSX1/CAS/Let%27s%20Computer%20(1984)(Melsoft%20%26%20Three%20Quarter)%5BCLOAD%20%2B%20RUN%5D.zip

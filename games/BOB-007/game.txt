@@ -1,4 +1,4 @@
 # Bob 007 - Infiltrado (1986)(Grupo de Trabajo Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Bob%20007%20-%20Infiltrado%20(1986)(Grupo%20de%20Trabajo%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas BOB-007.CAS
 sha1 fb298ff10c4ecf6d9e8ddb61bd0ca0e37a070a16
+url https://download.file-hunter.com/Games/MSX1/CAS/Bob%20007%20-%20Infiltrado%20(1986)(Grupo%20de%20Trabajo%20Software)(es)%5BRUN%27CAS-%27%5D.zip

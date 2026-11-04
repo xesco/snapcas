@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 009-Calculator new.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 009-CALC.CAS
 sha1 d55329311a290f111ef96b99f9d164f000caacef
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

@@ -1,4 +1,4 @@
 # Fuzzball (ByteBusters) (Eaglesoft - Premium III Software Distribution) [RUN'CAS-'] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Fuzzball%20(ByteBusters)%20(Eaglesoft%20-%20Premium%20III%20Software%20Distribution)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
 cas FUZZBALL.CAS
 sha1 6b961f9c807a045c246902d838a22303bdcbaf3f
+url https://download.file-hunter.com/Games/MSX1/CAS/Fuzzball%20(ByteBusters)%20(Eaglesoft%20-%20Premium%20III%20Software%20Distribution)%20%5BRUN%27CAS-%27%5D%20%5B_%5D.zip

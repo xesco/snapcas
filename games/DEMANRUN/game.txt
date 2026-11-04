@@ -1,4 +1,4 @@
 # Demand (1985)(Login Soft)[CLOAD+RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Demand%20(1985)(Login%20Soft)%5BCLOAD%2BRUN%5D.zip
 cas DEMANRUN.CAS
 sha1 99bd1c21a8eff70bb116aebbf90c878530e3f2b6
+url https://download.file-hunter.com/Games/MSX1/CAS/Demand%20(1985)(Login%20Soft)%5BCLOAD%2BRUN%5D.zip

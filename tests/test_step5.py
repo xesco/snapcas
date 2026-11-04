@@ -69,7 +69,7 @@ def service_symbol(name):
     raise KeyError(f"out/service.sym has no {name}: run make")
 
 
-def play_script(name, out):
+def play_script(name, out, games):
     game, inputs, seconds, counts = PLAYS[name][:4]
     # Without a part in page 3, T0 holds the data and the routines.
     t0 = len(PLAYS[name]) > 4 and PLAYS[name][4]
@@ -94,7 +94,7 @@ def play_script(name, out):
         else:
             action = msx.press(name, 0.5)
         presses.append(f"after time {2 + 4 * n} {{{action}}}")
-    state = os.path.join(ROOT, "out", MACHINE, game, "check", "10s")
+    state = os.path.join(games, game, MACHINE, "check", "10s")
     bps = "\n".join(f'set ::n({name}) 0\ndebug set_bp {address} {{{condition}}} {{incr ::n({name})}}'
                     for name, (address, condition) in {**entries, **{k: (a, "") for k, a in counts.items()}}.items())
     joy = "\n".join(f"debug set_bp {a} {{}} fire" for a in JOYSTICK_READS)
@@ -137,15 +137,16 @@ after time {seconds} {{
 """
 
 
-def play(name):
-    """Plays a restored game and returns its tape values and counts."""
+def play(name, games=os.path.join(WORK, "games")):
+    """Plays a restored game, whose folder is in games, and returns its tape
+    values and counts."""
     game = PLAYS[name][0]
     out = os.path.join(WORK, f"{name}-play.txt")
     if os.path.exists(out):
         os.remove(out)
     machine = msx.read_machine(msx.machine_path(MACHINE))
-    disk = os.path.join(ROOT, "out", MACHINE, game, "check", "disk.dsk")
-    msx.run([*machine.args, f"-{machine.disk}", disk], play_script(name, out), timeout=600)
+    disk = os.path.join(games, game, MACHINE, "check", "disk.dsk")
+    msx.run([*machine.args, f"-{machine.disk}", disk], play_script(name, out, games), timeout=600)
     if not os.path.exists(out):
         raise AssertionError(f"{name}: openMSX stopped before the play's report")
     with open(out) as f:
@@ -164,7 +165,7 @@ def run(game):
         if result.returncode != 0:
             return f"{step}: {result.stderr.strip()}", {}
     report = test_step4.tool("check.py", folder, MACHINE, "--dos", test_step4.NEXTOR).stdout
-    with open(os.path.join(ROOT, "out", MACHINE, game, "snap", "state.txt")) as f:
+    with open(os.path.join(WORK, "games", game, MACHINE, "snap", "state.txt")) as f:
         state = dict(line.split(" ", 1) for line in f.read().splitlines())
     return report, state
 
@@ -173,7 +174,7 @@ def run(game):
 class Step5(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
         with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
             cls.results = dict(zip(GAMES, pool.map(run, GAMES)))
         names = [name for name in PLAYS if cls.results[PLAYS[name][0]][0].startswith("point 1: pass")]

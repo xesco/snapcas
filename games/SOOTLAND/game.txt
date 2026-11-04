@@ -1,5 +1,5 @@
 # Sootland (1988)(Zafiro Software Division)(es)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Sootland%20(1988)(Zafiro%20Software%20Division)(es)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas SOOTLAND.CAS
 side2 SOOTLANB.CAS
 sha1 5ccf9a2463aa3144f3c03c2a23b798ba68d184e4 c2d10d8d5694de81b1192ec7d85aa80a10f89045
+url https://download.file-hunter.com/Games/MSX1/CAS/Sootland%20(1988)(Zafiro%20Software%20Division)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Sootland%20(1988)(Zafiro%20Software%20Division)(es)(Side%20B)%5BRUN%27CAS-%27%5D.zip

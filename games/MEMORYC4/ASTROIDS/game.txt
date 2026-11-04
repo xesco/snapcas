@@ -1,8 +1,8 @@
 # Astroids, the fourth program on the Computer Users Club's tape C.04, after
-# Auto-Race (games/MEMORYC4/AUTORACE):
-# https://download.file-hunter.com/Games/MSX1/CAS/Memory%20-%20C.04%20(1985)(Computer%20Users%20Club)(nl)%5Bposition%20tape%20%2B%20CLOAD%20%2B%20RUN%5D.zip
+# Auto-Race (games/MEMORYC4/AUTORACE).
 # The load starts at the BASIC program Astro, as when the tape runs on after
 # Auto-Race.
 cas MEMORY.CAS
 sha1 bbed5547cc0a64b068c90612c4f8af0c182ea075
+url https://download.file-hunter.com/Games/MSX1/CAS/Memory%20-%20C.04%20(1985)(Computer%20Users%20Club)(nl)%5Bposition%20tape%20%2B%20CLOAD%20%2B%20RUN%5D.zip
 start Astro

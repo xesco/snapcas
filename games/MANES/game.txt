@@ -1,4 +1,4 @@
 # Manes (1984)(Ascii)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Manes%20(1984)(Ascii)%5BBLOAD'CAS-'%2CR%5D.zip
 cas MANES.CAS
 sha1 2f243ed115efe7c4e4c24da53e56694a8439530e
+url https://download.file-hunter.com/Games/MSX1/CAS/Manes%20(1984)(Ascii)%5BBLOAD%27CAS-%27%2CR%5D.zip

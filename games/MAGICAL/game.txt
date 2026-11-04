@@ -1,4 +1,4 @@
 # Magical Computer Music L5 Demo (1985)(CBS & Sony)[CLOAD]
-# https://download.file-hunter.com/Games/MSX1/CAS/Magical%20Computer%20Music%20L5%20Demo%20(1985)(CBS%20%26%20Sony)%5BCLOAD%5D.zip
 cas MAGICAL.CAS
 sha1 54d0e0185d63deeea308403487555a65fcf6e730
+url https://download.file-hunter.com/Games/MSX1/CAS/Magical%20Computer%20Music%20L5%20Demo%20(1985)(CBS%20%26%20Sony)%5BCLOAD%5D.zip

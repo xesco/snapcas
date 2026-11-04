@@ -1,6 +1,5 @@
 # Zapper, the third game on the tape Super MSX n.9 (febbraio 1988) - cas_9 /
-# SUPER09A.CAS, after Aliens (games/SUPERMSX/ALIENS):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.9%20(febbraio%201988)%20-%20cas_9.zip
+# SUPER09A.CAS, after Aliens (games/SUPERMSX/ALIENS).
 # It is a copy of Panique, as edicola8bit lists it. It also has a dump of its own
 # (games/PANIQUE). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=9
@@ -8,4 +7,5 @@
 # Aliens.
 cas SUPER-09.CAS
 sha1 b0a1e73ee6fa9a5fd4691ef8a6b74c14278433e9
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.9%20(febbraio%201988)%20-%20cas_9.zip
 start ZAPPER

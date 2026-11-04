@@ -1,8 +1,8 @@
-# Procedures of the capture (docs/DESIGN.md, Capture). tools/capture.py puts
+# Procedures of the capture (docs/INTERNALS.md, Capture). tools/capture.py puts
 # the game file's settings and memory.tcl before them, patches/slots.tcl and
 # patches/ramsearch.tcl after them, and then the steps' start.
 
-# ---- The steps (DESIGN.md, Capture) ----
+# ---- The steps (INTERNALS.md, Capture) ----
 #
 # capture.py sets these before the procedures:
 #   ::S(snap)     the snapshot folder
@@ -213,7 +213,7 @@ proc step3 {} {
     debug set_bp $tapion {[rom0]} {safe on_tapion}
     debug set_bp $tapin {[rom0]} {safe on_tapin}
     # The BIOS's reset routine, where 0000h's DI / JP jumps: a loader that has
-    # crashed or rebooted the machine can also jump there itself (DESIGN.md,
+    # crashed or rebooted the machine can also jump there itself (INTERNALS.md,
     # Capture, step 4).
     set reset [word_at 2]
     debug set_bp $reset {[rom0]} {safe on_reset}
@@ -507,7 +507,7 @@ proc take_snapshot {{pc {}}} {
     lappend state "psgsel [hex 2 $::st(psgsel)]"
     lappend state "tapepos [hex 6 $::st(pos)]" "service $::st(service)"
     # The player's position and side, for the non-standard blocks that the
-    # game has read by its own loader (DESIGN.md, Tape files).
+    # game has read by its own loader (INTERNALS.md, Tape files).
     lappend state "tapetime [format %.2f [cassetteplayer getpos]]" "tapeside [expr {$::st(side2in) ? 2 : 1}]"
 
     # The pages selected at the snapshot count as selected during the load.

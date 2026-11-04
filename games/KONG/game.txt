@@ -1,4 +1,4 @@
 # Kong (1988)(Eurosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Kong%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
 cas KONG.CAS
 sha1 ec570778b5d14436a83e77c80eb6e00590895419
+url https://download.file-hunter.com/Games/MSX1/CAS/Kong%20(1988)(Eurosoft)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Tank (1986)[Run'cas-',r / MSX Tank.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Tank%20(1986)%5BRun'cas-'%2Cr.zip
 cas MSX-TANK.CAS
 sha1 603fc3c2841a1f3358625372b27b899e4d924693
+url https://download.file-hunter.com/Games/MSX1/CAS/Tank%20(1986)%5BRun%27cas-%27%2Cr.zip

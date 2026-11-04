@@ -1,4 +1,4 @@
 # Base de Datos (1985)(DIMensionNEW)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Base%20de%20Datos%20(1985)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
 cas BASE-DE.CAS
 sha1 a3f61481c156538fd26d42e9d48c47419075f111
+url https://download.file-hunter.com/Games/MSX1/CAS/Base%20de%20Datos%20(1985)(DIMensionNEW)(es)%5BRUN%27CAS-%27%5D.zip

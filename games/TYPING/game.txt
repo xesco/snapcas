@@ -1,4 +1,4 @@
 # Typing Tutor (1985)(Sanyo)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Typing%20Tutor%20(1985)(Sanyo)%5BCLOAD%20%2B%20RUN%5D.zip
 cas TYPING.CAS
 sha1 e3eb0ca2633cd5d099ea3937d400a6f123e30013
+url https://download.file-hunter.com/Games/MSX1/CAS/Typing%20Tutor%20(1985)(Sanyo)%5BCLOAD%20%2B%20RUN%5D.zip

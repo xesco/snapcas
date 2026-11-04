@@ -1,4 +1,4 @@
 # Leyendas (19xx)(Mind Games Espana)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Leyendas%20(19xx)(Mind%20Games%20Espana)(es)%5BRUN'CAS-'%5D.zip
 cas LEYENDAS.CAS
 sha1 76bcda8b8680408b43525d096644148342ccfec4
+url https://download.file-hunter.com/Games/MSX1/CAS/Leyendas%20(19xx)(Mind%20Games%20Espana)(es)%5BRUN%27CAS-%27%5D.zip

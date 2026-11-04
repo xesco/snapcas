@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 057-Azul y rosa.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 057-AZUL.CAS
 sha1 cb0d9da08c29012f71144a3e493c22adcf5e662f
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

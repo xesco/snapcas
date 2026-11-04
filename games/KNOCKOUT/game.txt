@@ -1,4 +1,4 @@
 # Knockout (1985)(Alligata Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Knockout%20(1985)(Alligata%20Software)%5BRUN'CAS-'%5D.zip
 cas KNOCKOUT.CAS
 sha1 acdf07679c7baeb92ba01793e0d1d4c62e6598a6
+url https://download.file-hunter.com/Games/MSX1/CAS/Knockout%20(1985)(Alligata%20Software)%5BRUN%27CAS-%27%5D.zip

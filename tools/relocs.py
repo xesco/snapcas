@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Append to SERVICE.BIN the offsets of the bytes that move with its page 3
-part (docs/DESIGN.md, SERVICE.BIN).
+part (docs/FORMATS.md, SERVICE.BIN).
 
 Usage: relocs.py <SERVICE.BIN at FCh> <SERVICE.BIN at FBh> <output>
 

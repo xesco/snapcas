@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 090-Maziacs.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 090-MAZI.CAS
 sha1 22693cf223f89b79006e121fbc4d4dbcbf28e30a
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

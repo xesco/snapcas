@@ -1,5 +1,5 @@
 # Satan (1989)(Dinamic Software)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Satan%20(1989)(Dinamic%20Software)(Side%20A)%5BRUN'CAS-'%5D.zip
 # Part 1. Side B, part 2, loads from BASIC on its own, in games/SATAN2.
 cas SATAN.CAS
 sha1 11ac33530518b1296a689e430e90996df39145cd
+url https://download.file-hunter.com/Games/MSX1/CAS/Satan%20(1989)(Dinamic%20Software)(Side%20A)%5BRUN%27CAS-%27%5D.zip

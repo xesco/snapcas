@@ -1,4 +1,4 @@
-; SNAPCAS.COM, the snapcas restorer (docs/DESIGN.md, Restorer).
+; SNAPCAS.COM, the snapcas restorer (docs/INTERNALS.md, Restorer).
 ;
 ; SNAPCAS <GAME> restores <GAME>.SNP, the snapshot of a cassette game, and
 ; starts the game.
@@ -34,7 +34,7 @@ EXPTBL  equ 0FCC1h      ; the main ROM's slot ID, then one byte per slot
 SLTTBL  equ 0FCC5h      ; the subslot register of each slot
 EXTBIO  equ 0FFCAh      ; MSX-DOS 2's extended BIOS
 
-; The image (DESIGN.md, Image).
+; The image (FORMATS.md, Image).
 HDR     equ 2800h       ; the image's first 4,096 bytes
 H_ROM   equ HDR+8
 H_SUBROM equ HDR+10
@@ -71,7 +71,7 @@ start:
         ld de,t_usage
         jp z,stop_message
         ; /M in the command line, its length at 0080h and its text after it,
-        ; asks for the manual tape (DESIGN.md, The manual tape). It is read
+        ; asks for the manual tape (INTERNALS.md, The manual tape). It is read
         ; first, before a DOS call can use 0080h.
         ld hl,0080h
         ld b,(hl)
@@ -1308,7 +1308,7 @@ fill:
         ret
 
 ; When the record at IX holds the tail, fills in the values that depend on
-; this machine (DESIGN.md, Tail): the worker's page's mapper register and its
+; this machine (FORMATS.md, Tail): the worker's page's mapper register and its
 ; value, and the slot register. HL is where the record is.
 fill_tail:
         ld a,(tail_page)

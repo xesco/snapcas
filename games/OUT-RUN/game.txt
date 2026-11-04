@@ -1,4 +1,4 @@
 # Out Run (1988)(US Gold)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Out%20Run%20(1988)(US%20Gold)%5BRUN'CAS-'%5D.zip
 cas OUT-RUN.CAS
 sha1 d6aa224e5b37ab95926a905a030fe6195e01012e
+url https://download.file-hunter.com/Games/MSX1/CAS/Out%20Run%20(1988)(US%20Gold)%5BRUN%27CAS-%27%5D.zip

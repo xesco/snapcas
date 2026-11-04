@@ -1,4 +1,4 @@
 # Cavit (2021)(Inufuto)
-# https://download.file-hunter.com/Games/MSX1/CAS/Cavit%20(2021)(Inufuto).zip
 cas CAVIT.CAS
 sha1 29c1410a174bdccbc84d77130f3afbcc2effdab7
+url https://download.file-hunter.com/Games/MSX1/CAS/Cavit%20(2021)(Inufuto).zip

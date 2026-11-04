@@ -1,4 +1,4 @@
 # Dungeon Adventure - Text Only (1984)(Level 9 Computing)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Dungeon%20Adventure%20-%20Text%20Only%20(1984)(Level%209%20Computing)%5BRUN'CAS-'%5D.zip
 cas DUNGEON.CAS
 sha1 f48c8ff6e609fb02e4d7006ddc03ab74d9f0136f
+url https://download.file-hunter.com/Games/MSX1/CAS/Dungeon%20Adventure%20-%20Text%20Only%20(1984)(Level%209%20Computing)%5BRUN%27CAS-%27%5D.zip

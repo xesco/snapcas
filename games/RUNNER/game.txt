@@ -1,4 +1,4 @@
 # Runner (1986)(Loriciels)(fr)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Runner%20(1986)(Loriciels)(fr)%5BRUN'CAS-'%5D.zip
 cas RUNNER.CAS
 sha1 d75ef8e9d81f1926f79ce21d9f601d0ca8299da0
+url https://download.file-hunter.com/Games/MSX1/CAS/Runner%20(1986)(Loriciels)(fr)%5BRUN%27CAS-%27%5D.zip

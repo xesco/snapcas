@@ -1,4 +1,4 @@
 # Thor (1988)(Proein Soft Line)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Thor%20(1988)(Proein%20Soft%20Line)(es)%5BRUN'CAS-'%5D.zip
 cas THOR.CAS
 sha1 0f0dcf260076ca869678e0b0cf7fbe04d66d838e
+url https://download.file-hunter.com/Games/MSX1/CAS/Thor%20(1988)(Proein%20Soft%20Line)(es)%5BRUN%27CAS-%27%5D.zip

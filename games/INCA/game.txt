@@ -1,4 +1,4 @@
 # Inca (1987)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Inca%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas INCA.CAS
 sha1 b04e280295d89dc8b2b7b9a3001a50fe2de6ab58
+url https://download.file-hunter.com/Games/MSX1/CAS/Inca%20(1987)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

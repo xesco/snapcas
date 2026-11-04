@@ -1,8 +1,8 @@
 # Pirata, the first game on the tape Super MSX n.21 (maggio 1989) - cas_21 /
-# super_msx_21_lato_A.cas, after the issue's intro:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.21%20(maggio%201989)%20-%20cas_21.zip
+# super_msx_21_lato_A.cas, after the issue's intro.
 # It is a copy of Black Beard (Topo Soft), as edicola8bit lists it. It also has a
 # dump of its own (games/BLACKBEA). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=21
 cas SUPER21.CAS
 sha1 991bbcd2ccec644d3c1d1095965ee48f7d923d18
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.21%20(maggio%201989)%20-%20cas_21.zip

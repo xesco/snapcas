@@ -1,4 +1,4 @@
 # Temptations - Toposoft (1988)(Alternative version by Xesco)
-# https://download.file-hunter.com/Games/MSX1/CAS/Temptations%20-%20Toposoft%20(1988)(Alternative%20version%20by%20Xesco).zip
 cas TEMPTABY.CAS
 sha1 d42d0dd83490df8942b720873af9434c0c08fefc
+url https://download.file-hunter.com/Games/MSX1/CAS/Temptations%20-%20Toposoft%20(1988)(Alternative%20version%20by%20Xesco).zip

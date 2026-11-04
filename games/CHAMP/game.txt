@@ -1,4 +1,4 @@
 # Champ (1984)(PSS)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Champ%20(1984)(PSS)%5BBLOAD'CAS-'%2CR%5D.zip
 cas CHAMP.CAS
 sha1 a055cdc80309867c27b5914c90e5ee20122a4720
+url https://download.file-hunter.com/Games/MSX1/CAS/Champ%20(1984)(PSS)%5BBLOAD%27CAS-%27%2CR%5D.zip

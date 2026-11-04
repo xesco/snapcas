@@ -1,4 +1,4 @@
 # Mac Attack (1986)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Mac%20Attack%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas MAC-ATTA.CAS
 sha1 45b817e31a83f8c127e2104672e45d70ce66478f
+url https://download.file-hunter.com/Games/MSX1/CAS/Mac%20Attack%20(1986)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

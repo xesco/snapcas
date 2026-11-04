@@ -1,4 +1,4 @@
 # 180 (1987)(Mastertronic Added Dimension)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/180%20(1987)(Mastertronic%20Added%20Dimension)%5BRUN'CAS-'%5D.zip
 cas 180.CAS
 sha1 8ba4577f331f1e1385adee5dc52f092b8a63e96f
+url https://download.file-hunter.com/Games/MSX1/CAS/180%20(1987)(Mastertronic%20Added%20Dimension)%5BRUN%27CAS-%27%5D.zip

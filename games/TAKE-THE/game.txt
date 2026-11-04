@@ -1,4 +1,4 @@
 # Take the B Train (198x)(Atorasu)
-# https://download.file-hunter.com/Games/MSX1/CAS/Take%20the%20B%20Train%20(198x)(Atorasu).zip
 cas TAKE-THE.CAS
 sha1 3233be3709ef3bd35fb776b83b53a2deb3352196
+url https://download.file-hunter.com/Games/MSX1/CAS/Take%20the%20B%20Train%20(198x)(Atorasu).zip

@@ -1,9 +1,9 @@
 # Dasshutsu, the sixteenth program on Technopolis Soft's For MSX Special, after W
-# Crash (games/FORMSXSP/WCRASH):
-# https://download.file-hunter.com/Games/MSX1/CAS/For%20MSX%20Special%20(1985)(Technopolis%20Soft).zip
+# Crash (games/FORMSXSP/WCRASH).
 # The title comes from the program's name on the tape (C0 DE AF BC AD C2h, in kana
 # ダッシュツ). The load starts at that BASIC program, as when the tape runs on after W
 # Crash.
 cas FOR-MSX.CAS
 sha1 81ea6916b986dbe9e88d8e7d130526152e43b776
+url https://download.file-hunter.com/Games/MSX1/CAS/For%20MSX%20Special%20(1985)(Technopolis%20Soft).zip
 start ÀÞ¯¼­Â

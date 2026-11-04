@@ -1,6 +1,5 @@
 # Natalino Folle, the sixth game on the tape Super MSX n.3 (luglio-agosto 1987) -
-# cas_3, after Dada Umpa (games/SUPERMSX/DADAUMPA):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.3%20(luglio-agosto%201987)%20-%20cas_3.zip
+# cas_3, after Dada Umpa (games/SUPERMSX/DADAUMPA).
 # It is a copy of Eggerland Mystery (HAL Laboratory), as edicola8bit lists it. It
 # also has a dump of its own (games/EGGERLAN). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=3
@@ -8,4 +7,5 @@
 # Umpa.
 cas SUPER-MS.CAS
 sha1 dcc09cf7d6e985053ac6cb96157c91847ebf7e40
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.3%20(luglio-agosto%201987)%20-%20cas_3.zip
 start NATA

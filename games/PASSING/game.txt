@@ -1,4 +1,4 @@
 # Passing Shot (1989)(Image Works)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Passing%20Shot%20(1989)(Image%20Works)%5BBLOAD'CAS-'%2CR%5D.zip
 cas PASSING.CAS
 sha1 ca1d0940029b9776745132a708cec68acb904fe4
+url https://download.file-hunter.com/Games/MSX1/CAS/Passing%20Shot%20(1989)(Image%20Works)%5BBLOAD%27CAS-%27%2CR%5D.zip

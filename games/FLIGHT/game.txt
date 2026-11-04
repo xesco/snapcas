@@ -1,4 +1,4 @@
 # Flight Deck II (1986)(Aackosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Flight%20Deck%20II%20(1986)(Aackosoft)%5BRUN'CAS-'%5D.zip
 cas FLIGHT.CAS
 sha1 4dce519d4e81af176bc9ded3d716ef0a0cb091f9
+url https://download.file-hunter.com/Games/MSX1/CAS/Flight%20Deck%20II%20(1986)(Aackosoft)%5BRUN%27CAS-%27%5D.zip

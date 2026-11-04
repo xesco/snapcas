@@ -1,4 +1,4 @@
 # Skramble (1985)(Aackosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Skramble%20(1985)(Aackosoft)%5BRUN'CAS-'%5D.zip
 cas SKRAMBLE.CAS
 sha1 5b3f2b831dfc8a78bd394ad7a0df1d3ae71f7e16
+url https://download.file-hunter.com/Games/MSX1/CAS/Skramble%20(1985)(Aackosoft)%5BRUN%27CAS-%27%5D.zip

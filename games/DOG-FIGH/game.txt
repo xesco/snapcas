@@ -1,4 +1,4 @@
 # Dog Fighter (1986)(Kuma Computers)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Dog%20Fighter%20(1986)(Kuma%20Computers)%5BBLOAD'CAS-'%2CR%5D.zip
 cas DOG-FIGH.CAS
 sha1 4c9ecd35b925cbe5bbe6fcbbfed6ab31cacb0739
+url https://download.file-hunter.com/Games/MSX1/CAS/Dog%20Fighter%20(1986)(Kuma%20Computers)%5BBLOAD%27CAS-%27%2CR%5D.zip

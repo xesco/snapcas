@@ -1,6 +1,5 @@
 # Goalgame, the second game on the tape Super MSX n.23 (settembre 1989) - cas_23 /
-# super_msx_23_lato_B.CAS, after Crossair (games/SUPERMSX/CROSSAIR):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.23%20(settembre%201989)%20-%20cas_23.zip
+# super_msx_23_lato_B.CAS, after Crossair (games/SUPERMSX/CROSSAIR).
 # It is a copy of Match Day II (Ocean), as edicola8bit lists it. It also has a
 # dump of its own (games/MATCH-DA). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=23
@@ -8,4 +7,5 @@
 # Crossair.
 cas SUPER23B.CAS
 sha1 cca9e481111050c59842beac90e47d91fd6c0219
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.23%20(settembre%201989)%20-%20cas_23.zip
 start GOALGA

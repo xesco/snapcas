@@ -1,4 +1,4 @@
 # Congo (1986)(LiveWire Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Congo%20(1986)(LiveWire%20Software)%5BRUN'CAS-'%5D.zip
 cas CONGO.CAS
 sha1 8f42d8238272112ff6ffdb4733d9c17bfb7a5c20
+url https://download.file-hunter.com/Games/MSX1/CAS/Congo%20(1986)(LiveWire%20Software)%5BRUN%27CAS-%27%5D.zip

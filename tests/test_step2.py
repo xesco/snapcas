@@ -1,7 +1,6 @@
 """Step 2 (docs/PLAN.md): the capture of single-load games.
 
-The CAS files come from the folder that CAS_DIR names; without it, the tests
-are skipped.
+The CAS files come from tests/tapes/, the tests' own tapes.
 """
 import concurrent.futures
 import filecmp
@@ -13,7 +12,7 @@ import sys
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CAS_DIR = os.environ.get("CAS_DIR", "")
+CAS_DIR = os.path.join(ROOT, "tests", "tapes")
 WORK = os.path.join(ROOT, "out", "test", "step2")
 
 # game: (CAS file, machine)
@@ -25,7 +24,7 @@ GAMES = {
     "abadia": ("ABADIA.CAS", "test/nms8250-128k"),
 }
 
-# The names of state.txt (DESIGN.md, Snapshot files).
+# The names of state.txt (FORMATS.md, Snapshot files).
 NAMES = ([r for r in "af bc de hl af2 bc2 de2 hl2 ix iy sp pc i im iff a8 ppic".split()]
          + [f"sub{n}" for n in range(4)] + ["fc", "fd", "fe", "ff"]
          + [f"psg{n}" for n in range(16)] + ["psgsel", "vramptr", "vramwrite",
@@ -58,7 +57,7 @@ def capture(game, folder=None):
     result = subprocess.run(
         [sys.executable, "-I", os.path.join(ROOT, "tools", "capture.py"), games, machine,
          "--tapes", CAS_DIR], capture_output=True, text=True)
-    snap = os.path.join(ROOT, "out", machine, folder_name(game), "snap")
+    snap = os.path.join(WORK, "games", folder_name(game), machine, "snap")
     if folder and result.returncode == 0:
         shutil.rmtree(folder, ignore_errors=True)
         shutil.copytree(snap, folder)

@@ -1,7 +1,7 @@
 # The Queens Footsteps Part 1 (2020)(Davide Bucci)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Queens%20Footsteps%20Part%201%20(2020)(Davide%20Bucci)%5BBLOAD'CAS-'%2CR%5D.zip
 cas THE-QUEE.CAS
 sha1 0a2954cdbe0dc6924f27c74060f06308693b95d3
+url https://download.file-hunter.com/Games/MSX1/CAS/The%20Queens%20Footsteps%20Part%201%20(2020)(Davide%20Bucci)%5BBLOAD%27CAS-%27%2CR%5D.zip
 
 # The loader calls TAPION once more after the tape's last block, so the snapshot
 # comes before that call.

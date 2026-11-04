@@ -1,4 +1,4 @@
 # Time Out (1988)(Zafiro Software Division)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Time%20Out%20(1988)(Zafiro%20Software%20Division)(es)%5BRUN'CAS-'%5D.zip
 cas TIME-OUT.CAS
 sha1 7e7c0a93f681a0fff5f1f7d9e5135c0ebb5fbe92
+url https://download.file-hunter.com/Games/MSX1/CAS/Time%20Out%20(1988)(Zafiro%20Software%20Division)(es)%5BRUN%27CAS-%27%5D.zip

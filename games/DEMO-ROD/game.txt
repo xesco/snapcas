@@ -1,4 +1,4 @@
 # Rodman demo - Misfit (2018)
-# https://download.file-hunter.com/Games/MSX1/CAS/Rodman%20demo%20-%20Misfit%20(2018).zip
 cas DEMO-ROD.CAS
 sha1 76eebf73fbe4b0492388062553598411778e4dbb
+url https://download.file-hunter.com/Games/MSX1/CAS/Rodman%20demo%20-%20Misfit%20(2018).zip

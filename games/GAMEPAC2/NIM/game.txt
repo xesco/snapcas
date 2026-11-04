@@ -1,7 +1,7 @@
 # The Game of Nim, the ninth program on Aackosoft's Game Pack 2, after Maxit
-# (games/GAMEPAC2/MAXIT):
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
+# (games/GAMEPAC2/MAXIT).
 # The load starts at the BASIC loader NIM, as when the tape runs on after Maxit.
 cas GAME-PAC.CAS
 sha1 e65f4e4dbabffd242081acc8d66b3ef107a9394c
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
 start NIM

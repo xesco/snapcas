@@ -1,4 +1,4 @@
 # Silicon Dreams III - The Worm in Paradise v2 (1986)(Level 9 Computing)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Silicon%20Dreams%20III%20-%20The%20Worm%20in%20Paradise%20v2%20(1986)(Level%209%20Computing)%5BRUN'CAS-'%5D.zip
 cas SILICIII.CAS
 sha1 762f49897cf54c84159a5a19b1010eefebb3f4c6
+url https://download.file-hunter.com/Games/MSX1/CAS/Silicon%20Dreams%20III%20-%20The%20Worm%20in%20Paradise%20v2%20(1986)(Level%209%20Computing)%5BRUN%27CAS-%27%5D.zip

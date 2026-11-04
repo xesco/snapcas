@@ -1,4 +1,4 @@
 # Frogger [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Frogger%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas FROGGER.CAS
 sha1 6a15c90882ead035a5a6a468ea016fcbc212ab15
+url https://download.file-hunter.com/Games/MSX1/CAS/Frogger%20%5BBLOAD%27CAS-%27%2CR%5D.zip

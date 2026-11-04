@@ -1,4 +1,4 @@
 # Antarctic Adventure (Pinguin) (Italy) [BLOAD'CAS-',R] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Antarctic%20Adventure%20(Pinguin)%20(Italy)%20%5BBLOAD'CAS-'%2CR%5D%20%5B_%5D.zip
 cas ANTARCAS.CAS
 sha1 912203276eb275da2375b625dba8a9b279ee86ca
+url https://download.file-hunter.com/Games/MSX1/CAS/Antarctic%20Adventure%20(Pinguin)%20(Italy)%20%5BBLOAD%27CAS-%27%2CR%5D%20%5B_%5D.zip

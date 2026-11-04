@@ -1,4 +1,4 @@
 # Kick It - MSX Compilation 5 (ByteBusters) (Aackosoft - Eaglesoft) [RUN'CAS-'] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Kick%20It%20-%20MSX%20Compilation%205%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
 cas KICK-IT.CAS
 sha1 fe9326d493753695abeb8b46fc1c95f3fb010c7a
+url https://download.file-hunter.com/Games/MSX1/CAS/Kick%20It%20-%20MSX%20Compilation%205%20(ByteBusters)%20(Aackosoft%20-%20Eaglesoft)%20%5BRUN%27CAS-%27%5D%20%5B_%5D.zip

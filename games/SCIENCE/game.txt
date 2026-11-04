@@ -1,4 +1,4 @@
 # Science Fiction (1986)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Science%20Fiction%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas SCIENCE.CAS
 sha1 f4294d69867d3be3f5f6dcbea286b3aee7f67945
+url https://download.file-hunter.com/Games/MSX1/CAS/Science%20Fiction%20(1986)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

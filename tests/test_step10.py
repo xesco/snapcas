@@ -1,5 +1,5 @@
 """Step 10 (docs/PLAN.md): the automatic fixes, each on a game that needed a
-game file line by hand, without that line (DESIGN.md, Slot patches, Without a
+game file line by hand, without that line (INTERNALS.md, Slot patches, Without a
 part in page 3, and Files and commands)."""
 import concurrent.futures
 import os
@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 import patches  # noqa: E402
 import test_step4  # noqa: E402
 
-COLLECTION = os.environ.get("COLLECTION_DIR", os.path.join(test_step4.CAS_DIR, "collection"))
+COLLECTION = test_step4.CAS_DIR
 WORK = os.path.join(ROOT, "out", "test", "step10")
 
 
@@ -35,17 +35,16 @@ def game(key, name, machine, lines):
 
 
 def make(folder, machine):
-    """snapcas.py on the game: capture, build and check."""
-    return test_step4.tool("snapcas.py", folder, machine, "--tapes", COLLECTION,
-                           "--dos", test_step4.MACHINES[machine][0])
+    """snapcas.py snap on the game: capture, build and check."""
+    return test_step4.command("snap", folder, machine, "--check", "--dos", test_step4.MACHINES[machine][0])
 
 
 def read(folder, machine, name):
-    with open(os.path.join(ROOT, "out", machine, os.path.basename(folder), name)) as f:
+    with open(os.path.join(folder, machine, name)) as f:
         return f.read()
 
 
-# The runs of snapcas.py, by key: the shipped game, the machine, and the lines
+# The runs of snapcas.py snap, by key: the shipped game, the machine, and the lines
 # of the machine's game file. setUpModule runs them at once, and the tests
 # read their results.
 RUNS = {
@@ -75,14 +74,14 @@ class SlotPatches(unittest.TestCase):
         found = patches.find(bytes.fromhex("F5 3E EF D3 A8"), patches.Context(slots=slots, tape=False))
         self.assertEqual([(f.offset, f.new) for f in found], [(1, bytes.fromhex("3E A6 D3 A8"))])
 
-    @unittest.skipUnless(has("SOOTLAND.CAS"), "COLLECTION_DIR holds no SOOTLAND.CAS")
+    @unittest.skipUnless(has("SOOTLAND.CAS"), "CAS_DIR holds no SOOTLAND.CAS")
     def test_the_capture_patches_sootlands_slot_value(self):
         folder, result = RESULTS["sootland"]
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("patch side1:24E 3E FC D3 A8 > 3E 14 D3 A8",
                       read(folder, "phc28s-ram64k-carnivore2", "snap/patches.txt"))
 
-    @unittest.skipUnless(has("FINDERIN.CAS"), "COLLECTION_DIR holds no FINDERIN.CAS")
+    @unittest.skipUnless(has("FINDERIN.CAS"), "CAS_DIR holds no FINDERIN.CAS")
     def test_the_capture_and_the_scan_patch_finders_keepers_wslreg_calls(self):
         folder, result = RESULTS["finderin"]
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -96,7 +95,7 @@ class SlotPatches(unittest.TestCase):
 
 
 class WithoutPage3(unittest.TestCase):
-    @unittest.skipUnless(has("CHASE-H.CAS"), "COLLECTION_DIR holds no CHASE-H.CAS")
+    @unittest.skipUnless(has("CHASE-H.CAS"), "CAS_DIR holds no CHASE-H.CAS")
     def test_chase_hq_gets_the_mode_without_a_part_in_page_3(self):
         folder, result = RESULTS["chase-h"]
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -105,7 +104,7 @@ class WithoutPage3(unittest.TestCase):
 
 class Variants(unittest.TestCase):
     # La Abadia del Crimen needed the variant until the RAM search patch.
-    @unittest.skipUnless(has("SOOTLAND.CAS"), "COLLECTION_DIR holds no SOOTLAND.CAS")
+    @unittest.skipUnless(has("SOOTLAND.CAS"), "CAS_DIR holds no SOOTLAND.CAS")
     def test_snapcas_py_finds_sootlands_capture_variant(self):
         folder, result = RESULTS["sootland-variant"]
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

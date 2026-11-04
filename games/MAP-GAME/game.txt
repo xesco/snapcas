@@ -1,4 +1,4 @@
 # Map Game (1985)(Erbe Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Map%20Game%20(1985)(Erbe%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas MAP-GAME.CAS
 sha1 c5c352bc499fab2f2ff5b69fa1cb9a8bb8def309
+url https://download.file-hunter.com/Games/MSX1/CAS/Map%20Game%20(1985)(Erbe%20Software)(es)%5BRUN%27CAS-%27%5D.zip

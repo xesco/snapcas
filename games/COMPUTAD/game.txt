@@ -1,4 +1,4 @@
 # Computadora Adivina (1985)(Sony)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Computadora%20Adivina%20(1985)(Sony)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas COMPUTAD.CAS
 sha1 f9700ccdfd443930f59323df2074d43f5263e452
+url https://download.file-hunter.com/Games/MSX1/CAS/Computadora%20Adivina%20(1985)(Sony)(es)%5BCLOAD%20%2B%20RUN%5D.zip

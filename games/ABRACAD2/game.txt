@@ -1,4 +1,4 @@
 # Abracadabra (1988)(Proein Soft Line)(es)(Side B)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Abracadabra%20(1988)(Proein%20Soft%20Line)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
 cas ABRACADB.CAS
 sha1 c16012937cb4a81e56c5bf0db6e9ef56cae8f1fa
+url https://download.file-hunter.com/Games/MSX1/CAS/Abracadabra%20(1988)(Proein%20Soft%20Line)(es)(Side%20B)%5BRUN%27CAS-%27%5D.zip

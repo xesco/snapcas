@@ -1,6 +1,5 @@
 # Adventor, the eighth game on the tape Super MSX n.27 (febbraio 1990) - cas_27,
-# after Jino Ninja (games/SUPERMSX/JINONINJ):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.27%20(febbraio%201990)%20-%20cas_27.zip
+# after Jino Ninja (games/SUPERMSX/JINONINJ).
 # It is a copy of Pentagram (Ultimate), as edicola8bit lists it. It also has a
 # dump of its own (games/PENTAGRA). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=27
@@ -8,4 +7,5 @@
 # Ninja.
 cas SUPER-27.CAS
 sha1 0dfacc50927cc042385de204ea208888d2b35dd8
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.27%20(febbraio%201990)%20-%20cas_27.zip
 start ADVENT

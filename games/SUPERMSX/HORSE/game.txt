@@ -1,7 +1,7 @@
 # Horse, the first game on the tape Super MSX n.19 (febbraio 1989) - cas_19 /
-# super msx 19 lato B.cas:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.19%20(febbraio%201989)%20-%20cas_19.zip
+# super msx 19 lato B.cas.
 # It is a copy of Exciting Jockey, as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=19
 cas SUPER19B.CAS
 sha1 f2627777fcf65ba6e4a781f22eb9f9477d5c969d
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.19%20(febbraio%201989)%20-%20cas_19.zip

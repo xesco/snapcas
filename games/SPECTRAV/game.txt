@@ -1,4 +1,4 @@
 # Spectravideo SVI-728 Introduction-Demonstration (1984)(Spectravideo)
-# https://download.file-hunter.com/Games/MSX1/CAS/Spectravideo%20SVI-728%20Introduction-Demonstration%20(1984)(Spectravideo).zip
 cas SPECTRAV.CAS
 sha1 f79b1007210a2fad41e56bbb4251af7a4dfa3834
+url https://download.file-hunter.com/Games/MSX1/CAS/Spectravideo%20SVI-728%20Introduction-Demonstration%20(1984)(Spectravideo).zip

@@ -1,4 +1,4 @@
 # Knight Orc - Part 2 - A Kind of Magic (1987)(Rainbird Software)[passworded][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Orc%20-%20Part%202%20-%20A%20Kind%20of%20Magic%20(1987)(Rainbird%20Software)%5Bpassworded%5D%5BRUN'CAS-'%5D.zip
 cas KNIGHRUN.CAS
 sha1 09ba7aa0bcf960a237410c67c5da389cbb766eb1
+url https://download.file-hunter.com/Games/MSX1/CAS/Knight%20Orc%20-%20Part%202%20-%20A%20Kind%20of%20Magic%20(1987)(Rainbird%20Software)%5Bpassworded%5D%5BRUN%27CAS-%27%5D.zip

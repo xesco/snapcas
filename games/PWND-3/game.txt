@@ -1,4 +1,4 @@
 # Pwnd 3 (2019) (Metal Soft) (v1.1) [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Pwnd%203%20(2019)%20(Metal%20Soft)%20(v1.1)%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas PWND-3.CAS
 sha1 d76a21ffdade8df30e2872013c6506127aa20444
+url https://download.file-hunter.com/Games/MSX1/CAS/Pwnd%203%20(2019)%20(Metal%20Soft)%20(v1.1)%20%5BBLOAD%27CAS-%27%2CR%5D.zip

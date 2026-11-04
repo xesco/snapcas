@@ -1,4 +1,4 @@
 # Thing Bounces Back (1987)(Gremlin Graphics Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Thing%20Bounces%20Back%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas THING-BO.CAS
 sha1 45229777fba081ddf6a4b25c08cf878b4b8219c7
+url https://download.file-hunter.com/Games/MSX1/CAS/Thing%20Bounces%20Back%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

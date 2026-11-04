@@ -1,4 +1,4 @@
 # WEC Le Mans (1988)(Imagine Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/WEC%20Le%20Mans%20(1988)(Imagine%20Software)%5BRUN'CAS-'%5D.zip
 cas WEC-LE.CAS
 sha1 a6ca1a129d02e6ca60efa657556db94f8e29aaca
+url https://download.file-hunter.com/Games/MSX1/CAS/WEC%20Le%20Mans%20(1988)(Imagine%20Software)%5BRUN%27CAS-%27%5D.zip

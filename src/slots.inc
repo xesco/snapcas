@@ -1,5 +1,5 @@
 ; Slot selection in one page, shared by the restorer and its worker
-; (docs/DESIGN.md, Restorer). The slot register is port A8h, with 2 bits per
+; (docs/INTERNALS.md, Restorer). The slot register is port A8h, with 2 bits per
 ; page. An expanded slot's subslot register is at FFFFh of that slot, readable
 ; only while page 3 selects the slot, and it reads back inverted (MSX Red Book,
 ; chapter 1).

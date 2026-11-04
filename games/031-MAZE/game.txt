@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 031-Mazes Unlimited.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 031-MAZE.CAS
 sha1 9c2642643304679fd8edc03b9d5559be11d85df6
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

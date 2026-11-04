@@ -1,4 +1,4 @@
 # Toobin' (1989)(Domark)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Toobin'%20(1989)(Domark)%5BBLOAD'CAS-'%2CR%5D.zip
 cas TOOBIN.CAS
 sha1 9c5f91aac959f287b5250ac1dea5ea801e749a7b
+url https://download.file-hunter.com/Games/MSX1/CAS/Toobin%27%20(1989)(Domark)%5BBLOAD%27CAS-%27%2CR%5D.zip

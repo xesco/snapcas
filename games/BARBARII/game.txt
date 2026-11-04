@@ -1,4 +1,4 @@
 # Barbarian II - The Dungeon of Drax (1988)(Erbe Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Barbarian%20II%20-%20The%20Dungeon%20of%20Drax%20(1988)(Erbe%20Software)%5BRUN'CAS-'%5D.zip
 cas BARBARII.CAS
 sha1 36b6c31583ba22007c0407d3e306db45e0ab3c85
+url https://download.file-hunter.com/Games/MSX1/CAS/Barbarian%20II%20-%20The%20Dungeon%20of%20Drax%20(1988)(Erbe%20Software)%5BRUN%27CAS-%27%5D.zip

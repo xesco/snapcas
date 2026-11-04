@@ -1,4 +1,4 @@
 # Booty (1988)(Eurosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Booty%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
 cas BOOTY.CAS
 sha1 227d0b7d2b3479e8f6e88777068181afddee66ed
+url https://download.file-hunter.com/Games/MSX1/CAS/Booty%20(1988)(Eurosoft)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Barbarian (1988)(Mastertronic)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Barbarian%20(1988)(Mastertronic)(es)%5BRUN'CAS-'%5D.zip
 cas BARBARIA.CAS
 sha1 4e560787ea8f49f66c8cda664055b1fb36a1e419
+url https://download.file-hunter.com/Games/MSX1/CAS/Barbarian%20(1988)(Mastertronic)(es)%5BRUN%27CAS-%27%5D.zip

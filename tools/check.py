@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Run a game's restorer in openMSX and check the restore (docs/DESIGN.md,
+"""Run a game's restorer in openMSX and check the restore (docs/INTERNALS.md,
 Check).
 
 Usage: check.py <game> <machine> --dos <dir>
 
 <game> and <machine> are as for capture.py. <dir> holds the DOS system files:
 NEXTOR.SYS and COMMAND2.COM, MSXDOS2.SYS and COMMAND2.COM, or MSXDOS.SYS and
-COMMAND.COM. The report goes to out/<machine>/<game>/check/report.txt.
+COMMAND.COM. The report goes to check/report.txt in the game's work folder.
 
 Exit status: 0 when the check passes, 1 for an error in the input files, 2
 when openMSX fails, 3 when the check fails.
@@ -29,7 +29,7 @@ TIMEOUT = 600  # real seconds for one check
 
 
 def read_facts(out):
-    """build.txt's facts (DESIGN.md, Check): the service flag, the patched
+    """build.txt's facts (INTERNALS.md, Check): the service flag, the patched
     ranges, and the tape service's part, moved part and C_POS's address, each
     as a Tcl list, empty when the image has none."""
     facts = {"service": "0", "patched": [], "part": "", "moved": "", "cpos": "0"}
@@ -46,7 +46,7 @@ def read_facts(out):
 
 def capture_reset(snap):
     """The seconds from the snapshot to the first reset that the capture's log
-    holds in the 60 seconds after it, or "" (DESIGN.md, Check, point 3)."""
+    holds in the 60 seconds after it, or "" (INTERNALS.md, Check, point 3)."""
     snapshot = None
     with open(os.path.join(snap, "log.txt")) as f:
         for line in f:
@@ -106,7 +106,7 @@ def main():
             raise OSError(f"{args.dos}: no DOS system files")
         out = gamefile.out_folder(args.machine, folder)
         snap = os.path.join(out, "snap")
-        image = os.path.join(out, f"{game.name}.SNP")
+        image = gamefile.image_path(args.machine, folder, game.name)
         state = build.read_state(snap)
         if not os.path.exists(image):
             raise OSError(f"{image}: no image; run build.py first")

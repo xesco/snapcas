@@ -1,4 +1,4 @@
 # Fantastic Footbal v1.0 (2021)
-# https://download.file-hunter.com/Games/MSX1/CAS/Fantastic%20Footbal%20v1.0%20(2021).zip
 cas FANTASTI.CAS
 sha1 c5c601bb6de2b37fbb4339f670b5269c8ea5fa63
+url https://download.file-hunter.com/Games/MSX1/CAS/Fantastic%20Footbal%20v1.0%20(2021).zip

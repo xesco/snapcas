@@ -1,4 +1,4 @@
 # Guillermo Tell (1989)(Opera Soft)(es)[gunstick][BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Guillermo%20Tell%20(1989)(Opera%20Soft)(es)%5Bgunstick%5D%5BBLOAD'CAS-'%2CR%5D.zip
 cas GUILLERM.CAS
 sha1 ab6d68ce76bd8314c5c816ab0cd43ec374aadbee
+url https://download.file-hunter.com/Games/MSX1/CAS/Guillermo%20Tell%20(1989)(Opera%20Soft)(es)%5Bgunstick%5D%5BBLOAD%27CAS-%27%2CR%5D.zip

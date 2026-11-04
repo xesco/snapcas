@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Write a game's image from its snapshot (docs/DESIGN.md, Build).
+"""Write a game's image from its snapshot (docs/INTERNALS.md, Build).
 
 Usage: build.py <game> <machine> --tapes <dir> [--service <file>]
 
-<game> and <machine> are as for capture.py. The image goes to
-out/<machine>/<game>/<GAME>.SNP, with scan.txt beside it. --service names the
-SERVICE.BIN to use, by default bin/SERVICE.BIN.
+<game> and <machine> are as for capture.py. The image, <GAME>.SNP, scan.txt and
+build.txt go to the game's work folder (gamefile.out_folder). --service names
+the SERVICE.BIN to use, by default bin/SERVICE.BIN.
 
 Exit status: 0 on success, 1 for an error in the input files.
 """
@@ -31,7 +31,7 @@ FLAG_ROM_KEEP = 1  # header byte 14, bit 0: T0 does not replace the ROM
 FLAG_T0 = 2  # bit 1: the tape service without a part in page 3
 DEFAULT_PAGE = patches.tape.ENTRY_PAGE  # the page of the service's page 3 part, as assembled
 
-# Record types (DESIGN.md, Image).
+# Record types (FORMATS.md, Image).
 RAM_IN_MAPPER, RAM, SERVICE_SEGMENT, VRAM, VRAM_ZEROS = 1, 2, 3, 4, 5
 
 
@@ -69,7 +69,7 @@ def num(state, name):
 def read_service(path, page=DEFAULT_PAGE):
     """SERVICE.BIN's parts: [bytes], checked against its version byte, with
     the page 3 part moved to page: its last part lists the bytes that add the
-    difference (DESIGN.md, SERVICE.BIN)."""
+    difference (FORMATS.md, SERVICE.BIN)."""
     with open(path, "rb") as f:
         data = bytearray(f.read())
     if not data or data[0] != SERVICE_VERSION:
@@ -152,7 +152,7 @@ def place_tail(state, pages, tail):
 
 
 def port_writes(state, v9938):
-    """The PSG, PPI and VDP state as (port, value) writes (DESIGN.md, Port
+    """The PSG, PPI and VDP state as (port, value) writes (FORMATS.md, Port
     writes)."""
     w = []
     for r in range(16):
@@ -184,7 +184,7 @@ def port_writes(state, v9938):
 
 
 # The BIOS's jump table entries for the tape and the addresses that they must
-# jump to (DESIGN.md, Tape service).
+# jump to (INTERNALS.md, Tape service).
 TAPE_ENTRIES = {0x00E1: 0x1A63, 0x00E4: 0x1ABC, 0x00E7: 0x19E9, 0x00EA: 0x19F1,
                 0x00ED: 0x1A19, 0x00F0: 0x19DD, 0x0018: 0x1B45}
 TAPE_CODE = 0x19DD
@@ -201,7 +201,7 @@ def service_page(state, pages, length, wanted=None):
     """The page of the service's page 3 part, which starts at E1h of it: the
     game file's, FCh when FCC9h to FD88h are zero, or else the highest page
     below the BIOS's work area whose bytes there are zero, or None when no part
-    has room (DESIGN.md, Build)."""
+    has room (INTERNALS.md, Build)."""
     p3 = selected_page(state, pages, 3)
     if p3 is None:
         raise BuildError("page 3 is not a RAM page that the snapshot keeps")
@@ -228,7 +228,7 @@ def borrowed_page(state, pages):
     T0's data for it: TAPIN's byte, the slot register's mask for the page, the
     restorer's byte, the mapper register's port, the page's first address's
     high byte and the game's segment there. The page is page 2 or page 1, the
-    first that is in a mapper at the snapshot, or else page 2 (DESIGN.md,
+    first that is in a mapper at the snapshot, or else page 2 (INTERNALS.md,
     Without a part in page 3)."""
     mapped = [page for page in (2, 1) if getattr(selected_page(state, pages, page), "seg", None) is not None]
     page = (mapped + [2])[0]
@@ -291,7 +291,7 @@ def write_page3_part(p3, page3, page, tail_address, e_fc, state):
 def service_segments(snap, parts, side1, side2, pages, state, tail_address, page, t0_mode):
     """T0, then the code segment and the tape, or only the tape without a part
     in page 3, as 16 KB blocks, after writing the service's part of page 3
-    into the game's page 3 at page's E1h (DESIGN.md, Tape service)."""
+    into the game's page 3 at page's E1h (INTERNALS.md, Tape service)."""
     _, stubs, page3, code, fields, t0m, t0m_fields = parts[:7]
     stmotr, c_pos, segs_max, e_fc, c_border, _ = struct.unpack("<6H", fields)
     t0 = tape_rom(snap)
@@ -347,7 +347,7 @@ def scan_snapshot(state, pages, side1, side2, page, slots, with_tape=True, patch
                   patched=None):
     """Patches the scan's findings in the RAM pages, for the entries at page's
     E1h, and returns scan.txt's text, with the findings in the unread blocks:
-    side 1 from the tape position, and side 2 (DESIGN.md, Scan), at their
+    side 1 from the tape position, and side 2 (INTERNALS.md, Scan), at their
     offsets in the tape files of blocks. Without with_tape, it looks only for
     fixed slot values, and without patch, it patches only those. patched,
     a dict, gets each ram/ file's patched ranges for the check."""
@@ -371,7 +371,7 @@ def scan_snapshot(state, pages, side1, side2, page, slots, with_tape=True, patch
         unread = num(state, "tapepos")
         context = patches.Context(page, slots)
         found = [[f for f in patches.find(side1, context) if f.offset >= unread], patches.find(side2, context)]
-        # A patch line's offset is an offset in the tape file (DESIGN.md, Tape
+        # A patch line's offset is an offset in the tape file (INTERNALS.md, Tape
         # files): a CAS file's offsets are the tape service's, and a TSX file's are
         # found through the blocks.
         for side, side_blocks in zip(found, blocks):
@@ -456,7 +456,7 @@ def service_mode(state, pages, length, game):
     """The page of the service's page 3 part, 0 without one, and whether the
     image has the mode without a part in page 3: by the game file's service
     t0, or when page 3 has no room for the part's length. A game file with rom
-    keep cannot take that mode (DESIGN.md, Game file)."""
+    keep cannot take that mode (FILES.md, Game file)."""
     if state["service"] != "1":
         return 0, False
     if game.service != "t0":
@@ -494,7 +494,7 @@ def records_and_data(snap, pages, service):
 
 
 def image_header(snap, state, records, writes, flags, page, borrowed, tail_address):
-    """The image's header and tables (DESIGN.md, Image)."""
+    """The image's header and tables (FORMATS.md, Image)."""
     with open(os.path.join(snap, "rom.bin"), "rb") as f:
         rom = crc16(f.read())
     subrom_path = os.path.join(snap, "subrom.bin")
@@ -536,7 +536,7 @@ def image_header(snap, state, records, writes, flags, page, borrowed, tail_addre
 def check_unread(state, blocks, names, service_no):
     """Stops when a non-standard block follows the snapshot: the game reads it
     with its own loader, which the tape service cannot serve, unless the game
-    file has service no (DESIGN.md, Tape files)."""
+    file has service no (INTERNALS.md, Tape files)."""
     if service_no or not any(not b.standard and b.data for side in blocks for b in side):
         return
     if "tapetime" not in state:
@@ -559,7 +559,7 @@ def build(snap, service_path, game, side1=b"", side2=b"", patch_lines=()):
     state = read_state(snap)
     slots = patches.slots.read_slots(snap)
     names = (game.tape, game.side2 or "")
-    # The tape service's tapes of the played files (DESIGN.md, Tape files).
+    # The tape service's tapes of the played files (INTERNALS.md, Tape files).
     blocks = (tape.read(names[0], side1) if side1 else [], tape.read(names[1], side2) if side2 else [])
     check_unread(state, blocks, names, game.service == "no")
     side1, side2 = tape.service(blocks[0]), tape.service(blocks[1])
@@ -605,14 +605,14 @@ def build(snap, service_path, game, side1=b"", side2=b"", patch_lines=()):
 
 
 def check_facts(state, pages, parts, page, service, ranges):
-    """build.txt's text: what the check takes from the build (DESIGN.md,
+    """build.txt's text: what the check takes from the build (INTERNALS.md,
     Check). The tape service's part of page 3, when the image has one, is
     {first last E_INSIDE segment} without the scratch bytes from e_sp on, which
     the service sets before it reads them, with page 3's mapper segment at the
     snapshot, or -1 outside a mapper. When the part moved from FCE1h, moved is
     its first and last byte. cpos is the address of C_POS in the code segment,
     selected in page 1."""
-    lines = ["# What the check takes from the build (docs/DESIGN.md, Check).",
+    lines = ["# What the check takes from the build (docs/INTERNALS.md, Check).",
              f"service {1 if service else 0}"]
     lines += [f"patched {r}" for r in ranges]
     if page:
@@ -649,7 +649,7 @@ def played_tapes(game, tapes_dir, captured=()):
     The game file's patch lines fit the downloaded files, so they come first.
     With a start line, side 1 is then the copy from that file on, and the
     capture's patches, captured, fit the file that it played, so they come last
-    (DESIGN.md, A game later on the tape)."""
+    (INTERNALS.md, A game later on the tape)."""
     side1, side2 = patch_sides(game.patches, *read_tapes(game, tapes_dir))
     if game.start:
         side1 = tape.start_copy(game.tape, side1, game.start)
@@ -677,7 +677,7 @@ def main():
     except (OSError, gamefile.GameFileError, BuildError, tape.TapeError) as e:
         print(f"build.py: {e}", file=sys.stderr)
         return 1
-    image = os.path.join(out, f"{game.name}.SNP")
+    image = gamefile.image_path(args.machine, folder, game.name)
     with open(image, "wb") as f:
         f.write(header)
         for chunk in data:

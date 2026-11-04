@@ -1,5 +1,5 @@
 # Power Drift (1989)(Activision)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Power%20Drift%20(1989)(Activision)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas POWER-DR.CAS
 side2 POWERB.CAS
 sha1 1f9a991af6292753a41b27c29efdbf946b5c1388 02df68dfb60701c4d35eead377aa006394516c4d
+url https://download.file-hunter.com/Games/MSX1/CAS/Power%20Drift%20(1989)(Activision)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Power%20Drift%20(1989)(Activision)(Side%20B)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Rath-Tha (1989)(Positive)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Rath-Tha%20(1989)(Positive)(es)%5BRUN'CAS-'%5D.zip
 cas RATH-THA.CAS
 sha1 7c1597b068aee0fe1b2a1999935ac71cb105f4c5
+url https://download.file-hunter.com/Games/MSX1/CAS/Rath-Tha%20(1989)(Positive)(es)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Heist, The (1985)(Aackosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Heist%2C%20The%20(1985)(Aackosoft)%5BRUN'CAS-'%5D.zip
 cas HEIST-TH.CAS
 sha1 a99bd93b295e137c449304bec5981e5d0d7824c9
+url https://download.file-hunter.com/Games/MSX1/CAS/Heist%2C%20The%20(1985)(Aackosoft)%5BRUN%27CAS-%27%5D.zip

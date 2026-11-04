@@ -1,4 +1,4 @@
 # Mr. Jaws (1987)(The Bytebusters)
-# https://download.file-hunter.com/Games/MSX1/CAS/Mr.%20Jaws%20(1987)(The%20Bytebusters).zip
 cas MR-JAWS.CAS
 sha1 194ee63a5745db10761a2bcad3cc8944bc7f5236
+url https://download.file-hunter.com/Games/MSX1/CAS/Mr.%20Jaws%20(1987)(The%20Bytebusters).zip

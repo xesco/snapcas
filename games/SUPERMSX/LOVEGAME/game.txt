@@ -1,6 +1,5 @@
 # Love Game, the second game on the tape Super MSX n.9 (febbraio 1988) - cas_9 /
-# SUPER09B.CAS, after Elicopter (games/SUPERMSX/ELICOPTE):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.9%20(febbraio%201988)%20-%20cas_9.zip
+# SUPER09B.CAS, after Elicopter (games/SUPERMSX/ELICOPTE).
 # It is a copy of Binary Land (Hudson Soft), as edicola8bit lists it. It also has
 # a dump of its own (games/BINARY). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=9
@@ -8,4 +7,5 @@
 # Elicopter.
 cas SUPERB.CAS
 sha1 09f3b40ac2697ec3eddc984ef6188b3a7ae6d034
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.9%20(febbraio%201988)%20-%20cas_9.zip
 start LOVE

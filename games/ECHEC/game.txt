@@ -1,4 +1,4 @@
 # Echec (1985)(Loriciels)[Side A)[RUN'CAS-',r]
-# https://download.file-hunter.com/Games/MSX1/CAS/Echec%20(1985)(Loriciels)%5BSide%20A)%5BRUN'CAS-'%2Cr%5D.zip
 cas ECHEC.CAS
 sha1 28853cedcd8ab5b4f71b0d272a257bc308e7b1e2
+url https://download.file-hunter.com/Games/MSX1/CAS/Echec%20(1985)(Loriciels)%5BSide%20A)%5BRUN%27CAS-%27%2Cr%5D.zip

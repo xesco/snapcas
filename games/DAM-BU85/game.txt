@@ -1,4 +1,4 @@
 # Dam Busters, The (1985)(Erbe Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Dam%20Busters%2C%20The%20(1985)(Erbe%20Software)%5BRUN'CAS-'%5D.zip
 cas DAM-BU85.CAS
 sha1 b7d34bfcec9ea53554f22c273f74809ec129ec2b
+url https://download.file-hunter.com/Games/MSX1/CAS/Dam%20Busters%2C%20The%20(1985)(Erbe%20Software)%5BRUN%27CAS-%27%5D.zip

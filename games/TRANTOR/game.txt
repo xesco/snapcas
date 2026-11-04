@@ -1,4 +1,4 @@
 # Trantor - The Last Stormtrooper (1987)(Go!)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Trantor%20-%20The%20Last%20Stormtrooper%20(1987)(Go!)%5BRUN'CAS-'%5D.zip
 cas TRANTOR.CAS
 sha1 a9ee3a57f3fe1eac1b4e7a69701707a8847bbee6
+url https://download.file-hunter.com/Games/MSX1/CAS/Trantor%20-%20The%20Last%20Stormtrooper%20(1987)(Go!)%5BRUN%27CAS-%27%5D.zip

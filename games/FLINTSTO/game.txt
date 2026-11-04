@@ -1,4 +1,4 @@
 # Flintstones, The (1988)(Grandslam Entertainments)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Flintstones%2C%20The%20(1988)(Grandslam%20Entertainments)%5BBLOAD'CAS-'%2CR%5D.zip
 cas FLINTSTO.CAS
 sha1 d29c30eac0b6793fd8214e6e5b2f618d43556e21
+url https://download.file-hunter.com/Games/MSX1/CAS/Flintstones%2C%20The%20(1988)(Grandslam%20Entertainments)%5BBLOAD%27CAS-%27%2CR%5D.zip

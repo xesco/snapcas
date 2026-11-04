@@ -1,4 +1,4 @@
 # Zond (1988)(Iber Soft)(es)[aka Zexas][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Zond%20(1988)(Iber%20Soft)(es)%5Baka%20Zexas%5D%5BRUN'CAS-'%5D.zip
 cas ZOND.CAS
 sha1 4d1878a95418c86012937a2ce53e25527d987cf1
+url https://download.file-hunter.com/Games/MSX1/CAS/Zond%20(1988)(Iber%20Soft)(es)%5Baka%20Zexas%5D%5BRUN%27CAS-%27%5D.zip

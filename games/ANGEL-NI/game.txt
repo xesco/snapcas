@@ -1,4 +1,4 @@
 # Angel Nieto Pole 500cc (1990)(Opera Soft)(es)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Angel%20Nieto%20Pole%20500cc%20(1990)(Opera%20Soft)(es)%5BBLOAD'CAS-'%2CR%5D.zip
 cas ANGEL-NI.CAS
 sha1 d1db4561975d6111938d533cd95ff820786626c9
+url https://download.file-hunter.com/Games/MSX1/CAS/Angel%20Nieto%20Pole%20500cc%20(1990)(Opera%20Soft)(es)%5BBLOAD%27CAS-%27%2CR%5D.zip

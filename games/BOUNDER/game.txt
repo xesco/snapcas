@@ -1,4 +1,4 @@
 # Bounder (1987)(Gremlin Graphics Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Bounder%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas BOUNDER.CAS
 sha1 61a6e2b1ae9b7db5b6db2538337db7b4d67c9cf8
+url https://download.file-hunter.com/Games/MSX1/CAS/Bounder%20(1987)(Gremlin%20Graphics%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

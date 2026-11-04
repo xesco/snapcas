@@ -1,4 +1,4 @@
 # Project A (1984)(Pony Canyon & Microbyte)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Project%20A%20(1984)(Pony%20Canyon%20%26%20Microbyte)%5BCLOAD%20%2B%20RUN%5D.zip
 cas PROJECT.CAS
 sha1 71a6f96b0eaf0345eff713cced08cc27da304b04
+url https://download.file-hunter.com/Games/MSX1/CAS/Project%20A%20(1984)(Pony%20Canyon%20%26%20Microbyte)%5BCLOAD%20%2B%20RUN%5D.zip

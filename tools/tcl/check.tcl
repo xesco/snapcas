@@ -1,4 +1,4 @@
-# The check (docs/DESIGN.md, Check), after memory.tcl's procedures, which it
+# The check (docs/INTERNALS.md, Check), after memory.tcl's procedures, which it
 # uses to read memory through the CPU's view. tools/check.py sets ::C.
 
 array set ::K $::C(kv)
@@ -29,7 +29,7 @@ proc start_check {} {
     debug set_bp 0x0100 "\[debug read memory 0x100\] == $b0 && \[debug read memory 0x101\] == $b1 && \[debug read memory 0x102\] == $b2" { if {$::reached} { rerun } else { read_exptbl; set ::dosslot [debug read memory 0xF344] } }
     # With the tape service, page 0's bits of the slot register, of DOS's
     # mapper's subslot register, and of SLTTBL, and mapper register FCh, can
-    # select T0 (DESIGN.md, Restorer, step 3).
+    # select T0 (INTERNALS.md, Restorer, step 3).
     set ::p0mask [expr {$::C(service) ? 0xFC : 0xFF}]
     set jp [expr {$::C(tail) + 21}]
     # The slot register alone can match DOS's own, so the breakpoint also
@@ -67,7 +67,7 @@ proc point2 {} {
 }
 
 # Point 3: in the same 60 seconds the restored machine must not reboot
-# (DESIGN.md, Check, point 3). A reboot shows itself as SNAPCAS.COM starting
+# (INTERNALS.md, Check, point 3). A reboot shows itself as SNAPCAS.COM starting
 # again, when a reset has booted DOS and AUTOEXEC.BAT runs it, or as the MSX1
 # BIOS's boot screen, whose first line is "MSX  system", at a savestate. BASIC's
 # banner, which a game's restored screen can still hold, does not count. A reset
@@ -100,7 +100,7 @@ proc watch_reset {} {
     }
 }
 # Point 4: in the same 60 seconds the game must not stop at a BASIC error
-# (DESIGN.md, Check, point 4). BASIC prints the message, with "in" and the line
+# (INTERNALS.md, Check, point 4). BASIC prints the message, with "in" and the line
 # number in a program, and then Ok, in a text mode. The message counts only with
 # the Ok after it, so that a game's own words do not.
 set ::basic_errors {}
@@ -226,7 +226,7 @@ proc compare {} {
     if {[debug read ioports 0xAA] != [scan $::K(ppic) %x]} { note "PPI port C is [hex2 [debug read ioports 0xAA]], expected $::K(ppic)" }
     # When the worker's page does not select DOS's mapper's slot at the
     # snapshot, that page's bits of the slot's subslot register can differ
-    # (DESIGN.md, Restorer, step 1).
+    # (INTERNALS.md, Restorer, step 1).
     set wpage [expr {[debug read memory [expr {$::C(tail) + 3}]] - 0xFC}]
     set mps [expr {$::dosslot & 3}]
     foreach ps {0 1 2 3} {

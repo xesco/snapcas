@@ -1,4 +1,4 @@
 # Haunted House (1988)(Eurosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Haunted%20House%20(1988)(Eurosoft)%5BRUN'CAS-'%5D.zip
 cas HAUNTED.CAS
 sha1 b50bd0b427136b20b19b926b78b6c31a7ecc13fb
+url https://download.file-hunter.com/Games/MSX1/CAS/Haunted%20House%20(1988)(Eurosoft)%5BRUN%27CAS-%27%5D.zip

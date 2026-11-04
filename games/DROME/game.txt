@@ -1,4 +1,4 @@
 # Drome (1987)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Drome%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas DROME.CAS
 sha1 04e3c12d029a5fe24f2957abe22db1cd509b8cee
+url https://download.file-hunter.com/Games/MSX1/CAS/Drome%20(1987)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

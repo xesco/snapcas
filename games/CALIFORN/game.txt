@@ -1,5 +1,5 @@
 # California Games (1987)(US Gold)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/California%20Games%20(1987)(US%20Gold)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas CALIFORN.CAS
 side2 CALIFORB.CAS
 sha1 5920691e8e49cbe56121e0468f19cf059e01caff 513d1b8f1bb7d928470a5488d5e076806a19e52c
+url https://download.file-hunter.com/Games/MSX1/CAS/California%20Games%20(1987)(US%20Gold)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/California%20Games%20(1987)(US%20Gold)(Side%20B)%5BRUN%27CAS-%27%5D.zip

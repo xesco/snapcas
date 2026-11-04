@@ -1,4 +1,4 @@
 # British Bob [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/British%20Bob%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas BRITISH.CAS
 sha1 6fc14c7600962a0255196d30a718cc84eddc1351
+url https://download.file-hunter.com/Games/MSX1/CAS/British%20Bob%20%5BBLOAD%27CAS-%27%2CR%5D.zip

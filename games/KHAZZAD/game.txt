@@ -1,4 +1,4 @@
 # Khazzad-Dum (1989)(SPE)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Khazzad-Dum%20(1989)(SPE)(es)%5BRUN'CAS-'%5D.zip
 cas KHAZZAD.CAS
 sha1 3fd741f9a5aad6d79b1bdafcde65e6b91f08aaea
+url https://download.file-hunter.com/Games/MSX1/CAS/Khazzad-Dum%20(1989)(SPE)(es)%5BRUN%27CAS-%27%5D.zip

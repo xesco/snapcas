@@ -1,7 +1,7 @@
 # Navy Moves (1988)(Dinamic Software)(Side A)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Navy%20Moves%20(1988)(Dinamic%20Software)(Side%20A)%5BRUN'CAS-'%5D.zip
 cas NAVY-MOV.CAS
 sha1 652d1683e7e3995dcf8194177c9fe81a350937d3
+url https://download.file-hunter.com/Games/MSX1/CAS/Navy%20Moves%20(1988)(Dinamic%20Software)(Side%20A)%5BRUN%27CAS-%27%5D.zip
 
 # The joystick's controls point at the game's variables at 4114h to 4116h, so
 # the diver moves by himself. The game reads a control as a bit of a keyboard

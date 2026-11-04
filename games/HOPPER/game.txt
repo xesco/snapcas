@@ -1,4 +1,4 @@
 # Hopper (1986)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Hopper%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas HOPPER.CAS
 sha1 c681293a0d893487fc6ede4531c2a345c5538eb4
+url https://download.file-hunter.com/Games/MSX1/CAS/Hopper%20(1986)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

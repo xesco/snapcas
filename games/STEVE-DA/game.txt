@@ -1,4 +1,4 @@
 # Steve Davis Snooker (1985)(CDS Microsystems)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Steve%20Davis%20Snooker%20(1985)(CDS%20Microsystems)%5BRUN'CAS-'%5D.zip
 cas STEVE-DA.CAS
 sha1 27aae1d72458c52adfdf7f864515713f56687cad
+url https://download.file-hunter.com/Games/MSX1/CAS/Steve%20Davis%20Snooker%20(1985)(CDS%20Microsystems)%5BRUN%27CAS-%27%5D.zip

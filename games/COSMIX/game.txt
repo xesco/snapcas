@@ -1,4 +1,4 @@
 # Cosmix Shock Absorber (1987)(Martech Games)
-# https://download.file-hunter.com/Games/MSX1/CAS/Cosmix%20Shock%20Absorber%20(1987)(Martech%20Games).zip
 cas COSMIX.CAS
 sha1 85f88bbcda85308b45cebaacdc27650b67f0b742
+url https://download.file-hunter.com/Games/MSX1/CAS/Cosmix%20Shock%20Absorber%20(1987)(Martech%20Games).zip

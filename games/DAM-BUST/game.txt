@@ -1,4 +1,4 @@
 # Dam Busters, The[RUN'-CAS']
-# https://download.file-hunter.com/Games/MSX1/CAS/Dam%20Busters%2C%20The%5BRUN'-CAS'%5D.zip
 cas DAM-BUST.CAS
 sha1 ca031291b41bb144b9524d55423172aaf439ce5f
+url https://download.file-hunter.com/Games/MSX1/CAS/Dam%20Busters%2C%20The%5BRUN%27-CAS%27%5D.zip

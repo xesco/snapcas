@@ -1,4 +1,4 @@
 # Lord Watson (Manhattan Transfer, 198x)
-# https://download.file-hunter.com/Games/MSX1/CAS/Lord%20Watson%20(Manhattan%20Transfer%2C%20198x).zip
 cas WATSON-1.CAS
 sha1 62dab36d97caeeb59e88c25887a764bffe0b631b
+url https://download.file-hunter.com/Games/MSX1/CAS/Lord%20Watson%20(Manhattan%20Transfer%2C%20198x).zip

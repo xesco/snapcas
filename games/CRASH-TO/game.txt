@@ -1,4 +1,4 @@
 # Crash Together - Butsukekko (1983)(Central Education)
-# https://download.file-hunter.com/Games/MSX1/CAS/Crash%20Together%20-%20Butsukekko%20(1983)(Central%20Education).zip
 cas CRASH-TO.CAS
 sha1 01146bcec2502a164dc678ea62209c249ddd2d78
+url https://download.file-hunter.com/Games/MSX1/CAS/Crash%20Together%20-%20Butsukekko%20(1983)(Central%20Education).zip

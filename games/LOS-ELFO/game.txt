@@ -1,4 +1,4 @@
 # Los Elfos de Maroland (2023)(Dwalin)(es)(Side A)
-# https://download.file-hunter.com/Games/MSX1/CAS/Los%20Elfos%20de%20Maroland%20(2023)(Dwalin)(es)(Side%20A).zip
 cas LOS-ELFO.CAS
 sha1 7d5fa7aae5ea69a72f963249bc95d76d6306c11f
+url https://download.file-hunter.com/Games/MSX1/CAS/Los%20Elfos%20de%20Maroland%20(2023)(Dwalin)(es)(Side%20A).zip

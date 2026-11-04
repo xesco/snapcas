@@ -1,4 +1,4 @@
 # Elevator Action (1985)(TAITO)[RUN'CAS']
-# https://download.file-hunter.com/Games/MSX1/CAS/Elevator%20Action%20(1985)(TAITO)%5BRUN'CAS'%5D.zip
 cas ELEVATOR.CAS
 sha1 acec7483705ef9cd8b39b9c6632a739a508e9cd6
+url https://download.file-hunter.com/Games/MSX1/CAS/Elevator%20Action%20(1985)(TAITO)%5BRUN%27CAS%27%5D.zip

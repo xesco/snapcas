@@ -1,4 +1,4 @@
 # Kong (Eurosoft) (VA Holding) (Side B) [RUN'CAS-'] [_]
-# https://download.file-hunter.com/Games/MSX1/CAS/Kong%20(Eurosoft)%20(VA%20Holding)%20(Side%20B)%20%5BRUN'CAS-'%5D%20%5B_%5D.zip
 cas KONGB.CAS
 sha1 7eaea59115cbad08c7361aa3374a4311f6448379
+url https://download.file-hunter.com/Games/MSX1/CAS/Kong%20(Eurosoft)%20(VA%20Holding)%20(Side%20B)%20%5BRUN%27CAS-%27%5D%20%5B_%5D.zip

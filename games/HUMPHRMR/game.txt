@@ -1,4 +1,4 @@
 # Humphrey (1984)(Mr. Micro)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Humphrey%20(1984)(Mr.%20Micro)%5BBLOAD'CAS-'%2CR%5D.zip
 cas HUMPHRMR.CAS
 sha1 7184d8d49cb9a44a8a003ed68b9087aa12b87cf8
+url https://download.file-hunter.com/Games/MSX1/CAS/Humphrey%20(1984)(Mr.%20Micro)%5BBLOAD%27CAS-%27%2CR%5D.zip

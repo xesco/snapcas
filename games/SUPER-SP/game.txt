@@ -1,4 +1,4 @@
 # Super Sprites (1986)(Idealogic)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20Sprites%20(1986)(Idealogic)(es)%5BRUN'CAS-'%5D.zip
 cas SUPER-SP.CAS
 sha1 9e193c54841d0046238c69eb0d7d6ce2eefe6006
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20Sprites%20(1986)(Idealogic)(es)%5BRUN%27CAS-%27%5D.zip

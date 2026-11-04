@@ -1,4 +1,4 @@
 # Mad Mix Game (1988)(Topo Soft)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Mad%20Mix%20Game%20(1988)(Topo%20Soft)(es)%5BRUN'CAS-'%5D.zip
 cas MAD-MIX.CAS
 sha1 7155947549ca38bfe810ae2a334a52b6da2a1da5
+url https://download.file-hunter.com/Games/MSX1/CAS/Mad%20Mix%20Game%20(1988)(Topo%20Soft)(es)%5BRUN%27CAS-%27%5D.zip

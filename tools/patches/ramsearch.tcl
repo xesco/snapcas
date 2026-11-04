@@ -1,5 +1,5 @@
 # The capture's watch for a slot register write that cuts off the code that
-# made it (docs/DESIGN.md, The RAM search patch). tools/capture.py loads it
+# made it (docs/INTERNALS.md, The RAM search patch). tools/capture.py loads it
 # after slots.tcl, and sets ::ramsearch, ::ramsearch_at, ::ramsearch_old and
 # ::ramsearch_new from patches/ramsearch.py.
 

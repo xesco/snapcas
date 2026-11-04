@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 043-Rios de Espana.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 021-RIOS.CAS
 sha1 31bf3ba10b34acd102d3364706d6291f058e6e85
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

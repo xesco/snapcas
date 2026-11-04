@@ -1,4 +1,4 @@
 # Maze Max (1985)(Loriciels)(fr)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Maze%20Max%20(1985)(Loriciels)(fr)%5BBLOAD'CAS-'%2CR%5D.zip
 cas MAZE-MAX.CAS
 sha1 ec7aa06c87faa70d2a34e1539e5700ee2e895bbe
+url https://download.file-hunter.com/Games/MSX1/CAS/Maze%20Max%20(1985)(Loriciels)(fr)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
 # Klax (1990)(Domark)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Klax%20(1990)(Domark)%5BBLOAD'CAS-'%2CR%5D.zip
 cas KLAX.CAS
 sha1 39b02640f97214406f016085877fdde3708c60e5
+url https://download.file-hunter.com/Games/MSX1/CAS/Klax%20(1990)(Domark)%5BBLOAD%27CAS-%27%2CR%5D.zip

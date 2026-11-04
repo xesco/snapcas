@@ -1,4 +1,4 @@
 # Bronx (1989)(Animagic)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Bronx%20(1989)(Animagic)(es)%5BRUN'CAS-'%5D.zip
 cas BRONX.CAS
 sha1 cffd9f4ff5f74d6799b2ecc5971fc58dbd7af204
+url https://download.file-hunter.com/Games/MSX1/CAS/Bronx%20(1989)(Animagic)(es)%5BRUN%27CAS-%27%5D.zip

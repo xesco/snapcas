@@ -1,5 +1,5 @@
 # Mot (1989)(Opera Soft)(es)(Side D)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Mot%20(1989)(Opera%20Soft)(es)(Side%20D)%5BBLOAD'CAS-'%2CR%5D.zip
 # The game's part 3, the file mot-3. Side A is the demo, in games/MOTDEMO.
 cas MOTD.CAS
 sha1 5e2f485703b1a5086978fd5b44b5fe04bacdc807
+url https://download.file-hunter.com/Games/MSX1/CAS/Mot%20(1989)(Opera%20Soft)(es)(Side%20D)%5BBLOAD%27CAS-%27%2CR%5D.zip

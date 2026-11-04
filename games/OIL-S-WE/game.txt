@@ -1,4 +1,4 @@
 # Oil's Well (1985)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Oil's%20Well%20(1985)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas OIL-S-WE.CAS
 sha1 8b797377c419380cdd0ab563708d70b493ad8c1d
+url https://download.file-hunter.com/Games/MSX1/CAS/Oil%27s%20Well%20(1985)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

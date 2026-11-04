@@ -1,4 +1,4 @@
-"""The slot patches (docs/DESIGN.md, Slot patches): fixed slot register values
+"""The slot patches (docs/INTERNALS.md, Slot patches): fixed slot register values
 that name a slot that holds nothing, the capture's slot map, and the capture's
 patches of the tape. patches/slots.tcl is the capture's watch."""
 import os

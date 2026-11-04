@@ -1,8 +1,8 @@
 # Gunman, the second game on Hudson Soft's W Series 5 side A, after Submarine
-# Shooter (games/WSERIES/SUBMARIN). It also has a dump of its own (games/GUNMAN):
-# https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%205%20(1983)%20(Hudson%20Soft)(Side%20A%20-%20Submarine%20Shooter%2C%20Gunman)%5BBLOAD'CAS-'%2CR%5D..zip
+# Shooter (games/WSERIES/SUBMARIN). It also has a dump of its own (games/GUNMAN).
 # The load starts at the binary file GUNMAN, as when the tape runs on after
 # Submarine Shooter.
 cas W-SERIE5.CAS
 sha1 09bc93e737b9f7f33486d90fce4a89c9c59176bb
+url https://download.file-hunter.com/Games/MSX1/CAS/W%20Series%205%20(1983)%20(Hudson%20Soft)(Side%20A%20-%20Submarine%20Shooter%2C%20Gunman)%5BBLOAD%27CAS-%27%2CR%5D..zip
 start GUNMAN

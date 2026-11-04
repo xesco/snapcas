@@ -1,4 +1,4 @@
 # X-Spellunker (2017)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/X-Spellunker%20(2017)%5BBLOAD'CAS-'%2CR%5D.zip
 cas X-SPELLU.CAS
 sha1 e5d812990c985ab6c907bb5f99ae556d8b624365
+url https://download.file-hunter.com/Games/MSX1/CAS/X-Spellunker%20(2017)%5BBLOAD%27CAS-%27%2CR%5D.zip

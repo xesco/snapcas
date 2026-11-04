@@ -1,4 +1,4 @@
 # Cyberbig (1989)(Animagic)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Cyberbig%20(1989)(Animagic)%5BRUN'CAS-'%5D.zip
 cas CYBERBIG.CAS
 sha1 a1120b1ce7892283a36fc3b13e40d0bf74b4fdbb
+url https://download.file-hunter.com/Games/MSX1/CAS/Cyberbig%20(1989)(Animagic)%5BRUN%27CAS-%27%5D.zip

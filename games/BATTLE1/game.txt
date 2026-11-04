@@ -1,4 +1,4 @@
 # Battle Mecha Xabungle Blue Gale Part 1 (1985) (Pony Canyon)[CLOAD + RUN)
-# https://download.file-hunter.com/Games/MSX1/CAS/Battle%20Mecha%20Xabungle%20Blue%20Gale%20Part%201%20(1985)%20(Pony%20Canyon)%5BCLOAD%20%2B%20RUN).zip
 cas BATTLE1.CAS
 sha1 a295746846c51e227d080a06c443564aabfb742a
+url https://download.file-hunter.com/Games/MSX1/CAS/Battle%20Mecha%20Xabungle%20Blue%20Gale%20Part%201%20(1985)%20(Pony%20Canyon)%5BCLOAD%20%2B%20RUN).zip

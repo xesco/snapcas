@@ -1,4 +1,4 @@
 # Golden Basket (1990)(Opera Soft)(es)[passworded][BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Golden%20Basket%20(1990)(Opera%20Soft)(es)%5Bpassworded%5D%5BBLOAD'CAS-'%2CR%5D.zip
 cas GOLDECAS.CAS
 sha1 c6a931351347d8ecc50f1adafe3624498e4f2f1c
+url https://download.file-hunter.com/Games/MSX1/CAS/Golden%20Basket%20(1990)(Opera%20Soft)(es)%5Bpassworded%5D%5BBLOAD%27CAS-%27%2CR%5D.zip

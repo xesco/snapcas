@@ -1,4 +1,4 @@
 # Computer Fan Tan (1985)(Login Soft)[CLOAD+RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Computer%20Fan%20Tan%20(1985)(Login%20Soft)%5BCLOAD%2BRUN%5D.zip
 cas COMPUTER.CAS
 sha1 49dccaafa894331f50dcf40cf29a3eb21bc364f8
+url https://download.file-hunter.com/Games/MSX1/CAS/Computer%20Fan%20Tan%20(1985)(Login%20Soft)%5BCLOAD%2BRUN%5D.zip

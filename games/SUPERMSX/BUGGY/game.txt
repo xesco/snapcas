@@ -1,6 +1,5 @@
 # Buggy, the second game on the tape Super MSX n.17 (dicembre 1988) - cas_17 /
-# super_msx_17_lato_A.cas, after Far West (games/SUPERMSX/FARWES17):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.17%20(dicembre%201988)%20-%20cas_17.zip
+# super_msx_17_lato_A.cas, after Far West (games/SUPERMSX/FARWES17).
 # It is a copy of Choro Q (Taito), as edicola8bit lists it. It also has a dump of
 # its own (games/CHORO-Q). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=17
@@ -8,4 +7,5 @@
 # West.
 cas SUPER17.CAS
 sha1 e65001db45e6778386a88d7f95ba3e1e8620aebf
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.17%20(dicembre%201988)%20-%20cas_17.zip
 start BUGGY

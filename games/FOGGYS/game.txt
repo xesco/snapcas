@@ -1,4 +1,4 @@
 # Foggys Quest (2017) (John Blythe) [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Foggys%20Quest%20(2017)%20(John%20Blythe)%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas FOGGYS.CAS
 sha1 20d84f4d40afcdce0504b5c40d8a832afb4a2099
+url https://download.file-hunter.com/Games/MSX1/CAS/Foggys%20Quest%20(2017)%20(John%20Blythe)%20%5BBLOAD%27CAS-%27%2CR%5D.zip

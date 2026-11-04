@@ -1,4 +1,4 @@
 # Farm (2019) (N.I.) [RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Farm%20(2019)%20(N.I.)%20%5BRUN'CAS-'%5D.zip
 cas FARM.CAS
 sha1 b450299f720ff2974aa6d6d9a0c6946ed3d221e0
+url https://download.file-hunter.com/Games/MSX1/CAS/Farm%20(2019)%20(N.I.)%20%5BRUN%27CAS-%27%5D.zip

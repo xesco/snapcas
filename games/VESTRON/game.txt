@@ -1,4 +1,4 @@
 # Vestron (1986)(Players Software)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Vestron%20(1986)(Players%20Software)%5BBLOAD'CAS-'%2CR%5D.zip
 cas VESTRON.CAS
 sha1 0c44ea2022e93e774af1641e676ce46290fb521f
+url https://download.file-hunter.com/Games/MSX1/CAS/Vestron%20(1986)(Players%20Software)%5BBLOAD%27CAS-%27%2CR%5D.zip

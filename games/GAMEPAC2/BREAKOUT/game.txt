@@ -1,5 +1,5 @@
 # Breakout, the first program on Aackosoft's Game Pack 2, Game Pack 2
-# (1986)(Aackosoft):
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
+# (1986)(Aackosoft).
 cas GAME-PAC.CAS
 sha1 e65f4e4dbabffd242081acc8d66b3ef107a9394c
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip

@@ -1,4 +1,4 @@
 # Maths Invaders (1985)(Aackosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Maths%20Invaders%20(1985)(Aackosoft)%5BRUN'CAS-'%5D.zip
 cas MATHS-IN.CAS
 sha1 30f56aaf11aabfdfcf878abd592ffd7ed45c3691
+url https://download.file-hunter.com/Games/MSX1/CAS/Maths%20Invaders%20(1985)(Aackosoft)%5BRUN%27CAS-%27%5D.zip

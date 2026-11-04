@@ -1,4 +1,4 @@
 # Zombie Calavera Prologue (2021) (conv Nanochess) [BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Zombie%20Calavera%20Prologue%20(2021)%20(conv%20Nanochess)%20%5BBLOAD'CAS-'%2CR%5D.zip
 cas ZOMBIE.CAS
 sha1 589bef05d69a1c70c23f8d2f8273c6e25752248f
+url https://download.file-hunter.com/Games/MSX1/CAS/Zombie%20Calavera%20Prologue%20(2021)%20(conv%20Nanochess)%20%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
 # Roma - La Conquista del Imperio (1986)(Idealogic)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Roma%20-%20La%20Conquista%20del%20Imperio%20(1986)(Idealogic)(es)%5BRUN'CAS-'%5D.zip
 cas ROMA-LA.CAS
 sha1 8d1b23f56d07887e262b838cf49481c3ea103009
+url https://download.file-hunter.com/Games/MSX1/CAS/Roma%20-%20La%20Conquista%20del%20Imperio%20(1986)(Idealogic)(es)%5BRUN%27CAS-%27%5D.zip

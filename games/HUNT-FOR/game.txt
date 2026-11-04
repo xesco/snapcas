@@ -1,4 +1,4 @@
 # Hunt for Red October, The (1988)(Grandslam Entertainments)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Hunt%20for%20Red%20October%2C%20The%20(1988)(Grandslam%20Entertainments)%5BBLOAD'CAS-'%2CR%5D.zip
 cas HUNT-FOR.CAS
 sha1 93d7a1a1b6c1ad4cb0b60e5f302d5fa34cded02a
+url https://download.file-hunter.com/Games/MSX1/CAS/Hunt%20for%20Red%20October%2C%20The%20(1988)(Grandslam%20Entertainments)%5BBLOAD%27CAS-%27%2CR%5D.zip

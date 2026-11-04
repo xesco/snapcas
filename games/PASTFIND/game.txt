@@ -1,4 +1,4 @@
 # Pastfinder (1984)(Activision)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Pastfinder%20(1984)(Activision)%5BBLOAD'CAS-'%2CR%5D.zip
 cas PASTFIND.CAS
 sha1 221a33555c88f2fb102447c3b99a5b6e83cbaa7c
+url https://download.file-hunter.com/Games/MSX1/CAS/Pastfinder%20(1984)(Activision)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,5 +1,5 @@
 """Step 15 (docs/PLAN.md): TSX tape files, read into the tape model
-(DESIGN.md, Tape files and TSX data)."""
+(INTERNALS.md, Tape files, and FORMATS.md, TSX data)."""
 import concurrent.futures
 import os
 import shutil
@@ -19,8 +19,8 @@ import tsx  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_step4  # noqa: E402
 
-TSX_DIR = os.path.join(test_step4.CAS_DIR, "tsx")
-COLLECTION = os.path.join(test_step4.CAS_DIR, "collection")
+TSX_DIR = test_step4.CAS_DIR
+COLLECTION = test_step4.CAS_DIR
 WORK = os.path.join(ROOT, "out", "test", "step15")
 MACHINE = "phc28s-ram64k-carnivore2"
 
@@ -77,13 +77,13 @@ class Reader(unittest.TestCase):
             tape.read("GAME.WAV", b"")
 
 
-@unittest.skipUnless(os.path.isfile(os.path.join(TSX_DIR, "LAZERBYK.TSX")), "CAS_DIR holds no tsx/LAZERBYK.TSX")
+@unittest.skipUnless(os.path.isfile(os.path.join(TSX_DIR, "LAZERBYK.TSX")), "CAS_DIR holds no LAZERBYK.TSX")
 class Files(unittest.TestCase):
     def read(self, name):
         with open(os.path.join(TSX_DIR, name), "rb") as f:
             return tape.read(name, f.read())
 
-    @unittest.skipUnless(os.path.isfile(os.path.join(COLLECTION, "035-EDGY.CAS")), "no collection/035-EDGY.CAS")
+    @unittest.skipUnless(os.path.isfile(os.path.join(COLLECTION, "035-EDGY.CAS")), "CAS_DIR holds no 035-EDGY.CAS")
     def test_a_tsx_file_of_standard_blocks_gives_its_cas_files_tape(self):
         with open(os.path.join(COLLECTION, "035-EDGY.CAS"), "rb") as f:
             cas_data = f.read()
@@ -225,12 +225,12 @@ GAMES = {
 class Games(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "openmsx-home"))
+        os.environ.setdefault("OPENMSX_HOME", os.path.join(ROOT, "out", "cache", "openmsx-home"))
         with concurrent.futures.ThreadPoolExecutor(len(GAMES)) as pool:
             cls.results = dict(zip(GAMES, pool.map(lambda n: restore(n, *GAMES[n]), GAMES)))
 
     def snap(self, name):
-        return os.path.join(ROOT, "out", MACHINE, name, "snap")
+        return os.path.join(WORK, "games", name, MACHINE, "snap")
 
     def test_turbo_loaders_load_their_whole_tape_and_the_images_pass(self):
         for name in ("s15-licence", "s15-4x4offro"):

@@ -1,5 +1,5 @@
 # Meganova (1988)(Dinamic Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Meganova%20(1988)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas MEGANOVA.CAS
 side2 MEGANOVB.CAS
 sha1 9c8b88381cb6f71fa22a6a4f28e9dddbbb26b611 cfda7342b6da19ddd14de9927b45ae66a0b01a94
+url https://download.file-hunter.com/Games/MSX1/CAS/Meganova%20(1988)(Dinamic%20Software)(es)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Meganova%20(1988)(Dinamic%20Software)(es)(Side%20B)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Lunar Ball [BLOAD'CAS-',r]
-# https://download.file-hunter.com/Games/MSX1/CAS/Lunar%20Ball%20%5BBLOAD'CAS-'%2Cr%5D.zip
 cas LUNAR-BA.CAS
 sha1 1aa34264c8bb499aea6d8127909b059d35ff1cfd
+url https://download.file-hunter.com/Games/MSX1/CAS/Lunar%20Ball%20%5BBLOAD%27CAS-%27%2Cr%5D.zip

@@ -1,4 +1,4 @@
 # Ninja-kun - Magic Castle Adventure (1985)(Jaleco)
-# https://download.file-hunter.com/Games/MSX1/CAS/Ninja-kun%20-%20Magic%20Castle%20Adventure%20(1985)(Jaleco).zip
 cas NINJA-KU.CAS
 sha1 3352ed6e455fa3fd7f73de21e9f6a8e90a1cb8c3
+url https://download.file-hunter.com/Games/MSX1/CAS/Ninja-kun%20-%20Magic%20Castle%20Adventure%20(1985)(Jaleco).zip

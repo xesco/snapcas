@@ -1,4 +1,4 @@
 # Las Aventuras de Rudolphine Rur (2020)(Dwalin & Domingo) / RUR2.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Las%20Aventuras%20de%20Rudolphine%20Rur%20(2020)(Dwalin%20%26%20Domingo).zip
 cas RUR-2.CAS
 sha1 7721e427072d9aa5f9545067784ac61def1f72c7
+url https://download.file-hunter.com/Games/MSX1/CAS/Las%20Aventuras%20de%20Rudolphine%20Rur%20(2020)(Dwalin%20%26%20Domingo).zip

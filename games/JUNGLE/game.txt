@@ -1,4 +1,4 @@
 # Jungle Warrior (1990)(Zigurat Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Jungle%20Warrior%20(1990)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas JUNGLE.CAS
 sha1 97bbe780eb3ad7a915ad45c5c9a5ce2962a35e09
+url https://download.file-hunter.com/Games/MSX1/CAS/Jungle%20Warrior%20(1990)(Zigurat%20Software)(es)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Dizzy Dice (1988)(Players Software)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Dizzy%20Dice%20(1988)(Players%20Software)%5BRUN'CAS-'%5D.zip
 cas DIZZY-DI.CAS
 sha1 c58c54dce31cc5c7cd54b1a6df1a57caa7c39d16
+url https://download.file-hunter.com/Games/MSX1/CAS/Dizzy%20Dice%20(1988)(Players%20Software)%5BRUN%27CAS-%27%5D.zip

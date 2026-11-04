@@ -1,4 +1,4 @@
 # HiSoft Devpac MONS (1984)(HiSoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/HiSoft%20Devpac%20MONS%20(1984)(HiSoft)%5BRUN'CAS-'%5D.zip
 cas HISOFRUN.CAS
 sha1 0d4c84ebb89a67870ed209261f7090a8a2ca5754
+url https://download.file-hunter.com/Games/MSX1/CAS/HiSoft%20Devpac%20MONS%20(1984)(HiSoft)%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Snake It (1986)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Snake%20It%20(1986)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas SNAKE-IT.CAS
 sha1 88a52cee01a9ea0b3edf884c72b18acacf5460cf
+url https://download.file-hunter.com/Games/MSX1/CAS/Snake%20It%20(1986)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

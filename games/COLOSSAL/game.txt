@@ -1,4 +1,4 @@
 # Colossal Adventure - Text Only (1984)(Level 9 Computing)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Colossal%20Adventure%20-%20Text%20Only%20(1984)(Level%209%20Computing)%5BRUN'CAS-'%5D.zip
 cas COLOSSAL.CAS
 sha1 d8c6a6f6b17b6ebc2029e08b4dee7181e7fc1b37
+url https://download.file-hunter.com/Games/MSX1/CAS/Colossal%20Adventure%20-%20Text%20Only%20(1984)(Level%209%20Computing)%5BRUN%27CAS-%27%5D.zip

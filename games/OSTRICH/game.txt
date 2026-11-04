@@ -1,4 +1,4 @@
 # Ostrich (1985)(Columbia) [CLOAD-RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Ostrich%20(1985)(Columbia)%20%5BCLOAD-RUN%5D.zip
 cas OSTRICH.CAS
 sha1 1bd409e18180fea366512499a3805617ff5619b8
+url https://download.file-hunter.com/Games/MSX1/CAS/Ostrich%20(1985)(Columbia)%20%5BCLOAD-RUN%5D.zip

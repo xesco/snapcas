@@ -1,4 +1,4 @@
 # Test de Caracter (1984)(DIMensionNEW)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Test%20de%20Caracter%20(1984)(DIMensionNEW)(es)%5BRUN'CAS-'%5D.zip
 cas TESTES.CAS
 sha1 d47523b6361f1c791f5080fec284d2c92e241613
+url https://download.file-hunter.com/Games/MSX1/CAS/Test%20de%20Caracter%20(1984)(DIMensionNEW)(es)%5BRUN%27CAS-%27%5D.zip

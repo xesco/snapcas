@@ -1,4 +1,4 @@
 # Kong's Revenge (1991)(Zigurat Software)(es)(Side B)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Kong's%20Revenge%20(1991)(Zigurat%20Software)(es)(Side%20B)%5BRUN'CAS-'%5D.zip
 cas KONG-SB.CAS
 sha1 b1c147b2ee8a34d646e79f099a38a6b354176ada
+url https://download.file-hunter.com/Games/MSX1/CAS/Kong%27s%20Revenge%20(1991)(Zigurat%20Software)(es)(Side%20B)%5BRUN%27CAS-%27%5D.zip

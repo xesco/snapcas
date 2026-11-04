@@ -1,4 +1,4 @@
 # Alfamat (1985)(Anaya Multimedia)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Alfamat%20(1985)(Anaya%20Multimedia)(es)%5BRUN'CAS-'%5D.zip
 cas ALFAMAT.CAS
 sha1 7716b9938c8190739b4079fce686857a28fc991b
+url https://download.file-hunter.com/Games/MSX1/CAS/Alfamat%20(1985)(Anaya%20Multimedia)(es)%5BRUN%27CAS-%27%5D.zip

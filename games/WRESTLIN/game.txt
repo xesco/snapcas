@@ -1,4 +1,4 @@
 # Wrestling (198x)(Grupo de Trabajo Software)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Wrestling%20(198x)(Grupo%20de%20Trabajo%20Software)%5BCLOAD%20%2B%20RUN%5D.zip
 cas WRESTLIN.CAS
 sha1 6f663886d8d9a1c8f0d58ea6a296e2dfa57e9dee
+url https://download.file-hunter.com/Games/MSX1/CAS/Wrestling%20(198x)(Grupo%20de%20Trabajo%20Software)%5BCLOAD%20%2B%20RUN%5D.zip

@@ -1,4 +1,4 @@
 # Viaje por Europa (19xx)(Mind Games Espana)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Viaje%20por%20Europa%20(19xx)(Mind%20Games%20Espana)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas VIAJE-PO.CAS
 sha1 900dd7cac62a0ede807df074f5564a0da6340a84
+url https://download.file-hunter.com/Games/MSX1/CAS/Viaje%20por%20Europa%20(19xx)(Mind%20Games%20Espana)(es)%5BCLOAD%20%2B%20RUN%5D.zip

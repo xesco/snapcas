@@ -1,4 +1,4 @@
 # Bounce (1987)(Methodic Solutions)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Bounce%20(1987)(Methodic%20Solutions)%5BRUN'CAS-'%5D.zip
 cas BOUNCE.CAS
 sha1 640aeac475cbb77fc56a8b10bb87e824b6ecaf0d
+url https://download.file-hunter.com/Games/MSX1/CAS/Bounce%20(1987)(Methodic%20Solutions)%5BRUN%27CAS-%27%5D.zip

@@ -1,7 +1,7 @@
 # UchiMata[+3][NR]
-# https://download.file-hunter.com/Games/MSX1/CAS/UchiMata%5B%2B3%5D%5BNR%5D.zip
 cas UCHIMATA.CAS
 sha1 604965ba31d18eea37bc4914a83a2e941cc76a3e
+url https://download.file-hunter.com/Games/MSX1/CAS/UchiMata%5B%2B3%5D%5BNR%5D.zip
 
 # The game's loader, at 86B2h and copied to 400Bh, reads 5808h bytes into 85D9h
 # with TAPIN after its own TAPION, but the tape holds 22152 of them, in a block of

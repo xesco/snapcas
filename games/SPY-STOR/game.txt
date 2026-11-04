@@ -1,4 +1,4 @@
 # Spy Story (1986)(Aackosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Spy%20Story%20(1986)(Aackosoft)%5BRUN'CAS-'%5D.zip
 cas SPY-STOR.CAS
 sha1 8fa0971ba685b96b7b316484f63f65ff09b751be
+url https://download.file-hunter.com/Games/MSX1/CAS/Spy%20Story%20(1986)(Aackosoft)%5BRUN%27CAS-%27%5D.zip

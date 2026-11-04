@@ -1,4 +1,4 @@
 # Rocky (1985)(Dinamic Software)(es)[a][RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Rocky%20(1985)(Dinamic%20Software)(es)%5Ba%5D%5BRUN'CAS-'%5D.zip
 cas ROCKYA.CAS
 sha1 361cdfb601908c3e86ee74842034741e00b5da5a
+url https://download.file-hunter.com/Games/MSX1/CAS/Rocky%20(1985)(Dinamic%20Software)(es)%5Ba%5D%5BRUN%27CAS-%27%5D.zip

@@ -1,4 +1,4 @@
 # Chuck Yeager's Advanced Flight Trainer (1989)(Dro Soft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Chuck%20Yeager's%20Advanced%20Flight%20Trainer%20(1989)(Dro%20Soft)%5BRUN'CAS-'%5D.zip
 cas CHUCK-YE.CAS
 sha1 811549b9d26b3043d0c4be08f1f222fd7160e8d2
+url https://download.file-hunter.com/Games/MSX1/CAS/Chuck%20Yeager%27s%20Advanced%20Flight%20Trainer%20(1989)(Dro%20Soft)%5BRUN%27CAS-%27%5D.zip

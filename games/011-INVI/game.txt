@@ -1,4 +1,4 @@
 # Turbo Pack A (1987)(Philips)(es) / 019-Invierte y gana.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP
 cas 011-INVI.CAS
 sha1 f5ba8cdf5bcf04e65eaca63ca958884f020feba8
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20A%20(1987)(Philips)(es).ZIP

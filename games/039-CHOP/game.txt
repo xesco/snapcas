@@ -1,4 +1,4 @@
 # Turbo Pack C (1987)(Philips)(es) / 039 - Choper I.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20C%20(1987)(Philips)(es).ZIP
 cas 039-CHOP.CAS
 sha1 36590f963c28fb3bd0570ef663fae9d90ebe923a
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20C%20(1987)(Philips)(es).ZIP

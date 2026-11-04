@@ -1,4 +1,4 @@
 # Cave Adventure (Chitai Tanken)(1984)(Ample Software)
-# https://download.file-hunter.com/Games/MSX1/CAS/Cave%20Adventure%20(Chitai%20Tanken)(1984)(Ample%20Software).zip
 cas CAVE-ADV.CAS
 sha1 314c66494a62b4886efe3ad0947fa2cef8061f54
+url https://download.file-hunter.com/Games/MSX1/CAS/Cave%20Adventure%20(Chitai%20Tanken)(1984)(Ample%20Software).zip

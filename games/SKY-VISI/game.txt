@@ -1,4 +1,4 @@
 # Sky Vision (1987)(Eaglesoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Sky%20Vision%20(1987)(Eaglesoft)%5BRUN'CAS-'%5D.zip
 cas SKY-VISI.CAS
 sha1 997a5079ebb14e4b21a41cb519b321f849c28a65
+url https://download.file-hunter.com/Games/MSX1/CAS/Sky%20Vision%20(1987)(Eaglesoft)%5BRUN%27CAS-%27%5D.zip

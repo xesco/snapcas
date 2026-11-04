@@ -1,4 +1,4 @@
 # Supermaze (1984)[Morwood Software][CLOAD]
-# https://download.file-hunter.com/Games/MSX1/CAS/Supermaze%20(1984)%5BMorwood%20Software%5D%5BCLOAD%5D.zip
 cas SUPERMAZ.CAS
 sha1 d2926b735d7adee49c4f254b67aab3cf876c89ef
+url https://download.file-hunter.com/Games/MSX1/CAS/Supermaze%20(1984)%5BMorwood%20Software%5D%5BCLOAD%5D.zip

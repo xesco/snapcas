@@ -1,4 +1,4 @@
 # U Boat (1985)(Omega Systems)(ja)
-# https://download.file-hunter.com/Games/MSX1/CAS/U%20Boat%20(1985)(Omega%20Systems)(ja).zip
 cas U-BOAT.CAS
 sha1 c5f674c9956cb61bd5422a19c0f27ebec339fa09
+url https://download.file-hunter.com/Games/MSX1/CAS/U%20Boat%20(1985)(Omega%20Systems)(ja).zip

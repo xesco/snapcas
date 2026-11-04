@@ -1,10 +1,10 @@
 # Mister Micky, the fifth game on the tape Super MSX n.21 (maggio 1989) - cas_21 /
-# super_msx_21_lato_A.cas, after Maiden Rescue (games/SUPERMSX/MAIDENRE):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.21%20(maggio%201989)%20-%20cas_21.zip
+# super_msx_21_lato_A.cas, after Maiden Rescue (games/SUPERMSX/MAIDENRE).
 # It is a copy of Fruity Frank (Kuma), as edicola8bit lists it. Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=21
 # The load starts at the BASIC loader MISTER, as when the tape runs on after
 # Maiden Rescue.
 cas SUPER21.CAS
 sha1 991bbcd2ccec644d3c1d1095965ee48f7d923d18
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.21%20(maggio%201989)%20-%20cas_21.zip
 start MISTER

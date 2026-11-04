@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 import msx  # noqa: E402
 
 WORK = os.path.join(ROOT, "out", "test", "step1")
-NEXTOR = os.environ.get("NEXTOR_DIR", os.path.join(ROOT, "out", "dl", "nextor"))
+NEXTOR = os.environ.get("NEXTOR_DIR", os.path.join(ROOT, "dos", "nextor"))
 
 
 class Step1(unittest.TestCase):

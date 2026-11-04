@@ -1,4 +1,4 @@
 # Cosmic Shock Absorber (1986)(Martech Games)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Cosmic%20Shock%20Absorber%20(1986)(Martech%20Games)%5BRUN'CAS-'%5D.zip
 cas COSMIC86.CAS
 sha1 85f88bbcda85308b45cebaacdc27650b67f0b742
+url https://download.file-hunter.com/Games/MSX1/CAS/Cosmic%20Shock%20Absorber%20(1986)(Martech%20Games)%5BRUN%27CAS-%27%5D.zip

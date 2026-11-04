@@ -1,4 +1,4 @@
 # The Way Of The Tiger (1986)(Gremlin Graphics Software)(GB)(Tape 1 of 2 Side A - Master Program)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Way%20Of%20The%20Tiger%20(1986)(Gremlin%20Graphics%20Software)(GB)(Tape%201%20of%202%20Side%20A%20-%20Master%20Program)%5BBLOAD'CAS-'%2CR%5D.zip
 cas THE-WAYA.CAS
 sha1 f9bf412416017fad68c8f09bd898f1b1e9dbc775
+url https://download.file-hunter.com/Games/MSX1/CAS/The%20Way%20Of%20The%20Tiger%20(1986)(Gremlin%20Graphics%20Software)(GB)(Tape%201%20of%202%20Side%20A%20-%20Master%20Program)%5BBLOAD%27CAS-%27%2CR%5D.zip

@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 068-Space.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 036-SPAC.CAS
 sha1 c10c59b481129e18fabbd28a37bf1a8640fd7a2f
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

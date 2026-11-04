@@ -1,4 +1,4 @@
 # West Bank (1989)(Dinamic Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/West%20Bank%20(1989)(Dinamic%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas WEST-BAN.CAS
 sha1 26e4da889c06c27d0127ae1185a556f9e7fa6092
+url https://download.file-hunter.com/Games/MSX1/CAS/West%20Bank%20(1989)(Dinamic%20Software)(es)%5BRUN%27CAS-%27%5D.zip

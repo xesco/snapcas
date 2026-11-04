@@ -1,4 +1,4 @@
 # Video Poker (1986)(Disprosoft)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Video%20Poker%20(1986)(Disprosoft)%5BCLOAD%20%2B%20RUN%5D.zip
 cas VIDEORUN.CAS
 sha1 5b36d4e765bd782d7fc688f0497c235498b22717
+url https://download.file-hunter.com/Games/MSX1/CAS/Video%20Poker%20(1986)(Disprosoft)%5BCLOAD%20%2B%20RUN%5D.zip

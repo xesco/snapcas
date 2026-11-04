@@ -1,4 +1,4 @@
 # Space Busters (1985)(Aackosoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Space%20Busters%20(1985)(Aackosoft)%5BRUN'CAS-'%5D.zip
 cas SPACE-BU.CAS
 sha1 7449e0805e08b1deb879967f012353ac4028eba4
+url https://download.file-hunter.com/Games/MSX1/CAS/Space%20Busters%20(1985)(Aackosoft)%5BRUN%27CAS-%27%5D.zip

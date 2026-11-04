@@ -1,4 +1,4 @@
 # Ruptus (2021)(Inufuto)
-# https://download.file-hunter.com/Games/MSX1/CAS/Ruptus%20(2021)(Inufuto).zip
 cas RUPTUS.CAS
 sha1 eee214ef849d0910dfca805818c96d98167e1a62
+url https://download.file-hunter.com/Games/MSX1/CAS/Ruptus%20(2021)(Inufuto).zip

@@ -1,4 +1,4 @@
 # The Growing Pains Of Adrian Mole - Part 1 (1987) (Level 9 Computing)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Growing%20Pains%20Of%20Adrian%20Mole%20-%20Part%201%20(1987)%20(Level%209%20Computing)%5BRUN'CAS-'%5D.zip
 cas THE-GRO1.CAS
 sha1 f3fd0484d4ef1beb13cf8516eeb4ee06801417cc
+url https://download.file-hunter.com/Games/MSX1/CAS/The%20Growing%20Pains%20Of%20Adrian%20Mole%20-%20Part%201%20(1987)%20(Level%209%20Computing)%5BRUN%27CAS-%27%5D.zip

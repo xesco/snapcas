@@ -1,8 +1,8 @@
 # Fantaparco, the first game on the tape Super MSX n.8 (gennaio 1988) - cas_8 /
-# super_msx_8_lato_A.cas:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.8%20(gennaio%201988)%20-%20cas_8.zip
+# super_msx_8_lato_A.cas.
 # It is a copy of Athletic Land (Konami), as edicola8bit lists it. It also has a
 # dump of its own (games/ENGESOFT/ATHLETIC). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=8
 cas SUPER8.CAS
 sha1 809a3afbaf5b3c158dd4a3ff6cba812163ac1d11
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.8%20(gennaio%201988)%20-%20cas_8.zip

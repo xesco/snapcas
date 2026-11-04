@@ -1,4 +1,4 @@
 # War Chess (1986)(Idealogic)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/War%20Chess%20(1986)(Idealogic)(es)%5BRUN'CAS-'%5D.zip
 cas WAR-CHES.CAS
 sha1 9a59a53aa76e8fa59ab94249a851f629de790e36
+url https://download.file-hunter.com/Games/MSX1/CAS/War%20Chess%20(1986)(Idealogic)(es)%5BRUN%27CAS-%27%5D.zip

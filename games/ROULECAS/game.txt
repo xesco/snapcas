@@ -1,4 +1,4 @@
 # Game Pack 1 (Aackosoft - Eaglesoft)[BASIC] / Roulette - Game Pack 1 (Aackosoft - Eaglesoft) [RUN'CAS-'] [_].cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%201%20(Aackosoft%20-%20Eaglesoft)%5BBASIC%5D.zip
 cas ROULECAS.CAS
 sha1 2467a686ea3a39431382cf5429e95ac540528ce3
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%201%20(Aackosoft%20-%20Eaglesoft)%5BBASIC%5D.zip

@@ -1,9 +1,9 @@
 # SPQR, the first game on the tape Super MSX n.22 (giugno 1989) - cas_22 /
-# SUPER22.CAS, after the issue's intro:
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.22%20(giugno%201989)%20-%20cas_22.zip
+# SUPER22.CAS, after the issue's intro.
 # It is a copy of Coliseum (Topo Soft), as edicola8bit lists it. It also has a
 # dump of its own (games/COLISEUM). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=22
 cas SUPER-22.CAS
 sha1 21afbc99cd5798845b536d2c25e0efe6917832a5
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.22%20(giugno%201989)%20-%20cas_22.zip
 name SUPER22A

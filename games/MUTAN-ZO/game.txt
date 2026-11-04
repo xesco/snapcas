@@ -1,4 +1,4 @@
 # Mutan Zone (1989)(Opera Soft)(es)(Side A)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Mutan%20Zone%20(1989)(Opera%20Soft)(es)(Side%20A)%5BBLOAD'CAS-'%2CR%5D.zip
 cas MUTAN-ZO.CAS
 sha1 45c31608423f03167724e46ada624b5d750e64ea
+url https://download.file-hunter.com/Games/MSX1/CAS/Mutan%20Zone%20(1989)(Opera%20Soft)(es)(Side%20A)%5BBLOAD%27CAS-%27%2CR%5D.zip

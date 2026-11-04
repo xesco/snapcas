@@ -1,4 +1,4 @@
 # Sir Fred (1986)(Zigurat Software)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Sir%20Fred%20(1986)(Zigurat%20Software)(es)%5BRUN'CAS-'%5D.zip
 cas SIR-FRED.CAS
 sha1 35fa3531ebb6bdc630938fa480dea5dd207ad622
+url https://download.file-hunter.com/Games/MSX1/CAS/Sir%20Fred%20(1986)(Zigurat%20Software)(es)%5BRUN%27CAS-%27%5D.zip

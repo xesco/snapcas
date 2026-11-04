@@ -1,4 +1,4 @@
 # HiSoft Devpac GENS (1984)(HiSoft)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/HiSoft%20Devpac%20GENS%20(1984)(HiSoft)%5BRUN'CAS-'%5D.zip
 cas HISOFCAS.CAS
 sha1 f872b4c84e39642c4bc169f8a5f7e9328655261e
+url https://download.file-hunter.com/Games/MSX1/CAS/HiSoft%20Devpac%20GENS%20(1984)(HiSoft)%5BRUN%27CAS-%27%5D.zip

@@ -19,37 +19,57 @@ game starts.
   example to load the next level. `snapcas` keeps the rest of the tape in the `.SNP`
   file. It stops and goes on where the game wants. It turns the tape over to side B
   by itself. You can also wind it back with a key ([Tape keys](#tape-keys)).
-- **Know 1,322 games.** The `games/` folder has a file for each game. The file tells
+- **Know 1,545 games.** The `games/` folder has a file for each game. The file tells
   `snapcas` how to make the game's `.SNP` file, and where to download the game.
 
 ## What you need
 
 - An MSX with a memory mapper and a disk system, such as MSX-DOS or Nextor.
 - A computer with Python 3 and the emulator `openMSX`.
-- The game's CAS or TSX file.
+- A network connection, from which `snapcas` downloads the game's tape file from
+  File-Hunter, or the tape file itself, a CAS or TSX file.
 
 ## Get started
 
 This example makes Gauntlet for a Sanyo PHC-28S.
 
-1. Find Gauntlet in `games/GAUNTLET/game.txt`. Its first lines have the link to
-   download `GAUNTLET.CAS`. Put the file in a folder, for example `~/tapes`.
-2. Find your MSX in the `machines/` folder. A file's name is the MSX's model, then
-   its cartridges in slot order. A Sanyo PHC-28S with a 64 KB RAM cartridge in slot
-   1 and a Carnivore2 in slot 2 is `machines/phc28s-ram64k-carnivore2.txt`. You will
-   call it `phc28s-ram64k-carnivore2`.
+1. Find the game:
+
+   ```
+   ./snapcas.py list gauntlet
+   ```
+
+   It shows `GAUNTLET`, the folder of `games/GAUNTLET/game.txt`, and the File-Hunter
+   file that the game comes from.
+2. Find your MSX:
+
+   ```
+   ./snapcas.py machines
+   ```
+
+   A machine's name is the MSX's model, then its cartridges in slot order. A Sanyo
+   PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2 is
+   `phc28s-ram64k-carnivore2`. Give the whole name, because each cartridge changes
+   the image.
 3. Make the `.SNP` file:
 
    ```
-   python3 tools/snapcas.py GAUNTLET phc28s-ram64k-carnivore2 --tapes ~/tapes
+   ./snapcas.py snap gauntlet phc28s-ram64k-carnivore2
    ```
 
-   You get `out/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`.
+   It downloads the game's two tape files from File-Hunter into the `downloads/`
+   folder, `GAUNTLET.CAS` and `GAUNTLEB.CAS`, unless they are there. You get
+   `images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`.
 4. Copy `bin/SNAPCAS.COM` and `GAUNTLET.SNP` to your MSX's disk. On the MSX, type:
 
    ```
    SNAPCAS GAUNTLET
    ```
+
+   To put all your images for an MSX on its SD card at once, run
+   `./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX` with the card's folder.
+   On the MSX, go to the game's letter first: `CD \SNAPCAS\G`, then
+   `\BIN\SNAPCAS GAUNTLET` ([CLI.md, Sync a card](docs/CLI.md#sync-a-card)).
 
 ## Tape keys
 
@@ -89,13 +109,46 @@ press GRAPH or CODE to wind the tape back. With a few games, `/M` does not work.
 | Folder | What it holds |
 |---|---|
 | `games/` | A game file for each MSX1 CAS game, without the game itself |
+| `custom/` | Your own games, each with its game file and its tapes ([custom/README.md](custom/README.md)) |
 | `machines/` | One file for each MSX with its cartridges |
 | `tools/` | The programs that make `.SNP` files |
 | `bin/` | `SNAPCAS.COM`, which starts a `.SNP` file on your MSX |
-| `out/` | The `.SNP` files that you make |
+| `downloads/` | The tape files that `snapcas` downloads from File-Hunter |
+| `images/` | The `.SNP` files that you make, one folder per MSX |
+| `dos/` | The DOS files that the checks boot ([dos/README.md](dos/README.md)) |
+| `out/` | The files that `snapcas` makes on the way, which you do not need |
 | `docs/`, `src/`, `tests/` | The project's documents, source code and tests |
+
+## Build and test
+
+The Makefile builds `snapcas` and runs its checks. You need it only to change
+`snapcas`, because `bin/` already holds the built files.
+
+| Command | What it does |
+|---|---|
+| `make all` | Builds `bin/SNAPCAS.COM` and `bin/SERVICE.BIN`. It downloads the sjasmplus assembler's source into `out/cache/` and builds it first |
+| `make test` | Runs the tests in `openMSX`, in about 2 minutes, with the tape files of `tests/tapes/`. It downloads Nextor's files into `dos/nextor/` and the cartridges' firmware into `out/cache/` |
+| `make games` | Makes and checks the image of every game in `games/` on one MSX, with the tape files of `downloads/`. It downloads no tape, so a game whose tape is missing fails |
+| `make clean` | Removes `bin/` and `out/test/` |
+
+The tests that need MSX-DOS 1 or MSX-DOS 2 look for its files in `dos/msxdos1/` and
+`dos/msxdos2/` ([dos/README.md](dos/README.md)), and are skipped without them.
+`DOS_DIR=` names another folder for them.
+
+`make games` takes these settings:
+
+| Setting | What it does | Default |
+|---|---|---|
+| `MACHINE=` | The MSX, as `./snapcas.py machines` lists it | `phc28s-ram64k-carnivore2` |
+| `DOS=` | The folder of the DOS files that the check boots | `dos/nextor` |
+| `FULL=1` | Runs every game again. Otherwise a game keeps its last result while its files and the code are unchanged | Off |
+
+The results go to `out/games/<machine>.txt`, one line per game. The command fails
+when a game fails that `tests/openmsx-failures.txt` does not list, because that list
+holds the games that fail in `openMSX` itself. A first run takes hours.
 
 ## Learn more
 
-[DESIGN.md](docs/DESIGN.md) explains how `snapcas` works, what it cannot do yet, and
-how to describe a new MSX.
+[DESIGN.md](docs/DESIGN.md) explains how `snapcas` works and what it cannot do yet.
+[FILES.md](docs/FILES.md) shows how to describe a new MSX or a game, and
+[FORMATS.md](docs/FORMATS.md) defines the image and the other files byte by byte.

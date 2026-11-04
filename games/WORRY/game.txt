@@ -1,4 +1,4 @@
 # Worry (1985)(Microcabin)
-# https://download.file-hunter.com/Games/MSX1/CAS/Worry%20(1985)(Microcabin).zip
 cas WORRY.CAS
 sha1 579bbd5be4763de45c82320be9290730c890d0c9
+url https://download.file-hunter.com/Games/MSX1/CAS/Worry%20(1985)(Microcabin).zip

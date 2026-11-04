@@ -1,6 +1,6 @@
 """Run openMSX for the snapcas tools: machine files, disk images and Tcl scripts.
 
-A machine file (docs/DESIGN.md, Machine file) names the openMSX arguments, the
+A machine file (docs/FILES.md, Machine file) names the openMSX arguments, the
 command that inserts a disk image and its size, the keys that pass a boot menu or
 that are held from power-on, and the machine's capture variants. The tools
 drive openMSX with a Tcl script that it runs with the throttle, the renderer and
@@ -17,7 +17,7 @@ MACHINES = os.path.join(os.path.dirname(HERE), "machines")
 # The capture variants, which only the capture runs on.
 VARIANTS = os.path.join(MACHINES, "capture")
 
-# The special keys of the MSX keyboard matrix, rows 6 to 8 (DESIGN.md, Key
+# The special keys of the MSX keyboard matrix, rows 6 to 8 (FILES.md, Key
 # names): name -> (row, bit).
 KEYS = {}
 for _row, _names in (
@@ -49,6 +49,26 @@ class Machine:
         self.boot = boot  # [(text, key)], matched in order
         self.dos = dos    # (prompt, drive) when DOS boots from the machine's own disk
         self.variants = variants  # the capture variants' names, in the order to try them
+
+
+def user_machines():
+    """The names of the user machines, the machine files in machines/ itself,
+    in order (FILES.md, Machine file)."""
+    return sorted(f[:-4] for f in os.listdir(MACHINES)
+                  if f.endswith(".txt") and os.path.isfile(os.path.join(MACHINES, f)))
+
+
+def description(path):
+    """What a machine file says that the machine is: its first comment's first
+    sentence, up to its first full stop or colon, on one line."""
+    lines = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            if not line.startswith("#"):
+                break
+            lines.append(line[1:].strip())
+    text = " ".join(lines)
+    return re.split(r"[.:](?:\s|$)", text, maxsplit=1)[0]
 
 
 def machine_path(machine):
@@ -156,6 +176,19 @@ def run(args, script, timeout):
              "-command", "set renderer none; set throttle off; set mute on"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             timeout=timeout, check=False)
+    finally:
+        os.unlink(path)
+
+
+def run_window(args, script):
+    """Runs openMSX with its window and the user's settings, sound included,
+    the given arguments and Tcl script text, until the user closes it, and
+    returns its exit status."""
+    with tempfile.NamedTemporaryFile("w", suffix=".tcl", delete=False) as f:
+        f.write(tcl("tcl/prelude.tcl") + script)
+        path = f.name
+    try:
+        return subprocess.run(["openmsx", *args, "-script", path]).returncode
     finally:
         os.unlink(path)
 

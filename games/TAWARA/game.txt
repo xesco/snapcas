@@ -1,4 +1,4 @@
 # Tawara (1984)(Ascii)[BLOAD'CAS-',R]
-# https://download.file-hunter.com/Games/MSX1/CAS/Tawara%20(1984)(Ascii)%5BBLOAD'CAS-'%2CR%5D.zip
 cas TAWARA.CAS
 sha1 9feb833ad4de92bd009ab5089e1151f169f06eee
+url https://download.file-hunter.com/Games/MSX1/CAS/Tawara%20(1984)(Ascii)%5BBLOAD%27CAS-%27%2CR%5D.zip

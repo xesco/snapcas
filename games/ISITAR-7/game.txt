@@ -1,4 +1,4 @@
 # Isitar 7 (2019) (N.I.) [RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Isitar%207%20(2019)%20(N.I.)%20%5BRUN'CAS-'%5D.zip
 cas ISITAR-7.CAS
 sha1 549e3a4876f3e7271773457bdb97b02df2445dfc
+url https://download.file-hunter.com/Games/MSX1/CAS/Isitar%207%20(2019)%20(N.I.)%20%5BRUN%27CAS-%27%5D.zip

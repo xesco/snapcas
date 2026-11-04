@@ -1,4 +1,4 @@
 # Turbo Pack B (1987)(Philips)(es) / 073-Alpha Blaster.cas
-# https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP
 cas 037-ALPH.CAS
 sha1 b235f748028531b3707c61a89717fa7fde037b1d
+url https://download.file-hunter.com/Games/MSX1/CAS/Turbo%20Pack%20B%20(1987)(Philips)(es).ZIP

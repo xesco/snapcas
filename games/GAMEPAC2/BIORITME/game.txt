@@ -1,8 +1,8 @@
 # Bioritme, the fifth program on Aackosoft's Game Pack 2, after Sprite Maker
-# (games/GAMEPAC2/SPRITEMA):
-# https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
+# (games/GAMEPAC2/SPRITEMA).
 # The load starts at the BASIC loader BIO, as when the tape runs on after Sprite
 # Maker.
 cas GAME-PAC.CAS
 sha1 e65f4e4dbabffd242081acc8d66b3ef107a9394c
+url https://download.file-hunter.com/Games/MSX1/CAS/Game%20Pack%202%20(1986)(Aackosoft).zip
 start BIO

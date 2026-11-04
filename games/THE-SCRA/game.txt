@@ -1,4 +1,4 @@
 # The Scramble (1983) (Marufune FSL)
-# https://download.file-hunter.com/Games/MSX1/CAS/The%20Scramble%20(1983)%20(Marufune%20FSL).zip
 cas THE-SCRA.CAS
 sha1 f4cd34f5a89d0af7d7f63b775edb2ed1faacee8d
+url https://download.file-hunter.com/Games/MSX1/CAS/The%20Scramble%20(1983)%20(Marufune%20FSL).zip

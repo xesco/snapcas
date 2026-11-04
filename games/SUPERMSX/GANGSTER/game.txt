@@ -1,6 +1,5 @@
 # Gangster, the fifth game on the tape Super MSX n.24 (ottobre 1989) - cas_24 /
-# super24latob.cas, after American Football (games/SUPERMSX/AMERICAN):
-# https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.24%20(ottobre%201989)%20-%20cas_24.zip
+# super24latob.cas, after American Football (games/SUPERMSX/AMERICAN).
 # It is a copy of Chicago's 30, as edicola8bit lists it. It also has a dump of its
 # own (games/CHICAGO). Source:
 # https://www.edicola8bit.com/giochi?collana=super_msx&console=msx&id=24
@@ -8,4 +7,5 @@
 # American Football.
 cas SUPEROB.CAS
 sha1 f747f0115d96e2a290de21c99dd891ec3bd1f4e4
+url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.24%20(ottobre%201989)%20-%20cas_24.zip
 start GANGST

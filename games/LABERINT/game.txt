@@ -1,4 +1,4 @@
 # Laberinto (1985)(Advance)(es)[CLOAD + RUN]
-# https://download.file-hunter.com/Games/MSX1/CAS/Laberinto%20(1985)(Advance)(es)%5BCLOAD%20%2B%20RUN%5D.zip
 cas LABERINT.CAS
 sha1 adbae3b82c1c3e0fed446707a014834ed2e52a1c
+url https://download.file-hunter.com/Games/MSX1/CAS/Laberinto%20(1985)(Advance)(es)%5BCLOAD%20%2B%20RUN%5D.zip

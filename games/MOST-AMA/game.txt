@@ -1,4 +1,4 @@
 # Most Amazing Memory Game, The (1986)(Idealogic)(es)[RUN'CAS-']
-# https://download.file-hunter.com/Games/MSX1/CAS/Most%20Amazing%20Memory%20Game%2C%20The%20(1986)(Idealogic)(es)%5BRUN'CAS-'%5D.zip
 cas MOST-AMA.CAS
 sha1 1624bea162863943ca30ab87135f63d72749a810
+url https://download.file-hunter.com/Games/MSX1/CAS/Most%20Amazing%20Memory%20Game%2C%20The%20(1986)(Idealogic)(es)%5BRUN%27CAS-%27%5D.zip
