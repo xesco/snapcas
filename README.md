@@ -104,19 +104,6 @@ When a game says "rewind the tape and press a key", press the game's key first. 
 press GRAPH or CODE to wind the tape back. With a few games, `/M` does not work.
 `SNAPCAS` then says so, and the tape works by itself.
 
-### Load at tape speed
-
-The tape loads in a moment. Type `/T1200` or `/T2400` after the game's name to hear
-it load as a real tape does, at that speed, through your MSX's sound:
-
-```
-SNAPCAS GAUNTLET /T1200
-```
-
-Each load then takes a real tape's time: Gauntlet's main game takes about 5 minutes
-at 1200 baud. With a few games, `/T` does not work. `SNAPCAS` then says so, and the
-game loads at once.
-
 ## Folders
 
 | Folder | What it holds |

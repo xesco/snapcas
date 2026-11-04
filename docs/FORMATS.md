@@ -70,13 +70,12 @@ segments after it. The code segment's fields are these:
 | 005Eh | 1 | The side that the tape position is on: 0 for side 1, 1 for side 2, set by `build.py` from the position at the snapshot |
 | 005Fh | 2 | The address of the game's value of VDP register 1: `RG1SAV`, F3E0h, when it equals the snapshot's register 1, otherwise 0061h |
 | 0061h | 1 | The snapshot's VDP register 1 |
-| 0062h | 1 | The tape speed, filled in by the restorer: 0 for the fast load, 1 for 1200 baud, 2 for 2400 baud |
+| 0062h | 1 | Unused, 0 |
 | 0063h | 1 | 1 when the tape has a side 2, set by `build.py` |
 | 0064h | 3 | The tape position while `TAPIN` looks for a header |
 | 0067h | 3 | Side 1's end before its padding, set by `build.py` when the tape has a side 2, otherwise side 1's end |
 | 006Ah | 1 | The tape's mode, filled in by the restorer: 1 for the manual tape of `/M`, 0 for the automatic tape |
-| 006Bh | 3 | A jump to the motor's routine, which T0's `TAPIOF` and `STMOTR` call through the trampoline |
-| 006Eh | | The routines, then the tape |
+| 006Bh | | The routines, then the tape |
 
 ## The entry code's data
 
@@ -171,7 +170,7 @@ that it names:
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 1 | Version: 13. `build.py` stops with an error on any other |
+| 0 | 1 | Version: 12. `build.py` stops with an error on any other |
 | 1 | 1 | Number of parts |
 | 2 | 4 per part | Each part's offset and length in the file, 2 bytes each |
 

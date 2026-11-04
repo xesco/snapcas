@@ -68,11 +68,8 @@ game is processed by four commands, in this order:
    verifies the restore ([Check](#check)). `<dir>` holds the user's DOS system
    files.
 4. The user copies `SNAPCAS.COM` and `<GAME>.SNP` to a disk of the real machine and
-   runs `SNAPCAS <GAME>`. With `/T1200` or `/T2400`, a game with the tape service
-   loads at that speed, with the sound of the tape
-   ([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)). With
-   `/M`, the tape moves only when the player presses a key
-   ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)).
+   runs `SNAPCAS <GAME>`. With `/M`, the tape moves only when the player presses a
+   key ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)).
 
 `./snapcas.py snap <game> <machine> [--check [--dos <dir>]]`, the `snapcas` command
 at the repository's top ([CLI.md](CLI.md)), makes the image in one command. It
@@ -155,9 +152,8 @@ keeps the rest of the tape in mapper segments. T0, a copy of the BIOS's page 0 w
 tape routines call the service, replaces the ROM in page 0, and entries in page 3
 serve the code that goes around T0. By default the tape turns over and rewinds by
 itself. With `/M` it stops where a real tape stops, and waits for the player's key.
-GRAPH goes back to side 1's start and CODE to side 2's. With `/T1200` or `/T2400`,
-each load takes a real tape's time and plays the tape's sound on the MSX's keyclick
-output. A game that needs all of its page 3 gets the whole service in T0
+GRAPH goes back to side 1's start and CODE to side 2's. A game that needs all of its
+page 3 gets the whole service in T0
 ([INTERNALS.md, Tape service](INTERNALS.md#tape-service)).
 
 ### Check
@@ -200,10 +196,9 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 | `rom keep` in the game file, not a rule of the restorer | T0 in page 0 serves a BASIC program, whose tape calls are in the ROM and cannot be patched, but it changes the slot register's page 0 bits. Gauntlet's RAM search adds the slot that it finds to those bits, expecting the ROM's slot 0, and selects an empty slot |
 | Find the slot patches of the load by watching it, and not by a search of the whole tape | A search also changes bytes that are data or code that never runs, and a loader that checks a block's sum then fails to load it. A write that the watch sees runs, and selects a slot that holds nothing, so its patch is needed |
 | Scan the snapshot and the unread blocks | Many games that load during play build stubs that T0 alone does not intercept |
-| The tape speed as an option of `SNAPCAS`, fast by default | The player chooses at each run between a quick load and the experience of the tape, and the image stays the same |
 | Rewind the capture with `savestate` and `loadstate` | `openMSX`'s `reverse goto` replays the input recorded after its target, while each key try must start from the saved moment with no other input |
 | A tape with both sides, a wrap, and fixed keys for each side's start | Most such games' unread blocks have no names, so only the tape's position decides which block a game reads, as with a real tape |
-| An automatic tape by default, and a manual one with `/M` | The automatic tape needs nothing from the player, and that is how most players want it. The manual tape follows what the game tells the player, as 4x4 Off-Road Racing does when it asks to stop the tape and later to rewind it, and with `/T1200` it avoids the wrap's reading of the rest of a side at tape speed |
+| An automatic tape by default, and a manual one with `/M` | The automatic tape needs nothing from the player, and that is how most players want it. The manual tape follows what the game tells the player, as 4x4 Off-Road Racing does when it asks to stop the tape and later to rewind it |
 | GRAPH for side 1's start and CODE for side 2's | GRAPH and CODE alone type no character, BASIC ignores them, and games rarely read them, while STOP pauses a BASIC program, the function keys type text, and many games use SELECT in their menus. On a Japanese MSX, CODE's key is KANA, which also switches the kana lock |
 | RETURN to play on, and a read that goes on only when the key is released | RETURN is the key that a player presses without thinking. Games read it, so the service waits for its release, and the game, which does not run while the service waits, never sees it |
 
@@ -232,8 +227,8 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 - The shipped machine's game files, `phc28s-ram64k-carnivore2.txt` and
   `vg8020-carnivore2.txt`, hold only on their machine. On another machine, the games
   that have one may need a machine's game file of their own for that machine.
-- A game in the mode without a part in page 3 has only the automatic tape at the
-  fast speed, because T0 has no room for the manual tape or the tape speed
+- A game in the mode without a part in page 3 has only the automatic tape, because
+  T0 has no room for the manual tape
   ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)).
 - With `/M`, a game that stops the motor between two loads without a message on the
   screen still waits for RETURN, and the player sees no reason for the wait

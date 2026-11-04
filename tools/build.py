@@ -22,7 +22,7 @@ import tape  # noqa: E402
 import gamefile  # noqa: E402
 import patches  # noqa: E402
 
-SERVICE_VERSION = 13
+SERVICE_VERSION = 12
 PAGE = 16384
 HEADER_SIZE = 4096
 MAGIC = b"SNAPCAS4"
