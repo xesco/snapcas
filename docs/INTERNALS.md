@@ -220,7 +220,10 @@ or step 5 restarts more than 20 times. It performs the following steps:
    `loadstate` restores the machine but neither the script's variables nor its
    timers, so each time the capture also restores its logged state from the saved
    moment and schedules again its polling and the `keys` that come after that
-   moment.
+   moment. `loadstate` also removes the watchpoints, though it keeps the
+   breakpoints. The capture does not set its watchpoints again, so after the first
+   `loadstate` it no longer logs writes to ports A0h and A8h or to FFFFh. Every game
+   file passes without them, and setting them again made two game files fail.
 6. Takes the snapshot when the CPU next accepts an interrupt while no VDP command is
    running (status register 2, bit 0, is 0) and both VDP latches are empty. A probe
    breakpoint on `z80.acceptIRQ` marks the acceptance, and a breakpoint at the
