@@ -211,6 +211,8 @@ commands:
 | Wait's start | `04` | The frames of a wait for a key start here |
 | Wait's end | `05` | Play the frames since `04` again until a key is pressed |
 | RETURN | `06` | Wait until the player presses RETURN, at the load command's RETURN |
+| Tape bytes | `07 n` and n bytes | Play n bytes, 1 to 255, on the keyclick bit as the tape holds them, at the capture's speed: the bytes that `TAPIN` returned in this frame |
+| Leader tone | `08` | Play the leader tone until the frame ends: a frame in which the capture's tape played a block's leader |
 | End | `FF` | The replay ends |
 
 The stream starts with the first state, as port writes and VRAM bytes. A `02 A0h`

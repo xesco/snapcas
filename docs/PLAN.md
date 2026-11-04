@@ -174,14 +174,15 @@ playing with `/R` in `SNAPCAS.COM`. The tests check:
   `phc28s-ram64k-carnivore2`.
 - That a wait for a key holds the replay until a key is pressed, with `ABADIA.CAS`
   on `nms8250-carnivore2`.
-- That Moonrider's replay at `/R` takes the capture's time within 5%, and at `/R2`
-  half of it, and that it makes no DOS call while it plays, from a breakpoint at
-  0005h, when the file fits in the free segments.
+- That Moonrider's replay at `/R` takes the capture's time within 5%, and that it
+  makes no DOS call while it plays, from a breakpoint at 0005h, when the file fits
+  in the free segments.
 - That with fewer free segments than the file needs, the replay reads its other
   chunks only at frames in which the motor bit is off.
-- That the replay toggles the keyclick bit only while the motor bit is on, at 1200
-  Hz for a 0 bit and 2400 Hz for a 1 bit, from write watchpoints on ports AAh and
-  ABh.
+- That the replay plays each byte that the capture's `TAPIN` returned, in order,
+  with the keyclick bit's edges of its 11 bits at the tape's pitch, and the leader
+  tone where `TAPION` found a header, from write watchpoints on ports AAh and ABh,
+  and that the keyclick bit stays still while the motor bit is off.
 - That Moonrider's replay starts with VRAM and the VDP's registers as they were just
   before the capture typed the load command, types the command, and waits at its
   RETURN until RETURN is pressed.
@@ -193,10 +194,10 @@ not, to judge the compression.
 
 The replay shows the load on the real machine as it happened in the capture: BASIC's
 screen with the load command being typed, the loading screens being drawn, their
-music, the game's own pauses and its waits for a key, and the cassette motor's
-relay. Nothing of the loader runs again: the replay is a recording, played before
-the restore, so it works for every game whose capture works. It is optional, in its
-own file, `<GAME>.RPL`, and runs only with `/R`.
+music, the game's own pauses and its waits for a key, the cassette motor's relay,
+and the tape's own sound. Nothing of the loader runs again: the replay is a
+recording, played before the restore, so it works for every game whose capture
+works. It is optional, in its own file, `<GAME>.RPL`, and runs only with `/R`.
 
 The capture records it from just before it types the load command to the snapshot,
 in `snap/replay.log`. The log starts with the VDP's state at that moment: VRAM, the
@@ -212,6 +213,10 @@ the port and the value. A frame is one VDP interrupt period of the machine, 1/50
 - Each wait that a key continued ([INTERNALS.md, Capture](INTERNALS.md#capture),
   step 5), as the frames of the wait's first 30 seconds, kept aside before the
   rewind, and the key.
+- Each byte that `TAPIN` returns, and each header that `TAPION` finds, with its
+  tone, long or short
+  ([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)). These
+  are the tape's own bytes, in the frames where the loader read them.
 - The frame of the load command's RETURN.
 
 A rewind truncates the log to its length at the saved moment, as it puts back the
@@ -235,10 +240,13 @@ interrupts off while it writes and on while it waits for the next frame:
 - It writes VRAM no faster than one byte every 29 cycles, 8 µs, which an MSX1 VDP
   needs during the display.
 - At a wait, it plays the wait's frames in a loop until a key is pressed.
-- `/R2` to `/R9` play 2 to 9 frames for each frame that it waits.
-- While the motor runs at `/R` speed, it toggles the keyclick bit in each frame's
-  spare time at 1200 Hz for a 0 bit and 2400 Hz for a 1 bit, from the stream's own
-  bytes, so that the load sounds like a tape.
+- It plays the tape's sound from the tape's own bytes, as `TAPIN` returned them in
+  the capture, in the frames where the capture read them: each byte as `/T` plays
+  it, at the capture's speed, and the leader tone in the frames where `TAPION` found
+  a header. Between two bytes only the replay's own code runs, so the tone goes on
+  with almost no gap, which `/T` cannot give while the game runs between its calls.
+  A turbo loader's blocks, which its own code reads and not `TAPIN`, play without
+  the tape's sound.
 
 When the replay ends, VRAM, the VDP's registers and the PSG's registers hold their
 values at the snapshot, and the restore goes on with step 3.
