@@ -70,9 +70,11 @@ start:
         cp " "
         ld de,t_usage
         jp z,stop_message
-        ; /M in the command line, its length at 0080h and its text after it,
-        ; asks for the manual tape (INTERNALS.md, The manual tape). It is read
-        ; first, before a DOS call can use 0080h.
+        ; The options in the command line, its length at 0080h and its text
+        ; after it: /M asks for the manual tape (INTERNALS.md, The manual
+        ; tape), and /T1200 or /T2400 for a tape speed (INTERNALS.md, Tape
+        ; speed and sound). They are read first, before a DOS call can use
+        ; 0080h.
         ld hl,0080h
         ld b,(hl)
 .option:
@@ -91,10 +93,46 @@ start:
         dec b
         ld a,(hl)
         and 0DFh                ; upper case
+        cp "T"
+        jr z,.speed
         cp "M"
         jr nz,.option
         ld a,1
         ld (manual),a
+        jr .option
+.speed:
+        ; 1200 or 2400: the first digit is the speed's number, the second
+        ; twice it, then two zeros.
+        ld a,b
+        cp 4
+        jr c,.option
+        push hl
+        push bc
+        inc hl
+        ld a,(hl)
+        sub "0"
+        ld c,a
+        dec a
+        cp 2
+        jr nc,.not
+        inc hl
+        ld a,c
+        add a,a
+        add a,"0"
+        cp (hl)
+        jr nz,.not
+        inc hl
+        ld a,(hl)
+        cp "0"
+        jr nz,.not
+        inc hl
+        cp (hl)
+        jr nz,.not
+        ld a,c
+        ld (speed),a
+.not:
+        pop bc
+        pop hl
         jr .option
 .options:
         ; Copy the drive and the name into our own FCB, which already holds
@@ -141,6 +179,7 @@ start:
         call check_roms
         call check_records
         call manual_note
+        call speed_note
         call find_worker_page
         call allocate
         call read_records
@@ -821,6 +860,24 @@ manual_note:
         ld de,t_manual
         jp print
 
+; A tape speed acts only through the tape service with its part in page 3,
+; because T0 has no room for its code. Otherwise /T says that the tape loads at
+; once, and the restore goes on.
+speed_note:
+        ld a,(speed)
+        or a
+        ret z
+        ld a,(service)
+        or a
+        jr z,.note
+        ld a,(H_FLAGS)
+        and 2                   ; bit 1: without a part in page 3
+        ret z
+.note:
+        call name
+        ld de,t_speed
+        jp print
+
 ; Prints A in decimal, without leading zeros.
 print_dec:
         ld hl,digits
@@ -1227,6 +1284,8 @@ dos_page:
         jr nz,.back
         ld a,(manual)
         ld (8000h+C_MODE),a
+        ld a,(speed)
+        ld (8000h+C_SPEED),a
         ld de,8000h+C_SEGS
         ld bc,SEGS_MAX
 .table:
@@ -1614,12 +1673,16 @@ name:
 
         include "slots.inc"
 
-t_usage:    db "Usage: SNAPCAS <game> [/M]",13,10
+t_usage:    db "Usage: SNAPCAS <game> [/M] [/T1200|/T2400]",13,10
             db "Restores <game>.SNP, a snapcas image.",13,10
             db "/M: the tape moves only with RETURN,",13,10
-            db "GRAPH or CODE.",13,10,"$"
+            db "GRAPH or CODE.",13,10
+            db "/T1200, /T2400: the game's loads take",13,10
+            db "a tape's time, with its sound.",13,10,"$"
 t_manual:   db ": /M does not work with this image,",13,10
             db "so the tape stays automatic",13,10,"$"
+t_speed:    db ": /T does not work with this image,",13,10
+            db "so its loads stay fast",13,10,"$"
 t_ext:      db ".SNP$"
 t_notfound: db " not found",13,10,"$"
 t_notimage: db " is not a snapcas image",13,10,"$"
@@ -1666,6 +1729,7 @@ service:    db 0                ; nonzero with the tape service
 p0:         db 0                ; the RAM pages for page 0, as in check_records
 t0_rom:     db 0                ; 1 when T0 replaces the ROM
 manual:     db 0                ; 1 with /M
+speed:      db 0                ; 1 with /T1200, 2 with /T2400
 svc_segs:   ds SEGS_MAX+1       ; T0's segment, the code segment, the tape's
 free_count: db 0
 hold_count: db 0

@@ -28,11 +28,11 @@ c_tapion:
         ; stops too. TAPION starts the motor, as the BIOS's does.
         in a,(0AAh)
         bit 4,a
-        jr z,.search
+        jr z,.motor
         res 4,a
         out (0AAh),a
         call stop
-        jr .search
+        jr .motor
 .auto:
         endif
         push bc
@@ -41,6 +41,12 @@ c_tapion:
         pop bc
         bit 4,c
         call z,side_b           ; CODE
+.motor:
+        if !T0MODE
+        call motor_on           ; at a tape speed
+        ld hl,0
+        ld (left),hl            ; the position moves: TAPIN checks all again
+        endif
         ; Find the next header at a multiple of 8 bytes.
 .search:
         call keys
@@ -64,10 +70,29 @@ c_tapion:
         jr nz,.search
         inc hl
         djnz .compare
+        if !T0MODE
+        call leader             ; at a tape speed
+        ret c                   ; CTRL+STOP
+        endif
         or a
         ret
 
+; At a tape speed, TAPIN reads each byte with the least work and plays it
+; (INTERNALS.md, Tape speed and sound).
 c_tapin:
+        if !T0MODE
+        ld a,(D_SPEED)
+        or a
+        jr z,tapin
+        di
+        call lean
+        ret c
+        push af
+        call play
+        pop af
+        ret
+        endif
+tapin:
         di
         call keys
         ret c                   ; CTRL+STOP
@@ -141,6 +166,18 @@ next_byte:
         or a
         call nz,wait
         ret c
+        call read_pos
+        push de
+        call inc_pos
+        call wrap
+        pop de
+        ld a,e
+        or a
+        ret
+
+; Returns in E the byte at the tape position, which stays. T0's copy has no
+; room for the call, so it reads, advances and wraps in one.
+read_pos:
         endif
         ld hl,(D_POS+1)
         add hl,hl
@@ -183,15 +220,6 @@ next_byte:
         out (c),a
         ld a,(D_PAGE)
         out (0A8h),a
-        else
-        ; Through the reader in page 3, in page 0.
-        ex de,hl
-        ld d,b
-        ld a,(D_SEGS)
-        ld b,a
-        ld c,0FCh
-        call reader
-        endif
         push de
         ld hl,D_POS
         inc (hl)
@@ -207,6 +235,27 @@ next_byte:
         ld a,e
         or a
         ret
+        else
+        ; Through the reader in page 3, in page 0.
+        ex de,hl
+        ld d,b
+        ld a,(D_SEGS)
+        ld b,a
+        ld c,0FCh
+        jp reader
+
+; Advances the tape position by one byte.
+inc_pos:
+        ld hl,D_POS
+        inc (hl)
+        ret nz
+        inc hl
+        inc (hl)
+        ret nz
+        inc hl
+        inc (hl)
+        ret
+        endif
 
 ; Flashes the screen in the border colour E for 0.1 second, counted by the
 ; VDP's frame flag in status register 0: it blanks the display, which then
@@ -439,4 +488,310 @@ release:
 
 again:  dw 0                    ; where the read starts again
 again_sp: dw 0                  ; the read's stack pointer
+        endif
+
+        if !T0MODE
+; ---- The tape speed and its sound (INTERNALS.md, Tape speed and sound) ----
+;
+; At D_SPEED 1 or 2, the service works as a tape at 1200 or 2400 baud: each
+; bit is one cycle of a square wave for a 0 and two cycles at twice the
+; frequency for a 1, played on the keyclick bit, PPI port C bit 7, which the
+; MSX sends to its sound output. The sound is the wait.
+
+; For each speed: the loop counts of edge for a 1 bit's quarter cycle and a 0
+; bit's half cycle, at the tape's frequencies, then the stop bits' edges and
+; the pad's loops. An edge takes 61 T-states and 14 more for each loop, with
+; the MSX's wait state on each opcode fetch. No edge comes between two bytes,
+; while the service returns to the game and the game calls it again, so the
+; stop bits leave out that time's quarter cycles, an even number, and the pad
+; makes up the rest: a byte takes its 11 bits, measured in openMSX.
+speeds: db 48,101,STOP1200,PAD1200
+        db 21,47,STOP2400,PAD2400
+STOP1200 equ 6
+PAD1200 equ 1
+STOP2400 equ 4
+PAD2400 equ 1
+
+; The counts of D_SPEED's row, which TAPION and the first TAPIN copy here.
+nq:     db 0                    ; a 1 bit's quarter cycle
+nh:     db 0                    ; a 0 bit's half cycle
+nstop:  db 0                    ; the stop bits' edges
+npad:   db 0                    ; the pad's loops
+left:   dw 0                    ; the bytes that lean can read on
+keyct:  db 0                    ; the bytes until lean reads the keys
+
+; Copies D_SPEED's row of speeds to nq to npad.
+counts:
+        ld a,(D_SPEED)
+        dec a
+        add a,a
+        add a,a
+        ld c,a
+        ld b,0
+        ld hl,speeds
+        add hl,bc
+        ld de,nq
+        ld bc,4
+        ldir
+        ret
+
+; TAPIN's byte with the least work, so that the gap without edges between two
+; bytes stays short: the keys after each 256 bytes, the sides' ends and side
+; 1's padding by the countdown in left, and a header's check only where the
+; byte at a multiple of 8 is the header's first. Otherwise, and when the manual
+; tape is stopped, the whole TAPIN, which also sets the countdown again.
+lean:
+        ld a,(nq)
+        or a
+        call z,counts           ; a TAPIN before any TAPION
+        ld hl,keyct
+        dec (hl)
+        jr nz,.stop
+        call keys
+        ret c                   ; CTRL+STOP
+.stop:
+        ld a,(D_STOP)
+        ld b,a
+        ld a,(D_MODE)
+        and b
+        jr nz,.whole            ; the manual tape is stopped
+        ld hl,(left)
+        ld a,h
+        or l
+        jr z,.whole
+        ld a,(D_POS)
+        and 7
+        jr nz,.read
+        call read_pos
+        ld a,e
+        ld hl,D_HEADER
+        cp (hl)
+        jr z,.whole             ; perhaps a header
+.read:
+        ld hl,(left)
+        dec hl
+        ld (left),hl
+        call read_pos
+        call inc_pos
+        ld a,e
+        or a
+        ret
+.whole:
+        call tapin
+        ret c
+        push af
+        call countdown
+        pop af
+        ret
+
+; Sets left to the bytes that lean can read before the whole TAPIN must check
+; the position: the least of side 1's padding's start, side 1's end less 1 and
+; side 2's end less 1, each less the position, of those not below it, and at
+; most 65535.
+countdown:
+        ld hl,0FFFFh
+        ld (left),hl
+        ld de,D_S1REAL
+        xor a
+        call .term
+        ld de,D_S1END
+        ld a,1
+        call .term
+        ld de,D_TOTAL
+        ld a,1
+; left takes the 3 bytes at DE, less A, less the position, when that is not
+; below 0 and is less than left.
+.term:
+        ld (.less+1),a
+        ld hl,D_POS
+        ld a,(de)
+        sub (hl)
+        ld c,a
+        inc de
+        inc hl
+        ld a,(de)
+        sbc a,(hl)
+        ld b,a
+        inc de
+        inc hl
+        ld a,(de)
+        sbc a,(hl)
+        ret c
+        ld h,a
+        ld a,c
+.less:
+        sub 0
+        ld c,a
+        ld a,b
+        sbc a,0
+        ld b,a
+        ld a,h
+        sbc a,0
+        ret c
+        or a
+        ret nz                  ; 65536 or more
+        ld hl,(left)
+        sbc hl,bc
+        ret c
+        ld (left),bc
+        ret
+
+; Plays the byte in A as the tape holds it: a start bit 0, the 8 data bits from
+; bit 0 up, and 2 stop bits 1 (MSX Red Book, chapter 4), less the stop bits'
+; edges that the gap to the next byte takes, then the pad.
+play:
+        ld e,a
+        ld hl,(nq)              ; L: a quarter, H: a half
+        or a                    ; the start bit
+        call bit
+        ld d,8
+.data:
+        rr e
+        call bit
+        dec d
+        jr nz,.data
+        ld a,(nstop)
+        ld d,a
+.stop:
+        ld b,l
+        call edge
+        dec d
+        jr nz,.stop
+        ld a,(npad)
+        ld b,a
+.pad:
+        djnz .pad
+        ret
+
+; Plays one bit, carry's value, with L a quarter's count and H a half's.
+bit:
+        jr c,.one
+        ld b,h
+        call edge
+        ld b,h
+        jr edge
+.one:
+        ld b,l
+        call edge
+        ld b,l
+        call edge
+        ld b,l
+        call edge
+        ld b,l
+; Toggles the keyclick bit, then waits B loops: one edge of the wave.
+edge:
+        in a,(0AAh)
+        xor 80h
+        out (0AAh),a
+.wait:
+        djnz .wait
+        ret
+
+; Plays the leader tone before the header that TAPION found, as long as the
+; BIOS's TAPOON writes it: the long one before a block that starts with a file
+; type's 10 bytes (FORMATS.md, CAS data), and the short one, a quarter of it,
+; before the others. The long one is 15,360 cycles of 2400 Hz at 1200 baud,
+; 6.4 seconds, as a TSX file's pilot holds it, and lasts as long at 2400 baud.
+; Returns carry for CTRL+STOP.
+leader:
+        ld a,(D_SPEED)
+        or a
+        ret z
+        call counts
+        ; The 10 bytes after the header, read ahead without moving the tape.
+        ld hl,D_POS
+        ld de,D_SAVE
+        ld bc,3
+        ldir
+        call read_pos
+        ld c,e                  ; the first byte
+        ld b,10
+.ahead:
+        push bc
+        call read_pos
+        call inc_pos
+        pop bc
+        ld a,e
+        cp c
+        jr nz,.back
+        djnz .ahead
+.back:
+        ld hl,D_SAVE
+        ld de,D_POS
+        push bc
+        ld bc,3
+        ldir
+        pop bc
+        ld a,b
+        or a
+        ld hl,1920              ; the short tone's 1 bits at 1200 baud
+        jr nz,.speed
+        ld a,c
+        cp 0D0h                 ; a binary file
+        jr z,.long
+        cp 0D3h                 ; a BASIC program
+        jr z,.long
+        cp 0EAh                 ; an ASCII program
+        jr nz,.speed
+.long:
+        ld hl,7680
+.speed:
+        ld a,(D_SPEED)
+        dec a
+        jr z,.counted
+        add hl,hl               ; as many seconds at 2400 baud
+.counted:
+        ex de,hl                ; the tone's 1 bits
+        ld hl,(nq)
+.tone:
+        scf
+        call bit
+        dec de
+        ld a,e
+        or a
+        jr nz,.more
+        push hl
+        call keys
+        pop hl
+        ret c                   ; CTRL+STOP
+.more:
+        ld a,d
+        or e
+        jr nz,.tone
+        ret
+
+; At a tape speed, starts the motor through the motor relay, PPI port C bit 4,
+; as the BIOS's TAPION does.
+motor_on:
+        ld a,(D_SPEED)
+        or a
+        ret z
+        in a,(0AAh)
+        and 0EFh
+        out (0AAh),a
+        ret
+
+; T0's STMOTR and TAPIOF, with B as STMOTR's A: 1 starts the motor, and any
+; other value stops the manual tape (INTERNALS.md, The manual tape). At a tape
+; speed, 0 also stops the motor and FFh switches it, as the BIOS's do, so the
+; relay clicks.
+c_motor:
+        ld a,b
+        cp 1
+        jr z,motor_on
+        ld a,1
+        ld (D_STOP),a
+        ld a,(D_SPEED)
+        or a
+        ret z
+        in a,(0AAh)
+        inc b
+        jr z,.switch
+        or 10h
+        out (0AAh),a
+        ret
+.switch:
+        xor 10h
+        out (0AAh),a
+        ret
         endif

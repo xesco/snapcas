@@ -464,7 +464,8 @@ and until step 4 it can stop with a message and return to DOS:
      which the restorer copies into its segment.
 
       It stops when there are too few, naming the segments needed and free. Then,
-      with `/R`, it will play the replay, once that is built ([PLAN.md, The replay's design](PLAN.md#the-replays-design)).
+      with `/R`, it will play the replay, once that is built
+      ([PLAN.md, The replay's design](PLAN.md#the-replays-design)).
 3. Reads the records in this order, through the FCB's random record field: the RAM
    pages of slots other than DOS's mapper, the VRAM blocks, the service segments,
    and the RAM pages of DOS's mapper. It places each one:
@@ -690,6 +691,66 @@ and sets mapper register FCh to T0's segment, with DOS's mapper's subslot in the
 page 0 bits of its slot's subslot register and of `SLTTBL`. It writes nothing into
 the game's page 3. Bit 1 of the image's flags marks the mode
 ([FORMATS.md, Image](FORMATS.md#image)).
+
+### Tape speed and sound
+
+By default the tape service returns each byte as soon as the game asks for it, so a
+load takes a moment. For the experience of a real tape, `SNAPCAS <GAME> /T1200` or
+`/T2400` makes a game load at that speed, with the tape's sound. The restorer writes
+the speed at 0062h in the code segment, and the service then works as a tape at that
+speed:
+
+- `TAPIN` plays each byte that it returns as the tape holds it, on the keyclick bit,
+  PPI port C bit 7, which the MSX sends to its sound output: a start bit 0, the 8
+  data bits from bit 0 up, and 2 stop bits 1 (MSX Red Book, chapter 4).
+- `TAPION` plays the leader tone before each header that it finds, as long as the
+  BIOS's `TAPOON` writes it: the long one before a block that starts with a file
+  type's 10 bytes ([FORMATS.md, CAS data](FORMATS.md#cas-data)), the short one
+  before the others.
+- `TAPION` starts the motor and `TAPIOF` stops it, and `STMOTR` switches it, as the
+  BIOS's routines do, through the motor relay, PPI port C bit 4. So the relay clicks
+  when the tape starts and stops.
+
+Each bit is one or two cycles of a square wave:
+
+| Speed | Bit 0 | Bit 1 | A byte's 11 bits |
+|---|---|---|---|
+| 1200 baud | One cycle of 1200 Hz | Two cycles of 2400 Hz | 9.2ms |
+| 2400 baud | One cycle of 2400 Hz | Two cycles of 4800 Hz | 4.6ms |
+
+The sound is the wait. Each edge of the wave toggles the keyclick bit, so a byte
+leaves the bit as it found it.
+
+Every bit keeps the tape's frequencies, so the load sounds as the tape does. No edge
+comes between two bytes, while the service returns to the game, the game runs, and
+the game calls the service again: about 0.45 ms with Gauntlet. So the stop bits
+leave out that time's quarter cycles, 2 at 1200 baud and 4 at 2400, an even number
+so that the keyclick bit ends as it started, and a byte takes its 11 bits within 1%:
+9.22 ms at 1200 baud and 4.57 ms at 2400. A game whose own code between two bytes
+takes longer than Gauntlet's makes its bytes longer by that. The keys and the flash
+work as at the fast speed.
+
+To keep that gap short, `TAPIN` does the least it can before a byte's first edge. It
+reads the keys after each 256 bytes. It counts down the bytes to the padding before
+side 2 or to a side's end, in place of comparing the position with them. At a
+multiple of 8, it checks for a header only when the byte there is the header's
+first. In any other case, and when the manual tape is stopped, it runs the whole
+`TAPIN`, which sets the count again, and `TAPION` sets it to 0.
+
+`TAPION` chooses the leader tone by the 10 bytes after the header, which it reads
+ahead without moving the tape, so a block near a side's end does not wrap it. The
+tone checks CTRL+STOP after each 256 of its bits. T0's `TAPIOF` and `STMOTR` reach
+the motor's routine in the code segment through the trampoline, at `C_MOTOR`, and
+`STMOTR` leaves the caller's interrupts as they were.
+
+`/T1200` and `/T2400` act only through the tape service with its part in page 3,
+because T0 has no room for their code. So they change nothing for a game without the
+service, or in the mode without a part in page 3, and the restorer then says so
+before the restore. A game without the service loaded completely before the
+snapshot, and the replay will give it the experience of its load
+([PLAN.md, The replay's design](PLAN.md#the-replays-design)). The two will combine:
+with `/R /T1200`, the replay shows the first load, and the game's later loads come
+from the tape service at 1200 baud.
 
 ### Scan
 

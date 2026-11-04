@@ -70,8 +70,10 @@ game is processed by four commands, in this order:
    verifies the restore ([Check](#check)). `<dir>` holds the user's DOS system
    files.
 4. The user copies `SNAPCAS.COM` and `<GAME>.SNP` to a disk of the real machine and
-   runs `SNAPCAS <GAME>`. The replay, `/R`, and the tape speed, `/T1200` and
-   `/T2400`, are planned ([PLAN.md](PLAN.md), steps 7 and 8). With `/M`, the tape
+   runs `SNAPCAS <GAME>`. With `/T1200` or `/T2400`, a game with the tape service
+   loads at that speed, with the sound of the tape
+   ([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)). The
+   replay, `/R`, is planned ([PLAN.md](PLAN.md), step 7). With `/M`, the tape
    moves only when the player presses a key
    ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)).
 
@@ -156,8 +158,9 @@ keeps the rest of the tape in mapper segments. T0, a copy of the BIOS's page 0 w
 tape routines call the service, replaces the ROM in page 0, and entries in page 3
 serve the code that goes around T0. By default the tape turns over and rewinds by
 itself. With `/M` it stops where a real tape stops, and waits for the player's key.
-GRAPH goes back to side 1's start and CODE to side 2's. A game that needs all of its
-page 3 gets the whole service in T0
+GRAPH goes back to side 1's start and CODE to side 2's. With `/T1200` or `/T2400`,
+each load takes a real tape's time and plays the tape's sound on the MSX's keyclick
+output. A game that needs all of its page 3 gets the whole service in T0
 ([INTERNALS.md, Tape service](INTERNALS.md#tape-service)).
 
 ### Check
@@ -235,8 +238,8 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 - The shipped machine's game files, `phc28s-ram64k-carnivore2.txt` and
   `vg8020-carnivore2.txt`, hold only on their machine. On another machine, the games
   that have one may need a machine's game file of their own for that machine.
-- A game in the mode without a part in page 3 has only the automatic tape, because
-  T0 has no room for the manual tape
+- A game in the mode without a part in page 3 has only the automatic tape at the
+  fast speed, because T0 has no room for the manual tape or the tape speed
   ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)).
 - With `/M`, a game that stops the motor between two loads without a message on the
   screen still waits for RETURN, and the player sees no reason for the wait

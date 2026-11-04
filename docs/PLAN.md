@@ -140,12 +140,12 @@ checks that the main game loads to side 1's end and that a level loads from side
 
 ## Step 6: scan
 
-This step adds the scan and its patches ([Scan](INTERNALS.md#scan)). Python unit tests
-check each of the scan's patterns on bytes made for it. The corpus test captures
-each file of `CAS_DIR` on `phc28s-ram64k-carnivore2`, with a side 2 file as the side
-2 of its game, builds the files that need the tape service, and writes every
-`scan.txt` into one report. It checks the findings that have been confirmed by hand:
-for Gauntlet, the calls of `TAPION` and `TAPIN` at E15Fh and E1ABh in page 3,
+This step adds the scan and its patches ([Scan](INTERNALS.md#scan)). Python unit
+tests check each of the scan's patterns on bytes made for it. The corpus test
+captures each file of `CAS_DIR` on `phc28s-ram64k-carnivore2`, with a side 2 file as
+the side 2 of its game, builds the files that need the tape service, and writes
+every `scan.txt` into one report. It checks the findings that have been confirmed by
+hand: for Gauntlet, the calls of `TAPION` and `TAPIN` at E15Fh and E1ABh in page 3,
 patched, and at AE88h and AED4h of side 1, listed. A game's findings join the check
 when they are confirmed.
 
@@ -162,9 +162,9 @@ The step also takes the tests that need the scan:
 
 ## Step 7: replay
 
-This step adds the replay ([The replay's design](PLAN.md#the-replays-design)): the recording in
-`capture.py`, the stream and its compression in `build.py`, and the playing with
-`/R` in `SNAPCAS.COM`. The tests check:
+This step adds the replay ([The replay's design](PLAN.md#the-replays-design)): the
+recording in `capture.py`, the stream and its compression in `build.py`, and the
+playing with `/R` in `SNAPCAS.COM`. The tests check:
 
 - With Python unit tests, that the stream's commands and the LZ4 compression read
   back what they wrote, and that a rewind truncates `replay.log`.
@@ -209,8 +209,9 @@ the port and the value. A frame is one VDP interrupt period of the machine, 1/50
 - Each change of the cassette motor and keyclick bits of PPI port C, bits 4 and 7,
   as a bit set or reset on port ABh, so that the replay does not touch the keyboard
   row bits.
-- Each wait that a key continued ([INTERNALS.md, Capture](INTERNALS.md#capture), step 5), as the frames of the
-  wait's first 30 seconds, kept aside before the rewind, and the key.
+- Each wait that a key continued ([INTERNALS.md, Capture](INTERNALS.md#capture),
+  step 5), as the frames of the wait's first 30 seconds, kept aside before the
+  rewind, and the key.
 - The frame of the load command's RETURN.
 
 A rewind truncates the log to its length at the saved moment, as it puts back the
@@ -244,63 +245,29 @@ values at the snapshot, and the restore goes on with step 3.
 
 A game with the tape service then loads the rest of its tape during play. So that
 the whole session loads at one speed, `/R` alone also sets the tape service to the
-capture's speed ([The tape speed's design](#the-tape-speeds-design)). `build.py` finds
-that speed, 1200 or 2400 baud, from the times of the `TAPIN` calls in the capture's
-log and writes it in the replay's header. `/T1200` or `/T2400` with `/R` sets the
-speed instead.
+capture's speed
+([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)).
+`build.py` finds that speed, 1200 or 2400 baud, from the times of the `TAPIN` calls
+in the capture's log and writes it in the replay's header. `/T1200` or `/T2400` with
+`/R` sets the speed instead.
 
 ## Step 8: tape speed and sound
 
 This step adds `/T1200` and `/T2400` to `SNAPCAS.COM` and the tape's speed and sound
-to the service ([The tape speed's design](PLAN.md#the-tape-speeds-design)). The tests
-restore Gauntlet on `phc28s-ram64k-carnivore2` with each option, play it to the main
-game's load as in step 5, and check:
+to the service
+([INTERNALS.md, Tape speed and sound](INTERNALS.md#tape-speed-and-sound)). The tests
+restore Gauntlet on `phc28s-ram64k-carnivore2` through the check, with check.py's
+`--options`, play it to the main game's load as in step 5, and measure:
 
-- That the main game's 34,341 bytes take 11 bits each at the chosen speed, within
-  5%, and that the load without an option stays as fast as in step 5.
-- That the keyclick bit toggles twice for each 0 bit and four times for each 1 bit
-  of a block, from a write watchpoint on port AAh, and has its value before the load
-  at the end.
-- That the motor bit of port AAh is on during the load and off after it.
-- That with `/R` alone the tape service runs at the speed in Gauntlet's replay
-  header, and with `/R /T2400` at 2400 baud.
+| Test | What it proves |
+|---|---|
+| The time between two `TAPIN`s of one block | The main game's 34,341 bytes take their 11 bits each at the chosen speed, within 1%: 9.22 ms at 1200 baud and 4.57 ms at 2400 |
+| The same without an option | The load stays as fast as in step 5, 0.62 ms a byte |
+| The keyclick bit's edges for each byte, from a write watchpoint on port AAh | Each 0 bit toggles it twice and each 1 bit four times, but for the stop bits' quarter cycles that the gap between two bytes takes, for all 34,341 bytes, and it ends as it started |
+| The motor bit of port AAh | It is on at each byte and off after the load |
+| The time from `TAPION` to the block's first `TAPIN` | The short leader tone, about 1.6 seconds at either speed, before the main game's block |
 
-### The tape speed's design
-
-By default the tape service returns each byte as soon as the game asks for it, so a
-load takes a moment. For the experience of a real tape, `SNAPCAS <GAME> /T1200` or
-`/T2400` makes a game load at that speed, with the tape's sound. The restorer writes
-the speed at 0062h in the code segment, and the service then works as a tape at that
-speed:
-
-- `TAPIN` plays each byte that it returns as the tape holds it, on the keyclick bit,
-  PPI port C bit 7, which the MSX sends to its sound output: a start bit 0, the 8
-  data bits from bit 0 up, and 2 stop bits 1 (MSX Red Book, chapter 4).
-- `TAPION` plays the leader tone before each header that it finds, as long as the
-  BIOS's `TAPOON` writes it: the long one before a block that starts with a file
-  type's 10 bytes ([FORMATS.md, CAS data](FORMATS.md#cas-data)), the short one
-  before the others.
-- `TAPION` starts the motor and `TAPIOF` stops it, and `STMOTR` switches it, as the
-  BIOS's routines do, through the motor relay, PPI port C bit 4. So the relay clicks
-  when the tape starts and stops.
-
-Each bit is one or two cycles of a square wave:
-
-| Speed | Bit 0 | Bit 1 | A byte's 11 bits |
-|---|---|---|---|
-| 1200 baud | One cycle of 1200 Hz | Two cycles of 2400 Hz | 9.2ms |
-| 2400 baud | One cycle of 2400 Hz | Two cycles of 4800 Hz | 4.6ms |
-
-The sound is the wait, so a byte takes as long as on the tape, plus the game's own
-code between two bytes. The service writes the keyclick bit back to its value before
-the byte. The keys and the flash work as at the fast speed.
-
-`/T1200` and `/T2400` act only through the tape service, so they change nothing for
-a game without it, and the restorer then says so before the restore. Such a game
-loaded completely before the snapshot, and the experience of its load comes from the
-replay, which plays the load at the capture's speed with the sound of a tape
-([The replay's design](#the-replays-design)). The two combine: with `/R /T1200`, the replay shows the first
-load, and the game's later loads come from the tape service at 1200 baud.
+With `/R`, the speed in Gauntlet's replay header waits for step 7.
 
 ## Step 9: shipped files
 
@@ -324,11 +291,12 @@ Some game files fail on a machine in `openMSX` itself, without `snapcas`: a plai
 load of the tape, with the same machine and no capture code, fails there too. Those
 are not failures of `snapcas`, so `tests/openmsx-failures.txt` lists them, with the
 machine, the game file's folder and what fails, to try again at the end. The run
-passes when every game file that fails is in that list, and it names the others. A listed game file that passes is only noted, for its line to go, because an
-`openMSX` failure can come and go. A patch line can still make such a game work
-later. The game files that load in a plain `openMSX` but fail with `snapcas` are its
-own failures, to fix, and `tests/snapcas-failures.txt` lists them in the same form.
-The run does not pass them, so they show until they are fixed.
+passes when every game file that fails is in that list, and it names the others. A
+listed game file that passes is only noted, for its line to go, because an `openMSX`
+failure can come and go. A patch line can still make such a game work later. The
+game files that load in a plain `openMSX` but fail with `snapcas` are its own
+failures, to fix, and `tests/snapcas-failures.txt` lists them in the same form. The
+run does not pass them, so they show until they are fixed.
 
 From 1 November 2026 the work focuses on two machines: `phc28s-ram64k-carnivore2`,
 the user's own, and `vg8020-carnivore2`, the plain MSX1. On the other five the
@@ -341,8 +309,8 @@ This step makes the fixes that the game files hold by hand automatic, so that a 
 machine needs as few game files of its own as possible. It adds the slot patches of
 the capture and of the scan ([Slot patches](INTERNALS.md#slot-patches)), the mode
 without a part in page 3 when page 3 has no room
-([Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)), and the tries of
-`snapcas.py make` on the capture variants
+([Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)), and the tries
+of `snapcas.py make` on the capture variants
 ([Files and commands](DESIGN.md#files-and-commands)). The tests check each fix on a
 game that needed it by hand, without its line: Sootland and Finders Keepers for the
 slot patches, Chase H.Q. for the mode, and Sootland on the HB-F700P for the
@@ -374,13 +342,14 @@ the same machine and the image, to compare.
 | 2026-11-02 | The same | `ENGESOFT\ATHLETIC.SNP`, `SUPERMSX\VERTIGO.SNP` and `SUPERMSX\ALIENS.SNP`, `D\DAMBUST.SNP`, `ENGESOFT\HYPERSP3.SNP` and `K\KONAMI.SNP`, from step 16's collection run | Athletic Land and Vertigo run. Aliens and Dam Busters reboot to the boot screen and Hyper Sports 3 into DOS, as point 3 reports. Konami's Soccer reboots into DOS, though `openMSX`'s check passed it, which led to point 3's third sign ([Check](INTERNALS.md#check)) |
 | 2026-11-02 | The same | `K\KONAMI.SNP`, `B\BUDOKAN.SNP`, `B\BEACHHE.SNP`, `M\MDROID.SNP` and `SUPERMSX\ALIENS.SNP`, with the fixes for loaders that take page 3's slot for the other pages ([Page 3's slot for the other pages](INTERNALS.md#page-3s-slot-for-the-other-pages)) | All five run. Konami's Soccer flashes its title until a key, and Budokan is silent at its menu, as they are in `openMSX` |
 | 2026-11-03 | The same | The 1,545 images of `phc28s-ram64k-carnivore2`, copied to the card with `sync`, and `G\GAUNTLET.SNP` played | `CD \SNAPCAS\G` and `\BIN\SNAPCAS GAUNTLET` start the game from the card's layout. After a game over, CODE held at the side B prompt loads level 1 at once. Without it, the automatic tape reads on through the rest of side B, about 10 seconds, before it wraps to side B's start |
+| 2026-11-04 | The same | `G\GAUNTLET.SNP` with `/T1200` and `/T2400`, from step 8 | The main game loads at the tape's speed, with the leader tone and the tape's sound through the MSX, and the game plays |
 
 ## Step 12: the tools' code
 
 This step moves the tools' code into the files of
-[The tools' code](INTERNALS.md#the-tools-code), and does not change what the tools do.
-It splits `build()` and `service_segments()` into the build's steps. The proof is
-that the outputs stay the same, byte for byte:
+[The tools' code](INTERNALS.md#the-tools-code), and does not change what the tools
+do. It splits `build()` and `service_segments()` into the build's steps. The proof
+is that the outputs stay the same, byte for byte:
 
 | Test | What it proves |
 |---|---|
@@ -447,11 +416,11 @@ length of the tape:
 
 This step adds point 3 to the check: a reboot of the machine during the 60 seconds
 after the restore fails it, shown by `SNAPCAS.COM` starting again or by
-`MSX  system`, the MSX1 BIOS's boot screen, on the screen at two or more savestates,
+`MSX system`, the MSX1 BIOS's boot screen, on the screen at two or more savestates,
 or by no reset in the check where the capture's log shows one after the snapshot
-([Check](INTERNALS.md#check)). The breakpoint at the start of the BIOS's reset routine
-while page 0 selects the main ROM notes each reset in the report, and it is set
-after point 1, because the check's own boot passes there.
+([Check](INTERNALS.md#check)). The breakpoint at the start of the BIOS's reset
+routine while page 0 selects the main ROM notes each reset in the report, and it is
+set after point 1, because the check's own boot passes there.
 
 | Test | What it proves |
 |---|---|
@@ -616,9 +585,9 @@ run and the user's images share no folder:
 
 The run over every game file moves from the tests to `tools/games.py`, and
 `make games MACHINE=<machine>` replaces `make collection`
-([INTERNALS.md, The games run](INTERNALS.md#the-games-run)). The step moved the 1,850
-tapes of `tapes/collection/` into `downloads/`, after checking that each of the
-1,601 tapes that the game files name has its game file's SHA-1.
+([INTERNALS.md, The games run](INTERNALS.md#the-games-run)). The step moved the
+1,850 tapes of `tapes/collection/` into `downloads/`, after checking that each of
+the 1,601 tapes that the game files name has its game file's SHA-1.
 
 The command's verb `make` becomes `snap`, as in `./snapcas.py snap gauntlet phc28s`,
 so that it no longer shares its name with the Makefile's `make test` and
@@ -637,11 +606,12 @@ the command, where step 22 chose the one game or machine that the text matched.
 ## Step 25: custom games
 
 This step adds `custom/`, the user's own games, for games that `snapcas` does not
-ship and for the user's own dumps of a tape ([CLI.md, Your own games](CLI.md#your-own-games)).
-A custom game's folder holds its `game.txt` and its tape files, and its name is
-`custom/<game>`. `snap` reads its tapes from the folder and never downloads them,
-and its image and work files go below `custom/` in `images/<machine>/` and
-`out/work/<machine>/`. Git keeps only `custom/README.md`.
+ship and for the user's own dumps of a tape
+([CLI.md, Your own games](CLI.md#your-own-games)). A custom game's folder holds its
+`game.txt` and its tape files, and its name is `custom/<game>`. `snap` reads its
+tapes from the folder and never downloads them, and its image and work files go
+below `custom/` in `images/<machine>/` and `out/work/<machine>/`. Git keeps only
+`custom/README.md`.
 
 | Test | What it proves |
 |---|---|

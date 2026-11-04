@@ -32,13 +32,16 @@ C_VDP7    equ 005Dh     ; build.py: the snapshot's VDP register 7
 C_SIDE    equ 005Eh     ; build.py: 0 while the position is on side 1, 1 on side 2
 C_SCREEN  equ 005Fh     ; build.py: where the game's VDP register 1 is, 2 bytes
 C_VDP1    equ 0061h     ; build.py: the snapshot's VDP register 1
-C_SPEED   equ 0062h     ; the tape speed (PLAN.md, The tape speed's design), 0
+C_SPEED   equ 0062h     ; restorer: the tape speed (INTERNALS.md, Tape speed and
+                        ; sound): 0 for the fast load, 1 for 1200 baud, 2 for 2400
 C_TWO     equ 0063h     ; build.py: 1 when the tape has a side 2
 C_SAVE    equ 0064h     ; TAPIN's position while it looks for a header, 3 bytes
 C_S1REAL  equ 0067h     ; build.py: side 1's end before its padding to a
                         ; multiple of 8, with a side 2, otherwise C_S1END's
 C_MODE    equ 006Ah     ; restorer: 1 for the manual tape of /M, 0 for the
                         ; automatic tape (INTERNALS.md, The manual tape)
+C_MOTOR   equ 006Bh     ; the jump to the motor's routine, for T0's TAPIOF and
+                        ; STMOTR through the trampoline
 
 ; T0 in the mode without a part in page 3 (INTERNALS.md, Without a part in page 3):
 ; its data, then its routines, from 19DDh to 1B44h.
