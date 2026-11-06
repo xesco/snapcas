@@ -4,3 +4,4 @@
 openmsx -machine Sony_HB-F700P -ext ram512k -ext msxdos2
 disk diska
 variant hbf700p-msxdos2
+dosfiles msxdos2

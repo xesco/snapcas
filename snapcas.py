@@ -23,6 +23,7 @@ files, 2 when openMSX fails or a wait times out, 3 when a check fails: that of
 the first step that fails.
 """
 import argparse
+import glob
 import os
 import subprocess
 import sys
@@ -35,9 +36,14 @@ import download  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
 
-# The DOS files that snap --check uses without --dos: Nextor's, which make test
+# The DOS files that snap --check and try use without --dos: the folder below
+# dos/ that the machine file names, by default Nextor's, which make test
 # downloads (Makefile).
-NEXTOR = os.path.join(ROOT, "dos", "nextor")
+DOS = os.path.join(ROOT, "dos")
+NEXTOR = os.path.join(DOS, "nextor")
+# The openMSX home that make firmware makes, with the user's system ROMs and the
+# firmware of the machines that need it (Makefile).
+EMU_HOME = os.path.join(ROOT, "out", "cache", "openmsx-home")
 # Nextor 2.1.0's tools.zip, which holds NEXTOR.SYS 2.11 and COMMAND2.COM 2.44,
 # and its SHA-256: the Makefile pins the same file.
 NEXTOR_ZIP = ("https://github.com/Konamiman/Nextor/releases/download/v2.1.0/tools.zip",
@@ -138,6 +144,19 @@ def nextor():
     return NEXTOR
 
 
+def dos_folder(machine):
+    """The folder of the DOS files that the machine boots: Nextor's, downloaded
+    when missing, or the one that its machine file names, which the user fills."""
+    name = msx.read_machine(msx.machine_path(machine)).dos_files
+    if name == "nextor":
+        return nextor()
+    folder = os.path.join(DOS, name)
+    if not glob.glob(os.path.join(folder, "*")):
+        raise Choice(f"{machine} boots {name}: put its files in {os.path.relpath(folder, ROOT)}/ (dos/README.md), "
+                     "or name them with --dos <dir>")
+    return folder
+
+
 def tapes_folder(game):
     """The folder of the game's tapes: a custom game's own folder, or
     downloads/."""
@@ -202,10 +221,10 @@ def snap(args):
             raise Choice("--dos gives the DOS files for --check")
         print(f"{gamefile.title(game) or os.path.basename(game)} for {machine}", flush=True)
         if args.check and not args.dos:
-            args.dos = nextor()
+            args.dos = dos_folder(machine)
         if not gamefile.is_custom(game):
             download.tapes(gamefile.read_game(game, machine), gamefile.DOWNLOADS)
-    except (Choice, OSError, gamefile.GameFileError, download.DownloadError) as e:
+    except (Choice, OSError, gamefile.GameFileError, msx.MachineError, download.DownloadError) as e:
         print(f"snapcas.py: {e}", file=sys.stderr)
         return 1
     status = steps(args, game, machine)
@@ -237,8 +256,8 @@ def try_game(args):
     try:
         game = find_game(args.game)
         machine = find_machine(args.machine)
-        dos = args.dos or nextor()
-    except Choice as e:
+        dos = args.dos or dos_folder(machine)
+    except (Choice, OSError, msx.MachineError) as e:
         print(f"snapcas.py: {e}", file=sys.stderr)
         return 1
     return step("try.py", game, machine, "--dos", dos)
@@ -282,6 +301,8 @@ def list_machines(args):
 
 
 def main():
+    if os.path.isdir(EMU_HOME):
+        os.environ.setdefault("OPENMSX_HOME", EMU_HOME)
     parser = Parser(prog="snapcas.py", description="Make snapcas images of MSX cassette games.")
     verbs = parser.add_subparsers(dest="verb", required=True, metavar="<command>", parser_class=Parser)
     snap_ = verbs.add_parser("snap", help="make a game's image for a machine",
@@ -290,16 +311,16 @@ def main():
     snap_.add_argument("game", help="a game's name, as snapcas.py list shows it")
     snap_.add_argument("machine", help="a machine's name, as snapcas.py machines lists it")
     snap_.add_argument("--check", action="store_true", help="check the image in openMSX")
-    snap_.add_argument("--dos", help="the folder that holds the DOS system files for --check (default: Nextor's, "
-                                     "in dos/nextor/)")
+    snap_.add_argument("--dos", help="the folder that holds the DOS system files for --check (default: the "
+                                     "machine's, below dos/)")
     snap_.set_defaults(run=snap)
     try_ = verbs.add_parser("try", help="start a game's image in openMSX",
                             description="Start a game's image in openMSX, and type the command that "
                                         "restores it, to try it before the real machine.")
     try_.add_argument("game", help="a game's name, as snapcas.py list shows it")
     try_.add_argument("machine", help="a machine's name, as snapcas.py machines lists it")
-    try_.add_argument("--dos", help="the folder that holds the DOS system files (default: Nextor's, "
-                                    "in dos/nextor/)")
+    try_.add_argument("--dos", help="the folder that holds the DOS system files (default: the machine's, "
+                                    "below dos/)")
     try_.set_defaults(run=try_game)
     sync_ = verbs.add_parser("sync", help="copy a machine's images and SNAPCAS.COM to a card",
                              description="Copy a machine's images and SNAPCAS.COM to a card: the files that are "

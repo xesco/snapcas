@@ -9,8 +9,8 @@ in [DESIGN.md](DESIGN.md).
 ## Machine file
 
 A machine file describes one MSX and the cartridges in its slots. It holds one
-`openmsx` line, one `disk` line, any number of `boot` lines, at most one `dos` line
-and any number of `variant` lines, as in this example for a Sanyo PHC-28S with a RAM
+`openmsx` line, one `disk` line, any number of `boot` lines, at most one `dos` line,
+at most one `dosfiles` line and any number of `variant` lines, as in this example for a Sanyo PHC-28S with a RAM
 cartridge and a Carnivore2:
 
 ```
@@ -30,6 +30,7 @@ variant phc28s-empty-carnivore2
 | `boot` | A text on the screen during boot and the key to press when it appears. Each key has its own line, matched in order. A menu can show its text before it reads the keyboard, so the key is pressed again each second while the text stays, up to 10 times |
 | `hold` | A key held down from power-on, and the emulated seconds it is held, such as `hold del 6`. It is for a machine whose firmware starts a program in a graphics mode in place of BASIC, whose screen `boot` cannot read: the Panasonic FS-A1 starts its Desk Pac menu unless DEL is held |
 | `dos` | For a machine that boots MSX-DOS from a disk of its own, as the MegaFlashROM SCC+ SD boots from the ROM disk in its flash: DOS's prompt, such as `A:\>`, and the drive letter of `check.py`'s disk. When the prompt appears, the capture types `BASIC`, because it loads the game from BASIC, and the check types that drive and `AUTOEXEC` |
+| `dosfiles` | The folder below `dos/` that holds the DOS system files that the machine boots in `snapcas.py snap --check` and `try`: `msxdos1` or `msxdos2`. Without this line, the folder is `nextor` |
 | `variant` | The name of one of the machine's capture variants. `snapcas.py snap` tries the variants in the order of these lines |
 
 `openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
