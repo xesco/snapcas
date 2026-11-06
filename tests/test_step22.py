@@ -4,12 +4,17 @@ step 9's OneCommand and step 10's tests."""
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 import gamefile  # noqa: E402
 import msx  # noqa: E402
+
+sys.path.insert(0, ROOT)
+import snapcas as snapcas_py  # noqa: E402
 
 COMMAND = os.path.join(ROOT, "snapcas.py")
 
@@ -115,6 +120,19 @@ class Snap(unittest.TestCase):
         result = snapcas("snap", "gauntlet", "phc28s-ram64k-carnivore2", "--dos", "dos")
         self.assertEqual(result.returncode, 1)
         self.assertIn("--dos gives the DOS files for --check", result.stderr)
+
+    def test_a_machine_file_names_the_dos_that_it_boots(self):
+        self.assertEqual(msx.read_machine(msx.machine_path("vg8235")).dos_files, "msxdos1")
+        self.assertEqual(msx.read_machine(msx.machine_path("hbf700p-ram512k-msxdos2")).dos_files, "msxdos2")
+        self.assertEqual(msx.read_machine(msx.machine_path("vg8020-carnivore2")).dos_files, "nextor")
+
+    def test_a_machines_missing_dos_files_stop_with_where_they_go(self):
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(snapcas_py, "DOS", folder):
+            with self.assertRaisesRegex(snapcas_py.Choice, "vg8235 boots msxdos1: put its files in"):
+                snapcas_py.dos_folder("vg8235")
+            os.mkdir(os.path.join(folder, "msxdos1"))
+            open(os.path.join(folder, "msxdos1", "MSXDOS.SYS"), "w").close()
+            self.assertEqual(snapcas_py.dos_folder("vg8235"), os.path.join(folder, "msxdos1"))
 
     def test_snap_without_arguments_prints_its_help(self):
         result = snapcas("snap")

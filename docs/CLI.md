@@ -17,6 +17,7 @@ is signed off.
 | Python 3, with its standard library only | The tools are Python 3 programs. The download uses `urllib` and `zipfile`, so nothing needs installing with pip |
 | `openMSX` 22.0, on the path or named by `OPENMSX` | The capture and the check run in it, as today |
 | The system ROMs of the user's machine, in `openMSX`'s `share/systemroms` | `openMSX` needs them to emulate the machine, and `snapcas` cannot ship them |
+| `make firmware`, once, for the machines `fsa1-mfrsd`, `hbf1xd-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper` and `vg8020-picoverse` | It downloads their firmware into `out/cache/openmsx-home/`, the `openMSX` home that `snapcas` then uses in place of the default one, with a link to the user's system ROMs. `OPENMSX_HOME` names another home |
 | A network connection, the first time a game is made | The tapes come from File-Hunter, and `snapcas` cannot ship them either |
 
 The user gets `snapcas` as today, as a clone or a zip of the repository, and runs
@@ -75,8 +76,8 @@ again each time.
 
 | Option | What it does | Default |
 |---|---|---|
-| `--check` | Runs `check.py` on the image. For a machine under Nextor, `snapcas` downloads Nextor 2.1.0's `NEXTOR.SYS` and `COMMAND2.COM` into `dos/nextor/`, pinned by SHA-256 as the Makefile does | No check |
-| `--dos <dir>` | The DOS system files for `--check`, on a machine that is not under Nextor | `dos/nextor/` |
+| `--check` | Runs `check.py` on the image, with the DOS files of the machine's `dosfiles` line ([FILES.md, Machine file][machine]). For a machine under Nextor, `snapcas` downloads Nextor 2.1.0's `NEXTOR.SYS` and `COMMAND2.COM` into `dos/nextor/`, pinned by SHA-256 as the Makefile does | No check |
+| `--dos <dir>` | The DOS system files for `--check`, in place of the machine's. A machine under MSX-DOS 1 or MSX-DOS 2 needs its files in `dos/msxdos1/` or `dos/msxdos2/` ([dos/README.md](../dos/README.md)), and `snapcas` stops and says so when they are missing | The machine's folder below `dos/` |
 
 ```
 $ ./snapcas.py snap gauntlet phc28s-ram64k-carnivore2 --check
@@ -102,10 +103,10 @@ try       images/phc28s-ram64k-carnivore2/TEMPTATI/TEMPTATI.SNP: SNAPCAS TEMPTAT
 ```
 
 `try` finds the game and the machine as `snap` does. It boots the machine with a
-disk that holds Nextor's files, `SNAPCAS.COM` and the game's image. It passes the
+disk that holds the machine's DOS files, `SNAPCAS.COM` and the game's image. It passes the
 machine's boot menu and types `SNAPCAS <GAME>` at DOS's prompt, as the player does
-on the real machine, and the keyboard is then the user's. `--dos <dir>` gives the
-DOS files of a machine that is not under Nextor. When the game has no image, `try`
+on the real machine, and the keyboard is then the user's. `--dos <dir>` names
+other DOS files, as for `snap`. When the game has no image, `try`
 stops and says that `snap` makes it.
 
 ## Your own games

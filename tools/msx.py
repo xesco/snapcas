@@ -41,13 +41,14 @@ class MachineError(Exception):
 
 
 class Machine:
-    def __init__(self, path, args, disk, disk_size, boot, dos, variants):
+    def __init__(self, path, args, disk, disk_size, boot, dos, dos_files, variants):
         self.path = path
         self.args = args  # openMSX arguments, without the program name
         self.disk = disk  # command that inserts a disk image, such as hda
         self.disk_size = disk_size  # the disk image's KB, 720 or 360
         self.boot = boot  # [(text, key)], matched in order
         self.dos = dos    # (prompt, drive) when DOS boots from the machine's own disk
+        self.dos_files = dos_files  # the folder below dos/ of the DOS files that it boots
         self.variants = variants  # the capture variants' names, in the order to try them
 
 
@@ -83,7 +84,7 @@ def variant_path(variant):
 
 
 def read_machine(path):
-    args, disk, disk_size, boot, dos, variants = None, None, 720, [], None, []
+    args, disk, disk_size, boot, dos, dos_files, variants = None, None, 720, [], None, None, []
     holds = []
     with open(path) as f:
         for number, line in enumerate(f, 1):
@@ -105,6 +106,8 @@ def read_machine(path):
                 holds.append(press(words[1], int(words[2])))
             elif words[0] == "dos" and dos is None and len(words) == 3 and re.fullmatch(r"[A-H]", words[2]):
                 dos = (words[1], words[2])
+            elif words[0] == "dosfiles" and dos_files is None and len(words) == 2 and words[1] in ("msxdos1", "msxdos2"):
+                dos_files = words[1]
             elif words[0] == "variant" and len(words) == 2:
                 if not os.path.isfile(variant_path(words[1])):
                     raise MachineError(f"{where}: {variant_path(words[1])} does not exist")
@@ -117,7 +120,7 @@ def read_machine(path):
     # so it is an openMSX command at startup in every run of the machine.
     for hold in holds:
         args += ["-command", hold]
-    return Machine(path, args, disk, disk_size, boot, dos, variants)
+    return Machine(path, args, disk, disk_size, boot, dos, dos_files or "nextor", variants)
 
 
 def tcl_word(text):

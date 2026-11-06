@@ -35,10 +35,11 @@ NEXTOR    := $(DOS_DIR)/nextor
 EMU_HOME  := $(CACHE)/openmsx-home
 
 help:
-	@echo "make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN"
-	@echo "make test   run the tests"
-	@echo "make games  check every game in downloads"
-	@echo "make clean  remove the built files and the test output"
+	@echo "make all       build bin/SNAPCAS.COM and bin/SERVICE.BIN"
+	@echo "make firmware  download the firmware that some machines need"
+	@echo "make test      run the tests"
+	@echo "make games     check every game in downloads"
+	@echo "make clean     remove the built files and the test output"
 
 all: bin/SNAPCAS.COM bin/SERVICE.BIN
 
@@ -144,7 +145,11 @@ FULL ?=
 games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) python3 -I tools/games.py $(MACHINE) --dos $(DOS) $(if $(FULL),--full)
 
+# The openMSX home that snapcas.py uses, with the firmware of the machines that
+# need it.
+firmware: $(FIRMWARE) $(RAM192K)
+
 clean:
 	rm -rf bin $(OUT)/test
 
-.PHONY: help all test games clean
+.PHONY: help all test games firmware clean

@@ -3,3 +3,4 @@
 # single-sided floppy drive.
 openmsx -machine Philips_VG_8235-00
 disk diska 360
+dosfiles msxdos1
