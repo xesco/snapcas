@@ -5,7 +5,7 @@ it in openMSX, and lists the games and the machines.
 Usage: snapcas.py snap <game> <machine> [--check [--dos <dir>]]
        snapcas.py try <game> <machine> [--dos <dir>]
        snapcas.py sync <machine> <destination>
-       snapcas.py list [text]
+       snapcas.py list [text] [--all]
        snapcas.py machines
 
 snap downloads the game's tape files that are not in downloads/, then
@@ -69,6 +69,22 @@ def games_with(text):
     games = [(name, gamefile.title(gamefile.game_folder(name)))
              for name in gamefile.game_names() + gamefile.custom_names()]
     return [(name, title) for name, title in games if text in name.lower() or text in title.lower()]
+
+
+def compilation_programs():
+    """The game files that list shows only with --all: a compilation's
+    programs, in a collection's folder such as SUPERMSX/GOLF, or one of 4 or
+    more game files from one zip, as Turbo Pack A's are. Fewer game files from
+    one zip are a game's parts or versions, as RUR-1 and RUR-2 are."""
+    names = gamefile.game_names()
+    by_zip = {}
+    for name in names:
+        with open(os.path.join(gamefile.game_folder(name), "game.txt"), encoding="utf-8") as f:
+            url = next((line.split()[1] for line in f if line.startswith("url ")), None)
+        if url:
+            by_zip.setdefault(url, []).append(name)
+    shared = {name for group in by_zip.values() if len(group) >= 4 for name in group}
+    return {name for name in names if "/" in name} | shared
 
 
 def columns(rows):
@@ -244,11 +260,17 @@ def sync_card(args):
 
 
 def list_games(args):
-    """Prints the games whose folder or title holds the text, and their number."""
+    """Prints the games whose folder or title holds the text, and their number.
+    A compilation's programs only with --all; without it, the count says how
+    many of them hold the text."""
     games = games_with(args.text or "")
-    for line in columns(games):
+    programs = compilation_programs()
+    shown = games if args.all else [(name, title) for name, title in games if name not in programs]
+    for line in columns(shown):
         print(line)
-    print(f"{len(games)} game" + ("" if len(games) == 1 else "s"))
+    hidden = len(games) - len(shown)
+    print(f"{len(shown)} game" + ("" if len(shown) == 1 else "s")
+          + (f", and {hidden} in compilations, which --all lists" if hidden else ""))
     return 0
 
 
@@ -289,6 +311,8 @@ def main():
     games = verbs.add_parser("list", help="list the games snapcas supports, or search them by name",
                              description="List the games snapcas supports, or search them by name.")
     games.add_argument("text", nargs="?", help="part of a game's folder or title, such as gaunt, in any case")
+    games.add_argument("--all", action="store_true", help="also list the compilations' programs, such as "
+                                                          "SUPERMSX/GOLF and Turbo Pack A's")
     games.set_defaults(run=list_games)
     machines = verbs.add_parser("machines", help="list the machines that snapcas makes images for",
                                 description="List the machines that snapcas makes images for.")
