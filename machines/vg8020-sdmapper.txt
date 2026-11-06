@@ -1,7 +1,7 @@
-# Philips VG-8020, an MSX1 with 64 KB, with an SD Mapper v1 (Fabio Belavenuto):
-# its 512 KB memory mapper and Nextor on its SD cards. openMSX needs its firmware,
-# SDMAPPER.ROM 1.0.7, which the Makefile downloads. The disk goes in its first SD
-# card slot.
+# Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1. The SD Mapper v1, by Fabio
+# Belavenuto, brings its 512 KB memory mapper and Nextor on its SD cards. openMSX
+# needs its firmware, SDMAPPER.ROM 1.0.7, which the Makefile downloads. The disk
+# goes in its first SD card slot.
 openmsx -machine Philips_VG_8020 -ext SD_Mapper_v1
 disk hda
 variant vg8020

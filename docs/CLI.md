@@ -35,7 +35,7 @@ The command takes a verb, which says what to do, and the verb's own arguments:
 | `snap <game> <machine>` | Makes the game's image for the machine, and downloads the game's tapes first when they are missing ([Make an image](#make-an-image)) |
 | `try <game> <machine>` | Starts the game's image in `openMSX`, to try it before the real machine ([Try an image](#try-an-image)) |
 | `sync <machine> <destination>` | Copies the machine's images and `SNAPCAS.COM` to a card ([Sync a card](#sync-a-card)) |
-| `list [text]` | Lists the games snapcas supports, or searches them by name ([Find a game or a machine](#find-a-game-or-a-machine)) |
+| `list [text] [--all]` | Lists the games snapcas supports, or searches them by name ([Find a game or a machine](#find-a-game-or-a-machine)) |
 | `machines` | Lists the machines that the command makes images for |
 
 `./snapcas.py --help` lists the verbs, and `./snapcas.py snap --help` shows the
@@ -125,27 +125,32 @@ Two verbs print a list and make nothing:
 
 | Command | What it prints |
 |---|---|
-| `list [text]` | The games whose folder or title holds the text, or every game, with the name to give `snap`. A game's title names the File-Hunter file that it comes from: its zip, a CAS file in a zip, or a compilation's zip and the program's name, as in `Super MSX n.23 (settembre 1989) - cas_23 / Africa Film` |
+| `list [text] [--all]` | The games whose folder or title holds the text, or every game, with the name to give `snap`. A compilation's programs are listed only with `--all`, and without it the last line counts the ones that hold the text. A compilation's program is a game in a collection's folder, such as `SUPERMSX/GOLF`, or one of 4 or more game files from one zip, as Turbo Pack A's are. Two or three game files from one zip are a game's parts or versions, such as `RUR-1` and `RUR-2`, and are always listed. A game's title names the File-Hunter file that it comes from: its zip, a CAS file in a zip, or a compilation's zip and the program's name, as in `Super MSX n.23 (settembre 1989) - cas_23 / Africa Film`. A CAS file whose name starts with its zip's name, such as the zip's name with `[LOADERFIX]` added, is named by its zip alone |
 | `machines` | The user machines, each with the first sentence of its machine file's first comment, up to a full stop or a colon |
 
 ```
 $ ./snapcas.py list gaunt
-GAUNTLET   Gauntlet (1986)(US Gold)(Side A)[RUN'CAS-']
+GAUNTLET  Gauntlet (1986)(US Gold)(Side A)[RUN'CAS-']
 1 game
 
+$ ./snapcas.py list wall
+WALL-THE  Wall, The (1987)(Erbe Software)[RUN'CAS-']
+WALLBALL  Wallball (19xx)(Tynesoft)[BLOAD'CAS-',R]
+2 games, and 1 in compilations, which --all lists
+
 $ ./snapcas.py machines
-fsa1-mfrsd                  Panasonic FS-A1, an MSX2 with 64 KB and no memory mapper, with a MegaFlashROM SCC+ SD
-hb75p-mfrsd                 Sony HB-75P, an MSX1 with 64 KB, with a MegaFlashROM SCC+ SD in openMSX's stock setup
-hbf1xd-mfrsd                Sony HB-F1XD, an MSX2 with 64 KB, no memory mapper and a floppy drive, with a MegaFlashROM SCC+ SD
-hbf700p-ram512k-msxdos2     Sony HB-F700P, an MSX2 with a 256 KB mapper and an expanded slot 0, with a 512 KB memory mapper cartridge, under MSX-DOS 2
-nms8245-ram512k-sunriseide  Philips NMS 8245, an MSX2 with a 128 KB mapper, with a 512 KB memory mapper cartridge and a Sunrise IDE interface under Nextor
-nms8250-carnivore2          Philips NMS 8250, an MSX2 with a 128 KB mapper and a floppy drive, with a Carnivore2 under Nextor
-phc28s-ram64k-carnivore2    Sanyo PHC-28S, an MSX1 with 16 KB, with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2, under Nextor
-vg8020-carnivore2           Philips VG-8020, an MSX1 with 64 KB, with a Carnivore2 under Nextor
-vg8020-picoverse            A Philips VG-8020 with a cartridge like the PicoVerse
-vg8020-sdmapper             Philips VG-8020, an MSX1 with 64 KB, with an SD Mapper v1 (Fabio Belavenuto)
-vg8235                      Philips VG-8235, an MSX2 with a 128 KB memory mapper and a single-sided floppy drive, without cartridges
-xp800-sdmapper              Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1 (Fabio Belavenuto)
+fsa1-mfrsd                  Panasonic FS-A1 (MSX2, 64 KB) with a MegaFlashROM SCC+ SD
+hb75p-mfrsd                 Sony HB-75P (MSX1, 64 KB) with a MegaFlashROM SCC+ SD
+hbf1xd-mfrsd                Sony HB-F1XD (MSX2, 64 KB) with a MegaFlashROM SCC+ SD
+hbf700p-ram512k-msxdos2     Sony HB-F700P (MSX2, 256 KB) with a 512 KB RAM cartridge, under MSX-DOS 2
+nms8245-ram512k-sunriseide  Philips NMS 8245 (MSX2, 128 KB) with a 512 KB RAM cartridge and a Sunrise IDE
+nms8250-carnivore2          Philips NMS 8250 (MSX2, 128 KB) with a Carnivore2
+phc28s-ram64k-carnivore2    Sanyo PHC-28S (MSX1, 16 KB) with a 64 KB RAM cartridge and a Carnivore2
+vg8020-carnivore2           Philips VG-8020 (MSX1, 64 KB) with a Carnivore2
+vg8020-picoverse            Philips VG-8020 (MSX1, 64 KB) with a PicoVerse-like cartridge
+vg8020-sdmapper             Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1
+vg8235                      Philips VG-8235 (MSX2, 128 KB) with no cartridges, under MSX-DOS 1
+xp800-sdmapper              Gradiente Expert XP-800 (MSX1, 64 KB) with an SD Mapper v1
 ```
 
 ## Machine names

@@ -14,8 +14,8 @@ and any number of `variant` lines, as in this example for a Sanyo PHC-28S with a
 cartridge and a Carnivore2:
 
 ```
-# Sanyo PHC-28S, an MSX1 with 16 KB, with a 64 KB RAM cartridge in slot 1 and a
-# Carnivore2 in slot 2, under Nextor.
+# Sanyo PHC-28S (MSX1, 16 KB) with a 64 KB RAM cartridge and a Carnivore2. The RAM
+# cartridge is in slot 1 and the Carnivore2 in slot 2, under Nextor.
 openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2
 disk hda
 boot "DefConfig" space

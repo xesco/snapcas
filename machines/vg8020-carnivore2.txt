@@ -1,4 +1,4 @@
-# Philips VG-8020, an MSX1 with 64 KB, with a Carnivore2 under Nextor.
+# Philips VG-8020 (MSX1, 64 KB) with a Carnivore2. The Carnivore2 runs Nextor.
 openmsx -machine Philips_VG_8020 -ext Carnivore2
 disk hda
 boot "DefConfig" space

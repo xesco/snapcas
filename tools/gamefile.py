@@ -128,8 +128,10 @@ def title(folder):
     name, which is its zip's name or the zip's name, / and the CAS file in it.
     A compilation's program's first comment names the program before its first
     comma, as in "Africa Film, the fourth game on the tape Super MSX n.23", so
-    its title is its zip's name, from its url line, / and that name. Or "" for
-    a game file that starts with no comment."""
+    its title is its zip's name, from its url line, / and that name. A CAS
+    file whose name starts with its zip's name, as the zip's name with
+    [LOADERFIX] added, is named by the zip alone. Or "" for a game file that
+    starts with no comment."""
     with open(os.path.join(folder, "game.txt"), encoding="utf-8") as f:
         lines = f.read().splitlines()
     comments = []
@@ -147,6 +149,9 @@ def title(folder):
         if zips:
             return zip_name(zips[0]) + " / " + program
         return program
+    zip_part, _, cas = comments[0].partition(" / ")
+    if cas and os.path.splitext(cas)[0].startswith(zip_part):
+        return zip_part
     return comments[0]
 
 
