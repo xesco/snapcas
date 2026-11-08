@@ -201,8 +201,9 @@ d122e3c80cce689efe28dbb4734f411f6487ed98 in downloads as MYGAME.CAS
 
 ## Sync a card
 
-`sync` copies a machine's images from `images/<machine>/` and `SNAPCAS.COM` to a
-card. Its second argument is the destination, the card's top folder:
+`sync` copies a machine's images from `images/<machine>/`, where `snap` and
+`make games` put them, and `SNAPCAS.COM` to a card. Its second argument is the
+destination, the card's top folder:
 
 ```
 $ ./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX

@@ -208,7 +208,8 @@ Do not change `bin/` or `tools/` while it runs: each result is kept with a hash 
 the game's files, the machine's files and the code in those two folders, and a
 changed hash makes the next run make that game's image again. So a change to the
 code makes the next run take as long as the first. The results go to
-`out/games/hb75p-carnivore2.txt`. Fix each game that fails as in
+`out/games/hb75p-carnivore2.txt`, and the image of each game that passes to
+`images/hb75p-carnivore2/`, which `./snapcas.py sync` copies to a card. Fix each game that fails as in
 [Fix a game that fails](#fix-a-game-that-fails), then write the number of the
 machine's game files in its row of `docs/FILES.md`.
 
