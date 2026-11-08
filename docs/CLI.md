@@ -16,8 +16,8 @@ is signed off.
 |---|---|
 | Python 3, with its standard library only | The tools are Python 3 programs. The download uses `urllib` and `zipfile`, so nothing needs installing with pip |
 | `openMSX` 22.0, on the path or named by `OPENMSX` | The capture and the check run in it, as today |
-| The system ROMs of the user's machine, in `openMSX`'s `share/systemroms` | `openMSX` needs them to emulate the machine, and `snapcas` cannot ship them |
-| `make firmware`, once, for the machines `fsa1-mfrsd`, `hbf1xd-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper` and `vg8020-picoverse` | It downloads their firmware into `out/cache/openmsx-home/`, the `openMSX` home that `snapcas` then uses in place of the default one, with a link to the user's system ROMs. `OPENMSX_HOME` names another home |
+| The system ROMs of the user's machine, in `openMSX`'s `share/systemroms` | `openMSX` needs them to emulate the machine, and `snapcas` cannot ship them. Without one, the command shows `openMSX`'s message, which names the ROM |
+| `make firmware`, once, for the machines `fsa1-mfrsd`, `hbf1xd-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper` and `vg8020-picoverse` | It downloads their firmware into `out/cache/openmsx-home/`, the `openMSX` home that `snapcas` then uses in place of the default one, with a link to the user's system ROMs. `OPENMSX_HOME` names another home. Without the firmware, `snap` and `try` stop and name this command |
 | A network connection, the first time a game is made | The tapes come from File-Hunter, and `snapcas` cannot ship them either |
 
 The user gets `snapcas` as today, as a clone or a zip of the repository, and runs
@@ -269,7 +269,6 @@ CD \SNAPCAS\G
   request.
 - The lowest Python 3 version that the tools run on, which the requirements then
   name.
-- That `openMSX` prints a missing system ROM as an error that the command can show.
 
 ## Not in the first version
 

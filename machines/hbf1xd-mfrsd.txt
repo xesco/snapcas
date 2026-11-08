@@ -5,3 +5,4 @@
 # MSX2. The disk goes in its first SD card slot.
 openmsx -machine Sony_HB-F1XD -ext MegaFlashROM_SCC+_SD_Nextor
 disk hda
+firmware extensions/MegaFlashROM_SCC+_SD_Nextor.xml

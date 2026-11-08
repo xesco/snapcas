@@ -5,3 +5,4 @@
 openmsx -machine Philips_VG_8020 -ext SunriseIDE_Nextor -ext ram192k
 disk hda
 variant vg8020
+firmware extensions/ram192k.xml
