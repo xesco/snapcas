@@ -214,6 +214,19 @@ def published_path(machine, folder, name):
     return None if key is None else os.path.join(IMAGES, machine, key, f"{name}.SNP")
 
 
+def publish(machine, folder):
+    """Moves a shipped or custom game's image from its work folder to
+    images/<machine>/<game>/, where the user takes it, and returns its path, or
+    None for a game folder elsewhere, whose image stays."""
+    name = read_game(folder, machine).name
+    target = published_path(machine, folder, name)
+    if target is None:
+        return None
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    os.replace(image_path(machine, folder, name), target)
+    return target
+
+
 def machine_file(folder, machine):
     """The path of a machine's file in a game's folder: phc28s-ram64k-carnivore2 has
     phc28s-ram64k-carnivore2.txt, and a test machine's path has - for /."""

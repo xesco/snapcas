@@ -19,15 +19,19 @@ shipped game file makes a working image on the machine. It is not part of
 2. It captures, builds and checks each game file, 11 at once by default, because
    `openMSX` keeps about one core busy. The check always runs, with Nextor's files
    unless `DOS=` names others.
-3. It writes one line per game file to `out/games/<machine>.txt`: the folder, a tab
+3. It moves the image of each game file that passes to `images/<machine>/`, as
+   `snap` does, so that `sync` copies it to a card. A game file that fails keeps
+   the image in `images/` of its last pass.
+4. It writes one line per game file to `out/games/<machine>.txt`: the folder, a tab
    and the first line of the check's report, the failed point with its first line,
    or the failed step's error.
-4. It compares the failures with `tests/openmsx-failures.txt`, which lists the game
+5. It compares the failures with `tests/openmsx-failures.txt`, which lists the game
    files that fail in `openMSX` itself, and exits with 3 when another game file
    fails.
 
-A game file keeps its last result while its inputs are unchanged: its folder, its
-tapes, the machine files that it runs on, `bin/` and `tools/`. A cache beside the
+A game file keeps its last result, and its image in `images/`, while its inputs are
+unchanged: its folder, its tapes, the machine files that it runs on, `bin/` and
+`tools/`. A cache beside the
 results, `<machine>.txt.cache`, holds the inputs' hash of each, and `FULL=1` gives
 every game file a new result.
 

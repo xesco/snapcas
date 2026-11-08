@@ -128,7 +128,7 @@ The Makefile builds `snapcas` and runs its checks. You need it only to change
 |---|---|
 | `make all` | Builds `bin/SNAPCAS.COM` and `bin/SERVICE.BIN`. It downloads the sjasmplus assembler's source into `out/cache/` and builds it first |
 | `make test` | Runs the tests in `openMSX`, in about 2 minutes, with the tape files of `tests/tapes/`. It downloads Nextor's files into `dos/nextor/` and the cartridges' firmware into `out/cache/` |
-| `make games` | Makes and checks the image of every game in `games/` on one MSX, with the tape files of `downloads/`. It downloads no tape, so a game whose tape is missing fails |
+| `make games` | Makes and checks the image of every game in `games/` on one MSX, with the tape files of `downloads/`, and puts each image that passes in `images/`, for `sync`. It downloads no tape, so a game whose tape is missing fails |
 | `make firmware` | Downloads the firmware of the machines that need it into `out/cache/openmsx-home/`, which `snapcas.py` then uses: `fsa1-mfrsd`, `hbf1xd-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper` and `vg8020-picoverse` |
 | `make clean` | Removes `bin/` and `out/test/` |
 
