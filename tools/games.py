@@ -7,10 +7,12 @@ Usage: games.py <machine> [--dos <dir>] [--full] [--workers <n>]
 Each game file's tapes come from downloads/, where snapcas.py snap puts them.
 The run downloads nothing, so as not to load File-Hunter with a download of the
 whole collection: a game file whose tape is missing gets that as its result.
-The other games are captured, built and checked, several at once. The results go to out/games/<machine>.txt, one
-line per game file: its folder, a tab and the first line of its check's
-report, the failed point with its first line, or the failed step's error. A
-game file whose inputs are unchanged keeps its last result, unless --full.
+The other games are captured, built and checked, several at once, and the
+image of each that passes goes to images/<machine>/, as with snapcas.py snap.
+The results go to out/games/<machine>.txt, one line per game file: its folder,
+a tab and the first line of its check's report, the failed point with its first
+line, or the failed step's error. A game file whose inputs are unchanged keeps
+its last result and its image in images/, unless --full.
 
 Exit status: 0 when every game file that fails is in tests/openmsx-failures.txt,
 1 for an error in the command line, 3 when another game file fails.
@@ -96,7 +98,9 @@ def tool(name, *args):
 def run_game(machine, name, dos):
     """Captures, builds and checks one game file on the machine, and returns
     the first line of the check's report, the failure of point 2, 3 or 4 with
-    its first line when that point fails, or the failed step's error."""
+    its first line when that point fails, or the failed step's error. A game
+    that passes has its image moved to images/, as snapcas.py snap does, so that
+    snapcas.py sync copies it to a card."""
     folder = os.path.join(GAMES, name)
     for step in ("capture.py", "build.py"):
         result = tool(step, folder, machine, "--tapes", gamefile.DOWNLOADS)
@@ -108,7 +112,10 @@ def run_game(machine, name, dos):
         if point in lines:
             failed = lines.index(point)
             return point + ":" + "".join(lines[failed + 1:failed + 2])
-    return (lines or [result.stderr.strip()])[0]
+    first = (lines or [result.stderr.strip()])[0]
+    if first == "point 1: pass":
+        gamefile.publish(machine, folder)
+    return first
 
 
 def main():

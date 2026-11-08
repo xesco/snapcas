@@ -3,37 +3,3 @@
 # The capture runs without the Carnivore2, so without a disk system, because the
 # game crashes when one is present.
 capture phc28s-ram64k
-
-# The game selects RAM in slot 3. Without Nextor, the PHC-28S has BASIC's page 3
-# in its internal RAM, slot 0, and pages 0 to 2 in the RAM cartridge, slot 1.
-# LD A,0FFh / OUT (0A8h),A selects slot 3 in pages 0 to 3. The patch selects
-# slot 1 in pages 0 to 2, and slot 0 in page 3 there.
-patch side1:202F 3E FF D3 A8 > 3E 15 D3 A8
-
-# LD A,0F0h / OUT (0A8h),A selects slot 3 in pages 2 and 3. The patch selects
-# slot 1 in page 2, and slot 0 in page 3 there.
-patch side1:203E 3E F0 D3 A8 > 3E 10 D3 A8
-
-# LD A,0FCh / OUT (0A8h),A selects slot 3 in pages 1 to 3. The patch selects
-# slot 1 in pages 1 and 2, and slot 0 in page 3 there.
-patch side1:402F 3E FC D3 A8 > 3E 14 D3 A8
-
-# LD A,0FFh / OUT (0A8h),A selects slot 3 in pages 0 to 3. The patch selects
-# slot 1 in pages 0 to 2, and slot 0 in page 3 there.
-patch side1:448B 3E FF D3 A8 > 3E 15 D3 A8
-
-# LD A,0FCh / OUT (0A8h),A selects slot 3 in pages 1 to 3. The patch selects
-# slot 1 in pages 1 and 2, and slot 0 in page 3 there.
-patch side1:44AB 3E FC D3 A8 > 3E 14 D3 A8
-
-# LD A,0FFh / OUT (0A8h),A selects slot 3 in pages 0 to 3. The patch selects
-# slot 1 in pages 0 to 2, and slot 0 in page 3 there.
-patch side1:44B4 3E FF D3 A8 > 3E 15 D3 A8
-
-# LD A,0FCh / OUT (0A8h),A selects slot 3 in pages 1 to 3. The patch selects
-# slot 1 in pages 1 and 2, and slot 0 in page 3 there.
-patch side1:44C3 3E FC D3 A8 > 3E 14 D3 A8
-
-# LD A,0FFh / OUT (0A8h),A selects slot 3 in pages 0 to 3. The patch selects
-# slot 1 in pages 0 to 2, and slot 0 in page 3 there.
-patch side1:4520 3E FF D3 A8 > 3E 15 D3 A8

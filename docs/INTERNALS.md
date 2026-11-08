@@ -19,15 +19,19 @@ shipped game file makes a working image on the machine. It is not part of
 2. It captures, builds and checks each game file, 11 at once by default, because
    `openMSX` keeps about one core busy. The check always runs, with Nextor's files
    unless `DOS=` names others.
-3. It writes one line per game file to `out/games/<machine>.txt`: the folder, a tab
+3. It moves the image of each game file that passes to `images/<machine>/`, as
+   `snap` does, so that `sync` copies it to a card. A game file that fails keeps
+   the image in `images/` of its last pass.
+4. It writes one line per game file to `out/games/<machine>.txt`: the folder, a tab
    and the first line of the check's report, the failed point with its first line,
    or the failed step's error.
-4. It compares the failures with `tests/openmsx-failures.txt`, which lists the game
+5. It compares the failures with `tests/openmsx-failures.txt`, which lists the game
    files that fail in `openMSX` itself, and exits with 3 when another game file
    fails.
 
-A game file keeps its last result while its inputs are unchanged: its folder, its
-tapes, the machine files that it runs on, `bin/` and `tools/`. A cache beside the
+A game file keeps its last result, and its image in `images/`, while its inputs are
+unchanged: its folder, its tapes, the machine files that it runs on, `bin/` and
+`tools/`. A cache beside the
 results, `<machine>.txt.cache`, holds the inputs' hash of each, and `FULL=1` gives
 every game file a new result.
 
@@ -51,6 +55,7 @@ The commands share their code through modules, and the Tcl that runs inside
 | `tools/games.py` | The games run of `make games` ([The games run](#the-games-run)) |
 | `tools/fetch.py` | The download of the test setup's files |
 | `tools/try.py` | The `openMSX` run of `snapcas.py try`, with its window, which types the restorer's command ([CLI.md, Try an image](CLI.md#try-an-image)) |
+| `tools/plain.py` | A load of a game's tape in plain `openMSX`, without the capture's code, which prints the screen 60 seconds after the tape's end: a game that fails there fails in `openMSX` itself |
 
 An automatic patch is a change that the tools make to a game without a line in its
 game file. Each kind of automatic patch is one file in `tools/patches/`:
@@ -61,7 +66,9 @@ game file. Each kind of automatic patch is one file in `tools/patches/`:
 | `slots.py` | The fixed slot values that name a slot that holds nothing, the slot map, and the capture's patches of the tape ([Slot patches](#slot-patches)) |
 | `slots.tcl` | The capture's watch on the slot register ([Slot patches](#slot-patches)) |
 | `ramsearch.py` | The bytes of the loader's RAM search and its patch ([The RAM search patch](#the-ram-search-patch)) |
-| `ramsearch.tcl` | The capture's watch for a slot register write that cuts off the code that made it ([The RAM search patch](#the-ram-search-patch)) |
+| `ramsearch.tcl` | The capture's watch for a slot register write that cuts off the code that made it, and its patch that keeps page 3's slot ([The RAM search patch](#the-ram-search-patch)) |
+| `pagecopy.py` | The forms of the loaders' code that copies page 3's slot to the other pages, and their places in the tape files ([The page copy patch](#the-page-copy-patch)) |
+| `pagecopy.tcl` | The capture's decision, by the slot map, of which forms to patch ([The page copy patch](#the-page-copy-patch)) |
 
 The Python file of each kind has a function, `find(data, context)`, that returns the
 kind's findings in data. A finding is the code found, its offset, what it is, and
@@ -291,13 +298,12 @@ that no game file needs a line for them. It does this in four parts:
 3. At step 4, the write watchpoint on port A8h tests each value against the slot
    map. A value whose field names a slot that holds nothing makes the capture log
    the write, the address of its `OUT` and the new value. When the code that set the
-   value is one of the forms in the second table below, and its bytes with the 8
-   bytes before them, or else with the 8 bytes after them, occur once in a tape
-   file, the capture stops. The bytes after them serve a loader that copies a
-   routine to RAM without the bytes before it, as Sootland's does. `capture.py` then
-   adds a patch of n on the tape to `snap/patches.txt` and runs the capture again
-   from step 1, up to 16 times. Otherwise the capture goes on, and the logged write
-   is for a `patch` line by hand.
+   value is one of the forms in the second table below, the capture looks for the
+   code in the tape files, in the order of the third table below. When it finds the
+   code, the capture stops, and `capture.py` adds a patch of n at each place to
+   `snap/patches.txt` and runs the capture again from step 1, up to 16 times.
+   Otherwise the capture goes on, and the logged write is for a `patch` line by
+   hand.
 4. The build's scan ([Scan](#scan)) looks for the same code with such a value in the
    snapshot's RAM pages and in the tape's unread blocks, for code that runs only
    while the game is played.
@@ -311,6 +317,14 @@ The patches in `snap/patches.txt` change the tape after the game file's `patch`
 lines, and `build.py` applies them as well, so the tape service serves the tape that
 the capture loaded.
 
+The capture looks for the code in three ways, and takes the first that finds it:
+
+| Bytes looked for | Places patched | For |
+|---|---|---|
+| The code and the 8 bytes before it | Each place | Most loaders. Rocky's and Time Out's tapes hold their routine more than once, and a copy can run after the snapshot |
+| The code and the 8 bytes after it | Each place | A loader that copies a routine to RAM without the bytes before it, as Sootland's does |
+| The code alone | The one place, when it occurs once | A routine that writes into the bytes around the code, as Uchi Mata's writes the slot register's value into the operand of the `LD A,n` after it |
+
 The watch and the scan know two forms of the code that sets a fixed value:
 
 | Code | Bytes | Where the watch finds it |
@@ -319,7 +333,10 @@ The watch and the scan know two forms of the code that sets a fixed value:
 | `LD A,n / CALL 013Bh`, a call of the BIOS's `WSLREG`, which writes A to the slot register | `3E n CD 3B 01` | When the write's `OUT` is in the main ROM, its last byte is the byte before the return address on top of the stack. The capture reads that address in the slot that page 3 selected before the write, because the write can change page 3 |
 
 The bytes of a form can also be the end of a longer instruction, whose operand a
-patch of n would change. So the watch and the scan skip code whose `3E` can be an
+patch of n would change. The watch knows that A holds n, and only `LD A,(nn)`, `3A`,
+loads A with the byte after a `3E` in its operand, as Knight Orc's does
+([NOTES.md, Slot patches](NOTES.md#slot-patches)). So the watch skips code whose `3E`
+follows a `3A`. The scan does not know A, so it skips code whose `3E` can be any
 operand:
 
 | Byte | Opcodes |
@@ -327,8 +344,8 @@ operand:
 | The byte before `3E` | Those of an instruction with a one-byte operand: `06 0E 16 1E 26 2E 36 3E C6 CE D6 DE E6 EE F6 FE D3 DB 10 18 20 28 30 38`, or with a two-byte operand, as below |
 | The second byte before `3E` | Those of an instruction with a two-byte operand: `01 11 21 31 22 2A 32 3A C2 C3 C4 CA CC CD D2 D4 DA DC E2 E4 EA EC F2 F4 FA FC` |
 
-A real `LD A,n` after an operand that has the value of such an opcode is skipped as
-well, and needs a `patch` line by hand.
+A real `LD A,n` after an operand that has the value of such an opcode is skipped by
+the scan as well, and the watch patches it when it runs before the snapshot.
 
 ### The RAM search patch
 
@@ -339,7 +356,7 @@ it finds, the loader writes the slot's subslot register at FFFFh, so it selects 
 primary slot in page 3, where its own code runs. That works when the RAM of page 3
 is in the same primary slot, as on the VG-8020, whose RAM is all in slot 3. On the
 Sanyo PHC-28S, the RAM of page 3 is in slot 0 and the HBM-64's RAM is in slot 1, so
-the loader's code is gone after the write. The capture finds this itself, in two
+the loader's code is gone after the write. The capture finds this itself, in three
 parts:
 
 1. At step 4, the write watchpoint on port A8h tests each write from code in page 3
@@ -351,7 +368,12 @@ parts:
    capture again, as for a slot patch. Each copy cuts off its code on this machine,
    and a copy on side 2 or in a compilation's later game runs after the snapshot.
    The patched loader selects the slot that it finds through the slot register only.
-   Otherwise the logged write is for a `patch` line by hand.
+3. Otherwise, when the write's code is one of the slot patches' forms
+   ([Slot patches](#slot-patches)), the capture patches its value, in the same way
+   as a slot patch, to keep page 3 in the slot that it selected before the write.
+   Doki Doki Penguin Land's and Eggerland's loaders select slot 1 in pages 1 to 3 on
+   the PHC-28S, whose page 3 is in slot 0, from code in page 3. Otherwise the
+   logged write is for a `patch` line by hand.
 
 | Code | Bytes | Patch |
 |---|---|---|
@@ -369,11 +391,47 @@ ROM or into a subslot that the other pages do not select, and the game crashes i
 a reset, or starts in BASIC's ROM, which stops at an error ([Check](#check), point
 4).
 
-The loaders take many forms, so their fixes are lines in the game files: most often
-a capture without the Carnivore2, or a patch of the slot value. The capture's own
-patches cover the forms that repeat over many tapes ([Slot patches](#slot-patches),
-[The RAM search patch](#the-ram-search-patch)). The forms seen so far, and their
-games, are in [NOTES.md](NOTES.md#page-3s-slot-for-the-other-pages).
+The loaders take many forms. The capture's own patches cover the forms that set a
+fixed value or copy a slot with known code ([Slot patches](#slot-patches),
+[The RAM search patch](#the-ram-search-patch),
+[The page copy patch](#the-page-copy-patch)). The other forms' fixes are lines in the
+game files: most often a capture without the Carnivore2. The forms seen so far, and
+their games, are in [NOTES.md](NOTES.md#page-3s-slot-for-the-other-pages).
+
+### The page copy patch
+
+Some loaders give pages 0 and 1 the slots of pages 2 and 3, or page 1 the slot of
+page 3, by shifting the slot register's value. On the PHC-28S without the
+Carnivore2, page 3 is the internal RAM in slot 0, which has the ROM in pages 0 and
+1, so the copy selects the ROM where the loader writes the game. The capture patches
+this code itself, in three parts:
+
+1. Before each capture, `capture.py` looks for the forms below in the tape files. For
+   each place, it also tests whether the last byte of the CAS block that holds it is
+   the 8-bit sum of the block's other bytes, as in the blocks that Level 9's loader
+   checks.
+2. At step 4, before the load command, the capture tests each slot that a form
+   copies, as the slot register at step 3 selects it, against the slot map. A slot
+   is fit for a page when it holds RAM there. For CasLink3's form, an expanded slot
+   is fit as well, because CasLink3 also copies the subslot register's fields.
+3. When a slot is not fit, the capture patches the form at each place, and adds the
+   patch's difference to the block's sum byte. It writes the patches to
+   `snap/patches.txt` and runs the capture again, as for a slot patch.
+
+| Form | Bytes | Copies | Patch |
+|---|---|---|---|
+| Level 9's: `IN A,(0A8h)`, four `SRA A`s, `AND 0Fh`, `OR C` | `DB A8 CB 2F CB 2F CB 2F CB 2F E6 0F B1` | Pages 2 and 3 to pages 0 and 1 | `LD A,n` and `NOP`s |
+| CasLink3's: `AND 0F0h`, `LD B,A`, four `RRCA`s, `AND 0Fh`, `OR B` | `E6 F0 47 0F 0F 0F 0F E6 0F B0` | Pages 2 and 3 to pages 0 and 1 | `LD A,n` and `NOP`s |
+| The Wall's: `AND 0F0h`, `LD B,A`, four `RLCA`s, `OR B` | `E6 F0 47 07 07 07 07 B0` | Pages 2 and 3 to pages 0 and 1 | `LD A,n` and `NOP`s |
+| Engesoft's: `BIT 7,A / JR Z,+2 / SET 3,A / BIT 6,A / JR Z,+2 / SET 2,A` | `CB 7F 28 02 CB DF CB 77 28 02 CB D7` | Page 3 to page 1 | `AND 0F3h / OR n` and `NOP`s |
+| M-Droid's: the same with `JP Z` | `CB 7F CA nn nn CB DF CB 77 CA nn nn CB D7` | Page 3 to page 1 | `AND 0F3h / OR n` and `NOP`s |
+
+In `LD A,n`, n holds the copied slot in pages 0 and 1 when it is fit, and else the
+slot map's replacement for the page, and BASIC's slots in pages 2 and 3. In
+`OR n`, n holds the slot map's replacement for page 1. On the PHC-28S without the
+Carnivore2, n is 15h for the first three forms, and 04h, the RAM cartridge in page
+1, for the last two. A machine whose RAM for page 3 holds RAM in pages 0 and 1, as
+the VG-8020's slot 3 does, never gets the patch.
 
 ## Build
 

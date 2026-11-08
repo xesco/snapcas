@@ -1,0 +1,7 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2, for the reason that the PHC-28S's game
+# file gives: with it, BASIC's page 2 is its mapper in slot 1-2, and NIGHT and
+# SHADE copy page 2's slot into page 1's bits, which cannot select that subslot.
+# Without it, page 2 is the internal RAM in slot 2.
+capture hb75p

@@ -221,6 +221,7 @@ proc step3 {} {
     debug set_watchpoint write_mem 0xFFFF {} {safe {on_ffff $::wp_last_value}}
     cassetteplayer insert $::S(tape)
     set ::t0 [now]
+    pagecopy_start
     set ::restarts 0
     type "$::S(cmd)\r"
     logev "typed $::S(cmd)"

@@ -1,0 +1,6 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2, for the reason that the PHC-28S's
+# game file gives: with it, BASIC's page 2 is its mapper, where MAD2 loads the
+# second half of the game's ROM image, and the game looks for it in page 1's slot.
+capture hb75p

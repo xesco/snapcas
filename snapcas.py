@@ -207,13 +207,9 @@ def check(game, machine, dos):
 def publish(game, machine):
     """Moves a shipped or custom game's image from its work folder to images/,
     where the user takes it, and prints where it went."""
-    name = gamefile.read_game(game, machine).name
-    target = gamefile.published_path(machine, game, name)
-    if target is None:
-        return
-    os.makedirs(os.path.dirname(target), exist_ok=True)
-    os.replace(gamefile.image_path(machine, game, name), target)
-    print(f"image     {os.path.relpath(target, ROOT)}")
+    target = gamefile.publish(machine, game)
+    if target is not None:
+        print(f"image     {os.path.relpath(target, ROOT)}")
 
 
 def snap(args):

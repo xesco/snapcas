@@ -9,10 +9,11 @@
 # RAM search occurs in the tape files, the capture writes a patch of each copy to
 # newpatch.txt and stops, and capture.py runs it again. Each copy cuts off its
 # code on this machine, and a copy on side 2, or in a compilation's later game,
-# runs after the snapshot.
+# runs after the snapshot. Otherwise, when the write's code is one of the slot
+# patches' forms, its value gets page 3's slot from before the write.
 proc ramsearch_watch {value before} {
     set pc [reg pc]
-    if {$pc < 0xC000 || (($value ^ $before) & 0xC0) == 0} return
+    if {[info exists ::newpatch] || $pc < 0xC000 || (($value ^ $before) & 0xC0) == 0} return
     set next [expr {($pc + 2) & 0xFFFF}]
     if {[read_with $value $next 4] eq [read_with $before $next 4]} return
     set found [tape_find $::ramsearch]
@@ -23,6 +24,14 @@ proc ramsearch_watch {value before} {
                 $::ramsearch_old $::ramsearch_new
         }]
         decide "the slot register write of [hex 2 $value] at PC [hex 4 $pc] cuts off its code: the RAM search patched"
+        catch write_log
+        quit
+    }
+    # Else the write's own code, when it is one of the forms, gets a patch that
+    # keeps page 3's slot.
+    set new [expr {($value & 0x3F) | ($before & 0xC0)}]
+    if {[patch_code $value $before $new]} {
+        decide "the slot register write of [hex 2 $value] at PC [hex 4 $pc] cuts off its code: patched to [hex 2 $new], which keeps page 3"
         catch write_log
         quit
     }

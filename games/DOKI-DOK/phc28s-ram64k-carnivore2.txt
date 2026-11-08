@@ -3,15 +3,3 @@
 # The capture runs without the Carnivore2, so without a disk system, because the
 # game crashes when one is present.
 capture phc28s-ram64k
-
-# A cartridge game: its loader copies the first half to page 1 of slot 1, the
-# second half loads into page 2, and a jump to 0000h starts it from RAM. The
-# loader selects slot 1 for pages 1 to 3, but without Nextor the PHC-28S keeps
-# BASIC's page 3 in its internal RAM, slot 0, so page 3 stays there.
-# LD A,54h / OUT (0A8h),A selects slot 1 in page 3. The patch selects slot 0
-# there.
-patch side1:46D6 3E 54 D3 A8 > 3E 14 D3 A8
-
-# LD A,50h / OUT (0A8h),A selects slot 1 in page 3. The patch selects slot 0
-# there.
-patch side1:46E5 3E 50 D3 A8 > 3E 10 D3 A8

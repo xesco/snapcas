@@ -1,0 +1,10 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The game sets its stack pointer to 0000h, so its pushes write FFFFh, which is
+# the subslot register when page 3 is the Carnivore2's RAM. The capture runs
+# without the Carnivore2, where FFFFh is RAM.
+capture hb75p
+
+# When the load stops, the stack pointer is 0000h and the tail has no room
+# below it. At 125 seconds Space Beater's menu runs with it at FFFCh.
+snapshot at 125

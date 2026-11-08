@@ -1,0 +1,7 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2, so without a disk system. With the
+# disk system the snapshot comes while the loader still runs, and the loader then
+# writes the tape service's part of page 3 (FD31h from code at 4951h). Without it
+# the snapshot comes after the game has started.
+capture hb75p

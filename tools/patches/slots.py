@@ -49,12 +49,6 @@ def find(data, context):
     return findings
 
 
-def tcl_settings():
-    """The Tcl that gives slots.tcl the opcodes of OPERAND_1 and OPERAND_2."""
-    return "".join(f"set ::{name} {{{' '.join(str(b) for b in data)}}}\n"
-                   for name, data in (("operand1", OPERAND_1), ("operand2", OPERAND_2)))
-
-
 def read_slots(snap):
     """snap/slots.txt, the capture's slot map: for each page, the primary slots
     that hold nothing there and the slot that replaces them, or -1. None for a

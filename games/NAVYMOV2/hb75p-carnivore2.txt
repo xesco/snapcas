@@ -1,0 +1,6 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2. With it, BASIC stops at "Syntax error in
+# 24" after the load, when line 24 calls the code that the program reloc put at
+# DEA8h, by a cause not yet traced. Without it the game starts.
+capture hb75p

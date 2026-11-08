@@ -3,16 +3,3 @@
 # The capture runs without the Carnivore2, because the game fails in a capture
 # with it in slot 1.
 capture nms8250
-
-# The game selects RAM in slot 2. The NMS 8250 has its RAM in slot 3.
-# LD A,0A8h / OUT (0A8h),A selects slot 2 in pages 1 to 3. The patch selects
-# slot 3 there.
-patch side1:FDE 3E A8 D3 A8 > 3E FC D3 A8
-
-# LD A,0A0h / OUT (0A8h),A selects slot 2 in pages 2 and 3. The patch selects
-# slot 3 there.
-patch side1:FED 3E A0 D3 A8 > 3E F0 D3 A8
-
-# LD A,0A8h / OUT (0A8h),A selects slot 2 in pages 1 to 3. The patch selects
-# slot 3 there.
-patch side1:5C84 3E A8 D3 A8 > 3E FC D3 A8

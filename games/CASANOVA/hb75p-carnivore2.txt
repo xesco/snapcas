@@ -1,0 +1,5 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2, whose RAM in slot 1 the game's loader
+# finds before the internal RAM in slot 2.
+capture hb75p

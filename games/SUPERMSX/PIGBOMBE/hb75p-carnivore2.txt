@@ -1,0 +1,6 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The game's stack reaches FFFFh, which is the subslot register when page 3
+# is the Carnivore2's RAM, so the capture runs without the Carnivore2, where
+# FFFFh is RAM.
+capture hb75p

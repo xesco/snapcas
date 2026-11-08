@@ -64,6 +64,7 @@ def settings(game, machine, tape_path, data, snap, side2_path=None, side2=b""):
     keys = [(t, key_tcl(kind, value)) for t, kind, value in game.keys]
     tries = ([game.continue_key] if game.continue_key else []) + ["space", "return"]
     command = load_command(game, data)
+    pagecopy = patches.pagecopy.tcl_settings(data, side2)
     data = tape.service(tape.read(game.tape, data))
     side2 = tape.service(tape.read(game.side2, side2)) if game.side2 else b""
     s = {
@@ -92,7 +93,7 @@ def settings(game, machine, tape_path, data, snap, side2_path=None, side2=b""):
         # openMSX's home, whose savestates/ folder the rewinds read.
         "home": msx.tcl_word(msx.home()),
     }
-    return "".join(f"set ::S({k}) {v}\n" for k, v in s.items())
+    return "".join(f"set ::S({k}) {v}\n" for k, v in s.items()) + pagecopy
 
 
 def capture_once(game, machine, tape_path, tapes_dir, snap, procedures, found):
@@ -173,9 +174,9 @@ def main():
         return 1
 
     snap = os.path.join(gamefile.out_folder(args.machine, game.folder), "snap")
-    procedures = (patches.slots.tcl_settings() + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/capture.tcl")
+    procedures = (msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/capture.tcl")
                   + msx.tcl("patches/slots.tcl") + patches.ramsearch.tcl_settings()
-                  + msx.tcl("patches/ramsearch.tcl"))
+                  + msx.tcl("patches/ramsearch.tcl") + msx.tcl("patches/pagecopy.tcl"))
     # The patches of the tape that the capture finds (INTERNALS.md, Slot patches,
     # The RAM search patch): each one stops the capture, which runs again on the
     # patched tape.

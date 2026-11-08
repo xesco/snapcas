@@ -4,11 +4,3 @@
 # pages, and a jump to 0000h starts the game from RAM, through the BIOS's search
 # for cartridges. With the Carnivore2 in slot 1, that search finds Nextor first.
 capture vg8020
-
-# The VG-8020's RAM is in slot 3, and slot 1 holds nothing without the Carnivore2.
-# LD A,54h / OUT (0A8h),A selects slot 1 in pages 1 to 3, and the patch selects
-# slot 3 there.
-patch side1:46D6 3E 54 D3 A8 > 3E FC D3 A8
-# LD A,50h / OUT (0A8h),A selects slot 1 in pages 2 and 3, and the patch selects
-# slot 3 there.
-patch side1:46E5 3E 50 D3 A8 > 3E F0 D3 A8

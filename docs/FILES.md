@@ -9,9 +9,10 @@ in [DESIGN.md](DESIGN.md).
 ## Machine file
 
 A machine file describes one MSX and the cartridges in its slots. It holds one
-`openmsx` line, one `disk` line, any number of `boot` lines, at most one `dos` line,
-at most one `dosfiles` line and any number of `firmware` and `variant` lines, as in this
-example for a Sanyo PHC-28S with a RAM cartridge and a Carnivore2:
+`openmsx` line, one `disk` line, any number of `boot`, `hold` and `press` lines, at
+most one `dos` line, at most one `dosfiles` line and any number of `firmware` and
+`variant` lines, as in this example for a Sanyo PHC-28S with a RAM cartridge and a
+Carnivore2:
 
 ```
 # Sanyo PHC-28S (MSX1, 16 KB) with a 64 KB RAM cartridge and a Carnivore2. The RAM
@@ -29,6 +30,7 @@ variant phc28s-empty-carnivore2
 | `disk` | The `openMSX` command that inserts `check.py`'s disk image, such as `hda` for an IDE interface or an SD card, or `diska` for a floppy drive. Then, optionally, the image's size in KB: 720, the default, or 360 for a single-sided drive, as the Philips VG-8235 has |
 | `boot` | A text on the screen during boot and the key to press when it appears. Each key has its own line, matched in order. A menu can show its text before it reads the keyboard, so the key is pressed again each second while the text stays, up to 10 times |
 | `hold` | A key held down from power-on, and the emulated seconds it is held, such as `hold del 6`. It is for a machine whose firmware starts a program in a graphics mode in place of BASIC, whose screen `boot` cannot read: the Panasonic FS-A1 starts its Desk Pac menu unless DEL is held |
+| `press` | A key pressed for 0.1 emulated seconds, and the emulated seconds after power-on when it goes down, such as `press down 8`. It is for a firmware menu in a graphics mode that no held key skips: the Sony HB-75P starts its Personal Data Bank menu without a disk system, and the `hb75p` capture variant moves down to its BASIC item and presses RETURN |
 | `dos` | For a machine that boots MSX-DOS from a disk of its own, as the MegaFlashROM SCC+ SD boots from the ROM disk in its flash: DOS's prompt, such as `A:\>`, and the drive letter of `check.py`'s disk. When the prompt appears, the capture types `BASIC`, because it loads the game from BASIC, and the check types that drive and `AUTOEXEC` |
 | `dosfiles` | The folder below `dos/` that holds the DOS system files that the machine boots in `snapcas.py snap --check` and `try`: `msxdos1` or `msxdos2`. Without this line, the folder is `nextor` |
 | `firmware` | A file below the `share` folder of the `openMSX` home that the machine needs and `make firmware` makes, such as `systemroms/snapcas/SDMAPPER.ROM`. Without the file, `snapcas.py snap` and `try` stop and name `make firmware` |
@@ -168,6 +170,7 @@ the number of machine's game files that each has:
 | `xp800-sdmapper` | Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1, as `vg8020-sdmapper` | 0 |
 | `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4, which the Makefile makes. `openMSX`'s stock flash also holds a ROM disk, whose `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, which skips the FS-A1's Desk Pac menu | 0 |
 | `hbf1xd-mfrsd` | Sony HB-F1XD: an MSX2 with 64 KB, no mapper and a floppy drive, with the MegaFlashROM SCC+ SD of `fsa1-mfrsd` | 0 |
+| `hb75p-carnivore2` | Sony HB-75P: an MSX1 with 64 KB in slot 2 and a Carnivore2 in slot 1 | 76 |
 | `vg8235` | Philips VG-8235: an MSX2 with a 128 KB mapper and a single-sided floppy drive, without cartridges. It boots MSX-DOS 1 from a 360 KB disk | 0 |
 
 It also ships these capture variants in `machines/capture/`
@@ -182,9 +185,10 @@ game files whose `capture` line names the variant:
 | `vg8020` | `vg8020-carnivore2` | The Carnivore2, and so Nextor | 121 game files that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
 | `vg8020` | `vg8020-picoverse` | The PicoVerse-like cartridge, and so its mapper and Nextor | 54 game files whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go straight to their slot, without holding segments |
 | `nms8250` | `nms8250-carnivore2` | The Carnivore2, and so Nextor | 54 game files that fail in a capture with the Carnivore2 in slot 1 |
-| `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 8 game files, Sootland among them, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch ([INTERNALS.md, The RAM search patch](INTERNALS.md#the-ram-search-patch)) |
+| `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 8 game files, Digger Dungeon among them, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch, and Sootland needs the variant no longer since the patch that keeps page 3 ([INTERNALS.md, The RAM search patch](INTERNALS.md#the-ram-search-patch)) |
 | `vg8020` | `vg8020-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 | `xp800` | `xp800-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
+| `hb75p` | `hb75p-carnivore2` | The Carnivore2, and so Nextor | 74 game files that fail in a capture with the Carnivore2 in slot 1. 4 of them also select RAM by fixed slot values: 1 in slot 1, and 3 in slot 3, the VG-8020's RAM slot |
 
 ## Compilations
 
