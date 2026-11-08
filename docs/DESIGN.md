@@ -190,7 +190,7 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 | ROM checksums checked by the restorer | A snapshot runs only on the ROMs it was taken with, and `build.py` can build T0 from `rom.bin` |
 | Port writes, T0 and the tail made by `build.py` | The restorer copies records and fills in only the values that depend on the real machine |
 | One restorer for every image | The user updates one program, and DOS passes it the image's name |
-| A game file can name the machine for the capture | A loader can trip over a cartridge that the game itself never selects again, so the game loads without it, and its image runs with the cartridge in place. Sootland's loader trips over the HB-F700P's RAM cartridge |
+| A game file can name the machine for the capture | A loader can trip over a cartridge that the game itself never selects again, so the game loads without it, and its image runs with the cartridge in place. Digger Dungeon's loader trips over the HB-F700P's RAM cartridge |
 | Tape service only for games that load during play | A game that loads in a single pass runs exactly as in the snapshot |
 | T0 kept out of page 0 when the game's page 0 RAM is in DOS's mapper | On a single-mapper MSX2, T0 and that RAM need the same mapper register |
 | `rom keep` in the game file, not a rule of the restorer | T0 in page 0 serves a BASIC program, whose tape calls are in the ROM and cannot be patched, but it changes the slot register's page 0 bits. Gauntlet's RAM search adds the slot that it finds to those bits, expecting the ROM's slot 0, and selects an empty slot |
