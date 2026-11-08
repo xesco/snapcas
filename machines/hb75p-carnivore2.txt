@@ -1,0 +1,6 @@
+# Sony HB-75P (MSX1, 64 KB) with a Carnivore2. The Carnivore2 is in slot 1 and runs
+# Nextor. The HB-75P's own RAM is in slot 2.
+openmsx -machine Sony_HB-75P -ext Carnivore2
+disk hda
+boot "DefConfig" space
+variant hb75p

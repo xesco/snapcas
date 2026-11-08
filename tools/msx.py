@@ -105,6 +105,8 @@ def read_machine(path):
                 boot.append((words[1], words[2]))
             elif words[0] == "hold" and len(words) == 3 and words[1] in KEYS and re.fullmatch(r"\d+", words[2]):
                 holds.append(press(words[1], int(words[2])))
+            elif words[0] == "press" and len(words) == 3 and words[1] in KEYS and re.fullmatch(r"\d+(\.\d+)?", words[2]):
+                holds.append(f"after time {words[2]} {{{press(words[1])}}}")
             elif words[0] == "dos" and dos is None and len(words) == 3 and re.fullmatch(r"[A-H]", words[2]):
                 dos = (words[1], words[2])
             elif words[0] == "dosfiles" and dos_files is None and len(words) == 2 and words[1] in ("msxdos1", "msxdos2"):
@@ -120,7 +122,8 @@ def read_machine(path):
     if args is None or disk is None:
         raise MachineError(f"{path}: needs one openmsx line and one disk line")
     # A key held from power-on goes down before the BIOS reads the keyboard,
-    # so it is an openMSX command at startup in every run of the machine.
+    # so it is an openMSX command at startup in every run of the machine, as is
+    # a key pressed at a time after power-on.
     for hold in holds:
         args += ["-command", hold]
     return Machine(path, args, disk, disk_size, boot, dos, dos_files or "nextor", firmware, variants)

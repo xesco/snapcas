@@ -141,6 +141,7 @@ WALLBALL  Wallball (19xx)(Tynesoft)[BLOAD'CAS-',R]
 
 $ ./snapcas.py machines
 fsa1-mfrsd                  Panasonic FS-A1 (MSX2, 64 KB) with a MegaFlashROM SCC+ SD
+hb75p-carnivore2            Sony HB-75P (MSX1, 64 KB) with a Carnivore2
 hb75p-mfrsd                 Sony HB-75P (MSX1, 64 KB) with a MegaFlashROM SCC+ SD
 hbf1xd-mfrsd                Sony HB-F1XD (MSX2, 64 KB) with a MegaFlashROM SCC+ SD
 hbf700p-ram512k-msxdos2     Sony HB-F700P (MSX2, 256 KB) with a 512 KB RAM cartridge, under MSX-DOS 2

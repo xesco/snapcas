@@ -24,7 +24,7 @@ SHIPPED = {machine: test_step4.MACHINES[machine][0]
 SHIPPED.update({"nms8245-ram512k-sunriseide": test_step4.NEXTOR, "hb75p-mfrsd": test_step4.NEXTOR,
                 "vg8020-picoverse": test_step4.NEXTOR, "vg8020-sdmapper": test_step4.NEXTOR,
                 "xp800-sdmapper": test_step4.NEXTOR, "fsa1-mfrsd": test_step4.NEXTOR,
-                "hbf1xd-mfrsd": test_step4.NEXTOR, "vg8235": os.path.join(test_step4.DOS_DIR, "msxdos1")})
+                "hbf1xd-mfrsd": test_step4.NEXTOR, "hb75p-carnivore2": test_step4.NEXTOR, "vg8235": os.path.join(test_step4.DOS_DIR, "msxdos1")})
 # A single-load game that fits each of them, the NMS 8250's 128 KB included.
 SINGLE = "CALDERO.CAS"
 

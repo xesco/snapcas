@@ -51,6 +51,7 @@ The commands share their code through modules, and the Tcl that runs inside
 | `tools/games.py` | The games run of `make games` ([The games run](#the-games-run)) |
 | `tools/fetch.py` | The download of the test setup's files |
 | `tools/try.py` | The `openMSX` run of `snapcas.py try`, with its window, which types the restorer's command ([CLI.md, Try an image](CLI.md#try-an-image)) |
+| `tools/plain.py` | A load of a game's tape in plain `openMSX`, without the capture's code, which prints the screen 60 seconds after the tape's end: a game that fails there fails in `openMSX` itself |
 
 An automatic patch is a change that the tools make to a game without a line in its
 game file. Each kind of automatic patch is one file in `tools/patches/`:

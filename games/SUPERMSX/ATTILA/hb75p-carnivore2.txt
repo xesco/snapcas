@@ -1,0 +1,6 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The magazine's menu loads each program from the tape, and code at 5629h
+# writes over the tape service's entries at FCE1h, so the whole service goes
+# into T0.
+service t0

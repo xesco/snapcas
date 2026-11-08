@@ -1,0 +1,17 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2, whose RAM in slot 1 the game's loader
+# finds before the internal RAM in slot 2.
+capture hb75p
+
+# The game's copy routine selects the VG-8020's RAM slot, slot 3, by fixed values,
+# and the HB-75P's RAM is in slot 2, so the load stops at the first copy. The tape
+# holds the routine twice.
+# LD A,0FFh / OUT (0A8h),A selects slot 3 in every page, for the copy to 0300h.
+# The patch selects slot 2 there.
+patch side1:6581 3E FF D3 A8 > 3E AA D3 A8
+# LD A,0F0h / OUT (0A8h),A selects slot 3 in pages 2 and 3 after the copy. The
+# patch selects slot 2 there.
+patch side1:6595 3E F0 D3 A8 > 3E A0 D3 A8
+patch side1:AC49 3E FF D3 A8 > 3E AA D3 A8
+patch side1:AC5D 3E F0 D3 A8 > 3E A0 D3 A8

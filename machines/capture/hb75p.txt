@@ -1,0 +1,13 @@
+# Sony HB-75P without cartridges, so without a disk system. It is the capture
+# variant of hb75p-carnivore2, for a game whose loader finds the Carnivore2's RAM
+# in slot 1 before the internal RAM in slot 2.
+# The capture uses no disk, but a machine file needs this line.
+openmsx -machine Sony_HB-75P
+disk hda
+# Without a disk system the HB-75P starts its Personal Data Bank menu, in a
+# graphics mode. BASIC is its fifth item, four cursor moves down from the first.
+press down 8
+press down 8.5
+press down 9
+press down 9.5
+press return 10

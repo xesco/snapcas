@@ -1,0 +1,7 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The load stops while the loader resets the machine to start its ROM copy, and
+# the first snapshot comes before the BIOS has set the stack pointer, at 50A0h,
+# outside a RAM page that the snapshot keeps. At 135 seconds the game runs, with
+# its stack in page 3.
+snapshot at 135

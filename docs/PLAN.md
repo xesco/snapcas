@@ -27,7 +27,7 @@ shortage of free segments. Each one boots the DOS of its row:
 
 | Machine file | DOS | Why |
 |---|---|---|
-| `phc28s-ram64k-carnivore2`, `vg8020-carnivore2`, `nms8250-carnivore2`, `nms8245-ram512k-sunriseide`, `vg8020-picoverse` | Nextor | Shipped |
+| `phc28s-ram64k-carnivore2`, `vg8020-carnivore2`, `nms8250-carnivore2`, `nms8245-ram512k-sunriseide`, `vg8020-picoverse`, `hb75p-carnivore2` | Nextor | Shipped |
 | `hb75p-mfrsd` | Nextor 2.10, from the ROM disk in the cartridge's flash | Shipped |
 | `hbf700p-ram512k-msxdos2` | `DOS_DIR/msxdos2/`, with the `msxdos2` cartridge in the machine file | Shipped |
 | `test/nms8250-dos1` | `DOS_DIR/msxdos1/`, from the NMS 8250's own disk ROM | No shipped machine runs MSX-DOS 1 |

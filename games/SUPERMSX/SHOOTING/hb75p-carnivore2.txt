@@ -1,0 +1,6 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2. With it, the screen stays half white
+# and half black after the load, as its plain load does in openMSX with the
+# Carnivore2, by a cause not yet traced. Without it the game runs.
+capture hb75p

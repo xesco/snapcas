@@ -126,6 +126,11 @@ class Snap(unittest.TestCase):
         self.assertEqual(msx.read_machine(msx.machine_path("hbf700p-ram512k-msxdos2")).dos_files, "msxdos2")
         self.assertEqual(msx.read_machine(msx.machine_path("vg8020-carnivore2")).dos_files, "nextor")
 
+    def test_a_press_line_presses_its_key_at_its_time_after_power_on(self):
+        machine = msx.read_machine(msx.variant_path("hb75p"))
+        self.assertIn("after time 10 {keymatrixdown 7 128; after time 0.1 [list keymatrixup 7 128]}", machine.args)
+        self.assertIn("after time 8.5 {keymatrixdown 8 64; after time 0.1 [list keymatrixup 8 64]}", machine.args)
+
     def test_a_machines_missing_dos_files_stop_with_where_they_go(self):
         with tempfile.TemporaryDirectory() as folder, mock.patch.object(snapcas_py, "DOS", folder):
             with self.assertRaisesRegex(snapcas_py.Choice, "vg8235 boots msxdos1: put its files in"):

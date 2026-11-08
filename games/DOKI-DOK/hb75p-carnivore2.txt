@@ -1,0 +1,14 @@
+# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
+
+# The capture runs without the Carnivore2. The loader selects slot 1 for its
+# pages, and a jump to 0000h starts the game from RAM, through the BIOS's search
+# for cartridges. With the Carnivore2 in slot 1, that search finds Nextor first.
+capture hb75p
+
+# The HB-75P's RAM is in slot 2, and slot 1 holds nothing without the Carnivore2.
+# LD A,54h / OUT (0A8h),A selects slot 1 in pages 1 to 3, and the patch selects
+# slot 2 there.
+patch side1:46D6 3E 54 D3 A8 > 3E A8 D3 A8
+# LD A,50h / OUT (0A8h),A selects slot 1 in pages 2 and 3, and the patch selects
+# slot 2 there.
+patch side1:46E5 3E 50 D3 A8 > 3E A0 D3 A8
