@@ -18,7 +18,7 @@ These rules hold for every task:
 | Start a step that you recommend only when the user says go | The user decides what comes next |
 | A build prints no warnings | A warning hides the next one |
 | Do not run `./snapcas.py try` yourself, and ask the user to run it | It opens `openMSX`'s window with its sound on, and the user hears it. The other tools run `openMSX` muted, without a window |
-| Never add system ROMs, MSX-DOS or tape files to git | `snapcas` cannot ship them. Git ignores `dos/`, `downloads/`, `images/` and `out/` |
+| Never add system ROMs or MSX-DOS to git, and add a tape file to the tests' `tests/tapes/` only when the user agrees | `snapcas` cannot ship ROMs or DOS, and git ignores `dos/`, `downloads/`, `images/` and `out/`. The tests' tapes are in git, so each one adds to the repository |
 | Fix a game with lines in its game file, not with code | Each loader differs. Code gets a fix only when one form repeats over many tapes, as the automatic patches in `tools/patches/` do |
 | Give each line that you add to a game file a comment above it that says why, and a blank line before the comment | The shipped game files are written that way, and the next reader needs the reason |
 
@@ -272,7 +272,19 @@ snapshot. Each key of a game file is in
 ### 3. Patch the code
 
 A slot patch changes the value that the loader writes to the slot register, port
-A8h, so that it selects the machine's RAM. Find the loader's write first:
+A8h, so that it selects the machine's RAM. The capture already patches these forms
+itself, on any machine, by the slot map that it makes of the machine's RAM, so a
+line for them is not needed:
+
+| Code | Automatic patch |
+|---|---|
+| `LD A,n / OUT (0A8h),A` or `LD A,n / CALL 013Bh`, run before the snapshot, whose n names a slot that holds nothing | [Slot patches](docs/INTERNALS.md#slot-patches), at each copy in the tape |
+| The same in the snapshot's RAM, run after it | The scan, in the build |
+| The same, run from page 3, that moves page 3 to a slot where the code differs | [The RAM search patch](docs/INTERNALS.md#the-ram-search-patch), which keeps page 3 |
+| Level 9's, CasLink3's and Engesoft's copies of page 3's slot to the other pages | [The page copy patch](docs/INTERNALS.md#the-page-copy-patch) |
+
+`log.txt` names each write that the capture saw and did not patch, with
+`for a patch line`. Find the loader's write first:
 
 1. Read `scan.txt`, which lists the scan's findings in `patch` line form. The
    build already patches the findings in the snapshot's RAM pages. The findings in

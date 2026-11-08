@@ -3,10 +3,3 @@
 # The capture runs without the Carnivore2, whose RAM in slot 1 the game's loader
 # finds before the internal RAM in slot 2.
 capture hb75p
-
-# The loader selects the VG-8020's RAM slot, slot 3, by a fixed value, and the
-# HB-75P's RAM is in slot 2, so the load stops in the loader's routine at DE00h.
-# LD A,0F0h / OUT (0A8h),A selects slot 3 in pages 2 and 3, and the patch selects
-# slot 2 there. The routine's LD A,0FCh after it needs no patch: the routine
-# first writes the slot register's value into that instruction's operand.
-patch side1:2012 3E F0 D3 A8 > 3E A0 D3 A8

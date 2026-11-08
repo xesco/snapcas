@@ -1,12 +1,12 @@
 # Lines for the Sanyo PHC-28S with a RAM cartridge in slot 1 and a Carnivore2 in slot 2.
 
-# The BASIC loader's routine at 38200, in its DATA lines, selects page 3's slot in
-# page 1 to copy the graphics from 9C40h to 4000h, and core's routine at CAB1h does
-# the same to copy them on to VRAM: each sets page 1's bits from page 3's. On the
-# PHC-28S page 3 is the internal RAM in slot 0, or the Carnivore2's mapper, so
-# the graphics go into the ROM or another subslot. The patches replace the bit
-# tests with NOPs and keep the SET 2,A after them, which selects the RAM
-# cartridge, slot 1, in page 1.
+# The BASIC loader's routine at 38200, in its DATA lines, selects page 3's slot
+# in page 1 to copy the graphics from 9C40h to 4000h: it sets page 1's bits from
+# page 3's. On the PHC-28S page 3 is the internal RAM in slot 0, or the
+# Carnivore2's mapper, so the graphics go into the ROM or another subslot. The
+# patches replace the bit tests in the text with zeros, NOPs, and keep the SET
+# 2,A after them, which selects the RAM cartridge, slot 1, in page 1. The page
+# copy patch does the same for core's routine at CAB1h, which copies the
+# graphics on to VRAM.
 patch side1:9F 43 42 2C 37 46 2C 32 38 2C 30 32 2C 43 42 > 30 30 2C 30 30 2C 30 30 2C 30 30 2C 30 30
 patch side1:B7 44 46 2C 43 42 2C 37 37 2C 32 38 2C 30 32 > 30 30 2C 30 30 2C 30 30 2C 30 30 2C 30 30
-patch side1:754A CB 7F CA BB CA CB DF CB 77 CA C2 CA > 00 00 00 00 00 00 00 00 00 00 00 00

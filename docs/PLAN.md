@@ -214,9 +214,10 @@ without a part in page 3 when page 3 has no room
 of `snapcas.py make` on the capture variants
 ([Files and commands](DESIGN.md#files-and-commands)). The tests check each fix on a
 game that needed it by hand, without its line: Sootland and Finders Keepers for the
-slot patches, Chase H.Q. for the mode, and Sootland on the HB-F700P for the
+slot patches, Chase H.Q. for the mode, and Digger Dungeon on the HB-F700P for the
 variants. La Abadia del Crimen was the variants' test until the RAM search patch
-fixed its load ([The RAM search patch](INTERNALS.md#the-ram-search-patch)). The
+fixed its load ([The RAM search patch](INTERNALS.md#the-ram-search-patch)), and
+Sootland until the patch that keeps page 3 fixed it. The
 collection then runs on all seven shipped machines, and the report lists the game
 files that a machine still needs.
 
@@ -380,7 +381,7 @@ the images do not change.
 |---|---|
 | Every shipped machine's game file | Its name is a machine file's name |
 | Every shipped `capture` line | It names a variant that its machine file lists |
-| Sootland on `hbf700p-ram512k-msxdos2`, without a `capture` line | `snapcas.py make` tries the variants that the machine file lists, and prints `capture hbf700p-msxdos2` |
+| Digger Dungeon on `hbf700p-ram512k-msxdos2`, without a `capture` line, Sootland before the patch that keeps page 3 | `snapcas.py make` tries the variants that the machine file lists, and prints `capture hbf700p-msxdos2` |
 | The collection on `phc28s-ram64k-carnivore2` and `vg8020-carnivore2` | Every game file passes, as before the rename |
 
 ## Step 20: the release machines
@@ -477,7 +478,7 @@ run and the user's images share no folder:
 
 | Folder | Holds |
 |---|---|
-| `tests/tapes/` | The tests' 61 tape files, in git, in place of `CAS_DIR` and its `tsx/` and `collection/` folders |
+| `tests/tapes/` | The tests' tape files, in git, in place of `CAS_DIR` and its `tsx/` and `collection/` folders |
 | `downloads/` | The tapes that `snapcas.py snap` downloads, which the games run reads without downloading, in place of `--tapes` and `tapes/` |
 | `images/<machine>/<game>/` | The image of a shipped game, which `snap` moves there when every step passes, in place of `out/<machine>/<game>/` |
 | `out/work/<machine>/<game>/` | The snapshot, the image until `snap` moves it, the check and the build's reports. A game folder of the tests holds its own, `<folder>/<machine>/`, below `out/test/` |

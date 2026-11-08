@@ -5,13 +5,3 @@
 # image holds the mapper's RAM in page 2, not that subslot, so after the restore the
 # game runs into empty RAM and hangs.
 capture phc28s-ram64k
-
-# Each part of the tape, made by CasLink3, gives pages 0 and 1 the slots of pages 2
-# and 3 while it copies its piece of the game, with AND F0h, LD B,A, four RRCAs,
-# AND 0Fh and OR B on the slot register's value. The last part then starts the
-# game at 4000h or above. Without the Carnivore2, page 3 is the internal RAM in
-# slot 0, which has the ROM in page 1, and the start lands in BASIC, which stops at
-# "Syntax error". The patches load 15h in their place: slot 1, the RAM cartridge,
-# in pages 0 to 2, and slot 0 in page 3.
-patch side1:23A E6 F0 47 0F 0F 0F 0F E6 0F B0 > 3E 15 00 00 00 00 00 00 00 00
-patch side1:433D E6 F0 47 0F 0F 0F 0F E6 0F B0 > 3E 15 00 00 00 00 00 00 00 00

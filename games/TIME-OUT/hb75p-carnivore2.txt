@@ -3,18 +3,3 @@
 # The capture runs without the Carnivore2, whose RAM in slot 1 the game's loader
 # finds before the internal RAM in slot 2.
 capture hb75p
-
-# The game's copy routines select the VG-8020's RAM slot, slot 3, by fixed values,
-# and the HB-75P's RAM is in slot 2, so the load stops at the first copy.
-# LD A,0FFh / OUT (0A8h),A selects slot 3 in every page, for a copy to page 0 or
-# page 1. The patches select slot 2 there.
-patch side1:202F 3E FF D3 A8 > 3E AA D3 A8
-patch side1:448B 3E FF D3 A8 > 3E AA D3 A8
-patch side1:44B4 3E FF D3 A8 > 3E AA D3 A8
-patch side1:4520 3E FF D3 A8 > 3E AA D3 A8
-# LD A,0F0h / OUT (0A8h),A selects slot 3 in pages 2 and 3, and LD A,0FCh /
-# OUT (0A8h),A in pages 1 to 3. The patches select slot 2 there.
-patch side1:203E 3E F0 D3 A8 > 3E A0 D3 A8
-patch side1:402F 3E FC D3 A8 > 3E A8 D3 A8
-patch side1:44AB 3E FC D3 A8 > 3E A8 D3 A8
-patch side1:44C3 3E FC D3 A8 > 3E A8 D3 A8
