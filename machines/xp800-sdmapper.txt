@@ -5,3 +5,4 @@
 openmsx -machine Gradiente_Expert_XP-800 -ext SD_Mapper_v1
 disk hda
 variant xp800
+firmware systemroms/snapcas/SDMAPPER.ROM

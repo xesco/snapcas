@@ -134,6 +134,19 @@ class Snap(unittest.TestCase):
             open(os.path.join(folder, "msxdos1", "MSXDOS.SYS"), "w").close()
             self.assertEqual(snapcas_py.dos_folder("vg8235"), os.path.join(folder, "msxdos1"))
 
+    def test_a_machine_without_its_firmware_stops_and_names_make_firmware(self):
+        with tempfile.TemporaryDirectory() as home:
+            env = dict(os.environ, OPENMSX_HOME=home)
+            for verb in (("snap", "CALDERO", "fsa1-mfrsd"), ("try", "CALDERO", "vg8020-sdmapper")):
+                with self.subTest(verb=verb):
+                    result = subprocess.run([COMMAND, *verb], capture_output=True, text=True, env=env)
+                    self.assertEqual(result.returncode, 1)
+                    self.assertIn("make firmware makes it", result.stderr)
+
+    def test_openmsxs_fatal_error_reaches_the_caller(self):
+        with self.assertRaisesRegex(msx.MachineError, "Fatal error:.*NoSuchMachine"):
+            msx.run(["-machine", "NoSuchMachine"], "exit\n", timeout=60)
+
     def test_snap_without_arguments_prints_its_help(self):
         result = snapcas("snap")
         self.assertEqual(result.returncode, 0)

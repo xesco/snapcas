@@ -41,7 +41,7 @@ class MachineError(Exception):
 
 
 class Machine:
-    def __init__(self, path, args, disk, disk_size, boot, dos, dos_files, variants):
+    def __init__(self, path, args, disk, disk_size, boot, dos, dos_files, firmware, variants):
         self.path = path
         self.args = args  # openMSX arguments, without the program name
         self.disk = disk  # command that inserts a disk image, such as hda
@@ -49,6 +49,7 @@ class Machine:
         self.boot = boot  # [(text, key)], matched in order
         self.dos = dos    # (prompt, drive) when DOS boots from the machine's own disk
         self.dos_files = dos_files  # the folder below dos/ of the DOS files that it boots
+        self.firmware = firmware  # the files below the openMSX home's share/ that make firmware makes
         self.variants = variants  # the capture variants' names, in the order to try them
 
 
@@ -85,7 +86,7 @@ def variant_path(variant):
 
 def read_machine(path):
     args, disk, disk_size, boot, dos, dos_files, variants = None, None, 720, [], None, None, []
-    holds = []
+    holds, firmware = [], []
     with open(path) as f:
         for number, line in enumerate(f, 1):
             words = shlex.split(line, comments=True)
@@ -108,6 +109,8 @@ def read_machine(path):
                 dos = (words[1], words[2])
             elif words[0] == "dosfiles" and dos_files is None and len(words) == 2 and words[1] in ("msxdos1", "msxdos2"):
                 dos_files = words[1]
+            elif words[0] == "firmware" and len(words) == 2:
+                firmware.append(words[1])
             elif words[0] == "variant" and len(words) == 2:
                 if not os.path.isfile(variant_path(words[1])):
                     raise MachineError(f"{where}: {variant_path(words[1])} does not exist")
@@ -120,7 +123,7 @@ def read_machine(path):
     # so it is an openMSX command at startup in every run of the machine.
     for hold in holds:
         args += ["-command", hold]
-    return Machine(path, args, disk, disk_size, boot, dos, dos_files or "nextor", variants)
+    return Machine(path, args, disk, disk_size, boot, dos, dos_files or "nextor", firmware, variants)
 
 
 def tcl_word(text):
@@ -168,19 +171,29 @@ def home():
     return os.environ.get("OPENMSX_HOME", os.path.join(os.path.expanduser("~"), ".openMSX"))
 
 
+def missing_firmware(machine):
+    """The machine's firmware files that the openMSX home does not hold."""
+    return [path for path in machine.firmware if not os.path.isfile(os.path.join(home(), "share", path))]
+
+
 def run(args, script, timeout):
-    """Runs openMSX with the given arguments and Tcl script text."""
+    """Runs openMSX with the given arguments and Tcl script text. Raises
+    MachineError with openMSX's message when it stops at a fatal error, such as
+    a missing system ROM."""
     with tempfile.NamedTemporaryFile("w", suffix=".tcl", delete=False) as f:
         f.write(tcl("tcl/prelude.tcl") + script)
         path = f.name
     try:
-        subprocess.run(
+        result = subprocess.run(
             ["openmsx", *args, "-setting", SETTINGS, "-script", path,
              "-command", "set renderer none; set throttle off; set mute on"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, errors="replace",
             timeout=timeout, check=False)
     finally:
         os.unlink(path)
+    fatal = result.stderr.find("Fatal error:")
+    if fatal >= 0:
+        raise MachineError(result.stderr[fatal:].strip())
 
 
 def run_window(args, script):

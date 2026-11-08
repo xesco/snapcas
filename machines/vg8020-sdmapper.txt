@@ -5,3 +5,4 @@
 openmsx -machine Philips_VG_8020 -ext SD_Mapper_v1
 disk hda
 variant vg8020
+firmware systemroms/snapcas/SDMAPPER.ROM

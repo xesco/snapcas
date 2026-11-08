@@ -157,6 +157,13 @@ def dos_folder(machine):
     return folder
 
 
+def check_firmware(machine):
+    """Stops when the openMSX home lacks a file that the machine needs."""
+    missing = msx.missing_firmware(msx.read_machine(msx.machine_path(machine)))
+    if missing:
+        raise Choice(f"{machine} needs {missing[0]} in openMSX's share folder: make firmware makes it")
+
+
 def tapes_folder(game):
     """The folder of the game's tapes: a custom game's own folder, or
     downloads/."""
@@ -217,6 +224,7 @@ def snap(args):
     try:
         game = find_game(args.game)
         machine = find_machine(args.machine)
+        check_firmware(machine)
         if args.dos and not args.check:
             raise Choice("--dos gives the DOS files for --check")
         print(f"{gamefile.title(game) or os.path.basename(game)} for {machine}", flush=True)
@@ -256,6 +264,7 @@ def try_game(args):
     try:
         game = find_game(args.game)
         machine = find_machine(args.machine)
+        check_firmware(machine)
         dos = args.dos or dos_folder(machine)
     except (Choice, OSError, msx.MachineError) as e:
         print(f"snapcas.py: {e}", file=sys.stderr)
