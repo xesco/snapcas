@@ -165,7 +165,7 @@ the number of machine's game files that each has:
 | `vg8020-picoverse` | Philips VG-8020 with a Sunrise IDE interface under Nextor and a 192 KB memory mapper, as the PicoVerse cartridge has them. `openMSX` has no PicoVerse, so these two cartridges stand in for it, and the Makefile makes the 192 KB mapper from `openMSX`'s 512 KB one | 54 |
 | `phc28s-ram64k-carnivore2` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1 and a Carnivore2 in slot 2 | 89 |
 | `hb75p-mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup, which boots MSX-DOS from the ROM disk in its flash, with the check's disk in SD card slot 1 as drive B: | 0 |
-| `hbf700p-ram512k-msxdos2` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. Its own mapper holds 256 KB | 8 |
+| `hbf700p-ram512k-msxdos2` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. Its own mapper holds 256 KB | 7 |
 | `vg8020-sdmapper` | Philips VG-8020 with an SD Mapper v1: its 512 KB mapper and Nextor on its SD cards. The Makefile downloads the cartridge's firmware, `SDMAPPER.ROM` 1.0.7, which `openMSX` needs | 0 |
 | `xp800-sdmapper` | Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1, as `vg8020-sdmapper` | 0 |
 | `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4, which the Makefile makes. `openMSX`'s stock flash also holds a ROM disk, whose `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, which skips the FS-A1's Desk Pac menu | 0 |
@@ -185,7 +185,7 @@ game files whose `capture` line names the variant:
 | `vg8020` | `vg8020-carnivore2` | The Carnivore2, and so Nextor | 121 game files that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
 | `vg8020` | `vg8020-picoverse` | The PicoVerse-like cartridge, and so its mapper and Nextor | 54 game files whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go straight to their slot, without holding segments |
 | `nms8250` | `nms8250-carnivore2` | The Carnivore2, and so Nextor | 54 game files that fail in a capture with the Carnivore2 in slot 1 |
-| `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 8 game files, Digger Dungeon among them, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch, and Sootland needs the variant no longer since the patch that keeps page 3 ([INTERNALS.md, The RAM search patch](INTERNALS.md#the-ram-search-patch)) |
+| `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 7 game files, Digger Dungeon among them, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch, and Sootland until the patch that keeps page 3 ([INTERNALS.md, The RAM search patch](INTERNALS.md#the-ram-search-patch)) |
 | `vg8020` | `vg8020-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 | `xp800` | `xp800-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 | `hb75p` | `hb75p-carnivore2` | The Carnivore2, and so Nextor | 74 game files that fail in a capture with the Carnivore2 in slot 1. 4 of them also select RAM by fixed slot values: 1 in slot 1, and 3 in slot 3, the VG-8020's RAM slot |
