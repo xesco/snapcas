@@ -113,6 +113,13 @@ in their place, which selects slot 2, DOS's mapper. Altered Beast and Bronx have
 same stub. On an NMS 8250 its own page 0 RAM is in DOS's mapper,
 so it cannot use the mode there.
 
+Desperado's phase loader writes 0 to FD68h before it looks for a phase, and that
+byte is in the tape service's reader in page 3. The write turns the reader's `OUT
+(C),D` into a 2-byte NOP, so every read comes from the code segment, where side 1
+starts, and the loader never finds a phase on side 2. The check does not start a
+phase, so it passes. The write happens on every machine, so the game's `game.txt`
+has `service t0`, and the scan patches its two stubs of `TAPION`.
+
 ## Check
 
 7 Card Stud reads its last block through the service and then keeps its variables at
