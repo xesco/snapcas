@@ -169,7 +169,8 @@ log in `snap/log.txt`, or the log and `snap/error.txt` when a `boot` text or BAS
 or step 5 restarts more than 20 times. It performs the following steps:
 
 1. Starts a write watchpoint on port A0h, which keeps the PSG register selected
-   last, boots the machine with no disk, presses the `boot` keys, and waits for
+   last, and one on port A1h, which keeps the last value written to register 15,
+   boots the machine with no disk, presses the `boot` keys, and waits for
    BASIC's `Ok`, then 10 seconds more, as a person would, because a disk system can
    still be busy just after `Ok`.
 2. Stops with an error unless the ROM's byte at 002Dh is 0 (MSX1) or 1 (MSX2), and
