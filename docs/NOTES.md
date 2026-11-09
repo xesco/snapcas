@@ -113,6 +113,26 @@ in their place, which selects slot 2, DOS's mapper. Altered Beast and Bronx have
 same stub. On an NMS 8250 its own page 0 RAM is in DOS's mapper,
 so it cannot use the mode there.
 
+Desperado's phase loader writes 0 to FD68h before it looks for a phase, and that
+byte is in the tape service's reader in page 3. The write turns the reader's `OUT
+(C),D` into a 2-byte NOP, so every read comes from the code segment, where side 1
+starts, and the loader never finds a phase on side 2. The check does not start a
+phase, so it passes. The write happens on every machine, so the game's `game.txt`
+has `service t0`, and the scan patches its two stubs of `TAPION`. Gunsmoke, Go!'s
+release of the same game, has the same loader and the same line. Far West, Super
+MSX's copy, holds only the first phase and reads no more of the tape.
+
+The three versions' joystick routine writes PSG register 7 as the sound's value OR
+C0h before it reads register 14. Bit 6 makes I/O port A an output, and a discrete
+PSG, as the PHC-28S, VG-8020 and HB-75P have, then returns register 14's own latch
+and not the joystick. Their `game.txt` patches OR C0h to OR 80h. The game never
+writes register 15, so it reads the port that the BIOS selected last, port 2.
+Its sound driver writes register 7 with bit 7 clear, so I/O port B is an input
+at the snapshot, and register 15 then reads FFh, its pins. The restore wrote that
+FFh with port B an output, which drives pin 8 of both joystick ports high, and a
+joystick whose switches share pin 8 then reads nothing. The capture now keeps the
+last value written to register 15, the BIOS's CFh.
+
 ## Check
 
 7 Card Stud reads its last block through the service and then keeps its variables at

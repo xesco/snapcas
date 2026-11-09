@@ -156,7 +156,9 @@ proc side1_read {} {
 # 1. Boot, pass the boot menu, wait for BASIC's Ok.
 proc step1 {} {
     set ::st(psgsel) 0
+    set ::st(psg15) -1
     debug set_watchpoint write_io 0xA0 {} {set ::st(psgsel) $::wp_last_value}
+    debug set_watchpoint write_io 0xA1 {} {if {$::st(psgsel) == 15} {set ::st(psg15) $::wp_last_value}}
     set ::booted 0
     later 120 { if {!$::booted} { fail "BASIC's Ok did not appear within 120 seconds" } }
     boot $::S(boot) $::S(afterboot)
@@ -502,8 +504,13 @@ proc take_snapshot {{pc {}}} {
     set ptr [expr {[debug read {VRAM pointer} 0] | (([debug read {VRAM pointer} 1] & 0x3F) << 8)}]
     if {$v9938} { set ptr [expr {$ptr | (([debug read {VDP regs} 14] & 7) << 14)}] }
     lappend state "vramptr [hex 5 $ptr]" "vramwrite [debug read {VRAM access status} 0]"
+    # While register 7's bit 7 is clear, I/O port B is an input, and register
+    # 15 reads its pins, FFh, not the value written, which the restore writes
+    # with port B an output. So register 15 is then the last value written.
     for {set r 0} {$r < 16} {incr r} {
-        lappend state "psg$r [hex 2 [debug read {PSG regs} $r]]"
+        set v [debug read {PSG regs} $r]
+        if {$r == 15 && !([debug read {PSG regs} 7] & 0x80) && $::st(psg15) >= 0} { set v $::st(psg15) }
+        lappend state "psg$r [hex 2 $v]"
     }
     lappend state "psgsel [hex 2 $::st(psgsel)]"
     lappend state "tapepos [hex 6 $::st(pos)]" "service $::st(service)"

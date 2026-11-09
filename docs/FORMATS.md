@@ -29,7 +29,7 @@ the tape files' formats. Why each holds what it holds is in [DESIGN.md](DESIGN.m
 | `pal0` to `pal15` | `VDP palette` |
 | `vramptr` | `VRAM pointer`, 14 bits, with bits 14 to 16 from register 14 |
 | `vramwrite` | `VRAM access status`: 1 after a write setup, 0 after a read setup |
-| `psg0` to `psg15`, `psgsel` | `PSG regs`, and the port A0h watchpoint |
+| `psg0` to `psg15`, `psgsel` | `PSG regs`, and the port A0h watchpoint. While register 7's bit 7 is clear, I/O port B is an input and register 15 reads its pins, FFh, so `psg15` is then the last value written to it, from the port A1h watchpoint |
 | `tapepos`, `service` | The tape position in side 1, and 1 when the game gets the tape service |
 | `tapetime`, `tapeside` | The player's position in seconds and its side, 1 or 2, for the non-standard blocks that the game has read ([INTERNALS.md, Tape files](INTERNALS.md#tape-files)) |
 
