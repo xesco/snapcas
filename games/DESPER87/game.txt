@@ -7,3 +7,11 @@ url https://download.file-hunter.com/Games/MSX1/CAS/Desperado%20(1987)(Topo%20So
 # The phase loader writes 0 to FD68h before it looks for a phase, over the
 # tape service's reader in page 3, so the whole service goes into T0.
 service t0
+
+# The joystick routines at AC22h and B6DAh write PSG register 7 as the sound's
+# value OR C0h. Bit 6 set makes I/O port A an output, so register 14 returns
+# its own latch and not the joystick, on a machine with a discrete PSG, such as
+# the PHC-28S. OR 80h keeps bit 7 set and bit 6 clear, as the MSX needs.
+patch page2:2C29 F6 C0 > F6 80
+
+patch page2:36E1 F6 C0 > F6 80

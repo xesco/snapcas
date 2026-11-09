@@ -6,3 +6,11 @@
 cas SUPER17.CAS
 sha1 e65001db45e6778386a88d7f95ba3e1e8620aebf
 url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.17%20(dicembre%201988)%20-%20cas_17.zip
+
+# The joystick routines at AC22h and B6DAh write PSG register 7 as the sound's
+# value OR C0h. Bit 6 set makes I/O port A an output, so register 14 returns
+# its own latch and not the joystick, on a machine with a discrete PSG, such as
+# the PHC-28S. OR 80h keeps bit 7 set and bit 6 clear, as the MSX needs.
+patch page2:2C29 F6 C0 > F6 80
+
+patch page2:36E1 F6 C0 > F6 80

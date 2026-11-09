@@ -3,3 +3,16 @@ cas GUNSMOKE.CAS
 side2 GUNSMOKB.CAS
 sha1 af17a78d71c808dae8e62b6c966c06a505f34462 ef295704a821ee76e33774108148ce79621e8c1a
 url https://download.file-hunter.com/Games/MSX1/CAS/Gunsmoke%20(1987)(Go!)(Side%20A)%5Baka%20Desperado%5D%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Gunsmoke%20(1987)(Go!)(Side%20B)%5Baka%20Desperado%5D%5BRUN%27CAS-%27%5D.zip
+
+# The phase loader writes 0 to FD68h before it looks for a phase, over the
+# tape service's reader in page 3, so the whole service goes into T0, as for
+# Desperado (games/DESPER87).
+service t0
+
+# The joystick routines at AC22h and B6DAh write PSG register 7 as the sound's
+# value OR C0h. Bit 6 set makes I/O port A an output, so register 14 returns
+# its own latch and not the joystick, on a machine with a discrete PSG, such as
+# the PHC-28S. OR 80h keeps bit 7 set and bit 6 clear, as the MSX needs.
+patch page2:2C29 F6 C0 > F6 80
+
+patch page2:36E1 F6 C0 > F6 80
