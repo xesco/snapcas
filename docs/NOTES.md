@@ -108,8 +108,9 @@ PHC-28S, and it lends its page too.
 
 Moonwalker's loader computes the value that its stub writes to the slot register as
 `AND H / LD L,A`, the slot register with page 0's bits cleared, for slot 0. On the
-Sanyo PHC-28S the game keeps the slot register at A5h, so `LD L,0A6h` in their place
-selects slot 2, DOS's mapper. On an NMS 8250 its own page 0 RAM is in DOS's mapper,
+Sanyo PHC-28S the game keeps the slot register at A5h, so the scan puts `LD L,0A6h`
+in their place, which selects slot 2, DOS's mapper. Altered Beast and Bronx have the
+same stub. On an NMS 8250 its own page 0 RAM is in DOS's mapper,
 so it cannot use the mode there.
 
 ## Check

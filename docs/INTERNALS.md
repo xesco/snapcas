@@ -63,6 +63,7 @@ game file. Each kind of automatic patch is one file in `tools/patches/`:
 | File | Kind |
 |---|---|
 | `tape.py` | The calls, stubs and entries of the tape routines, sent to the entries in page 3, and the readers of the cassette signal, which are only listed ([Scan](#scan)) |
+| `t0stub.py` | The stub of `TAPION` that selects the ROM in page 0 itself, sent to T0 in the mode without a part in page 3 ([Without a part in page 3](#without-a-part-in-page-3)) |
 | `slots.py` | The fixed slot values that name a slot that holds nothing, the slot map, and the capture's patches of the tape ([Slot patches](#slot-patches)) |
 | `slots.tcl` | The capture's watch on the slot register ([Slot patches](#slot-patches)) |
 | `ramsearch.py` | The bytes of the loader's RAM search and its patch ([The RAM search patch](#the-ram-search-patch)) |
@@ -739,9 +740,14 @@ stops with an error, or the restorer with a message for the last condition:
 | When DOS's mapper's slot is expanded, the snapshot's subslot register of that slot selects the mapper in the borrowed page | The slot register alone then selects the mapper there. The restorer checks this, because only it knows DOS's mapper's slot. When the capture did not have that slot expanded, as a capture variant without the Carnivore2 does not, the game never wrote its subslot register, so the restorer sets the borrowed page's bits there to the mapper's subslot instead |
 
 Code that selects the ROM in page 0 itself and then calls the tape reaches the ROM,
-not T0, so the scan only lists its findings in this mode, and the game file sends
-that code to T0 with `patch` lines that make it select DOS's mapper in page 0. A
-game that writes FCh itself loses T0.
+not T0, so the scan only lists its findings in this mode. One form of that code is
+patched by the scan itself: a stub of `TAPION` that also pushes `OUT (C),L`, reads
+the slot register into H, and computes the value with page 0's field cleared, for
+slot 0, as `AND H / LD L,A`. The scan makes `AND H / LD L,A` into `LD L,n`, where n
+is the snapshot's slot register value with page 0's field set to the primary slot of
+the snapshot's mapper pages, which is DOS's mapper. Other such code needs `patch`
+lines in the game file that make it select DOS's mapper in page 0. A game that
+writes FCh itself loses T0.
 
 The restorer allocates T0 and the tape's segments as in the default mode, writes the
 table of the tape's segments and DOS's mapper's slot for the borrowed page into T0,
@@ -769,6 +775,7 @@ own way. The scan looks for this code:
 | An entry in HL before a call: `LD HL,00E1h` or `LD HL,00E4h`, then `CALL`, to a routine of the game's that selects the ROM in page 0 and jumps to HL | `21 E1 00 CD` or `21 E4 00 CD` | The `00` becomes `FC` |
 | A reader of the cassette signal: `IN A,(0A2h)`, then within 4 bytes `RLA`, `RLCA`, `BIT 7,A` or `AND 80h` | `DB A2`, then `17`, `07`, `CB 7F` or `E6 80` | None: listed, for a `patch` line that sends its callers to the service |
 | A reader of PSG register 14, whose bit 7 is the cassette signal and whose other bits are a joystick: `LD A,0Eh / OUT (0A0h),A / IN A,(0A2h)` | `3E 0E D3 A0 DB A2` | None: listed, as above, and also found in joystick code |
+| In the mode without a part in page 3, a stub of `TAPION` that selects the ROM in page 0 as `AND H / LD L,A` ([Without a part in page 3](#without-a-part-in-page-3)) | `11 E1 00 D5 11 D9 CD D5 11 ED 69 D5 E5 D9 0E A8 ED 60 A4 6F` | `A4 6F` becomes `2E n`, `LD L,n`, with n the value that selects DOS's mapper in page 0 |
 | A fixed slot value: `LD A,n / OUT (0A8h),A` or `LD A,n / CALL 013Bh` ([Slot patches](#slot-patches)), with a field of n that names a slot that holds nothing | `3E n D3 A8` or `3E n CD 3B 01` | n becomes the value that [Slot patches](#slot-patches) gives |
 
 The stub stores `TAPION`'s address in RAM, and the game later changes its low byte

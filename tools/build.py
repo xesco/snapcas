@@ -344,17 +344,18 @@ def apply_patch(patch, data, place):
 
 
 def scan_snapshot(state, pages, side1, side2, page, slots, with_tape=True, patch=True, blocks=((), ()),
-                  patched=None):
+                  patched=None, t0=None):
     """Patches the scan's findings in the RAM pages, for the entries at page's
     E1h, and returns scan.txt's text, with the findings in the unread blocks:
     side 1 from the tape position, and side 2 (INTERNALS.md, Scan), at their
     offsets in the tape files of blocks. Without with_tape, it looks only for
-    fixed slot values, and without patch, it patches only those. patched,
-    a dict, gets each ram/ file's patched ranges for the check."""
+    fixed slot values, and without patch, it patches only those and the stubs
+    that select the ROM in page 0, with t0's slot register value. patched, a
+    dict, gets each ram/ file's patched ranges for the check."""
     ram = []
     for p in pages:
-        findings = patches.find(p.data, patches.Context(page, slots, with_tape))
-        applied = [f for f in findings if patch or f.what == patches.slots.SLOT_VALUE]
+        findings = patches.find(p.data, patches.Context(page, slots, with_tape, t0))
+        applied = [f for f in findings if patch or f.what in patches.ALWAYS]
         patches.patch(p.data, applied)
         if patched is not None:
             for name in ram_names(p.snap, p):
@@ -369,7 +370,7 @@ def scan_snapshot(state, pages, side1, side2, page, slots, with_tape=True, patch
     if with_tape:
         # Without the tape service, no block is read after the snapshot.
         unread = num(state, "tapepos")
-        context = patches.Context(page, slots)
+        context = patches.Context(page, slots, t0=t0)
         found = [[f for f in patches.find(side1, context) if f.offset >= unread], patches.find(side2, context)]
         # A patch line's offset is an offset in the tape file (INTERNALS.md, Tape
         # files): a CAS file's offsets are the tape service's, and a TSX file's are
@@ -450,6 +451,17 @@ def patch_pages(patch_lines, state, pages):
             ranges.append(f"{ps}-{'x' if ss is None else ss}-{patch.page} "
                           f"{patch.offset} {patch.offset + len(patch.old) - 1}")
     return ranges
+
+
+def t0_value(state, pages):
+    """For the mode without a part in page 3: the snapshot's slot register
+    value with page 0's field set to DOS's mapper, where T0 is, or None when
+    the snapshot's mapper pages are not in one primary slot. The snapshot's
+    mapper is DOS's mapper (INTERNALS.md, Restorer)."""
+    mapper = {p.ps for p in pages if p.seg is not None}
+    if len(mapper) != 1:
+        return None
+    return (num(state, "a8") & 0xFC) | mapper.pop()
 
 
 def service_mode(state, pages, length, game):
@@ -578,7 +590,7 @@ def build(snap, service_path, game, side1=b"", side2=b"", patch_lines=()):
                                 patched=scan_ranges)
     elif t0_mode:
         scanned = scan_snapshot(state, pages, side1, side2, DEFAULT_PAGE, slots, patch=False, blocks=blocks,
-                                patched=scan_ranges)
+                                patched=scan_ranges, t0=t0_value(state, pages))
     else:
         parts = read_service(service_path, page)
         scanned = scan_snapshot(state, pages, side1, side2, page, slots, blocks=blocks, patched=scan_ranges)

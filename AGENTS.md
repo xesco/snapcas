@@ -282,6 +282,7 @@ line for them is not needed:
 | `LD A,n / OUT (0A8h),A` or `LD A,n / CALL 013Bh`, run before the snapshot, whose n names a slot that holds nothing | [Slot patches](docs/INTERNALS.md#slot-patches), at each copy in the tape |
 | The same in the snapshot's RAM, run after it | The scan, in the build |
 | The same, run from page 3, that moves page 3 to a slot where the code differs | [The RAM search patch](docs/INTERNALS.md#the-ram-search-patch), which keeps page 3 |
+| A stub of `TAPION` that selects the ROM in page 0 as `AND H / LD L,A`, in the mode without a part in page 3 | The scan, in the build ([Without a part in page 3](docs/INTERNALS.md#without-a-part-in-page-3)) |
 | Level 9's, CasLink3's and Engesoft's copies of page 3's slot to the other pages | [The page copy patch](docs/INTERNALS.md#the-page-copy-patch) |
 
 `log.txt` names each write that the capture saw and did not patch, with
