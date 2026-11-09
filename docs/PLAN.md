@@ -156,7 +156,7 @@ The step also takes the tests that need the scan:
 | `TOUR-91.CAS` | `phc28s-ram64k-carnivore2` | That the game's stub reaches the tape service at its next load |
 | `MAD-MIDE.CAS` | `phc28s-ram64k-carnivore2` | The same |
 | `DESPERAD.CAS` | `phc28s-ram64k-carnivore2` | The same, for a loader that selects the ROM in page 0 itself, with `IN A,(0A8h) / AND 0FCh / OR 00h / OUT (0A8h),A` |
-| `MOONWALK.CAS` | `phc28s-ram64k-carnivore2` | With `service t0`, its snapshot in the intro and a `patch` line that makes its loader select DOS's mapper: that the main game loads through T0, to the end of its 22 KB block ([Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)) |
+| `MOONWALK.CAS` | `phc28s-ram64k-carnivore2` | With `service t0`, its snapshot in the intro and the scan's patch that makes its loader's stub select DOS's mapper: that the main game loads through T0, to the end of its 22 KB block ([Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)) |
 | `SOOTLAND.CAS` | `phc28s-ram64k-carnivore2`, captured on `phc28s-ram64k` | With a `side1` patch of the slot register's value that its loader writes: that the capture loads the patched tape, and turns the tape over to side 2 when the game reads past side 1's end ([Game file](FILES.md#game-file), [Capture](INTERNALS.md#capture)) |
 | `tests/borrow.asm`, which the test writes to a CAS file with a block of the bytes 0 to 255 | `phc28s-ram64k-carnivore2` | With `service t0` and a `patch` line that makes it select DOS's mapper in page 0: that `TAPIN` borrows page 2, which holds the RAM cartridge in slot 1 and the stack, through the slot register, and reads the block right |
 

@@ -6,13 +6,17 @@ lists them in the order that the scan runs them.
 """
 import collections
 
-from . import pagecopy, ramsearch, slots, tape  # noqa: F401
+from . import pagecopy, ramsearch, slots, t0stub, tape  # noqa: F401
 
-KINDS = [tape, slots]
+KINDS = [tape, slots, t0stub]
 
 # The page of the entries, E1h to F3h in it, the capture's slot map or None,
-# and whether the image has the tape service.
-Context = collections.namedtuple("Context", "page slots tape", defaults=(tape.ENTRY_PAGE, None, True))
+# whether the image has the tape service, and in the mode without a part in
+# page 3, the slot register value that selects T0 in page 0, or None.
+Context = collections.namedtuple("Context", "page slots tape t0", defaults=(tape.ENTRY_PAGE, None, True, None))
+
+# The findings that the scan also patches when it patches no others.
+ALWAYS = (slots.SLOT_VALUE, t0stub.T0_STUB)
 
 
 def find(data, context=Context()):

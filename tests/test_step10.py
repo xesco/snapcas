@@ -153,6 +153,18 @@ class PageCopy(unittest.TestCase):
             self.assertIn(line, patches)
 
 
+class T0Stub(unittest.TestCase):
+    # Altered Beast's stub of TAPION, which selects the ROM in page 0 with AND H / LD L,A.
+    STUB = bytes.fromhex("11 E1 00 D5 11 D9 CD D5 11 ED 69 D5 E5 D9 0E A8 ED 60 A4 6F CD 9A FC")
+
+    def test_the_scan_patches_the_stub_only_in_the_mode_without_a_part_in_page_3(self):
+        self.assertEqual(patches.find(self.STUB, patches.Context(tape=False)), [])
+        found = patches.find(self.STUB, patches.Context(tape=False, t0=0x96))
+        self.assertEqual([(f.offset, f.old, f.new) for f in found],
+                         [(18, bytes.fromhex("A4 6F"), bytes.fromhex("2E 96"))])
+        self.assertIn(found[0].what, patches.ALWAYS)
+
+
 class WithoutPage3(unittest.TestCase):
     @unittest.skipUnless(has("CHASE-H.CAS"), "CAS_DIR holds no CHASE-H.CAS")
     def test_chase_hq_gets_the_mode_without_a_part_in_page_3(self):
