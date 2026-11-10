@@ -721,7 +721,7 @@ alone.
 This step adds `snapcas.py sync <machine> <destination>`, which copies the machine's
 images and `SNAPCAS.COM` to a card, in place of `snap`'s `--to` option
 ([CLI.md, Sync a card](CLI.md#sync-a-card)). It copies only the new and changed
-files, reads each copy back, and deletes nothing on the card. The tests are `Sync`
+files, reads each copy back, and deletes no image on the card. The tests are `Sync`
 in `tests/test_card.py`.
 
 | Test | What it proves |

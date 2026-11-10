@@ -2,8 +2,10 @@
 
 This page is for an AI agent that works on `snapcas`. It gives each task as steps in
 order, with the files that each step changes, the command that checks it, and a
-table from each message that a step can print to its fix. It has two tasks: adding
-a machine, and fixing a game that fails. The reasons behind the rules are in
+table from each message that a step can print to its fix. It has four tasks: making
+a game's image, adding a machine, adding a game, and fixing a game that fails. The
+[README](README.md) gives the first three in short form for a person. The reasons
+behind the rules are in
 [docs/DESIGN.md](docs/DESIGN.md), the formats of the files in
 [docs/FILES.md](docs/FILES.md), and the games that taught each rule in
 [docs/NOTES.md](docs/NOTES.md).
@@ -30,6 +32,9 @@ These rules hold for every task:
 | `machines/capture/<variant>.txt` | A capture variant: a machine with fewer cartridges |
 | `games/<GAME>/game.txt` | A game file: the lines that hold on every machine |
 | `games/<GAME>/<machine>.txt` | A machine's game file: the lines that hold on one machine only |
+| `custom/<GAME>/` | A custom game: its game file and its tape files, which git ignores ([custom/README.md](custom/README.md)) |
+| `images/<machine>/<GAME>/<GAME>.SNP` | A game's image, which `./snapcas.py snap` makes and `sync` copies to a card |
+| `bin/SNAPCAS.COM` | The restorer, which starts an image on the MSX |
 | `downloads/` | The tape files, which `./snapcas.py snap` downloads |
 | `out/games/<machine>.txt` | The results of `make games`, one line per game |
 | `out/work/<machine>/<GAME>/snap/log.txt` | The capture's log: what it typed, each `TAPION`, the motor, each reset, where the load stopped and the screen then. When the capture failed, its last line holds the error and the screen then |
@@ -38,6 +43,57 @@ These rules hold for every task:
 | `out/work/<machine>/<GAME>/check/report.txt` | The check's report: a line per point, then what failed and the screen's text |
 | `tests/openmsx-failures.txt` | The games that fail in `openMSX` itself, which `make games` accepts |
 | `tests/snapcas-failures.txt` | The games that fail because of `snapcas`, still to fix. `make games` accepts them too, and lists them apart from a new failure |
+
+## Make a game's image
+
+The user names a game and their MSX. The result is the game's image, `<GAME>.SNP`,
+checked in `openMSX` and, when the user asks, copied to their card.
+
+### 1. Find the game
+
+`./snapcas.py list <text>` lists the games whose folder or title holds the text, in
+any case. When several match, ask the user which one. When none matches and the user
+has the game's tape file, add the game first ([Add a game](#add-a-game)).
+
+### 2. Find the machine
+
+`./snapcas.py machines` lists the machines. A machine is a model with its cartridges
+in slot order, and a machine with one cartridge more or fewer is another machine. So
+ask the user for the model and for what is in each cartridge slot, when they have
+not said. When no machine matches, add it first ([Add a machine](#add-a-machine)).
+
+### 3. Make and check the image
+
+```
+./snapcas.py snap <GAME> <machine> --check
+```
+
+The command downloads the game's tape from File-Hunter into `downloads/` when it is
+missing. It prints four `check` lines and the image's path,
+`images/<machine>/<GAME>/<GAME>.SNP`. When a step fails, go to
+[Fix a game that fails](#fix-a-game-that-fails). The messages about the machine's
+system ROMs, firmware and DOS files are in the table of
+[Check three games](#5-check-three-games).
+
+### 4. Copy the images to the card
+
+Copy only when the user asks, to the folder that the user names:
+
+```
+./snapcas.py sync <machine> <destination>
+```
+
+The command copies `SNAPCAS.COM` and the machine's images that are new or changed,
+reads each copy back, and deletes no image on the card
+([docs/CLI.md, Sync a card](docs/CLI.md#sync-a-card)). Then give the user the two
+lines to type on the MSX, `CD \SNAPCAS\<first letter>` and
+`\BIN\SNAPCAS <GAME>` ([docs/PLAYING.md](docs/PLAYING.md)).
+
+### 5. Ask the user to play the game
+
+The check runs the image for 60 seconds in `openMSX`. It does not play the game, and
+it does not run on the real MSX. So ask the user to play the game on their MSX, and
+to say what they see when it fails.
 
 ## Add a machine
 
@@ -192,6 +248,7 @@ Add the machine where the shipped machines are listed:
 | `docs/FILES.md` | A row in the table of shipped machine files, with 0 machine's game files, and a row in the table of capture variants |
 | `docs/CLI.md` | The output of `./snapcas.py machines` in the example of `machines`, copied from the command |
 | `docs/PLAN.md` | The machine in its DOS's row of the test machines' table |
+| `README.md` | The number of machines, in the last sentence of "What it is" |
 
 The tests need no line for the machine. `Shipped` in `tests/test_machines.py` checks
 Caldero on every machine file of `machines/`, with the DOS files that the machine
@@ -215,6 +272,61 @@ go to `out/games/hb75p-carnivore2.txt`, and the image of each game that passes t
 `images/hb75p-carnivore2/`, which `./snapcas.py sync` copies to a card. Fix each
 game that fails as in [Fix a game that fails](#fix-a-game-that-fails), then write
 the number of the machine's game files in its row of `docs/FILES.md`.
+
+## Add a game
+
+A game that `snapcas` does not ship is a custom game: a folder in `custom/` with its
+game file and its tape files ([custom/README.md](custom/README.md)). Git ignores the
+folder, so the game stays on the user's computer. The example is a game named
+`MYGAME`, on the machine `hb75p-carnivore2`.
+
+### 1. Make the game's folder
+
+Name the folder after the game, in upper case, with up to 8 letters and digits,
+because the image takes that name. Copy the user's tape files into it, CAS or TSX,
+and leave the user's own files where they are:
+
+```
+custom/MYGAME/MYGAME.CAS
+```
+
+### 2. Write the game file
+
+Write `custom/MYGAME/game.txt`. It needs one line, which names side 1's tape: `cas`
+for a CAS file, or `tsx` for a TSX file. A game on two tapes gets a `side2` line for
+the other tape. The first comment says which game it is:
+
+```
+# My Game (1986)(Its Publisher)
+cas MYGAME.CAS
+side2 MYGAMEB.CAS
+```
+
+Each line of a game file is in
+[docs/FILES.md, Game file](docs/FILES.md#game-file).
+
+### 3. Make and check its image
+
+```
+./snapcas.py snap custom/MYGAME hb75p-carnivore2 --check
+```
+
+`snap` reads the tapes from the game's folder and never downloads them. It prints
+four `check` lines, and the image goes to `images/hb75p-carnivore2/custom/MYGAME/`.
+
+### 4. Fix what fails
+
+When a step fails, follow [Fix a game that fails](#fix-a-game-that-fails), with
+`custom/MYGAME` as the game. The fix's lines go in `custom/MYGAME/game.txt`, or in
+`custom/MYGAME/hb75p-carnivore2.txt` when they hold on that machine only.
+
+### 5. Share the game
+
+Share the game only when the user asks. Move its folder into `games/`, add its
+`sha1` and `url` lines, and move its tapes into `downloads/`
+([docs/FILES.md, Game file](docs/FILES.md#game-file)). Then run `make games` on each
+machine that has results in `out/games/`, as in [Check the fix](#6-check-the-fix),
+and add 1 to the number of games in the README's "What it is".
 
 ## Fix a game that fails
 
@@ -391,6 +503,8 @@ on each machine that has results in `out/games/` as well. Last, run `make test`.
 
 ## More
 
-- [README.md](README.md): the folders and the `make` commands.
+- [README.md](README.md): the tasks in short form, for a person.
+- [docs/PLAYING.md](docs/PLAYING.md): what the MSX needs, and the tape's keys.
+- [docs/BUILD.md](docs/BUILD.md): the folders and the `make` commands.
 - [docs/CLI.md](docs/CLI.md): the `snapcas.py` commands.
 - [docs/INTERNALS.md](docs/INTERNALS.md): the capture, the build and the check.

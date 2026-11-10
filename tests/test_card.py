@@ -45,6 +45,22 @@ class Sync(unittest.TestCase):
             self.assertEqual(f.read(), b"a new build")
         self.assertTrue(os.path.isfile(os.path.join(self.card, "SNAPCAS", "Z", "ZANAC.SNP")))
 
+    def test_the_sidecar_that_macos_writes_beside_a_copy_goes(self):
+        # macOS keeps a file's extended attributes on a FAT card in ._<name>,
+        # an AppleDouble file, which DOS lists as one more file.
+        sidecar = os.path.join(self.card, "SNAPCAS", "G", "._GAUNTLET.SNP")
+        other = os.path.join(self.card, "SNAPCAS", "Z", "._ZANAC.SNP")
+        own = os.path.join(self.card, "SNAPCAS", "0-9", "._1942.SNP")
+        write(sidecar, card.APPLEDOUBLE + bytes(4092))
+        write(other, card.APPLEDOUBLE + bytes(4092))
+        write(own, b"the user's own file of that name")
+        card.sync(card.card_files(self.images, self.com), self.card, log=lambda text: None)
+        self.assertFalse(os.path.exists(sidecar))
+        # A sidecar of a file that sync did not copy stays, and so does a file
+        # of that name that is no AppleDouble file.
+        self.assertTrue(os.path.isfile(other))
+        self.assertTrue(os.path.isfile(own))
+
     def test_a_copy_that_fails_leaves_no_file_under_its_name(self):
         files = card.card_files(self.images, self.com)
         with mock.patch.object(card.os, "fsync", side_effect=OSError(28, "No space left on device")):
