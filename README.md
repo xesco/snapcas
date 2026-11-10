@@ -35,8 +35,7 @@ more machines.
 
 You need three things:
 
-- An MSX that `snapcas` knows, with a disk or an SD card
-  ([what the MSX needs](docs/PLAYING.md#what-you-need)).
+- An MSX with a memory mapper and a disk.
 - A computer with Python 3 and `openMSX`.
 - The system ROMs of your MSX, installed in `openMSX`. `openMSX` needs them to
   emulate your MSX.
