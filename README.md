@@ -104,6 +104,10 @@ game on that MSX.
    ./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
    ```
 
+   The command puts `SNAPCAS.COM` in the card's `BIN` folder. It puts each game in
+   the `SNAPCAS` folder, in a folder for the first letter of the game's name: `A` to
+   `Z`, or `0-9` for a name that starts with a digit.
+
 6. Put the card back in the MSX. On the MSX, go to the folder of the game's first
    letter and start the game:
 
