@@ -64,8 +64,9 @@ game on that MSX.
 
    A machine's name is the MSX's model, followed by its cartridges in slot order. A
    Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2 is
-   `phc28s-ram64k-carnivore2`. Give the whole name, because each cartridge changes
-   the `.SNP` file.
+   `phc28s-ram64k-carnivore2`. Choose the name that matches your MSX and all its
+   cartridges. A `.SNP` file works only on the MSX and the cartridges that it was
+   made for.
 
    If your MSX is not in the list, add it first. An AI coding agent, such as Claude
    Code, can add it for you. Open the `snapcas` folder in the agent, and tell it
