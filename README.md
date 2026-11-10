@@ -38,7 +38,8 @@ You need three things:
 - The system ROMs of your MSX, installed in `openMSX`. `openMSX` needs them to
   emulate your MSX.
 
-This example makes Gauntlet for a Sanyo PHC-28S.
+This example makes the `.SNP` file of Gauntlet for a Sanyo PHC-28S and starts the
+game on that MSX.
 
 1. Get `snapcas`:
 
@@ -140,7 +141,7 @@ with a Carnivore2 in slot 1.
    cp machines/capture/vg8020.txt machines/capture/hx10.txt
    ```
 
-5. Make a game with the `--check` option, which also tests the game's `.SNP` file
+5. Make a game's `.SNP` file with the `--check` option, which also tests the file
    in `openMSX`:
 
    ```
@@ -191,7 +192,7 @@ the game yourself.
    A game on two tapes needs a second line for the other tape:
    `side2 MYGAMEB.CAS`.
 
-3. Make the game with the `--check` option:
+3. Make the game's `.SNP` file with the `--check` option:
 
    ```
    ./snapcas.py snap custom/MYGAME phc28s-ram64k-carnivore2 --check
