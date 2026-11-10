@@ -9,8 +9,9 @@ file.
 
 - An MSX with a memory mapper and a disk system, such as MSX-DOS or Nextor.
 - A computer with Python 3 and the emulator `openMSX`.
-- A network connection, from which `snapcas` downloads the game's tape file from
-  File-Hunter, or the tape file itself, a CAS or TSX file.
+- A network connection, so that `snapcas` can download the game's tape file from
+  File-Hunter. Without a connection, you need the tape file itself, a CAS or TSX
+  file.
 
 A tape file is a tape, saved as a file on your computer. A TSX file also holds the
 fast loaders of some games, which a CAS file cannot.
@@ -24,9 +25,9 @@ On the MSX, go to that folder and type `SNAPCAS` and the file's name:
 SNAPCAS GAUNTLET
 ```
 
-`./snapcas.py sync` copies all your images for an MSX to its card at once, each in
-the folder of its first letter ([CLI.md, Sync a card](CLI.md#sync-a-card)). On the
-MSX, go to the game's letter first:
+`./snapcas.py sync` copies all your images for an MSX to its card at once
+([CLI.md, Sync a card](CLI.md#sync-a-card)). It puts each image in the folder of its
+first letter. On the MSX, go to the game's letter first:
 
 ```
 CD \SNAPCAS\G
