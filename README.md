@@ -221,8 +221,3 @@ the game yourself.
 | [docs/FILES.md](docs/FILES.md) | Every line of a machine file and of a game file |
 | [AGENTS.md](AGENTS.md) | Every task in full, step by step, for an AI agent or for you |
 | [custom/README.md](custom/README.md) | Your own games |
-| [docs/DESIGN.md](docs/DESIGN.md) | How `snapcas` works, and what it cannot do yet |
-| [docs/INTERNALS.md](docs/INTERNALS.md) | The capture, the build, the restorer and the check in detail |
-| [docs/FORMATS.md](docs/FORMATS.md) | The `.SNP` file and the other files, byte by byte |
-| [docs/NOTES.md](docs/NOTES.md) | The games that taught each rule |
-| [docs/BUILD.md](docs/BUILD.md) | The folders, and the `make` commands that build and test `snapcas` |
