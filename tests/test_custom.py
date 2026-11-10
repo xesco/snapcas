@@ -50,6 +50,18 @@ class Custom(unittest.TestCase):
         self.assertEqual(pipeline.tapes_folder(folder), gamefile.DOWNLOADS)
         self.assertEqual(gamefile.game_key(folder), "GAUNTLET")
 
+    def test_a_games_name_has_slashes_on_windows(self):
+        folder = os.path.join(ROOT, "games", "SUPERMSX", "GOLF")
+        with mock.patch.object(gamefile.os, "sep", "\\"), \
+                mock.patch.object(gamefile.os.path, "relpath", return_value="SUPERMSX\\GOLF"):
+            self.assertEqual(gamefile.game_key(folder), "SUPERMSX/GOLF")
+
+    def test_a_folder_on_another_drive_is_no_shipped_or_custom_game(self):
+        # On Windows, commonpath raises ValueError for paths on two drives.
+        with mock.patch.object(gamefile.os.path, "commonpath", side_effect=ValueError("mixed drives")):
+            self.assertIsNone(gamefile.game_key(self.folder))
+            self.assertFalse(gamefile.is_custom(self.folder))
+
 
 if __name__ == "__main__":
     unittest.main()
