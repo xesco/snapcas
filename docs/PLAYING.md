@@ -10,11 +10,9 @@ file.
 - An MSX with a memory mapper and a disk system, such as MSX-DOS or Nextor.
 - A computer with Python 3 and the emulator `openMSX`.
 - A network connection, so that `snapcas` can download the game's tape file from
-  File-Hunter. Without a connection, you need the tape file itself, a CAS or TSX
-  file.
+  File-Hunter. Without a connection, you need the tape file itself, a CAS file.
 
-A tape file is a tape, saved as a file on your computer. A TSX file also holds the
-fast loaders of some games, which a CAS file cannot.
+A CAS file is an MSX tape, saved as a file on your computer.
 
 ## Start a game
 

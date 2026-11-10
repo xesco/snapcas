@@ -292,9 +292,8 @@ CD \SNAPCAS\G
 
 - Several games in one run. A shell loop runs the command once for each game.
 - A download of the whole collection.
-- Tapes from any site other than File-Hunter. The command downloads CAS files only,
-  because no shipped game file names a TSX file. A custom game can have a TSX file
-  as its tape ([Your own games](#your-own-games)).
+- Tapes from any site other than File-Hunter. A tape from another place goes in as
+  a custom game ([Your own games](#your-own-games)).
 - A package for pip, or a program built for each OS.
 - A machine file made by the command. A new machine is still described by hand
   ([FILES.md, Machine file][machine]).

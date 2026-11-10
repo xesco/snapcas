@@ -297,8 +297,8 @@ the user's computer. The example is a game named `MYGAME`, on the machine
 ### 1. Make the game's folder
 
 The image takes the folder's name. So name the folder after the game, in upper case,
-with up to 8 letters and digits. Copy the user's tape files, CAS or TSX, into the
-folder. Leave the user's own files where they are:
+with up to 8 letters and digits. Copy the user's CAS files into the folder. Leave
+the user's own files where they are:
 
 ```
 custom/MYGAME/MYGAME.CAS
@@ -307,8 +307,8 @@ custom/MYGAME/MYGAME.CAS
 ### 2. Write the game file
 
 Write `custom/MYGAME/game.txt`. The game file needs one line, which names side 1's
-tape. Use `cas` for a CAS file, or `tsx` for a TSX file. A game on two tapes gets a
-`side2` line for the other tape. The first comment says which game it is:
+tape with a `cas` line. A game on two tapes gets a `side2` line for the other tape.
+The first comment says which game it is:
 
 ```
 # My Game (1986)(Its Publisher)
