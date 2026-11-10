@@ -1,9 +1,10 @@
 # The capture's page copy patch (docs/INTERNALS.md, The page copy patch).
-# tools/capture.py loads it after slots.tcl, and sets ::pagecopy from
-# patches/pagecopy.py: each form in the tape files, as {side offset bytes copy
-# subslots sum value}, where copy is 23 or 31, subslots is 1 when the loader
-# also copies the subslot register's fields, sum is the offset of its block's
-# sum byte, or -1, and value is that byte.
+# tools/patches/pagecopy.py puts its setting before this file, which follows
+# slots.tcl: ::pagecopy holds each form in the tape files, as {side offset bytes
+# copy subslots sum value}, where bytes is the form's bytes as hex, copy is 23
+# or 31, subslots is 1 when the loader also copies the subslot register's
+# fields, sum is the offset of its block's sum byte, or -1, and value is that
+# byte.
 
 # Whether slot ps is fit for page: it holds RAM there, by the slot map, or it is
 # expanded and the loader copies its subslots as well.
@@ -18,10 +19,10 @@ proc pagecopy_slot {ps page subslots} {
     return [lindex $::slots($page) 1]
 }
 
-# Step 4's part, before the load command, by step 3's slot map: each form that copies a slot that is not
-# fit for its page gets a patch that loads the value, and its block's sum byte
-# gets the patch's difference. The capture writes the patches to newpatch.txt
-# and stops, and capture.py runs it again on the patched tape.
+# Step 3's part, before the load command, after the slot map: each form that
+# copies a slot that is not fit for its page gets a patch that loads the value,
+# and its block's sum byte gets the patch's difference. The capture stops with
+# the patches, and capture.py runs it again on the patched tape.
 proc pagecopy_start {} {
     set a8 $::st(a8)
     set p2 [expr {($a8 >> 4) & 3}]
@@ -48,8 +49,7 @@ proc pagecopy_start {} {
         }
         while {[llength $new] < $length} { lappend new 0 }
         binary scan [binary format H* $old] cu* bytes
-        lappend lines [format "patch side%d:%X %s > %s" $side $offset \
-            [join [lmap b $bytes {format %02X $b}]] [join [lmap b $new {format %02X $b}]]]
+        lappend lines [patch_line $side $offset $bytes $new]
         if {$sum >= 0} {
             set key "$side $sum"
             if {![info exists sums($key)]} { set sums($key) [list $value $value] }
@@ -62,12 +62,10 @@ proc pagecopy_start {} {
         lassign $key side sum
         lassign $sums($key) before after
         if {$before == $after} continue
-        lappend lines [format "patch side%d:%X %02X > %02X" $side $sum $before $after]
+        lappend lines [patch_line $side $sum [list $before] [list $after]]
     }
     if {[llength $lines]} {
-        write_newpatch $lines
-        decide "the tape's code copies a slot that is not fit for page 0 or 1: patched"
-        catch write_log
-        quit
+        stop_with_patch $lines "the tape's code copies a slot that is not fit for page 0 or 1: patched"
     }
 }
+hook start pagecopy_start

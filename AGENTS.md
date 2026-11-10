@@ -32,12 +32,12 @@ These rules hold for every task:
 | `games/<GAME>/<machine>.txt` | A machine's game file: the lines that hold on one machine only |
 | `downloads/` | The tape files, which `./snapcas.py snap` downloads |
 | `out/games/<machine>.txt` | The results of `make games`, one line per game |
-| `out/work/<machine>/<GAME>/snap/log.txt` | The capture's log: what it typed, each `TAPION`, the motor, each reset, where the load stopped and the screen then |
+| `out/work/<machine>/<GAME>/snap/log.txt` | The capture's log: what it typed, each `TAPION`, the motor, each reset, where the load stopped and the screen then. When the capture failed, its last line holds the error and the screen then |
 | `out/work/<machine>/<GAME>/snap/error.txt` | The capture's error, when it failed |
 | `out/work/<machine>/<GAME>/scan.txt` | The scan's findings, in `patch` line form |
 | `out/work/<machine>/<GAME>/check/report.txt` | The check's report: a line per point, then what failed and the screen's text |
 | `tests/openmsx-failures.txt` | The games that fail in `openMSX` itself, which `make games` accepts |
-| `tests/snapcas-failures.txt` | The games that fail because of `snapcas`, still to fix |
+| `tests/snapcas-failures.txt` | The games that fail because of `snapcas`, still to fix. `make games` accepts them too, and lists them apart from a new failure |
 
 ## Add a machine
 
@@ -181,19 +181,21 @@ message instead, the message names the cause:
 | `boots msxdos1: put its files in dos/msxdos1/` | Ask the user for MSX-DOS's files ([dos/README.md](dos/README.md)) |
 | `capture: BASIC's Ok did not appear within 120 seconds` | The `boot` lines do not pass the boot. Compare with a working machine of the same disk cartridge. When only the third game stops, the variant boots into a program of the model's own: add `hold` or `press` lines to the variant ([Add a capture variant](#4-add-a-capture-variant)) |
 | `the tail's jump did not run within 120 seconds`, with BASIC on the screen | DOS did not start the check's `AUTOEXEC.BAT`: a wrong `disk`, `dos` or `dosfiles` line |
+| `check: the boot text '...' did not appear within 120 seconds` | The check's boot never shows the text of a `boot` line. Compare with a working machine of the same disk cartridge |
 
-### 6. List the machine in the docs and the tests
+### 6. List the machine in the docs
 
 Add the machine where the shipped machines are listed:
 
 | File | Change |
 |---|---|
-| `tests/test_step9.py` | An entry in `SHIPPED`, with the folder of its DOS's files: `test_step4.NEXTOR` for Nextor. The test checks Caldero on every shipped machine |
 | `docs/FILES.md` | A row in the table of shipped machine files, with 0 machine's game files, and a row in the table of capture variants |
 | `docs/CLI.md` | The output of `./snapcas.py machines` in the example of `machines`, copied from the command |
 | `docs/PLAN.md` | The machine in its DOS's row of the test machines' table |
 
-Then run `make test`, which must pass.
+The tests need no line for the machine. `Shipped` in `tests/test_machines.py` checks
+Caldero on every machine file of `machines/`, with the DOS files that the machine
+file names. Then run `make test`, which must pass.
 
 ### 7. Run the collection
 
@@ -205,13 +207,14 @@ make games MACHINE=hb75p-carnivore2
 ```
 
 Do not change `bin/` or `tools/` while it runs: each result is kept with a hash of
-the game's files, the machine's files and the code in those two folders, and a
-changed hash makes the next run make that game's image again. So a change to the
-code makes the next run take as long as the first. The results go to
-`out/games/hb75p-carnivore2.txt`, and the image of each game that passes to
-`images/hb75p-carnivore2/`, which `./snapcas.py sync` copies to a card. Fix each game that fails as in
-[Fix a game that fails](#fix-a-game-that-fails), then write the number of the
-machine's game files in its row of `docs/FILES.md`.
+the game's files, the machine's files, the code in those two folders, the DOS files
+that the check boots and `openMSX`'s version, and a changed hash makes the next run
+make that game's image again. So a change to the code makes the next run take as
+long as the first. Ctrl-C stops the run, which keeps its results so far. The results
+go to `out/games/hb75p-carnivore2.txt`, and the image of each game that passes to
+`images/hb75p-carnivore2/`, which `./snapcas.py sync` copies to a card. Fix each
+game that fails as in [Fix a game that fails](#fix-a-game-that-fails), then write
+the number of the machine's game files in its row of `docs/FILES.md`.
 
 ## Fix a game that fails
 
@@ -232,8 +235,9 @@ Run the game alone, with the check:
 
 `<GAME>` is the game file's folder, as `make games` and `./snapcas.py list --all`
 show it. When a step fails and the game file has no `capture` line, `snap` runs the
-steps again on each capture variant that the machine file lists. When a variant
-passes, it prints:
+steps again on each capture variant that the machine file lists. `snap` skips the
+variants when the capture stops at an error in the input files, with status 1,
+because a variant reads the same files. When a variant passes, `snap` prints:
 
 ```
 snapcas.py: it passes, so the machine's game file needs: capture hb75p
@@ -250,15 +254,18 @@ same files of a machine where the game passes, from `out/games/<machine>.txt`:
 
 | Message | Cause | Fix |
 |---|---|---|
-| `capture: the CPU is halted with no interrupt, at XXXXh` | The loader crashed, mostly because it selected a slot that holds no RAM | A capture variant, or a slot patch ([Patch the code](#3-patch-the-code)) |
+| `capture: the CPU is halted with no interrupt, at XXXX` | The loader crashed, mostly because it selected a slot that holds no RAM | A capture variant, or a slot patch ([Patch the code](#3-patch-the-code)) |
 | `capture: step 5 restarted more than 20 times` | The load waits for a key each time, and no key that the capture tries continues it | `continue <key>`, the key that the game asks for, or `snapshot at <seconds>` |
 | `capture: the load ran for more than 3600 seconds` | The load never stops the motor for good | `snapshot at <seconds>`, a time after the load, from `log.txt` |
 | `the first block is a non-standard block` or `is not a binary file, a BASIC` | The tape does not start with a block that the BIOS loads | `load 'RUN"CAS:"'`, or the command that the tape's label gives |
-| `the tape needs N segments, more than M` | The machine's mapper has too few free segments for the tape | A capture variant whose game runs in the machine's own RAM, or a line in `tests/snapcas-failures.txt` |
-| `the N bytes below SP XXXXh are not in a RAM page that the snapshot keeps`, or `cross a page boundary` | The stack is too low for the restorer's tail at the snapshot | `snapshot at <seconds>`, a later moment, when the stack has moved |
-| `page 3 has no room for the tape service's part` | The game fills page 3 | `service t0`: the tape service without a part in page 3 |
+| `the tape needs N segments, more than M` | The tape is longer than the tape service holds: 64 segments, 1 MB, with the code segment, or 16 segments, 256 KB, in the mode without a part in page 3 | With 16, `service at <address>`, an address xxE1h in page 3 that the game leaves alone, which gives the service its part of page 3. With 64, a line in `tests/snapcas-failures.txt` |
+| `the 26 bytes below SP XXXXh are not in a RAM page that the snapshot keeps`, or `cross a page boundary or include FFFFh` | Mostly a load that failed on this machine, so that the snapshot shows BASIC or a crash, with the stack in the ROM: `snap/log.txt` shows where the load stopped and the screen then. Or the stack is too low for the restorer's tail at the snapshot | For a failed load, a capture variant or a slot patch. Otherwise `snapshot at <seconds>`, a later moment, when the stack has moved |
+| `page 3 has no room for the tape service's part, and rom keep needs it` | The game fills page 3, and the game file's `rom keep` rules out the mode without a part in page 3 | `service at <address>`, an address xxE1h in page 3 that the game leaves alone, or the game file without `rom keep` |
+| `the tape service without a part in page 3 keeps T0 in page 0 of DOS's mapper` | The game fills page 3, or its game file has `service t0`, and the game keeps RAM of DOS's mapper in page 0, where that mode puts T0 | A capture variant, whose RAM is outside DOS's mapper, or `service at <address>` |
 | `the bytes at ... are not the patch's old bytes` | The patch was made for another dump | Make the patch again for this dump, with the `sha1` of its tape |
-| `point 1: fail`, `the tail's jump did not run within 120 seconds` | The restore never reached the game. The report's screen shows the restorer's or DOS's message | The message says what to fix, often too few free segments |
+| `point 1: fail`, `the restorer stopped: ...` | The restorer refused the image and returned to DOS. The line holds its message | The message says what to fix, often too few free segments |
+| `point 1: fail`, `the tail's jump did not run within 120 seconds` | The restore never reached the game, and the restorer printed no message. The report's screen shows where it stopped | DOS's message says what to fix. A restorer that hangs is a failure of `snapcas`: a line in `tests/snapcas-failures.txt` |
+| A failed point with another line that starts with `check:` | A callback of `tools/tcl/check.tcl` failed, and the line holds its error | A failure of `snapcas`: a line in `tests/snapcas-failures.txt` |
 | `point 1: fail` with differences | The restored machine differs from the snapshot | A failure of `snapcas`: a line in `tests/snapcas-failures.txt` |
 | `point 2: fail`, `the game writes XXXXh, in the tape service's part of page 3` | The game keeps data where the tape service's part goes | `service at <address>`, an address xxE1h in page 3 that the game leaves alone, or `service t0` |
 | `point 3: fail` | The restored machine rebooted, mostly because the loader crashed after the restore | A capture variant, or a slot patch |
@@ -286,12 +293,14 @@ line for them is not needed:
 | Level 9's, CasLink3's and Engesoft's copies of page 3's slot to the other pages | [The page copy patch](docs/INTERNALS.md#the-page-copy-patch) |
 
 `log.txt` names each write that the capture saw and did not patch, with
-`for a patch line`. Find the loader's write first:
+`for a patch line`. It names each address and value once, and leaves out the
+writes of the BIOS's own slot routines. Find the loader's write first:
 
 1. Read `scan.txt`, which lists the scan's findings in `patch` line form. The
-   build already patches the findings in the snapshot's RAM pages. The findings in
-   the tape's unread blocks are not patched, so such a finding is a line to add,
-   and the line must also fix the block's sum when the block's loader checks one.
+   build already patches a finding in the snapshot's RAM pages when the finding's
+   line holds new bytes after `>`. The findings in the tape's unread blocks are not
+   patched, so such a finding is a line to add, and the line must also fix the
+   block's sum when the block's loader checks one.
 2. Otherwise search the tape file for the forms that write the register:
 
    | Bytes | Code |
@@ -368,14 +377,17 @@ file's patches, keys or side 2. When the plain load fails as the capture does, t
 game fails in `openMSX` itself: add a line to `tests/openmsx-failures.txt`, with the
 machine, the folder and what fails. Otherwise the failure is one of `snapcas`: add
 the same kind of line to `tests/snapcas-failures.txt`, with the cause when known.
+`make games` reads both lists before it starts, and stops at a line that it cannot
+read. It prints the failures of each list as a group of their own, and fails only
+for a game that fails and is in neither.
 
 ### 6. Check the fix
 
 Run `./snapcas.py snap <GAME> <machine> --check` again, which must pass. Then run
 `make games MACHINE=<machine>`, which reruns only the games whose files changed,
-or every game when the code in `bin/` or `tools/` changed. A
-change to `game.txt` holds on every machine, so run `make games` on each machine
-that has results in `out/games/` as well. Last, run `make test`.
+or every game when the code in `bin/` or `tools/`, the DOS files or `openMSX`'s
+version changed. A change to `game.txt` holds on every machine, so run `make games`
+on each machine that has results in `out/games/` as well. Last, run `make test`.
 
 ## More
 

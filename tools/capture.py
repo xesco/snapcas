@@ -11,21 +11,20 @@ game file's capture line, or --capture, names a capture variant in
 machines/capture/ to load the game on: the user's machine without a cartridge
 that the game's loader trips over.
 
-Exit status: 0 on success, 1 for an error in the input files, 2 when openMSX
-fails or a wait times out.
+Exit status: 0 on success, 1 for an error in the command line or the input
+files, 2 when openMSX fails or a wait times out.
 """
-import argparse
 import os
 import shutil
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import build  # noqa: E402
 import tape  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
 import patches  # noqa: E402
+from snapshot import Snapshot  # noqa: E402
 
 # Real seconds that one capture may take: the load's 3600 emulated seconds
 # run much faster with the throttle off.
@@ -39,11 +38,7 @@ def tcl_list(items):
 
 
 def key_tcl(kind, value):
-    if kind == "key":
-        return msx.press(value)
-    # The text as hex, so that the command needs no quoting inside the keys
-    # list's braces.
-    return f"type [binary format H* {value.encode('latin-1').hex()}]"
+    return msx.press(value) if kind == "key" else msx.tcl_type(value)
 
 
 def load_command(game, data):
@@ -58,13 +53,14 @@ def load_command(game, data):
     return tape.load_command(tape.service(blocks))
 
 
-def settings(game, machine, tape_path, data, snap, side2_path=None, side2=b""):
+def settings(game, machine, tape_path, data, snap, state, side2_path=None, side2=b""):
     """The Tcl settings. data and side2 are the tape files' bytes, of which
-    the capture uses the tape service's tapes (INTERNALS.md, Tape files)."""
+    the capture uses the tape service's tapes (INTERNALS.md, Tape files). snap
+    is the snapshot's folder, and state starts the names of the capture's
+    savestates."""
     keys = [(t, key_tcl(kind, value)) for t, kind, value in game.keys]
     tries = ([game.continue_key] if game.continue_key else []) + ["space", "return"]
     command = load_command(game, data)
-    pagecopy = patches.pagecopy.tcl_settings(data, side2)
     data = tape.service(tape.read(game.tape, data))
     side2 = tape.service(tape.read(game.side2, side2)) if game.side2 else b""
     s = {
@@ -89,117 +85,126 @@ def settings(game, machine, tape_path, data, snap, side2_path=None, side2=b""):
         # continue a load are held for 0.5 seconds.
         "tries": tcl_list("{" + k + " " + msx.tcl_word(msx.press(k, 0.5)) + "}" for k in tries),
         "snapat": "{}" if game.snapshot_at is None else str(game.snapshot_at),
-        "state": f"snapcas-capture-{os.getpid()}",
-        # openMSX's home, whose savestates/ folder the rewinds read.
+        "state": state,
+        # openMSX's home, whose savestates/ folder holds the savestates.
         "home": msx.tcl_word(msx.home()),
     }
-    return "".join(f"set ::S({k}) {v}\n" for k, v in s.items()) + pagecopy
+    return "".join(f"set ::S({k}) {v}\n" for k, v in s.items())
 
 
-def capture_once(game, machine, tape_path, tapes_dir, snap, procedures, found):
+def capture_once(game, machine, tape_path, tapes_dir, snapshot, state, found):
     """Runs the capture once, on the tape files as played with the patches
-    found so far (build.played_tapes). Returns "" for a snapshot, "patch" for a
-    new patch, or the error."""
-    data, side2 = build.played_tapes(game, tapes_dir, found)
-    shutil.rmtree(snap, ignore_errors=True)
-    os.makedirs(snap)
-    if found or game.start or any(patch.page == "side1" for patch in game.patches):
+    found so far (tape.played), into the folder of snapshot, a Snapshot.
+    Returns the new patches that the capture stopped with, or None for a
+    snapshot. Raises msx.Failure for a capture that fails, and an exception of
+    INPUT_ERRORS for an error in the input files."""
+    data, side2 = tape.played(game, tapes_dir, found)
+    shutil.rmtree(snapshot.folder, ignore_errors=True)
+    os.makedirs(snapshot.folder)
+    if found or game.start or any(patch.side == 1 for patch in game.patches):
         # The tape that the capture loads, with the side1 patches.
-        tape_path = os.path.join(snap, "side1" + os.path.splitext(game.tape)[1].lower())
+        tape_path = snapshot.path("side1" + os.path.splitext(game.tape)[1].lower())
         with open(tape_path, "wb") as f:
             f.write(data)
     side2_path = None
     if game.side2:
         # Side 2, with the side2 patches, for the capture to insert when the
         # game reads past side 1's end.
-        side2_path = os.path.join(snap, "side2" + os.path.splitext(game.side2)[1].lower())
+        side2_path = snapshot.path("side2" + os.path.splitext(game.side2)[1].lower())
         with open(side2_path, "wb") as f:
             f.write(side2)
-    script = settings(game, machine, tape_path, bytes(data), snap, side2_path, bytes(side2)) + procedures + "\nstep1\n"
+    # The settings, the procedures, the patch kinds, each with its settings
+    # for these tape files, and the start.
+    script = (settings(game, machine, tape_path, data, snapshot.folder, state, side2_path, side2)
+              + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/capture.tcl")
+              + patches.tcl(data, side2) + "\nsafe step1\n")
     try:
-        msx.run(machine.args, script, timeout=TIMEOUT)
+        stderr = msx.run(machine.args, script, timeout=TIMEOUT)
     except Exception as e:
-        return f"capture.py: openMSX failed: {e}"
-    error = os.path.join(snap, "error.txt")
-    if os.path.exists(error):
-        with open(error) as f:
-            return f.read().strip()
-    if os.path.exists(os.path.join(snap, "newpatch.txt")):
-        return "patch"
-    if not os.path.exists(os.path.join(snap, "state.txt")):
-        return f"capture.py: openMSX stopped before the snapshot; see {snap}"
-    return ""
+        raise msx.Failure(2, f"capture.py: openMSX failed: {e}", broke=True)
+    finally:
+        # openMSX leaves the capture's savestates, also when it is stopped.
+        msx.remove_savestates(state)
+    error = snapshot.error()
+    if error is not None:
+        raise msx.Failure(2, error)
+    new = snapshot.new_patches()
+    if new is None and not os.path.exists(snapshot.path("state.txt")):
+        raise msx.Failure(2, "capture.py: openMSX stopped before the snapshot; see "
+                          f"{snapshot.folder}{msx.last_output(stderr)}", broke=True)
+    return new
+
+
+# What an error in the input files raises.
+INPUT_ERRORS = (OSError, gamefile.GameFileError, msx.MachineError, tape.TapeError)
+
+
+def input_error(e):
+    """The one line that the capture prints for an error of INPUT_ERRORS."""
+    if isinstance(e, OSError) and e.filename and e.strerror:
+        return f"capture.py: {e.filename}: {e.strerror}"
+    return f"capture.py: {e}"
+
+
+def capture(game_arg, machine_name, tapes_dir, variant=None):
+    """Loads a game in openMSX on a machine and saves its snapshot, as
+    capture.py's arguments name them. variant is the capture variant to load
+    the game on, in place of the game file's. Returns the snapshot's folder.
+    Raises msx.Failure for a capture that fails."""
+    try:
+        game = gamefile.read_game(gamefile.game_folder(game_arg), machine_name)
+        variant = variant or game.capture
+        machine = msx.read_machine(msx.variant_path(variant) if variant else msx.machine_path(machine_name))
+        tape_path = os.path.abspath(os.path.join(tapes_dir, game.tape))
+        data, side2 = tape.played(game, tapes_dir)
+        command = load_command(game, data)
+        first = tape.read(game.tape, data)[:1]
+        if game.side2:
+            tape.read(game.side2, side2)
+    except INPUT_ERRORS as e:
+        raise msx.Failure(1, input_error(e))
+    if command is None and first and not first[0].standard:
+        raise msx.Failure(1, f"capture.py: {tape_path}: the first block is a non-standard block, so the game "
+                          "file needs a load line")
+    if command is None:
+        raise msx.Failure(1, f"capture.py: {tape_path}: the first block is not a binary file, a BASIC "
+                          "program or an ASCII program")
+
+    snapshot = Snapshot(os.path.join(gamefile.out_folder(machine_name, game.folder), "snap"))
+    # The savestates' names hold the process ID, so that captures can run side
+    # by side. An earlier run with the same ID can have left some.
+    state = f"snapcas-capture-{os.getpid()}"
+    msx.remove_savestates(state)
+    # The patches of the tape that the capture finds (INTERNALS.md, Slot patches,
+    # The RAM search patch): each one stops the capture, which runs again on the
+    # patched tape.
+    found = []
+    try:
+        for _ in range(MAX_SLOT_PATCHES + 1):
+            new = capture_once(game, machine, tape_path, tapes_dir, snapshot, state, found)
+            if new is None:
+                break
+            found += new
+        else:
+            raise msx.Failure(2, f"capture.py: the capture found more than {MAX_SLOT_PATCHES} slot patches")
+    except INPUT_ERRORS as e:
+        raise msx.Failure(1, input_error(e))
+    snapshot.write_patches(found)
+    return snapshot.folder
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Load a cassette game in openMSX and save its snapshot.")
+    parser = msx.Parser(description="Load a cassette game in openMSX and save its snapshot.")
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
     parser.add_argument("machine", help="a machine file's name below machines/, without .txt")
     parser.add_argument("--tapes", required=True, help="the folder that holds the tape files, CAS or TSX")
     parser.add_argument("--capture", help="a capture variant in machines/capture/ to load the game on, in "
                         "place of the game file's capture line")
     args = parser.parse_args()
-
     try:
-        game = gamefile.read_game(gamefile.game_folder(args.game), args.machine)
-        variant = args.capture or game.capture
-        machine = msx.read_machine(msx.variant_path(variant) if variant else msx.machine_path(args.machine))
-    except (OSError, gamefile.GameFileError, msx.MachineError) as e:
-        print(f"capture.py: {e}", file=sys.stderr)
-        return 1
-    tape_path = os.path.abspath(os.path.join(args.tapes, game.tape))
-    try:
-        data, side2 = build.played_tapes(game, args.tapes)
-    except OSError as e:
-        print(f"capture.py: {e.filename}: {e.strerror}", file=sys.stderr)
-        return 1
-    except (build.BuildError, tape.TapeError) as e:
-        print(f"capture.py: {e}", file=sys.stderr)
-        return 1
-    try:
-        command = load_command(game, data)
-        first = tape.read(game.tape, data)[:1]
-        if game.side2:
-            tape.read(game.side2, side2)
-    except tape.TapeError as e:
-        print(f"capture.py: {e}", file=sys.stderr)
-        return 1
-    if command is None and first and not first[0].standard:
-        print(f"capture.py: {tape_path}: the first block is a non-standard block, so the game "
-              "file needs a load line", file=sys.stderr)
-        return 1
-    if command is None:
-        print(f"capture.py: {tape_path}: the first block is not a binary file, a BASIC "
-              "program or an ASCII program", file=sys.stderr)
-        return 1
-
-    snap = os.path.join(gamefile.out_folder(args.machine, game.folder), "snap")
-    procedures = (msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/capture.tcl")
-                  + msx.tcl("patches/slots.tcl") + patches.ramsearch.tcl_settings()
-                  + msx.tcl("patches/ramsearch.tcl") + msx.tcl("patches/pagecopy.tcl"))
-    # The patches of the tape that the capture finds (INTERNALS.md, Slot patches,
-    # The RAM search patch): each one stops the capture, which runs again on the
-    # patched tape.
-    found = []
-    for run in range(MAX_SLOT_PATCHES + 1):
-        result = capture_once(game, machine, tape_path, args.tapes, snap, procedures, found)
-        if result != "patch":
-            break
-        # One line for a slot patch, one for each copy of the RAM search.
-        with open(os.path.join(snap, "newpatch.txt")) as f:
-            for line in f.read().splitlines():
-                found.append(gamefile.read_patch(line.split()[1:], f"{snap}/newpatch.txt"))
-                found[-1].line = line
-    else:
-        print(f"capture.py: the capture found more than {MAX_SLOT_PATCHES} slot patches", file=sys.stderr)
-        return 2
-    if result:
-        print(result, file=sys.stderr)
-        return 2
-    with open(os.path.join(snap, "patches.txt"), "w") as f:
-        f.write("# The capture's patches of the tape (docs/INTERNALS.md, Slot patches, The RAM search patch).\n")
-        f.writelines(p.line + "\n" for p in found)
-    print(snap)
+        print(capture(args.game, args.machine, args.tapes, args.capture))
+    except msx.Failure as e:
+        return e.show()
     return 0
 
 

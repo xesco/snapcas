@@ -106,6 +106,15 @@ the game's stack, which is why the mode without a part in page 3 serves `BLOAD` 
 its `TAPIN` uses no stack. Bronx's RAM is in a slot without a mapper on the Sanyo
 PHC-28S, and it lends its page too.
 
+Bronx's page 3 has one area of zeros at the snapshot that the service's part fits,
+F1E1h to F26Fh. Bronx's code names two addresses in that area, F1F3h and F207h, so
+Bronx's game file has `service t0`. `build.py` took that mode by itself while the
+part was 168 bytes, because the part did not fit in the area then.
+
+Gauntlet's level loader reads a byte with `TAPIN`, puts the byte in C, and adds BC
+to a sum. The loader counts on the B = 0 that the BIOS's `TAPIN` leaves. So the
+service's `TAPIN` leaves B = 0 too, through the entries in page 3 and through T0.
+
 Moonwalker's loader computes the value that its stub writes to the slot register as
 `AND H / LD L,A`, the slot register with page 0's bits cleared, for slot 0. On the
 Sanyo PHC-28S the game keeps the slot register at A5h, so the scan puts `LD L,0A6h`

@@ -40,14 +40,14 @@ in [PLAN.md](PLAN.md).
 | `out/work/<machine>/<game>/<GAME>.SNP` | `tools/build.py` | The image, until `snap` moves it |
 | `out/work/<machine>/<game>/snap/` | `tools/capture.py` | The snapshot |
 | `out/work/<machine>/<game>/scan.txt` | `tools/build.py` | The scan's findings and patches |
-| `out/work/<machine>/<game>/build.txt` | `tools/build.py` | What the check takes from the build: the RAM bytes that the build patched, under each RAM file of their segment, the tape service's part of page 3, and the address of its tape position `C_POS` ([Check](#check)) |
+| `out/work/<machine>/<game>/build.txt` | `tools/build.py` | What the check takes from the build: the tail's address, the offsets of the tail's bytes that the check reads, the area of page 3 that the capture clears (FCC9h to FD88h), the RAM bytes that the build patched, under each RAM file of their segment, the tape service's part of page 3, the addresses of the service's tape position and of the tape's end, and the addresses of the service's two jumps at the tape's end ([Check](#check)) |
 | `out/work/<machine>/<game>/check/` | `tools/check.py` | The check's report and savestates |
 | `out/work/<machine>/<game>/try/` | `tools/try.py` | The disk of `snapcas.py try` |
 | `out/games/<machine>.txt` | `tools/games.py` | The result of each game file on the machine ([INTERNALS.md, The games run](INTERNALS.md#the-games-run)) |
 | `dos/` | The user, and the Makefile for `dos/nextor/` | The DOS system files of the checks: `msxdos1/`, `msxdos2/` and `nextor/` |
 | `out/cache/` | The Makefile | The tools that it downloads and builds, and the test home of `openMSX` |
 | `bin/SNAPCAS.COM` | The developers | The restorer, from `src/snapcas.asm` |
-| `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, and the tail, from `src/service.asm` ([FORMATS.md, SERVICE.BIN](FORMATS.md#servicebin)) |
+| `bin/SERVICE.BIN` | The developers | The code that `build.py` writes into images: the tape service's routines, entries, entry code and reader, the tail, and the symbols that give `build.py` their addresses, from `src/service.asm` ([FORMATS.md, SERVICE.BIN](FORMATS.md#servicebin)) |
 
 The `bin/` files are built with sjasmplus 1.24.0 and shipped. Git keeps only a short
 `README.md` in `custom/`, `downloads/`, `dos/`, `images/` and `out/`, and ignores
@@ -73,26 +73,36 @@ game is processed by four commands, in this order:
 
 `./snapcas.py snap <game> <machine> [--check [--dos <dir>]]`, the `snapcas` command
 at the repository's top ([CLI.md](CLI.md)), makes the image in one command. It
-downloads the game's tape files that are missing from `downloads/`, then runs steps
-1 and 2 with `--tapes downloads/`, and step 3 with `--check`, with Nextor's files
-from `dos/nextor/` unless `--dos` gives others. It downloads Nextor's files there
-first when they are missing, pinned by SHA-256 as the Makefile pins them. When every
-step passes, it moves a shipped game's image to `images/`. The tests set
-`SNAPCAS_DOWNLOADS` to `tests/tapes/`, so that `snap` finds their tapes there and
-downloads nothing. When a step fails and the game file names no capture variant, it
-runs these steps again on each capture variant that the machine file lists, in the
-order of its `variant` lines ([FILES.md, Machine file](FILES.md#machine-file)). A
-failed capture counts too, because a loader that trips over a cartridge can crash
-during the capture. It keeps the first image that passes, and prints the `capture`
-line that made it, for the machine's game file. Otherwise it makes the image of the
-game file's own lines again, and exits with the status of the first step that
-failed. `capture.py`'s `--capture <variant>` names the variant, in place of the game
-file's `capture` line.
+downloads the game's tape files that are missing from `downloads/`. It then does
+steps 1 and 2 with the tapes of `downloads/`, and with `--check` also step 3. The
+check boots the DOS files of the machine's folder below `dos/`, which its machine
+file's `dosfiles` line names ([FILES.md, Machine file](FILES.md#machine-file)),
+unless `--dos` gives others. For a machine under Nextor, `snap` first downloads
+Nextor's files into `dos/nextor/` when they are missing, pinned by SHA-256 as the
+Makefile pins them. When every step passes, it moves a shipped or custom game's
+image to `images/`. The tests set `SNAPCAS_DOWNLOADS` to `tests/tapes/`, so that
+`snap` finds their tapes there and downloads nothing. `tools/pipeline.py` holds this
+sequence of steps, for `snap` and for the games run, and calls each step as a
+function of its tool ([INTERNALS.md, The tools' code](INTERNALS.md#the-tools-code)).
+
+When a step fails and the game file names no capture variant, `snap` does the steps
+again on each capture variant that the machine file lists, in the order of its
+`variant` lines ([FILES.md, Machine file](FILES.md#machine-file)). A failed capture
+counts too, because a loader that trips over a cartridge can crash during the
+capture. So does a failed build, whose snapshot another capture can change. A
+capture that stops at an error in the input files, with status 1, does not, because
+a variant reads the same files. `snap` keeps the first image that passes, and prints
+the `capture` line that made it, for the machine's game file. Otherwise it captures
+and builds the image of the game file's own lines again, without the check, and
+exits with the status of the first step that failed. The option
+`--capture <variant>` of `capture.py` and of `build.py` names the variant, in place
+of the game file's `capture` line.
 
 The tools are Python 3 programs that require only Python 3 and `openMSX` 22.0, so
 they run on macOS, Linux and Windows. They print errors on standard error, naming
-the file and the problem, and exit with 0 on success, 1 for an error in the input
-files, 2 when `openMSX` fails or a wait times out, and 3 when a check fails.
+the file and the problem, and exit with 0 on success, 1 for an error in the command
+line or the input files, 2 when `openMSX` fails or a wait times out, and 3 when a
+check fails.
 
 The games run, `make games`, and the map of the tools' code are in
 [INTERNALS.md](INTERNALS.md#the-games-run).
@@ -213,7 +223,7 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 - DOS's four pages must be in one memory mapper, with enough free segments for the
   image's holding and service segments and the worker. A game with a long tape needs
   a large mapper.
-- A game with the tape service needs one of two things. Either its page 3 keeps 168
+- A game with the tape service needs one of two things. Either its page 3 keeps 143
   bytes from an address xxE1h free for the service's part of page 3, at the snapshot
   and in every later load ([Build](#build)). Or the game meets the conditions of the
   mode without a part in page 3, which `build.py` takes when page 3 has no room, or

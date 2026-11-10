@@ -4,3 +4,4 @@
 # shortage of segments.
 openmsx -machine Philips_NMS_8250 -ext msxdos2
 disk diska
+dosfiles msxdos2

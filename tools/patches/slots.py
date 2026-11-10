@@ -1,21 +1,35 @@
 """The slot patches (docs/INTERNALS.md, Slot patches): fixed slot register values
-that name a slot that holds nothing, the capture's slot map, and the capture's
-patches of the tape. patches/slots.tcl is the capture's watch."""
-import os
+that name a slot that holds nothing, by the capture's slot map
+(snapshot.Snapshot.slots). patches/slots.tcl is the capture's watch."""
 import re
 
-import gamefile
+import msx
 from .finding import Finding
 
-# LD A,n / OUT (0A8h),A, and LD A,n / CALL 013Bh, a call of the BIOS's WSLREG:
-# a fixed slot register value.
-SLOT_CODE = re.compile(rb"\x3E(.)(?:\xD3\xA8|\xCD\x3B\x01)", re.S)
+# The two forms of the code that sets a fixed slot register value: LD A,n and
+# then OUT (0A8h),A, or CALL 013Bh, a call of the BIOS's WSLREG.
+LOAD = bytes.fromhex("3E")
+OUT = bytes.fromhex("D3 A8")
+WSLREG = bytes.fromhex("CD 3B 01")
+SLOT_CODE = re.compile(re.escape(LOAD) + b"(.)(?:" + re.escape(OUT) + b"|" + re.escape(WSLREG) + b")", re.S)
 SLOT_VALUE = "fixed slot value"
+# LD A,(nn), the one instruction that loads A with the byte after a 3Eh in its
+# operand, as Knight Orc's LD A,(EF3Eh) / OUT (0A8h),A does.
+LD_A_NN = 0x3A
 # The opcodes of the instructions with a one-byte and with a two-byte operand.
-# A 3Eh after one can be its operand, as in Knight Orc's LD A,(EF3Eh) / OUT
-# (0A8h),A.
+# A 3Eh after one can be its operand.
 OPERAND_1 = bytes.fromhex("06 0E 16 1E 26 2E 36 3E C6 CE D6 DE E6 EE F6 FE D3 DB 10 18 20 28 30 38")
 OPERAND_2 = bytes.fromhex("01 11 21 31 22 2A 32 3A C2 C3 C4 CA CC CD D2 D4 DA DC E2 E4 EA EC F2 F4 FA FC")
+
+
+def tcl(side1, side2):
+    """The kind's Tcl for the capture: the forms' bytes, as slots.tcl's
+    settings, and slots.tcl. The capture reads the tape files itself."""
+    return (f"set ::slotcode(load) {msx.tcl_bytes(LOAD)}\n"
+            f"set ::slotcode(out) {msx.tcl_bytes(OUT)}\n"
+            f"set ::slotcode(wslreg) {msx.tcl_bytes(WSLREG)}\n"
+            f"set ::slotcode(indirect) {LD_A_NN}\n"
+            + msx.tcl("patches/slots.tcl"))
 
 
 def in_operand(data, offset):
@@ -47,29 +61,3 @@ def find(data, context):
             old = match.group()
             findings.append(Finding(SLOT_VALUE, match.start(), old, old[:1] + bytes([fixed]) + old[2:]))
     return findings
-
-
-def read_slots(snap):
-    """snap/slots.txt, the capture's slot map: for each page, the primary slots
-    that hold nothing there and the slot that replaces them, or -1. None for a
-    snapshot without it."""
-    path = os.path.join(snap, "slots.txt")
-    if not os.path.exists(path):
-        return None
-    slots = {}
-    with open(path) as f:
-        for line in f:
-            if line.strip() and not line.startswith("#"):
-                _, page, _, empty, _, with_ = line.split()
-                slots[int(page)] = (set() if empty == "-" else {int(v) for v in empty.split(",")}, int(with_))
-    return slots
-
-
-def capture_patches(snap):
-    """The capture's patches of the tape, in snap/patches.txt: the slot
-    patches and the RAM search patch."""
-    path = os.path.join(snap, "patches.txt")
-    if not os.path.exists(path):
-        return []
-    with open(path) as f:
-        return [gamefile.read_patch(line.split()[1:], path) for line in f if line.startswith("patch ")]

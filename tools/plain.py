@@ -16,7 +16,6 @@ snapcas fails in openMSX itself (PLAN.md, step 9).
 Exit status: 0 when the screen was read, 1 for an error in the input files,
 2 when openMSX fails or stops before the screen.
 """
-import argparse
 import os
 import sys
 
@@ -25,6 +24,7 @@ sys.path.insert(0, HERE)
 import capture  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
+import tape as tapes  # noqa: E402
 
 # Emulated seconds: the wait after the boot menu, and the time from the tape's
 # end to the screen.
@@ -33,7 +33,7 @@ AFTER_TAPE = 60
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Load a game's tape in plain openMSX and print the screen.")
+    parser = msx.Parser(description="Load a game's tape in plain openMSX and print the screen.")
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
     parser.add_argument("machine", help="a machine file's path below machines/, without .txt")
     args = parser.parse_args()
@@ -46,7 +46,7 @@ def main():
             command = capture.load_command(game, f.read())
         if command is None:
             raise gamefile.GameFileError(f"{tape}: no load command; the game file needs a load line")
-    except (OSError, gamefile.GameFileError, msx.MachineError) as e:
+    except (OSError, gamefile.GameFileError, msx.MachineError, tapes.TapeError) as e:
         print(f"plain.py: {e}", file=sys.stderr)
         return 1
     work = gamefile.out_folder(args.machine, folder)
@@ -54,30 +54,29 @@ def main():
     out = os.path.join(work, "plain.txt")
     if os.path.exists(out):
         os.remove(out)
-    typed = command.replace("\\", "\\\\").replace('"', '\\"')
-    script = (f"proc plain {{}} {{ after time {AFTER_BOOT} plain_load }}\n"
+    script = (f"proc plain {{}} {{ later {AFTER_BOOT} plain_load }}\n"
               f"proc plain_load {{}} {{\n"
               f"    set ::autoruncassettes off\n"
               f"    cassetteplayer insert {msx.tcl_word(os.path.abspath(tape))}\n"
               f"    set len [cassetteplayer getlength]\n"
-              f"    type \"{typed}\\r\"\n"
-              + (f"    after time [expr {{$len + 5}}] {{type \"RUN\\r\"}}\n" if command == "CLOAD" else "")
-              + f"    after time [expr {{$len + {AFTER_TAPE}}}] plain_screen\n"
+              f"    {msx.tcl_type(command + chr(13))}\n"
+              + (f"    later [expr {{$len + 5}}] {{{msx.tcl_type('RUN' + chr(13))}}}\n" if command == "CLOAD" else "")
+              + f"    later [expr {{$len + {AFTER_TAPE}}}] plain_screen\n"
               f"}}\n"
               f"proc plain_screen {{}} {{\n"
               f"    set f [open {msx.tcl_word(out)} w]\n"
               f"    puts $f [screen]\n"
               f"    close $f\n"
-              f"    exit\n"
+              f"    stop\n"
               f"}}\n"
-              f"boot {{{msx.boot_steps(machine)}}} plain\n")
+              f"safe {{boot {{{msx.boot_steps(machine)}}} plain}}\n")
     try:
-        msx.run(machine.args, script, timeout=1800)
+        stderr = msx.run(machine.args, script, timeout=1800)
     except Exception as e:
         print(f"plain.py: openMSX failed: {e}", file=sys.stderr)
         return 2
     if not os.path.exists(out):
-        print(f"plain.py: openMSX stopped before the screen; see {work}", file=sys.stderr)
+        print(f"plain.py: openMSX stopped before the screen; see {work}{msx.last_output(stderr)}", file=sys.stderr)
         return 2
     with open(out, encoding="utf-8", errors="replace") as f:
         text = "\n".join(line.rstrip() for line in f.read().splitlines() if line.strip())

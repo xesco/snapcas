@@ -1,0 +1,6 @@
+# The Victor HC-90A (MSX2, 256 KB) under MSX-DOS 2, for the restorer's stop when
+# the main ROM and DOS's mapper are in one slot: its ROM is in slot 0-0 and its
+# mapper in slot 0-2.
+openmsx -machine Victor_HC-90A -ext msxdos2
+disk diska
+dosfiles msxdos2

@@ -1,18 +1,17 @@
-"""Step 23 (docs/PLAN.md): the download of a game's tape files from its url
-line (docs/CLI.md, Download). The tests replace the network with zips that
-they make, so they run offline."""
+"""The download of a game's tape files from its url line (docs/CLI.md,
+Download, and docs/PLAN.md, step 23). The tests replace the network with zips
+that they make, so they run offline. Pure tier."""
 import hashlib
+import http.client
 import io
 import os
-import sys
-import tempfile
 import unittest
 import zipfile
+from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "tools"))
-import download  # noqa: E402
-import gamefile  # noqa: E402
+import support
+import download
+import gamefile
 
 SIDE1 = b"side 1's tape"
 SIDE2 = b"side 2's tape"
@@ -32,17 +31,14 @@ class Download(unittest.TestCase):
                      "https://example.org/b.zip": zipped(**{"Game (Side B).cas": SIDE2})}
         self.fetched = []
         self.real_fetch = download.fetch
-        download.fetch = lambda url: self.fetched.append(url) or self.zips[url]
-        self.folder = tempfile.mkdtemp()
-        self.tapes = tempfile.mkdtemp()
-
-    def tearDown(self):
-        download.fetch = self.real_fetch
+        patch = mock.patch.object(download, "fetch", lambda url: self.fetched.append(url) or self.zips[url])
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.folder = support.temp(self)
+        self.tapes = support.temp(self)
 
     def game(self, lines):
-        with open(os.path.join(self.folder, "game.txt"), "w") as f:
-            f.write(lines)
-        return gamefile.read_game(self.folder)
+        return gamefile.read_game(support.game_folder(self.folder, lines))
 
     def two_sides(self):
         return self.game(f"cas GAME.CAS\nside2 GAMEB.CAS\nsha1 {hashlib.sha1(SIDE1).hexdigest()} "
@@ -86,6 +82,12 @@ class Download(unittest.TestCase):
         with self.assertRaisesRegex(download.DownloadError, "the zip holds no file whose SHA-1 is"):
             download.tapes(game, self.tapes, log=lambda text: None)
         self.assertEqual(os.listdir(self.tapes), [])
+
+    def test_a_download_cut_in_its_body_is_a_download_error(self):
+        cut = http.client.IncompleteRead(b"PK", 1000)
+        with mock.patch.object(download.urllib.request, "urlopen", side_effect=cut):
+            with self.assertRaisesRegex(download.DownloadError, "https://x/a.zip: IncompleteRead"):
+                self.real_fetch("https://x/a.zip")
 
     def test_a_game_file_without_a_url_line_names_the_file_to_put_in_the_folder(self):
         game = self.game(f"cas GAME.CAS\nsha1 {hashlib.sha1(SIDE1).hexdigest()}\n")

@@ -12,11 +12,12 @@ the tape files' formats. Why each holds what it holds is in [DESIGN.md](DESIGN.m
 | `rom.bin` | 32 KB: pages 0 and 1 of the main ROM, from the slot that `EXPTBL` names |
 | `subrom.bin` | 16 KB on an MSX2: the sub-ROM, from the slot that `EXBRSA` names |
 | `vram.bin` | The `physical VRAM` debuggable: 16 KB with an MSX1 VDP, 64 or 128 KB with a V9938. With a V9938, the capture reads it with bit 3 of register 8, VR, set for the read, because `openMSX` shows it through VR's addressing: a game that clears VR, as Boulder Dash does with an MSX1 write to register 8, would otherwise give a view that the restorer's linear writes do not reproduce |
-| `state.txt` | One `name value` per line, values in hexadecimal, as below |
+| `state.txt` | One `name value` per line, as below. The values are in hexadecimal, each with all the digits of its width, except `tapetime`, which is in decimal |
 | `side1.cas` | Side 1 with the game file's `side1` patches and those of `patches.txt`, when there are any: the tape that the capture loads |
-| `slots.txt` | The slot map: for each page of each slot and subslot, whether it holds RAM, ROM or nothing ([INTERNALS.md, Slot patches](INTERNALS.md#slot-patches)) |
+| `slots.txt` | The slot map, one line for each page, `page <n> empty <slots> with <slot>`: the primary slots that hold nothing in that page, with commas between them, or `-` for none, and the slot that replaces them in a slot register value, or -1 ([INTERNALS.md, Slot patches](INTERNALS.md#slot-patches)) |
 | `patches.txt` | The slot patches on the tape that the capture found, as `patch` lines |
-| `log.txt` | The logged events and the capture's decisions, in time order: each stop of the load with the screen's text, the key that continued it, each mapper's size, and how the snapshot was taken. Its last line names the `continue` key that worked |
+| `log.txt` | The logged events and the capture's decisions, in time order: each stop of the load with the screen's text, the key that continued it, each mapper's size, and how the snapshot was taken. A capture that stops with an error logs the error with the screen's text, as the last of these lines. The log's last line then names the `continue` key that worked |
+| `error.txt` | The error of a capture that stopped with one, on one line |
 
 | `state.txt` names | Source in `openMSX` |
 |---|---|
@@ -25,18 +26,21 @@ the tape files' formats. Why each holds what it holds is in [DESIGN.md](DESIGN.m
 | `a8`, `ppic` | `debug read` on ports A8h and AAh |
 | `sub0` to `sub3`, `-` when not expanded | For a slot that `EXPTBL` marks expanded, the byte at FFFFh, inverted, read while page 3 selects that slot |
 | `fc` to `ff`, `-` without a mapper | `MSX Memory Mapper I/O`: the values written, which each mapper masks to its size |
+| `mapper<ps>-<ss>`, one for each mapper that holds a kept RAM page | The mapper's size in segments, for the mapper in primary slot `<ps>` and subslot `<ss>` (`x` when not expanded), as in the RAM pages' file names. A register of `fc` to `ff` selects the segment that is its value modulo this size. A snapshot of an older capture has no such line, and the build then takes the register's value as the segment |
 | `vdp0` to `vdp23`, `vdp32` to `vdp45` | `VDP regs`, which holds only 0 to 7 with an MSX1 VDP |
 | `pal0` to `pal15` | `VDP palette` |
 | `vramptr` | `VRAM pointer`, 14 bits, with bits 14 to 16 from register 14 |
 | `vramwrite` | `VRAM access status`: 1 after a write setup, 0 after a read setup |
 | `psg0` to `psg15`, `psgsel` | `PSG regs`, and the port A0h watchpoint. While register 7's bit 7 is clear, I/O port B is an input and register 15 reads its pins, FFh, so `psg15` is then the last value written to it, from the port A1h watchpoint |
 | `tapepos`, `service` | The tape position in side 1, and 1 when the game gets the tape service |
-| `tapetime`, `tapeside` | The player's position in seconds and its side, 1 or 2, for the non-standard blocks that the game has read ([INTERNALS.md, Tape files](INTERNALS.md#tape-files)) |
+| `tapetime`, `tapeside` | The player's position in seconds, in decimal with two decimals, and its side, 1 or 2, for the non-standard blocks that the game has read ([INTERNALS.md, Tape files](INTERNALS.md#tape-files)) |
 
 ## T0's jump table
 
 `build.py` checks that each entry of the BIOS's tape jump table jumps to its address
-before it builds T0 ([INTERNALS.md, Tape service](INTERNALS.md#tape-service)):
+before it builds T0 ([INTERNALS.md, Tape service](INTERNALS.md#tape-service)). The
+addresses are those of T0's stubs, which `build.py` reads from `SERVICE.BIN`'s
+symbols ([SERVICE.BIN](#servicebin)):
 
 | Entry | Routine | Address it must jump to |
 |---|---|---|
@@ -53,33 +57,51 @@ before it builds T0 ([INTERNALS.md, Tape service](INTERNALS.md#tape-service)):
 The code segment holds the service's data, its routines and then the tape, which
 starts at a multiple of 8 bytes. The tape position and the sides' starts and ends
 count bytes from the code segment's start, across the code segment and the tape
-segments after it. The code segment's fields are these:
+segments after it. `src/tape.inc` declares the data once, for the code segment and
+for T0 in the mode without a part in page 3
+([INTERNALS.md, Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)),
+and `build.py` finds each field by its name ([SERVICE.BIN](#servicebin)). The code
+segment's fields are these:
 
 | Offset | Size | Field |
 |---|---|---|
-| 0000h | 6 | Jumps to `TAPION` and `TAPIN` |
-| 0006h | 3 | The tape position |
-| 0009h | 3 | Side 1's end, which is side 2's start |
-| 000Ch | 3 | Side 2's end, equal to side 1's end without a side 2 |
-| 000Fh | 3 | Side 1's start |
-| 0012h | 8 | The CAS header |
-| 001Ah | 64 | The code segment, then the other tape segments, filled in by the restorer |
-| 005Ah | 2 | The address of the game's value of VDP register 7: `RG7SAV`, F3E6h, when it equals the snapshot's register 7, otherwise 005Dh |
-| 005Ch | 1 | The frames in 0.1 second: 5 when bit 7 of the ROM's byte 002Bh is set, for 50 Hz, otherwise 6 |
-| 005Dh | 1 | The snapshot's VDP register 7 |
-| 005Eh | 1 | The side that the tape position is on: 0 for side 1, 1 for side 2, set by `build.py` from the position at the snapshot |
-| 005Fh | 2 | The address of the game's value of VDP register 1: `RG1SAV`, F3E0h, when it equals the snapshot's register 1, otherwise 0061h |
-| 0061h | 1 | The snapshot's VDP register 1 |
-| 0062h | 1 | Unused, 0 |
-| 0063h | 1 | 1 when the tape has a side 2, set by `build.py` |
-| 0064h | 3 | The tape position while `TAPIN` looks for a header |
-| 0067h | 3 | Side 1's end before its padding, set by `build.py` when the tape has a side 2, otherwise side 1's end |
-| 006Ah | 1 | The tape's mode, filled in by the restorer: 1 for the manual tape of `/M`, 0 for the automatic tape |
-| 006Bh | | The routines, then the tape |
+| 0000h | 3 | The tape position |
+| 0003h | 3 | Side 1's end, which is side 2's start |
+| 0006h | 3 | Side 2's end, equal to side 1's end without a side 2 |
+| 0009h | 3 | Side 1's start |
+| 000Ch | 8 | The CAS header |
+| 0014h | 64 | The code segment, then the other tape segments, filled in by the restorer |
+| 0054h | 1 | The tape's mode, filled in by the restorer: 1 for the manual tape of `/M`, 0 for the automatic tape |
+| 0055h | 2 | The address of the game's value of VDP register 7: `RG7SAV`, F3E6h, when it equals the snapshot's register 7, otherwise 0058h |
+| 0057h | 1 | The frames in 0.1 second: 5 when bit 7 of the ROM's byte 002Bh is set, for 50 Hz, otherwise 6 |
+| 0058h | 1 | The snapshot's VDP register 7 |
+| 0059h | 1 | The side that the tape position is on: 0 for side 1, 1 for side 2, set by `build.py` from the position at the snapshot |
+| 005Ah | 2 | The address of the game's value of VDP register 1: `RG1SAV`, F3E0h, when it equals the snapshot's register 1, otherwise 005Ch |
+| 005Ch | 1 | The snapshot's VDP register 1 |
+| 005Dh | 1 | 1 when the tape has a side 2, set by `build.py` |
+| 005Eh | 3 | The tape position while `TAPIN` looks for a header |
+| 0061h | 3 | Side 1's end before its padding, set by `build.py` when the tape has a side 2, otherwise side 1's end |
+| 0064h | 4 | Where a read of the manual tape starts again after GRAPH or CODE, and its stack pointer |
+| 0068h | | The routines, then the tape |
+
+In the mode without a part in page 3, T0 holds the same fields from 19DDh, in the
+same order, with three differences. The table of segments holds 16 segments, all of
+them the tape's. T0 has no field after the byte that says whether the tape has a
+side 2. In place of the tape's mode, after the table of segments, T0 holds 6 bytes
+for the page that `TAPIN` borrows:
+
+| Byte | What it holds |
+|---|---|
+| 1 | The game's slot register value, while `TAPIN` borrows the page |
+| 2 | The mask that clears the page's bits in a slot register value |
+| 3 | The slot of DOS's mapper in the page's bits, filled in by the restorer |
+| 4 | The port of the page's mapper register, FDh or FEh |
+| 5 | The high byte of the page's first address |
+| 6 | The game's segment in the page |
 
 ## The entry code's data
 
-The entry code keeps its data in page 3, before its code:
+The service's part of page 3 keeps its data after its entries, before its code:
 
 | Address | Value |
 |---|---|
@@ -87,19 +109,25 @@ The entry code keeps its data in page 3, before its code:
 | FCF7h | T0's segment, filled in by the restorer |
 | FCF8h | The code segment, filled in by the restorer |
 | FCF9h | The game's mapper register FCh, from `build.py`, or T0's segment when T0 replaces the ROM |
-| FCFAh | 1 while the entry code runs, so that T0's `TAPIOF` and `TAPOOF` leave interrupts off |
-| FCFBh | 1 while the manual tape is stopped ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)): set by `build.py` when the motor is off at the snapshot, by `TAPIOF` and `STMOTR`, and when a read reaches a side's end |
+| FCFAh | 1 while the manual tape is stopped ([INTERNALS.md, The manual tape](INTERNALS.md#the-manual-tape)): set by `build.py` when the motor is off at the snapshot, by `TAPIOF` and `STMOTR`, and when a read reaches a side's end |
+
+The restorer writes the first three bytes, and the fourth when T0 replaces the ROM,
+one after the other, so `src/service.inc` asserts their order.
 
 ## Image
 
 All numbers are little-endian, and the CRC-16 is CRC-16/CCITT-FALSE: polynomial
 1021h, initial value FFFFh, not reflected, no final XOR. The image holds 4,096 bytes
 of header and tables, padded with zeros, then the data of each record in table
-order, 16,384 bytes each, except a block of zeros, which holds none.
+order, 16,384 bytes each, except a block of zeros, which holds none. A record's
+number is its place in the record table, from 0. `src/service.inc` defines this
+layout once, under names that start with `H_`, `REC_` and `FLAG_`. The restorer is
+assembled with these names, and `build.py` reads them from `SERVICE.BIN`'s symbols
+([SERVICE.BIN](#servicebin)).
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 8 | `SNAPCAS4`, which changes when the image's format changes |
+| 0 | 8 | The mark: `SNAPCAS6`. Its last character is the format's number, which changes when the image's format changes, and when the places change where the restorer writes in the image's service segments ([The code segment](#the-code-segment)) |
 | 8 | 2 | CRC-16 of the main ROM's 32 KB |
 | 10 | 2 | CRC-16 of the sub-ROM's 16 KB, or 0 on an MSX1 |
 | 12 | 1 | Number of records |
@@ -117,9 +145,13 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 | 54 | 1 | The snapshot's VDP register 1 |
 | 55 | 1 | Without a part in page 3, the page that `TAPIN` borrows, 1 or 2, otherwise 0 |
 | 56 | 1 | Bit n set when slot n is not expanded in the capture |
-| 57 | 7 | Zero |
+| 57 | 1 | The number of the record that holds the tail |
+| 58 | 1 | With the tape service, the number of the record that holds the game's page 3, otherwise 0 |
+| 59 | 1 | Number of places |
+| 60 | 4 | Zero |
 | 64 | 4 per record | Record table |
 | 64 + 4 × records | 2 per port write | Port writes: port, value |
+| After the port writes | 3 per place | Places: the record's number, then the offset in the record's data, 2 bytes |
 
 | Record byte | 0 | 1 | 2 | 3 |
 |---|---|---|---|---|
@@ -129,7 +161,26 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 | VRAM block | 4 | Block number, 0 to 7 | 0 | 0 |
 | VRAM block of zeros | 5 | Block number, 0 to 7 | 0 | 0 |
 
+The header holds each table's length in one byte, so an image has at most 255
+records, 255 port writes and 255 places, and a record's number is at most 254.
+
+A game can select one mapper segment in two pages. The segment has one record, with
+the lower of the two pages in its page byte. So the restorer does not find the tail
+and the game's page 3 by a record's page byte. The header names the two records, in
+its bytes 57 and 58.
+
+A place is a byte in a RAM page, and the byte's value depends on the machine that
+restores the image. The restorer writes into each place the slot register value that
+selects DOS's mapper in page 0. That value is the header's slot register value with
+the primary slot of DOS's mapper in the bits of page 0. `build.py` lists a place for
+each stub of `TAPION` that it patches in the mode without a part in page 3
+([INTERNALS.md, Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)).
+
 ## Tail
+
+The tail is 26 bytes of code that the restorer and `build.py` complete.
+`src/service.inc` names the offsets of the bytes that they fill in, as `TAIL_MAP` to
+`TAIL_AF`, and `src/service.asm` checks these offsets against the tail's code.
 
 | Offset | Bytes | Instruction |
 |---|---|---|
@@ -165,32 +216,51 @@ order, 16,384 bytes each, except a block of zeros, which holds none.
 
 ## SERVICE.BIN
 
-`SERVICE.BIN` starts with a table of its parts, and `build.py` reads only the parts
-that it names:
+`SERVICE.BIN` starts with a table of its parts:
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 1 | Version: 12. `build.py` stops with an error on any other |
-| 1 | 1 | Number of parts |
+| 0 | 1 | Version: 15. `build.py` stops with an error on any other |
+| 1 | 1 | Number of parts: 7 |
 | 2 | 4 per part | Each part's offset and length in the file, 2 bytes each |
 
-The parts hold the code that `build.py` places, with the operands and the data that
-`build.py` and the restorer fill in set to 0:
+The first five parts hold the code that `build.py` places, with the operands and the
+data that `build.py` and the restorer fill in set to 0:
 
 | Part | What it holds |
 |---|---|
 | 0 | The tail ([Tail](#tail)) |
 | 1 | T0's stubs, for 19DDh to 1B44h ([INTERNALS.md, Tape service](INTERNALS.md#tape-service)) |
-| 2 | The service's part of page 3, for FCE1h to FD88h |
+| 2 | The service's part of page 3, for FCE1h to FD6Fh |
 | 3 | The code segment's data and routines, from 0000h, up to the tape's start |
-| 4 | The addresses of `STMOTR`'s stub, of the tape position in the code segment, of the byte at FCF9h, of the marker's data in the code segment and of `e_sp` in page 3, with the most segments that the code segment and the tape can use, 2 bytes each |
-| 5 | T0's routines and data without a part in page 3, for 19DDh to 1B44h ([INTERNALS.md, Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)) |
-| 6 | The addresses of T0's routines for the jump table's entries from 00E1h to 00F3h, in their order, then of T0's tape position, borrowed page and flash's data, and the most segments of the tape, 2 bytes each |
-| 7 | The offsets in the file of the bytes that move with the part of page 3, 2 bytes each: the high bytes of the addresses in that part |
+| 4 | T0's data and routines without a part in page 3, for 19DDh to 1B44h ([INTERNALS.md, Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)) |
+| 5 | The symbols: for each, in the order of their names, its value in 2 bytes, its name's length in 1 byte, and its name in ASCII |
+| 6 | The offsets in the file of the bytes that move with the part of page 3, 2 bytes each: the high bytes of the addresses in that part, those of part 5's symbols among them |
+
+The symbols are the only source of the service's addresses for `build.py`, which
+looks each one up by its name. They are the labels and constants that
+`src/service.asm` names in its `EXPORT` lines, under the names of the assembly:
+
+| Symbols | What they are |
+|---|---|
+| `E_PAGE`, `E_ENTRY`, `E_CODE`, `E_FC`, `E_STOP`, `e_sp` | The page of the part of page 3, its first entry, three of its data bytes ([The entry code's data](#the-entry-codes-data)), and its first scratch byte, where the check's watch ends |
+| `P3_FREE`, `P3_FREE_END` | FCC9h and FD88h: the area that must be zero for the part to stay at FCE1h |
+| `T0_CODE`, `T0_END` | 19DDh and 1B45h: the BIOS's tape code in T0, and the first byte after it |
+| `t_tapion`, `t_tapin`, `t_tapiof`, `t_tapoon`, `t_tapout`, `t_tapoof`, `t_stmotr` | T0's stubs. The first six are at the addresses that the ROM's jump table must hold ([T0's jump table](#t0s-jump-table)), and the last is where `build.py` points the entry 00F3h |
+| `D_POS`, `D_S1END`, `D_TOTAL`, `D_START`, `D_S1REAL`, `D_BORDER`, `D_FRAMES`, `D_VDP7`, `D_SIDE`, `D_SCREEN`, `D_VDP1`, `D_TWO`, `SEGS_MAX` | The code segment's fields that `build.py` fills in ([The code segment](#the-code-segment)), and the most segments of the code segment and the tape |
+| `wrap.one`, `wrap.two` | The code segment's two jumps that leave the end of the tape's last side, for a tape of one side and for side 2, where the check learns that the game has read the tape to its end ([INTERNALS.md, Check](INTERNALS.md#check)) |
+| The names that start with `t0m.`, and `T_SEGS_MAX` | The same for T0 without a part in page 3: its routines for the jump table's entries, as `t0m.tapion`, its fields, with those of the borrowed page, as `t0m.D_PAGE_MASK`, and the most segments of the tape |
+| `TAIL_PORT`, `TAIL_STACK`, `TAIL_SP`, `TAIL_EI`, `TAIL_JP`, `TAIL_PC`, `TAIL_AF` | The offsets in the tail of the bytes that `build.py` fills in, and of the two that the check reads: the port of the worker's page's mapper register, and the jump to the game ([Tail](#tail)) |
+| `IMAGE_FORMAT`, `H_SIZE`, `DATA_SIZE`, the names that start with `H_`, `REC_SIZE`, `WRITE_SIZE`, `PLACE_SIZE` | The image's layout: the format's number as the mark's last character, the header's 4,096 bytes, a record's 16,384 bytes of data, each header field's offset, and the size of an entry of each table ([Image](#image)) |
+| `FLAG_ROM_KEEP`, `FLAG_T0` | The bits of the header's flags: 1 and 2 |
+| `REC_MAPPER`, `REC_RAM`, `REC_SERVICE`, `REC_VRAM`, `REC_ZEROS` | The record types, 1 to 5 |
 
 The Makefile assembles `src/service.asm` twice, with the part of page 3 at FCE1h and
-at FBE1h, one page lower, and `tools/relocs.py` lists the bytes that differ as the
-last part. They differ by exactly 1, and the assembly at FCE1h is the file.
+at FBE1h, one page lower. `tools/relocs.py` appends each assembly's symbols as part
+5, and then lists the bytes that differ between the two assemblies as the last part.
+These bytes differ by exactly 1, and the assembly at FCE1h is the file. `build.py`
+moves the part by adding the difference of the pages to each listed byte, so a
+symbol in the part has the moved part's address.
 
 ## CAS data
 
@@ -211,7 +281,8 @@ own for MSX, 4Bh (the makeTSX project's tutorial,
 github.com/nataliapc/makeTSX/wiki). It starts with `ZXTape!`, 1Ah and a 2-byte
 version, and then holds blocks, each an ID byte and its body (TZX format 1.20,
 worldofspectrum.net/TZXformat.html). `tools/tsx.py` reads the 12 blocks that the
-2354 files use, and stops with an error at any other: 10h, 11h and 4Bh hold bytes,
+2354 files use, and stops with an error at any other, and at a block that the file's
+end cuts, with the block's offset: 10h, 11h and 4Bh hold bytes,
 15h a recording of the signal, 12h, 13h and 20h pulses and pauses, and 21h, 22h,
 30h, 32h and 35h groups and text. It counts each block's pulses and pauses in
 T-states of 3.5 MHz, the TZX format's clock, for the block's time, and the times end

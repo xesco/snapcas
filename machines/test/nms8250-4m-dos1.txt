@@ -1,0 +1,5 @@
+# An NMS 8250 whose single mapper holds 4 MB, made by the Makefile, under
+# MSX-DOS 1, which leaves segments 4 to 255 free: for a page in segment 255.
+openmsx -machine Philips_NMS_8250_4m
+disk diska
+dosfiles msxdos1

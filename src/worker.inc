@@ -113,9 +113,10 @@ make_table:
 
 ; ---- A copy into page 0 (step 3), run in page 1 ----
 
-; Copies the 16 KB at 8000h into page 0 of slot ID C, with mapper segment E,
-; or FFh for a page outside a mapper, then reads the page back. Returns with
-; carry set on a mismatch. dos_seg0 holds DOS's segment in page 0.
+; Copies the 16 KB at 8000h into page 0 of slot ID C, then reads the page
+; back. D is 1 for a page in a mapper, with its segment in E, and 0 for a page
+; outside a mapper. Returns with carry set on a mismatch, and with dos_fc in
+; mapper register FCh again.
 copy_page0:
         di
         ld (w_sp),sp
@@ -124,9 +125,9 @@ copy_page0:
         push de
         call select_slot
         pop de
+        dec d
+        jr nz,.copy             ; outside a mapper
         ld a,e
-        cp 0FFh
-        jr z,.copy
         out (0FCh),a
 .copy:
         ld hl,8000h
@@ -152,7 +153,7 @@ copy_page0:
         scf
 .out:
         push af
-        ld a,(dos_seg0)
+        ld a,(dos_fc)
         out (0FCh),a
         call restore_slot
         pop af
@@ -280,7 +281,8 @@ write_subslot:
 ; f_holdn to f_im are read through IX from f_holdn, so they stay within 127
 ; bytes of it, and f_hold comes last.
 
-dos_seg0:   db 0                ; DOS's segment in page 0
+dos_fc:     db 0                ; mapper register FCh's value under DOS: DOS's
+                                ; segment in page 0
 rom_crc:    dw 0
 crc:        dw 0
 rom_id:     db 0
@@ -304,7 +306,7 @@ f_ix:       dw 0
 f_iy:       dw 0
 f_i:        db 0
 f_im:       db 0
-f_hold:     ds 2*64             ; each: the holding segment, its own segment
+f_hold:     ds 2*HOLD_MAX       ; each: the holding segment, its own segment
             ds 64
 w_stack:
             align 256

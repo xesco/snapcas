@@ -1,15 +1,12 @@
-"""Step 26 (docs/PLAN.md): snapcas.py sync, which copies a machine's images and
-SNAPCAS.COM to a card (docs/CLI.md, Sync a card). The tests make the images and
-the card in folders of their own."""
+"""snapcas.py sync, which copies a machine's images and SNAPCAS.COM to a card
+(docs/CLI.md, Sync a card, and docs/PLAN.md, step 26). The tests make the
+images and the card in folders of their own. Pure tier."""
 import os
-import shutil
-import sys
-import tempfile
 import unittest
+from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "tools"))
-import card  # noqa: E402
+import support
+import card
 
 
 def write(path, data):
@@ -20,7 +17,7 @@ def write(path, data):
 
 class Sync(unittest.TestCase):
     def setUp(self):
-        self.top = tempfile.mkdtemp()
+        self.top = support.temp(self)
         self.images = os.path.join(self.top, "images")
         self.com = os.path.join(self.top, "SNAPCAS.COM")
         self.card = os.path.join(self.top, "card")
@@ -29,9 +26,6 @@ class Sync(unittest.TestCase):
         for key, name in (("GAUNTLET", "GAUNTLET.SNP"), ("SUPERMSX/GOLF", "GOLF.SNP"),
                           ("custom/MYGAME", "MYGAME.SNP"), ("1942", "1942.SNP")):
             write(os.path.join(self.images, key, name), key.encode())
-
-    def tearDown(self):
-        shutil.rmtree(self.top)
 
     def test_each_file_goes_to_its_letters_folder(self):
         self.assertEqual(sorted(card.card_files(self.images, self.com)), sorted([
@@ -50,6 +44,16 @@ class Sync(unittest.TestCase):
         with open(os.path.join(self.card, "SNAPCAS", "G", "GAUNTLET.SNP"), "rb") as f:
             self.assertEqual(f.read(), b"a new build")
         self.assertTrue(os.path.isfile(os.path.join(self.card, "SNAPCAS", "Z", "ZANAC.SNP")))
+
+    def test_a_copy_that_fails_leaves_no_file_under_its_name(self):
+        files = card.card_files(self.images, self.com)
+        with mock.patch.object(card.os, "fsync", side_effect=OSError(28, "No space left on device")):
+            with self.assertRaises(OSError):
+                card.sync(files, self.card, log=lambda text: None)
+        self.assertEqual([name for _, _, names in os.walk(self.card) for name in names], [])
+        # The next sync copies every file, and leaves no temporary file.
+        self.assertEqual(card.sync(files, self.card, log=lambda text: None), (5, 0))
+        self.assertFalse(any(name.endswith(".$$$") for _, _, names in os.walk(self.card) for name in names))
 
     def test_the_cards_snapcas_or_bin_folder_is_refused(self):
         for name in ("SNAPCAS", "bin"):

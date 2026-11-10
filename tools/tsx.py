@@ -28,14 +28,15 @@ def u(data, at, n):
     return int.from_bytes(data[at:at + n], "little")
 
 
-def bits_time(data, zero, one, pulses0=2, pulses1=2, used=8):
+def bits_time(data, zero, one, used=8):
     """The T-states of data's bits, most significant first, with used bits of
-    the last byte, as the TZX blocks 10h, 11h and 14h send them."""
+    the last byte, as the TZX blocks 10h and 11h send them: 2 pulses for each
+    bit."""
     ones = sum(bin(b).count("1") for b in data[:-1]) if data else 0
     total = 8 * (len(data) - 1) + used if data else 0
     if data:
         ones += bin(data[-1] >> (8 - used)).count("1")
-    return ones * pulses1 * one + (total - ones) * pulses0 * zero
+    return 2 * (ones * one + (total - ones) * zero)
 
 
 def standard(body):
@@ -64,10 +65,15 @@ def kcs_time(body):
 def read(data):
     """The file's blocks that hold bytes or signal, as the fields of
     tape.Block: standard, the bytes, their offset in the file, and the
-    player's seconds at the block's start and end."""
+    player's seconds at the block's start and end. A block that the file's
+    end cuts stops the reader, as a file cut in a download has."""
     if data[:8] != SIGNATURE:
         raise TsxError("not a TSX file: no ZXTape! signature")
     at, t, found = 10, 0, []
+
+    def need(n):
+        if at + n > len(data):
+            raise TsxError(f"block {block:02X}h at {at - 1:X}h goes past the file's end")
 
     def add(is_standard, start, end, length):
         nonlocal t
@@ -77,45 +83,67 @@ def read(data):
     while at < len(data):
         block, at = data[at], at + 1
         if block == 0x10:
+            need(4)
             pause, n = u(data, at, 2), u(data, at + 2, 2)
+            need(4 + n)
             body = data[at + 4:at + 4 + n]
             pilots = 8063 if body and body[0] < 128 else 3223
             add(False, at + 4, at + 4 + n, pilots * 2168 + 667 + 735 + bits_time(body, 855, 1710))
             t += pause * T_STATES // 1000
             at += 4 + n
         elif block == 0x11:
+            need(18)
             pilot, sync1, sync2, zero, one, pilots = (u(data, at + 2 * k, 2) for k in range(6))
             used, pause, n = data[at + 12], u(data, at + 13, 2), u(data, at + 15, 3)
+            need(18 + n)
+            if used > 8:
+                raise TsxError(f"block 11h at {at - 1:X}h uses {used} bits of its last byte")
             body = data[at + 18:at + 18 + n]
             add(False, at + 18, at + 18 + n, pilots * pilot + sync1 + sync2 + bits_time(body, zero, one, used=used))
             t += pause * T_STATES // 1000
             at += 18 + n
         elif block == 0x12:
+            need(4)
             t += u(data, at, 2) * u(data, at + 2, 2)
             at += 4
         elif block == 0x13:
+            need(1)
             n = data[at]
+            need(1 + 2 * n)
             t += sum(u(data, at + 1 + 2 * k, 2) for k in range(n))
             at += 1 + 2 * n
         elif block == 0x15:
+            need(8)
             sample, pause, used, n = u(data, at, 2), u(data, at + 2, 2), data[at + 4], u(data, at + 5, 3)
+            need(8 + n)
             # A recording of the signal, with no bytes to read or patch.
             add(False, at + 8, at + 8, sample * (8 * max(n - 1, 0) + used))
             t += pause * T_STATES // 1000
             at += 8 + n
         elif block == 0x20:
+            need(2)
             t += u(data, at, 2) * T_STATES // 1000
             at += 2
         elif block in (0x21, 0x30):
+            need(1)
+            need(1 + data[at])
             at += 1 + data[at]
         elif block == 0x22:
             pass
         elif block == 0x32:
+            need(2)
+            need(2 + u(data, at, 2))
             at += 2 + u(data, at, 2)
         elif block == 0x35:
+            need(20)
+            need(20 + u(data, at + 16, 4))
             at += 20 + u(data, at + 16, 4)
         elif block == 0x4B:
+            need(4)
             n = u(data, at, 4)
+            need(4 + n)
+            if n < 12:
+                raise TsxError(f"block 4Bh at {at - 1:X}h is shorter than its 12 bytes of settings")
             body = data[at:at + 4 + n]
             add(standard(body), at + 16, at + 4 + n, kcs_time(body))
             t += u(body, 4, 2) * T_STATES // 1000

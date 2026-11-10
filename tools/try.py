@@ -7,13 +7,13 @@ Usage: try.py <game> <machine> --dos <dir>
 The disk holds them, SNAPCAS.COM and the image that snapcas.py snap moved to
 images/<machine>/<game>/, and goes to try/disk.dsk in the game's work folder.
 The run passes the machine's boot menu and types SNAPCAS <GAME> at DOS's
-prompt, as the player does on the real machine.
+prompt, as the player does on the real machine. When the prompt does not
+appear within the prelude's deadline, openMSX prints the error and its window
+stays.
 
 Exit status: 0 when openMSX ends, 1 for an error in the input files or no
 image, 2 when openMSX cannot make the disk.
 """
-import argparse
-import glob
 import os
 import sys
 
@@ -23,23 +23,25 @@ sys.path.insert(0, HERE)
 import gamefile  # noqa: E402
 import msx  # noqa: E402
 
-# DOS's prompts on the disk's drive, for a machine that boots DOS from the
-# disk: Nextor's and MSX-DOS 2's with the path, and MSX-DOS 1's.
-PROMPTS = ("A:\\>", "A>")
 
-# Waits for one of the prompts, given in hex, and types the text in hex.
-TYPE_AT_PROMPT = """
-proc type_at_prompt {prompts hex {tries 0}} {
-  foreach prompt $prompts {
-    if {[string first [binary format H* $prompt] [screen]] >= 0} { type [binary format H* $hex]; return }
-  }
-  if {$tries < 240} { after time 0.5 [list type_at_prompt $prompts $hex [expr {$tries + 1}]] }
-}
-"""
+def script(machine, name, dos):
+    """The run's Tcl: it passes the machine's boot menu, waits for DOS's
+    prompt and types SNAPCAS and the image's name. dos are the DOS system
+    files on the disk. On a machine that boots DOS from its own disk, the
+    prompt is that DOS's, and the try's disk is another drive. Otherwise DOS
+    boots from the try's disk, drive A: Nextor's and MSX-DOS 2's prompt shows
+    the path, and MSX-DOS 1's, which has no COMMAND2.COM, does not."""
+    if machine.dos:
+        prompt, typed = machine.dos[0], f"{machine.dos[1]}:\rSNAPCAS {name}"
+    elif any(os.path.basename(path).upper() == "COMMAND2.COM" for path in dos):
+        prompt, typed = "A:\\>", f"SNAPCAS {name}"
+    else:
+        prompt, typed = "A>", f"SNAPCAS {name}"
+    return f"safe {{boot {{{msx.boot_steps(machine)}}} {{{msx.type_at_prompt(prompt, typed)}}}}}\n"
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Start a game's image in openMSX, to try it by hand.")
+    parser = msx.Parser(description="Start a game's image in openMSX, to try it by hand.")
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
     parser.add_argument("machine", help="a machine file's name below machines/, without .txt")
     parser.add_argument("--dos", required=True, help="the folder that holds the DOS system files")
@@ -49,9 +51,7 @@ def main():
     try:
         game = gamefile.read_game(folder, args.machine)
         machine = msx.read_machine(msx.machine_path(args.machine))
-        dos = sorted(glob.glob(os.path.join(args.dos, "*")))
-        if not dos:
-            raise OSError(f"{args.dos}: no DOS system files")
+        dos = msx.dos_files(args.dos)
     except (OSError, gamefile.GameFileError, msx.MachineError) as e:
         print(f"try.py: {e}", file=sys.stderr)
         return 1
@@ -64,21 +64,15 @@ def main():
     disk = os.path.join(gamefile.out_folder(args.machine, folder), "try", "disk.dsk")
     try:
         msx.make_disk(disk, dos + [os.path.join(ROOT, "bin", "SNAPCAS.COM"), image], machine.disk_size)
-    except RuntimeError as e:
+    except msx.DiskError as e:
         print(f"try.py: {e}", file=sys.stderr)
         return 2
-    # On a machine that boots DOS from its own disk, the try's disk is another
-    # drive.
-    if machine.dos:
-        prompts, typed = [machine.dos[0]], f"{machine.dos[1]}:\rSNAPCAS {game.name}\r"
-    else:
-        prompts, typed = PROMPTS, f"SNAPCAS {game.name}\r"
-    hexed = " ".join(p.encode("latin-1").hex() for p in prompts)
-    script = (TYPE_AT_PROMPT + f"boot {{{msx.boot_steps(machine)}}} "
-              f"{{type_at_prompt {{{hexed}}} {typed.encode('latin-1').hex()}}}\n")
     print(f"try       {os.path.relpath(image, ROOT)}: SNAPCAS {game.name}", flush=True)
-    return msx.run_window([*machine.args, f"-{machine.disk}", disk], script)
+    return msx.run_window([*machine.args, f"-{machine.disk}", disk], script(machine, game.name, dos))
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)

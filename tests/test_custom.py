@@ -1,35 +1,29 @@
-"""Step 25 (docs/PLAN.md): custom games, the user's own game files in custom/,
-each with its tape files beside it (custom/README.md). The tests point
-gamefile.CUSTOM at a folder of their own, so that they leave custom/ alone."""
+"""Custom games, the user's own game files in custom/, each with its tape
+files beside it (custom/README.md, and docs/PLAN.md, step 25). The tests give
+gamefile.CUSTOM a folder of their own for the time of a test, so that they
+leave custom/ alone. Pure tier."""
 import os
-import shutil
-import sys
-import tempfile
 import unittest
+from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, ROOT)
-sys.path.insert(0, os.path.join(ROOT, "tools"))
-import gamefile  # noqa: E402
-import snapcas  # noqa: E402
+import support
+import gamefile
+import pipeline
+import snapcas
 
-MACHINE = "phc28s-ram64k-carnivore2"
+ROOT = support.ROOT
+MACHINE = support.PHC28S
 
 
 class Custom(unittest.TestCase):
     def setUp(self):
-        self.real_custom = gamefile.CUSTOM
-        gamefile.CUSTOM = os.path.join(tempfile.mkdtemp(), "custom")
-        self.folder = os.path.join(gamefile.CUSTOM, "MyGame")
-        os.makedirs(self.folder)
-        with open(os.path.join(self.folder, "game.txt"), "w") as f:
-            f.write("# My game, my own dump\ncas MYGAME.CAS\n")
+        custom = os.path.join(support.temp(self), "custom")
+        patch = mock.patch.object(gamefile, "CUSTOM", custom)
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.folder = support.game_folder(os.path.join(custom, "MyGame"), "# My game, my own dump\ncas MYGAME.CAS\n")
         # A folder without a game.txt is no game.
-        os.makedirs(os.path.join(gamefile.CUSTOM, "notes"))
-
-    def tearDown(self):
-        shutil.rmtree(os.path.dirname(gamefile.CUSTOM))
-        gamefile.CUSTOM = self.real_custom
+        os.makedirs(os.path.join(custom, "notes"))
 
     def test_the_custom_games_are_the_folders_with_a_game_file(self):
         self.assertEqual(gamefile.custom_names(), ["custom/MyGame"])
@@ -42,7 +36,7 @@ class Custom(unittest.TestCase):
 
     def test_a_custom_games_tapes_are_in_its_folder(self):
         self.assertTrue(gamefile.is_custom(self.folder))
-        self.assertEqual(snapcas.tapes_folder(self.folder), self.folder)
+        self.assertEqual(pipeline.tapes_folder(self.folder), self.folder)
 
     def test_a_custom_games_work_folder_and_image_are_below_custom(self):
         self.assertEqual(gamefile.out_folder(MACHINE, self.folder),
@@ -53,7 +47,7 @@ class Custom(unittest.TestCase):
     def test_a_shipped_game_is_no_custom_game(self):
         folder = gamefile.game_folder("GAUNTLET")
         self.assertFalse(gamefile.is_custom(folder))
-        self.assertEqual(snapcas.tapes_folder(folder), gamefile.DOWNLOADS)
+        self.assertEqual(pipeline.tapes_folder(folder), gamefile.DOWNLOADS)
         self.assertEqual(gamefile.game_key(folder), "GAUNTLET")
 
 

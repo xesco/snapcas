@@ -1,12 +1,52 @@
-;; The tape service's routines (INTERNALS.md, Tape service), which service.asm
-;; assembles twice: in the code segment, which runs in page 0 and reads the
-;; tape through the reader in page 3, and in T0 for the mode without a part in
-;; page 3 (T0MODE), which reads the tape through a borrowed page 1 or 2. The
-;; module that includes this file sets T0MODE and the data's places, D_POS to
-;; D_VDP1, D_TWO, D_HEADER, D_SEGS and, in T0 mode, D_PAGE.
+;; The tape service's data and routines (INTERNALS.md, Tape service), which
+;; service.asm assembles twice: in the code segment, which runs in page 0 and
+;; reads the tape through the reader in page 3, and in T0 for the mode without
+;; a part in page 3 (T0MODE), which reads the tape through a borrowed page 1 or
+;; 2. The module that includes this file sets T0MODE. The second copy is in
+;; the module t0m, so its labels are t0m.D_POS, t0m.tapion and so on.
 ;;
 ;; TAPION and TAPIN behave as the BIOS's: carry clear on success, set when
 ;; CTRL+STOP is held, and they run with interrupts off, as the BIOS's do.
+
+; The data, at the start of each copy (FORMATS.md, The code segment). build.py
+; fills in each field by its name, except where the restorer does, and a
+; position counts bytes from the start of the first tape segment.
+D_POS:    ds 3,0        ; the tape position at the snapshot
+D_S1END:  ds 3,0        ; side 1's end, which is side 2's start
+D_TOTAL:  ds 3,0        ; side 2's end, or side 1's end without a side 2
+D_START:  ds 3,0        ; side 1's start
+D_HEADER: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h  ; the CAS header (FORMATS.md, CAS data)
+; restorer: the tape's segments in order, the code segment first.
+        if T0MODE
+D_SEGS:   ds T_SEGS_MAX,0
+; The borrowed page (INTERNALS.md, Without a part in page 3). next_byte reads
+; these 6 bytes in this order.
+D_PAGE:   db 0          ; the game's slot register while TAPIN borrows the page
+D_PAGE_MASK: db 0       ; the slot register's mask that clears the page's bits
+D_PAGE_SLOT: db 0       ; restorer: DOS's mapper's slot in the page's bits
+D_PAGE_PORT: db 0       ; the page's mapper register's port, FDh or FEh
+D_PAGE_HIGH: db 0       ; the high byte of the page's first address
+D_PAGE_SEG:  db 0       ; the game's segment in the page
+        else
+D_SEGS:   ds SEGS_MAX,0
+D_MODE:   db 0          ; restorer: 1 for the manual tape of /M, 0 for the
+                        ; automatic tape (INTERNALS.md, The manual tape)
+        endif
+; The flash's data (mark).
+D_BORDER: dw 0          ; where the game's VDP register 7 is: RG7SAV or D_VDP7
+D_FRAMES: db 0          ; the frames in 0.1 second
+D_VDP7:   db 0          ; the snapshot's VDP register 7
+D_SIDE:   db 0          ; 0 while the position is on side 1, 1 on side 2
+D_SCREEN: dw 0          ; where the game's VDP register 1 is: RG1SAV or D_VDP1
+D_VDP1:   db 0          ; the snapshot's VDP register 1
+D_TWO:    db 0          ; 1 when the tape has a side 2
+        if !T0MODE
+D_SAVE:   ds 3,0        ; TAPIN's position while it looks for a header
+D_S1REAL: ds 3,0        ; side 1's end before its padding to a multiple of 8,
+                        ; with a side 2, otherwise D_S1END's
+again:    dw 0          ; where the manual tape's read starts again
+again_sp: dw 0          ; that read's stack pointer
+        endif
 
 ; The colours of the flash after GRAPH, CODE and RETURN, and when the position
 ; changes side or goes back to a side's start by itself.
@@ -14,7 +54,7 @@ SIDE_A  equ 3                   ; light green
 SIDE_B  equ 9                   ; light red
 PLAY    equ 11                  ; light yellow, after RETURN on the manual tape
 
-c_tapion:
+tapion:
         di
         call keys
         ret c                   ; CTRL+STOP
@@ -50,6 +90,9 @@ c_tapion:
         and 7
         jr z,.header
         call next_byte
+        if !T0MODE
+        ret c                   ; CTRL+STOP while the stopped manual tape waits
+        endif
         jr .align
 .header:
         ld hl,D_HEADER
@@ -60,6 +103,9 @@ c_tapion:
         call next_byte
         pop hl
         pop bc
+        if !T0MODE
+        ret c                   ; CTRL+STOP, as above
+        endif
         cp (hl)
         jr nz,.search
         inc hl
@@ -67,7 +113,7 @@ c_tapion:
         or a
         ret
 
-c_tapin:
+tapin:
         di
         call keys
         ret c                   ; CTRL+STOP
@@ -121,6 +167,9 @@ c_tapin:
         call next_byte
         pop hl
         pop bc
+        ; CTRL+STOP while the stopped manual tape waits: the read below, from
+        ; the position before the header, returns the carry.
+        jr c,.data
         cp (hl)
         jr nz,.data
         inc hl
@@ -134,10 +183,14 @@ c_tapin:
         endif
 ; Returns in A the byte at the tape position, and advances the position. The
 ; manual tape, when stopped, first waits for the player's key, and returns
-; carry for CTRL+STOP without a byte.
+; carry for CTRL+STOP without a byte. With a byte, it returns B = 0, as the
+; BIOS's TAPIN does, whose bit loop ends in a DJNZ: Gauntlet's level loader
+; adds BC to its sum after LD C,A. Every path of wrap ends in a DJNZ or an
+; LDIR, in lt24, mark or to_side, and TAPIN's own return for side 1's padding
+; comes after an LDIR.
 next_byte:
         if !T0MODE
-        ld a,(D_STOP)
+        ld a,(E_STOP)
         or a
         call nz,wait
         ret c
@@ -276,7 +329,10 @@ row:
 ; start; at or past side 2's end, side 2's start. TAPION's rounding can pass
 ; a side's end, so the tests are not for equality. Side 2 starts at side 1's
 ; end, so a read that reaches it changes only D_SIDE. Each change shows the
-; side's border colour.
+; side's border colour. The two jumps at .one and .two are where the automatic
+; tape leaves its last side's end: tools/tcl/check.tcl takes the jump at .one
+; with Z, or the one at .two without carry, for a tape that the service has
+; read to its end.
 wrap:
         call on_side1
         ld a,0
@@ -288,9 +344,11 @@ wrap:
         endif
         ld a,(D_TWO)            ; 0 when the tape has no side 2
         or a
+.one:
         jr z,side_a             ; past side 1's end without a side 2
         ld de,D_TOTAL
         call on_side1.pos
+.two:
         jr nc,side_b.two        ; past side 2's end
         ld a,1
 .side:
@@ -358,7 +416,7 @@ wrap_manual:
         ret nz                  ; on side 2
 stop:
         ld a,1
-        ld (D_STOP),a
+        ld (E_STOP),a
         ret
 
 ; For the manual tape: keeps HL, where the read starts, and the read's stack
@@ -417,13 +475,13 @@ wait:
         call side_b
 .again:
         xor a
-        ld (D_STOP),a
+        ld (E_STOP),a
         ld sp,(again_sp)
         ld hl,(again)
         jp (hl)
 .play:
         xor a
-        ld (D_STOP),a
+        ld (E_STOP),a
         ret
 
 ; Waits until RETURN, GRAPH and CODE are all released.
@@ -436,7 +494,4 @@ release:
         bit 7,a
         jr z,release
         ret
-
-again:  dw 0                    ; where the read starts again
-again_sp: dw 0                  ; the read's stack pointer
         endif
