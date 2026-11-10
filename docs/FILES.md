@@ -80,8 +80,9 @@ line that starts with `#` is a comment, and the tools ignore blank lines. In the
 shipped game files, each line after `cas`, `side2`, `sha1`, `url`, and `name` has
 its own comment above it and a blank line before the comment. The comment says why
 the line is there. Times are decimal emulated seconds from the moment when the load
-command is typed. Addresses and bytes are hexadecimal. Only `cas` is required. This
-example is for Gauntlet, which loads its levels from side 2 of the tape:
+command is typed. Addresses and bytes are hexadecimal. A game file needs only its
+tape's line, `cas` or `tsx`. This example is for Gauntlet, which loads its levels
+from side 2 of the tape:
 
 ```
 cas GAUNTLET.CAS
@@ -229,10 +230,10 @@ compilation, and the program's place on the compilation. The game file's `url` l
 links the compilation's zip file. A loader's file name, such as ATLET, seldom gives
 the title, so the title comes from a list of the tape's contents. Each program has
 its own machine's game files, because each program has its own loader. Athletic
-Land's capture runs without the disk system only on the Sanyo PHC-28S. The capture
-of Kung-Fu Master, which is before Athletic Land on the tape, runs without the disk
-system on the PHC-28S and on the Philips VG-8020. A program that is not a game also
-has a game file, as De Demo's programs have.
+Land's capture runs without the disk system on the Sanyo PHC-28S and on the Sony
+HB-75P. The capture of Kung-Fu Master, which is before Athletic Land on the tape,
+runs without the disk system on those two machines and on the Philips VG-8020. A
+program that is not a game also has a game file, as De Demo's programs have.
 
 ## Key names
 

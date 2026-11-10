@@ -1,4 +1,4 @@
-# The `snapcas` command (draft design)
+# The `snapcas` command
 
 `snapcas.py` is one command that makes a game's image for the user's machine from
 the game's name. The command downloads the game's tape from File-Hunter when the
@@ -7,26 +7,24 @@ copies the images to a card. The command is for MSX owners who are not developer
 So its main use is one short line that holds `snap`, a game and a machine. It needs
 only Python 3 and `openMSX`, on macOS, Linux or Windows. `snapcas.py` does the steps
 of the tools that already exist ([DESIGN.md, Files and commands][files]) and adds no
-new way to make an image. This page is a draft for review. Its sections move into
-DESIGN.md and PLAN.md when the draft is approved.
+new way to make an image.
 
 ## Requirements
 
 | What | Why |
 |---|---|
 | Python 3, with its standard library only | The tools are Python 3 programs. The download uses `urllib` and `zipfile`, so the user installs nothing with pip |
-| `openMSX` 22.0, on the path or named by `OPENMSX` | The capture and the check run in `openMSX`, as they do today |
+| `openMSX` 22.0, on the path or named by `OPENMSX` | The capture and the check run in `openMSX` |
 | The system ROMs of the user's machine, in `openMSX`'s `share/systemroms` | `openMSX` needs the system ROMs to emulate the machine, and `snapcas` cannot ship them. When a ROM is missing, the command shows `openMSX`'s message, and that message names the ROM |
 | `make firmware`, once, for the machines `fsa1-mfrsd`, `hbf1xd-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper` and `vg8020-picoverse` | `make firmware` downloads the firmware of these machines into `out/cache/openmsx-home/`, an `openMSX` home with a link to the user's system ROMs. `snapcas` then uses that home in place of the default home. `OPENMSX_HOME` names another home. Without the firmware, `snap` and `try` stop and name `make firmware` |
 | A network connection, the first time that the user makes a game | The tapes come from File-Hunter, and `snapcas` cannot ship the tapes either |
 
-The user gets `snapcas` in the same way as today, as a clone or a zip of the
-repository. In the repository's folder, the user runs `./snapcas.py`. The file
-starts with `#!/usr/bin/env python3`, and git keeps the file executable, so macOS
-and Linux run it with Python 3. Windows runs the file as `py snapcas.py`. A zip of
-the repository may lose the executable bit, so `python3 snapcas.py` is the form that
-works on any OS. `snapcas` ships `bin/SNAPCAS.COM` and `bin/SERVICE.BIN`, so the
-user needs no assembler.
+The user gets `snapcas` as a clone or a zip of the repository. In the repository's
+folder, the user runs `./snapcas.py`. The file starts with `#!/usr/bin/env python3`,
+and git keeps the file executable, so macOS and Linux run it with Python 3. Windows
+runs the file as `py snapcas.py`. A zip of the repository may lose the executable
+bit. `python3 snapcas.py` then runs the command on macOS and Linux. `snapcas` ships
+`bin/SNAPCAS.COM` and `bin/SERVICE.BIN`, so the user needs no assembler.
 
 ## Commands
 
@@ -167,8 +165,7 @@ xp800-sdmapper              Gradiente Expert XP-800 (MSX1, 64 KB) with an SD Map
 
 A machine's name is its model and then its cartridges in slot order, such as
 `phc28s-ram64k-carnivore2`. The machine's capture variants have names of the same
-form ([FILES.md, Machine file][machine]). The machines have these names already, so
-the names need no change for the command.
+form ([FILES.md, Machine file][machine]).
 
 ## Download
 
@@ -182,8 +179,8 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 url https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20B)%5BRUN%27CAS-%27%5D.zip
 ```
 
-The `url` lines exist already ([FILES.md, Game file][gamefile]). Each of the 1545
-shipped game files has one.
+Each of the 1545 shipped game files has a `url` line
+([FILES.md, Game file][gamefile]).
 
 For each side, the command does these steps:
 
@@ -259,16 +256,16 @@ CD \SNAPCAS\G
 
 | Decision | Rejected | Why |
 |---|---|---|
-| A verb for each command: `snap`, `list` and `machines` | A main use without a verb, `snapcas.py <game> <machine>`, with the lists as the options `--list` and `--machines` | Without a verb, the main use requires the game and the machine, and the lists take neither. A parser cannot state that rule, so the parser's help would show the game and the machine as optional. With a verb, each command states its own arguments and has its own help. The cost is one more word. A `download` verb would add nothing, because `snap` downloads what it needs |
+| A verb for each command: `snap`, `try`, `sync`, `list` and `machines` | A main use without a verb, `snapcas.py <game> <machine>`, with the lists as the options `--list` and `--machines` | Without a verb, the main use requires the game and the machine, and the lists take neither. A parser cannot state that rule, so the parser's help would show the game and the machine as optional. With a verb, each command states its own arguments and has its own help. The cost is one more word. A `download` verb would add nothing, because `snap` downloads what it needs |
 | A machine given by its whole name, such as `phc28s-ram64k-carnivore2` | A start of its name, such as `phc28s` | The name says the machine's cartridges, and the cartridges change the image. A start that names one machine today can name another machine when a machine file is added |
 | The game by its name, as `list` shows it | A text that matches one game, as in `snap gaunt` | A text that matches one game today can match two games when a game file is added. `list` finds a game by a part of its name or title |
-| One command, `snapcas.py`, in the repository's top folder. It takes the place of `tools/snapcas.py` and runs that tool's steps | A new command beside `tools/snapcas.py` | Two commands that make an image would need two sets of docs and tests |
+| One command, `snapcas.py`, in the repository's top folder. It replaced an earlier tool, `tools/snapcas.py`, and took over that tool's steps | A new command beside the earlier tool | Two commands that make an image would need two sets of docs and tests |
 | A `url` key in the game file | Reading the link comment | A comment is free text, and the comment's line is not fixed. Athletic Land's link is on its third line. Side 2 also needs a link |
 | The tape found in the zip by its SHA-1 | By the member's name | `sha1` is already in every game file, and the member names differ from the game files' names |
 | Python's standard library only | A package from pip, such as `requests` | The user installs nothing beyond Python, on any OS |
 | Downloads of the games that the user makes, one at a time | A download of the whole collection | File-Hunter is one person's site, and a user needs the games that they play |
-| `out/cache/openmsx-home/`, the home that `make firmware` makes, when that home exists and `OPENMSX_HOME` names no other home. Otherwise, `openMSX`'s user home, as the tools use today | Always a home of the command's own, as the tests use | The tests' home links the system ROMs with a symbolic link, and Windows does not allow a symbolic link without rights. So only the machines that need `make firmware`'s files need that home |
-| The machine's description from the first sentence of each machine file's first comment | A table in the command | The machine file stays the one place for a machine's facts. The user machines' files get that comment line, and the capture variants have one today |
+| `out/cache/openmsx-home/`, the home that `make firmware` makes, when that home exists and `OPENMSX_HOME` names no other home. Otherwise, `openMSX`'s user home | Always a home of the command's own, as the tests use | The tests' home links the system ROMs with a symbolic link, and Windows does not allow a symbolic link without rights. So only the machines that need `make firmware`'s files need that home |
+| The machine's description from the first sentence of each machine file's first comment | A table in the command | The machine file stays the one place for a machine's facts. Each machine's file and each capture variant's file starts with that comment line |
 
 ## Limits
 
@@ -278,9 +275,9 @@ CD \SNAPCAS\G
 | A tape that File-Hunter has changed or removed | The command stops, because it finds no zip, or no member with the SHA-1 |
 | A machine whose system ROMs are missing | `openMSX` does not start, and the command prints `openMSX`'s error with exit code 2 |
 | `vg8020-picoverse` needs a 192 KB mapper. The mapper is `ram192k.xml` in `openMSX`'s `share/extensions`, and `make firmware` makes that file | Without the mapper, the command stops and names `make firmware` |
-| The games run, `make games`, checks every game file on only `phc28s-ram64k-carnivore2` and `vg8020-carnivore2` ([DESIGN.md, The games run][gamesrun]) | A game can fail on another machine, and `snap --check` shows the failure |
+| The games run, `make games`, checks every game file on one machine. The developers run it on three machines only: `phc28s-ram64k-carnivore2`, `vg8020-carnivore2` and `hb75p-carnivore2` ([INTERNALS.md, The games run][gamesrun]) | A game can fail on another machine, and `snap --check` shows the failure |
 | MSX-DOS 1 has no folders | A machine under MSX-DOS 1, such as `vg8235`, cannot use the card's layout. The user puts `SNAPCAS.COM` and the image into one folder by hand |
-| A game that hangs or shows garbage passes the check ([DESIGN.md, Check][check]) | The image fails only on the real machine |
+| A game that hangs or shows garbage passes the check ([INTERNALS.md, Check][check]) | The image fails only on the real machine |
 
 ## To verify
 
@@ -291,11 +288,13 @@ CD \SNAPCAS\G
 - The lowest Python 3 version that the tools run on. The requirements then name that
   version.
 
-## Not in the first version
+## What the command does not do
 
 - Several games in one run. A shell loop runs the command once for each game.
 - A download of the whole collection.
-- Tapes from any site other than File-Hunter, and TSX files.
+- Tapes from any site other than File-Hunter. The command downloads CAS files only,
+  because no shipped game file names a TSX file. A custom game can have a TSX file
+  as its tape ([Your own games](#your-own-games)).
 - A package for pip, or a program built for each OS.
 - A machine file made by the command. A new machine is still described by hand
   ([FILES.md, Machine file][machine]).

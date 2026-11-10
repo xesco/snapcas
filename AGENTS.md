@@ -2,7 +2,7 @@
 
 This page is for an AI agent that works on `snapcas`. The page gives each task as
 steps in order. Each step names the files that the step changes and the command that
-checks the step. A table gives the fix for each message that a step can print. The
+checks the step. Tables give the fix for each message that a step can print. The
 page has four tasks: to make a game's image, to add a machine, to add a game, and to
 fix a game that fails. The [README](README.md) gives the first three in short form
 for a person. The reasons behind the rules are in [docs/DESIGN.md](docs/DESIGN.md).
@@ -404,9 +404,10 @@ file.
 ### 3. Patch the code
 
 A slot patch changes the value that the loader writes to the slot register, port
-A8h, so that the loader selects the machine's RAM. On any machine, the capture
-itself already patches the forms in the next table, by the slot map that it makes of
-the machine's RAM. These forms need no line:
+A8h, so that the loader selects the machine's RAM. On any machine, the tools already
+patch the forms in the next table, by the slot map that the capture makes of the
+machine's RAM. The capture patches most of the forms, and the scan in the build
+patches two. These forms need no line:
 
 | Code | Automatic patch |
 |---|---|
