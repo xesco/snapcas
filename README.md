@@ -83,8 +83,12 @@ game on that MSX.
    ./snapcas.py snap gauntlet phc28s-ram64k-carnivore2
    ```
 
-   The command downloads the game's tape from File-Hunter and makes
+   The command downloads the game's tape from
+   [File-Hunter](https://download.file-hunter.com) and makes
    `images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`.
+
+   File-Hunter is one person's site. Download only the games that you play, one at
+   a time.
 
 5. Put the MSX's card in your computer and copy your games to it. In this example,
    `/Volumes/MSX` is the card's folder on your computer:
