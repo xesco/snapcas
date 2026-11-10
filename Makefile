@@ -210,12 +210,16 @@ MACHINE ?= phc28s-ram64k-carnivore2
 # DOS_DIR, which its machine file's dosfiles line names.
 DOS ?=
 FULL ?=
+# The run tries each game file that fails on the machine's capture variants, and
+# writes the capture line of one that passes into the machine's game file. FIX=0
+# leaves that out.
+FIX ?= 1
 
 # The run over every shipped game file on a machine (docs/INTERNALS.md, The games
 # run), apart from make test because it takes hours.
 games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) DOS_DIR=$(abspath $(DOS_DIR)) \
-	  python3 -I tools/games.py $(MACHINE) $(if $(DOS),--dos $(DOS)) $(if $(FULL),--full)
+	  python3 -I tools/games.py $(MACHINE) $(if $(DOS),--dos $(DOS)) $(if $(FULL),--full) $(if $(filter 0,$(FIX)),--no-fix)
 
 # The openMSX home that snapcas.py uses, with the firmware of the machines that
 # need it.

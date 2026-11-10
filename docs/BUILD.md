@@ -46,6 +46,7 @@ names a folder that takes the place of `dos/`, with the same folders in it, and
 |---|---|---|
 | `MACHINE=` | The MSX, as `./snapcas.py machines` lists it | `phc28s-ram64k-carnivore2` |
 | `DOS=` | The folder of the DOS files that the check boots | The MSX's own folder below `dos/`: `nextor`, `msxdos1` or `msxdos2` |
+| `FIX=0` | Turns off the retry. Without this setting, the run tries each game that fails on the MSX's capture variants. When a variant passes, the run writes the `capture` line into the machine's game file ([INTERNALS.md, The games run](INTERNALS.md#the-games-run)) | The retry is on |
 | `FULL=1` | Runs every game again. Otherwise a game keeps its last result while its files, the code, the DOS files and `openMSX`'s version are unchanged | Off |
 
 The results go to `out/games/<machine>.txt`, one line per game. The command fails

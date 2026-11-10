@@ -98,10 +98,19 @@ class Run(unittest.TestCase):
         self.results = {name: passed() for name in self.NAMES}
         self.ran, self.no_image, self.tools = [], set(), "tools"
 
-        def run_game(machine, name, dos):
+        # The capture variant whose trial passes, for each game that has one.
+        self.variants = {}
+
+        def run_game(machine, name, dos, variants=False):
             self.assertEqual((machine, dos), (MACHINE, self.dos))
+            if variants:
+                self.tried.append(name)
+                if name in self.variants:
+                    return pipeline.Result(None, 0, pipeline.PASS, False, self.variants[name], "/images/GAME.SNP")
+                return pipeline.Result("check", 3, pipeline.NO_VARIANT, False, None, None)
             self.ran.append(name)
             return self.results[name]
+        self.tried = []
         for patch in (mock.patch.object(games, "GAMES", self.games), mock.patch.object(games, "REPORTS", self.reports),
                       mock.patch.object(games, "OPENMSX_FAILURES", self.lists["openmsx"]),
                       mock.patch.object(games, "SNAPCAS_FAILURES", self.lists["snapcas"]),
@@ -134,6 +143,60 @@ class Run(unittest.TestCase):
         with open(os.path.join(self.reports, MACHINE + ".txt")) as f:
             return f.read()
 
+    def machine_file(self, name):
+        path = gamefile.machine_file(os.path.join(self.games, name), MACHINE)
+        if not os.path.exists(path):
+            return None
+        with open(path, encoding="utf-8") as f:
+            return f.read()
+
+    def test_the_run_writes_the_capture_line_of_a_variant_that_passes(self):
+        self.results.update({"ALPHA": failed(REBOOT), "BETA": failed("point 1: fail:  the restorer stopped")})
+        self.variants["ALPHA"] = "vg8020"
+        status, out, _, ran = self.run_games()
+        # BETA has no variant that passes, so it stays a new failure.
+        self.assertEqual((status, ran, sorted(self.tried)), (3, self.NAMES, ["ALPHA", "BETA"]))
+        text = self.machine_file("ALPHA")
+        self.assertEqual(text.splitlines()[0][:len("# Lines for " + MACHINE)], "# Lines for " + MACHINE)
+        self.assertEqual(text.splitlines()[-1], "capture vg8020")
+        self.assertIn("itself the game fails: point 3: fail: the machine rebooted.",
+                      " ".join(text.replace("#", " ").split()))
+        self.assertTrue(all(len(line) <= 84 for line in text.splitlines()))
+        self.assertEqual(gamefile.read_game(os.path.join(self.games, "ALPHA"), MACHINE).capture, "vg8020")
+        self.assertIsNone(self.machine_file("BETA"))
+        self.assertIn("1 game files pass with a capture line that the run wrote: ALPHA", out)
+        self.assertIn(f"ALPHA\t{pipeline.PASS}\n", self.report())
+        self.assertIn("  BETA: point 1: fail:  the restorer stopped", out)
+        # The next run keeps ALPHA's pass, though its folder has a new file.
+        self.tried.clear()
+        self.assertEqual(self.run_games()[3], [])
+        self.assertEqual(self.tried, ["BETA"])
+
+    def test_the_run_adds_the_line_to_a_machines_game_file_that_exists(self):
+        support.game_folder(os.path.join(self.games, "ALPHA"), "cas ALPHA.CAS\n",
+                            {MACHINE: "# Lines for this machine.\n\n# Why.\nservice no\n"})
+        self.results["ALPHA"] = failed(REBOOT)
+        self.variants["ALPHA"] = "vg8020"
+        self.assertEqual(self.run_games()[0], 0)
+        lines = self.machine_file("ALPHA").splitlines()
+        self.assertEqual(lines[:5], ["# Lines for this machine.", "", "# Why.", "service no", ""])
+        self.assertEqual((lines[5][:2], lines[-1]), ("# ", "capture vg8020"))
+
+    def test_the_run_tries_only_a_failure_without_a_capture_line_that_openmsx_can_load(self):
+        support.game_folder(os.path.join(self.games, "BETA"), "cas BETA.CAS\n",
+                            {MACHINE: "# Lines.\n\n# Why.\ncapture vg8020\n"})
+        self.results.update({"ALPHA": failed(REBOOT), "BETA": failed(REBOOT), "GAMMA": failed(REBOOT, transient=True)})
+        self.listed(openmsx=["ALPHA"])
+        self.run_games()
+        # ALPHA fails in openMSX itself, BETA names a variant, and GAMMA's run broke.
+        self.assertEqual(self.tried, [])
+
+    def test_no_fix_tries_no_game_file_on_a_variant(self):
+        self.results["ALPHA"] = failed(REBOOT)
+        self.variants["ALPHA"] = "vg8020"
+        self.assertEqual(self.run_games("--no-fix")[0], 3)
+        self.assertEqual((self.tried, self.machine_file("ALPHA")), ([], None))
+
     def test_the_failures_are_printed_in_three_groups_and_only_a_new_one_fails_the_run(self):
         self.results.update({"BETA": failed("capture: the load ran for more than 3600 seconds"),
                              "GAMMA": failed(REBOOT), "PACK/DELTA": failed("point 1: fail")})
@@ -142,7 +205,12 @@ class Run(unittest.TestCase):
         self.assertEqual((status, err, ran), (3, "", self.NAMES))
         lines = out.splitlines()
         self.assertEqual(lines[0], f"{MACHINE}: 0 unchanged, 4 to run, 0 without their tapes in downloads/")
-        self.assertEqual(lines[5:], [
+        # The run tries the two failures that openMSX can load on the capture
+        # variants, and no variant passes.
+        self.assertEqual(lines[5], f"{MACHINE}: 2 game files that fail to try on the capture variants")
+        self.assertEqual(sorted(lines[6:8]), ["1/2  GAMMA  no capture variant passes",
+                                              "2/2  PACK/DELTA  no capture variant passes"])
+        self.assertEqual(lines[8:], [
             f"1 of 4 game files pass; the results are in {os.path.join(self.reports, MACHINE + '.txt')}",
             "These game files fail in openMSX itself, as tests/openmsx-failures.txt lists:",
             "  BETA: capture: the load ran for more than 3600 seconds",

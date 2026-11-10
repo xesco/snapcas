@@ -269,6 +269,12 @@ machine:
 make games MACHINE=hb75p-carnivore2
 ```
 
+The run tries each game that fails on the machine's capture variants, as `snap` does
+for one game. When a variant passes, the run writes the `capture` line into the
+machine's game file, under a comment that names the variant and the failure. Most
+failures of a new machine end there, so that the machine starts with its `capture`
+lines. Read a few of the files that the run wrote. `FIX=0` turns the retry off.
+
 Do not change `bin/` or `tools/` during the run. The run keeps each result with a
 hash of the game's files, the machine's files, the code in those two folders, the
 DOS files that the check boots, and `openMSX`'s version. A changed hash makes the
@@ -366,9 +372,10 @@ snapcas.py: it passes, so the machine's game file needs: capture hb75p
 ```
 
 Then write that line in the machine's game file ([Write the fix](#4-write-the-fix)),
-and the fix is done. A `capture` line is the most common fix. Of the shipped
-machine's game files, 314 hold a `capture` line. When no variant passes, continue
-with the next step.
+and the fix is done. `make games MACHINE=<machine>` does both for every game that
+fails on a machine ([Run the collection](#7-run-the-collection)). A `capture` line
+is the most common fix. Of the shipped machine's game files, 403 hold a `capture`
+line. When no variant passes, continue with the next step.
 
 ### 2. Read the failure
 

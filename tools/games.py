@@ -2,7 +2,7 @@
 """Make and check every shipped game file's image on a machine (docs/INTERNALS.md,
 The games run).
 
-Usage: games.py <machine> [--dos <dir>] [--full] [--workers <n>]
+Usage: games.py <machine> [--dos <dir>] [--full] [--no-fix] [--workers <n>]
 
 Each game file's tapes come from downloads/, where snapcas.py snap puts them.
 The run downloads nothing, so as not to load File-Hunter with a download of the
@@ -17,6 +17,13 @@ failed step's error. A game file whose inputs are unchanged keeps its last
 result and its image in images/, unless --full. A result that says that the
 run broke, as an openMSX that stopped, is not kept, so the next run makes it
 again.
+
+The run then tries each game file that fails, and that names no capture
+variant, on the capture variants that the machine file lists, as snapcas.py
+snap does. When a variant passes, the run writes the capture line into the
+machine's game file, with a comment that says why, and the game file passes.
+So a new machine gets its capture lines from one run. --no-fix leaves this
+out.
 
 The failures are printed in three groups: those that tests/openmsx-failures.txt
 lists, which fail in openMSX itself, those that tests/snapcas-failures.txt
@@ -131,14 +138,16 @@ STOPPED = threading.Event()
 LOCK = threading.Lock()
 
 
-def run_game(machine, name, dos):
+def run_game(machine, name, dos, variants=False):
     """Captures, builds and checks one game file on the machine, and returns
-    the pipeline.Result. The steps run in pipeline.py as a program, which
+    the pipeline.Result. With variants, the steps run on the machine's capture
+    variants only, and the result names the first that passes
+    (pipeline.variant_trials). The steps run in pipeline.py as a program, which
     moves the image of a game that passes to images/, as snapcas.py snap does,
     so that snapcas.py sync copies it to a card. The program gets a process
     group of its own, so that stop_games stops it with its openMSX."""
     command = [sys.executable, "-I", os.path.join(HERE, "pipeline.py"), os.path.join(GAMES, name), machine,
-               "--dos", dos]
+               "--dos", dos] + (["--variants"] if variants else [])
     with LOCK:
         if STOPPED.is_set():
             return pipeline.broken("games.py: stopped")
@@ -174,6 +183,16 @@ def image_missing(machine, name, game):
     return not os.path.isfile(gamefile.published_path(machine, os.path.join(GAMES, name), game.name))
 
 
+def capture_comments(machine, variant, failure):
+    """The two comments of a capture line that the run writes: the heading of
+    a new machine's game file, and why the line is there, from the failure of
+    the game file's own lines."""
+    failure = " ".join(failure.split()).split(". ")[0].rstrip(".")
+    return (f"Lines for {machine}, the {msx.description(msx.machine_path(machine))}.",
+            f"The capture runs on {variant}, the {msx.description(msx.variant_path(variant))}. On {machine} "
+            f"itself the game fails: {failure}. `make games` wrote this line.")
+
+
 def group(title, names, results):
     """Prints a group of failures, each with its result."""
     if names:
@@ -186,6 +205,9 @@ def main():
     parser.add_argument("--dos", help="the folder that holds the DOS system files (default: the machine's, "
                                       "below dos/)")
     parser.add_argument("--full", action="store_true", help="give every game file a new result")
+    parser.add_argument("--no-fix", action="store_true",
+                        help="do not try a game file that fails on the machine's capture variants, and write "
+                             "no capture line")
     parser.add_argument("--workers", type=int, default=11,
                         help="the number of games to run at once (default: 11, as openMSX keeps about one "
                              "core busy)")
@@ -248,6 +270,29 @@ def main():
                 # stops keeps what it has done.
                 with open(path + ".cache", "a") as f:
                     f.write(f"{name}\t{hashes[name]}\t{results[name]}\n")
+        fixed = []
+        variants = [] if args.no_fix else msx.read_machine(msx.machine_path(args.machine)).variants
+        # A game file that fails in openMSX itself fails on a variant too.
+        again = [name for name in names if variants and name in kept and name not in errors
+                 and results[name] != pipeline.PASS and not games[name].capture and name not in in_openmsx]
+        if again:
+            print(f"{args.machine}: {len(again)} game files that fail to try on the capture variants", flush=True)
+        jobs = {pool.submit(run_game, args.machine, name, dos, True): name for name in again}
+        for done, job in enumerate(concurrent.futures.as_completed(jobs), 1):
+            name = jobs[job]
+            result = job.result()
+            if result.variant:
+                gamefile.add_capture_line(os.path.join(GAMES, name), args.machine, result.variant,
+                                          *capture_comments(args.machine, result.variant, results[name]))
+                # The line changes the game file's inputs, and its result.
+                hashes[name] = inputs_hash(args.machine, name, tools)
+                results[name] = result.message
+                fixed.append(name)
+                with open(path + ".cache", "a") as f:
+                    f.write(f"{name}\t{hashes[name]}\t{results[name]}\n")
+            print(f"{done}/{len(again)}  {name}  " + (f"capture {result.variant}" if result.variant else
+                                                    result.message + ("  (not kept)" if result.transient else "")),
+                  flush=True)
     except KeyboardInterrupt:
         pool.shutdown(wait=False, cancel_futures=True)
         stop_games()
@@ -265,6 +310,8 @@ def main():
     for listed, file in ((in_openmsx, OPENMSX_FAILURES), (in_snapcas, SNAPCAS_FAILURES)):
         if listed - failed:
             print(f"In {os.path.relpath(file, ROOT)}, but passing now: " + ", ".join(sorted(listed - failed)))
+    if fixed:
+        print(f"{len(fixed)} game files pass with a capture line that the run wrote: " + ", ".join(sorted(fixed)))
     print(f"{len(names) - len(failed)} of {len(names)} game files pass; the results are in {path}")
     new = sorted(failed - in_openmsx - in_snapcas)
     group("These game files fail in openMSX itself, as tests/openmsx-failures.txt lists:",

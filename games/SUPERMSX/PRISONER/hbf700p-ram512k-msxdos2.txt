@@ -1,0 +1,8 @@
+# Lines for hbf700p-ram512k-msxdos2, the Sony HB-F700P (MSX2, 256 KB) with a 512 KB
+# RAM cartridge, under MSX-DOS 2.
+
+# The capture runs on hbf700p-msxdos2, the Sony HB-F700P with an MSX-DOS 2
+# cartridge. On hbf700p-ram512k-msxdos2 itself the game fails: point 2: fail: the
+# game writes FD00h, in the tape service's part of page 3, from 04B9h. `make games`
+# wrote this line.
+capture hbf700p-msxdos2
