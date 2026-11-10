@@ -77,7 +77,7 @@ game on that MSX.
 
    To add it by hand, follow [Add a machine](#add-a-machine).
 
-4. Make the game's `.SNP` file:
+4. Make the game's `.SNP` file for your machine:
 
    ```
    ./snapcas.py snap gauntlet phc28s-ram64k-carnivore2
