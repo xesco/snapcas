@@ -1,17 +1,18 @@
 # snapcas
 
-`snapcas` lets you play MSX tape games on your real MSX, without a tape player.
+`snapcas` lets you play MSX tape games on your real MSX, without a tape player. It
+works from CAS files, which are MSX tapes saved as files on a computer.
 
-The goal of the project is that any tape file plays on any MSX as the original tape
+The goal of the project is that any CAS file plays on any MSX as the original tape
 did, whatever cartridges the MSX has and in whatever slot order. That includes games
 whose original tape fails on some machines, because its loader expects one machine's
 memory layout or no disk interface.
 
 ## What it is
 
-`snapcas` is a program for your computer. It turns a tape game into a single `.SNP`
-file. You copy that file to your MSX's disk or SD card and type one command. The
-game then starts right away, already loaded.
+`snapcas` is a program for your computer. It turns a game's CAS file into a single
+`.SNP` file. You copy that file to your MSX's disk or SD card and type one command.
+The game then starts right away, already loaded.
 
 It works in three steps:
 
@@ -172,18 +173,17 @@ make games MACHINE=hx10-carnivore2
 
 ## Add a game
 
-If `./snapcas.py list` does not find a game and you have its tape file, you can add
-the game yourself. A tape file is a tape saved as a file on your computer, either a
-CAS file or a TSX file.
+If `./snapcas.py list` does not find a game and you have its CAS file, you can add
+the game yourself.
 
-1. Make a folder for the game in `custom/` and put the tape file in it:
+1. Make a folder for the game in `custom/` and put the CAS file in it:
 
    ```
    custom/MYGAME/MYGAME.CAS
    ```
 
 2. In the same folder, create a text file named `game.txt` with one line that names
-   the tape file:
+   the CAS file:
 
    ```
    cas MYGAME.CAS
