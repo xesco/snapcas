@@ -4,14 +4,16 @@ commands): the capture, the build and the check, the trials of the machine's
 capture variants, and the result of them all. snapcas.py snap prints from it,
 and games.py runs it for each game file.
 
-Usage: pipeline.py <game> <machine> --dos <dir>
+Usage: pipeline.py <game> <machine> --dos <dir> [--variants]
 
 <game> and <machine> are as for capture.py, and <dir> as for check.py. As a
 program, it makes and checks one game's image, without the capture variants'
-trials, and prints the result as one line of JSON. games.py starts it once for
-each game file, so that each game has a process of its own: the names of its
-savestates hold its process ID, Ctrl-C stops it with its openMSX, and a step
-that ends in a Python error takes only its own game with it.
+trials, and prints the result as one line of JSON. With --variants it runs
+only those trials, for a game whose own lines have failed already. games.py
+starts it once for each game file, so that each game has a process of its own:
+the names of its savestates hold its process ID, Ctrl-C stops it with its
+openMSX, and a step that ends in a Python error takes only its own game with
+it.
 
 The steps are functions of capture.py, build.py and check.py, which raise
 msx.Failure with the exit status that the tool gives as a program, its error,
@@ -117,7 +119,7 @@ def message(step):
         return PASS if step.name == "check" else ""
     if step.name == "check" and step.status == 3 and step.output.strip():
         for number, passed, lines in check.points(step.output.strip()):
-            if number in (2, 3, 4) and not passed:
+            if number and not passed:
                 return f"point {number}: fail:" + "".join(lines[:1])
         return step.output.strip().splitlines()[0]
     return (step.error.strip().splitlines() or [f"{step.name}.py failed"])[-1]
@@ -147,10 +149,19 @@ def run(game, machine, dos=None, try_variants=False, show=None, trying=None):
     # which another capture can change.
     if not try_variants or (first.status == 1 and first.name == "capture"):
         return result(first)
-    named = gamefile.read_game(game, machine).capture
-    variants = msx.read_machine(msx.machine_path(machine)).variants
-    if named:
+    if gamefile.read_game(game, machine).capture:
         return result(first)
+    return variant_trials(game, machine, dos, show, trying) or result(first)
+
+
+def variant_trials(game, machine, dos=None, show=None, trying=None):
+    """Runs the steps on each capture variant that the machine file lists, and
+    returns the Result of the first that passes, whose image goes to images/.
+    When none passes, the steps run once more with the game file's own lines
+    and without the check, to leave their snapshot and image, and the function
+    returns None. show gets each Step when it ends, and trying each variant's
+    name before its trial."""
+    variants = msx.read_machine(msx.machine_path(machine)).variants
     for variant in variants:
         if trying:
             trying(variant)
@@ -160,7 +171,11 @@ def run(game, machine, dos=None, try_variants=False, show=None, trying=None):
     if variants:
         # The check's result is known.
         steps(game, machine, show=show)
-    return result(first)
+    return None
+
+
+# The message of --variants' result when no capture variant passes.
+NO_VARIANT = "no capture variant passes"
 
 
 def broken(error):
@@ -187,8 +202,16 @@ def main():
     parser.add_argument("game", help="a folder below games/, or a folder's path, that holds game.txt")
     parser.add_argument("machine", help="a machine file's name below machines/, without .txt")
     parser.add_argument("--dos", required=True, help="the folder that holds the DOS system files")
+    parser.add_argument("--variants", action="store_true",
+                        help="run only the trials of the machine's capture variants, for a game whose own "
+                             "lines have failed")
     args = parser.parse_args()
-    print(json.dumps(run(gamefile.game_folder(args.game), args.machine, args.dos)._asdict()))
+    folder = gamefile.game_folder(args.game)
+    if args.variants:
+        found = variant_trials(folder, args.machine, args.dos) or Result("check", 3, NO_VARIANT, False, None, None)
+    else:
+        found = run(folder, args.machine, args.dos)
+    print(json.dumps(found._asdict()))
     return 0
 
 

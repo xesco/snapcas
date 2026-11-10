@@ -8,6 +8,7 @@ import math
 import os
 import re
 import shlex
+import textwrap
 import urllib.parse
 
 from msx import KEYS
@@ -261,6 +262,30 @@ def machine_file(folder, machine):
     """The path of a machine's file in a game's folder: phc28s-ram64k-carnivore2 has
     phc28s-ram64k-carnivore2.txt, and a test machine's path has - for /."""
     return os.path.join(folder, machine.replace("/", "-") + ".txt")
+
+
+def comment(text):
+    """A text as the comment lines of a game file, each up to 84 columns."""
+    return "\n".join(textwrap.wrap(text, 84, initial_indent="# ", subsequent_indent="# ",
+                                   break_long_words=False, break_on_hyphens=False)) + "\n"
+
+
+def add_capture_line(folder, machine, variant, heading, why):
+    """Adds the line that names a capture variant to the machine's game file
+    of the game in folder, under a comment that says why, as every line of a
+    shipped game file has one. A new file starts with heading, the comment that
+    says which machine its lines are for. Returns the file's path."""
+    path = machine_file(folder, machine)
+    text = ""
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            text = f.read().rstrip("\n") + "\n"
+    else:
+        text = comment(heading)
+    text += "\n" + comment(why) + f"capture {variant}\n"
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+    return path
 
 
 def read_game(folder, machine=None):

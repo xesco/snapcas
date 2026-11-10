@@ -52,9 +52,10 @@ class Pipeline(unittest.TestCase):
         result = self.result("check", 3, output=report)
         self.assertEqual((result.step, result.status, result.transient), ("check", 3, False))
         self.assertEqual(result.message, "point 2: fail:  the game writes FCE1h, in the tape service's part of page 3")
-        # Point 1 fails alone, and gives the report's first line.
+        # Point 1 fails alone, and gives its first line too.
         self.assertEqual(self.result("check", 3, output="point 1: fail\n  RAM 3-x-2 differs at 8000\n").message,
-                         "point 1: fail")
+                         "point 1: fail:  RAM 3-x-2 differs at 8000")
+        self.assertEqual(self.result("check", 3, output="point 1: fail\n").message, "point 1: fail:")
 
     def test_a_run_that_broke_is_transient(self):
         result = self.result("check", 2, "check.py: openMSX stopped before the report's end; see out", True,

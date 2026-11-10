@@ -34,6 +34,17 @@ has these steps:
    with 3 only when there is a new failure. It also names each listed game file that
    passes now, so that its line can be removed.
 
+The run then fixes what a capture variant can fix. It takes each game file that
+fails, unless the game file names a capture variant already or is in
+`tests/openmsx-failures.txt`. A game file that fails in `openMSX` itself fails on a
+variant too. The run does that game file's steps on each capture variant that the
+machine file lists, as `snap` does
+([DESIGN.md, Files and commands](DESIGN.md#files-and-commands)). When a variant
+passes, the run writes a `capture` line for the variant into the machine's game
+file. Above the line, it writes a comment that names the variant and the failure of
+the game file's own lines. The game file then passes. So one run gives a new machine
+its `capture` lines. `FIX=0` turns this retry off.
+
 Before it starts, the run reads both lists and stops at a line that it cannot read,
 at a machine without its firmware or at a folder without DOS files. The run checks
 these things first, so that none of these faults stops the run hours later.

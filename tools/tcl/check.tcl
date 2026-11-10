@@ -73,9 +73,28 @@ proc script_failed {msg} {
 set ::DEADLINE 600
 later $::DEADLINE { error "the check did not end within $::DEADLINE seconds" }
 
-# The screen's text on one line. A row that the text fills goes on in the next
-# row, so the rows are joined as they are.
-proc screen_line {} { string trim [regsub -all {\s+} [string map [list \n ""] [screen]] { }] }
+# The screen's text on one line. DOS breaks a long line at LINLEN, the text
+# width at F3B0h, in the middle of a word, so a row that is full to that width
+# joins the next row without a space. The screen's rows start with a margin
+# when LINLEN is less than the screen's width: the fewest spaces that start a
+# row with text.
+proc screen_line {} {
+    set width [debug read memory 0xF3B0]
+    set rows [split [screen] \n]
+    set margin -1
+    foreach row $rows {
+        if {[string trim $row] eq ""} continue
+        set n [expr {[string length $row] - [string length [string trimleft $row]]}]
+        if {$margin < 0 || $n < $margin} { set margin $n }
+    }
+    set text ""
+    foreach row $rows {
+        set row [string trimright $row]
+        append text [string trimleft $row]
+        if {[string length $row] - $margin != $width} { append text " " }
+    }
+    string trim [regsub -all {\s+} $text { }]
+}
 
 # A breakpoint's condition: memory at address holds the bytes.
 proc holds {address bytes} {
