@@ -1,7 +1,7 @@
 # Your own games
 
-This folder holds your own games: games that `snapcas` does not ship, or your own
-dumps of a tape. Git ignores everything here except this file.
+This folder holds your own games. They are games that `snapcas` does not ship, or
+your own dumps of a tape. Git ignores everything here except this file.
 
 Each game has a folder of its own, with its game file and its tape files, CAS or
 TSX:

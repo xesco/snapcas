@@ -92,8 +92,8 @@ A machine is your MSX with its cartridges. `snapcas` keeps one small text file f
 each machine, in the `machines/` folder. This example adds a Sony HB-75P with a
 Carnivore2 in slot 1.
 
-1. Name the machine: the model, then each cartridge in slot order. The example is
-   `hb75p-carnivore2`.
+1. Name the machine after its model, then each cartridge in slot order. The example
+   is `hb75p-carnivore2`.
 
 2. Copy the file of a machine that has the same disk cartridge as yours:
 
@@ -120,13 +120,14 @@ Carnivore2 in slot 1.
    `pass`, the machine works.
 
 5. When a line says `fail`, or the command stops with a message, follow the full
-   steps, which list each message with its fix
-   ([AGENTS.md, Add a machine](AGENTS.md#add-a-machine)).
+   steps ([AGENTS.md, Add a machine](AGENTS.md#add-a-machine)). They list each
+   message with its fix.
 
 ## Add a game
 
-Add a game when `./snapcas.py list` does not find it, and you have its tape file.
-A tape file is a tape, saved as a file on your computer: a CAS file or a TSX file.
+When `./snapcas.py list` does not find a game and you have its tape file, add the
+game. A tape file is a tape, saved as a file on your computer. It is a CAS file or a
+TSX file.
 
 1. Make a folder for the game in `custom/`, and put the tape file in it:
 
