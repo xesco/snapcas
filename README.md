@@ -26,7 +26,10 @@ It works in three steps:
 Some games read the tape again while you play, for example to load the next level.
 The `.SNP` file also holds the rest of the tape, so those games work too. Other
 games do not work on every MSX, and `snapcas` changes them so that they work on
-yours. `snapcas` knows 1,545 games and 13 MSX machines.
+yours.
+
+`snapcas` knows 1,545 games and 13 MSX machines, and you can add more games and
+more machines.
 
 ## Play a game
 
