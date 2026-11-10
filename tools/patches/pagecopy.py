@@ -1,12 +1,12 @@
 """The page copy patch (docs/INTERNALS.md, The page copy patch): a loader's code
 that gives pages 0 and 1 the slots of pages 2 and 3, or page 1 the slot of page
-3, from the slot register's value. patches/pagecopy.tcl decides at step 4, by
-step 3's slot map, whether the machine needs the patch. The kind works only in
-the capture, so it has no find()."""
+3, from the slot register's value. patches/pagecopy.tcl decides at step 3, by
+the slot map, whether the machine needs the patch. The kind works only in the
+capture, so its find() finds nothing."""
 import re
 
-# CAS's block header, which starts each block at a multiple of 8 bytes.
-CAS_HEADER = bytes.fromhex("1F A6 DE BA CC 13 7D 74")
+import cas
+import msx
 
 # What the code is, its bytes, what it copies: "23" for pages 2 and 3 into
 # pages 0 and 1, "31" for page 3 into page 1, and whether the loader also copies
@@ -28,35 +28,35 @@ FORMS = [
 ]
 
 
-def sum_byte(data, offset):
+def sum_byte(data, blocks, offset):
     """The offset of the last byte of the CAS block that holds offset, when
     that byte is the 8-bit sum of the block's other bytes, as Level 9's
-    loader checks, or -1."""
-    if not data.startswith(CAS_HEADER):
-        return -1
-    start = data.rfind(CAS_HEADER, 0, offset + 1)
-    while start % 8:
-        start = data.rfind(CAS_HEADER, 0, start)
-    start += len(CAS_HEADER)
-    end = data.find(CAS_HEADER, offset)
-    while end >= 0 and end % 8:
-        end = data.find(CAS_HEADER, end + 1)
-    if end < 0:
-        end = len(data)
-    if end - start < 2:
-        return -1
-    return end - 1 if sum(data[start:end - 1]) & 0xFF == data[end - 1] else -1
+    loader checks, or -1. blocks are the blocks of data, a CAS file's bytes,
+    as cas.spans gives them."""
+    for start, end in blocks:
+        if start <= offset < end and end - start >= 2:
+            return end - 1 if sum(data[start:end - 1]) & 0xFF == data[end - 1] else -1
+    return -1
 
 
-def tcl_settings(side1, side2):
-    """The Tcl that gives pagecopy.tcl each form in the tape files: its side,
-    offset, bytes, copy and whether it copies the subslots, and its block's sum
-    byte's offset and value."""
+def find(data, context):
+    """Nothing: the loader that the kind patches has finished by the
+    snapshot."""
+    return []
+
+
+def tcl(side1, side2):
+    """The kind's Tcl for the capture: each form in the tape files' bytes, with
+    its side, offset, bytes, copy and whether it copies the subslots, and its
+    block's sum byte's offset and value, as pagecopy.tcl's setting, and
+    pagecopy.tcl. A TSX file has no CAS blocks, so its forms have no sum
+    byte."""
     found = []
     for side, data in ((1, side1), (2, side2)):
+        blocks = cas.spans(data)
         for _, pattern, copy, subslots in FORMS:
             for match in pattern.finditer(data):
-                at = sum_byte(data, match.start())
+                at = sum_byte(data, blocks, match.start())
                 found.append(f"{{{side} {match.start()} {match.group().hex()} {copy} {int(subslots)} {at} "
                              f"{data[at] if at >= 0 else 0}}}")
-    return f"set ::pagecopy {{{' '.join(found)}}}\n"
+    return f"set ::pagecopy {{{' '.join(found)}}}\n" + msx.tcl("patches/pagecopy.tcl")

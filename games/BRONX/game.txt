@@ -2,3 +2,8 @@
 cas BRONX.CAS
 sha1 cffd9f4ff5f74d6799b2ecc5971fc58dbd7af204
 url https://download.file-hunter.com/Games/MSX1/CAS/Bronx%20(1989)(Animagic)(es)%5BRUN%27CAS-%27%5D.zip
+
+# The only place in page 3 that is free at the snapshot for the tape service's
+# part is F1E1h to F26Fh, and the game's code holds addresses in it, F1F3h and
+# F207h, so the whole service goes into T0.
+service t0

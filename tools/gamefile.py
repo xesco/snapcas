@@ -4,6 +4,7 @@ A game file holds one setting per line: a key, a space and a value. A line that
 starts with # is a comment, and blank lines are ignored. A machine's game file beside
 game.txt, named after the machine file, adds the lines that fit only that machine.
 """
+import math
 import os
 import re
 import shlex
@@ -23,7 +24,8 @@ CUSTOM = os.path.join(ROOT, "custom")
 
 
 class GameFileError(Exception):
-    """A game file that cannot be read."""
+    """A game file that cannot be read, or a patch line whose old bytes are
+    not where it puts them."""
 
 
 class Game:
@@ -39,26 +41,47 @@ class Game:
         self.keys = []        # [(time, kind, value)], kind "key" or "text"
         self.continue_key = None
         self.snapshot_at = None
-        # The service line: None, "no" when the game never reads the rest of
-        # its tape, "t0" for the tape service without a part in page 3, or for
-        # service at xxE1 the page of the service's page 3 part.
+        # The service line's first word: None without the line, "no" when the
+        # game never reads the rest of its tape, "t0" for the tape service
+        # without a part in page 3, or "at".
         self.service = None
+        # For service at xxE1, the entry page: the high byte, xx, of the
+        # addresses of the service's part of page 3. Otherwise None.
+        self.entry_page = None
         self.capture = None      # the machine file for the capture, if not the user's
         self.rom_keep = False    # rom keep: page 0 keeps the ROM, and T0 does not replace it
         self.patches = []     # [Patch]
 
 
 class Patch:
-    """A patch line: its place, as the page, 0 to 3, whose selected RAM page
-    it patches, or as "side1" or "side2", and the offset, the old bytes and the
-    new bytes."""
+    """A patch line: where the line is, its place, the old bytes and the new
+    bytes. The place is an offset in a side of the tape, 1 or 2, or in the RAM
+    page that the snapshot selects in a page, 0 to 3. The other of side and
+    page is None."""
 
-    def __init__(self, where, page, offset, old, new):
+    def __init__(self, where, side, page, offset, old, new):
         self.where = where
+        self.side = side
         self.page = page
         self.offset = offset
         self.old = old
         self.new = new
+
+    @property
+    def place(self):
+        """The place as an error names it: side<n>:<offset> in the tape, or the
+        address in memory."""
+        if self.side is not None:
+            return f"side{self.side}:{self.offset:X}"
+        return f"{self.page * 0x4000 + self.offset:04X}"
+
+    def apply(self, data):
+        """Writes the new bytes over the old ones in data, the bytes of the
+        patch's side or RAM page."""
+        end = self.offset + len(self.old)
+        if bytes(data[self.offset:end]) != self.old:
+            raise GameFileError(f"{self.where}: the bytes at {self.place} are not the patch's old bytes")
+        data[self.offset:end] = self.new
 
 
 def default_name(folder_name):
@@ -76,22 +99,25 @@ def read_patch(args, where):
     if not old or len(old) != len(new) or not all(re.fullmatch(r"[0-9A-Fa-f]{2}", b) for b in old + new):
         raise GameFileError(usage)
     ram = re.fullmatch(r"page([0-3]):([0-9A-Fa-f]{1,4})", place)
-    tape = re.fullmatch(r"(side[12]):([0-9A-Fa-f]{1,6})", place)
+    tape = re.fullmatch(r"side([12]):([0-9A-Fa-f]{1,6})", place)
+    side = page = None
     if ram:
         page, offset = int(ram.group(1)), ram.group(2)
         if int(offset, 16) + len(old) > 0x4000:
             raise GameFileError(f"{where}: the patch goes past the page's end")
     elif tape:
-        page, offset = tape.groups()
+        side, offset = int(tape.group(1)), tape.group(2)
     else:
         raise GameFileError(f"{where}: {place} is not a place: page<n>:<offset>, side1:<offset> or side2:<offset>")
-    return Patch(where, page, int(offset, 16), bytes.fromhex("".join(old)), bytes.fromhex("".join(new)))
+    return Patch(where, side, page, int(offset, 16), bytes.fromhex("".join(old)), bytes.fromhex("".join(new)))
 
 
 def number(text, where):
     try:
         value = float(text)
     except ValueError:
+        raise GameFileError(f"{where}: {text} is not a time in seconds")
+    if not math.isfinite(value):
         raise GameFileError(f"{where}: {text} is not a time in seconds")
     if value < 0:
         raise GameFileError(f"{where}: the time {text} is negative")
@@ -109,7 +135,7 @@ def game_names():
             names.append(name)
         elif os.path.isdir(os.path.join(games, name)):
             names += [f"{name}/{n}" for n in sorted(os.listdir(os.path.join(games, name)))
-                      if os.path.isdir(os.path.join(games, name, n))]
+                      if os.path.isfile(os.path.join(games, name, n, "game.txt"))]
     return names
 
 
@@ -161,14 +187,18 @@ def zip_name(url):
 
 
 def game_folder(game):
-    """The folder of a game: a folder's path, a custom game's name, such as
-    custom/MYGAME, or a folder below games/, such as ABADIA or a compilation's
-    program, SUPERMSX/GOLF."""
-    if os.path.isdir(game):
-        return os.path.abspath(game)
+    """The folder of a game: a custom game's name, such as custom/MYGAME, or a
+    folder below games/, such as ABADIA or a compilation's program,
+    SUPERMSX/GOLF. A name that is neither is the path of a folder that holds a
+    game.txt, as the tests give, so that a folder of the game's name below the
+    current folder, as images/<machine>/ has, is not taken for the game."""
     if game.lower().startswith("custom/"):
-        return os.path.join(CUSTOM, game.split("/", 1)[1])
-    return os.path.join(ROOT, "games", game)
+        folder = os.path.join(CUSTOM, game.split("/", 1)[1])
+    else:
+        folder = os.path.join(ROOT, "games", game)
+    if not os.path.isfile(os.path.join(folder, "game.txt")) and os.path.isfile(os.path.join(game, "game.txt")):
+        return os.path.abspath(game)
+    return folder
 
 
 def game_key(folder):
@@ -285,6 +315,10 @@ def read_game(folder, machine=None):
             quoted = '"' in line.split(None, 2)[2]
             if not quoted and args[1] not in KEYS:
                 raise GameFileError(f"{where}: {args[1]} is not a key name")
+            try:
+                args[1].encode("latin-1")
+            except UnicodeEncodeError:
+                raise GameFileError(f"{where}: the text holds a character that is not in Latin-1")
             game.keys.append((number(args[0], where), "text" if quoted else "key", args[1]))
         elif key == "continue":
             if args[0] not in KEYS:
@@ -301,9 +335,12 @@ def read_game(folder, machine=None):
                 raise GameFileError(f"{where}: a file holds one service line")
             service_files.add(file)
             if args in (["no"], ["t0"]):
-                game.service = args[0]
+                game.service, game.entry_page = args[0], None
             elif len(args) == 2 and args[0] == "at" and re.fullmatch(r"[C-Fc-f][0-9A-Fa-f][Ee]1", args[1]):
-                game.service = int(args[1][:2], 16)
+                game.service, game.entry_page = "at", int(args[1][:2], 16)
+                if game.entry_page == 0xFF:
+                    raise GameFileError(f"{where}: a part of the tape service at FFE1h would pass FFFEh, "
+                                        "the last byte that it can take")
             else:
                 raise GameFileError(f"{where}: service takes no, at and an address xxE1 in page 3, or t0")
         elif key == "capture":
@@ -318,6 +355,9 @@ def read_game(folder, machine=None):
             raise GameFileError(f"{where}: unknown key {key}")
     if game.tape is None:
         raise GameFileError(f"{path}: needs a cas or tsx line")
+    if not game.name:
+        raise GameFileError(f"{path}: the folder's name has no letter or digit for the image's name, so the "
+                            "game file needs a name line")
     if game.side2 and os.path.splitext(game.side2)[1].lower() != os.path.splitext(game.tape)[1].lower():
         raise GameFileError(f"{path}: side2 takes a file of side 1's format")
     if game.urls and len(game.urls) != (2 if game.side2 else 1):

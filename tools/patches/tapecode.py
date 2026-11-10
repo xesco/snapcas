@@ -1,15 +1,18 @@
-"""The tape's automatic patches (docs/INTERNALS.md, Scan): code that reaches the
-tape without going through T0.
+"""The tape code patch (docs/INTERNALS.md, Scan): the game's code that reaches
+the tape without going through T0.
 
 A finding that can be patched sends its call or stub to the entries in page 3,
-FCE1h to FCE7h, by writing FCh over the 00h of the BIOS's jump table address.
+at E1h to F3h of the entry page, by writing the entry page over the 00h of the
+BIOS's jump table address. In the mode without a part in page 3 there are no
+entries, and each finding is only listed. The kind works only in the scan, so
+its tcl() returns nothing.
 """
 import re
 
 from .finding import Finding
 
 # What the code is, its bytes, and the offset in the match of the byte that the
-# patch sets to FCh, or None for a finding that is only listed. The stub pushes
+# patch sets to the entry page, or None for a finding that is only listed. The stub pushes
 # TAPION's entry and the BIOS's inter-slot call routine, CDD9h, and the game
 # later changes the entry's low byte to E4h for TAPIN.
 PATTERNS = [
@@ -28,20 +31,25 @@ PATTERNS = [
     # cassette signal and whose other bits are a joystick (MSX Red Book, PSG).
     ("reader of PSG register 14, the cassette signal or a joystick", re.compile(rb"\x3E\x0E\xD3\xA0\xDB\xA2"), None),
 ]
-ENTRY_PAGE = 0xFC  # the page of the entries, FCE1h to FCF3h, by default
 
 
 def find(data, context):
-    """The tape's findings in data, with patches for the entries at the
-    context's page's E1h, when the image has the tape service."""
+    """The tape code in data, when the image has the tape service, with
+    patches for the entries when the context has an entry page."""
     findings = []
     for what, pattern, patch_at in PATTERNS if context.tape else ():
         for match in pattern.finditer(data):
             old = match.group()
             new = None
-            if patch_at is not None:
+            if patch_at is not None and context.entry_page is not None:
                 new = bytearray(old)
-                new[patch_at] = context.page
+                new[patch_at] = context.entry_page
                 new = bytes(new)
             findings.append(Finding(what, match.start(), old, new))
     return findings
+
+
+def tcl(side1, side2):
+    """Nothing: in the capture the game reads openMSX's cassette player
+    through the BIOS, so its tape code needs no patch."""
+    return ""

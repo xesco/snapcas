@@ -7,6 +7,7 @@ game file's for that side. It is saved in the tapes folder under the game file's
 name for the side, where the tools look for it.
 """
 import hashlib
+import http.client
 import io
 import os
 import urllib.error
@@ -32,7 +33,8 @@ def fetch(url):
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as reply:
             return reply.read()
-    except (urllib.error.URLError, OSError) as e:
+    except (urllib.error.URLError, http.client.HTTPException, OSError) as e:
+        # A download cut in its body is an HTTPException, IncompleteRead.
         raise DownloadError(f"{url}: {getattr(e, 'reason', e)}")
 
 

@@ -1,5 +1,6 @@
 # Procedures that the capture and the check share (docs/INTERNALS.md, The tools'
-# code): the CPU's view of memory with a slot selected, and the read of VRAM.
+# code): the CPU's view of memory with a slot selected, the read of VRAM, and
+# the machine's state as state.txt holds it.
 
 # The CPU's view of memory, after selecting a slot in a page (INTERNALS.md, RAM).
 
@@ -128,13 +129,21 @@ proc mapper_size {page} {
     return $n
 }
 
-# n bytes at address, read with the slot register at a8.
+# n bytes at address, read with the slot register at a8, which goes back to its
+# value afterwards, also when the read fails. The address wraps at FFFFh, as
+# the CPU's does, so a read can start at any value.
 proc read_with {a8 address n} {
+    set address [expr {$address & 0xFFFF}]
+    set first [expr {min($n, 0x10000 - $address)}]
     set now [debug read ioports 0xA8]
     debug write ioports 0xA8 $a8
-    set bytes [debug read_block memory [expr {$address & 0xFFFF}] $n]
+    set code [catch {
+        set bytes [debug read_block memory $address $first]
+        if {$first < $n} { append bytes [debug read_block memory 0 [expr {$n - $first}]] }
+        set bytes
+    } result]
     debug write ioports 0xA8 $now
-    return $bytes
+    return -code $code $result
 }
 
 proc v9938 {} { expr {[debug size "physical VRAM"] > 0x4000} }
@@ -150,4 +159,41 @@ proc physical_vram {} {
     set v [debug read_block "physical VRAM" 0 $size]
     debug write {VDP regs} 8 $r8
     return $v
+}
+
+proc hex {width value} { format %0${width}X $value }
+
+# The machine's state, as the name and value pairs of state.txt (FORMATS.md,
+# Snapshot files), in its order: the capture writes them, and the check
+# compares them with the snapshot's.
+proc machine_state {} {
+    set state {}
+    foreach r {AF BC DE HL AF2 BC2 DE2 HL2 IX IY SP PC} {
+        lappend state [string tolower $r] [hex 4 [reg $r]]
+    }
+    lappend state i [hex 2 [reg I]] im [hex 1 [reg IM]] iff [hex 1 [expr {[reg IFF] & 1}]]
+    lappend state a8 [hex 2 [debug read ioports 0xA8]] ppic [hex 2 [debug read ioports 0xAA]]
+    foreach ps {0 1 2 3} {
+        lappend state sub$ps [if {[expanded $ps]} { hex 2 [subslot_reg $ps] } else { string cat - }]
+    }
+    set mapper [expr {"MSX Memory Mapper I/O" in [debug list]}]
+    foreach p {0 1 2 3} r {fc fd fe ff} {
+        lappend state $r [if {$mapper} { hex 2 [debug read {MSX Memory Mapper I/O} $p] } else { string cat - }]
+    }
+    set v9938 [v9938]
+    set regs {0 1 2 3 4 5 6 7}
+    if {$v9938} {
+        lappend regs 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 32 33 34 35 36 37 38 39 40 41 42 43 44 45
+    }
+    foreach r $regs { lappend state vdp$r [hex 2 [debug read {VDP regs} $r]] }
+    if {$v9938} {
+        for {set c 0} {$c < 16} {incr c} {
+            lappend state pal$c [hex 2 [debug read {VDP palette} [expr {2 * $c}]]][hex 2 [debug read {VDP palette} [expr {2 * $c + 1}]]]
+        }
+    }
+    set ptr [expr {[debug read {VRAM pointer} 0] | (([debug read {VRAM pointer} 1] & 0x3F) << 8)}]
+    if {$v9938} { set ptr [expr {$ptr | (([debug read {VDP regs} 14] & 7) << 14)}] }
+    lappend state vramptr [hex 5 $ptr] vramwrite [debug read {VRAM access status} 0]
+    for {set r 0} {$r < 16} {incr r} { lappend state psg$r [hex 2 [debug read {PSG regs} $r]] }
+    return $state
 }

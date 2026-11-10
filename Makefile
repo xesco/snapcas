@@ -2,27 +2,31 @@
 #
 #   make        print this help
 #   make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN
-#   make test   run the tests in openMSX
+#   make unit   run the tests that need no openMSX, in a few seconds
+#   make test   run all the tests, most of them in openMSX
 #   make games  make and check every shipped game file's image on MACHINE=
 #
-# The tests read their tape files from tests/tapes/, and MSX-DOS's system files
-# from DOS_DIR, by default dos/, with msxdos1/ and msxdos2/: git ignores dos/,
-# because snapcas cannot ship MSX-DOS. The tests that need it are skipped when
-# the folders do not exist.
+# The tests read their tape files from tests/tapes/, which git holds, and
+# MSX-DOS's system files from DOS_DIR, by default dos/, with msxdos1/ and
+# msxdos2/: git ignores dos/, because snapcas cannot ship MSX-DOS. The tests that
+# need MSX-DOS are skipped when its folder does not exist, and the run names
+# them. No other test is skipped: a tape or a built file that is missing stops
+# make test.
 #
 # The Makefile downloads Nextor's NEXTOR.SYS and COMMAND2.COM into dos/nextor/,
 # and its tools into out/cache/, each pinned by version and SHA-256: the sjasmplus
 # assembler's source, which it builds, and two cartridges' firmware: the SD
 # Mapper's SDMAPPER.ROM and Nextor's ROM for the MegaFlashROM SCC+ SD. The tests
-# run openMSX 22.0 from the path, in a home of their own, out/cache/openmsx-home,
-# whose system ROMs are a link to the user's and that firmware, so that they
-# leave the user's openMSX settings alone.
+# run openMSX 22.0 from the path, or the program that OPENMSX names, in a home of
+# their own, out/cache/openmsx-home, whose system ROMs are a link to the user's
+# and that firmware, so that they leave the user's openMSX settings alone.
 
 SJASMPLUS_VERSION := 1.24.0
 SYSTEMROMS ?= $(HOME)/.openMSX/share/systemroms
 # openMSX's own share folder: in its app beside the program on macOS, as
 # Homebrew installs it, or in /usr/share.
-OPENMSX_BIN := $(dir $(realpath $(shell command -v openmsx)))
+OPENMSX ?= openmsx
+OPENMSX_BIN := $(dir $(realpath $(shell command -v $(OPENMSX))))
 OPENMSX_SHARE ?= $(firstword $(wildcard $(OPENMSX_BIN)../openMSX.app/Contents/Resources/share \
                    $(OPENMSX_BIN)../Resources/share /usr/share/openmsx /usr/local/share/openmsx))
 DOS_DIR ?= dos
@@ -37,28 +41,59 @@ EMU_HOME  := $(CACHE)/openmsx-home
 help:
 	@echo "make all       build bin/SNAPCAS.COM and bin/SERVICE.BIN"
 	@echo "make firmware  download the firmware that some machines need"
-	@echo "make test      run the tests"
+	@echo "make unit      run the tests that need no openMSX"
+	@echo "make test      run all the tests"
 	@echo "make games     check every game in downloads"
-	@echo "make clean     remove the built files and the test output"
+	@echo "make clean     remove the test output and the build's files in out/"
 
-all: bin/SNAPCAS.COM bin/SERVICE.BIN
+# The symbol files give the addresses in the binaries: out/service.sym the
+# service's, which the tests read, and out/snapcas.sym the restorer's. Each has
+# a rule of its own, with its binary's sources, because git holds the binaries
+# and not the symbol files: a clone gets them by an assembly that leaves the
+# binaries alone.
+SNAPCAS_SRC := src/snapcas.asm src/service.inc src/slots.inc src/worker.inc
+SERVICE_SRC := src/service.asm src/service.inc src/tape.inc
+SYMBOLS := $(OUT)/snapcas.sym $(OUT)/service.sym
 
-bin/SNAPCAS.COM: src/snapcas.asm src/service.inc $(SJASMPLUS)
+all: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS)
+
+bin/SNAPCAS.COM: $(SNAPCAS_SRC) $(SJASMPLUS)
 	mkdir -p bin
 	$(SJASMPLUS) --nologo --raw=$@ $<
 
-# out/service.sym gives the tests the service's addresses. The second
-# assembly, with the page 3 part one page lower, shows which bytes move with it.
-bin/SERVICE.BIN: src/service.asm src/service.inc src/tape.inc tools/relocs.py $(SJASMPLUS)
-	mkdir -p bin $(OUT)
-	$(SJASMPLUS) --nologo --raw=$(OUT)/service-fc.bin --sym=$(OUT)/service.sym $<
-	$(SJASMPLUS) --nologo -DP3_PAGE=0FBh --raw=$(OUT)/service-fb.bin $<
-	python3 -I tools/relocs.py $(OUT)/service-fc.bin $(OUT)/service-fb.bin $@
-
-# A test game for the tape service through a borrowed page outside a mapper.
-$(OUT)/borrow.bin: tests/borrow.asm $(SJASMPLUS)
+$(OUT)/snapcas.sym: $(SNAPCAS_SRC) $(SJASMPLUS)
 	mkdir -p $(OUT)
-	$(SJASMPLUS) --nologo --raw=$@ --sym=$(OUT)/borrow.sym $<
+	$(SJASMPLUS) --nologo --sym=$@ $<
+
+# The second assembly, with the page 3 part one page lower, shows which bytes
+# move with it. Each assembly also writes the symbols that service.asm exports,
+# which tools/relocs.py appends for build.py.
+bin/SERVICE.BIN: $(SERVICE_SRC) tools/relocs.py $(SJASMPLUS)
+	mkdir -p bin $(OUT)
+	$(SJASMPLUS) --nologo --raw=$(OUT)/service-fc.bin --exp=$(OUT)/service-fc.exp $<
+	$(SJASMPLUS) --nologo -DP3_PAGE=0FBh --raw=$(OUT)/service-fb.bin --exp=$(OUT)/service-fb.exp $<
+	python3 -I tools/relocs.py $(OUT)/service-fc.bin $(OUT)/service-fc.exp $(OUT)/service-fb.bin $(OUT)/service-fb.exp $@
+
+# service.asm exports symbols, so each of its assemblies names a file for them.
+$(OUT)/service.sym: $(SERVICE_SRC) $(SJASMPLUS)
+	mkdir -p $(OUT)
+	$(SJASMPLUS) --nologo --sym=$@ --exp=$(OUT)/service.exp $<
+
+# Three test games, each with the symbol file that its tests read, by a rule of
+# its own: borrow, for the tape service through a borrowed page outside a
+# mapper, contract, which calls each entry of the tape service and keeps what
+# it returns, and guard, which writes the service's part of page 3, for the
+# check's point 2.
+TEST_GAME_NAMES := borrow contract guard
+TEST_GAMES := $(foreach game,$(TEST_GAME_NAMES),$(OUT)/$(game).bin $(OUT)/$(game).sym)
+
+$(TEST_GAME_NAMES:%=$(OUT)/%.bin): $(OUT)/%.bin: tests/%.asm $(SJASMPLUS)
+	mkdir -p $(OUT)
+	$(SJASMPLUS) --nologo --raw=$@ $<
+
+$(TEST_GAME_NAMES:%=$(OUT)/%.sym): $(OUT)/%.sym: tests/%.asm $(SJASMPLUS)
+	mkdir -p $(OUT)
+	$(SJASMPLUS) --nologo --sym=$@ $<
 
 $(SJASMPLUS): $(DL)/sjasmplus-$(SJASMPLUS_VERSION)-src.tar.xz
 	rm -rf $(CACHE)/tools/src
@@ -124,6 +159,15 @@ $(NMS8250_512K):
 	grep -q '<size>512</size>' $@.tmp
 	mv $@.tmp $@
 
+# test/nms8250-4m-dos1 and test/nms8250-4m-ram4mb-dos1: the same with its
+# mapper at 4 MB, whose last segment is segment 255.
+NMS8250_4M := $(EMU_HOME)/share/machines/Philips_NMS_8250_4m.xml
+$(NMS8250_4M):
+	mkdir -p $(dir $@)
+	sed 's|<size>128</size>|<size>4096</size>|' $(OPENMSX_SHARE)/machines/Philips_NMS_8250.xml > $@.tmp
+	grep -q '<size>4096</size>' $@.tmp
+	mv $@.tmp $@
+
 # vg8020-picoverse: a 192 KB memory mapper cartridge, the PicoVerse's mapper.
 RAM192K := $(EMU_HOME)/share/extensions/ram192k.xml
 $(RAM192K):
@@ -132,24 +176,57 @@ $(RAM192K):
 	grep -q '<size>192</size>' $@.tmp
 	mv $@.tmp $@
 
-test: bin/SNAPCAS.COM bin/SERVICE.BIN $(OUT)/borrow.bin $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(RAM192K)
+# The tests' tape files, which git holds. A test does not skip without its
+# tape, so one that the folder lacks stops make test here.
+TEST_TAPES := $(addprefix tests/tapes/, \
+  001-ARIO.CAS 016-ROBE.CAS 022-MOON.CAS 035-EDGY.CAS 4X4OFFRO.TSX 7-CARD.CAS \
+  ABADIA.CAS ABU-SIMB.CAS AMOTO-S.CAS BATMAN.CAS BESTIAL.CAS BUMPER.CAS \
+  CALDERO.CAS CAMELOT.CAS CHASE-H.CAS CHASEB.CAS CHICAGO.CAS COBRA-S.CAS \
+  COMPUTAD.CAS DESPERAD.CAS DOKI-DOK.CAS DUSTIN.CAS EMERALD.CAS ENCHANTE.CAS \
+  ENGESO06.CAS ENGESO07.CAS FERNANDO.CAS FIELD-MA.CAS FINDERIN.CAS FREDDY.CAS \
+  GAUNTLEB.CAS GAUNTLET.CAS GHOSTB85.CAS ITALIA.CAS JET-BOMB.CAS KNIGHTMA.CAS \
+  KONAMI.CAS LAZERBYK.TSX LICENCE.TSX LIVINGST.CAS MAD-MIDE.CAS MAD-MIX.CAS \
+  MADE-IN.CAS MOONWALK.CAS MORTADEL.CAS MOTB.CAS MOTORIST.CAS NONAMED.CAS \
+  PICOPICO.TSX ROCKYA.CAS SIR-FRED.CAS SOOTLANB.CAS SOOTLAND.CAS SUPER-09.CAS \
+  SUPERM18.CAS SUPERMOB.CAS TETRIS.CAS THING-BO.CAS TOUR-91.CAS TOUR-91B.CAS \
+  TUAREG.CAS TURBO-GI.CAS UCHI87.CAS WORLD-CU.CAS YIE-AR.CAS YIE-ARII.CAS \
+  ZANAC.CAS)
+
+$(TEST_TAPES):
+	@echo "$@ is missing: git holds the tests' tapes" >&2
+	@false
+
+# The pure tier (tests/support.py, PURE): the tests that start no openMSX and
+# read no tape, so they need only the built files.
+unit: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS)
+	python3 -I tests/run.py --pure
+
+test: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS) $(TEST_GAMES) $(TEST_TAPES) $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(NMS8250_4M) $(RAM192K)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I tests/run.py
 
 MACHINE ?= phc28s-ram64k-carnivore2
-DOS ?= $(NEXTOR)
+# The folder of the check's DOS files, in place of the machine's own below
+# DOS_DIR, which its machine file's dosfiles line names.
+DOS ?=
 FULL ?=
 
 # The run over every shipped game file on a machine (docs/INTERNALS.md, The games
 # run), apart from make test because it takes hours.
 games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K)
-	OPENMSX_HOME=$(abspath $(EMU_HOME)) python3 -I tools/games.py $(MACHINE) --dos $(DOS) $(if $(FULL),--full)
+	OPENMSX_HOME=$(abspath $(EMU_HOME)) DOS_DIR=$(abspath $(DOS_DIR)) \
+	  python3 -I tools/games.py $(MACHINE) $(if $(DOS),--dos $(DOS)) $(if $(FULL),--full)
 
 # The openMSX home that snapcas.py uses, with the firmware of the machines that
 # need it.
 firmware: $(FIRMWARE) $(RAM192K)
 
+# bin/ stays, because git holds its files.
 clean:
-	rm -rf bin $(OUT)/test
+	rm -rf $(OUT)/test $(SYMBOLS) $(OUT)/service-fc.bin $(OUT)/service-fb.bin $(OUT)/service-fc.exp $(OUT)/service-fb.exp $(OUT)/service.exp \
+	  $(TEST_GAMES)
 
-.PHONY: help all test games firmware clean
+.PHONY: help all unit test games firmware clean
+
+# A recipe that fails leaves no cut file under its target's name.
+.DELETE_ON_ERROR:

@@ -5,7 +5,11 @@ the ROM instead of T0.
 The stub pushes TAPION's entry, the BIOS's inter-slot call routine and OUT
 (C),L, then reads the slot register into H and makes page 0's field slot 0
 with AND H / LD L,A, where A clears that field. The patch makes AND H / LD L,A
-into LD L,n, with n the context's slot register value that selects T0.
+into LD L,n. n is the slot register value that selects DOS's mapper, where T0
+is, in page 0. Only the restorer knows DOS's mapper, so the build leaves n at
+0 and the finding names its place, which the image's header lists for the
+restorer (docs/FORMATS.md, Image). The kind works only in the scan, so its
+tcl() returns nothing.
 """
 import re
 
@@ -16,8 +20,18 @@ T0_STUB_CODE = re.compile(rb"\x11\xE1\x00\xD5\x11\xD9\xCD\xD5\x11\xED\x69\xD5\xE
 
 
 def find(data, context):
-    """The stubs in data, patched with the context's value for T0, in the mode
-    without a part in page 3."""
-    if context.t0 is None:
+    """The stubs in data, in the mode without a part in page 3: patched in a
+    RAM page, where the restorer fills in the value, and otherwise only
+    listed."""
+    if not context.tape or context.entry_page is not None:
         return []
-    return [Finding(T0_STUB, m.start(1), m.group(1), bytes([0x2E, context.t0])) for m in T0_STUB_CODE.finditer(data)]
+    if not context.ram:
+        return [Finding(T0_STUB, m.start(1), m.group(1), None) for m in T0_STUB_CODE.finditer(data)]
+    return [Finding(T0_STUB, m.start(1), m.group(1), bytes([0x2E, 0x00]), place=1)
+            for m in T0_STUB_CODE.finditer(data)]
+
+
+def tcl(side1, side2):
+    """Nothing: the capture runs without T0, so the stub reaches the ROM as
+    it must."""
+    return ""

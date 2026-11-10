@@ -1,2 +1,3 @@
 openmsx -machine Philips_NMS_8250
 disk diska
+dosfiles msxdos1

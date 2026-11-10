@@ -1,0 +1,6 @@
+# An NMS 8250 whose own mapper holds 4 MB, made by the Makefile, with a RAM
+# cartridge of 4 MB in slot 1, under MSX-DOS 1: two mappers that each have a
+# segment 255, for a page in segment 255 of the mapper that is not DOS's.
+openmsx -machine Philips_NMS_8250_4m -ext ram4mb
+disk diska
+dosfiles msxdos1

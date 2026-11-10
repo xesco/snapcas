@@ -2,10 +2,10 @@
 
 `snapcas.py` is one command that makes a game's image for the user's machine from
 the game's name. It downloads the game's tape from File-Hunter when it is missing,
-captures the game in `openMSX`, builds the image, and copies the images to a card. It is
-written for MSX owners who are not developers, so its main use is one short line,
-`snap`, a game and a machine, and it needs only Python 3 and `openMSX`, on macOS,
-Linux or Windows. It runs the tools that already exist
+captures the game in `openMSX`, builds the image, and copies the images to a card.
+It is written for MSX owners who are not developers, so its main use is one short
+line, `snap`, a game and a machine. It needs only Python 3 and `openMSX`, on macOS,
+Linux or Windows. It does the steps of the tools that already exist
 ([DESIGN.md, Files and commands][files]) and adds no new way to make an image. This
 page is a draft for review, and its sections move into DESIGN.md and PLAN.md when it
 is signed off.
@@ -76,8 +76,8 @@ again each time.
 
 | Option | What it does | Default |
 |---|---|---|
-| `--check` | Runs `check.py` on the image, with the DOS files of the machine's `dosfiles` line ([FILES.md, Machine file][machine]). For a machine under Nextor, `snapcas` downloads Nextor 2.1.0's `NEXTOR.SYS` and `COMMAND2.COM` into `dos/nextor/`, pinned by SHA-256 as the Makefile does | No check |
-| `--dos <dir>` | The DOS system files for `--check`, in place of the machine's. A machine under MSX-DOS 1 or MSX-DOS 2 needs its files in `dos/msxdos1/` or `dos/msxdos2/` ([dos/README.md](../dos/README.md)), and `snapcas` stops and says so when they are missing | The machine's folder below `dos/` |
+| `--check` | Checks the image as `check.py` does ([INTERNALS.md, Check][check]), with the DOS files of the machine's `dosfiles` line ([FILES.md, Machine file][machine]). For a machine under Nextor, `snapcas` downloads Nextor 2.1.0's `NEXTOR.SYS` and `COMMAND2.COM` into `dos/nextor/`, pinned by SHA-256 as the Makefile does | No check |
+| `--dos <dir>` | The DOS system files for `--check`, in place of the machine's. A machine under MSX-DOS 1 or MSX-DOS 2 needs its files in `dos/msxdos1/` or `dos/msxdos2/` ([dos/README.md](../dos/README.md)), and `snapcas` stops and says so when they are missing. The environment variable `DOS_DIR` names a folder that takes the place of `dos/` for these two folders | The machine's folder below `dos/` |
 
 ```
 $ ./snapcas.py snap gauntlet phc28s-ram64k-carnivore2 --check
@@ -91,7 +91,8 @@ image     images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP
 
 The command exits with the tools' codes: 0 on success, 1 for an error in the input
 files, a game that it cannot find or a download that fails, 2 when `openMSX` fails
-or a wait times out, and 3 when a check fails.
+or a wait times out, and 3 when a check fails. Ctrl-C stops it without a message,
+with code 130.
 
 ## Try an image
 
@@ -221,12 +222,16 @@ The files go to these places, so that no folder of the card holds every image:
 | A compilation's program | `SNAPCAS/<letter>/<COLLECTION>/<GAME>.SNP`, with the letter of the collection's name |
 | A custom game's image | `SNAPCAS/C/CUSTOM/<GAME>.SNP`, as a program of a collection named `CUSTOM` |
 
-`sync` copies only the files that the card lacks or holds with other bytes. It reads
-each copy back and compares it with the original, and stops at the first copy that
-differs. It never deletes a file on the card, so an image deleted from `images/`
-stays there. A destination named `SNAPCAS` or `BIN` stops the command, because the
-destination is the folder that holds them. Two images that go to the same place
-stop it too, before it copies anything.
+`sync` copies only the files that the card lacks or holds with other bytes. It
+writes each copy under a temporary name in the same folder, the file's name with
+`.$$$` in place of its ending, and has the system write the bytes out to the card.
+Only then does `sync` give the copy the file's name, so a card that is full, or that
+is pulled out during the copy, holds no cut file under an image's name. `sync` then
+reads each copy back and compares it with the original, and stops at the first copy
+that differs. It never deletes a file on the card, so an image deleted from
+`images/` stays there. A destination named `SNAPCAS` or `BIN` stops the command,
+because the destination is the folder that holds them. Two images that go to the
+same place stop it too, before it copies anything.
 
 `SNAPCAS.COM` opens the image in the current folder, so on the MSX the player goes
 to the image's folder first:
@@ -248,7 +253,7 @@ CD \SNAPCAS\G
 | The tape found in the zip by its SHA-1 | By the member's name | `sha1` is already in every game file, and the member names differ from the game files' names |
 | Python's standard library only | A package from pip, such as `requests` | Nothing to install beyond Python, on any OS |
 | Downloads of the games that the user makes, one at a time | A download of the whole collection | File-Hunter is one person's site, and a user needs the games that they play |
-| `openMSX`'s user home, as the tools use today | A home of the command's own, as the tests use | The tests' home links the system ROMs with a symbolic link, which Windows does not allow without rights |
+| `out/cache/openmsx-home/`, the home that `make firmware` makes, when it exists and `OPENMSX_HOME` names no other. Otherwise `openMSX`'s user home, as the tools use today | Always a home of the command's own, as the tests use | The tests' home links the system ROMs with a symbolic link, which Windows does not allow without rights. So only the machines that need `make firmware`'s files need that home |
 | The machine's description from the first sentence of each machine file's first comment | A table in the command | The machine file stays the one place for a machine's facts. The user machines' files get that comment line, as the capture variants have one today |
 
 ## Limits
@@ -258,7 +263,7 @@ CD \SNAPCAS\G
 | A game file in `games/` without a link | The command stops and names the file and the SHA-1 to put in `downloads/` |
 | A tape that File-Hunter has changed or removed | The command stops: no zip, or no member with the SHA-1 |
 | A machine whose system ROMs are missing | `openMSX` does not start, and the command prints its error with exit code 2 |
-| `vg8020-picoverse` needs a 192 KB mapper, which the Makefile makes for the tests | The command writes `ram192k.xml` into `openMSX`'s `share/extensions` when it is missing, as the Makefile does |
+| `vg8020-picoverse` needs a 192 KB mapper, `ram192k.xml` in `openMSX`'s `share/extensions`, which `make firmware` makes | Without it, the command stops and names `make firmware` |
 | The games run, `make games`, checks every game file on `phc28s-ram64k-carnivore2` and `vg8020-carnivore2` only ([DESIGN.md, The games run][gamesrun]) | A game can fail on another machine, and `snap --check` shows it |
 | MSX-DOS 1 has no folders | A machine under MSX-DOS 1, such as `vg8235`, cannot use the card's layout: `SNAPCAS.COM` and the image go into one folder by hand |
 | A game that hangs or shows garbage passes the check ([DESIGN.md, Check][check]) | The image fails only on the real machine |

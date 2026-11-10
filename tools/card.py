@@ -8,6 +8,11 @@ collection's name. A name that starts with a digit has the letter 0-9.
 """
 import os
 
+try:
+    import fcntl
+except ImportError:  # Windows
+    fcntl = None
+
 # The files of a game that go to the card: its image.
 SUFFIXES = (".SNP",)
 
@@ -61,6 +66,32 @@ def read(path):
         return f.read()
 
 
+def write(target, data):
+    """Writes data as the file target. The bytes go to a temporary file beside
+    it, whose name fits a FAT card's 8.3 names, and the OS writes them out
+    before the file takes target's name: fsync, and on macOS F_FULLFSYNC, which
+    also empties the drive's own buffer. So a card that is full or pulled out
+    leaves no cut file under target's name."""
+    temp = os.path.splitext(target)[0] + ".$$$"
+    try:
+        with open(temp, "wb") as f:
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+            if hasattr(fcntl, "F_FULLFSYNC"):
+                try:
+                    fcntl.fcntl(f.fileno(), fcntl.F_FULLFSYNC)
+                except OSError:
+                    pass  # not every file system has it, and fsync is done
+        os.replace(temp, target)
+    except BaseException:
+        try:
+            os.remove(temp)
+        except OSError:
+            pass
+        raise
+
+
 def sync(files, destination, log=print):
     """Copies each file that the destination lacks or holds with other bytes,
     reads each copy back and compares it, and returns the numbers of copied and
@@ -73,8 +104,7 @@ def sync(files, destination, log=print):
             unchanged += 1
             continue
         os.makedirs(os.path.dirname(target), exist_ok=True)
-        with open(target, "wb") as f:
-            f.write(data)
+        write(target, data)
         if read(target) != data:
             raise CardError(f"{target}: the copy differs from {source} when read back")
         log(f"copy      {target}, compared ok")

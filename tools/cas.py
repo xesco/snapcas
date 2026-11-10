@@ -8,17 +8,25 @@ header can be at any offset, as openMSX reads it. tape.py makes the tape model
 of the blocks that read() returns.
 """
 
+# The header before each block. The tape service's copy is D_HEADER in
+# src/tape.inc.
 HEADER = bytes.fromhex("1FA6DEBACC137D74")
 
 
-def read(data):
-    """The file's blocks, as the fields of tape.Block: standard, the block's
-    bytes, their offset in the file, and no times, because the capture follows
-    a CAS file's blocks by TAPIN."""
+def spans(data):
+    """Each block's bytes in the file, after its header, as (start, end)
+    offsets."""
     starts = []
     at = data.find(HEADER)
     while at >= 0:
         starts.append(at)
         at = data.find(HEADER, at + 8)
     ends = starts[1:] + [len(data)]
-    return [(True, data[s + 8:e], s + 8, None, None) for s, e in zip(starts, ends)]
+    return [(s + 8, e) for s, e in zip(starts, ends)]
+
+
+def read(data):
+    """The file's blocks, as the fields of tape.Block: standard, the block's
+    bytes, their offset in the file, and no times, because the capture follows
+    a CAS file's blocks by TAPIN."""
+    return [(True, data[start:end], start, None, None) for start, end in spans(data)]

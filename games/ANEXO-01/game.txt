@@ -2,3 +2,19 @@
 cas ANEXO-01.CAS
 sha1 51f31d8b74049d8f9435691194d6f939e56d176d
 url https://download.file-hunter.com/Games/MSX1/CAS/Anexo%2001%2C%20El%20Algoritmo%20%5BEn%5D%20(2018)%20%5BBLOAD%27CAS-%27%2CR%5D.zip
+
+# The tape's stub selects the RAM's subslot in page 1 by writing the subslot
+# register, and leaves SLTTBL, the BIOS's copy of that register, as it was. The
+# game's first code, at 4010h, takes its own subslot from SLTTBL, to select it in
+# page 2. With the RAM in an expanded slot, as a Carnivore2's is, SLTTBL still names
+# the disk ROM's subslot for page 1 then. On a machine with its disk system, the
+# disk ROM's interrupt hook makes an inter-slot call before the game's first
+# instruction, and that call writes SLTTBL again from the register. The capture
+# removes the disk system's hooks, as a cassette machine has none. So the game
+# selects the disk ROM's subslot, calls AA31h there, runs FFh bytes and then BASIC's
+# data, and reaches a reset by accident, which starts the ROM copy. The first patch
+# makes the game read the subslot register itself: LD A,(FFFFh) / CPL / AND 0Ch /
+# NOP in place of INC L four times / LD A,(HL) / AND 0Ch. The second fixes the
+# stub's sum of the block, C2h, for the new bytes.
+patch side1:289 2C 2C 2C 2C 7E E6 0C > 3A FF FF 2F E6 0C 00
+patch side1:F7 C2 > FB

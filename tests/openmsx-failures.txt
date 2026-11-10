@@ -1,6 +1,7 @@
 # Game files that fail on a machine in openMSX itself: a plain load of the tape,
 # on the same machine without the capture code, fails too (docs/PLAN.md, step 9).
-# make games passes when every game file that fails is here. A patch
+# make games passes when every game file that fails is here or in
+# snapcas-failures.txt, and notes a game file here that passes now. A patch
 # line can still make such a game work later. Each line: the machine, the game
 # file's folder, and what fails in plain openMSX.
 
