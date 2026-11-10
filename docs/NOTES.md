@@ -168,35 +168,34 @@ title or an empty screen for the 60 seconds. But their captures reset 8.7 and 7.
 seconds after the snapshot, and on a real PHC-28S Konami's Soccer's restored game
 does reset, into DOS.
 
-   The point judges where the machine ends, not the reset, because a loader can
-   reset the machine on purpose after the restore. Japan, from Super MSX n.20,
-   resets the VG-8020 0.8 seconds after the restore, and the BIOS's search for
-   cartridges finds the ROM copy in RAM and starts that copy. A breakpoint is at the
-   start of the BIOS's reset routine, where 0000h's `DI / JP` jumps, while page 0
-   selects the main ROM, as in the capture's log ([Capture](#capture)). The
-   breakpoint notes each reset in the report with its time, but a reset alone does
-   not fail the point. The check reads EXPTBL, for the main ROM's slot, when
-   `SNAPCAS.COM` starts. At first, the check read EXPTBL when the boot steps ended.
-   On the PHC-28S the BIOS has not set EXPTBL then, so the breakpoint took the main
-   ROM for slot 3-3 and missed every reset there, Aliens's among them. The report
-   adds `point 3: fail` and the sign, or else `point 3: pass`, and a failed point 3
-   fails the check. A hang is not a reboot, and point 3 does not see a hang.
-   American Football, captured with the Carnivore2, stops in the BIOS on the VG-8020
-   with its interrupts off. Its game file now captures it without the Carnivore2
-   ([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)).
-4. During the same 60 seconds the game must not stop at a BASIC error. A BASIC
-   program, or a loader written in BASIC, that meets an error prints one of BASIC's
-   error messages, such as `Syntax error in 100`. It then waits at `Ok`, in a text
-   mode, where `openMSX`'s `screen` reads the message. The point fails when the
-   screen's text holds one of those messages at one of the savestates. Points 1 to 3
-   do not see such a stop. A scan of the 60-second savestates of the collection's
-   passing game files found 17 runs on the PHC-28S and the VG-8020 that end at an
-   error. Among them are Field Master's `Overflow in 130` and three tapes of the
-   CasLink3 loader, whose `BLOAD` of the next part ends in `Syntax error`. A loader
-   that stops at `Ok` on purpose, and tells the player to press F5 or type `RUN`, as
-   12 tapes do, shows no error message, so it passes. The report adds
-   `point 4: fail` and the message, or else `point 4: pass`, and a failed point 4
-   fails the check.
+Point 3 judges where the machine ends, not the reset, because a loader can reset the
+machine on purpose after the restore. Japan, from Super MSX n.20, resets the VG-8020
+0.8 seconds after the restore, and the BIOS's search for cartridges finds the ROM
+copy in RAM and starts that copy. A breakpoint is at the start of the BIOS's reset
+routine, where 0000h's `DI / JP` jumps, while page 0 selects the main ROM, as in the
+capture's log ([Capture](#capture)). The breakpoint notes each reset in the report
+with its time, but a reset alone does not fail the point. The check reads EXPTBL,
+for the main ROM's slot, when `SNAPCAS.COM` starts. At first, the check read EXPTBL
+when the boot steps ended. On the PHC-28S the BIOS has not set EXPTBL then, so the
+breakpoint took the main ROM for slot 3-3 and missed every reset there, Aliens's
+among them. The report adds `point 3: fail` and the sign, or else `point 3: pass`,
+and a failed point 3 fails the check. A hang is not a reboot, and point 3 does not
+see a hang. American Football, captured with the Carnivore2, stops in the BIOS on
+the VG-8020 with its interrupts off. Its game file now captures it without the
+Carnivore2 ([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)).
+
+During the same 60 seconds the game must not stop at a BASIC error, and point 4
+checks that. A BASIC program, or a loader written in BASIC, that meets an error
+prints one of BASIC's error messages, such as `Syntax error in 100`. It then waits
+at `Ok`, in a text mode, where `openMSX`'s `screen` reads the message. Point 4 fails
+when the screen's text holds one of those messages at one of the savestates. Points
+1 to 3 do not see such a stop. A scan of the 60-second savestates of the
+collection's passing game files found 17 runs on the PHC-28S and the VG-8020 that
+end at an error. Among them are Field Master's `Overflow in 130` and three tapes of
+the CasLink3 loader, whose `BLOAD` of the next part ends in `Syntax error`. A loader
+that stops at `Ok` on purpose, and tells the player to press F5 or type `RUN`, as 12
+tapes do, shows no error message, so it passes. The report adds `point 4: fail` and
+the message, or else `point 4: pass`, and a failed point 4 fails the check.
 
 ## Decisions
 

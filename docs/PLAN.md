@@ -720,7 +720,7 @@ only `custom/README.md`.
 | A folder of the tests' own `custom/` with a game file, and one without | Only the folder with a `game.txt` is a custom game |
 | `CUSTOM/mygame` | The name finds the game's folder in any case |
 | `list custom` | The game shows with its title |
-| The tapes, the work folder and the image | The tapes are the game's folder, and the work folder and image are below `custom/` |
+| The tapes, the work folder and the image | The tapes are in the game's folder. The work folder is `out/work/<machine>/custom/<GAME>/`, and the image goes to `images/<machine>/custom/<GAME>/` |
 | Gauntlet | A shipped game is no custom game. Its tapes come from `downloads/` |
 | A custom game made from `FREDDY.CAS` on `phc28s-ram64k-carnivore2` with `--check`, by hand | `snap` passes, and the image goes to `images/phc28s-ram64k-carnivore2/custom/ZZFREDDY/` |
 

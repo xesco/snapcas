@@ -419,8 +419,8 @@ that no game file needs a line for them. It does this in four parts:
 3. At step 4, the write watchpoint on port A8h tests each value against the slot
    map. A value whose field names a slot that holds nothing makes the capture log
    the write, the address of its `OUT` and the new value. When the code that set the
-   value is one of the forms in the second table below, the capture looks for the
-   code in the tape files, in the order of the third table below. When it finds the
+   value is one of the forms in the third table below, the capture looks for the
+   code in the tape files, in the order of the second table below. When it finds the
    code, the capture stops. `capture.py` then adds a patch of n at each place to
    `snap/patches.txt` and runs the capture again from step 1, up to 16 times.
    Otherwise the capture goes on, and the logged write is for a `patch` line by
