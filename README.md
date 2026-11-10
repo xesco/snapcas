@@ -211,12 +211,25 @@ the game yourself.
    ```
 
    The command prints four lines that start with `check`. If all four say `pass`,
-   the game works. Copy it to the card and play it, as in
-   [Play a game](#play-a-game).
+   the game works.
 
-4. If a line says `fail`, the game needs more lines in its `game.txt`. Each line
-   tells `snapcas` how to load the game or what to change in it. An AI coding agent
-   can find those lines:
+4. Copy your games to the MSX's card:
+
+   ```
+   ./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
+   ```
+
+   On the MSX, your own games are in the folder `\SNAPCAS\C\CUSTOM`. Go to that
+   folder and start the game:
+
+   ```
+   CD \SNAPCAS\C\CUSTOM
+   \BIN\SNAPCAS MYGAME
+   ```
+
+5. If a line of step 3 says `fail`, the game needs more lines in its `game.txt`.
+   Each line tells `snapcas` how to load the game or what to change in it. An AI
+   coding agent can find those lines:
 
    > MYGAME in custom/ fails on phc28s-ram64k-carnivore2. Follow AGENTS.md, Fix a
    > game that fails.
