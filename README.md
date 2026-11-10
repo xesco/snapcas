@@ -35,7 +35,8 @@ more machines.
 
 You need three things:
 
-- An MSX with a memory mapper and a disk.
+- An MSX with a memory mapper and a disk
+  ([what the MSX needs](docs/PLAYING.md#what-you-need)).
 - A computer with Python 3 and `openMSX`.
 - The system ROMs of your MSX, installed in `openMSX`. `openMSX` needs them to
   emulate your MSX.
