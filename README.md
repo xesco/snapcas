@@ -28,26 +28,6 @@ The `.SNP` file also holds the rest of the tape, so those games work too. Other
 games do not work on every MSX, and `snapcas` changes them so that they work on
 yours. `snapcas` knows 1,545 games and 13 MSX machines.
 
-## Let an AI do it
-
-An AI coding agent, such as Claude Code, can do each task of this page for you. The
-file [AGENTS.md](AGENTS.md) describes every task to the agent, step by step. Get
-`snapcas` (step 1 of [Play a game](#play-a-game)), open the `snapcas` folder in your
-agent, and ask in your own words, for example:
-
-| You want to | Ask the AI |
-|---|---|
-| Play a game | "Make Gauntlet for my Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2. Check it, and copy my games to the card at /Volumes/MSX." |
-| Add a machine | "Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow AGENTS.md, Add a machine." |
-| Add a game | "Add the tape ~/Downloads/MYGAME.CAS to snapcas as a custom game, and make it for hx10-carnivore2. Follow AGENTS.md, Add a game." |
-| Fix a game | "Gauntlet fails on hx10-carnivore2. Follow AGENTS.md, Fix a game that fails." |
-
-Always tell the AI your MSX's model and what is in each cartridge slot. The AI can
-test a game only in the emulator. It cannot see your real MSX, so play the game
-there and tell the AI what happens.
-
-The next sections give the same tasks as steps that you do by hand.
-
 ## Play a game
 
 You need three things:
@@ -84,8 +64,16 @@ This example makes Gauntlet for a Sanyo PHC-28S.
    A machine's name is the MSX's model, followed by its cartridges in slot order. A
    Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2 is
    `phc28s-ram64k-carnivore2`. Give the whole name, because each cartridge changes
-   the `.SNP` file. If your MSX is not in the list, add it first
-   ([Add a machine](#add-a-machine)).
+   the `.SNP` file.
+
+   If your MSX is not in the list, add it first. An AI coding agent, such as Claude
+   Code, can add it for you. Open the `snapcas` folder in the agent, and tell it
+   your MSX's model and what is in each cartridge slot:
+
+   > Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
+   > AGENTS.md, Add a machine.
+
+   To add it by hand, follow [Add a machine](#add-a-machine).
 
 4. Make the game's `.SNP` file:
 
@@ -137,6 +125,12 @@ with a Carnivore2 in slot 1.
      of its file in `openMSX`'s `share/machines/` folder, without `.xml`.
    - Change the `variant` line to `variant hx10`. The next step makes that variant.
 
+   An MSX with another disk cartridge, or one that starts in a menu, needs more
+   changes. An AI coding agent can write the file for it:
+
+   > Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
+   > AGENTS.md, Add a machine.
+
 4. Make the capture variant. Some games load only without the disk cartridge, so
    `snapcas` loads them on a second machine file: your MSX without that cartridge.
    Copy the variant of the machine that you copied, and change its `openmsx` line to
@@ -156,8 +150,13 @@ with a Carnivore2 in slot 1.
    The command prints four lines that start with `check`. If all four say `pass`,
    the machine works.
 
-6. If a line says `fail`, or the command stops with a message, follow the full
-   steps ([AGENTS.md, Add a machine](AGENTS.md#add-a-machine)). Those steps list
+6. If a line says `fail`, or the command stops with a message, ask the AI:
+
+   > Gauntlet fails on hx10-carnivore2. Follow AGENTS.md, Add a machine.
+
+   The AI can test a game only in the emulator. It cannot see your real MSX, so play
+   the game there and tell the AI what happens. To fix the machine by hand, follow
+   the full steps ([AGENTS.md, Add a machine](AGENTS.md#add-a-machine)), which list
    each message and its fix.
 
 Many games need a small fix for each machine. The most common fix is to load the
@@ -202,8 +201,13 @@ the game yourself.
    the game works. Copy it to the card and play it, as in
    [Play a game](#play-a-game).
 
-4. If a line says `fail`, the game needs more lines in its `game.txt`. The full
-   steps show how to find those lines
+4. If a line says `fail`, the game needs more lines in its `game.txt`. An AI coding
+   agent can find those lines:
+
+   > MYGAME in custom/ fails on phc28s-ram64k-carnivore2. Follow AGENTS.md, Fix a
+   > game that fails.
+
+   To find them by hand, follow the full steps
    ([AGENTS.md, Fix a game that fails](AGENTS.md#fix-a-game-that-fails)).
 
 ## Learn more
