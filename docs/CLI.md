@@ -228,10 +228,13 @@ writes each copy under a temporary name in the same folder, the file's name with
 Only then does `sync` give the copy the file's name, so a card that is full, or that
 is pulled out during the copy, holds no cut file under an image's name. `sync` then
 reads each copy back and compares it with the original, and stops at the first copy
-that differs. It never deletes a file on the card, so an image deleted from
-`images/` stays there. A destination named `SNAPCAS` or `BIN` stops the command,
-because the destination is the folder that holds them. Two images that go to the
-same place stop it too, before it copies anything.
+that differs. It never deletes an image on the card, so an image deleted from
+`images/` stays there. It deletes one kind of file only. macOS keeps a file's
+extended attributes on a FAT card in a second file, named `._` and the file's name,
+which DOS lists as one more file, and `sync` removes that file of each copy that it
+makes. A destination named `SNAPCAS` or `BIN` stops the command, because the
+destination is the folder that holds them. Two images that go to the same place stop
+it too, before it copies anything.
 
 `SNAPCAS.COM` opens the image in the current folder, so on the MSX the player goes
 to the image's folder first:

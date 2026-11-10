@@ -261,8 +261,8 @@ def main():
     try_.set_defaults(run=try_game)
     sync_ = verbs.add_parser("sync", help="copy a machine's images and SNAPCAS.COM to a card",
                              description="Copy a machine's images and SNAPCAS.COM to a card: the files that are "
-                                         "new or changed, each read back and compared. Nothing on the card is "
-                                         "deleted.")
+                                         "new or changed, each read back and compared. No image on the card "
+                                         "is deleted.")
     sync_.add_argument("machine", help="a machine's name, as snapcas.py machines lists it")
     sync_.add_argument("destination", help="the card's top folder, such as /Volumes/MSX")
     sync_.set_defaults(run=sync_card)

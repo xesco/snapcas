@@ -16,6 +16,11 @@ except ImportError:  # Windows
 # The files of a game that go to the card: its image.
 SUFFIXES = (".SNP",)
 
+# The first bytes of an AppleDouble file. macOS keeps a file's extended
+# attributes on a FAT card in such a file beside it, named ._ and the file's
+# name, and DOS lists it as one more file.
+APPLEDOUBLE = b"\x00\x05\x16\x07"
+
 
 class CardError(Exception):
     """A destination or a set of images that cannot be synced."""
@@ -66,12 +71,26 @@ def read(path):
         return f.read()
 
 
+def remove_sidecar(path):
+    """Removes the AppleDouble file that macOS wrote beside the file path, if
+    there is one. A file of that name with other bytes stays."""
+    sidecar = os.path.join(os.path.dirname(path), "._" + os.path.basename(path))
+    try:
+        with open(sidecar, "rb") as f:
+            if f.read(len(APPLEDOUBLE)) != APPLEDOUBLE:
+                return
+        os.remove(sidecar)
+    except OSError:
+        pass
+
+
 def write(target, data):
     """Writes data as the file target. The bytes go to a temporary file beside
     it, whose name fits a FAT card's 8.3 names, and the OS writes them out
     before the file takes target's name: fsync, and on macOS F_FULLFSYNC, which
     also empties the drive's own buffer. So a card that is full or pulled out
-    leaves no cut file under target's name."""
+    leaves no cut file under target's name. The AppleDouble file that macOS
+    wrote beside either name goes."""
     temp = os.path.splitext(target)[0] + ".$$$"
     try:
         with open(temp, "wb") as f:
@@ -84,18 +103,22 @@ def write(target, data):
                 except OSError:
                     pass  # not every file system has it, and fsync is done
         os.replace(temp, target)
+        remove_sidecar(temp)
+        remove_sidecar(target)
     except BaseException:
         try:
             os.remove(temp)
         except OSError:
             pass
+        remove_sidecar(temp)
         raise
 
 
 def sync(files, destination, log=print):
     """Copies each file that the destination lacks or holds with other bytes,
     reads each copy back and compares it, and returns the numbers of copied and
-    unchanged files. It deletes nothing on the card."""
+    unchanged files. It deletes nothing on the card but the AppleDouble file
+    of a copy that it makes."""
     copied = unchanged = 0
     for path, source in files.items():
         data = read(source)
