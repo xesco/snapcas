@@ -56,6 +56,10 @@ game on that MSX.
 
    The command shows the game's name, `GAUNTLET`.
 
+   If the command does not find the game and you have its CAS file, add the game
+   first ([Add a game](#add-a-game)). Then make its `.SNP` file in step 4 with the
+   game's folder, such as `custom/MYGAME`, in place of the name.
+
 3. Find your MSX:
 
    ```
@@ -207,13 +211,14 @@ the game yourself.
    the game works. Copy it to the card and play it, as in
    [Play a game](#play-a-game).
 
-4. If a line says `fail`, the game needs more lines in its `game.txt`. An AI coding
-   agent can find those lines:
+4. If a line says `fail`, the game needs more lines in its `game.txt`. Each line
+   tells `snapcas` how to load the game or what to change in it. An AI coding agent
+   can find those lines:
 
    > MYGAME in custom/ fails on phc28s-ram64k-carnivore2. Follow AGENTS.md, Fix a
    > game that fails.
 
-   To find them by hand, follow the full steps
+   To find the lines by hand, follow the full steps
    ([AGENTS.md, Fix a game that fails](AGENTS.md#fix-a-game-that-fails)).
 
 ## Learn more
