@@ -2,6 +2,11 @@
 
 `snapcas` lets you play MSX tape games on your real MSX, without a tape player.
 
+The goal of the project is that any tape file plays on any MSX as the original tape
+did, whatever cartridges the MSX has and in whatever slot order. That includes games
+whose original tape fails on some machines, because its loader expects one machine's
+memory layout or no disk interface.
+
 ## What it is
 
 `snapcas` is a program for your computer. It turns a tape game into a single `.SNP`
@@ -21,6 +26,26 @@ Some games read the tape again while you play, for example to load the next leve
 The `.SNP` file also holds the rest of the tape, so those games work too. Other
 games do not work on every MSX, and `snapcas` changes them so that they work on
 yours. `snapcas` knows 1,545 games and 13 MSX machines.
+
+## Let an AI do it
+
+An AI coding agent, such as Claude Code, can do each task of this page for you. The
+file [AGENTS.md](AGENTS.md) describes every task to the agent, step by step. Get
+`snapcas` (step 1 of [Play a game](#play-a-game)), open the `snapcas` folder in your
+agent, and ask in your own words, for example:
+
+| You want to | Ask the AI |
+|---|---|
+| Play a game | "Make Gauntlet for my Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2. Check it, and copy my games to the card at /Volumes/MSX." |
+| Add a machine | "Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow AGENTS.md, Add a machine." |
+| Add a game | "Add the tape ~/Downloads/MYGAME.CAS to snapcas as a custom game, and make it for hx10-carnivore2. Follow AGENTS.md, Add a game." |
+| Fix a game | "Gauntlet fails on hx10-carnivore2. Follow AGENTS.md, Fix a game that fails." |
+
+Always tell the AI your MSX's model and what is in each cartridge slot. The AI can
+test a game only in the emulator. It cannot see your real MSX, so play the game
+there and tell the AI what happens.
+
+The next sections give the same tasks as steps that you do by hand.
 
 ## Play a game
 
@@ -124,7 +149,7 @@ with a Carnivore2 in slot 1.
    in `openMSX`:
 
    ```
-   ./snapcas.py snap caldero hx10-carnivore2 --check
+   ./snapcas.py snap gauntlet hx10-carnivore2 --check
    ```
 
    The command prints four lines that start with `check`. If all four say `pass`,
@@ -180,23 +205,6 @@ CAS file or a TSX file.
 4. If a line says `fail`, the game needs more lines in its `game.txt`. The full
    steps show how to find those lines
    ([AGENTS.md, Fix a game that fails](AGENTS.md#fix-a-game-that-fails)).
-
-## Let an AI do it
-
-An AI coding agent, such as Claude Code, can do each of these tasks for you. The
-file [AGENTS.md](AGENTS.md) describes every task to the agent, step by step. Open
-the `snapcas` folder in your agent and ask in your own words, for example:
-
-| You want to | Ask the AI |
-|---|---|
-| Play a game | "Make Gauntlet for my Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2. Check it, and copy my games to the card at /Volumes/MSX." |
-| Add a machine | "Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow AGENTS.md, Add a machine." |
-| Add a game | "Add the tape ~/Downloads/MYGAME.CAS to snapcas as a custom game, and make it for hx10-carnivore2. Follow AGENTS.md, Add a game." |
-| Fix a game | "Gauntlet fails on hx10-carnivore2. Follow AGENTS.md, Fix a game that fails." |
-
-Always tell the AI your MSX's model and what is in each cartridge slot. The AI can
-test a game only in the emulator. It cannot see your real MSX, so play the game
-there and tell the AI what happens.
 
 ## Learn more
 
