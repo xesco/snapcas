@@ -1,0 +1,16 @@
+# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# The game builds 14 tables of 256 bytes in F200h to FFFFh, for the 7 shifts of
+# a sprite's byte, and reads them with the byte as the low address. On a
+# machine whose RAM is in an expanded slot, FFFFh is the slot's subslot
+# register, so the last table's entry for FFh deselects the RAM when the game
+# builds it, and could not be read back. The NMS 8250 has no other RAM. The
+# patches move the tables down one page, to F100h to FEFFh. The builder at
+# 6A27h starts at page FEh for FFh. The lookup at 6AC4h has ADD A,0EFh for
+# OR 0F0h, and steps to the second table of a pair with INC H as before. The
+# game's stack, which was below F200h, is set below F100h in both places. The
+# game writes nothing else in F000h to F1FFh.
+patch side1:3B28 26 FF > 26 FE
+patch side1:3BC5 F6 F0 > C6 EF
+patch side1:113D 31 00 F2 > 31 00 F1
+patch side1:11B6 31 00 F2 > 31 00 F1

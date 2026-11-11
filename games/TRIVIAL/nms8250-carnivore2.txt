@@ -1,0 +1,13 @@
+# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# The game copies the BIOS to the RAM of page 0, puts its own code there from
+# 268Ch, and sets the hooks H.KEYI and H.TIMI to JP 2701h, a RET, and JP 2702h,
+# its timer routine, both in that RAM. On an MSX2 the BIOS calls the sub-ROM,
+# and an interrupt in the sub-ROM goes to the handler of the main ROM in slot 0,
+# not to the copy. The hooks then jump to 2701h and 2702h in the ROM, where an
+# LDIR of 65,536 bytes can run. The patch changes the 10 bytes that the game
+# copies to the two hooks. H.KEYI becomes a RET. H.TIMI becomes IN A,(0A8h),
+# RRCA and a JR to H.KEYI's other four bytes, RET NC and JP 2702h. So the timer
+# routine runs when page 0 is in slot 1 or 3, the RAM, and not when it is in
+# slot 0, the ROM.
+patch side1:4687 C3 01 27 00 00 C3 02 27 00 00 > C9 D0 C3 02 27 DB A8 0F 18 F7

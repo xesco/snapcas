@@ -1,0 +1,16 @@
+# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# For its double-width text the game builds a table of 256 words in FE00h to
+# FFFFh, at 9F16h, and reads it at B739h with twice the byte as the offset. On a
+# machine whose RAM is in an expanded slot, FFFFh is the slot's subslot
+# register, and the last word deselects the RAM. The NMS 8250 has no other RAM.
+# The patches put the table two bytes lower, in FDFEh to FFFDh. The builder
+# starts at FDFEh. The reader's six bytes become LD L,A, LD H,7Fh, DEC HL,
+# ADD HL,HL and NOP, which give FDFEh plus twice the byte. FDFEh and FDFFh hold
+# 00h in every block of the tape that loads them, after a table that ends at
+# FDFDh, and the table's first word, for the byte 00h, is 0000h. The last patch
+# gives the byte after the block the exclusive OR of the changed block, which
+# the loader checks.
+patch side1:81D7 21 00 FE > 21 FE FD
+patch side1:99FA 87 6F CE FE 95 67 > 6F 26 7F 2B 29 00
+patch side1:E0D9 18 > FB

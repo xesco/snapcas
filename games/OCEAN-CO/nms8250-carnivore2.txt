@@ -1,0 +1,9 @@
+# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# The loader moves the game's last part to C000h to FFFFh, by an LDDR of 4000h
+# bytes. On a machine whose RAM is in an expanded slot, FFFFh is the slot's
+# subslot register, and the move's first byte deselects the RAM. The NMS 8250
+# has no other RAM. The patch makes the move 3FFFh bytes, from DFFEh to FFFEh.
+# The byte left out is the last row of the character set's last character, a
+# row of 00h, and the game then reads the subslot register there.
+patch side1:2E8 11 FF FF 21 FF DF 01 00 40 > 11 FE FF 21 FE DF 01 FF 3F

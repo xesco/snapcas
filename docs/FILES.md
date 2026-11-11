@@ -181,7 +181,7 @@ files that each machine file has:
 | File | Configuration | Machine's game files |
 |---|---|---|
 | `vg8020-carnivore2` | Philips VG-8020: an MSX1 with 64 KB and a Carnivore2 | 123 |
-| `nms8250-carnivore2` | Philips NMS 8250: an MSX2 with its own 128 KB and a floppy drive, and a Carnivore2 under Nextor. This machine file is for the cartridge with a mapper and a disk interface that most MSX2 owners use | 76 |
+| `nms8250-carnivore2` | Philips NMS 8250: an MSX2 with its own 128 KB and a floppy drive, and a Carnivore2 under Nextor. This machine file is for the cartridge with a mapper and a disk interface that most MSX2 owners use | 93 |
 | `nms8245-ram512k-sunriseide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. The machine's own 128 KB leave Nextor too few free segments | 0 |
 | `vg8020-picoverse` | Philips VG-8020 with a Sunrise IDE interface under Nextor and a 192 KB memory mapper, as the PicoVerse cartridge has them. `openMSX` has no PicoVerse, so these two cartridges replace the PicoVerse. The Makefile makes the 192 KB mapper from `openMSX`'s 512 KB mapper | 53 |
 | `phc28s-ram64k-carnivore2` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1, and a Carnivore2 in slot 2 | 85 |

@@ -1,0 +1,13 @@
+# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# The game writes EDh to FFFEh and B0h to FFFFh, an LDIR, each time that it
+# clears a part of its memory, and then jumps to an LDIR and RET at B274h. It
+# never runs the two bytes at FFFEh. On a machine whose RAM is in an expanded
+# slot, FFFFh is the slot's subslot register, and the write of B0h deselects
+# the RAM in page 2. The NMS 8250 has no other RAM. The patch replaces the write
+# to FFFFh, 32 FF FF at AC97h, with OR A and CP 7Bh, which change only the
+# flags. The tape holds each byte XOR the two bytes of its address, and the
+# loader checks the sum of the bytes, which the new bytes keep.
+patch side1:27E7 09 > 8C
+patch side1:27E8 CB > CA
+patch side1:27E9 CA > 4E

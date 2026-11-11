@@ -200,13 +200,39 @@ machine:
 | Jumping Jack | BASIC's `POKE &HFFFF` in seven places, and `LD A,(0FFFFh)` in the machine code | Patches keep the value at FFFEh, in `game.txt` |
 | Space Beater | A push with the stack at 0000h, from `LD SP,0000h` in three places | Patches set the stack at FFFEh, in `game.txt` |
 | Enchanted | An LDIR of the character set to EA60h to FFFFh | A patch copies one byte less, on this machine only. The byte is the last row of the last character |
-| RoboCop | A fill of F000h to FFFFh at 56C8h, and then a copy that ends at FFFFh at 84CAh | No image |
-| Alien Syndrome, Knight Lore | A table that the game builds at FE00h or FF00h to FFFFh | No image |
-| Barbarian | An LDIR of code to FF01h and on through FFFFh to 00B2h | No image |
-| Casanova | `LD A,18h / LD (0FFFFh),A` at 05ECh | No image |
-| Jack the Nipper | Its unpacker's `LD (BC),A` at 0075h | No image |
-| Mortadelo y Filemon, Ocean Conqueror | A call with the stack at 0000h, and a copy to page 3 | No image. Where each sets its stack was not found |
-| The Wall, Container, Trivial Pursuit | A push with the stack at the top of memory, by the capture's log | No image. Not looked into further |
+| RoboCop | Two fills of F000h to FFFFh, at 56C8h and 5A4Ah, and a copy of 2000h to 2FFFh there at 84C0h, before each load from the tape | Patches end the fills and the copy at FFFEh, on this machine only. The game keeps a copy of the system area in 2000h to 2FFFh |
+| Ocean Conqueror | The loader's LDDR of 4000h bytes to C000h to FFFFh | A patch moves one byte less, on this machine only. The byte is the last row of the last character, as in Enchanted |
+| The Wall | An LDDR of 8001h bytes from C000h to 0000h, at 0360h | A patch moves 7FFFh bytes, from BFFEh to FFFEh, on this machine only. The byte left out follows a filler at the block's end, and no code of the game names FFFFh |
+| Casanova | `LD A,18h / LD (0FFFFh),A` at 05ECh, a rest of the ZX Spectrum version. The game runs in interrupt mode 1 | A patch replaces the write with `NOP` and `LD A,0Ch`, on this machine only |
+| Jack the Nipper | The last byte of the block of FC00h bytes that its loader reads to 0400h | Patches make the load FBFFh bytes, on this machine only |
+| Barbarian | An LDIR of 1B2h bytes to FF01h and on through FFFFh to 00B2h | A patch makes the byte for FFFFh AAh, the value that the register has, on this machine only. The game then reads 55h there, where the tape has 00h |
+| Chuckie Egg, in two dumps | `LD (0FFFFh),A` with B0h at AC97h, before each `LDIR` that clears a part of memory. With EDh at FFFEh the two bytes are an `LDIR`, which the game never runs | A patch replaces the write with `OR A` and `CP 7Bh`, on this machine only |
+| Knight Lore | 14 tables of 256 bytes that the game builds in F200h to FFFFh, for the 7 shifts of a sprite's byte, and reads with the byte as the low address | Patches move the tables down one page, to F100h to FEFFh, and the stack from below F200h to below F100h, on this machine only. The stack has 256 bytes there, above the game's tables in E000h to EFFFh |
+| Alien Syndrome | A table of 256 words in FE00h to FFFFh, built at 9F16h for the double-width text and read at B739h only. The game's other two tables there, built at 9EF3h and 9F03h, end at FEFFh and FFBFh | Patches put the word table two bytes lower, in FDFEh to FFFDh, on this machine only. FDFEh and FDFFh hold 00h in every block that loads them, and the table's first word is 0000h |
+
+The Wall, Jack the Nipper and Barbarian load with a loader that compares the
+exclusive OR of a block's bytes with the byte after the block. Their patches change
+that byte too. The Wall flashes the Caps lamp 16 times after a block that fails, and
+starts the game 5 seconds later. Casanova's three new bytes have the exclusive OR of
+the old ones. Chuckie Egg's tape holds each byte XOR the two bytes of its address,
+and its loader checks the sum of the bytes, which the new bytes keep.
+
+No patch of the capture replaces these patches. Both RAMs of the machine are in an
+expanded slot, slot 2 is empty, and slot 0 holds the ROM, so an image for this
+machine always has the register at FFFFh.
+
+These game files failed for another cause:
+
+| Game | Cause | Result |
+|---|---|---|
+| Choplift, Tetratlon, Toruk, Digy Dung, Container, of the Super MSX tapes | The game's loader fills FD9Ah to FFF6h with C9h, to clear the hooks. On an MSX2, FFE7h to FFF6h hold the BIOS's copies of VDP registers 8 to 23. The game then sets the screen mode, the sub-ROM writes the registers from the copies, and register 15 gets 09h. The interrupt handler then reads status register 9, the interrupt stays active, and the handler's stack runs through the memory | A patch ends the fill at FFE6h, on this machine only |
+| Trivial Pursuit | The game copies the BIOS to the RAM of page 0, puts its own code there from 268Ch, and sets H.KEYI and H.TIMI to jump to 2701h and 2702h in that RAM. An interrupt in the sub-ROM goes to the main ROM's handler, whose hooks then jump to 2701h and 2702h in the ROM, where an LDIR of 65,536 bytes can run | A patch makes H.KEYI a `RET`, and H.TIMI a test of the slot register that runs the routine only when page 0 is in slot 1 or 3, on this machine only |
+| Mortadelo y Filemon | `OUT (0FEh),A`, the ZX Spectrum's border port, at 5B13h and FF5Dh. Port FEh is a memory mapper's register of page 2, and both RAMs of this machine are mappers | Patches replace each with `LD A,A` and `LD D,D`, on this machine only |
+
+Trivial Pursuit selects its RAM in page 0 by its primary slot only. Without the
+Carnivore2, its RAM is in slot 3, where the sub-ROM is too, and a call of the
+sub-ROM leaves the sub-ROM in page 0. So the game needs a RAM in another slot than
+3, as the Carnivore2's is.
 
 The NMS 8250's BASIC needs 160 free bytes at each check of the stack, where an
 MSX1's and the HB-F700P's need 120. Its `LD A,60h` at 6268h is `LD A,88h` in those.
@@ -216,7 +242,10 @@ Happy Fret in two dumps, Reflex and Wing Man got `MAXFILES=0`, which frees a fil
 machine only, because its program is stored in BASIC's tokens. A View to a Kill
 opens a file, and lost its 63 needless spaces. Robotix already has `MAXFILES=0`, and
 got its five lines as one, with `CLEAR0`. Survivor loads with the step above.
-Spartan X still stops at `Out of memory in 110`.
+Spartan X runs its BASIC program during the game, and its code at 8580h is in the
+file's area, so `MAXFILES=0` breaks it. Its line 100 lost `LOCATE 10,11` and the
+`PRINT` of its message, and has `CLEAR 1` for `CLEAR 10`, which frees 39 bytes, on
+this machine only.
 
 Crazy Golf, Cubit and Humphrey load their loader at FFCAh to FFFEh, over an MSX2's
 copies of VDP registers 8 to 23 and the main ROM's slot at FFF7h. Their patches load

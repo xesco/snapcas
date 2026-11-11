@@ -835,3 +835,14 @@ The results of the step, from the collections after it:
 | `hbf700p-ram512k-msxdos2` | 1,544 | 1,544. Goody and El Poder Oscuro got `subslots keep` |
 | `vg8020-carnivore2`, `phc28s-ram64k-carnivore2`, `hb75p-carnivore2` | 1,545 each | 1,545 each |
 
+## Step 30: the rest of the NMS 8250's games
+
+This step looks into the 18 game files that still fail on `nms8250-carnivore2`
+([NOTES.md, The RAM's subslot in every page](NOTES.md#the-rams-subslot-in-every-page)).
+It changes game files only, each in the machine's own file, so no other machine's
+image changes. All 18 pass after it: Ocean Conqueror, The Wall, RoboCop, Casanova,
+Jack the Nipper, Barbarian, Chuckie Egg in two dumps, Spartan X, Knight Lore, Alien
+Syndrome, Mortadelo y Filemon, Trivial Pursuit, and Choplift, Tetratlon, Toruk, Digy
+Dung and Container of the Super MSX tapes. Each was captured, built and checked by
+itself on this machine. The collection was not run on any machine after the step.
+
