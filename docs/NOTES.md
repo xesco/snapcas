@@ -156,6 +156,23 @@ Relics still fails on the HB-F700P. The restorer needs 32 or 33 free mapper segm
 for its tape, and MSX-DOS 2 has 26 in the 512 KB cartridge. So 1,544 of the 1,545
 game files pass.
 
+The HB-F700P's own mapper, in slot 3-3, has 16 more free segments, and the restorer
+does not use them. It takes every segment from MSX-DOS 2's primary mapper, which is
+the cartridge and also holds the game's RAM, because the tape service selects a
+segment to read the tape and does not select a slot. The game needs both sides of
+its tape, so a shorter tape is not a fix.
+
+A tape service that reads from a second mapper is possible, and is not built. In a
+test in `openMSX`, a routine in the code segment selected slot 3-3 in page 2, read
+a byte of a segment there and selected the old slot again. The part in page 3 does
+not grow. The restorer would find the second mapper in MSX-DOS 2's mapper table
+(`EXTBIO` with D=4 and E=1) and get its segments with `ALL_SEG`. The restorer must
+then leave out the segments of that mapper that the game holds. MSX-DOS 1 has no
+mapper table. The change is about 500 lines with its tests, and it changes the
+image format. Relics is the only game file that fails for free segments in the
+results of the five machines, and none of `openMSX`'s 251 machine files has two
+mappers.
+
 ## The interrupt slot patch
 
 La Aventura Espacial resets the HB-F700P at the end of its load. The stack at the
