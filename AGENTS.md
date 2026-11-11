@@ -383,7 +383,7 @@ snapcas.py: it passes, so the machine's game file needs: capture hb75p
 Then write that line in the machine's game file ([Write the fix](#4-write-the-fix)),
 and the fix is done. `make games MACHINE=<machine>` does both for every game that
 fails on a machine ([Run the collection](#7-run-the-collection)). A `capture` line
-is the most common fix. Of the shipped machine's game files, 640 hold a `capture`
+is the most common fix. Of the shipped machine's game files, 642 hold a `capture`
 line. When no variant passes, continue with the next step.
 
 ### 2. Read the failure
@@ -433,6 +433,7 @@ patches two. These forms need no line:
 | The same, run from page 3, that moves page 3 to a slot where the code differs | [The RAM search patch](docs/INTERNALS.md#the-ram-search-patch), which keeps page 3 |
 | A stub of `TAPION` that selects the ROM in page 0 as `AND H / LD L,A`, in the mode without a part in page 3 | The scan, in the build ([Without a part in page 3](docs/INTERNALS.md#without-a-part-in-page-3)) |
 | Level 9's, CasLink3's, and Engesoft's copies of page 3's slot to the other pages | [The page copy patch](docs/INTERNALS.md#the-page-copy-patch) |
+| The interrupt handler of Aventuras AD's interpreter, which writes the slot register from the game's copy of it, on an MSX2 | [The interrupt slot patch](docs/INTERNALS.md#the-interrupt-slot-patch) |
 
 `log.txt` names each write that the capture saw and did not patch, with
 `for a patch line`. The log names each address and value once, and leaves out the

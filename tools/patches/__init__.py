@@ -8,12 +8,12 @@ only one of the two returns nothing in the other. KINDS lists the kinds.
 """
 import collections
 
-from . import pagecopy, ramsearch, slots, t0stub, tapecode
+from . import irqslot, pagecopy, ramsearch, slots, t0stub, tapecode
 
 # The kinds, in the order that the scan runs them and that the capture loads
 # their Tcl. slots comes before ramsearch and pagecopy, because its Tcl makes
 # the slot map and holds the procedures that the other two use.
-KINDS = [tapecode, slots, t0stub, ramsearch, pagecopy]
+KINDS = [tapecode, slots, t0stub, ramsearch, pagecopy, irqslot]
 
 # What a search depends on: the entry page, at whose E1h to F3h the entries
 # are, or None when the image has no entries, the capture's slot map or None,

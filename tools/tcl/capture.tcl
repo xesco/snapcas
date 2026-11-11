@@ -47,7 +47,9 @@
 #   accepted, irq_probe, irq_bp, fallback_pc  the snapshot's wait for an
 #               interrupt (step 6)
 #   psg         the watchpoints on the PSG's ports
-array set ::run {msx2 0 t0 0 elapsed 0 restarts 0 since "" saved 0 decisions {} psg {}}
+#   slotwp, slots_watched  the watchpoints on the slot register and on FFFFh,
+#               and whether step 4 has set them
+array set ::run {msx2 0 t0 0 elapsed 0 restarts 0 since "" saved 0 decisions {} psg {} slotwp {} slots_watched 0}
 set ::st(log) {}
 
 proc now {} { machine_info time }
@@ -145,9 +147,10 @@ proc stop_with_patch {lines why} {
 # A moment is the machine, which savestate saves, and ::st then. openMSX's
 # loadstate restores the machine but not the script's variables, and it removes
 # the watchpoints, though it keeps the breakpoints. So moment_load puts ::st
-# back and sets the PSG's watchpoints again, which only keep two values. The
-# watchpoints on the slot register and on FFFFh stay removed (INTERNALS.md,
-# Capture, step 5).
+# back and sets the watchpoints again: the PSG's, and those on the slot
+# register and on FFFFh once step 4 has set them. Without them, a RAM page that
+# a game first selects after a rewind is not kept (INTERNALS.md, Capture, step
+# 5).
 proc moment_file {name} { file join $::S(home) savestates $::S(state)-$name.oms }
 proc moment_saved {name} { info exists ::run(moment,$name) }
 proc moment_forget {name} { unset -nocomplain ::run(moment,$name) }
@@ -164,6 +167,7 @@ proc moment_load {name} {
     array unset ::st
     array set ::st $::run(moment,$name)
     watch_psg
+    if {$::run(slots_watched)} watch_slots
 }
 
 # ---- What the capture tracks (INTERNALS.md, Capture, steps 1 and 4) ----
@@ -190,10 +194,17 @@ proc note_selection {a8} {
         dict set ::st(sel) "$ps-$ss-$page" 1
     }
 }
-# The watchpoints on the slot register and on FFFFh. While they are set, the
-# capture's own slot switches also pass them: those of take_snapshot, in a
-# capture without a rewind. They are not the game's writes, so the snap phase
-# leaves them out.
+# The watchpoints on the slot register and on FFFFh, which step 4 sets, and
+# moment_load again after each loadstate. The capture's own slot switches also
+# pass them: those of take_snapshot. They are not the game's writes, so the
+# snap phase leaves them out.
+proc watch_slots {} {
+    foreach wp $::run(slotwp) { catch { debug remove_watchpoint $wp } }
+    set ::run(slots_watched) 1
+    set ::run(slotwp) [list \
+        [debug set_watchpoint write_io 0xA8 {} {safe {on_a8 $::wp_last_value}}] \
+        [debug set_watchpoint write_mem 0xFFFF {} {safe {on_ffff $::wp_last_value}}]]
+}
 proc on_ffff {value} {
     if {$::run(phase) eq "snap"} return
     set a8 [debug read ioports 0xA8]
@@ -343,8 +354,7 @@ proc step4 {} {
     # The BIOS's reset routine, where 0000h's DI / JP jumps: a loader that has
     # crashed or rebooted the machine can also jump there itself.
     debug set_bp [word_at 2] {[rom0]} {safe on_reset}
-    debug set_watchpoint write_io 0xA8 {} {safe {on_a8 $::wp_last_value}}
-    debug set_watchpoint write_mem 0xFFFF {} {safe {on_ffff $::wp_last_value}}
+    watch_slots
     schedule_keys
     step5
 }

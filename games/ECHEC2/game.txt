@@ -2,3 +2,12 @@
 cas ECHECB.CAS
 sha1 a831c913b13b6b63aa3d07df3c1315f6bb6ee7e2
 url https://download.file-hunter.com/Games/MSX1/CAS/Echec%20(1985)(Loriciels)%5BSide%20B)%5BRUN%27CAS-%27%2Cr%5D.zip
+
+# The program's first BLOAD reads CODEFEN1 into FD9Ah to FFFFh. From FFCAh on, the
+# block holds no code, only the bytes FFh FFh 00h 00h of an MSX1's empty memory.
+# An MSX2 keeps system variables there: the copies of VDP registers 8 to 23 from
+# FFE7h, and the main ROM's slot at FFF7h, which gets FFh. The sub-ROM then comes
+# back to slot 3-3 in place of the main ROM, and the load fails. The patch makes
+# the block's end address FFC9h, the last hook's last byte, so that BLOAD stops
+# there.
+patch side1:2242 FF FF > C9 FF

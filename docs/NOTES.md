@@ -32,6 +32,14 @@ Moonrider pauses its own load for 16 seconds, so step 5's wait lasts 30 seconds.
 Saint Dragon reads its tape with interrupts off, and Thunder Blade waits in `TAPION`
 for side 2, so their snapshots go back to the last `TAPION` call's entry (step 6).
 
+This note is about step 5's watchpoints. A-TEAM waits for a key after its title
+screen, and the capture's key try there rewinds the machine. Until the capture set
+its watchpoints again after a rewind, it did not see the loader select the RAM of
+pages 0 and 1, at ATEAM1's FA00h and FA17h, and did not keep those pages. On the
+HB-F700P the restored game then reset the machine, which the check's point 2 and
+point 3 saw. On the VG-8020, the PHC-28S and the HB-75P the image passed the check
+without the two pages.
+
 ## Slot patches
 
 Sootland's FCh names slot 0 for page 0, which holds the ROM, and slot 3 for pages 1
@@ -117,19 +125,51 @@ Bestial Warrior and Mandragore also find the HB-F700P's own RAM in slot 3-3 and
 select slot 3 in page 3, where the RAM cartridge in slot 1 holds their code. They
 load on `hbf700p-noexp0-msxdos2`, without that cartridge.
 
-With the variants, the games run wrote 235 `capture` lines, and 1,534 of the 1,545
-game files pass. Continental Circus and Il Giustiziere got their lines by hand,
-Thunder Blade got `service t0` beside the run's line, as on the other machines, and
-Operation Wolf, Rambo III and Puzzle pass with the check's limit for a large image.
-These 11 game files still fail:
+With the variants, the games run wrote 235 `capture` lines. Continental Circus and
+Il Giustiziere got their lines by hand, Thunder Blade got `service t0` beside the
+run's line, as on the other machines, and Operation Wolf, Rambo III and Puzzle pass
+with the check's limit for a large image. That left 11 game files. Ten of them
+failed for a reason of their own, and none of those reasons is the HB-F700P's:
 
-| Game files | What fails | In plain `openMSX` on the machine |
+| Game files | What failed | The fix |
 |---|---|---|
-| Booga-Boo, Frog, A-TEAM | The game resets the machine at the end of its load. The HB-F700P then starts no game, and the check's disk boots DOS again. A-TEAM resets 3.7 seconds after the restore, with the tape service or without it | Booga-Boo shows BASIC's banner alone, so it fails there too. A-TEAM's plain load waits for a key |
-| La Aventura Espacial's two sides, Echec's side B | The load fails on every variant. Side A resets the machine at the end of its load with slot 0 not expanded | Echec's side B stops at `Disk offline in 40` |
-| Break Out!, Breakout | The loader selects slot 2 for RAM, where this machine has the MSX-DOS 2 cartridge | The program counter at 0038h with slot 2 in every page |
-| Master of the Lamps, The Queens Footsteps Part 2 | BASIC stops at `Out of memory in 2`, at `CLEAR0,&H82E6`, and at `Syntax error in 10` | The same errors |
-| Relics | The restorer needs 32 or 33 free mapper segments, and MSX-DOS 2 has 26 in the 512 KB cartridge | Not tried |
+| Break Out!, Breakout | Line 30 stops at `Out of memory`. An MSX2's `SCREEN` runs in the sub-ROM, with the stack pointer at 81B7h where the PHC-28S has 81DAh, and `CLEAR1,&H83FF` leaves 10 bytes too few. The loader also selects slot 2 for RAM by fixed values, and this machine has the MSX-DOS 2 cartridge's ROM in page 1 of slot 2, so the slot patch left that field | `MAXFILES=0` at the start of line 5, in `game.txt`, which frees a file's 267 bytes. In the machine's game file, patches of the 12 slot values to slot 1 |
+| Master of the Lamps | `CLEAR0,&H82E6` needs 160 bytes above the program, and the program has 161 on an MSX1. The MSX2 BASIC has one `DEC HL` more, at 7A22h, and keeps one byte more below the file buffers | `MAXFILES=0` at the start of line 1, in `game.txt` |
+| The Queens Footsteps Part 2 | The game calls 0115h, the second byte of the jump table's entry at 0114h. An MSX1's bytes there run on into `TAPIN` and return 7 seconds later. An MSX2's jump to C316h | The call made three NOPs, in `game.txt`. The game file's `snapshot at` and `service no` lines were for that call of the tape, and are gone |
+| Booga-Boo, Frog | `LD SP,0FFFFh`, on an MSX2's copies of VDP registers 8 to 23 and the main ROM's slot at FFF7h | The stack at F380h, in `game.txt` |
+| A-TEAM | The capture did not keep the RAM of pages 0 and 1 ([Capture](#capture)) | The capture's watchpoints after a rewind. The game file needs no line |
+| La Aventura Espacial, both sides | The interrupt handler writes the slot register from the game's copy of it, and the machine resets at the end of the load | [The interrupt slot patch](#the-interrupt-slot-patch), with the capture on `hbf700p-noexp0-ram512k-msxdos2` |
+| Echec, side B | The block CODEFEN1 loads FD9Ah to FFFFh, with an empty MSX1's bytes from FFCAh on, over an MSX2's variables there. FFF7h, the main ROM's slot, gets FFh | The block's end address made FFC9h, in `game.txt` |
+
+The fixes in `game.txt` pass on the VG-8020, the PHC-28S, the HB-75P, the HB-F700P
+and the NMS 8250 with a Carnivore2, except Echec's side B on the NMS 8250. Its
+loader looks for RAM in pages 0 and 1 by primary slot only, at BB00h. The NMS 8250's
+RAM is in slot 3-2, with ROMs in pages 0 and 1 of slot 3, and with the Carnivore2
+the loader writes into the cartridge, so it finds no RAM either way.
+
+The NMS 8250's BASIC needs 160 free bytes at each check of the stack, where the
+HB-F700P's and an MSX1's need 120. Its `LD A,60h` at 6268h is `LD A,88h` in those.
+So `&H82E7`, which gives Master of the Lamps its one byte on the HB-F700P, was not
+enough there, and both games got `MAXFILES=0`.
+
+Relics still fails on the HB-F700P. The restorer needs 32 or 33 free mapper segments
+for its tape, and MSX-DOS 2 has 26 in the 512 KB cartridge. So 1,544 of the 1,545
+game files pass.
+
+## The interrupt slot patch
+
+La Aventura Espacial resets the HB-F700P at the end of its load. The stack at the
+reset holds the frame of a BIOS call into the sub-ROM, and the handler at CF9Ah had
+written 50h, the copy's value at D053h, to the slot register. The same handler is on
+14 tapes, with the copy at D053h or CFBEh, and 13 game files load them: both sides
+of La Aventura Espacial, Ci-U-Than Trilogy II and III in two game files each, Los
+Elfos de Maroland in two, The Elves of Maroland, Las Aventuras de Rudolphine Rur 1
+and 2, and Torreoscura in two. The 14th tape is a second dump of The Elves that no
+game file names. On the HB-F700P, the 11 game files other than La Aventura
+Espacial's loaded only on `hbf700p-noexp0-msxdos2` before the patch. With the patch,
+R.U.R. 1, Los Templos Sagrados, Chichen Itza, Los Elfos and Torreoscura also load on
+`hbf700p-noexp0-ram512k-msxdos2`. The Elves still loads only without the RAM
+cartridge, and the cause is not known.
 
 ## Build
 

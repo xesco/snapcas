@@ -1,0 +1,23 @@
+# Lines for hbf700p-ram512k-msxdos2, the Sony HB-F700P (MSX2, 256 KB) with a 512 KB
+# RAM cartridge, under MSX-DOS 2.
+
+# The game selects its RAM in slot 2 by fixed values, as on the Toshiba HX-10. The
+# HB-F700P has the MSX-DOS 2 cartridge in slot 2, whose ROM is in page 1. The
+# capture's slot patch replaces only a field that names a slot that holds nothing,
+# so it left slot 2 in page 1, and the loader copied the game's page 1 into the
+# ROM. These patches select slot 1, the RAM cartridge, in place of slot 2.
+# LD A,0AAh / OUT (0A8h),A selects slot 2 in every page, 0A8h the ROM in page 0
+# and slot 2 in pages 1 to 3, and 0A0h the ROM in pages 0 and 1 and slot 2 in
+# pages 2 and 3. The new values are 55h, 54h and 50h.
+patch side1:FDF 3E AA D3 A8 > 3E 55 D3 A8
+patch side1:FEE 3E A0 D3 A8 > 3E 50 D3 A8
+patch side1:FF5 3E AA D3 A8 > 3E 55 D3 A8
+patch side1:1004 3E A0 D3 A8 > 3E 50 D3 A8
+patch side1:C477 3E AA D3 A8 > 3E 55 D3 A8
+patch side1:C742 3E A8 D3 A8 > 3E 54 D3 A8
+patch side1:C864 3E A0 D3 A8 > 3E 50 D3 A8
+patch side1:C9F1 3E A8 D3 A8 > 3E 54 D3 A8
+patch side1:C9F8 3E AA D3 A8 > 3E 55 D3 A8
+patch side1:D1BB 3E AA D3 A8 > 3E 55 D3 A8
+patch side1:D1C5 3E A0 D3 A8 > 3E 50 D3 A8
+patch side1:F82B 3E A0 D3 A8 > 3E 50 D3 A8

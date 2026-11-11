@@ -1,5 +1,6 @@
 """The automatic patches of tools/patches/ (docs/INTERNALS.md, The tools'
-code, Scan, Slot patches, The RAM search patch and The page copy patch): each
+code, Scan, Slot patches, The RAM search patch, The page copy patch and The
+interrupt slot patch): each
 kind's patterns, on bytes made for each case, and the settings that the
 capture's Tcl gets. The capture's watches run in tests/test_capture.py, and
 the patches of real games in tests/test_snap.py. Pure tier."""
@@ -162,6 +163,45 @@ class RamSearch(unittest.TestCase):
         for context in (patches.Context(), patches.Context(entry_page=0xFC), patches.Context(tape=False)):
             self.assertEqual(patches.ramsearch.find(search, context), [])
             self.assertEqual(patches.find(search, context), [])
+
+
+# The interrupt handler of Aventuras AD's interpreter, with the game's copy of
+# the slot register at D053h, as in La Aventura Espacial: its start, the call
+# of the game's routine and its end.
+HANDLER = bytes.fromhex("F3 F5 E5 DD E5 3A 53 D0 F5 3A 09 B0 D3 A8 32 53 D0 2A 11 B0 DD 21 67 D1 CD 10 B0"
+                        "3A 08 B0 D3 A8 32 53 D0 00 00 FF F3 F1 D3 A8 32 53 D0 DD E1 E1 F1 FB C9")
+
+
+class IrqSlot(unittest.TestCase):
+    """The interrupt slot patch (INTERNALS.md, The interrupt slot patch). The
+    capture's decision by the machine is in tests/test_capture.py."""
+
+    def test_a_handler_is_found_at_its_read_of_the_copy(self):
+        self.assertEqual(patches.irqslot.places(b"\x00" * 7 + HANDLER), [(7 + 5, bytes.fromhex("3A 53 D0"))])
+        # The Elves's interpreter keeps the copy at CFBEh.
+        other = HANDLER.replace(bytes.fromhex("53 D0"), bytes.fromhex("BE CF"))
+        self.assertEqual(patches.irqslot.places(HANDLER + other),
+                         [(5, bytes.fromhex("3A 53 D0")), (len(HANDLER) + 5, bytes.fromhex("3A BE CF"))])
+
+    def test_code_that_does_not_write_the_copys_value_back_is_left_alone(self):
+        # Without the handler's end, with an end that stores to another
+        # address, and with a start that stores to another address.
+        end = HANDLER.index(bytes.fromhex("F1 D3 A8 32 53 D0"))
+        for data in (HANDLER[:end], HANDLER[:end] + bytes.fromhex("F1 D3 A8 32 54 D0"),
+                     HANDLER[:14] + bytes.fromhex("32 54 D0") + HANDLER[17:]):
+            self.assertEqual(patches.irqslot.places(data), [])
+
+    def test_the_capture_gets_each_handler_and_the_patch_as_settings(self):
+        tcl = patches.irqslot.tcl(b"\x00" + HANDLER, b"\x00" * 3 + HANDLER)
+        self.assertIn("set ::irqslot {{1 6 3a53d0} {2 8 3a53d0}}\n", tcl)
+        self.assertIn("set ::irqslot_new {219 168 0}\n", tcl)
+        self.assertLess(tcl.index("set ::irqslot_new"), tcl.index("proc irqslot_start"))
+        self.assertIn("hook start irqslot_start", tcl)
+        self.assertIn("set ::irqslot {}\n", patches.irqslot.tcl(b"", b""))
+
+    def test_the_scan_leaves_the_handler_alone(self):
+        # The capture patches every copy on the tape before the load.
+        self.assertEqual(patches.irqslot.find(HANDLER, patches.Context()), [])
 
 
 if __name__ == "__main__":
