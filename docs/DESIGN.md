@@ -268,9 +268,13 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
   subslot register after the restore changes the real register, which its capture
   did not have
   ([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)).
-- A game whose stack reaches FFFFh writes the subslot register when page 3 is an
-  expanded slot, and that write changes the game's slots. Page 3 is such a slot in a
-  capture on the VG-8020, where page 3 holds the Carnivore2's RAM.
+- A game whose stack reaches FFFFh, or that keeps data there, writes the subslot
+  register when page 3 is an expanded slot, and that write changes the game's slots.
+  Page 3 is such a slot in a capture on the VG-8020, where page 3 holds the
+  Carnivore2's RAM, and the capture without the Carnivore2 avoids it. On the NMS
+  8250 every RAM is in an expanded slot, so such a game needs a patch that keeps it
+  away from FFFFh, and gets no image without one
+  ([NOTES.md, The RAM's subslot in every page](NOTES.md#the-rams-subslot-in-every-page)).
 - Music that BASIC's `PLAY` statement is still playing at the snapshot does not
   resume on a real Sanyo PHC-28S, though it does in `openMSX`. The cause is not
   known. A game whose music must end gets a `snapshot at` after the music.

@@ -6,3 +6,12 @@
 cas SUPER17B.CAS
 sha1 fa20084b1c0c70b4b144c7f9b0f54ebe21409bfb
 url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.17%20(dicembre%201988)%20-%20cas_17.zip
+
+# The game sets its stack at 0000h, with LD SP,0000h in three places, so its
+# first push writes FFFFh. On a machine whose RAM is in an expanded slot, FFFFh
+# is the slot's subslot register, and the push deselects the RAM. The Philips
+# NMS 8250 has no other RAM. The patches set the stack at FFFEh, two bytes
+# lower.
+patch side1:5448 31 00 00 > 31 FE FF
+patch side1:5462 31 00 00 > 31 FE FF
+patch side1:5E00 31 00 00 > 31 FE FF

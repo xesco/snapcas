@@ -811,3 +811,27 @@ The results of the step, from the collections after it:
 | `phc28s-ram64k-carnivore2`, `hb75p-carnivore2` | 1,545 each | Time Out has a patch of one more copy of its routine, which runs after the rewind |
 | `nms8250-carnivore2`, with `FIX=0` | 1,455 | A first run of this machine here, with no earlier result to compare |
 
+## Step 29: the NMS 8250's games
+
+This step makes the capture select the RAM's subslot in every page of the slot of
+BASIC's RAM, on an MSX2 where that slot is expanded, as `POKE -1,170` does
+([INTERNALS.md, The RAM's subslot in every page](INTERNALS.md#the-rams-subslot-in-every-page)).
+A game file's `subslots keep` leaves the step out. The capture's log also names the
+first push that writes FFFFh in an expanded slot. The step then fixes the games of
+`nms8250-carnivore2` that fail for a cause of their own
+([NOTES.md, The RAM's subslot in every page](NOTES.md#the-rams-subslot-in-every-page)).
+
+| Test | What it proves |
+|---|---|
+| `Corpus` in `tests/test_machines.py`: Exerion on `nms8250-carnivore2`, and the same with `subslots keep` | With the step the image passes the gate. Without it, BASIC stops at `Syntax error in 23`, which point 4 fails |
+| `Folder` in `tests/test_gamefile.py`: `subslots keep` and `subslots drop` | The reader takes the line, and refuses another value |
+| `Procedures` in `tests/test_capture.py`: writes of FFFFh with the stack pointer at F000h and at FFFEh, in the C-BIOS machine | The log names the push once, and leaves a loader's write of the subslot register out |
+
+The results of the step, from the collections after it:
+
+| Machine | Game files that pass | Before the step |
+|---|---|---|
+| `nms8250-carnivore2` | 1,527 of 1,545 | 1,455 with `FIX=0`, and 1,479 with the capture lines that the games run then wrote |
+| `hbf700p-ram512k-msxdos2` | 1,544 | 1,544. Goody and El Poder Oscuro got `subslots keep` |
+| `vg8020-carnivore2`, `phc28s-ram64k-carnivore2`, `hb75p-carnivore2` | 1,545 each | 1,545 each |
+

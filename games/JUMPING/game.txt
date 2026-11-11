@@ -2,3 +2,17 @@
 cas JUMPING.CAS
 sha1 95f7905ca611e7e0959c5fa4a5703fc4f5d7ba03
 url https://download.file-hunter.com/Games/MSX1/CAS/Jumping%20Jack%20(1986)(Livewire).zip
+
+# The game's BASIC program keeps a value at FFFFh, with POKE &HFFFF in seven
+# places, and its machine code reads it with LD A,(0FFFFh). On a machine whose
+# RAM is in an expanded slot, FFFFh is the slot's subslot register, and the
+# first POKE deselects the RAM. The Philips NMS 8250 has no other RAM. The
+# patches keep the value at FFFEh, which the game does not use.
+patch side1:50A 0C FF FF > 0C FE FF
+patch side1:84C 0C FF FF > 0C FE FF
+patch side1:ADC 0C FF FF > 0C FE FF
+patch side1:C9E 0C FF FF > 0C FE FF
+patch side1:CCB 0C FF FF > 0C FE FF
+patch side1:CE9 0C FF FF > 0C FE FF
+patch side1:E55 0C FF FF > 0C FE FF
+patch side1:5595 3A FF FF > 3A FE FF

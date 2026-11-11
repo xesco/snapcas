@@ -9,3 +9,14 @@ cas SUPER13.CAS
 sha1 1092075064f631b49b8c2ed103209bde0a49b689
 url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.13%20(Giugno%201988)%20-%20cas_13.zip
 start ROBO
+
+# The loader's second program sets MAXFILES=0 and CLEAR10,&H81FF in five lines,
+# which leaves it the stack that an MSX1 needs and little more. The Philips NMS
+# 8250's BASIC needs 160 free bytes at each check of the stack, where an MSX1's
+# needs 120, and stops at "Out of memory in 30". The patches write the program
+# as one line with CLEAR0, which frees the 16 bytes of four lines' starts and
+# the 10 bytes of string space, which the program does not use.
+patch side1:11034 35 20 53 43 52 45 45 4E 32 0D 0A 31 30 20 4D 41 58 46 49 4C 45 53 3D 30 > 35 20 53 43 52 45 45 4E 32 3A 4D 41 58 46 49 4C 45 53 3D 30 3A 43 4C 45
+patch side1:1104C 0D 0A 32 30 20 43 4C 45 41 52 31 30 2C 26 48 38 31 46 46 0D 0A 33 30 20 > 41 52 30 2C 26 48 38 31 46 46 3A 42 4C 4F 41 44 22 43 41 53 3A 22 2C 52
+patch side1:11064 42 4C 4F 41 44 22 43 41 53 3A 22 2C 52 0D 0A 34 30 20 44 45 46 55 53 52 > 3A 44 45 46 55 53 52 3D 26 48 38 45 45 30 3A 41 3D 55 53 52 28 30 29 0D
+patch side1:1107C 3D 26 > 0A 1A

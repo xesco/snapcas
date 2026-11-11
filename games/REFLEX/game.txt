@@ -2,3 +2,19 @@
 cas REFLEX.CAS
 sha1 255bc42570f05355d54cfbc6fa4ebc43895aa403
 url https://download.file-hunter.com/Games/MSX1/CAS/Reflex%20(1987)(Players%20Software)(Side%20A)%5BRUN%27CAS-%27%5D.zip
+
+# Line 0 is CLEAR0,&H833F, which leaves the program the stack that an MSX1 needs
+# and little more. The Philips NMS 8250's BASIC needs 160 free bytes at each
+# check of the stack, where an MSX1's needs 120, and stops at "Out of memory in
+# 0". The program opens no file, so the patches put MAXFILES=0 at the start of
+# the line, which frees a file's 267 bytes on every machine. The text moves 10
+# bytes into the padding after its end.
+patch side1:28 30 20 20 43 4C 45 41 52 30 2C 26 48 38 33 33 46 3A 50 4F 4B 45 26 48 46 > 30 20 4D 41 58 46 49 4C 45 53 3D 30 3A 43 4C 45 41 52 30 2C 26 48 38 33
+patch side1:40 42 42 30 2C 30 3A 50 4F 4B 45 26 48 46 42 42 31 2C 32 35 35 3A 4F 4E 45 > 33 46 3A 50 4F 4B 45 26 48 46 42 42 30 2C 30 3A 50 4F 4B 45 26 48 46 42
+patch side1:58 52 52 4F 52 47 4F 54 4F 34 0D 0A 31 20 42 4C 4F 41 44 22 63 61 73 3A 22 > 42 31 2C 32 35 35 3A 4F 4E 45 52 52 4F 52 47 4F 54 4F 34 0D 0A 31 20 42
+patch side1:70 2C 52 3A 42 4C 4F 41 44 22 63 61 73 3A 22 2C 52 3A 4F 4E 45 52 52 4F 52 > 4C 4F 41 44 22 63 61 73 3A 22 2C 52 3A 42 4C 4F 41 44 22 63 61 73 3A 22
+patch side1:88 47 4F 54 4F 33 0D 0A 32 20 42 4C 4F 41 44 22 63 61 73 3A 22 2C 52 3A 47 > 2C 52 3A 4F 4E 45 52 52 4F 52 47 4F 54 4F 33 0D 0A 32 20 42 4C 4F 41 44
+patch side1:A0 4F 54 4F 32 0D 0A 33 20 44 45 46 55 53 52 3D 26 48 39 37 39 35 3A 41 3D > 22 63 61 73 3A 22 2C 52 3A 47 4F 54 4F 32 0D 0A 33 20 44 45 46 55 53 52
+patch side1:B8 55 53 52 28 30 29 3A 52 45 53 55 4D 45 32 0D 0A 34 20 44 45 46 55 53 52 > 3D 26 48 39 37 39 35 3A 41 3D 55 53 52 28 30 29 3A 52 45 53 55 4D 45 32
+patch side1:D0 3D 26 48 37 43 37 36 3A 41 3D 55 53 52 28 30 29 0D 0A 1A 1A 1A 1A 1A 1A > 0D 0A 34 20 44 45 46 55 53 52 3D 26 48 37 43 37 36 3A 41 3D 55 53 52 28
+patch side1:E8 1A 1A 1A 1A 1A > 30 29 0D 0A 1A

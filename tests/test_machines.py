@@ -40,6 +40,13 @@ GAMES = {
     # selects slot 3 in page 3, which the RAM cartridge in slot 1 holds. So the
     # capture runs on the variant without that cartridge as well.
     "bestial-noexp0": "cas BESTIAL.CAS\ncapture hbf700p-noexp0-msxdos2\n",
+    # Exerion's loader looks for RAM in page 1 by primary slot. On the NMS 8250
+    # the Carnivore2's slot shows a ROM there until the capture selects the
+    # RAM's subslot in every page (INTERNALS.md, Capture, step 2).
+    "exerion": "cas ENGESO06.CAS\nstart EXER\n",
+    # With subslots keep the capture leaves that out, and the loader finds no
+    # RAM in page 1.
+    "exerion-keep": "cas ENGESO06.CAS\nstart EXER\nsubslots keep\n",
     # A folder whose path holds characters that Tcl's and Python's glob read:
     # the check must still find the snapshot's RAM pages.
     "caldero[1]*": "cas CALDERO.CAS\nname BRACKETS\n",
@@ -51,7 +58,7 @@ GAMES = {
 MACHINES = {
     PHC28S: ({"freddy", "fernando", "moonrider", "caldero", "abadia", "abadia-phc"}, set()),
     VG8020: ({"freddy", "fernando", "moonrider", "caldero", "caldero[1]*"}, set()),
-    "nms8250-carnivore2": ({"freddy", "fernando", "moonrider", "caldero"}, set()),
+    "nms8250-carnivore2": ({"freddy", "fernando", "moonrider", "caldero", "exerion"}, set()),
     "hbf700p-ram512k-msxdos2": ({"moonrider", "caldero", "abadia", "fernando-noexp0", "bestial-noexp0"}, set()),
     "test/nms8250-128k": ({"caldero"}, {"freddy", "fernando", "moonrider", "abadia"}),
     "test/nms8250-dos1": ({"freddy", "fernando", "moonrider", "caldero", "abadia"}, set()),
@@ -74,6 +81,8 @@ class Corpus(unittest.TestCase):
             support.tape(text.split()[1])
             support.game_folder(folder_of(game), text)
         jobs = [(g, m) for m, (passes, short) in MACHINES.items() for g in passes | short]
+        # A game that fails the check on purpose.
+        jobs.append(("exerion-keep", "nms8250-carnivore2"))
         with concurrent.futures.ThreadPoolExecutor(6) as pool:
             cls.restored = dict(zip(jobs, pool.map(lambda job: support.restore(folder_of(job[0]), job[1]), jobs)))
 
@@ -140,6 +149,12 @@ class Corpus(unittest.TestCase):
                 support.assert_passes(self, restored)
                 self.assertEqual(restored.snapshot.state["sub0"], "-")
                 self.assertEqual(restored.header["H_NOEXP"] & 1, 1)
+
+    def test_basics_ram_is_in_every_page_of_its_expanded_slot(self):
+        support.assert_passes(self, self.restored["exerion", "nms8250-carnivore2"])
+        # Without that step, Exerion's BASIC loader stops at an error.
+        support.assert_fails(self, self.restored["exerion-keep", "nms8250-carnivore2"], 4,
+                             "the screen shows Syntax error in 23")
 
     def test_a_machine_whose_ram_the_loader_finds_gets_no_patch(self):
         for game, machine in (("abadia", "test/nms8250-dos1"), ("abadia-phc", PHC28S)):

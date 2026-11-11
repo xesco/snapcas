@@ -287,8 +287,10 @@ stopped. The script takes the following steps, which are the procedures `step1` 
    `EXTBIO`, `DISINT` and `ENAINT`, so that nothing calls the disk system. It writes
    00h at F37Dh, which some loaders read to refuse to run with a disk system. It
    writes zeros from FCC9h to FD88h, `SLTATR` and `SLTWRK`, so that no extension ROM
-   claims them and the tape service can use them. It then types `CLEAR200,&HF380`,
-   which sets `HIMEM` to a cassette machine's F380h.
+   claims them and the tape service can use them. On an MSX2 whose BASIC has its RAM
+   in an expanded slot, it selects the RAM's subslot in every page of that slot
+   ([The RAM's subslot in every page](#the-rams-subslot-in-every-page)). It then
+   types `CLEAR200,&HF380`, which sets `HIMEM` to a cassette machine's F380h.
 3. Notes the slots selected in each page, and runs the `start` hook of the patch
    kinds, which writes the slot map ([Slot patches](#slot-patches)) and decides on
    the page copy patch ([The page copy patch](#the-page-copy-patch)). It then
@@ -310,6 +312,12 @@ stopped. The script takes the following steps, which are the procedures `step1` 
      and on FFFFh, and each write to port A8h that selects a slot that holds nothing
      ([Slot patches](#slot-patches)). The watchpoint on port A8h runs the
      `slot_write` hook of the patch kinds.
+   - The first push that writes FFFFh while page 3 selects an expanded slot. The
+     game's stack is then at the top of memory, and its push writes the slot's
+     subslot register, which deselects the game's RAM. The capture knows such a
+     write by the stack pointer, FFFEh or FFFFh after it. The log's line names the
+     slot and the program counter, for a `patch` line by hand or for a capture in a
+     slot that is not expanded.
    - Each start and stop of the cassette motor.
    - The start of the BIOS's reset routine, where 0000h's `DI / JP` jumps, while
      page 0 selects the main ROM. A loader can also jump there itself. The capture
@@ -385,6 +393,42 @@ either side 1 is not read or the game file has `side2`, unless the game file has
 joystick choice of players, gets its snapshot at that screen after the key tries of
 step 5. The player chooses on the real machine, and the tape service supplies the
 rest.
+
+### The RAM's subslot in every page
+
+An MSX2 has its own RAM in an expanded slot, beside ROMs. On the Philips NMS 8250
+the RAM is in slot 3-2, the sub-ROM in 3-0 and the disk ROM in 3-3. BASIC selects
+the RAM's subslot in pages 2 and 3 only, so slot 3's subslot register holds F0h, and
+pages 0 and 1 of slot 3 show the sub-ROM. A Carnivore2 expands its own slot in the
+same way, with A6h in its register, so page 1 of its slot shows subslot 1 and not
+its RAM in subslot 2. Many loaders look for RAM in pages 0 and 1 by the slot
+register alone, as on an MSX1 with 64 KB in one slot. Such a loader finds no RAM
+there on this machine. It loads the game into a ROM, or returns to BASIC, which
+stops at a `Syntax error`.
+
+MSX2 users load such games after `POKE -1,170`, which writes AAh to the subslot
+register of page 3's slot and selects subslot 2 in every page. The capture does the
+same at step 2, on an MSX2 whose page 3 selects an expanded slot. It takes the
+subslot that page 3 selects, writes it to every field of that slot's subslot
+register, and writes the same value to the slot's byte of `SLTTBL` at FCC5h, the
+BIOS's copy of the register. The BIOS's inter-slot calls put the register back after
+each call, so the BIOS still reaches the sub-ROM. The snapshot holds the registers
+as the game leaves them, and the restorer writes them, so the restored game has the
+same slots.
+
+An MSX1 stays as it is. Its own RAM is in a slot that is not expanded, and its
+loaders find that RAM. On the VG-8020 with a Carnivore2, the step made Jack the
+Nipper load into the Carnivore2's RAM, where its write of FFFFh deselects the RAM.
+
+A game file's `subslots keep` leaves the step out
+([FILES.md, Game file](FILES.md#game-file)). The line is for a game that puts its
+stack at the top of memory once its loader finds 64 KB of RAM. Macadam Bumper and
+Las Tres Luces de Glaurung load on the NMS 8250 with BASIC's subslots, and write
+FFFFh with the RAM's subslot in every page.
+
+A game that uses FFFFh as memory fails with this step and without it. FFFFh is the
+subslot register of every slot that holds RAM on the NMS 8250
+([NOTES.md](NOTES.md#the-rams-subslot-in-every-page)).
 
 ### RAM
 

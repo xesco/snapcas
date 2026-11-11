@@ -2,3 +2,12 @@
 cas CUBIT.CAS
 sha1 4cf1dadd98cc9b827858da606720e392ead97d75
 url https://download.file-hunter.com/Games/MSX1/CAS/Cubit%20(1986)(Mr.%20Micro)%5BBLOAD%27CAS-%27%2CR%5D.zip
+
+# The tape's loader goes to FFCAh to FFFEh, twice, and reads a BASIC program
+# with TAPIN. An MSX2 keeps system variables there: the copies of VDP registers
+# 8 to 23 from FFE7h, and the main ROM's slot at FFF7h. So the loader's code
+# and the BIOS write over each other, and the load stops. The loader's code
+# runs at any address, so the patches load its 47 bytes at FB03h, in the work
+# area of the RS-232C interface, which no machine without that interface uses.
+patch side1:28 CA FF FE FF CA FF > 03 FB 31 FB 03 FB
+patch side1:720 CA FF FE FF CA FF > 03 FB 31 FB 03 FB

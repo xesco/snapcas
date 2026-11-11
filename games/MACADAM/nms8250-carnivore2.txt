@@ -1,0 +1,7 @@
+# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# With the RAM's subslot in every page of its slot, the game puts its stack at
+# the top of memory, and a push writes FFFFh, the subslot register of the game's
+# RAM on this machine. With BASIC's subslots the game keeps its stack below
+# F100h, and loads.
+subslots keep

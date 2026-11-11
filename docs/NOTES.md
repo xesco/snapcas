@@ -171,6 +171,58 @@ R.U.R. 1, Los Templos Sagrados, Chichen Itza, Los Elfos and Torreoscura also loa
 `hbf700p-noexp0-ram512k-msxdos2`. The Elves still loads only without the RAM
 cartridge, and the cause is not known.
 
+## The RAM's subslot in every page
+
+On `nms8250-carnivore2`, 85 of the 1,545 game files failed before this step, and the
+capture without the Carnivore2 fixed 19 of them. Of the 66 others, 32 pass with the
+step alone, on the machine itself. Arkanoid, Bruce Lee and Punch and Judy stopped at
+`Syntax error in 10`, after `BLOAD"cas:",R` came back from a loader that had found
+no RAM. Engesoft's loaders stopped at an error in line 23 or 25. Head over Heels,
+Match Day II, Rambo III and Operation Wolf tried each slot register value from code
+in page 3, and ended with slot 2, which holds nothing, in page 3. The game files
+that reset the machine and booted DOS again, such as Beach-Head and Hyper Sports 3,
+had loaded their game into a ROM.
+
+The step made two games fail that passed before it. Macadam Bumper and Las Tres
+Luces de Glaurung put their stack at the top of memory once their loader finds 64
+KB, and the capture's log names their push at FFFFh. They got `subslots keep`. Four
+game files of Satan, whose stack is at 000Ch then, failed on the machine, and the
+games run gave them the capture without the Carnivore2. On the HB-F700P, Goody and
+El Poder Oscuro are captured without the RAM cartridge, in slot 3-3. With the step
+their loaders select another slot in page 3, where their code runs, and they got
+`subslots keep` too.
+
+These games use FFFFh as memory, which is the subslot register of both RAMs of this
+machine:
+
+| Game | What writes FFFFh | Result |
+|---|---|---|
+| Jumping Jack | BASIC's `POKE &HFFFF` in seven places, and `LD A,(0FFFFh)` in the machine code | Patches keep the value at FFFEh, in `game.txt` |
+| Space Beater | A push with the stack at 0000h, from `LD SP,0000h` in three places | Patches set the stack at FFFEh, in `game.txt` |
+| Enchanted | An LDIR of the character set to EA60h to FFFFh | A patch copies one byte less, on this machine only. The byte is the last row of the last character |
+| RoboCop | A fill of F000h to FFFFh at 56C8h, and then a copy that ends at FFFFh at 84CAh | No image |
+| Alien Syndrome, Knight Lore | A table that the game builds at FE00h or FF00h to FFFFh | No image |
+| Barbarian | An LDIR of code to FF01h and on through FFFFh to 00B2h | No image |
+| Casanova | `LD A,18h / LD (0FFFFh),A` at 05ECh | No image |
+| Jack the Nipper | Its unpacker's `LD (BC),A` at 0075h | No image |
+| Mortadelo y Filemon, Ocean Conqueror | A call with the stack at 0000h, and a copy to page 3 | No image. Where each sets its stack was not found |
+| The Wall, Container, Trivial Pursuit | A push with the stack at the top of memory, by the capture's log | No image. Not looked into further |
+
+The NMS 8250's BASIC needs 160 free bytes at each check of the stack, where an
+MSX1's and the HB-F700P's need 120. Its `LD A,60h` at 6268h is `LD A,88h` in those.
+Nine BASIC loaders set `CLEAR` for an MSX1's stack and stop at `Out of memory` here.
+Happy Fret in two dumps, Reflex and Wing Man got `MAXFILES=0`, which frees a file's
+267 bytes. Polar Star got it in the place of five characters of its message, on this
+machine only, because its program is stored in BASIC's tokens. A View to a Kill
+opens a file, and lost its 63 needless spaces. Robotix already has `MAXFILES=0`, and
+got its five lines as one, with `CLEAR0`. Survivor loads with the step above.
+Spartan X still stops at `Out of memory in 110`.
+
+Crazy Golf, Cubit and Humphrey load their loader at FFCAh to FFFEh, over an MSX2's
+copies of VDP registers 8 to 23 and the main ROM's slot at FFF7h. Their patches load
+it at FB03h. The Queens Footsteps Part 1 calls 0115h, as Part 2 does, and has the
+same patch.
+
 ## Build
 
 Double Dragon selects one segment in two pages, so the build finds a page's RAM by

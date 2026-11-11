@@ -1,0 +1,7 @@
+# Lines for nms8250-carnivore2, the Philips NMS 8250 (MSX2, 128 KB) with a
+# Carnivore2.
+
+# The capture runs on nms8250, the Philips NMS 8250 without cartridges, so without
+# Nextor. On nms8250-carnivore2 itself the game fails: build.py: the 26 bytes below
+# SP 000Ch cross a page boundary or include FFFFh. `make games` wrote this line.
+capture nms8250

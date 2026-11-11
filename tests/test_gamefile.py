@@ -40,6 +40,7 @@ class Lines(Folder):
                          "service at f9e1\n"
                          "capture vg8020\n"
                          "rom keep\n"
+                         "subslots keep\n"
                          "  # A comment after spaces.\n"
                          "patch page3:1F 3E FC > 3e 14\n"
                          "patch side2:AE88 CD > C9\n")
@@ -50,10 +51,11 @@ class Lines(Folder):
                          ('BLOAD"CAS:",R', "SKY", "return", 130))
         self.assertEqual(game.keys, [(5, "key", "space"), (7.5, "text", "1")])
         self.assertEqual((game.service, game.entry_page, game.capture, game.rom_keep), ("at", 0xF9, "vg8020", True))
+        self.assertTrue(game.subslots_keep)
         self.assertEqual([(p.side, p.page, p.offset, p.old, p.new, p.place) for p in game.patches],
                          [(None, 3, 0x1F, bytes.fromhex("3EFC"), bytes.fromhex("3E14"), "C01F"),
                           (2, None, 0xAE88, b"\xCD", b"\xC9", "side2:AE88")])
-        self.assertTrue(game.patches[0].where.endswith("game.txt:18"))
+        self.assertTrue(game.patches[0].where.endswith("game.txt:19"))
 
     def test_a_game_file_with_only_its_tape_has_the_defaults(self):
         game = self.read("cas GAME.CAS\n")
@@ -61,7 +63,7 @@ class Lines(Folder):
                                                                                                None, None))
         self.assertEqual((game.keys, game.continue_key, game.snapshot_at, game.service, game.entry_page),
                          ([], None, None, None, None))
-        self.assertEqual((game.capture, game.rom_keep, game.patches), (None, False, []))
+        self.assertEqual((game.capture, game.rom_keep, game.subslots_keep, game.patches), (None, False, False, []))
 
     def test_the_images_name_is_the_folders_in_8_capital_letters_and_digits(self):
         self.assertEqual(gamefile.default_name("caldero[1]*"), "CALDERO1")
@@ -100,6 +102,7 @@ class Lines(Folder):
                 ("service at BFE1", "service takes no, at and an address xxE1 in page 3, or t0"),
                 ("service yes", "service takes no, at and an address xxE1 in page 3, or t0"),
                 ("rom drop", "game.txt:2: rom takes keep"),
+                ("subslots drop", "game.txt:2: subslots takes keep"),
                 ("patch page3:1F 3E FC", "game.txt:2: patch takes a place, the old bytes, > and as many new bytes"),
                 ("patch page3:1F 3E FC > 3E", "patch takes a place, the old bytes, > and as many new bytes"),
                 ("patch page3:1F > ", "patch takes a place, the old bytes, > and as many new bytes"),
