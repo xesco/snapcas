@@ -1,0 +1,7 @@
+# Lines for hbf700p-ram512k-msxdos2, the Sony HB-F700P (MSX2, 256 KB) with a 512 KB
+# RAM cartridge, under MSX-DOS 2.
+
+# The game's loader writes slot 0's subslot register in its search for RAM, and
+# leaves the main ROM deselected on the HB-F700P, whose slot 0 is expanded. So
+# the capture runs with slot 0 not expanded.
+capture hbf700p-noexp0-ram512k-msxdos2

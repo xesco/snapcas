@@ -2,3 +2,19 @@
 cas BREAKOUT.CAS
 sha1 0a3439e2103fc88c4585980f9144f9532d357614
 url https://download.file-hunter.com/Games/MSX1/CAS/Breakout(1985)(Toshiba)%5BRUN%27CAS-%27%5D.zip
+
+# Line 5 is CLEAR1,&H83FF, which leaves the program the stack that an MSX1 needs
+# and no more. An MSX2's SCREEN statement runs in the sub-ROM, 35 bytes deeper on
+# the stack, and stops at "Out of memory in 30". The Philips NMS 8250's BASIC also
+# needs 40 bytes more at each check of the stack, and stops in line 5. The
+# program opens no file, so the patches put MAXFILES=0 at the start of line 5,
+# which frees a file's 267 bytes on every machine. Lines 5, 10 and 20 keep their
+# length: they lose 11 spaces that BASIC does not need.
+patch side1:20 35 20 43 4C 45 41 52 31 2C 26 48 38 33 46 46 3A 42 4C 4F 41 44 20 22 43 > 35 20 4D 41 58 46 49 4C 45 53 3D 30 3A 43 4C 45 41 52 31 2C 26 48 38 33
+patch side1:38 41 53 3A 53 43 52 45 45 4E 22 3A 53 43 52 45 45 4E 20 32 3A 44 45 46 20 > 46 46 3A 42 4C 4F 41 44 22 43 41 53 3A 53 43 52 45 45 4E 22 3A 53 43 52
+patch side1:50 55 53 52 3D 26 48 39 46 30 30 3A 41 3D 55 53 52 28 30 29 0D 0A 31 30 20 > 45 45 4E 32 3A 44 45 46 20 55 53 52 3D 26 48 39 46 30 30 3A 41 3D 55 53
+patch side1:68 42 4C 4F 41 44 20 22 43 41 53 3A 50 41 47 45 43 22 3A 42 4C 4F 41 44 20 > 52 28 30 29 0D 0A 31 30 20 42 4C 4F 41 44 22 43 41 53 3A 50 41 47 45 43
+patch side1:80 22 43 41 53 3A 50 41 47 45 31 22 3A 44 45 46 20 55 53 52 20 3D 26 48 38 > 22 3A 42 4C 4F 41 44 22 43 41 53 3A 50 41 47 45 31 22 3A 44 45 46 55 53
+patch side1:98 38 30 30 3A 41 3D 55 53 52 20 28 30 29 0D 0A 32 30 20 42 4C 4F 41 44 20 > 52 3D 26 48 38 38 30 30 3A 41 3D 55 53 52 28 30 29 0D 0A 32 30 20 42 4C
+patch side1:B0 22 43 41 53 3A 50 41 47 45 32 22 3A 44 45 46 20 55 53 52 20 3D 26 48 38 > 4F 41 44 22 43 41 53 3A 50 41 47 45 32 22 3A 44 45 46 55 53 52 3D 26 48
+patch side1:C8 38 31 36 3A 41 3D 55 53 52 20 28 30 29 0D 0A > 38 38 31 36 3A 41 3D 55 53 52 28 30 29 0D 0A

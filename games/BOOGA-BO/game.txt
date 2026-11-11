@@ -2,3 +2,13 @@
 cas BOOGA-BO.CAS
 sha1 e448407dddb8b002be7199b44aed24daa83e234d
 url https://download.file-hunter.com/Games/MSX1/CAS/Booga-Boo%20the%20Flea%20(1986)(Quicksilva)%5BBLOAD%27CAS-%27%2CR%5D.zip
+
+# The game sets its stack at FFFFh, with LD SP,0FFFFh in three places. An MSX2
+# keeps system variables there: the copies of VDP registers 8 to 23 from FFE7h to
+# FFF6h, and the main ROM's slot at FFF7h. The BIOS and the game's stack then
+# write over each other, and the game resets the machine at its start. The
+# patches set the stack at F380h, below the BIOS's work area, in memory that the
+# game leaves alone.
+patch side1:1D6 31 FF FF > 31 80 F3
+patch side1:1F6 31 FF FF > 31 80 F3
+patch side1:4D1 31 FF FF > 31 80 F3
