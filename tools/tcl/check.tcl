@@ -1,6 +1,7 @@
 # The check (docs/INTERNALS.md, Check), after memory.tcl's procedures, which it
 # uses to read memory through the CPU's view. tools/check.py sets these:
 #   ::C(report)   the report's file
+#   ::C(restore)  the seconds that the restore may take, by the image's size
 #   ::C(snap)     the snapshot folder
 #   ::C(pages)    the number of RAM pages in it
 #   ::C(kv)       the names and values of its state.txt
@@ -70,7 +71,9 @@ proc script_failed {msg} {
 }
 # The check ends within DEADLINE emulated seconds of its start, whatever the
 # machine does: the boot steps, the restore and the 60 seconds take far less.
-set ::DEADLINE 600
+# The deadline is 600 seconds for a restore that may take 120, and grows with
+# the seconds that the restore of a large image may take.
+set ::DEADLINE [expr {480 + $::C(restore)}]
 later $::DEADLINE { error "the check did not end within $::DEADLINE seconds" }
 
 # The screen's text on one line. DOS breaks a long line at LINLEN, the text
@@ -130,9 +133,9 @@ proc start_check {} {
     # needs the jump to the snapshot's program counter.
     set pc [want pc]
     debug set_bp $jp "(\[debug read ioports 0xA8\] & $::p0mask) == ([want a8] & $::p0mask) && [holds [expr {$jp + 1}] [list [expr {$pc & 0xFF}] [expr {$pc >> 8}]]]" {safe at_tail}
-    later 120 {
+    later $::C(restore) {
         if {$::run(phase) eq "restore"} {
-            note "the tail's jump did not run within 120 seconds"
+            note "the tail's jump did not run within $::C(restore) seconds"
             note "screen: [screen_line]"
             write_report
             stop

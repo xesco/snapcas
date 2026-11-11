@@ -33,7 +33,7 @@ variant phc28s-empty-carnivore2
 | `press` | A key pressed for 0.1 emulated seconds, and the emulated seconds after power-on when the key goes down, such as `press down 8`. The line is for a firmware menu in a graphics mode that no held key skips. For example, without a disk system, the Sony HB-75P starts its Personal Data Bank menu. The `hb75p` capture variant moves down to the menu's BASIC item and presses RETURN |
 | `dos` | DOS's prompt, such as `A:\>`, and the drive letter of `check.py`'s disk. The line is for a machine that boots MSX-DOS from a disk of its own. For example, the MegaFlashROM SCC+ SD boots from the ROM disk in its flash. When the prompt appears, the capture types `BASIC`, because the capture loads the game from BASIC. The check types that drive and `AUTOEXEC` when the prompt appears |
 | `dosfiles` | The folder below `dos/` that holds the DOS system files that the machine boots in `snapcas.py snap --check`, `try`, `make games`, and the tests. The folder is `msxdos1` or `msxdos2`. Without this line, the folder is `nextor` |
-| `firmware` | A file below the `share` folder of the `openMSX` home that the machine needs and that `make firmware` makes, such as `systemroms/snapcas/SDMAPPER.ROM`. Without the file, `snapcas.py snap` and `try` stop and name `make firmware` |
+| `firmware` | A file below the `share` folder of the `openMSX` home that the machine needs and that `make firmware` makes, such as `systemroms/snapcas/SDMAPPER.ROM`. Without the file, `snapcas.py snap` and `try` stop and name `make firmware`. They also stop without a file that one of the machine's capture variants needs |
 | `variant` | The name of one of the machine's capture variants. `snapcas.py snap` tries the capture variants in the order of these lines |
 
 `openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
@@ -57,13 +57,18 @@ Machine files are of three kinds, each in its own place:
 | Kind | Where | What it is |
 |---|---|---|
 | A user's machine | `machines/` | A real machine that the images are made for, given as the command's `<machine>` |
-| A capture variant | `machines/capture/` | The same machine with fewer cartridges. It is for a game whose loader fails because of a cartridge. It is also for a game whose image needs fewer free mapper segments when the game runs in the machine's own RAM. A game's `capture` line names the capture variant |
+| A capture variant | `machines/capture/` | The same machine with fewer cartridges, or with its slot 0 not expanded. It is for a game whose loader fails because of a cartridge, or because slot 0 is expanded. It is also for a game whose image needs fewer free mapper segments when the game runs in the machine's own RAM. A game's `capture` line names the capture variant |
 | A test machine | `machines/test/`, given as `test/<name>` | A machine that only the tests use |
 
-A capture variant only takes cartridges away. It keeps the machine's ROMs, and every
+A capture variant takes cartridges away. It keeps the machine's ROMs, and every
 other cartridge stays in its slot. The image built from the capture variant's
 snapshot is still for the user's machine and is checked there. So the restorer finds
-the RAM pages in the slots that the snapshot names. A capture variant's name follows
+the RAM pages in the slots that the snapshot names. Two of the HB-F700P's capture
+variants also run a model whose slot 0 is not expanded, for the loaders that fail
+because the real slot 0 is expanded
+([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)).
+Such a capture variant has `noexp0` after the model in its name, and its `firmware`
+line names the model, which `make firmware` makes. A capture variant's name follows
 the same rule as a machine file's name. By that rule, the name gives the cartridges
 that the capture variant holds, and not the cartridges that the capture variant
 leaves out. So two machines whose capture variants hold the same cartridges share
@@ -180,7 +185,7 @@ files that each machine file has:
 | `vg8020-picoverse` | Philips VG-8020 with a Sunrise IDE interface under Nextor and a 192 KB memory mapper, as the PicoVerse cartridge has them. `openMSX` has no PicoVerse, so these two cartridges replace the PicoVerse. The Makefile makes the 192 KB mapper from `openMSX`'s 512 KB mapper | 53 |
 | `phc28s-ram64k-carnivore2` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1, and a Carnivore2 in slot 2 | 85 |
 | `hb75p-mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup. In that setup, the MegaFlashROM SCC+ SD boots MSX-DOS from the ROM disk in its flash. The check's disk is in SD card slot 1 as drive B: | 0 |
-| `hbf700p-ram512k-msxdos2` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. The machine's own mapper holds 256 KB | 23 |
+| `hbf700p-ram512k-msxdos2` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. The machine's own mapper holds 256 KB | 260 |
 | `vg8020-sdmapper` | Philips VG-8020 with an SD Mapper v1. The machine has the SD Mapper's 512 KB mapper, and Nextor on the SD Mapper's SD cards. The Makefile downloads the cartridge's firmware, `SDMAPPER.ROM` 1.0.7, which `openMSX` needs | 0 |
 | `xp800-sdmapper` | Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1, as in `vg8020-sdmapper` | 0 |
 | `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4. The Makefile makes that flash. `openMSX`'s stock flash also holds a ROM disk, and the ROM disk's `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, so the FS-A1 skips its Desk Pac menu | 0 |
@@ -201,7 +206,9 @@ variant:
 | `vg8020` | `vg8020-carnivore2` | The Carnivore2, and so Nextor | 121 game files that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
 | `vg8020` | `vg8020-picoverse` | The PicoVerse-like cartridge, and so its mapper and Nextor | 53 game files whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go directly to their slot, and the restorer needs no holding segments for them |
 | `nms8250` | `nms8250-carnivore2` | The Carnivore2, and so Nextor | 54 game files that fail in a capture with the Carnivore2 in slot 1 |
-| `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 23 game files. One of them is Digger Dungeon, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch. Sootland crashed with the cartridge in either slot until the patch that keeps page 3 ([INTERNALS.md, The RAM search patch](INTERNALS.md#the-ram-search-patch)) |
+| `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 24 game files. One of them is Digger Dungeon, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch. Sootland crashed with the cartridge in either slot until the patch that keeps page 3 ([INTERNALS.md, The RAM search patch](INTERNALS.md#the-ram-search-patch)) |
+| `hbf700p-noexp0-ram512k-msxdos2` | `hbf700p-ram512k-msxdos2` | No cartridge. Its slot 0 is not expanded | 210 game files whose loader fails because slot 0 is expanded ([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)). After the War is one of them, and Fernando Martin, which is in the tests |
+| `hbf700p-noexp0-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1. Its slot 0 is not expanded | 26 game files. The games run found 24 of them, which pass on none of the variants before this one. Bestial Warrior is one of them, and is in the tests. Continental Circus, Il Giustiziere and Thunder Blade need `service t0`, and so their page 0 RAM outside DOS's mapper |
 | `vg8020` | `vg8020-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 | `xp800` | `xp800-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 | `hb75p` | `hb75p-carnivore2` | The Carnivore2, and so Nextor | 74 game files that fail in a capture with the Carnivore2 in slot 1. 4 of them also select RAM by fixed slot values. 1 selects RAM in slot 1, and 3 select RAM in slot 3, the VG-8020's RAM slot |

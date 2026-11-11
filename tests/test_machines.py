@@ -1,11 +1,15 @@
 """Single-load games restored on the test machines (docs/PLAN.md, Test setup
 and steps 4, 9, 14 and 20): each game of the corpus is captured, built and
 checked on each machine where it loads, one game on every shipped machine,
-and Mot and Made in Spain for the RAM search patch. A game passes only through the gate: check.py's exit status 0, for a
-report whose four points pass. Emulator tier."""
+Mot and Made in Spain for the RAM search patch, and two games on the HB-F700P's
+capture variants whose slot 0 is not expanded. A game passes only through the
+gate: check.py's exit status 0, for a report whose four points pass. Emulator
+tier."""
 import concurrent.futures
 import os
 import re
+import subprocess
+import sys
 import unittest
 
 import support
@@ -28,6 +32,14 @@ GAMES = {
     # expanded slot and crashed, so the game loaded without it. The RAM search
     # patch fixes that now, and this one tests the capture line.
     "abadia-phc": "cas ABADIA.CAS\nservice no\ncapture phc28s-empty-carnivore2\n",
+    # On the HB-F700P, whose slot 0 is expanded, Fernando Martin's loader
+    # selects slot 0 in page 3, where its own code runs. So the capture runs on
+    # the variant whose slot 0 is not expanded.
+    "fernando-noexp0": "cas FERNANDO.CAS\ncapture hbf700p-noexp0-ram512k-msxdos2\n",
+    # Bestial Warrior's loader also finds the HB-F700P's own RAM in slot 3-3 and
+    # selects slot 3 in page 3, which the RAM cartridge in slot 1 holds. So the
+    # capture runs on the variant without that cartridge as well.
+    "bestial-noexp0": "cas BESTIAL.CAS\ncapture hbf700p-noexp0-msxdos2\n",
     # A folder whose path holds characters that Tcl's and Python's glob read:
     # the check must still find the snapshot's RAM pages.
     "caldero[1]*": "cas CALDERO.CAS\nname BRACKETS\n",
@@ -40,7 +52,7 @@ MACHINES = {
     PHC28S: ({"freddy", "fernando", "moonrider", "caldero", "abadia", "abadia-phc"}, set()),
     VG8020: ({"freddy", "fernando", "moonrider", "caldero", "caldero[1]*"}, set()),
     "nms8250-carnivore2": ({"freddy", "fernando", "moonrider", "caldero"}, set()),
-    "hbf700p-ram512k-msxdos2": ({"moonrider", "caldero", "abadia"}, set()),
+    "hbf700p-ram512k-msxdos2": ({"moonrider", "caldero", "abadia", "fernando-noexp0", "bestial-noexp0"}, set()),
     "test/nms8250-128k": ({"caldero"}, {"freddy", "fernando", "moonrider", "abadia"}),
     "test/nms8250-dos1": ({"freddy", "fernando", "moonrider", "caldero", "abadia"}, set()),
 }
@@ -116,6 +128,18 @@ class Corpus(unittest.TestCase):
                 # without a write that cuts off its code.
                 self.assertNotIn("the RAM search patched", restored.read("snap/log.txt"))
                 self.assertEqual(restored.read("snap/side1.cas", binary=True)[0x84:0x86], bytes(2))
+
+    def test_a_capture_with_slot_0_not_expanded_restores_on_the_machine_that_expands_it(self):
+        # The image's header marks slot 0 as not expanded in the capture, and
+        # the restorer then writes 0 to its subslot register, which selects the
+        # main ROM in subslot 0 (INTERNALS.md, The capture with slot 0 not
+        # expanded).
+        for game in ("fernando-noexp0", "bestial-noexp0"):
+            with self.subTest(game=game):
+                restored = self.restored[game, "hbf700p-ram512k-msxdos2"]
+                support.assert_passes(self, restored)
+                self.assertEqual(restored.snapshot.state["sub0"], "-")
+                self.assertEqual(restored.header["H_NOEXP"] & 1, 1)
 
     def test_a_machine_whose_ram_the_loader_finds_gets_no_patch(self):
         for game, machine in (("abadia", "test/nms8250-dos1"), ("abadia-phc", PHC28S)):
@@ -223,6 +247,31 @@ class Shipped(unittest.TestCase):
     @support.needs_dos("msxdos1")
     def test_a_single_load_game_restores_on_each_shipped_machine_under_msx_dos_1(self):
         self.restores("msxdos1")
+
+
+class Plain(unittest.TestCase):
+    """tools/plain.py, the load of a tape in plain openMSX (AGENTS.md, Decide
+    whether openMSX itself fails)."""
+
+    def test_the_plain_load_types_its_command_after_basics_ok(self):
+        # The HB-F700P has no boot lines, and is still booting 10 seconds after
+        # power-on. A load command typed then is lost, and the screen shows
+        # BASIC's banner alone. The VG-8020 with a Carnivore2 has a boot line.
+        support.tape("CALDERO.CAS")
+        folder = support.game_folder(os.path.join(WORK, "games", "plain"), "cas CALDERO.CAS\n")
+        env = dict(os.environ, SNAPCAS_DOWNLOADS=support.TAPES)
+        machines = ("hbf700p-ram512k-msxdos2", VG8020)
+
+        def plain(machine):
+            return subprocess.run([sys.executable, "-I", os.path.join(support.ROOT, "tools", "plain.py"), folder,
+                                   machine], capture_output=True, text=True, env=env)
+        with concurrent.futures.ThreadPoolExecutor(len(machines)) as pool:
+            for machine, result in zip(machines, pool.map(plain, machines)):
+                with self.subTest(machine=machine):
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    # El Caldero Magico's own text, in place of BASIC's banner.
+                    self.assertNotIn("MSX BASIC", result.stdout)
+                    self.assertIn("CONSEGUIDO", result.stdout)
 
 
 if __name__ == "__main__":

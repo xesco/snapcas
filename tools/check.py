@@ -29,6 +29,14 @@ COM = os.path.join(ROOT, "bin", "SNAPCAS.COM")
 SYMBOLS = os.path.join(ROOT, "out", "snapcas.sym")
 # The seconds that the restored game runs in the check.
 SECONDS = 60
+# The emulated seconds that the restore may take, from the boot steps' end to
+# the tail's jump: RESTORE, or for a large image on a slow disk the seconds to
+# read the image at READ_RATE bytes a second, after READ_START seconds for DOS's
+# boot. The slowest disk of the shipped machines is the HB-F700P's floppy drive,
+# which reads about 3,300 bytes a second under MSX-DOS 2.
+RESTORE = 120
+READ_START = 30
+READ_RATE = 2048
 
 
 def read_facts(out):
@@ -127,13 +135,21 @@ def points(report):
     return found
 
 
-def settings(snapshot, report, name, state_name, facts):
+def restore_seconds(size):
+    """The emulated seconds that the restore of an image of size bytes may
+    take."""
+    return max(RESTORE, READ_START + size // READ_RATE)
+
+
+def settings(snapshot, report, name, state_name, facts, size):
     """Tcl variables for check.tcl: its own, the names and values of the
-    snapshot's state as kv, and build.txt's facts under their names."""
+    snapshot's state as kv, and build.txt's facts under their names. size is
+    the image's size in bytes."""
     with open(COM, "rb") as f:
         com = f.read()
     s = {
         "report": msx.tcl_word(report),
+        "restore": str(restore_seconds(size)),
         "snap": msx.tcl_word(snapshot.folder),
         "pages": str(len(snapshot.ram_names)),
         "kv": "{" + " ".join(f"{k} {v}" for k, v in snapshot.state.items()) + "}",
@@ -171,7 +187,7 @@ def check(game_arg, machine_name, dos_dir):
         state_name = f"snapcas-check-{os.getpid()}"
         if not facts["tail"]:
             raise OSError(f"{out}/build.txt: no tail line; run build.py again")
-        script = (settings(snapshot, report, game.name, state_name, facts)
+        script = (settings(snapshot, report, game.name, state_name, facts, os.path.getsize(image))
                   + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/check.tcl")
                   + "\nsafe {boot {" + msx.boot_steps(machine) + "} "
                   # On a machine that boots DOS from its own disk, the check's disk

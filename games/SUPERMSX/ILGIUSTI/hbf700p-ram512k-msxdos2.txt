@@ -1,0 +1,12 @@
+# Lines for hbf700p-ram512k-msxdos2, the Sony HB-F700P (MSX2, 256 KB) with a 512 KB
+# RAM cartridge, under MSX-DOS 2.
+
+# The game's loader writes slot 0's subslot register in its search for RAM, and
+# leaves the main ROM deselected on the HB-F700P, whose slot 0 is expanded. The
+# magazine's menu loads each program from the tape, and the game keeps its
+# variables from FCE1h on, where the tape service's entries are, so the whole
+# service goes into T0. T0 needs the game's page 0 RAM outside DOS's mapper. So
+# the capture runs with slot 0 not expanded and without the RAM cartridge, which
+# is DOS's mapper.
+capture hbf700p-noexp0-msxdos2
+service t0

@@ -568,6 +568,47 @@ Carnivore2, n is 15h for the first three forms, and 04h, the RAM cartridge in pa
 1, for the last two. A machine whose RAM for page 3 holds RAM in pages 0 and 1, as
 the VG-8020's slot 3 does, never gets the patch.
 
+### The capture with slot 0 not expanded
+
+The Sony HB-F700P's slot 0 is expanded, and holds only the main ROM, in subslot 0.
+Many loaders expect a slot 0 that is not expanded, and fail on the HB-F700P in one
+of two ways. They fail there in plain `openMSX` too
+([NOTES.md](NOTES.md#the-capture-with-slot-0-not-expanded)):
+
+| The loader | What it does on the HB-F700P |
+|---|---|
+| Looks for RAM in pages 0 and 1, in each slot and then in each subslot of that slot. For the subslots, it selects the slot in page 3 and writes the subslot's number at FFFFh, whether the slot is expanded or not. After the War's `slots` does so | Each write changes slot 0's subslot register. The last one leaves subslot 3, which holds nothing, in pages 0 and 1 of slot 0. The loader then selects slot 0 in page 0 for the BIOS, and the next interrupt calls 0038h, where every byte reads FFh |
+| Selects each slot with its own copy of the BIOS's `ENASLT`, which runs in page 3. For an expanded slot, the copy selects that slot in page 3 and writes its subslot register. Mot's loader does so | The main ROM's slot ID at `EXPTBL` is 80h, an expanded slot's. So the copy selects slot 0 in page 3, where its own code runs, and the code is gone |
+
+A patch would need each loader's code, so these games get a capture variant instead.
+The variants `hbf700p-noexp0-ram512k-msxdos2` and `hbf700p-noexp0-msxdos2` run
+`openMSX`'s HB-F700P with its slot 0 not expanded. The Makefile makes that model
+from `openMSX`'s file. It removes the two lines that start and end subslot 0 of slot
+0, so the main ROM is in slot 0 itself. On that model, a write to FFFFh while page 3
+selects slot 0 changes nothing. The BIOS sets `EXPTBL`'s byte for slot 0 to 00h
+there, so the loader's copy of `ENASLT` selects slot 0 by the slot register alone.
+
+The image of such a snapshot is for the real machine, as with every capture variant,
+and restores there for these reasons:
+
+- The snapshot holds no subslot register for slot 0, so the image's header marks
+  slot 0 as not expanded in the capture ([FORMATS.md, Image](FORMATS.md#image)). The
+  restorer's worker writes the subslot register of each slot that the machine
+  expands, with the header's value, which is 0 for such a slot
+  ([Restorer](#restorer), step 6). So every page of slot 0 selects subslot 0, the
+  main ROM's.
+- The game's page 3 keeps 00h in `EXPTBL`'s byte for slot 0. The BIOS's `ENASLT`
+  tests bit 7 of the slot ID that it gets, at 0336h in the HB-F700P's ROM. For the
+  ID 00h it writes the slot register alone, and leaves slot 0's subslot register as
+  the worker wrote it.
+
+So such a variant needs the main ROM in subslot 0, and a slot 0 that holds nothing
+else that the game uses. A game that runs a loader of the first kind again after the
+restore still changes the real subslot register, as its tape does. The check runs
+the image on the machine itself, with slot 0 expanded, so it sees that failure only
+when the failure comes in its 60 seconds and ends in a reboot or in a BASIC error
+([Check](#check), points 3 and 4).
+
 ## Build
 
 `tools/build.py` writes the image ([DESIGN.md, Formats](DESIGN.md#formats)). It:
@@ -1140,15 +1181,19 @@ the disk and the `boot` keys, and writes its report to `check/report.txt`:
    and 3). The check must find every RAM page of `snap/ram/`, and fails the point
    when it finds fewer. A difference or a timeout fails the check.
 
-   The breakpoint must fire within 120 seconds, or the point fails with the
-   screen's text. When the restorer refuses the image, it prints a message and
-   returns to DOS, and the point need not wait. A breakpoint at the start of that
-   code, `stop_message` in `src/snapcas.asm`, fails the point 2 seconds later, with
-   `the restorer stopped:` and the message from the screen. The address comes from
-   `out/snapcas.sym`, which `make all` writes, and the breakpoint fires only while
-   `SNAPCAS.COM` is the program at 0100h. Without that file, or with the file of
-   another assembly than `bin/SNAPCAS.COM`, the check sets no such breakpoint, and
-   the point fails after the 120 seconds.
+   The breakpoint must fire within 120 seconds, or the point fails with the screen's
+   text. A large image on a slow disk gets more seconds. The HB-F700P's floppy drive
+   reads about 3,300 bytes a second under MSX-DOS 2, so Altered Beast's image of
+   364,544 bytes takes about 125 seconds there. The limit is 30 seconds and the
+   seconds that the image takes at 2,048 bytes a second, when that sum is more than
+   120. The point's message names the limit. When the restorer refuses the image, it
+   prints a message and returns to DOS, and the point need not wait. A breakpoint at
+   the start of that code, `stop_message` in `src/snapcas.asm`, fails the point 2
+   seconds later, with `the restorer stopped:` and the message from the screen. The
+   address comes from `out/snapcas.sym`, which `make all` writes, and the breakpoint
+   fires only while `SNAPCAS.COM` is the program at 0100h. Without that file, or
+   with the file of another assembly than `bin/SNAPCAS.COM`, the check sets no such
+   breakpoint, and the point fails at the limit.
 2. The game runs for 60 seconds, and the check saves it with `savestate` every 10
    seconds as `check/10s.oms` to `check/60s.oms`. `openMSX` loads such a savestate
    to show the screen, because it takes screenshots only with a renderer. Meanwhile
@@ -1222,10 +1267,10 @@ ends the check. The report gets that point as failed, with a line that starts wi
 `check:` and holds the error. The point is point 1 until `check.tcl` writes that
 point's lines, and then point 2, or point 3 or 4 when the error comes from their
 code. The check also ends, in the same way, when it has not ended 600 emulated
-seconds after its start. It also ends in the same way when a `boot` text or DOS's
-prompt does not appear within 120 seconds. `check.py` moves the savestates from
-`openMSX`'s home folder to `check/`, and deletes those that a stopped `openMSX`
-leaves there.
+seconds after its start, or later by the seconds that point 1's limit is above 120.
+It also ends in the same way when a `boot` text or DOS's prompt does not appear
+within 120 seconds. `check.py` moves the savestates from `openMSX`'s home folder to
+`check/`, and deletes those that a stopped `openMSX` leaves there.
 
 Neither the scan nor the check sees code that a game builds only when the player
 reaches a level. Such code appears as a hang during play, and a trace of that load

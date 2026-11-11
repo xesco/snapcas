@@ -5,13 +5,13 @@ the screen 60 emulated seconds after the tape's end, or "a graphics screen".
 Usage: plain.py <game> <machine>
 
 <game> and <machine> are as for capture.py, and the tape is side 1 in
-downloads/. The run passes the machine's boot menu, waits 10 seconds after it
-as the capture does, and types the load command that the capture would type,
-and RUN after a CLOAD once the tape has played. It plays the tape as it is,
-from its start, without the game file's patch lines, keys or side 2, so a game
-that needs them stops where its tape alone stops. The screen goes to
-plain.txt in the game's work folder. A game that fails here as it fails with
-snapcas fails in openMSX itself (PLAN.md, step 9).
+downloads/. The run passes the machine's boot menu, waits for BASIC's Ok and
+10 seconds more, as the capture does, and types the load command that the
+capture would type, and RUN after a CLOAD once the tape has played. It plays
+the tape as it is, from its start, without the game file's patch lines, keys
+or side 2, so a game that needs them stops where its tape alone stops. The
+screen goes to plain.txt in the game's work folder. A game that fails here as
+it fails with snapcas fails in openMSX itself (PLAN.md, step 9).
 
 Exit status: 0 when the screen was read, 1 for an error in the input files,
 2 when openMSX fails or stops before the screen.
@@ -26,8 +26,8 @@ import gamefile  # noqa: E402
 import msx  # noqa: E402
 import tape as tapes  # noqa: E402
 
-# Emulated seconds: the wait after the boot menu, and the time from the tape's
-# end to the screen.
+# Emulated seconds: the wait after BASIC's Ok, and the time from the tape's end
+# to the screen.
 AFTER_BOOT = 10
 AFTER_TAPE = 60
 
@@ -54,7 +54,13 @@ def main():
     out = os.path.join(work, "plain.txt")
     if os.path.exists(out):
         os.remove(out)
-    script = (f"proc plain {{}} {{ later {AFTER_BOOT} plain_load }}\n"
+    # A machine without boot lines, such as the HB-F700P, is still booting 10
+    # seconds after power-on, and loses what is typed then. So the load
+    # command waits for BASIC's Ok, as in the capture's step 1.
+    script = (f"proc plain {{}} {{\n"
+              f"    wait_screen Ok 120 {{ later {AFTER_BOOT} plain_load }} "
+              f"{{ error {{BASIC's Ok did not appear within 120 seconds}} }}\n"
+              f"}}\n"
               f"proc plain_load {{}} {{\n"
               f"    set ::autoruncassettes off\n"
               f"    cassetteplayer insert {msx.tcl_word(os.path.abspath(tape))}\n"
@@ -69,7 +75,9 @@ def main():
               f"    close $f\n"
               f"    stop\n"
               f"}}\n"
-              f"safe {{boot {{{msx.boot_steps(machine)}}} plain}}\n")
+              # On a machine that boots DOS from its own disk, BASIC comes
+              # from DOS.
+              f"safe {{boot {{{msx.boot_steps(machine)}}} {{{msx.at_prompt(machine, 'BASIC', 'plain')}}}}}\n")
     try:
         stderr = msx.run(machine.args, script, timeout=1800)
     except Exception as e:

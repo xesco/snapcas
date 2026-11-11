@@ -31,7 +31,7 @@ The Makefile builds `snapcas` and runs its checks. You need it only to change
 | `make unit` | Runs the tests that need no `openMSX` and no tape file, in about 3 seconds |
 | `make test` | Runs all the tests, those of `make unit` and those that run in `openMSX`, in about 2 minutes, with the tape files of `tests/tapes/`. It downloads Nextor's files into `dos/nextor/` and the cartridges' firmware into `out/cache/` |
 | `make games` | Makes and checks the image of every game in `games/` on one MSX, with the tape files of `downloads/`, and puts each image that passes in `images/`, for `sync`. It downloads no tape, so a game whose tape is missing fails |
-| `make firmware` | Downloads the firmware of the machines that need it into `out/cache/openmsx-home/`, which `snapcas.py` then uses: `fsa1-mfrsd`, `hbf1xd-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper` and `vg8020-picoverse` |
+| `make firmware` | Downloads the firmware of the machines that need it into `out/cache/openmsx-home/`, which `snapcas.py` then uses: `fsa1-mfrsd`, `hbf1xd-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper` and `vg8020-picoverse`. It also makes the HB-F700P with its slot 0 not expanded there, from `openMSX`'s own file, for two capture variants of `hbf700p-ram512k-msxdos2` |
 | `make clean` | Removes `out/test/` and the build's files in `out/`: the symbol files and the test games. It leaves `bin/`, whose files git holds |
 
 The tests that need MSX-DOS 1 or MSX-DOS 2 look for its files in `dos/msxdos1/` and

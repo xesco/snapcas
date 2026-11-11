@@ -1,0 +1,8 @@
+# Lines for hbf700p-ram512k-msxdos2, the Sony HB-F700P (MSX2, 256 KB) with a 512 KB
+# RAM cartridge, under MSX-DOS 2.
+
+# The capture runs on hbf700p-noexp0-msxdos2, the Sony HB-F700P with its slot 0 not
+# expanded and an MSX-DOS 2 cartridge. On hbf700p-ram512k-msxdos2 itself the game
+# fails: point 1: fail: the restorer stopped: THEELVE.SNP: service t0 needs page 0
+# outside DOS's mapper. `make games` wrote this line.
+capture hbf700p-noexp0-msxdos2

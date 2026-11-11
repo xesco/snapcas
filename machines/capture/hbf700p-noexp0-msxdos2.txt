@@ -1,0 +1,7 @@
+# Sony HB-F700P with its slot 0 not expanded and an MSX-DOS 2 cartridge: the capture
+# variant of hbf700p-ram512k-msxdos2 without the RAM cartridge in slot 1, for a game
+# whose loader fails both because slot 0 is expanded and because of that cartridge.
+# The Makefile makes the model from openMSX's HB-F700P (make firmware).
+openmsx -machine Sony_HB-F700P_noexp0 -ext msxdos2
+disk diska
+firmware machines/Sony_HB-F700P_noexp0.xml
