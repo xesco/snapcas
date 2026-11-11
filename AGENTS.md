@@ -3,11 +3,12 @@
 This page is for an AI agent that works on `snapcas`. The page gives each task as
 steps in order. Each step names the files that the step changes and the command that
 checks the step. Tables give the fix for each message that a step can print. The
-page has four tasks: to make a game's image, to add a machine, to add a game, and to
-fix a game that fails. The [README](README.md) gives the first three in short form
-for a person. The reasons behind the rules are in [docs/DESIGN.md](docs/DESIGN.md).
-The formats of the files are in [docs/FILES.md](docs/FILES.md), and the games that
-taught each rule are in [docs/NOTES.md](docs/NOTES.md).
+page has five tasks: to guide a user, to make a game's image, to add a machine, to
+add a game, and to fix a game that fails. The [README](README.md) gives the tasks in
+short form for a person. The reasons behind the rules are in
+[docs/DESIGN.md](docs/DESIGN.md). The formats of the files are in
+[docs/FILES.md](docs/FILES.md), and the games that taught each rule are in
+[docs/NOTES.md](docs/NOTES.md).
 
 ## Rules
 
@@ -43,6 +44,37 @@ These rules hold for every task:
 | `tests/openmsx-failures.txt` | The games that fail in `openMSX` itself, which `make games` accepts |
 | `tests/snapcas-failures.txt` | The games that fail because of `snapcas` and still need a fix. `make games` accepts these games too, and lists them apart from a new failure |
 
+## Guide a user
+
+The user says what they want to play, a game by its name or a CAS file of their own,
+and may be new to `snapcas`. Do the steps for the user, and ask the user only for
+what the user alone knows or can do, one question at a time. The user's request
+covers every step, so do not ask before each step. Say in one sentence what each
+step does.
+
+1. Ask for what the request lacks: the game's name or the CAS file's path, and the
+   MSX's model with what is in each cartridge slot.
+2. Check that Python 3 and `openMSX` run. When one is missing, tell the user how to
+   install it, and wait.
+3. Find the machine ([Find the machine](#2-find-the-machine)). When no machine
+   matches, do steps 1 to 5 of [Add a machine](#add-a-machine).
+4. Make the image. For a game's name, do steps 1 and 3 of
+   [Make a game's image](#make-a-games-image). For a CAS file, do steps 1 to 4 of
+   [Add a game](#add-a-game). When no line fixes the game, tell the user what fails
+   and stop. Add no line to the lists in `tests/`.
+5. Ask the user to put the MSX's card in the computer and to name its folder. Copy
+   the image, and give the user the two lines to type on the MSX
+   ([Copy the images to the card](#4-copy-the-images-to-the-card)). A custom game is
+   in `\SNAPCAS\CUSTOM`.
+6. Ask the user to play the game and to say what they see. The check passed in
+   `openMSX`, so a failure on the MSX needs the user's words:
+
+   | The user sees | Do |
+   |---|---|
+   | A message of `SNAPCAS` at the DOS prompt | Mostly the MSX is not the machine of the image. Ask again what is in each slot, and go back to step 3 |
+   | The game stops when it loads from the tape | Give the user the tape's keys ([docs/PLAYING.md, Tape keys](docs/PLAYING.md#tape-keys)) |
+   | The game fails later | Go back to step 4 with what the user did and saw |
+
 ## Make a game's image
 
 The user names a game and their MSX. The result is the game's image, `<GAME>.SNP`.
@@ -72,10 +104,18 @@ slot, ask the user. When no machine matches, add the machine first
 
 When the game's tape is missing, the command downloads the tape from File-Hunter
 into `downloads/`. The command prints four `check` lines and the image's path,
-`images/<machine>/<GAME>/<GAME>.SNP`. When a step fails, go to
-[Fix a game that fails](#fix-a-game-that-fails). The messages about the machine's
-system ROMs, firmware, and DOS files are in the table of
-[Check three games](#5-check-three-games).
+`images/<machine>/<GAME>/<GAME>.SNP`. The image works when all four lines say
+`pass`. Otherwise the command's output says what to do:
+
+| Output | Do |
+|---|---|
+| A message about system ROMs, firmware, DOS files, or the boot | The fix in the table of [Check three games](#5-check-three-games). Ask the user for ROMs and DOS files |
+| The download of the tape fails | Tell the user, and ask for the game's CAS file. Then add the game as a custom game ([Add a game](#add-a-game)) |
+| `it passes, so the machine's game file needs: capture <variant>` | The game loads only on a capture variant. Write that line in the machine's game file ([Write the fix](#4-write-the-fix)) |
+| Another message of the capture or the build, or a `check` line that says `fail` | [Fix a game that fails](#fix-a-game-that-fails) |
+| `the restorer stopped: ... needs N free mapper segments, and DOS has M` | No line fixes this failure. The MSX's mapper is too small for the game, so tell the user both numbers |
+
+After each fix, run the command again.
 
 ### 4. Copy the images to the card
 
@@ -253,6 +293,12 @@ with a message instead, the message names the cause:
 | `the tail's jump did not run within 120 seconds`, or more for a large image, with BASIC on the screen | DOS did not start the check's `AUTOEXEC.BAT`, because a `disk`, `dos`, or `dosfiles` line is wrong |
 | `check: the boot text '...' did not appear within 120 seconds` | The check's boot never shows the text of a `boot` line. Compare the machine file with the machine file of a working machine that has the same disk cartridge |
 
+Another message, or a `check` line that says `fail`, is a failure of that game on
+the new machine, and the table of
+[Make and check the image](#3-make-and-check-the-image) says what to do. When all
+three games fail in the same way, look at the machine file and its capture variant
+before the games.
+
 ### 6. List the machine in the docs
 
 Add the machine to each place that lists the shipped machines:
@@ -340,9 +386,13 @@ prints four `check` lines, and the image goes to
 
 ### 4. Fix what fails
 
-When a step fails, follow [Fix a game that fails](#fix-a-game-that-fails), with
+When a `check` line does not say `pass`, the table of
+[Make and check the image](#3-make-and-check-the-image) says what to do, with
 `custom/MYGAME` as the game. The fix's lines go in `custom/MYGAME/game.txt`, or in
-`custom/MYGAME/hb75p-carnivore2.txt` when the lines hold on that machine only.
+`custom/MYGAME/hb75p-carnivore2.txt` when the lines hold on that machine only, as a
+`capture` line does. A `patch` line needs a `sha1` line in `game.txt`, and
+`shasum custom/MYGAME/*.CAS` prints its values. The lists in `tests/` are for
+shipped games, so add no line there for a custom game.
 
 ### 5. Share the game
 
