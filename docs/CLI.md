@@ -276,7 +276,7 @@ CD \SNAPCAS\G
 | A machine whose system ROMs are missing | `openMSX` does not start, and the command prints `openMSX`'s error with exit code 2 |
 | `vg8020-picoverse` needs a 192 KB mapper. The mapper is `ram192k.xml` in `openMSX`'s `share/extensions`, and `make firmware` makes that file | Without the mapper, the command stops and names `make firmware` |
 | Two capture variants of `hbf700p-ram512k-msxdos2` need the HB-F700P with its slot 0 not expanded. The model is `Sony_HB-F700P_noexp0.xml` in `openMSX`'s `share/machines`, and `make firmware` makes that file from `openMSX`'s own ([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)) | Without the model, the command stops and names `make firmware` |
-| The games run, `make games`, checks every game file on one machine. The developers run it on three machines only: `phc28s-ram64k-carnivore2`, `vg8020-carnivore2` and `hb75p-carnivore2` ([INTERNALS.md, The games run][gamesrun]) | A game can fail on another machine, and `snap --check` shows the failure |
+| The games run, `make games`, checks every game file on one machine. The developers run it on five machines only: `phc28s-ram64k-carnivore2`, `vg8020-carnivore2`, `hb75p-carnivore2`, `hbf700p-ram512k-msxdos2` and `nms8250-carnivore2` ([INTERNALS.md, The games run][gamesrun]) | A game can fail on another machine, and `snap --check` shows the failure |
 | MSX-DOS 1 has no folders | A machine under MSX-DOS 1, such as `vg8235`, cannot use the card's layout. The user puts `SNAPCAS.COM` and the image into one folder by hand |
 | A game that hangs or shows garbage passes the check ([INTERNALS.md, Check][check]) | The image fails only on the real machine |
 

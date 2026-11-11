@@ -213,6 +213,25 @@ debug write ioports 0xA8 [expr {$before ^ 0x04}]
 result rewind_a8 [expr {$::st(a8) == ($before ^ 0x04)}]
 debug write ioports 0xA8 $before
 result rewind_watchpoints [llength $::run(slotwp)]
+
+# A write of FFFFh in an expanded slot with the stack pointer at FFFEh is a
+# push at the top of memory, which the log names once. A write with the stack
+# elsewhere is a loader's write of the subslot register.
+set ::st(sub3) 0
+set ::st(a8) 0xC0
+set ::run(phase) load
+set decisions [llength $::run(decisions)]
+set sp [reg sp]
+set a8 [debug read ioports 0xA8]
+debug write ioports 0xA8 [expr {$a8 | 0xC0}]
+reg sp 0xF000; on_ffff 0xAA
+set loader [expr {[llength $::run(decisions)] - $decisions}]
+reg sp 0xFFFE; on_ffff 0x39; on_ffff 0x00
+result stack_at_ffff "$loader [expr {[llength $::run(decisions)] - $decisions}] [regexp {the game's stack reaches FFFFh, the subslot register of slot 3} [lindex $::run(decisions) end]]"
+reg sp $sp
+debug write ioports 0xA8 $a8
+set ::st(sub3) -1
+set ::run(decisions) {}
 catch { file delete [moment_file rewind] }
 
 # A reset during a key try follows the machine, and another is kept.
@@ -314,7 +333,7 @@ class Procedures(unittest.TestCase):
             settings = {"snap": msx.tcl_word(snap), "home": msx.tcl_word(msx.home()), "state": "snapcas-test",
                         "boot": "{}", "afterboot": "wait_ok", "tape": "{}", "cmd": "{}", "cload": "0",
                         "headers": "{}", "needed": "0", "side2tape": "{}", "s1len": "0", "headers2": "{}",
-                        "nosvc": "0", "keys": "{}", "lastkey": "0", "tries": "{}", "snapat": "{}"}
+                        "nosvc": "0", "subkeep": "0", "keys": "{}", "lastkey": "0", "tries": "{}", "snapat": "{}"}
             script = ("".join(f"set ::S({k}) {v}\n" for k, v in settings.items())
                       + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/capture.tcl") + patches.tcl(b"", b"") + start)
             support.cbios(script)
@@ -397,6 +416,9 @@ class Procedures(unittest.TestCase):
         # Before, a RAM page that a game first selected after a rewind was not
         # kept: A-TEAM's pages 0 and 1, after the rewind of its key try.
         self.assertEqual((self.results["rewind_a8"], self.results["rewind_watchpoints"]), ("1", "2"))
+
+    def test_a_push_that_writes_ffffh_in_an_expanded_slot_is_logged_once(self):
+        self.assertEqual(self.results["stack_at_ffff"], "0 1 1")
 
     def test_an_msx1_keeps_the_handlers_bytes(self):
         self.assertEqual(self.results["irqslot_msx1"], "0")

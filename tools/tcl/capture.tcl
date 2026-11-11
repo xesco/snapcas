@@ -16,6 +16,7 @@
 #   ::S(s1len)    side 1's length, padded to a multiple of 8: side 2's start
 #   ::S(headers2) the positions of side 2's headers, from side 1's start
 #   ::S(nosvc)    1 when the game file has service no
+#   ::S(subkeep)  1 when the game file has subslots keep
 #   ::S(keys)     [list time tcl] pairs, times from the load command
 #   ::S(lastkey)  the last keys time
 #   ::S(tries)    [list name tcl] pairs: the keys that may continue a load
@@ -49,7 +50,8 @@
 #   psg         the watchpoints on the PSG's ports
 #   slotwp, slots_watched  the watchpoints on the slot register and on FFFFh,
 #               and whether step 4 has set them
-array set ::run {msx2 0 t0 0 elapsed 0 restarts 0 since "" saved 0 decisions {} psg {} slotwp {} slots_watched 0}
+#   stack_logged  whether the log names a push that writes FFFFh
+array set ::run {msx2 0 t0 0 elapsed 0 restarts 0 since "" saved 0 decisions {} psg {} slotwp {} slots_watched 0 stack_logged 0}
 set ::st(log) {}
 
 proc now {} { machine_info time }
@@ -212,7 +214,19 @@ proc on_ffff {value} {
     if {$::st(sub$ps) >= 0} {
         set ::st(sub$ps) $value
         note_selection $a8
+        stack_at_ffff $ps
     }
+}
+# A push that writes FFFFh while page 3 selects an expanded slot: the game's
+# stack is at the top of memory, and its push writes the slot's subslot
+# register, which deselects the game's RAM. The log names the first one, for a
+# patch line by hand or a capture in a slot that is not expanded. After a push
+# at FFFFh the stack pointer is FFFEh or FFFFh, which it never is in the BIOS's
+# own writes of the register.
+proc stack_at_ffff {ps} {
+    if {$::run(stack_logged) || $::run(phase) ne "load" || [reg sp] < 0xFFFE} return
+    set ::run(stack_logged) 1
+    decide "the game's stack reaches FFFFh, the subslot register of slot $ps, at PC [hex 4 [reg pc]], for a patch line"
 }
 proc on_a8 {value} {
     if {$::run(phase) eq "snap"} return
@@ -303,8 +317,27 @@ proc wait_ok {} {
         { fail "BASIC's Ok did not appear within 120 seconds" }
 }
 
-# 2. Remove the disk system from page 3, and set HIMEM as on a cassette
-#    machine.
+# On an MSX2 whose BASIC has its RAM in an expanded slot, the slot's subslot
+# register selects the RAM's subslot in pages 2 and 3 only, and a ROM of the
+# slot in pages 0 or 1. A loader that looks for RAM by primary slot then finds
+# none there. So every page of that slot gets the RAM's subslot, as POKE -1,170
+# gives it on a machine with its RAM in subslot 2. SLTTBL at FCC5h, the BIOS's
+# copy of the subslot registers, gets the same value. The BIOS's inter-slot
+# calls put the register back after each call, so the BIOS still reaches the
+# slot's ROMs. An MSX1 stays as it is: its loaders find its own RAM, which is
+# not in an expanded slot. A game file's subslots keep leaves the register
+# alone, for a game that puts its stack at FFFFh once it finds 64 KB.
+proc ram_in_every_page {} {
+    set ps [expr {([debug read ioports 0xA8] >> 6) & 3}]
+    if {$::S(subkeep) || !$::run(msx2) || ![expanded $ps]} return
+    set ss [expr {([subslot_reg $ps] >> 6) & 3}]
+    set value [expr {$ss * 0x55}]
+    set_subslot_reg $ps $value
+    debug write memory [expr {0xFCC5 + $ps}] $value
+}
+
+# 2. Remove the disk system from page 3, select BASIC's RAM in every page of
+#    its slot, and set HIMEM as on a cassette machine.
 proc step2 {} {
     set v [debug read memory 0x002D]
     if {$v > 1} { fail "the machine is not an MSX1 or an MSX2: 002Dh holds $v" }
@@ -316,6 +349,7 @@ proc step2 {} {
     foreach a {0xFFCA 0xFFCF 0xFFD4} { debug write memory $a 0xC9 }
     debug write memory 0xF37D 0
     for {set a 0xFCC9} {$a <= 0xFD88} {incr a} { debug write memory $a 0 }
+    ram_in_every_page
     type "CLEAR200,&HF380\r"
     later 3 step3
 }

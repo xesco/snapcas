@@ -51,6 +51,9 @@ class Game:
         self.entry_page = None
         self.capture = None      # the machine file for the capture, if not the user's
         self.rom_keep = False    # rom keep: page 0 keeps the ROM, and T0 does not replace it
+        # subslots keep: the capture leaves the subslot register of BASIC's RAM
+        # slot as BASIC has it (INTERNALS.md, The RAM's subslot in every page).
+        self.subslots_keep = False
         self.patches = []     # [Patch]
 
 
@@ -320,7 +323,7 @@ def read_game(folder, machine=None):
         except ValueError as e:
             raise GameFileError(f"{where}: {e}")
         key, args = words[0], words[1:]
-        if key in ("cas", "tsx", "side2", "load", "start", "name", "continue", "capture", "rom") and len(args) != 1:
+        if key in ("cas", "tsx", "side2", "load", "start", "name", "continue", "capture", "rom", "subslots") and len(args) != 1:
             raise GameFileError(f"{where}: {key} takes one value")
         if key in ("cas", "tsx"):
             if game.tape is not None:
@@ -386,6 +389,10 @@ def read_game(folder, machine=None):
             if args[0] != "keep":
                 raise GameFileError(f"{where}: rom takes keep")
             game.rom_keep = True
+        elif key == "subslots":
+            if args[0] != "keep":
+                raise GameFileError(f"{where}: subslots takes keep")
+            game.subslots_keep = True
         elif key == "patch":
             game.patches.append(read_patch(args, where))
         else:

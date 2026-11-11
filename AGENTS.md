@@ -383,7 +383,7 @@ snapcas.py: it passes, so the machine's game file needs: capture hb75p
 Then write that line in the machine's game file ([Write the fix](#4-write-the-fix)),
 and the fix is done. `make games MACHINE=<machine>` does both for every game that
 fails on a machine ([Run the collection](#7-run-the-collection)). A `capture` line
-is the most common fix. Of the shipped machine's game files, 642 hold a `capture`
+is the most common fix. Of the shipped machine's game files, 660 hold a `capture`
 line. When no variant passes, continue with the next step.
 
 ### 2. Read the failure
@@ -400,6 +400,7 @@ step's message names the failure:
 | `the first block is a non-standard block` or `is not a binary file, a BASIC` | The tape does not start with a block that the BIOS loads | `load 'RUN"CAS:"'`, or the command that the tape's label gives |
 | `the tape needs N segments, more than M` | The tape is longer than the tape service holds. The tape service holds 64 segments, 1 MB, with the code segment, or 16 segments, 256 KB, in the mode without a part in page 3 | With a limit of 16 segments, `service at <address>` with an address xxE1h in page 3 that the game leaves alone. That line gives the tape service its part of page 3. With a limit of 64 segments, add a line to `tests/snapcas-failures.txt` |
 | `the 26 bytes below SP XXXXh are not in a RAM page that the snapshot keeps`, or `cross a page boundary or include FFFFh` | Mostly, the load failed on this machine, so the snapshot shows BASIC or a crash, with the stack in the ROM. `snap/log.txt` shows where the load stopped and the screen at that moment. Otherwise the stack is too low for the restorer's tail at the snapshot | For a failed load, a capture variant or a slot patch. Otherwise `snapshot at <seconds>` with a later moment, when the stack has moved |
+| `the game's stack reaches FFFFh, the subslot register of slot N`, in `snap/log.txt` | The game's stack is at the top of memory, and page 3 is in an expanded slot. The push writes the slot's subslot register and deselects the game's RAM | A capture variant whose RAM is in a slot that is not expanded. On a machine without one, a patch of the game's `LD SP,0000h` to `LD SP,0FFFEh`, as in Space Beater's game file |
 | `page 3 is not a RAM page that the snapshot keeps` | The load failed on this machine. The loader selected a slot without RAM in page 3, where its own code runs. `snap/log.txt` names the write, with `cuts off its code` | A capture variant, or a slot patch |
 | `page 3 has no room for the tape service's part, and rom keep needs it` | The game fills page 3, and the game file's `rom keep` does not allow the mode without a part in page 3 | `service at <address>` with an address xxE1h in page 3 that the game leaves alone, or the game file without `rom keep` |
 | `the tape service without a part in page 3 keeps T0 in page 0 of DOS's mapper` | Either the game fills page 3 or its game file has `service t0`. The game also keeps RAM of DOS's mapper in page 0, where that mode puts T0 | A capture variant, whose RAM is outside DOS's mapper, or `service at <address>` |
