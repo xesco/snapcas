@@ -224,7 +224,7 @@ The files go to these places, so that no folder of the card holds every image:
 | `SNAPCAS.COM` | `BIN/SNAPCAS.COM` |
 | A game's image | `SNAPCAS/<letter>/<GAME>.SNP`, with `0-9` as the letter of a name that starts with a digit |
 | A compilation's program | `SNAPCAS/<letter>/<COLLECTION>/<GAME>.SNP`, with the letter of the collection's name |
-| A custom game's image | `SNAPCAS/C/CUSTOM/<GAME>.SNP`, as a program of a collection named `CUSTOM` |
+| A custom game's image | `SNAPCAS/CUSTOM/<GAME>.SNP`, apart from the letters' folders |
 
 `sync` copies only the files that the card lacks or holds with other bytes. It
 writes each copy under a temporary name in the same folder. The temporary name is
@@ -293,9 +293,8 @@ CD \SNAPCAS\G
 
 - Several games in one run. A shell loop runs the command once for each game.
 - A download of the whole collection.
-- Tapes from any site other than File-Hunter. The command downloads CAS files only,
-  because no shipped game file names a TSX file. A custom game can have a TSX file
-  as its tape ([Your own games](#your-own-games)).
+- Tapes from any site other than File-Hunter. A tape from another place goes in as
+  a custom game ([Your own games](#your-own-games)).
 - A package for pip, or a program built for each OS.
 - A machine file made by the command. A new machine is still described by hand
   ([FILES.md, Machine file][machine]).

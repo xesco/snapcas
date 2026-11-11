@@ -86,7 +86,7 @@ shipped game files, each line after `cas`, `side2`, `sha1`, `url`, and `name` ha
 its own comment above it and a blank line before the comment. The comment says why
 the line is there. Times are decimal emulated seconds from the moment when the load
 command is typed. Addresses and bytes are hexadecimal. A game file needs only its
-tape's line, `cas` or `tsx`. This example is for Gauntlet, which loads its levels
+tape's line, `cas`. This example is for Gauntlet, which loads its levels
 from side 2 of the tape:
 
 ```
@@ -97,8 +97,7 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 
 | Key | Value | Default | File |
 |---|---|---|---|
-| `cas` | The CAS file of side 1, in the tapes folder. A game file has `cas` or `tsx` | | `game.txt` |
-| `tsx` | The TSX file of side 1, in the tapes folder ([INTERNALS.md, Tape files](INTERNALS.md#tape-files)) | | `game.txt` |
+| `cas` | The CAS file of side 1, in the tapes folder | | `game.txt` |
 | `side2` | The file of side 2, in side 1's format | None | `game.txt` |
 | `load` | The load command in quotes, for a tape whose first block is not standard, as in `load 'RUN"CAS:"'` ([INTERNALS.md, Tape files](INTERNALS.md#tape-files)) | From the first block's type | `game.txt` |
 | `start` | The name of a file on side 1, such as `start SKY`, for a game that is not the tape's first program. The load starts at the first file with that name ([INTERNALS.md, A game later on the tape](INTERNALS.md#a-game-later-on-the-tape)) | The tape's start | `game.txt` |

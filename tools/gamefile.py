@@ -207,12 +207,24 @@ def game_key(folder):
     shipped game's path below games/, such as GAUNTLET or SUPERMSX/GOLF, a
     custom game's custom/<game>, or None for a folder elsewhere."""
     folder = os.path.abspath(folder)
-    games = os.path.join(ROOT, "games")
-    if os.path.commonpath([folder, games]) == games:
-        return os.path.relpath(folder, games)
-    if os.path.commonpath([folder, CUSTOM]) == CUSTOM:
-        return "custom/" + os.path.relpath(folder, CUSTOM)
-    return None
+    shipped = path_below(folder, os.path.join(ROOT, "games"))
+    if shipped is not None:
+        return shipped
+    custom = path_below(folder, CUSTOM)
+    return None if custom is None else "custom/" + custom
+
+
+def path_below(folder, parent):
+    """The path of folder below parent, with / between its names on every OS,
+    so that a game has one name everywhere, or None for a folder that is not
+    below parent. On Windows, commonpath raises ValueError for a folder on
+    another drive than parent's."""
+    try:
+        if os.path.commonpath([folder, parent]) != parent:
+            return None
+    except ValueError:
+        return None
+    return os.path.relpath(folder, parent).replace(os.sep, "/")
 
 
 def is_custom(folder):
