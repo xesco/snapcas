@@ -1,0 +1,8 @@
+# Lines for nms8250-carnivore2, the Philips NMS 8250 (MSX2, 128 KB) with a
+# Carnivore2.
+
+# The capture runs on nms8250, the Philips NMS 8250 without cartridges, so without
+# Nextor. On nms8250-carnivore2 itself the game fails: point 4: fail: the screen
+# shows Syntax error in 3 10.0 seconds after the restore. `make games` wrote this
+# line.
+capture nms8250

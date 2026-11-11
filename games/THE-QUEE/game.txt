@@ -3,10 +3,9 @@ cas THE-QUEE.CAS
 sha1 0a2954cdbe0dc6924f27c74060f06308693b95d3
 url https://download.file-hunter.com/Games/MSX1/CAS/The%20Queens%20Footsteps%20Part%201%20(2020)(Davide%20Bucci)%5BBLOAD%27CAS-%27%2CR%5D.zip
 
-# The loader calls TAPION once more after the tape's last block, so the snapshot
-# comes before that call.
-snapshot at 106.9
-
-# The game was played to its end with no load after the snapshot, so the image
-# needs no tape service.
-service no
+# The game's start calls 0115h, which is no BIOS entry. It is the second byte of
+# the jump table's entry at 0114h. An MSX1's bytes there run on into TAPIN, which
+# waits 7 seconds at the tape's end and returns. An MSX2's bytes there jump into
+# RAM, the game falls out of its start, and BASIC stops at "Syntax error in 10".
+# The patch makes the call three NOPs.
+patch side1:2FF1 CD 15 01 > 00 00 00

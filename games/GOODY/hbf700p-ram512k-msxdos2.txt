@@ -5,3 +5,9 @@
 # cartridge. On hbf700p-ram512k-msxdos2 itself the game fails: build.py: page 3 is
 # not a RAM page that the snapshot keeps. `make games` wrote this line.
 capture hbf700p-msxdos2
+
+# On that capture variant, BASIC's RAM is in the expanded slot 3. With the RAM's
+# subslot in every page of that slot, the loader takes slot 3 for pages 0 and 1
+# and selects another slot in page 3, where its own code runs. With BASIC's
+# subslots, the game loads.
+subslots keep
