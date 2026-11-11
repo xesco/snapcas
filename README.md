@@ -153,7 +153,7 @@ If you want to play your own CAS file, you can add the game to the project.
    file, which tells `snapcas` how to load the game, and makes the game's `.SNP`
    file for your machine:
 
-   > Add MYGAME in custom/ to snapcas and make its image for
+   > Add the CAS file ~/Downloads/mygame.cas to snapcas and make its image for
    > phc28s-ram64k-carnivore2. Follow steps 1 to 4 of "Add a game" in AGENTS.md.
 
 2. Copy your games to the MSX's card:
@@ -163,7 +163,8 @@ If you want to play your own CAS file, you can add the game to the project.
    ```
 
    On the MSX, your own games are in the folder `\SNAPCAS\CUSTOM`. Go to that
-   folder and start the game:
+   folder and start the game. The agent tells you the game's name, which is `MYGAME`
+   in this example:
 
    ```
    CD \SNAPCAS\CUSTOM
