@@ -1,0 +1,11 @@
+# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# The game writes port FEh, the ZX Spectrum's border and sound port, at 5B13h
+# when it starts and at FF5Dh in a delay loop. On a machine with a memory mapper,
+# port FEh is the mapper's register of page 2, so the write selects another
+# segment there and the game's code is gone. Both RAMs of this machine are
+# mappers. The patches replace each OUT (0FEh),A with LD A,A and LD D,D, which
+# do nothing and have the exclusive OR of the old bytes, which the loader's
+# check of each block needs.
+patch side1:3421 D3 FE > 7F 52
+patch side1:D87D D3 FE > 7F 52

@@ -3,3 +3,16 @@
 # The capture runs without the Carnivore2, because the game fails in a capture
 # with it in slot 1.
 capture nms8250
+
+# The game moves 4000h to BFFFh up to 8000h to FFFFh, by an LDDR of 8001h bytes
+# from C000h to 0000h. On a machine whose RAM is in an expanded slot, FFFFh is
+# the slot's subslot register, and the move's second byte deselects the RAM. The
+# NMS 8250 has no other RAM. The patch makes the move 7FFFh bytes, from BFFEh to
+# FFFEh. The two bytes left out are those for 0000h and for FFFFh.
+patch side1:3A16 21 00 C0 11 00 00 01 01 80 > 21 FE BF 11 FE FF 01 FF 7F
+
+# The loader keeps an exclusive OR of the block's bytes and compares it with the
+# byte after the block. When they differ, it flashes the Caps lamp 16 times and
+# starts the game 5 seconds later. The second patch gives that byte the value for
+# the changed block, CCh XOR 81h.
+patch side1:F6B5 CC > 4D

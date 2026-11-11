@@ -1,0 +1,9 @@
+# Lines for the Philips NMS 8250 with a Carnivore2 in slot 1.
+
+# The game's loader fills FD9Ah to FFF6h with C9h, to clear the hooks. On an
+# MSX2, FFE7h to FFF6h hold the BIOS's copies of VDP registers 8 to 23. The game
+# then sets the screen mode, the sub-ROM writes those registers from the copies,
+# and register 15 gets 09h. The interrupt handler then reads status register 9,
+# the interrupt stays active, and the handler's stack runs through the memory.
+# The patch ends the fill at FFE6h.
+patch side1:473E 01 5C 02 > 01 4C 02
