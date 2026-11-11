@@ -65,7 +65,7 @@ You can also give the agent your own CAS file instead of a game's name:
 > I want to play the CAS file ~/Downloads/mygame.cas on my MSX. Follow "Guide a
 > user" in AGENTS.md.
 
-The rest of this page gives the same steps for you to do.
+The rest of this page gives the same steps for you to do instead of the agent.
 
 ## How to play a game
 
