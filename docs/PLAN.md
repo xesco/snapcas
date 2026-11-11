@@ -49,9 +49,9 @@ module is named after what it tests:
 | `test_capture.py` | Emulator | The capture of single-load games, its Tcl procedures in the C-BIOS machine, the images of captured snapshots, and a patched tape with two sides |
 | `test_corpus.py` | Emulator | The scan over the corpus |
 | `test_restore.py` | Emulator | The restorer on images that the test writes: its messages, its stops, its plan, and a restore to the tail's jump |
-| `test_machines.py` | Emulator | The single-load games of the corpus on the test machines, one game on every shipped machine, and the games of the RAM search patch |
+| `test_machines.py` | Emulator | The single-load games of the corpus on the test machines, one game on every shipped machine, the games of the RAM search patch, and two games captured with slot 0 not expanded |
 | `test_service.py` | Emulator | The tape service in restored games: loads during play, the contracts of its entries, the manual tape, and the check's guard of its part of page 3 |
-| `test_check.py` | Emulator | The check's points 3 and 4 on games, and `check.tcl`'s own errors in the C-BIOS machine |
+| `test_check.py` | Emulator | The check's points 3 and 4 on games, and `check.tcl`'s own errors and point 1's limit in the C-BIOS machine |
 | `test_snap.py` | Emulator | `snapcas.py snap` on games, and the automatic fixes |
 | `test_tsx.py` | Emulator | The TSX files of the collection |
 
@@ -743,3 +743,37 @@ in `tests/test_card.py`.
 | The card's `SNAPCAS` or `BIN` folder as the destination | The command stops and asks for the card's top folder |
 | Two images for one place on the card | The command stops |
 | `phc28s-ram64k-carnivore2` into an empty folder, twice, by hand | The first sync copies 1,546 files and the second none |
+
+## Step 27: the capture with slot 0 not expanded
+
+This step adds two capture variants of `hbf700p-ram512k-msxdos2` that run the
+HB-F700P with its slot 0 not expanded, for the loaders that fail because slot 0 is
+expanded
+([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)).
+The variants are `hbf700p-noexp0-ram512k-msxdos2` and `hbf700p-noexp0-msxdos2`. The
+Makefile makes their model from `openMSX`'s file, and `make firmware` makes it for
+`snapcas.py`. A machine now also needs the `firmware` files of its capture variants.
+
+The step also gives the check's point 1 more seconds for a large image, because the
+HB-F700P restores from a floppy disk, at about 3,300 bytes a second
+([INTERNALS.md, Check](INTERNALS.md#check)).
+
+| Test | What it proves |
+|---|---|
+| `Msx` in `tests/test_msx.py`: `hbf700p-ram512k-msxdos2` with an empty `openMSX` home | The machine lists both variants, each names the model as its firmware, and the machine stops and names `make firmware` without the model |
+| `Corpus` in `tests/test_machines.py`: Fernando Martin with `capture hbf700p-noexp0-ram512k-msxdos2`, and Bestial Warrior with `capture hbf700p-noexp0-msxdos2` | The image of a capture with slot 0 not expanded passes the gate on the machine itself, whose slot 0 is expanded. The snapshot holds no subslot register for slot 0, and the header marks slot 0 as not expanded in the capture |
+| `Script` in `tests/test_check.py`: a restore that never reaches the tail, with a limit of 7 seconds, and a deadline for a limit of 150 seconds | Point 1 fails at the limit and names it, and the check's deadline grows with the limit |
+| `Script` in `tests/test_check.py`: images of 0 to 700,000 bytes | An image up to 184 KB keeps the 120 seconds, and a larger image gets 30 seconds and the seconds to read it at 2,048 bytes a second |
+| `Plain` in `tests/test_machines.py`: El Caldero Magico in `tools/plain.py` on `hbf700p-ram512k-msxdos2` and `vg8020-carnivore2` | The plain load types its load command after BASIC's `Ok`, and shows the game's text. Before this step, the HB-F700P lost a command typed 10 seconds after power-on, and showed BASIC's banner alone for every game |
+
+The results of the step, from the collection on `hbf700p-ram512k-msxdos2`
+([NOTES.md, The capture with slot 0 not expanded](NOTES.md#the-capture-with-slot-0-not-expanded)):
+
+| Result | Game files |
+|---|---|
+| Passed before the step | 1,294 of 1,545 |
+| Pass after the step | 1,534 |
+| `capture` lines that the games run wrote | 235: 210 for `hbf700p-noexp0-ram512k-msxdos2`, 24 for `hbf700p-noexp0-msxdos2` and 1 for `hbf700p-msxdos2` |
+| Machine's game files written by hand | 2: Continental Circus and Il Giustiziere, with `capture hbf700p-noexp0-msxdos2` and `service t0` |
+| Pass with the check's limit for a large image alone | 3: Operation Wolf, Rambo III and Puzzle |
+| Still fail | 11 |

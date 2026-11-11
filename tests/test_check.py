@@ -1,7 +1,7 @@
 """The check on games (docs/INTERNALS.md, Check): point 3, which fails a reboot
 of the machine after the restore, point 4, which fails a game that stops at a
-BASIC error, and what check.tcl leaves in the report when one of its own
-callbacks fails. check.py's reading of a report is in tests/test_gate.py, and
+BASIC error, what check.tcl leaves in the report when one of its own
+callbacks fails, and point 1's limit for the restore. check.py's reading of a report is in tests/test_gate.py, and
 point 2's guard in tests/test_service.py. Emulator tier."""
 import concurrent.futures
 import os
@@ -122,12 +122,13 @@ class Script(unittest.TestCase):
     """check.tcl's procedures in openMSX's C-BIOS machine, which needs no
     system ROMs: what it leaves in the report when it cannot go on."""
 
-    def report(self, start):
+    def report(self, start, restore=120):
         """The report of check.tcl with the Tcl start after it, in the C-BIOS
-        machine."""
+        machine. restore is the seconds that the restore may take."""
         folder = support.temp(self)
         report = os.path.join(folder, "report.txt")
-        settings = {"report": msx.tcl_word(report), "snap": msx.tcl_word(folder), "pages": "0",
+        settings = {"report": msx.tcl_word(report), "restore": str(restore), "snap": msx.tcl_word(folder),
+                    "pages": "0",
                     "kv": "{pc 0000 a8 00}", "capreset": "{}", "state": "snapcas-test", "name": "TEST",
                     "com": "{0 0 0}", "stop": "{}", "tail": "{0 25 3 21}", "free": "{}", "service": "0",
                     "patched": "{}", "part": "{}", "moved": "{}", "cpos": "{}", "ended": "{}"}
@@ -151,6 +152,20 @@ class Script(unittest.TestCase):
         report = self.report("")
         self.assertEqual(report, "point 1: fail\n  check: the check did not end within 600 seconds\n")
         self.assertEqual(check.verdict(report), 3)
+        # The deadline grows with the seconds that the restore may take.
+        self.assertEqual(self.report("", restore=150),
+                         "point 1: fail\n  check: the check did not end within 630 seconds\n")
+
+    def test_a_restore_that_never_reaches_the_tail_fails_point_1_at_its_limit(self):
+        report = self.report("safe start_check\n", restore=7)
+        self.assertEqual(report.splitlines()[:2], ["point 1: fail", "  the tail's jump did not run within 7 seconds"])
+        self.assertEqual(check.verdict(report), 3)
+
+    def test_a_large_image_gets_the_seconds_to_read_it_from_a_slow_disk(self):
+        # An image up to 184 KB keeps the 120 seconds. Altered Beast's 364,544
+        # bytes take about 125 seconds from the HB-F700P's floppy drive.
+        self.assertEqual([check.restore_seconds(size) for size in (0, 16384, 184320, 364544, 700000)],
+                         [120, 120, 120, 208, 371])
 
 
 if __name__ == "__main__":

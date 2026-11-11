@@ -3,5 +3,7 @@
 # a memory mapper too, and MSX-DOS 2 takes the larger mapper.
 openmsx -machine Sony_HB-F700P -ext ram512k -ext msxdos2
 disk diska
+variant hbf700p-noexp0-ram512k-msxdos2
 variant hbf700p-msxdos2
+variant hbf700p-noexp0-msxdos2
 dosfiles msxdos2

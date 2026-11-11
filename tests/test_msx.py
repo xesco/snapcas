@@ -108,6 +108,22 @@ class Msx(unittest.TestCase):
                     with self.subTest(file=name):
                         msx.read_machine(os.path.join(folder, name))
 
+    def test_a_machine_needs_the_firmware_of_its_capture_variants(self):
+        # The HB-F700P's own file needs no firmware, and two of its capture
+        # variants need the model whose slot 0 is not expanded.
+        machine = "hbf700p-ram512k-msxdos2"
+        model = "machines/Sony_HB-F700P_noexp0.xml"
+        self.assertEqual(msx.read_machine(msx.machine_path(machine)).firmware, [])
+        for variant in ("hbf700p-noexp0-ram512k-msxdos2", "hbf700p-noexp0-msxdos2"):
+            self.assertIn(variant, msx.read_machine(msx.machine_path(machine)).variants)
+            self.assertEqual(msx.read_machine(msx.variant_path(variant)).firmware, [model])
+        with tempfile.TemporaryDirectory() as home, mock.patch.dict(os.environ, OPENMSX_HOME=home):
+            with self.assertRaisesRegex(msx.MachineError, f"{machine} needs {model} .*make firmware makes it"):
+                msx.check_firmware(machine)
+            os.makedirs(os.path.join(home, "share", "machines"))
+            open(os.path.join(home, "share", model), "w").close()
+            msx.check_firmware(machine)
+
     def ended(self, status, stderr=""):
         """msx.run with an openMSX that ends with the status, after it printed
         stderr."""

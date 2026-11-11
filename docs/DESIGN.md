@@ -193,6 +193,7 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 |---|---|
 | A machine file named after its model and cartridges, such as `phc28s-ram64k-carnivore2` | A machine file is a model and the cartridges in its slots, and two setups of one model need two names ([FILES.md, Machine file](FILES.md#machine-file)) |
 | A capture variant named after the cartridges that it holds, in `machines/capture/`, and listed by the machine file's `variant` lines | A name that lists the cartridges says what the capture ran on, and one variant can serve two machines, as `vg8020` does ([FILES.md, Machine file](FILES.md#machine-file)) |
+| A capture variant that runs the HB-F700P with its slot 0 not expanded, for the loaders that fail because slot 0 is expanded | A patch needs the code of each loader, and these loaders differ. After the War's search and Mot's copy of `ENASLT` are two of them. One model loads them all, and the restorer already writes 0 to the subslot register of a slot that the capture did not expand, which selects the main ROM in subslot 0 ([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)) |
 | One reader for each tape format, and a format-neutral tape model for the rest of the code | A TSX file holds the turbo blocks that a CAS file cannot hold, so converting a TSX file to CAS would lose the games that need TSX. If each tool handled both formats, the formats would mix in every tool, while the model keeps each format in one file ([Tape files](#tape-files)) |
 | A game file for each program of a compilation, named after its game | A player looks for a game by its name, and an image named after the tape holds only the tape's first program. One game file for the tape, with a line for each program, would keep the tape's `cas` and `sha1` lines in one place. But that alternative needs both game files with sections and changes to every tool and to the collection's cache, to save two lines for each program ([INTERNALS.md, A game later on the tape](INTERNALS.md#a-game-later-on-the-tape)) |
 | Every program of a compilation in the collection's folder, even when the game has a dump of its own | A compilation's copy can differ from that dump, because the magazines renamed the games and changed their title screens. A folder for each collection keeps their names, such as `GOLF` or `STAR`, apart from the games of `games/` |
@@ -262,6 +263,11 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
   keeps, or else 26 bytes below the start of the stack pointer's page. A game whose
   stack pointer is below 26, or whose bytes there are not in a kept RAM page, gets
   no image, because `build.py` stops ([FORMATS.md, Tail](FORMATS.md#tail)).
+- A capture variant with slot 0 not expanded needs the main ROM in subslot 0 of slot
+  0, and nothing else in slot 0 that the game uses. A game that writes slot 0's
+  subslot register after the restore changes the real register, which its capture
+  did not have
+  ([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)).
 - A game whose stack reaches FFFFh writes the subslot register when page 3 is an
   expanded slot, and that write changes the game's slots. Page 3 is such a slot in a
   capture on the VG-8020, where page 3 holds the Carnivore2's RAM.

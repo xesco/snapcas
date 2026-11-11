@@ -1,0 +1,9 @@
+# Sony HB-F700P with its slot 0 not expanded, a 512 KB RAM cartridge and an MSX-DOS 2
+# cartridge: the capture variant of hbf700p-ram512k-msxdos2 for a game whose loader
+# fails because slot 0 is expanded. Such a loader writes slot 0's subslot register
+# in its search for RAM and leaves the main ROM deselected, or selects slot 0 in
+# page 3, where its own code runs. The Makefile makes the model from openMSX's
+# HB-F700P (make firmware).
+openmsx -machine Sony_HB-F700P_noexp0 -ext ram512k -ext msxdos2
+disk diska
+firmware machines/Sony_HB-F700P_noexp0.xml

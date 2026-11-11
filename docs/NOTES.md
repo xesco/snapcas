@@ -83,6 +83,54 @@ blocks that Level 9's loader checks end with an 8-bit sum, which the patch keeps
 M-Droid's BASIC loader holds the routine as text, and that form stays a line in its
 game file.
 
+## The capture with slot 0 not expanded
+
+On `hbf700p-ram512k-msxdos2`, 251 of the 1,545 game files failed before these
+variants. Three messages covered 237 of them:
+
+| Message | Game files | What the snapshots show |
+|---|---|---|
+| `service t0 needs page 0 outside DOS's mapper`, from the restorer | 121 | In all 121, the program counter is at 0038h, page 0 selects slot 0, and slot 0's subslot register selects another subslot than 0 there. Each interrupt's `RST 38h` runs again at 0038h, and its return address, 0039h, fills the stack downwards. The stack went through FCC9h to FD88h, so the build took the mode without a part in page 3 |
+| `the 26 bytes below SP ... are not in a RAM page that the snapshot keeps`, from the build | 68 | The same in 67, with a stack that had reached the ROM |
+| `page 3 is not a RAM page that the snapshot keeps`, from the build | 48 | A slot register write from code in page 3 that selects slot 0 or slot 3 there. The capture's log names the write, with `cuts off its code` |
+
+After the War's `slots` is a loader of the first kind. At 9024h and 905Eh it writes
+10h to the slot register, which selects slot 0 in page 3. At FFFFh it then writes
+F0h to F3h for page 0, and F3h, F7h, FBh and FFh for page 1. Altered Beast's loader
+does the same at B01Ah, with 14h and then FCh to FFh. Mot's loader is of the second
+kind. Its copy of `ENASLT` at D08Eh gets the main ROM's slot ID, 80h, and writes 15h
+to the slot register at D13Ch.
+
+These loaders fail in `openMSX` itself. A plain load on the same machine, which
+types the load command after BASIC's `Ok`, ends in these states 60 seconds after the
+tape's end:
+
+| Games | The plain load's end |
+|---|---|
+| After the War, Altered Beast, Lorna, Casanova | The program counter at 0038h, with FFh in slot 0's subslot register |
+| Kong's Revenge, Fernando Martin, Robot Wars | Slot 0 in page 3 |
+| Satan, Bestial Warrior | Slot 3 in page 3, where BASIC had slot 1, the RAM cartridge |
+| Mot, Mandragore | BASIC's screen with `Found:` and the file's name, and no game |
+| Uchusen Gamma | BASIC's banner alone, after a reboot |
+
+Bestial Warrior and Mandragore also find the HB-F700P's own RAM in slot 3-3 and
+select slot 3 in page 3, where the RAM cartridge in slot 1 holds their code. They
+load on `hbf700p-noexp0-msxdos2`, without that cartridge.
+
+With the variants, the games run wrote 235 `capture` lines, and 1,534 of the 1,545
+game files pass. Continental Circus and Il Giustiziere got their lines by hand,
+Thunder Blade got `service t0` beside the run's line, as on the other machines, and
+Operation Wolf, Rambo III and Puzzle pass with the check's limit for a large image.
+These 11 game files still fail:
+
+| Game files | What fails | In plain `openMSX` on the machine |
+|---|---|---|
+| Booga-Boo, Frog, A-TEAM | The game resets the machine at the end of its load. The HB-F700P then starts no game, and the check's disk boots DOS again. A-TEAM resets 3.7 seconds after the restore, with the tape service or without it | Booga-Boo shows BASIC's banner alone, so it fails there too. A-TEAM's plain load waits for a key |
+| La Aventura Espacial's two sides, Echec's side B | The load fails on every variant. Side A resets the machine at the end of its load with slot 0 not expanded | Echec's side B stops at `Disk offline in 40` |
+| Break Out!, Breakout | The loader selects slot 2 for RAM, where this machine has the MSX-DOS 2 cartridge | The program counter at 0038h with slot 2 in every page |
+| Master of the Lamps, The Queens Footsteps Part 2 | BASIC stops at `Out of memory in 2`, at `CLEAR0,&H82E6`, and at `Syntax error in 10` | The same errors |
+| Relics | The restorer needs 32 or 33 free mapper segments, and MSX-DOS 2 has 26 in the 512 KB cartridge | Not tried |
+
 ## Build
 
 Double Dragon selects one segment in two pages, so the build finds a page's RAM by

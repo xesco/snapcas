@@ -168,6 +168,18 @@ $(NMS8250_4M):
 	grep -q '<size>4096</size>' $@.tmp
 	mv $@.tmp $@
 
+# The capture variants hbf700p-noexp0-ram512k-msxdos2 and hbf700p-noexp0-msxdos2:
+# openMSX's HB-F700P with its slot 0 not expanded. The real slot 0 holds only
+# the main ROM, in subslot 0. So the two lines that start and end that subslot
+# go, in slot 0 alone, and the file keeps the 2 subslots of slot 3.
+HBF700P_NOEXP0 := $(EMU_HOME)/share/machines/Sony_HB-F700P_noexp0.xml
+$(HBF700P_NOEXP0):
+	mkdir -p $(dir $@)
+	sed -e '/<primary slot="0">/,/<\/primary>/{' -e '/<secondary slot="0">/d' -e '/<\/secondary>/d' -e '}' $(OPENMSX_SHARE)/machines/Sony_HB-F700P.xml > $@.tmp
+	test "$$(grep -c '<secondary slot' $@.tmp)" = 2
+	test "$$(grep -c '</secondary>' $@.tmp)" = 2
+	mv $@.tmp $@
+
 # vg8020-picoverse: a 192 KB memory mapper cartridge, the PicoVerse's mapper.
 RAM192K := $(EMU_HOME)/share/extensions/ram192k.xml
 $(RAM192K):
@@ -201,7 +213,7 @@ $(TEST_TAPES):
 unit: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS)
 	python3 -I tests/run.py --pure
 
-test: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS) $(TEST_GAMES) $(TEST_TAPES) $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(NMS8250_4M) $(RAM192K)
+test: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS) $(TEST_GAMES) $(TEST_TAPES) $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(NMS8250_4M) $(RAM192K) $(HBF700P_NOEXP0)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I tests/run.py
 
@@ -217,13 +229,13 @@ FIX ?= 1
 
 # The run over every shipped game file on a machine (docs/INTERNALS.md, The games
 # run), apart from make test because it takes hours.
-games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K)
+games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K) $(HBF700P_NOEXP0)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I tools/games.py $(MACHINE) $(if $(DOS),--dos $(DOS)) $(if $(FULL),--full) $(if $(filter 0,$(FIX)),--no-fix)
 
 # The openMSX home that snapcas.py uses, with the firmware of the machines that
 # need it.
-firmware: $(FIRMWARE) $(RAM192K)
+firmware: $(FIRMWARE) $(RAM192K) $(HBF700P_NOEXP0)
 
 # bin/ stays, because git holds its files.
 clean:

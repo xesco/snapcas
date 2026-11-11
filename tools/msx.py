@@ -266,8 +266,11 @@ def missing_firmware(machine):
 
 def check_firmware(name):
     """Stops when the openMSX home lacks a file that the machine named name
-    needs."""
-    missing = missing_firmware(read_machine(machine_path(name)))
+    needs, or that one of its capture variants needs."""
+    machine = read_machine(machine_path(name))
+    missing = missing_firmware(machine)
+    for variant in machine.variants:
+        missing += missing_firmware(read_machine(variant_path(variant)))
     if missing:
         raise MachineError(f"{name} needs {missing[0]} in openMSX's share folder: make firmware makes it")
 

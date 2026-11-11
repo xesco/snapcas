@@ -209,6 +209,15 @@ press down 9.5
 press return 10
 ```
 
+A machine whose slot 0 is expanded can need one more variant. Many loaders fail
+because slot 0 is expanded, with or without cartridges
+([docs/INTERNALS.md, The capture with slot 0 not expanded](docs/INTERNALS.md#the-capture-with-slot-0-not-expanded)).
+When slot 0 holds only the main ROM, in subslot 0, add a variant that runs the model
+with its slot 0 not expanded, as `hbf700p-noexp0-ram512k-msxdos2` does. The
+Makefile's rule for `Sony_HB-F700P_noexp0.xml` makes that model from `openMSX`'s
+file, and the variant's `firmware` line names the model. Such a variant has `noexp0`
+after the model in its name.
+
 When a variant with the same cartridges exists, such as `vg8020`, the machine lists
 that variant in place of a new one. A model without a disk system can start a
 program of its own in place of BASIC, as the HB-75P starts its Personal Data Bank
@@ -241,7 +250,7 @@ with a message instead, the message names the cause:
 | `needs ... make firmware makes it` | Run `make firmware` |
 | `boots msxdos1: put its files in dos/msxdos1/` | Ask the user for MSX-DOS's files ([dos/README.md](dos/README.md)) |
 | `capture: BASIC's Ok did not appear within 120 seconds` | The `boot` lines do not pass the boot. Compare the machine file with the machine file of a working machine that has the same disk cartridge. When only the third game stops, the variant boots into a program of the model's own, so add `hold` or `press` lines to the variant ([Add a capture variant](#4-add-a-capture-variant)) |
-| `the tail's jump did not run within 120 seconds`, with BASIC on the screen | DOS did not start the check's `AUTOEXEC.BAT`, because a `disk`, `dos`, or `dosfiles` line is wrong |
+| `the tail's jump did not run within 120 seconds`, or more for a large image, with BASIC on the screen | DOS did not start the check's `AUTOEXEC.BAT`, because a `disk`, `dos`, or `dosfiles` line is wrong |
 | `check: the boot text '...' did not appear within 120 seconds` | The check's boot never shows the text of a `boot` line. Compare the machine file with the machine file of a working machine that has the same disk cartridge |
 
 ### 6. List the machine in the docs
@@ -374,7 +383,7 @@ snapcas.py: it passes, so the machine's game file needs: capture hb75p
 Then write that line in the machine's game file ([Write the fix](#4-write-the-fix)),
 and the fix is done. `make games MACHINE=<machine>` does both for every game that
 fails on a machine ([Run the collection](#7-run-the-collection)). A `capture` line
-is the most common fix. Of the shipped machine's game files, 403 hold a `capture`
+is the most common fix. Of the shipped machine's game files, 640 hold a `capture`
 line. When no variant passes, continue with the next step.
 
 ### 2. Read the failure
@@ -391,11 +400,12 @@ step's message names the failure:
 | `the first block is a non-standard block` or `is not a binary file, a BASIC` | The tape does not start with a block that the BIOS loads | `load 'RUN"CAS:"'`, or the command that the tape's label gives |
 | `the tape needs N segments, more than M` | The tape is longer than the tape service holds. The tape service holds 64 segments, 1 MB, with the code segment, or 16 segments, 256 KB, in the mode without a part in page 3 | With a limit of 16 segments, `service at <address>` with an address xxE1h in page 3 that the game leaves alone. That line gives the tape service its part of page 3. With a limit of 64 segments, add a line to `tests/snapcas-failures.txt` |
 | `the 26 bytes below SP XXXXh are not in a RAM page that the snapshot keeps`, or `cross a page boundary or include FFFFh` | Mostly, the load failed on this machine, so the snapshot shows BASIC or a crash, with the stack in the ROM. `snap/log.txt` shows where the load stopped and the screen at that moment. Otherwise the stack is too low for the restorer's tail at the snapshot | For a failed load, a capture variant or a slot patch. Otherwise `snapshot at <seconds>` with a later moment, when the stack has moved |
+| `page 3 is not a RAM page that the snapshot keeps` | The load failed on this machine. The loader selected a slot without RAM in page 3, where its own code runs. `snap/log.txt` names the write, with `cuts off its code` | A capture variant, or a slot patch |
 | `page 3 has no room for the tape service's part, and rom keep needs it` | The game fills page 3, and the game file's `rom keep` does not allow the mode without a part in page 3 | `service at <address>` with an address xxE1h in page 3 that the game leaves alone, or the game file without `rom keep` |
 | `the tape service without a part in page 3 keeps T0 in page 0 of DOS's mapper` | Either the game fills page 3 or its game file has `service t0`. The game also keeps RAM of DOS's mapper in page 0, where that mode puts T0 | A capture variant, whose RAM is outside DOS's mapper, or `service at <address>` |
 | `the bytes at ... are not the patch's old bytes` | The patch was made for another dump | Make the patch again for this dump, with the `sha1` of its tape |
 | `point 1: fail`, `the restorer stopped: ...` | The restorer refused the image and returned to DOS. The line holds the restorer's message | The message says what to fix. Often the problem is too few free segments |
-| `point 1: fail`, `the tail's jump did not run within 120 seconds` | The restore never reached the game, and the restorer printed no message. The report's screen shows where the restore stopped | DOS's message says what to fix. A restorer that hangs is a failure of `snapcas`, so add a line to `tests/snapcas-failures.txt` |
+| `point 1: fail`, `the tail's jump did not run within 120 seconds`, or more for a large image | The restore never reached the game, and the restorer printed no message. The report's screen shows where the restore stopped | DOS's message says what to fix. A restorer that hangs is a failure of `snapcas`, so add a line to `tests/snapcas-failures.txt` |
 | A failed point with another line that starts with `check:` | A callback of `tools/tcl/check.tcl` failed, and the line holds the callback's error | A failure of `snapcas`, so add a line to `tests/snapcas-failures.txt` |
 | `point 1: fail` with differences | The restored machine differs from the snapshot | A failure of `snapcas`, so add a line to `tests/snapcas-failures.txt` |
 | `point 2: fail`, `the game writes XXXXh, in the tape service's part of page 3` | The game keeps data where the tape service's part goes | `service at <address>` with an address xxE1h in page 3 that the game leaves alone, or `service t0` |
@@ -507,14 +517,16 @@ python3 -I tools/plain.py <GAME> <machine>
 
 The command prints the screen 60 seconds after the tape's end, or
 `a graphics screen`, an output that usually means that the game runs. The command
-plays the tape as it is, without the game file's patches, keys, or side 2. When the
-plain load fails as the capture does, the game fails in `openMSX` itself, so add a
-line to `tests/openmsx-failures.txt`. The line holds the machine, the folder, and
-what fails. Otherwise the failure is one of `snapcas`, so add the same kind of line
-to `tests/snapcas-failures.txt`, with the cause when you know it. `make games` reads
-both lists before it starts, and stops at a line that it cannot read. It prints the
-failures of each list as a group of their own, and fails only for a game that fails
-and is in neither list.
+plays the tape as it is, without the game file's patches, keys, or side 2. A loader
+that crashed in a graphics mode prints `a graphics screen` too. So for such an
+output, also compare `snap/log.txt` with the log of a machine where the game passes.
+When the plain load fails as the capture does, the game fails in `openMSX` itself,
+so add a line to `tests/openmsx-failures.txt`. The line holds the machine, the
+folder, and what fails. Otherwise the failure is one of `snapcas`, so add the same
+kind of line to `tests/snapcas-failures.txt`, with the cause when you know it.
+`make games` reads both lists before it starts, and stops at a line that it cannot
+read. It prints the failures of each list as a group of their own, and fails only
+for a game that fails and is in neither list.
 
 ### 6. Check the fix
 
