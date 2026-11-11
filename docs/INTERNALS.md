@@ -152,6 +152,8 @@ game file. Each kind of automatic patch is one file in `tools/patches/`:
 | `ramsearch.tcl` | The capture's watch for a slot register write that cuts off the code that made it, and its patch that keeps page 3's slot ([The RAM search patch](#the-ram-search-patch)) |
 | `pagecopy.py` | The forms of the loaders' code that copies page 3's slot to the other pages, and their places in the tape files ([The page copy patch](#the-page-copy-patch)) |
 | `pagecopy.tcl` | The capture's decision, by the slot map, of which forms to patch ([The page copy patch](#the-page-copy-patch)) |
+| `irqslot.py` | The interrupt handler that writes the slot register from the game's copy of it, and its places in the tape files ([The interrupt slot patch](#the-interrupt-slot-patch)) |
+| `irqslot.tcl` | The capture's decision, by the machine's generation, to patch the handler ([The interrupt slot patch](#the-interrupt-slot-patch)) |
 
 The Python file of each kind has the same two functions. `find(data, context)`
 returns the kind's findings in data, for the scan. `tcl(side1, side2)` returns the
@@ -340,11 +342,12 @@ stopped. The script takes the following steps, which are the procedures `step1` 
    timers. So each time, the capture also restores its logged state from the saved
    moment, and schedules again its polling and the `keys` that come after that
    moment. `loadstate` also removes the watchpoints, though it keeps the
-   breakpoints. The capture sets the watchpoints of step 1 on ports A0h and A1h
-   again each time, so that the snapshot holds the PSG register selected last. It
-   does not set the watchpoints on port A8h and on FFFFh again, so after the first
-   `loadstate` it no longer logs those writes. Every game file passes without them,
-   and setting them again made two game files fail.
+   breakpoints. So the capture sets its watchpoints again each time. Those of step
+   1, on ports A0h and A1h, keep the PSG register selected last for the snapshot.
+   Those of step 4, on port A8h and on FFFFh, note each page that the game selects.
+   Without them, the snapshot lacked a RAM page that a game first selects after a
+   rewind. A-TEAM's loader fills pages 0 and 1 after the rewind of its key try
+   ([NOTES.md, Capture](NOTES.md#capture)).
 
    The capture goes on for 29 seconds after the saved moment before it goes back to
    that moment. So its log holds each reset of those seconds. The check's point 3
@@ -373,9 +376,8 @@ stopped. The script takes the following steps, which are the procedures `step1` 
    code calls, is an example of the second case. So that the snapshot can go back,
    the capture saves the machine at each `TAPION` call's entry, and a rewind of step
    5 puts back the entry saved with its moment. While it reads the machine, the
-   capture selects slots itself, with `debug write`. A capture without a rewind, as
-   with `snapshot at`, still has its watchpoints on port A8h and on FFFFh then, and
-   the watchpoints leave out these writes, which are not the game's.
+   capture selects slots itself, with `debug write`. Its watchpoints on port A8h and
+   on FFFFh leave out these writes, which are not the game's.
 
 The game gets the tape service when the `TAPION` and `TAPIN` breakpoints fired and
 either side 1 is not read or the game file has `side2`, unless the game file has
@@ -567,6 +569,32 @@ In `OR n`, n holds the slot map's replacement for page 1. On the PHC-28S without
 Carnivore2, n is 15h for the first three forms, and 04h, the RAM cartridge in page
 1, for the last two. A machine whose RAM for page 3 holds RAM in pages 0 and 1, as
 the VG-8020's slot 3 does, never gets the patch.
+
+### The interrupt slot patch
+
+The interpreter of Aventuras AD's adventures keeps a copy of the slot register's
+value, and its interrupt handler works by that copy. The handler takes the copy's
+value, selects the game's RAM in page 0, calls the game's routine, selects the ROM
+for the BIOS's own handler, and then writes the value that it took to the slot
+register. On an MSX1 the copy always equals the slot register. An MSX2's BIOS
+selects the sub-ROM in page 0 during some calls, with a value that the copy does not
+hold. An interrupt during such a call then puts the main ROM under the sub-ROM's
+code, and the machine resets. The capture patches the handler itself, in two parts:
+
+1. Before each capture, `capture.py` looks for the handler in the tape files. The
+   handler's start is
+   `DI / PUSH AF / PUSH HL / PUSH IX / LD A,(copy) / PUSH AF / LD A,(nn) / OUT (0A8h),A / LD (copy),A`.
+   Its end, `POP AF / OUT (0A8h),A / LD (copy),A`, must follow within 64 bytes, so
+   that the value taken first is the value written back.
+2. At step 3, before the load command, the capture patches each handler when the
+   machine is an MSX2. The patch makes the first `LD A,(copy)` an `IN A,(0A8h)` and
+   a `NOP`, `DB A8 00`, so that the handler writes back the slot register's own
+   value. The capture writes the patches to `snap/patches.txt` and runs again, as
+   for a slot patch. An MSX1 keeps the handler's bytes.
+
+The handler stays in memory while the game is played, so the patch is on the tape,
+where it also reaches a copy that a later load reads. The 14 tapes that hold the
+handler are in [NOTES.md](NOTES.md#the-interrupt-slot-patch).
 
 ### The capture with slot 0 not expanded
 

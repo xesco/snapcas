@@ -202,6 +202,19 @@ result snap_phase "$::st(a8) $::st(sub0) [dict size $::st(sel)]"
 set ::run(phase) load; on_a8 255
 result load_phase $::st(a8)
 
+# loadstate removes the watchpoints, and a rewind sets those of the slot
+# register again: a write after it still reaches on_a8 and on_ffff.
+set ::st(a8) 0
+watch_slots
+moment_save rewind
+moment_load rewind
+set before [debug read ioports 0xA8]
+debug write ioports 0xA8 [expr {$before ^ 0x04}]
+result rewind_a8 [expr {$::st(a8) == ($before ^ 0x04)}]
+debug write ioports 0xA8 $before
+result rewind_watchpoints [llength $::run(slotwp)]
+catch { file delete [moment_file rewind] }
+
 # A reset during a key try follows the machine, and another is kept.
 set ::run(phase) try; on_reset
 result try_reset "[llength $::st(log)] [llength $::run(decisions)]"
@@ -229,6 +242,12 @@ reg pc 0xC100
 set decisions [llength $::run(decisions)]
 ramsearch_watch [expr {$a8 ^ 0x03}] $a8
 result ramsearch_same_page_3 "[expr {[llength $::run(decisions)] - $decisions}] [file exists [file join $::S(snap) newpatch.txt]]"
+# An MSX1 has no sub-ROM, so a tape's interrupt handler keeps its bytes there.
+set ::irqslot {{1 21 3a53d0}}
+set ::run(msx2) 0
+irqslot_start
+result irqslot_msx1 [file exists [file join $::S(snap) newpatch.txt]]
+set ::irqslot {}
 reg pc $pc
 close $f
 
@@ -266,6 +285,20 @@ later 1 {
 """ % patches.ramsearch.SEARCH.hex()
 
 
+# Tcl for the interrupt slot patch (INTERNALS.md, The interrupt slot patch), on
+# an MSX2: a handler on each side of the tape.
+IRQSLOT = r"""
+set ::irqslot {{1 21 3a53d0} {2 5 3abecf}}
+set ::run(msx2) 1
+later 1 {
+    irqslot_start
+    # stop_with_patch has stopped the capture, and nothing runs after it.
+    write_lines went_on.txt 1
+    stop
+}
+"""
+
+
 class Procedures(unittest.TestCase):
     """The capture's Tcl procedures, run in openMSX's C-BIOS machine, which
     needs no system ROMs."""
@@ -273,7 +306,8 @@ class Procedures(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.snaps = {}
-        for name, start in (("procedures", PROCEDURES), ("boot", "safe step1\n"), ("ramsearch", RAMSEARCH)):
+        for name, start in (("procedures", PROCEDURES), ("boot", "safe step1\n"), ("ramsearch", RAMSEARCH),
+                            ("irqslot", IRQSLOT)):
             snap = cls.snaps[name] = os.path.join(WORK, name)
             shutil.rmtree(snap, ignore_errors=True)
             os.makedirs(snap)
@@ -351,6 +385,21 @@ class Procedures(unittest.TestCase):
                          r"the slot register write of [0-9A-F]{2} at PC C100 cuts off its code: the RAM search patched")
         for file in ("went_on.txt", "error.txt", "state.txt"):
             self.assertFalse(os.path.exists(os.path.join(self.snaps["ramsearch"], file)), file)
+
+    def test_an_msx2_gets_the_interrupt_slot_patch_at_each_handler(self):
+        self.assertEqual(self.read("irqslot", "newpatch.txt").splitlines(),
+                         ["patch side1:15 3A 53 D0 > DB A8 00", "patch side2:5 3A BE CF > DB A8 00"])
+        self.assertIn("the tape's interrupt handler writes the slot register from the game's copy of it",
+                      self.read("irqslot", "log.txt"))
+        self.assertFalse(os.path.exists(os.path.join(self.snaps["irqslot"], "went_on.txt")))
+
+    def test_a_rewind_sets_the_slot_registers_watchpoints_again(self):
+        # Before, a RAM page that a game first selected after a rewind was not
+        # kept: A-TEAM's pages 0 and 1, after the rewind of its key try.
+        self.assertEqual((self.results["rewind_a8"], self.results["rewind_watchpoints"]), ("1", "2"))
+
+    def test_an_msx1_keeps_the_handlers_bytes(self):
+        self.assertEqual(self.results["irqslot_msx1"], "0")
 
     def test_a_write_that_keeps_page_3s_slot_is_left_alone(self):
         self.assertEqual(self.results["ramsearch_same_page_3"], "0 0")

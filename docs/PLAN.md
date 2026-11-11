@@ -772,8 +772,42 @@ The results of the step, from the collection on `hbf700p-ram512k-msxdos2`
 | Result | Game files |
 |---|---|
 | Passed before the step | 1,294 of 1,545 |
-| Pass after the step | 1,534 |
+| Pass after the variants | 1,534 |
 | `capture` lines that the games run wrote | 235: 210 for `hbf700p-noexp0-ram512k-msxdos2`, 24 for `hbf700p-noexp0-msxdos2` and 1 for `hbf700p-msxdos2` |
 | Machine's game files written by hand | 2: Continental Circus and Il Giustiziere, with `capture hbf700p-noexp0-msxdos2` and `service t0` |
 | Pass with the check's limit for a large image alone | 3: Operation Wolf, Rambo III and Puzzle |
-| Still fail | 11 |
+| Still failed after the variants | 11 |
+| Fixed by lines in their game files, each for a cause of its own ([NOTES.md, The capture with slot 0 not expanded](NOTES.md#the-capture-with-slot-0-not-expanded)) | 10 |
+| Pass now | 1,544. Relics needs more free mapper segments than MSX-DOS 2 has |
+
+## Step 28: the watchpoints after a rewind, and the interrupt slot patch
+
+This step makes the capture set its watchpoints on the slot register and on FFFFh
+again after each `loadstate` ([INTERNALS.md, Capture](INTERNALS.md#capture), step
+5). Before, the snapshot lacked a RAM page that a game first selects after a rewind,
+and the check could pass without the page. A-TEAM was such a game on every machine.
+
+The step also adds the interrupt slot patch, for the interrupt handler of Aventuras
+AD's interpreter on an MSX2
+([INTERNALS.md, The interrupt slot patch](INTERNALS.md#the-interrupt-slot-patch)).
+And it moves to `game.txt` the fixes of step 27's last games that hold on every
+machine
+([NOTES.md, The capture with slot 0 not expanded](NOTES.md#the-capture-with-slot-0-not-expanded)).
+
+| Test | What it proves |
+|---|---|
+| `Procedures` in `tests/test_capture.py`: a write to the slot register after `moment_save` and `moment_load`, in the C-BIOS machine | A rewind sets both watchpoints again, and the write reaches the capture |
+| `Procedures` in `tests/test_capture.py`: a handler on each side of a tape, on an MSX2 and on an MSX1 | The MSX2's capture stops with a patch of each handler, and the MSX1's leaves the tape alone |
+| `IrqSlot` in `tests/test_patches.py`: the handler with its copy at D053h and at CFBEh, without its end, and with another address in its start or its end | The patch's place is the handler's first read of the copy, and code that does not write that value back is left alone |
+| A-TEAM without lines in its game file, on five machines, by hand | The snapshot keeps the RAM of pages 0 to 3, and the image passes the check |
+| R.U.R. 1, Los Templos Sagrados, Chichen Itza, Los Elfos and Torreoscura on `hbf700p-noexp0-ram512k-msxdos2`, by hand | With the patch they load there, where they reset the machine before |
+
+The results of the step, from the collections after it:
+
+| Machine | Game files that pass | What differs from before the step |
+|---|---|---|
+| `hbf700p-ram512k-msxdos2` | 1,544 of 1,545 | 13 game files have the interrupt slot patch. 9 that reset the machine on purpose keep one more page, the empty RAM that the BIOS's start selects after the rewind |
+| `vg8020-carnivore2` | 1,545 | Nothing |
+| `phc28s-ram64k-carnivore2`, `hb75p-carnivore2` | 1,545 each | Time Out has a patch of one more copy of its routine, which runs after the rewind |
+| `nms8250-carnivore2`, with `FIX=0` | 1,455 | A first run of this machine here, with no earlier result to compare |
+
