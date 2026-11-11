@@ -224,7 +224,7 @@ The files go to these places, so that no folder of the card holds every image:
 | `SNAPCAS.COM` | `BIN/SNAPCAS.COM` |
 | A game's image | `SNAPCAS/<letter>/<GAME>.SNP`, with `0-9` as the letter of a name that starts with a digit |
 | A compilation's program | `SNAPCAS/<letter>/<COLLECTION>/<GAME>.SNP`, with the letter of the collection's name |
-| A custom game's image | `SNAPCAS/C/CUSTOM/<GAME>.SNP`, as a program of a collection named `CUSTOM` |
+| A custom game's image | `SNAPCAS/CUSTOM/<GAME>.SNP`, apart from the letters' folders |
 
 `sync` copies only the files that the card lacks or holds with other bytes. It
 writes each copy under a temporary name in the same folder. The temporary name is
