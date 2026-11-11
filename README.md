@@ -1,12 +1,18 @@
 # snapcas
 
-`snapcas` lets you play MSX tape games on your real MSX, without a tape player.
+`snapcas` lets you play MSX tape games on your real MSX, without a tape player. It
+works from CAS files, which are MSX tapes saved as files on a computer.
+
+The goal of the project is that any CAS file plays on any MSX as the original tape
+did, whatever cartridges the MSX has and in whatever slot order. That includes games
+whose original tape fails on some machines, because its loader expects one machine's
+memory layout or no disk interface.
 
 ## What it is
 
-`snapcas` is a program for your computer. It turns a tape game into a single `.SNP`
-file. You copy that file to your MSX's disk or SD card and type one command. The
-game then starts right away, already loaded.
+`snapcas` is a program for your computer. It turns a game's CAS file into a single
+`.SNP` file. You copy that file to your MSX's disk or SD card and type one command.
+The game then starts right away, already loaded.
 
 It works in three steps:
 
@@ -20,19 +26,23 @@ It works in three steps:
 Some games read the tape again while you play, for example to load the next level.
 The `.SNP` file also holds the rest of the tape, so those games work too. Other
 games do not work on every MSX, and `snapcas` changes them so that they work on
-yours. `snapcas` knows 1,545 games and 13 MSX machines.
+yours.
+
+`snapcas` knows 1,545 games and 13 MSX machines, and you can add more games and
+more machines.
 
 ## Play a game
 
 You need three things:
 
-- An MSX that `snapcas` knows, with a disk or an SD card
+- An MSX with a memory mapper and a disk
   ([what the MSX needs](docs/PLAYING.md#what-you-need)).
 - A computer with Python 3 and `openMSX`.
 - The system ROMs of your MSX, installed in `openMSX`. `openMSX` needs them to
   emulate your MSX.
 
-This example makes Gauntlet for a Sanyo PHC-28S.
+This example makes the `.SNP` file of Gauntlet for a Sanyo PHC-28S and starts the
+game on that MSX.
 
 1. Get `snapcas`:
 
@@ -49,6 +59,10 @@ This example makes Gauntlet for a Sanyo PHC-28S.
 
    The command shows the game's name, `GAUNTLET`.
 
+   If the command does not find the game and you have its CAS file, add the game
+   first ([Add a game](#add-a-game)). Then make its `.SNP` file in step 4 with the
+   game's folder, such as `custom/MYGAME`, in place of the name.
+
 3. Find your MSX:
 
    ```
@@ -57,18 +71,31 @@ This example makes Gauntlet for a Sanyo PHC-28S.
 
    A machine's name is the MSX's model, followed by its cartridges in slot order. A
    Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2 is
-   `phc28s-ram64k-carnivore2`. Give the whole name, because each cartridge changes
-   the `.SNP` file. If your MSX is not in the list, add it first
-   ([Add a machine](#add-a-machine)).
+   `phc28s-ram64k-carnivore2`. Choose the name that matches your MSX and all its
+   cartridges. A `.SNP` file works only on the MSX and the cartridges that it was
+   made for.
 
-4. Make the game's `.SNP` file:
+   If your MSX is not in the list, add it first. An AI coding agent, such as Claude
+   Code, can add it for you. Open the `snapcas` folder in the agent, and tell it
+   your MSX's model and what is in each cartridge slot:
+
+   > Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
+   > AGENTS.md, Add a machine.
+
+   To add it by hand, follow [Add a machine](#add-a-machine).
+
+4. Make the game's `.SNP` file for your machine:
 
    ```
    ./snapcas.py snap gauntlet phc28s-ram64k-carnivore2
    ```
 
-   The command downloads the game's tape from File-Hunter and makes
+   The command downloads the game's tape from
+   [File-Hunter](https://download.file-hunter.com) and makes
    `images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`.
+
+   File-Hunter is one person's site. Download only the games that you play, one at
+   a time.
 
 5. Put the MSX's card in your computer and copy your games to it. In this example,
    `/Volumes/MSX` is the card's folder on your computer:
@@ -76,6 +103,11 @@ This example makes Gauntlet for a Sanyo PHC-28S.
    ```
    ./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
    ```
+
+   The command puts `SNAPCAS.COM` in the card's `BIN` folder. It puts each game in
+   the `SNAPCAS` folder, in a folder for the first letter of the game's name: `A` to
+   `Z`, or `0-9` for a name that starts with a digit. Your own games go in the folder
+   `SNAPCAS\CUSTOM`.
 
 6. Put the card back in the MSX. On the MSX, go to the folder of the game's first
    letter and start the game:
@@ -111,6 +143,12 @@ with a Carnivore2 in slot 1.
      of its file in `openMSX`'s `share/machines/` folder, without `.xml`.
    - Change the `variant` line to `variant hx10`. The next step makes that variant.
 
+   An MSX with another disk cartridge, or one that starts in a menu, needs more
+   changes. An AI coding agent can write the file for it:
+
+   > Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
+   > AGENTS.md, Add a machine.
+
 4. Make the capture variant. Some games load only without the disk cartridge, so
    `snapcas` loads them on a second machine file: your MSX without that cartridge.
    Copy the variant of the machine that you copied, and change its `openmsx` line to
@@ -120,18 +158,23 @@ with a Carnivore2 in slot 1.
    cp machines/capture/vg8020.txt machines/capture/hx10.txt
    ```
 
-5. Make a game with the `--check` option, which also tests the game's `.SNP` file
+5. Make a game's `.SNP` file with the `--check` option, which also tests the file
    in `openMSX`:
 
    ```
-   ./snapcas.py snap caldero hx10-carnivore2 --check
+   ./snapcas.py snap gauntlet hx10-carnivore2 --check
    ```
 
    The command prints four lines that start with `check`. If all four say `pass`,
    the machine works.
 
-6. If a line says `fail`, or the command stops with a message, follow the full
-   steps ([AGENTS.md, Add a machine](AGENTS.md#add-a-machine)). Those steps list
+6. If a line says `fail`, or the command stops with a message, ask the AI:
+
+   > Gauntlet fails on hx10-carnivore2. Follow AGENTS.md, Add a machine.
+
+   The AI can test a game only in the emulator. It cannot see your real MSX, so play
+   the game there and tell the AI what happens. To fix the machine by hand, follow
+   the full steps ([AGENTS.md, Add a machine](AGENTS.md#add-a-machine)), which list
    each message and its fix.
 
 Many games need a small fix for each machine. The most common fix is to load the
@@ -147,18 +190,17 @@ make games MACHINE=hx10-carnivore2
 
 ## Add a game
 
-If `./snapcas.py list` does not find a game and you have its tape file, you can add
-the game yourself. A tape file is a tape saved as a file on your computer, either a
-CAS file or a TSX file.
+If `./snapcas.py list` does not find a game and you have its CAS file, you can add
+the game yourself.
 
-1. Make a folder for the game in `custom/` and put the tape file in it:
+1. Make a folder for the game in `custom/` and put the CAS file in it:
 
    ```
    custom/MYGAME/MYGAME.CAS
    ```
 
 2. In the same folder, create a text file named `game.txt` with one line that names
-   the tape file:
+   the CAS file:
 
    ```
    cas MYGAME.CAS
@@ -167,36 +209,38 @@ CAS file or a TSX file.
    A game on two tapes needs a second line for the other tape:
    `side2 MYGAMEB.CAS`.
 
-3. Make the game with the `--check` option:
+3. Make the game's `.SNP` file with the `--check` option:
 
    ```
    ./snapcas.py snap custom/MYGAME phc28s-ram64k-carnivore2 --check
    ```
 
    The command prints four lines that start with `check`. If all four say `pass`,
-   the game works. Copy it to the card and play it, as in
-   [Play a game](#play-a-game).
+   the game works.
 
-4. If a line says `fail`, the game needs more lines in its `game.txt`. The full
-   steps show how to find those lines
+4. Copy your games to the MSX's card:
+
+   ```
+   ./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
+   ```
+
+   On the MSX, your own games are in the folder `\SNAPCAS\CUSTOM`. Go to that
+   folder and start the game:
+
+   ```
+   CD \SNAPCAS\CUSTOM
+   \BIN\SNAPCAS MYGAME
+   ```
+
+5. If a line of step 3 says `fail`, the game needs more lines in its `game.txt`.
+   Each line tells `snapcas` how to load the game or what to change in it. An AI
+   coding agent can find those lines:
+
+   > MYGAME in custom/ fails on phc28s-ram64k-carnivore2. Follow AGENTS.md, Fix a
+   > game that fails.
+
+   To find the lines by hand, follow the full steps
    ([AGENTS.md, Fix a game that fails](AGENTS.md#fix-a-game-that-fails)).
-
-## Let an AI do it
-
-An AI coding agent, such as Claude Code, can do each of these tasks for you. The
-file [AGENTS.md](AGENTS.md) describes every task to the agent, step by step. Open
-the `snapcas` folder in your agent and ask in your own words, for example:
-
-| You want to | Ask the AI |
-|---|---|
-| Play a game | "Make Gauntlet for my Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2. Check it, and copy my games to the card at /Volumes/MSX." |
-| Add a machine | "Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow AGENTS.md, Add a machine." |
-| Add a game | "Add the tape ~/Downloads/MYGAME.CAS to snapcas as a custom game, and make it for hx10-carnivore2. Follow AGENTS.md, Add a game." |
-| Fix a game | "Gauntlet fails on hx10-carnivore2. Follow AGENTS.md, Fix a game that fails." |
-
-Always tell the AI your MSX's model and what is in each cartridge slot. The AI can
-test a game only in the emulator. It cannot see your real MSX, so play the game
-there and tell the AI what happens.
 
 ## Learn more
 
@@ -207,8 +251,3 @@ there and tell the AI what happens.
 | [docs/FILES.md](docs/FILES.md) | Every line of a machine file and of a game file |
 | [AGENTS.md](AGENTS.md) | Every task in full, step by step, for an AI agent or for you |
 | [custom/README.md](custom/README.md) | Your own games |
-| [docs/DESIGN.md](docs/DESIGN.md) | How `snapcas` works, and what it cannot do yet |
-| [docs/INTERNALS.md](docs/INTERNALS.md) | The capture, the build, the restorer and the check in detail |
-| [docs/FORMATS.md](docs/FORMATS.md) | The `.SNP` file and the other files, byte by byte |
-| [docs/NOTES.md](docs/NOTES.md) | The games that taught each rule |
-| [docs/BUILD.md](docs/BUILD.md) | The folders, and the `make` commands that build and test `snapcas` |

@@ -2,9 +2,10 @@
 
 The card holds SNAPCAS.COM in BIN/, and the images in SNAPCAS/, in a folder per
 first letter, so that a folder never holds too many files for DOS: a game's
-image in SNAPCAS/<letter>/<GAME>.SNP, and a compilation's program, or a custom
-game, in SNAPCAS/<letter>/<COLLECTION>/<GAME>.SNP, with the letter of the
-collection's name. A name that starts with a digit has the letter 0-9.
+image in SNAPCAS/<letter>/<GAME>.SNP, and a compilation's program in
+SNAPCAS/<letter>/<COLLECTION>/<GAME>.SNP, with the letter of the collection's
+name. A name that starts with a digit has the letter 0-9. A custom game's image
+is in SNAPCAS/CUSTOM/<GAME>.SNP, apart from the letters' folders.
 """
 import os
 
@@ -35,6 +36,8 @@ def card_path(key, name):
     images/<machine>/, such as GAUNTLET, SUPERMSX/GOLF or custom/MYGAME, and the
     file's name."""
     parts = key.split("/")
+    if parts[0] == "custom":
+        return os.path.join("SNAPCAS", "CUSTOM", name)
     if len(parts) > 1:
         return os.path.join("SNAPCAS", letter(parts[0]), parts[0].upper(), name)
     return os.path.join("SNAPCAS", letter(name), name)

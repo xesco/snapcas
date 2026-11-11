@@ -32,7 +32,7 @@ class Sync(unittest.TestCase):
             os.path.join("BIN", "SNAPCAS.COM"),
             os.path.join("SNAPCAS", "G", "GAUNTLET.SNP"),
             os.path.join("SNAPCAS", "S", "SUPERMSX", "GOLF.SNP"),
-            os.path.join("SNAPCAS", "C", "CUSTOM", "MYGAME.SNP"),
+            os.path.join("SNAPCAS", "CUSTOM", "MYGAME.SNP"),
             os.path.join("SNAPCAS", "0-9", "1942.SNP")]))
 
     def test_a_second_sync_copies_only_what_changed_and_deletes_nothing(self):
