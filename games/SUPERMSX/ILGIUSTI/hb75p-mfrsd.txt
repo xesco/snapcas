@@ -1,0 +1,8 @@
+# Lines for hb75p-mfrsd, the Sony HB-75P (MSX1, 64 KB) with a MegaFlashROM SCC+ SD.
+
+# The magazine's menu loads each program from the tape, and the game keeps
+# its variables from FCE1h on, where the tape service's entries are, so the
+# whole service goes into T0. T0 needs the game's page 0 RAM outside DOS's
+# mapper, so the capture runs without the MegaFlashROM SCC+ SD.
+capture hb75p
+service t0

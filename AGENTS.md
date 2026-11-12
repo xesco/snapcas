@@ -215,7 +215,7 @@ holds the disk:
 | MegaFlashROM SCC+ SD in `openMSX`'s stock setup | `disk hda` and `dos "A:\>" B`, because the cartridge boots MSX-DOS from its ROM disk | `hb75p-mfrsd` |
 | SD Mapper v1 | `disk hda` and `firmware systemroms/snapcas/SDMAPPER.ROM` | `vg8020-sdmapper` |
 | Sunrise IDE interface | `disk hda` | `nms8245-ram512k-sunriseide` |
-| The machine's own floppy drive | `disk diska`, or `disk diska 360` for a single-sided drive | `vg8235` |
+| The machine's own floppy drive | `disk diska`, or `disk diska 360` for a single-sided drive | `hbf700p-ram512k-msxdos2` |
 
 The DOS is Nextor unless a `dosfiles` line names `msxdos1` or `msxdos2`. A machine
 whose firmware starts a menu in a graphics mode needs either a `hold` line, or

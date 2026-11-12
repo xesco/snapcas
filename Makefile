@@ -124,8 +124,8 @@ SDMAPPER_ROM := $(EMU_HOME)/share/systemroms/snapcas/SDMAPPER.ROM
 $(SDMAPPER_ROM): | $(SYSTEMROMS_LINK)
 	python3 -I tools/fetch.py https://github.com/fbelavenuto/msxsdmapper/releases/download/v1.0.7/SDMAPPER.ROM 4371c4094756672f78b295dbfb753cb6a3011e7fdb11348249be1bc36fbd061b $@
 
-# The MegaFlashROM SCC+ SD with only Nextor in its flash, for fsa1-mfrsd and
-# hbf1xd-mfrsd: openMSX's stock flash also holds a ROM disk, whose AUTOEXEC.BAT
+# The MegaFlashROM SCC+ SD with only Nextor in its flash, for fsa1-mfrsd:
+# openMSX's stock flash also holds a ROM disk, whose AUTOEXEC.BAT
 # starts a file manager on an MSX2. The flash is 8 MB of FFh with Nextor's ROM
 # at 700000h, where the cartridge's subslot 3, its SD interface, reads it.
 MFR_NEXTOR := $(DL)/Nextor-2.1.4.MegaFlashSDSCC.1-slot.ROM

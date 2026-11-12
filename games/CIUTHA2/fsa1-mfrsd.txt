@@ -1,0 +1,6 @@
+# Lines for fsa1-mfrsd, the Panasonic FS-A1 (MSX2, 64 KB) with a MegaFlashROM SCC+ SD.
+
+# The FS-A1's BASIC has its RAM in an expanded slot, and the capture's selection of
+# the RAM's subslot in every page leaves the loader running into memory that the
+# game did not fill. The line keeps the subslots as BASIC has them.
+subslots keep

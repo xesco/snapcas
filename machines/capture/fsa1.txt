@@ -1,0 +1,7 @@
+# Panasonic FS-A1 without cartridges, so without Nextor: the capture variant of
+# fsa1-mfrsd, for a game whose loader trips over the MegaFlashROM SCC+ SD's RAM or
+# slot. The capture uses no disk, but a machine file needs this line. DEL held from
+# power-on skips the FS-A1's Desk Pac menu.
+openmsx -machine Panasonic_FS-A1
+disk hda
+hold del 6

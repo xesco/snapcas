@@ -1,0 +1,12 @@
+# Lines for fsa1-mfrsd, the Panasonic FS-A1 (MSX2, 64 KB) with a MegaFlashROM SCC+ SD
+# under Nextor.
+
+# The loader reads the game's block of FC00h bytes to 0400h to FFFFh. On a
+# machine whose RAM is in an expanded slot, FFFFh is the slot's subslot register,
+# and the block's last byte, F0h, deselects the RAM. The FS-A1 has no other
+# RAM. The first patch makes the load FBFFh bytes. The loader compares the
+# exclusive OR of the block's bytes with the byte after the block, so the second
+# patch puts that value for the shorter block, ABh XOR F0h, in the place of the
+# last byte.
+patch side1:67 11 00 FC > 11 FF FB
+patch side1:FE30 F0 > 5B

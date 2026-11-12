@@ -1,0 +1,8 @@
+# Lines for fsa1-mfrsd, the Panasonic FS-A1 (MSX2, 64 KB) with a MegaFlashROM SCC+ SD
+# under Nextor.
+
+# The FS-A1 starts BASIC in a 32-column screen mode, and the program sets a wider
+# text mode (Chicken Chase's line 10 has WIDTH38), which fails there with Illegal
+# function call. SCREEN 0 first gives the 40-column text mode of the other MSX
+# machines.
+load 'SCREEN 0:RUN"CAS:"'

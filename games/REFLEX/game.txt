@@ -18,3 +18,11 @@ patch side1:A0 4F 54 4F 32 0D 0A 33 20 44 45 46 55 53 52 3D 26 48 39 37 39 35 3A
 patch side1:B8 55 53 52 28 30 29 3A 52 45 53 55 4D 45 32 0D 0A 34 20 44 45 46 55 53 52 > 3D 26 48 39 37 39 35 3A 41 3D 55 53 52 28 30 29 3A 52 45 53 55 4D 45 32
 patch side1:D0 3D 26 48 37 43 37 36 3A 41 3D 55 53 52 28 30 29 0D 0A 1A 1A 1A 1A 1A 1A > 0D 0A 34 20 44 45 46 55 53 52 3D 26 48 37 43 37 36 3A 41 3D 55 53 52 28
 patch side1:E8 1A 1A 1A 1A 1A > 30 29 0D 0A 1A
+
+# The original game takes a cursor key as a lost life: at C646h, after GTSTCK(0),
+# `jp nz,0D924h` jumps to the routine that takes a life. Plain openMSX on an
+# MSX1 does the same (lives 2 to 1 within 0.1 s), because openMSX's cursor keys
+# also drive joystick 1. The user decided the game must be playable on a
+# keyboard, so the jump becomes three NOPs. The call's result is not read again,
+# and the joystick still moves the paddle through GTSTCK(1).
+patch side1:4754 C2 24 D9 > 00 00 00

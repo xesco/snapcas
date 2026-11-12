@@ -1,0 +1,146 @@
+# Lines for the Philips NMS 8245 with a 512 KB RAM cartridge and a Sunrise IDE.
+
+# The loader and the game call the MSX1 BIOS's inner routines by their addresses
+# in page 0, such as CALL 0815h for FILVRM's body. The NMS 8245 is an MSX2 and
+# its BIOS has other code there, so the first call crashes the machine into a
+# reset. Each line below points a call to the routine's standard entry in the
+# jump table, which does the same on the MSX1 BIOS and on the MSX2 BIOS. One
+# comment covers the lines of one routine.
+
+# FILVRM (0815h) -> the entry 0056h, 59 calls.
+patch side1:266 CD 15 08 > CD 56 00
+patch side1:293 CD 15 08 > CD 56 00
+patch side1:2A5 CD 15 08 > CD 56 00
+patch side1:48BA CD 15 08 > CD 56 00
+patch side1:48C4 CD 15 08 > CD 56 00
+patch side1:4955 CD 15 08 > CD 56 00
+patch side1:4981 CD 15 08 > CD 56 00
+patch side1:4A08 CD 15 08 > CD 56 00
+patch side1:4BB4 CD 15 08 > CD 56 00
+patch side1:4C42 CD 15 08 > CD 56 00
+patch side1:4C4D CD 15 08 > CD 56 00
+patch side1:4C57 CD 15 08 > CD 56 00
+patch side1:5061 CD 15 08 > CD 56 00
+patch side1:508E CD 15 08 > CD 56 00
+patch side1:50A0 CD 15 08 > CD 56 00
+patch side1:517E CD 15 08 > CD 56 00
+patch side1:51BD CD 15 08 > CD 56 00
+patch side1:5325 CD 15 08 > CD 56 00
+patch side1:5341 CD 15 08 > CD 56 00
+patch side1:547D CD 15 08 > CD 56 00
+patch side1:5488 CD 15 08 > CD 56 00
+patch side1:5494 CD 15 08 > CD 56 00
+patch side1:549F CD 15 08 > CD 56 00
+patch side1:54AB CD 15 08 > CD 56 00
+patch side1:54B6 CD 15 08 > CD 56 00
+patch side1:5597 CD 15 08 > CD 56 00
+patch side1:5668 CD 15 08 > CD 56 00
+patch side1:5672 CD 15 08 > CD 56 00
+patch side1:567C CD 15 08 > CD 56 00
+patch side1:571F CD 15 08 > CD 56 00
+patch side1:5758 CD 15 08 > CD 56 00
+patch side1:5772 CD 15 08 > CD 56 00
+patch side1:578C CD 15 08 > CD 56 00
+patch side1:57E8 CD 15 08 > CD 56 00
+patch side1:57F4 CD 15 08 > CD 56 00
+patch side1:589A CD 15 08 > CD 56 00
+patch side1:59B9 CD 15 08 > CD 56 00
+patch side1:5A73 CD 15 08 > CD 56 00
+patch side1:5A7C CD 15 08 > CD 56 00
+patch side1:5A86 CD 15 08 > CD 56 00
+patch side1:5AD1 CD 15 08 > CD 56 00
+patch side1:5ADB CD 15 08 > CD 56 00
+patch side1:5AE5 CD 15 08 > CD 56 00
+patch side1:5AEF CD 15 08 > CD 56 00
+patch side1:5C43 CD 15 08 > CD 56 00
+patch side1:5C4C CD 15 08 > CD 56 00
+patch side1:5C55 CD 15 08 > CD 56 00
+patch side1:5CFD CD 15 08 > CD 56 00
+patch side1:5D08 CD 15 08 > CD 56 00
+patch side1:5D12 CD 15 08 > CD 56 00
+patch side1:5D2B CD 15 08 > CD 56 00
+patch side1:5D37 CD 15 08 > CD 56 00
+patch side1:5D44 CD 15 08 > CD 56 00
+patch side1:5D53 CD 15 08 > CD 56 00
+patch side1:5D5E CD 15 08 > CD 56 00
+patch side1:5D6A CD 15 08 > CD 56 00
+patch side1:5D82 CD 15 08 > CD 56 00
+patch side1:5D8C CD 15 08 > CD 56 00
+patch side1:5D95 CD 15 08 > CD 56 00
+
+# LDIRVM (0744h) -> the entry 005Ch, 19 calls.
+patch side1:272 CD 44 07 > CD 5C 00
+patch side1:4971 CD 44 07 > CD 5C 00
+patch side1:4C09 CD 44 07 > CD 5C 00
+patch side1:4C15 CD 44 07 > CD 5C 00
+patch side1:4C1F CD 44 07 > CD 5C 00
+patch side1:506D CD 44 07 > CD 5C 00
+patch side1:56CF CD 44 07 > CD 5C 00
+patch side1:56DB CD 44 07 > CD 5C 00
+patch side1:56E6 CD 44 07 > CD 5C 00
+patch side1:56F4 CD 44 07 > CD 5C 00
+patch side1:5700 CD 44 07 > CD 5C 00
+patch side1:570B CD 44 07 > CD 5C 00
+patch side1:59FF CD 44 07 > CD 5C 00
+patch side1:5A0B CD 44 07 > CD 5C 00
+patch side1:5A17 CD 44 07 > CD 5C 00
+patch side1:5A23 CD 44 07 > CD 5C 00
+patch side1:5C97 CD 44 07 > CD 5C 00
+patch side1:5CAF CD 44 07 > CD 5C 00
+patch side1:5CC7 CD 44 07 > CD 5C 00
+
+# KILBUF (0468h) -> the entry 0156h, 9 calls.
+patch side1:492B CD 68 04 > CD 56 01
+patch side1:49EF CD 68 04 > CD 56 01
+patch side1:4B0B CD 68 04 > CD 56 01
+patch side1:512E CD 68 04 > CD 56 01
+patch side1:5208 CD 68 04 > CD 56 01
+patch side1:52DE CD 68 04 > CD 56 01
+patch side1:5519 CD 68 04 > CD 56 01
+patch side1:5608 CD 68 04 > CD 56 01
+patch side1:5821 CD 68 04 > CD 56 01
+
+# WRTPSG (1102h) -> the entry 0093h, 9 calls.
+patch side1:4C61 CD 02 11 > CD 93 00
+patch side1:4C67 CD 02 11 > CD 93 00
+patch side1:4C6E CD 02 11 > CD 93 00
+patch side1:4C79 CD 02 11 > CD 93 00
+patch side1:4C8E CD 02 11 > CD 93 00
+patch side1:4C94 CD 02 11 > CD 93 00
+patch side1:4C9B CD 02 11 > CD 93 00
+patch side1:4CA7 CD 02 11 > CD 93 00
+patch side1:4CB4 CD 02 11 > CD 93 00
+
+# CHSNS (0D6Ah) -> the entry 009Ch, 4 calls.
+patch side1:4921 CD 6A 0D > CD 9C 00
+patch side1:49E9 CD 6A 0D > CD 9C 00
+patch side1:4B3A CD 6A 0D > CD 9C 00
+patch side1:59CE CD 6A 0D > CD 9C 00
+
+# LDIRMV (070Fh) -> the entry 0059h, 3 calls.
+patch side1:5C8B CD 0F 07 > CD 59 00
+patch side1:5CA3 CD 0F 07 > CD 59 00
+patch side1:5CBB CD 0F 07 > CD 59 00
+
+# ERAFNK (0B15h) -> the entry 00CCh, 2 calls.
+patch side1:24E CD 15 0B > CD CC 00
+patch side1:489F CD 15 0B > CD CC 00
+
+# INIGRP (05D2h) -> the entry 0072h, 2 calls.
+patch side1:251 CD D2 05 > CD 72 00
+patch side1:48A2 CD D2 05 > CD 72 00
+
+# SETGRP (0602h) -> the entry 007Eh, 2 calls.
+patch side1:254 CD 02 06 > CD 7E 00
+patch side1:48A5 CD 02 06 > CD 7E 00
+
+# WRTVDP (057Fh) -> the entry 0047h, 2 calls.
+patch side1:25B CD 7F 05 > CD 47 00
+patch side1:48CB CD 7F 05 > CD 47 00
+
+# CHGET (10CBh) -> the entry 009Fh, 2 calls.
+patch side1:4927 CD CB 10 > CD 9F 00
+patch side1:59D6 CD CB 10 > CD 9F 00
+
+# RDVRM (07D7h) -> the entry 004Ah, 1 calls.
+patch side1:4947 CD D7 07 > CD 4A 00

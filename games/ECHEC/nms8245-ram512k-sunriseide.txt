@@ -1,0 +1,10 @@
+# Lines for the Philips NMS 8245 with a 512 KB RAM cartridge and a Sunrise IDE.
+
+# The program's first BLOAD reads CODEFEN1 into FD9Ah to FFFFh. From FFCAh on, the
+# block holds the bytes FFh FFh 00h 00h of an MSX1's empty memory. On an MSX2 they
+# land on the EXTBIO, DISINT and ENAINT hooks at FFCAh, FFCFh and FFD4h, where FFh
+# is RST 38h, and on the VDP register copies and the main ROM's slot at FFE7h to
+# FFF7h. Line 110's SCREEN 2 then calls the hooks, the interrupt routine runs inside
+# itself and the stack falls through RAM until the machine resets. The patch makes
+# the block's end address FFC9h, as for side B (ECHEC2), so that BLOAD stops there.
+patch side1:982 FF FF > C9 FF

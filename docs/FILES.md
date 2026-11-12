@@ -138,7 +138,7 @@ game file holds the lines that depend on where the machine's RAM and cartridges 
 | `capture` | The line names one of the capture variants that the machine file lists ([Machine file](#machine-file)) |
 | A patch of a slot register's value | The value names slots. Sootland writes FCh to the slot register, for RAM in slot 3, and crashes on the Sanyo PHC-28S. Without Nextor, that machine's BASIC keeps page 3 in the internal RAM, slot 0, and the RAM cartridge in slot 1 holds pages 0 to 2. So a patch to 14h keeps page 3 in the internal RAM and selects slot 1 for pages 1 and 2. The capture itself makes such a patch for a fixed value ([INTERNALS.md, Slot patches](INTERNALS.md#slot-patches)), so a game file needs such a patch only for a value that the game computes |
 | A `snapshot` that a real machine needs | Tokyo Nampa Street's snapshot comes after its music only because of the real PHC-28S ([DESIGN.md, Limits](DESIGN.md#limits)) |
-| `subslots keep` | The line is for a machine whose RAM is all in expanded slots. Macadam Bumper needs it on the NMS 8250, where its stack would write the subslot register at FFFFh |
+| `subslots keep` | The line is for a machine whose RAM is all in expanded slots. Macadam Bumper needs it on the NMS 8250, where its stack would write the subslot register at FFFFh. Ci-U-Than Trilogy III needs it on the FS-A1 in both game files, where the loader otherwise runs into memory that the game did not fill |
 
 ## Shipped files
 
@@ -183,14 +183,12 @@ files that each machine file has:
 | `nms8250-carnivore2` | Philips NMS 8250: an MSX2 with its own 128 KB and a floppy drive, and a Carnivore2 under Nextor. This machine file is for the cartridge with a mapper and a disk interface that most MSX2 owners use | 93 |
 | `nms8245-ram512k-sunriseide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. The machine's own 128 KB leave Nextor too few free segments | 32 |
 | `phc28s-ram64k-carnivore2` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1, and a Carnivore2 in slot 2 | 85 |
-| `hb75p-mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup. In that setup, the MegaFlashROM SCC+ SD boots MSX-DOS from the ROM disk in its flash. The check's disk is in SD card slot 1 as drive B: | 0 |
+| `hb75p-mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup. In that setup, the MegaFlashROM SCC+ SD boots MSX-DOS from the ROM disk in its flash. The check's disk is in SD card slot 1 as drive B: | 70 |
 | `hbf700p-ram512k-msxdos2` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. The machine's own mapper holds 256 KB | 264 |
 | `vg8020-sdmapper` | Philips VG-8020 with an SD Mapper v1. The machine has the SD Mapper's 512 KB mapper, and Nextor on the SD Mapper's SD cards. The Makefile downloads the cartridge's firmware, `SDMAPPER.ROM` 1.0.7, which `openMSX` needs | 0 |
 | `xp800-sdmapper` | Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1, as in `vg8020-sdmapper` | 0 |
-| `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4. The Makefile makes that flash. `openMSX`'s stock flash also holds a ROM disk, and the ROM disk's `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, so the FS-A1 skips its Desk Pac menu | 0 |
-| `hbf1xd-mfrsd` | Sony HB-F1XD: an MSX2 with 64 KB, no mapper, and a floppy drive, with the MegaFlashROM SCC+ SD of `fsa1-mfrsd` | 0 |
+| `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4. The Makefile makes that flash. `openMSX`'s stock flash also holds a ROM disk, and the ROM disk's `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, so the FS-A1 skips its Desk Pac menu | 71 |
 | `hb75p-carnivore2` | Sony HB-75P: an MSX1 with 64 KB in slot 2 and a Carnivore2 in slot 1 | 76 |
-| `vg8235` | Philips VG-8235: an MSX2 with a 128 KB mapper and a single-sided floppy drive, without cartridges. It boots MSX-DOS 1 from a 360 KB disk | 0 |
 
 The repository also ships these capture variants in `machines/capture/`
 ([Machine file](#machine-file)). The games' `capture` lines name these capture
@@ -211,6 +209,8 @@ variant:
 | `vg8020` | `vg8020-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 | `xp800` | `xp800-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 | `hb75p` | `hb75p-carnivore2` | The Carnivore2, and so Nextor | 74 game files that fail in a capture with the Carnivore2 in slot 1. 4 of them also select RAM by fixed slot values. 1 selects RAM in slot 1, and 3 select RAM in slot 3, the VG-8020's RAM slot |
+| `hb75p` | `hb75p-mfrsd` | The MegaFlashROM SCC+ SD, and so its mapper and Nextor | 70 game files that fail in a capture with the cartridge. Continental Circus, Il Giustiziere and Thunder Blade also need `service t0`, and so their page 0 RAM outside DOS's mapper |
+| `fsa1` | `fsa1-mfrsd` | The MegaFlashROM SCC+ SD, and so its mapper and Nextor | 60 game files that fail in a capture with the cartridge. 10 of them also need `service t0` |
 
 ## Compilations
 

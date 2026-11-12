@@ -1,6 +1,0 @@
-# Philips VG-8235 (MSX2, 128 KB) with no cartridges, under MSX-DOS 1. The VG-8235's
-# 128 KB is a memory mapper. It boots MSX-DOS 1 from a 360 KB floppy disk in its
-# single-sided floppy drive.
-openmsx -machine Philips_VG_8235-00
-disk diska 360
-dosfiles msxdos1

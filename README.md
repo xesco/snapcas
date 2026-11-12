@@ -29,7 +29,7 @@ The `.SNP` file also holds the rest of the tape, so those games work too. Some
 games do not work on every MSX, and `snapcas` changes them with patches so that they
 work on yours.
 
-`snapcas` knows 1,545 games (CAS files) and 12 MSX machines, and you can add your
+`snapcas` knows 1,545 games (CAS files) and 10 MSX machines, and you can add your
 own games and machines. `snapcas` does not hold the CAS files of these games. It
 downloads a game's CAS file from [File-Hunter](https://download.file-hunter.com)
 when you make the game's `.SNP` file. What it holds for each game is a few small

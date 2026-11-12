@@ -1,0 +1,15 @@
+# Lines for xp800-sdmapper, the Gradiente Expert XP-800 (MSX1, 64 KB, RAM in slot 2) with an SD Mapper v1.
+
+# The loader at 9010h looks for RAM in page 1, in slots 1, 2 and then 3. When it
+# finds RAM in slot 1 or 2 it jumps to 4042h, which holds nothing yet: the code
+# that copies the loader to page 1 is at 9042h, and only the search's last case,
+# slot 3, falls through to it. The XP-800 has its RAM in slot 2, so the loader runs
+# into the empty page and resets the machine. The patches jump to 9042h.
+patch side1:330F 42 40 > 42 90
+patch side1:3320 42 40 > 42 90
+
+# The capture runs on xp800, the XP-800 without cartridges, so without a disk
+# system. On xp800-sdmapper itself the restored game fails point 2 and point 3:
+# the game writes FD31h from 4951h, in the SD Mapper's Nextor, and the machine
+# reboots 3.9 seconds after the restore, as on vg8020-sdmapper.
+capture xp800

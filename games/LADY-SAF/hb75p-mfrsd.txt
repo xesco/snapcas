@@ -1,0 +1,14 @@
+# Lines for hb75p-mfrsd, the Sony HB-75P (MSX1, 64 KB, RAM in slot 2) with a
+# MegaFlashROM SCC+ SD.
+
+# The loader at 9010h looks for RAM in page 1, in slots 1, 2 and then 3. When it
+# finds RAM in slot 1 or 2 it jumps to 4042h, which holds nothing yet: the code
+# that copies the loader to page 1 is at 9042h, and only the search's last case,
+# slot 3, falls through to it. The HB-75P has its RAM in slot 2, so the loader runs
+# into the empty page and resets the machine. The patches jump to 9042h.
+patch side1:330F 42 40 > 42 90
+patch side1:3320 42 40 > 42 90
+
+# The capture runs without the MegaFlashROM SCC+ SD, so the loader finds only the
+# HB-75P's own RAM in slot 2.
+capture hb75p
