@@ -68,112 +68,125 @@ The rest of this page gives the same steps for you to do instead of the agent.
 This example makes the `.SNP` file of Gauntlet for a Sanyo PHC-28S and starts the
 game on that MSX.
 
-1. Get `snapcas`:
+### Get snapcas
 
-   ```
-   git clone https://github.com/xesco/snapcas.git
-   cd snapcas
-   ```
+```
+git clone https://github.com/xesco/snapcas.git
+cd snapcas
+```
 
-2. Find the game:
+### Find the game
 
-   ```
-   ./snapcas.py list gauntlet
-   ```
+```
+./snapcas.py list gauntlet
+```
 
-   The command shows the game's name, `GAUNTLET`.
+The command shows the game's name, `GAUNTLET`.
 
-3. Find your MSX:
+### Find your MSX
 
-   ```
-   ./snapcas.py machines
-   ```
+```
+./snapcas.py machines
+```
 
-   If your MSX is not in the list, add it first. An AI coding agent can add it for
-   you. Open the `snapcas` folder in the agent, and tell it your MSX's model and
-   what is in each cartridge slot:
+If your MSX is not in the list, add it first. An AI coding agent can add it for
+you. Open the `snapcas` folder in the agent, and tell it your MSX's model and
+what is in each cartridge slot:
 
-   > Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
-   > steps 1 to 5 of "Add a machine" in AGENTS.md.
+> Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
+> steps 1 to 5 of "Add a machine" in AGENTS.md.
 
-   Or [open an issue](https://github.com/xesco/snapcas/issues) with your MSX's model
-   and what is in each cartridge slot. I will add support for your machine and patch
-   all the needed games for you.
+Or [open an issue](https://github.com/xesco/snapcas/issues) with your MSX's model
+and what is in each cartridge slot. I will add support for your machine and patch
+all the needed games for you.
 
-4. Make the game's `.SNP` file for your machine:
+### Make the game's `.SNP` file
 
-   ```
-   ./snapcas.py snap gauntlet phc28s-ram64k-carnivore2 --check
-   ```
+```
+./snapcas.py snap gauntlet phc28s-ram64k-carnivore2 --check
+```
 
-   Or for the machine that the agent added:
+Or for the machine that the agent added:
 
-   ```
-   ./snapcas.py snap gauntlet hx10-carnivore2 --check
-   ```
+```
+./snapcas.py snap gauntlet hx10-carnivore2 --check
+```
 
-   The command downloads the game's tape from
-   [File-Hunter](https://download.file-hunter.com) and makes
-   `images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`. The `--check` option
-   also tests the file in `openMSX`. The command prints four lines that start with
-   `check`. If all four say `pass`, the game works.
+The command downloads the game's tape from
+[File-Hunter](https://download.file-hunter.com) and makes
+`images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`. The `--check` option
+also tests the file in `openMSX`. The command prints four lines that start with
+`check`. If all four say `pass`, the game works.
 
-   File-Hunter is one person's site. Download only the games that you play, one at
-   a time.
+> [!NOTE]
+> File-Hunter is one person's site. Download only the games that you play, one at
+> a time.
 
-5. If a line says `fail`, or the command stops with an error, the game needs a fix
-   for your MSX. An AI coding agent can find the fix for you:
+### Fix a game that fails
 
-   > Gauntlet fails on phc28s-ram64k-carnivore2. Fix it: follow steps 1 to 4 of
-   > "Fix a game that fails" in AGENTS.md. Then run snap with --check again.
+You need this step only if a line says `fail`, or if the command stops with an
+error. Then the game needs a fix for your MSX. An AI coding agent can find the fix
+for you:
 
-6. Once the game works, put the MSX's card in your computer and copy the game to it.
-   In this example, `/Volumes/MSX` is the card's folder on your computer:
+> Gauntlet fails on phc28s-ram64k-carnivore2. Fix it: follow steps 1 to 4 of
+> "Fix a game that fails" in AGENTS.md. Then run snap with --check again.
 
-   ```
-   ./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
-   ```
+### Copy the game to the card
 
-   The command puts `SNAPCAS.COM` in the card's `BIN` folder. It puts each game in
-   the `SNAPCAS` folder, in a folder for the first letter of the game's name: `A` to
-   `Z`, or `0-9` for a name that starts with a digit.
+Once the game works, put the MSX's card in your computer and copy the game to it.
+In this example, `/Volumes/MSX` is the card's folder on your computer:
 
-7. Put the card back in the MSX. On the MSX, go to the folder of the game's first
-   letter and start the game:
+```
+./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
+```
 
-   ```
-   CD \SNAPCAS\G
-   \BIN\SNAPCAS GAUNTLET
-   ```
+The command puts `SNAPCAS.COM` in the card's `BIN` folder. It puts each game in
+the `SNAPCAS` folder, in a folder for the first letter of the game's name: `A` to
+`Z`, or `0-9` for a name that starts with a digit.
 
-While you play, three keys control the tape. You need them only for a game that
-loads its levels from the tape ([Tape keys](docs/PLAYING.md#tape-keys)).
+### Start the game on the MSX
+
+Put the card back in the MSX. On the MSX, go to the folder of the game's first
+letter and start the game:
+
+```
+CD \SNAPCAS\G
+\BIN\SNAPCAS GAUNTLET
+```
+
+> [!TIP]
+> While you play, three keys control the tape. You need them only for a game that
+> loads its levels from the tape ([Tape keys](docs/PLAYING.md#tape-keys)).
 
 ## Add a custom game
 
 If you want to play your own CAS file, you can add the game to the project.
 
-1. Ask an AI coding agent to add the game. The agent writes the game's `game.txt`
-   file, which tells `snapcas` how to load the game, and makes the game's `.SNP`
-   file for your machine:
+### Make the image of your own game
 
-   > Add the CAS file ~/Downloads/mygame.cas to snapcas and make its image for
-   > phc28s-ram64k-carnivore2. Follow steps 1 to 4 of "Add a game" in AGENTS.md.
+Ask an AI coding agent to add the game. The agent writes the game's `game.txt`
+file, which tells `snapcas` how to load the game, and makes the game's `.SNP`
+file for your machine:
 
-2. Copy your games to the MSX's card:
+> Add the CAS file ~/Downloads/mygame.cas to snapcas and make its image for
+> phc28s-ram64k-carnivore2. Follow steps 1 to 4 of "Add a game" in AGENTS.md.
 
-   ```
-   ./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
-   ```
+### Copy your games to the card
 
-   On the MSX, your own games are in the folder `\SNAPCAS\CUSTOM`. Go to that
-   folder and start the game. The agent tells you the game's name, which is `MYGAME`
-   in this example:
+```
+./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
+```
 
-   ```
-   CD \SNAPCAS\CUSTOM
-   \BIN\SNAPCAS MYGAME
-   ```
+### Start your game on the MSX
+
+On the MSX, your own games are in the folder `\SNAPCAS\CUSTOM`. Go to that
+folder and start the game. The agent tells you the game's name, which is `MYGAME`
+in this example:
+
+```
+CD \SNAPCAS\CUSTOM
+\BIN\SNAPCAS MYGAME
+```
 
 ## Learn more
 
