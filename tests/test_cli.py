@@ -107,17 +107,19 @@ class List(unittest.TestCase):
 
     def test_without_a_text_it_lists_every_game_file(self):
         lines = snapcas("list", "--all").stdout.splitlines()
-        self.assertEqual(len(lines) - 1, len(gamefile.game_names()))
-        self.assertEqual(lines[-1], f"{len(gamefile.game_names())} games")
+        total = len(gamefile.game_names()) + len(gamefile.custom_names())
+        self.assertEqual(len(lines) - 1, total)
+        self.assertEqual(lines[-1], f"{total} games")
 
     def test_without_a_text_or_all_it_lists_every_game_but_the_compilations_programs(self):
         lines = snapcas("list").stdout.splitlines()
         folders = [line.split()[0] for line in lines[:-1]]
-        self.assertFalse(any("/" in folder for folder in folders))
+        shipped = [folder for folder in folders if not folder.startswith("custom/")]
+        self.assertFalse(any("/" in folder for folder in shipped))
         self.assertNotIn("001-ARIO", folders)
         self.assertIn("RUR-1", folders)
         self.assertIn("RUR-2", folders)
-        hidden = len(gamefile.game_names()) - len(folders)
+        hidden = len(gamefile.game_names()) - len(shipped)
         self.assertEqual(lines[-1], f"{len(folders)} games, and {hidden} in compilations, which --all lists")
 
 
