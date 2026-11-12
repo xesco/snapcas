@@ -1,19 +1,14 @@
 # snapcas
 
 `snapcas` lets you play MSX tape games on your real MSX, without a tape player. It
-works from CAS files, which are MSX tapes saved as files on a computer.
+is a program for your computer and for your MSX. On the computer, it turns a game's
+CAS file into a single `.SNP` file. You copy that file to your MSX's disk or SD card
+and type one command on the MSX. The game then loads and starts right away.
 
 The goal of the project is to play any CAS file on any MSX as the original tape
 did, whatever cartridges the MSX has and in whatever slot order. That includes games
 whose original tape fails on some machines, because its loader expects one machine's
 memory layout or no disk interface, or other issues.
-
-## What it is
-
-`snapcas` is a program for your computer and for your MSX. On the computer, it turns
-a game's CAS file into a single `.SNP` file. You copy that file to your MSX's disk
-or SD card and type one command on the MSX. The game then loads and starts right
-away.
 
 It works in three steps:
 
