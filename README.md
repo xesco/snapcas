@@ -24,12 +24,12 @@ The `.SNP` file also holds the rest of the tape, so those games work too. Some
 games do not work on every MSX, and `snapcas` changes them with patches so that they
 work on yours.
 
-`snapcas` knows 1,545 games (CAS files) and 10 MSX machines, and you can add your
-own games and machines. `snapcas` does not hold the CAS files of these games. It
-downloads a game's CAS file from [File-Hunter](https://download.file-hunter.com)
-when you make the game's `.SNP` file. What it holds for each game is a few small
-text files that say how to load the game on a particular machine and list the
-game's patches.
+`snapcas` knows 1,545 games and 10 MSX configurations, each an MSX model with its
+cartridges. You can add your own games and configurations. `snapcas` does not hold
+the CAS files of these games. It downloads a game's CAS file from
+[File-Hunter](https://download.file-hunter.com) when you make the game's `.SNP`
+file. What it holds for each game is a few small text files that say how to load
+the game on a particular configuration and list the game's patches.
 
 ## Why another tool
 
@@ -76,7 +76,8 @@ The agent asks you what it needs to know, such as your MSX's model and its
 cartridges. Then it makes the game's `.SNP` file, copies it to your MSX's card, and
 gives you the commands to type on the MSX.
 
-You can also give the agent your own CAS file instead of a game's name:
+For a game that `snapcas` does not know, give the agent your own CAS file instead
+of a game's name:
 
 > I want to play the CAS file ~/Downloads/mygame.cas on my MSX. Follow "Guide a
 > user" in AGENTS.md.
