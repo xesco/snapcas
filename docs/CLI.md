@@ -16,7 +16,7 @@ new way to make an image.
 | Python 3, with its standard library only | The tools are Python 3 programs. The download uses `urllib` and `zipfile`, so the user installs nothing with pip |
 | `openMSX` 22.0, on the path or named by `OPENMSX` | The capture and the check run in `openMSX` |
 | The system ROMs of the user's machine, in `openMSX`'s `share/systemroms` | `openMSX` needs the system ROMs to emulate the machine, and `snapcas` cannot ship them. When a ROM is missing, the command shows `openMSX`'s message, and that message names the ROM |
-| `make firmware`, once, for the machines `fsa1-mfrsd`, `hbf1xd-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper`, `vg8020-picoverse` and `hbf700p-ram512k-msxdos2` | `make firmware` downloads the firmware of these machines into `out/cache/openmsx-home/`, an `openMSX` home with a link to the user's system ROMs. For `hbf700p-ram512k-msxdos2` it makes a model there, and downloads nothing. `snapcas` then uses that home in place of the default home. `OPENMSX_HOME` names another home. Without the firmware, `snap` and `try` stop and name `make firmware` |
+| `make firmware`, once, for the machines `fsa1-mfrsd`, `hbf1xd-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper` and `hbf700p-ram512k-msxdos2` | `make firmware` downloads the firmware of these machines into `out/cache/openmsx-home/`, an `openMSX` home with a link to the user's system ROMs. For `hbf700p-ram512k-msxdos2` it makes a model there, and downloads nothing. `snapcas` then uses that home in place of the default home. `OPENMSX_HOME` names another home. Without the firmware, `snap` and `try` stop and name `make firmware` |
 | A network connection, the first time that the user makes a game | The tapes come from File-Hunter, and `snapcas` cannot ship the tapes either |
 
 The user gets `snapcas` as a clone or a zip of the repository. In the repository's
@@ -155,7 +155,6 @@ nms8245-ram512k-sunriseide  Philips NMS 8245 (MSX2, 128 KB) with a 512 KB RAM ca
 nms8250-carnivore2          Philips NMS 8250 (MSX2, 128 KB) with a Carnivore2
 phc28s-ram64k-carnivore2    Sanyo PHC-28S (MSX1, 16 KB) with a 64 KB RAM cartridge and a Carnivore2
 vg8020-carnivore2           Philips VG-8020 (MSX1, 64 KB) with a Carnivore2
-vg8020-picoverse            Philips VG-8020 (MSX1, 64 KB) with a PicoVerse-like cartridge
 vg8020-sdmapper             Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1
 vg8235                      Philips VG-8235 (MSX2, 128 KB) with no cartridges, under MSX-DOS 1
 xp800-sdmapper              Gradiente Expert XP-800 (MSX1, 64 KB) with an SD Mapper v1
@@ -274,7 +273,6 @@ CD \SNAPCAS\G
 | A game file in `games/` without a link | The command stops and names the file and the SHA-1 to put in `downloads/` |
 | A tape that File-Hunter has changed or removed | The command stops, because it finds no zip, or no member with the SHA-1 |
 | A machine whose system ROMs are missing | `openMSX` does not start, and the command prints `openMSX`'s error with exit code 2 |
-| `vg8020-picoverse` needs a 192 KB mapper. The mapper is `ram192k.xml` in `openMSX`'s `share/extensions`, and `make firmware` makes that file | Without the mapper, the command stops and names `make firmware` |
 | Two capture variants of `hbf700p-ram512k-msxdos2` need the HB-F700P with its slot 0 not expanded. The model is `Sony_HB-F700P_noexp0.xml` in `openMSX`'s `share/machines`, and `make firmware` makes that file from `openMSX`'s own ([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)) | Without the model, the command stops and names `make firmware` |
 | The games run, `make games`, checks every game file on one machine. The developers run it on five machines only: `phc28s-ram64k-carnivore2`, `vg8020-carnivore2`, `hb75p-carnivore2`, `hbf700p-ram512k-msxdos2` and `nms8250-carnivore2` ([INTERNALS.md, The games run][gamesrun]) | A game can fail on another machine, and `snap --check` shows the failure |
 | MSX-DOS 1 has no folders | A machine under MSX-DOS 1, such as `vg8235`, cannot use the card's layout. The user puts `SNAPCAS.COM` and the image into one folder by hand |

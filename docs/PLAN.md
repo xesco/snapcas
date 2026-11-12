@@ -91,7 +91,7 @@ the tests:
 
 | Machine file | DOS | Why |
 |---|---|---|
-| `fsa1-mfrsd`, `hb75p-carnivore2`, `hbf1xd-mfrsd`, `nms8245-ram512k-sunriseide`, `nms8250-carnivore2`, `phc28s-ram64k-carnivore2`, `vg8020-carnivore2`, `vg8020-picoverse`, `vg8020-sdmapper`, `xp800-sdmapper` | Nextor | Shipped |
+| `fsa1-mfrsd`, `hb75p-carnivore2`, `hbf1xd-mfrsd`, `nms8245-ram512k-sunriseide`, `nms8250-carnivore2`, `phc28s-ram64k-carnivore2`, `vg8020-carnivore2`, `vg8020-sdmapper`, `xp800-sdmapper` | Nextor | Shipped |
 | `hb75p-mfrsd` | Nextor 2.10, from the ROM disk in the cartridge's flash | Shipped |
 | `hbf700p-ram512k-msxdos2` | `DOS_DIR/msxdos2/`, with the `msxdos2` cartridge in the machine file | Shipped |
 | `vg8235` | `DOS_DIR/msxdos1/`, from the VG-8235's own disk ROM | Shipped |
