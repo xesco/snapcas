@@ -16,7 +16,8 @@ cartridges. The first column is the name that the commands take.
 | `vg8020-sdmapper` | Philips VG-8020 (MSX1) | 64 KB | SD Mapper v1 | 1,544 |
 | `xp800-sdmapper` | Gradiente Expert XP-800 (MSX1) | 64 KB | SD Mapper v1 | 1,544 |
 
-Of the 1,545 games, `RELICS` needs more memory than the machines with 1,544 have.
+`RELICS` is the only game that does not work on the machines with 1,544 games,
+because it needs more memory than they have.
 
 Your MSX is not in the list? [Open an issue](https://github.com/xesco/snapcas/issues)
 and tell me your MSX model, its RAM, and what is in each cartridge slot, for example
