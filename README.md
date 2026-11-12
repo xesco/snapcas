@@ -194,3 +194,7 @@ If you want to play your own CAS file, you can add the game to the project.
 | [Build and test](docs/BUILD.md) | The folders, and the `make` commands that build and test `snapcas` |
 | [The `snapcas` plan](docs/PLAN.md) | The steps that built `snapcas`, and their tests |
 | [openMSX](https://openmsx.org) | The `openMSX` emulator, and how to install your MSX's system ROMs in it |
+
+## License
+
+`snapcas` is under the [MIT License](LICENSE). The license covers the code, and it does not cover the games, the system ROMs, or the DOS files, which this repository does not hold.
