@@ -34,7 +34,8 @@ game's patches.
 ## Why another tool
 
 I wrote `snapcas` because most of the games I like did not work with
-[SofaCas](https://www.louthrax.net/mgr/sofacas.html).
+[SofaCas](https://www.louthrax.com/mgr/sofacas.html) (a great piece of software by
+the way!).
 A tool that plays a CAS file as it is depends on the game's own loader, and many
 loaders expect one machine's memory layout, one slot order, or no disk interface.
 
