@@ -36,6 +36,25 @@ when you make the game's `.SNP` file. What it holds for each game is a few small
 text files that say how to load the game on a particular machine and list the
 game's patches.
 
+## Why another tool
+
+I wrote `snapcas` because most of the games I like did not work with SofaCas.
+A tool that plays a CAS file as it is depends on the game's own loader, and many
+loaders expect one machine's memory layout, one slot order, or no disk interface.
+
+`snapcas` handles those games in these ways:
+
+- It runs the loader in `openMSX`, set up like your MSX, so the loader sees your
+  slots and your RAM.
+- It patches a game for your machine when its loader still fails, with patch lines
+  that the project keeps for each game and machine.
+- It has a tape service, so games that load from the tape while you play, such as
+  the next level, work without a tape player.
+- It supports games on more than one tape or side. You can rewind the tape and
+  flip it from the keyboard, for a game that says "rewind the tape and press a
+  key".
+- It checks each image in `openMSX` before you copy it to your MSX.
+
 ## Requirements
 
 You need three things:
