@@ -5,3 +5,4 @@
 openmsx -machine Sony_HB-75P -ext MegaFlashROM_SCC+_SD
 disk hda
 dos "A:\>" B
+variant hb75p

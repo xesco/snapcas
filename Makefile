@@ -124,8 +124,8 @@ SDMAPPER_ROM := $(EMU_HOME)/share/systemroms/snapcas/SDMAPPER.ROM
 $(SDMAPPER_ROM): | $(SYSTEMROMS_LINK)
 	python3 -I tools/fetch.py https://github.com/fbelavenuto/msxsdmapper/releases/download/v1.0.7/SDMAPPER.ROM 4371c4094756672f78b295dbfb753cb6a3011e7fdb11348249be1bc36fbd061b $@
 
-# The MegaFlashROM SCC+ SD with only Nextor in its flash, for fsa1-mfrsd and
-# hbf1xd-mfrsd: openMSX's stock flash also holds a ROM disk, whose AUTOEXEC.BAT
+# The MegaFlashROM SCC+ SD with only Nextor in its flash, for fsa1-mfrsd:
+# openMSX's stock flash also holds a ROM disk, whose AUTOEXEC.BAT
 # starts a file manager on an MSX2. The flash is 8 MB of FFh with Nextor's ROM
 # at 700000h, where the cartridge's subslot 3, its SD interface, reads it.
 MFR_NEXTOR := $(DL)/Nextor-2.1.4.MegaFlashSDSCC.1-slot.ROM
@@ -180,14 +180,6 @@ $(HBF700P_NOEXP0):
 	test "$$(grep -c '</secondary>' $@.tmp)" = 2
 	mv $@.tmp $@
 
-# vg8020-picoverse: a 192 KB memory mapper cartridge, the PicoVerse's mapper.
-RAM192K := $(EMU_HOME)/share/extensions/ram192k.xml
-$(RAM192K):
-	mkdir -p $(dir $@)
-	sed 's|<size>512</size>|<size>192</size>|; s|512 kB|192 kB|g; s|512k|192k|g' $(OPENMSX_SHARE)/extensions/ram512k.xml > $@.tmp
-	grep -q '<size>192</size>' $@.tmp
-	mv $@.tmp $@
-
 # The tests' tape files, which git holds. A test does not skip without its
 # tape, so one that the folder lacks stops make test here.
 TEST_TAPES := $(addprefix tests/tapes/, \
@@ -213,7 +205,7 @@ $(TEST_TAPES):
 unit: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS)
 	python3 -I tests/run.py --pure
 
-test: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS) $(TEST_GAMES) $(TEST_TAPES) $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(NMS8250_4M) $(RAM192K) $(HBF700P_NOEXP0)
+test: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS) $(TEST_GAMES) $(TEST_TAPES) $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(NMS8250_4M) $(HBF700P_NOEXP0)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I tests/run.py
 
@@ -229,13 +221,13 @@ FIX ?= 1
 
 # The run over every shipped game file on a machine (docs/INTERNALS.md, The games
 # run), apart from make test because it takes hours.
-games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(RAM192K) $(HBF700P_NOEXP0)
+games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(HBF700P_NOEXP0)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I tools/games.py $(MACHINE) $(if $(DOS),--dos $(DOS)) $(if $(FULL),--full) $(if $(filter 0,$(FIX)),--no-fix)
 
 # The openMSX home that snapcas.py uses, with the firmware of the machines that
 # need it.
-firmware: $(FIRMWARE) $(RAM192K) $(HBF700P_NOEXP0)
+firmware: $(FIRMWARE) $(HBF700P_NOEXP0)
 
 # bin/ stays, because git holds its files.
 clean:

@@ -1,0 +1,8 @@
+# Lines for vg8020-sdmapper, the Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1.
+
+# The magazine's menu loads each program from the tape, and the game keeps its
+# variables from FCE1h on, where the tape service's entries are, so the whole
+# service goes into T0. T0 needs the game's page 0 RAM outside DOS's mapper, so
+# the capture runs on vg8020, the Philips VG-8020 without cartridges.
+capture vg8020
+service t0

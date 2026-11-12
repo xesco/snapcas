@@ -403,8 +403,7 @@ does not intercept, and in 41 the unread blocks have no names.
 
 ## Limits
 
-Moonwalker's 236 KB tape does not fit in an NMS 8250's 128 KB. The PicoVerse's 192
-KB mapper leaves Nextor 5 free segments, and 191 games need 6 to 32 for their tapes.
+Moonwalker's 236 KB tape does not fit in an NMS 8250's 128 KB.
 
 Doki Doki Penguinland selects the RAM cartridge, slot 1, in page 3, where the Sanyo
 PHC-28S without Nextor keeps its internal RAM. So the game's slot patch is a line by

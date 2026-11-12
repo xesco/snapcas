@@ -1,0 +1,8 @@
+# Lines for xp800-sdmapper, the Gradiente Expert XP-800 (MSX1, 64 KB) with an SD
+# Mapper v1.
+
+# The capture runs on xp800, the Gradiente Expert XP-800 without cartridges, so
+# without a disk system. On xp800-sdmapper itself the game fails: point 1: fail: the
+# restorer stopped: MADDRIVE.SNP: service t0 needs DOS's mapper's subslot in the
+# borrowed page. `make games` wrote this line.
+capture xp800

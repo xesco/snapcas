@@ -1,0 +1,8 @@
+# Lines for vg8020-sdmapper, the Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1.
+
+# The capture runs on vg8020, the Philips VG-8020 without cartridges, so without a
+# disk system. On vg8020-sdmapper itself the game fails: build.py:
+# /Users/xesco/src/snapcas/games/KE-RULEN: the tape service without a part in page 3
+# keeps T0 in page 0 of DOS's mapper, where the snapshot has a RAM page of the game.
+# `make games` wrote this line.
+capture vg8020

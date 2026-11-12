@@ -1,0 +1,5 @@
+# Philips NMS 8245 without cartridges, so without Nextor: the capture variant of
+# nms8245-ram512k-sunriseide, for a game whose loader trips over the RAM cartridge
+# or the Sunrise IDE. The capture uses no disk, but a machine file needs this line.
+openmsx -machine Philips_NMS_8245
+disk diska

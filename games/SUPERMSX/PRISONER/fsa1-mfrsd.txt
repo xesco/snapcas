@@ -1,0 +1,11 @@
+# Lines for fsa1-mfrsd, the Panasonic FS-A1 (MSX2, 64 KB) with a MegaFlashROM SCC+ SD.
+
+# The game's BASIC loader has POKE &HFFFF,&HAA in line 2. On a machine whose RAM
+# is in an expanded slot, FFFFh is the slot's subslot register, and the POKE
+# deselects the RAM. The patch writes the value at FFFEh instead, on this machine
+# only.
+patch side1:1B5FF 46 46 46 46 > 46 46 46 45
+
+# The capture runs on fsa1, the Panasonic FS-A1 without cartridges, so without
+# Nextor.
+capture fsa1

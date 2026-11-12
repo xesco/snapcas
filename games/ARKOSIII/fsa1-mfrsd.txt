@@ -1,0 +1,6 @@
+# Lines for fsa1-mfrsd, the Panasonic FS-A1 (MSX2, 64 KB) with a MegaFlashROM SCC+ SD
+# under Nextor.
+
+# The capture runs without the MegaFlashROM SCC+ SD, so the game's loader and code
+# see only the FS-A1's own RAM, not the cartridge's mapper and ROMs.
+capture fsa1

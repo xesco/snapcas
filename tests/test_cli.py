@@ -229,7 +229,7 @@ class Snap(unittest.TestCase):
         spec.loader.exec_module(try_py)
         typed = b"SNAPCAS GAUNTLET\r".hex()
         for machine, dos, prompt, typed in (
-                ("vg8235", ["MSXDOS.SYS", "COMMAND.COM"], "A>", typed),
+                ("test/nms8250-dos1", ["MSXDOS.SYS", "COMMAND.COM"], "A>", typed),
                 ("vg8020-carnivore2", ["NEXTOR.SYS", "COMMAND2.COM"], "A:\\>", typed),
                 ("hb75p-mfrsd", ["NEXTOR.SYS", "COMMAND2.COM"], "A:\\>", b"B:\r".hex() + typed)):
             with self.subTest(machine=machine):
@@ -240,11 +240,11 @@ class Snap(unittest.TestCase):
 
     def test_a_machines_missing_dos_files_stop_with_where_they_go(self):
         with tempfile.TemporaryDirectory() as folder, mock.patch.object(msx, "DOS", folder):
-            with self.assertRaisesRegex(msx.MachineError, "vg8235 boots msxdos1: put its files in"):
-                snapcas_py.dos_folder("vg8235")
+            with self.assertRaisesRegex(msx.MachineError, "test/nms8250-dos1 boots msxdos1: put its files in"):
+                snapcas_py.dos_folder("test/nms8250-dos1")
             os.mkdir(os.path.join(folder, "msxdos1"))
             open(os.path.join(folder, "msxdos1", "MSXDOS.SYS"), "w").close()
-            self.assertEqual(snapcas_py.dos_folder("vg8235"), os.path.join(folder, "msxdos1"))
+            self.assertEqual(snapcas_py.dos_folder("test/nms8250-dos1"), os.path.join(folder, "msxdos1"))
 
     def test_a_machine_without_its_firmware_stops_and_names_make_firmware(self):
         with tempfile.TemporaryDirectory() as home:

@@ -25,7 +25,7 @@ class Msx(unittest.TestCase):
             self.assertEqual(msx.dos_files(folder), [os.path.join(folder, "NEXTOR.SYS")])
 
     def test_a_machine_file_names_the_dos_that_it_boots(self):
-        self.assertEqual(msx.read_machine(msx.machine_path("vg8235")).dos_files, "msxdos1")
+        self.assertEqual(msx.read_machine(msx.machine_path("test/nms8250-dos1")).dos_files, "msxdos1")
         self.assertEqual(msx.read_machine(msx.machine_path("hbf700p-ram512k-msxdos2")).dos_files, "msxdos2")
         self.assertEqual(msx.read_machine(msx.machine_path("vg8020-carnivore2")).dos_files, "nextor")
 

@@ -8,3 +8,4 @@ openmsx -machine Panasonic_FS-A1 -ext MegaFlashROM_SCC+_SD_Nextor
 disk hda
 hold del 6
 firmware extensions/MegaFlashROM_SCC+_SD_Nextor.xml
+variant fsa1

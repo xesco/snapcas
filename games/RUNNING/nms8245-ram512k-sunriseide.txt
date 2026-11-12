@@ -1,0 +1,8 @@
+# Lines for nms8245-ram512k-sunriseide, the Philips NMS 8245 (MSX2, 128 KB) with a
+# 512 KB RAM cartridge and a Sunrise IDE.
+
+# The capture runs on nms8245, the Philips NMS 8245 without cartridges, so without
+# Nextor. On nms8245-ram512k-sunriseide itself the game fails: build.py: the tape
+# service without a part in page 3 keeps T0 in page 0 of DOS's mapper, where the
+# snapshot has a RAM page of the game.
+capture nms8245

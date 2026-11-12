@@ -1,0 +1,5 @@
+# Lines for hb75p-mfrsd, the Sony HB-75P (MSX1, 64 KB) with a MegaFlashROM SCC+ SD.
+
+# The capture runs without the MegaFlashROM SCC+ SD, so the game's loader and code
+# see only the HB-75P's own RAM in slot 2, not the cartridge's mapper and ROMs.
+capture hb75p

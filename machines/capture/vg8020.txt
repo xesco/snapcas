@@ -1,10 +1,7 @@
 # Philips VG-8020 without cartridges, so without a disk system. It is the capture
-# variant of three machines:
+# variant of two machines:
 # - vg8020-carnivore2, for a game whose loader finds the Carnivore2's RAM in slot 1
 #   before the internal RAM in slot 3;
-# - vg8020-picoverse, for a game whose image needs more free mapper segments than
-#   Nextor leaves in 192 KB: the game then runs in the internal RAM, whose pages
-#   the restorer writes straight to their slot;
 # - vg8020-sdmapper, for a game whose loader trips over the SD Mapper.
 # The capture uses no disk, but a machine file needs this line.
 openmsx -machine Philips_VG_8020

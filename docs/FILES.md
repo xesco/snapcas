@@ -47,8 +47,7 @@ A machine file's name says what the file describes. The name gives the model, th
 each cartridge in slot order, with `empty` for an empty slot before a cartridge. A
 cartridge's name is `openMSX`'s name for the cartridge in lower case, such as
 `ram64k` or `carnivore2`. For a long `openMSX` name, the cartridge's name is a short
-form, such as `sunriseide` and `mfrsd`. The PicoVerse is `picoverse`, though two of
-`openMSX`'s cartridges replace the PicoVerse. So `phc28s-ram64k-carnivore2` is a
+form, such as `sunriseide` and `mfrsd`. So `phc28s-ram64k-carnivore2` is a
 Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2. Two
 setups of one model have two names.
 
@@ -73,7 +72,7 @@ the same rule as a machine file's name. By that rule, the name gives the cartrid
 that the capture variant holds, and not the cartridges that the capture variant
 leaves out. So two machines whose capture variants hold the same cartridges share
 one capture variant. For example, the VG-8020 with a Carnivore2 and the VG-8020 with
-a PicoVerse both list `vg8020`. The capture variant's first comment says which
+an SD Mapper both list `vg8020`. The capture variant's first comment says which
 machines list that capture variant and why. A game's `capture` line is in the
 machine's game file. The machine's game file already names the machine that the
 image is for, so the `capture` line names only the capture variant.
@@ -139,7 +138,7 @@ game file holds the lines that depend on where the machine's RAM and cartridges 
 | `capture` | The line names one of the capture variants that the machine file lists ([Machine file](#machine-file)) |
 | A patch of a slot register's value | The value names slots. Sootland writes FCh to the slot register, for RAM in slot 3, and crashes on the Sanyo PHC-28S. Without Nextor, that machine's BASIC keeps page 3 in the internal RAM, slot 0, and the RAM cartridge in slot 1 holds pages 0 to 2. So a patch to 14h keeps page 3 in the internal RAM and selects slot 1 for pages 1 and 2. The capture itself makes such a patch for a fixed value ([INTERNALS.md, Slot patches](INTERNALS.md#slot-patches)), so a game file needs such a patch only for a value that the game computes |
 | A `snapshot` that a real machine needs | Tokyo Nampa Street's snapshot comes after its music only because of the real PHC-28S ([DESIGN.md, Limits](DESIGN.md#limits)) |
-| `subslots keep` | The line is for a machine whose RAM is all in expanded slots. Macadam Bumper needs it on the NMS 8250, where its stack would write the subslot register at FFFFh |
+| `subslots keep` | The line is for a machine whose RAM is all in expanded slots. Macadam Bumper needs it on the NMS 8250, where its stack would write the subslot register at FFFFh. Ci-U-Than Trilogy III needs it on the FS-A1 in both game files, where the loader otherwise runs into memory that the game did not fill |
 
 ## Shipped files
 
@@ -182,17 +181,14 @@ files that each machine file has:
 |---|---|---|
 | `vg8020-carnivore2` | Philips VG-8020: an MSX1 with 64 KB and a Carnivore2 | 123 |
 | `nms8250-carnivore2` | Philips NMS 8250: an MSX2 with its own 128 KB and a floppy drive, and a Carnivore2 under Nextor. This machine file is for the cartridge with a mapper and a disk interface that most MSX2 owners use | 93 |
-| `nms8245-ram512k-sunriseide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. The machine's own 128 KB leave Nextor too few free segments | 0 |
-| `vg8020-picoverse` | Philips VG-8020 with a Sunrise IDE interface under Nextor and a 192 KB memory mapper, as the PicoVerse cartridge has them. `openMSX` has no PicoVerse, so these two cartridges replace the PicoVerse. The Makefile makes the 192 KB mapper from `openMSX`'s 512 KB mapper | 53 |
+| `nms8245-ram512k-sunriseide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. The machine's own 128 KB leave Nextor too few free segments | 32 |
 | `phc28s-ram64k-carnivore2` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1, and a Carnivore2 in slot 2 | 85 |
-| `hb75p-mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup. In that setup, the MegaFlashROM SCC+ SD boots MSX-DOS from the ROM disk in its flash. The check's disk is in SD card slot 1 as drive B: | 0 |
+| `hb75p-mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup. In that setup, the MegaFlashROM SCC+ SD boots MSX-DOS from the ROM disk in its flash. The check's disk is in SD card slot 1 as drive B: | 70 |
 | `hbf700p-ram512k-msxdos2` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. The machine's own mapper holds 256 KB | 264 |
 | `vg8020-sdmapper` | Philips VG-8020 with an SD Mapper v1. The machine has the SD Mapper's 512 KB mapper, and Nextor on the SD Mapper's SD cards. The Makefile downloads the cartridge's firmware, `SDMAPPER.ROM` 1.0.7, which `openMSX` needs | 0 |
 | `xp800-sdmapper` | Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1, as in `vg8020-sdmapper` | 0 |
-| `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4. The Makefile makes that flash. `openMSX`'s stock flash also holds a ROM disk, and the ROM disk's `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, so the FS-A1 skips its Desk Pac menu | 0 |
-| `hbf1xd-mfrsd` | Sony HB-F1XD: an MSX2 with 64 KB, no mapper, and a floppy drive, with the MegaFlashROM SCC+ SD of `fsa1-mfrsd` | 0 |
+| `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4. The Makefile makes that flash. `openMSX`'s stock flash also holds a ROM disk, and the ROM disk's `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, so the FS-A1 skips its Desk Pac menu | 71 |
 | `hb75p-carnivore2` | Sony HB-75P: an MSX1 with 64 KB in slot 2 and a Carnivore2 in slot 1 | 76 |
-| `vg8235` | Philips VG-8235: an MSX2 with a 128 KB mapper and a single-sided floppy drive, without cartridges. It boots MSX-DOS 1 from a 360 KB disk | 0 |
 
 The repository also ships these capture variants in `machines/capture/`
 ([Machine file](#machine-file)). The games' `capture` lines name these capture
@@ -205,14 +201,16 @@ variant:
 | `phc28s-ram64k` | `phc28s-ram64k-carnivore2` | The Carnivore2, and so Nextor | 69 game files that crash when a disk system is present, or that select RAM by fixed slot values |
 | `phc28s-empty-carnivore2` | `phc28s-ram64k-carnivore2` | The RAM cartridge in slot 1 | 9 game files whose loader fails because of that cartridge |
 | `vg8020` | `vg8020-carnivore2` | The Carnivore2, and so Nextor | 121 game files that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
-| `vg8020` | `vg8020-picoverse` | The PicoVerse-like cartridge, and so its mapper and Nextor | 53 game files whose image needs more free mapper segments than Nextor leaves in 192 KB. In the VG-8020's own 64 KB, the game's RAM pages go directly to their slot, and the restorer needs no holding segments for them |
 | `nms8250` | `nms8250-carnivore2` | The Carnivore2, and so Nextor | 72 game files that fail in a capture with the Carnivore2 in slot 1. Continental Circus and Il Giustiziere also need `service t0`, and so their page 0 RAM outside DOS's mapper |
 | `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 24 game files. One of them is Digger Dungeon, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch. Sootland crashed with the cartridge in either slot until the patch that keeps page 3 ([INTERNALS.md, The RAM search patch](INTERNALS.md#the-ram-search-patch)) |
 | `hbf700p-noexp0-ram512k-msxdos2` | `hbf700p-ram512k-msxdos2` | No cartridge. Its slot 0 is not expanded | 212 game files whose loader fails because slot 0 is expanded ([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)). After the War is one of them, and Fernando Martin, which is in the tests |
 | `hbf700p-noexp0-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1. Its slot 0 is not expanded | 26 game files. The games run found 24 of them, which pass on none of the variants before this one. Bestial Warrior is one of them, and is in the tests. Continental Circus, Il Giustiziere and Thunder Blade need `service t0`, and so their page 0 RAM outside DOS's mapper |
+| `nms8245` | `nms8245-ram512k-sunriseide` | The RAM cartridge and the Sunrise IDE, and so Nextor | 25 game files that fail in a capture with the cartridges. Continental Circus, Il Giustiziere and Thunder Blade also need `service t0`, and so their page 0 RAM outside DOS's mapper |
 | `vg8020` | `vg8020-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 | `xp800` | `xp800-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
 | `hb75p` | `hb75p-carnivore2` | The Carnivore2, and so Nextor | 74 game files that fail in a capture with the Carnivore2 in slot 1. 4 of them also select RAM by fixed slot values. 1 selects RAM in slot 1, and 3 select RAM in slot 3, the VG-8020's RAM slot |
+| `hb75p` | `hb75p-mfrsd` | The MegaFlashROM SCC+ SD, and so its mapper and Nextor | 70 game files that fail in a capture with the cartridge. Continental Circus, Il Giustiziere and Thunder Blade also need `service t0`, and so their page 0 RAM outside DOS's mapper |
+| `fsa1` | `fsa1-mfrsd` | The MegaFlashROM SCC+ SD, and so its mapper and Nextor | 60 game files that fail in a capture with the cartridge. 10 of them also need `service t0` |
 
 ## Compilations
 
