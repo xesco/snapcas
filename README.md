@@ -177,24 +177,40 @@ If you want to play your own CAS file, you can add the game to the project.
 
 ## Learn more
 
-| Page | What it holds |
-|---|---|
-| [Playing a game](docs/PLAYING.md) | What the MSX needs, and the keys that control the tape while you play |
-| [The `snapcas` command](docs/CLI.md) | Every `snapcas.py` command and its options |
-| [Machine and game files](docs/FILES.md) | Every line of a machine file and of a game file |
-| [Adding a machine](AGENTS.md#add-a-machine) | The steps to add your MSX by hand |
-| [Adding a game](AGENTS.md#add-a-game) | The steps to add your own game by hand |
-| [Fixing a game](AGENTS.md#fix-a-game-that-fails) | The steps to fix a game by hand |
-| [Your own games](custom/README.md) | Your own games |
-| [DOS system files](dos/README.md) | The DOS system files that `--check` needs |
-| [The `snapcas` design](docs/DESIGN.md) | What each part of `snapcas` does and why |
-| [Internals](docs/INTERNALS.md) | How each part works, step by step |
-| [Formats](docs/FORMATS.md) | The files and memory layouts, byte by byte |
-| [Notes](docs/NOTES.md) | The games and findings behind each rule |
-| [Build and test](docs/BUILD.md) | The folders, and the `make` commands that build and test `snapcas` |
-| [The `snapcas` plan](docs/PLAN.md) | The steps that built `snapcas`, and their tests |
-| [openMSX](https://openmsx.org) | The `openMSX` emulator, and how to install your MSX's system ROMs in it |
-| [Supported machines](docs/MACHINES.md) | The MSX configurations that `snapcas` supports, and how to ask for another |
+### Use snapcas
+
+- [Playing a game](docs/PLAYING.md): what the MSX needs, and the keys that control
+  the tape while you play.
+- [The `snapcas` command](docs/CLI.md): every `snapcas.py` command and its options.
+- [Supported machines](docs/MACHINES.md): the MSX configurations that `snapcas`
+  supports, and how to ask for another.
+- [Your own games](custom/README.md): how to play a CAS file that `snapcas` does
+  not know.
+- [DOS system files](dos/README.md): the files that `--check` needs.
+- [openMSX](https://openmsx.org): the emulator, and how to install your MSX's
+  system ROMs in it.
+
+### Add a machine or a game
+
+- [Adding a machine](AGENTS.md#add-a-machine): the steps to add your MSX by hand.
+- [Adding a game](AGENTS.md#add-a-game): the steps to add your own game by hand.
+- [Fixing a game](AGENTS.md#fix-a-game-that-fails): the steps to fix a game by hand.
+- [Machine and game files](docs/FILES.md): every line of a machine file and of a
+  game file.
+
+### How it works
+
+- [The `snapcas` design](docs/DESIGN.md): what each part does and why.
+- [Internals](docs/INTERNALS.md): how each part works, step by step.
+- [Formats](docs/FORMATS.md): the files and memory layouts, byte by byte.
+- [Notes](docs/NOTES.md): the games and findings behind each rule.
+
+### Build and test
+
+- [Build and test](docs/BUILD.md): the folders, and the `make` commands that build
+  and test `snapcas`.
+- [The `snapcas` plan](docs/PLAN.md): the steps that built `snapcas`, and their
+  tests.
 
 ## License
 
