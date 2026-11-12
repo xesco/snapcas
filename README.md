@@ -50,7 +50,7 @@ git clone https://github.com/xesco/snapcas.git
 ```
 
 ```
-I want to play Gauntlet on my MSX. Follow "Guide a user" in AGENTS.md.
+> I want to play Gauntlet on my MSX. Follow "Guide a user" in AGENTS.md.
 ```
 
 The agent asks you what it needs to know, such as your MSX's model and its
@@ -61,8 +61,8 @@ For a game that `snapcas` does not know, give the agent your own CAS file instea
 of a game's name:
 
 ```
-I want to play the CAS file ~/Downloads/mygame.cas on my MSX. Follow "Guide a
-user" in AGENTS.md.
+> I want to play the CAS file ~/Downloads/mygame.cas on my MSX. Follow "Guide a
+  user" in AGENTS.md.
 ```
 
 The rest of this page gives the same steps for you to do instead of the agent.
@@ -98,8 +98,8 @@ you. Open the `snapcas` folder in the agent, and tell it your MSX's model and
 what is in each cartridge slot:
 
 ```
-Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
-steps 1 to 5 of "Add a machine" in AGENTS.md.
+> Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
+  steps 1 to 5 of "Add a machine" in AGENTS.md.
 ```
 
 Or [open an issue](https://github.com/xesco/snapcas/issues) with your MSX's model
@@ -135,8 +135,8 @@ error. Then the game needs a fix for your MSX. An AI coding agent can find the f
 for you:
 
 ```
-Gauntlet fails on phc28s-ram64k-carnivore2. Fix it: follow steps 1 to 4 of
-"Fix a game that fails" in AGENTS.md. Then run snap with --check again.
+> Gauntlet fails on phc28s-ram64k-carnivore2. Fix it: follow steps 1 to 4 of
+  "Fix a game that fails" in AGENTS.md. Then run snap with --check again.
 ```
 
 ### Copy the game to the card
@@ -177,8 +177,8 @@ file, which tells `snapcas` how to load the game, and makes the game's `.SNP`
 file for your machine:
 
 ```
-Add the CAS file ~/Downloads/mygame.cas to snapcas and make its image for
-phc28s-ram64k-carnivore2. Follow steps 1 to 4 of "Add a game" in AGENTS.md.
+> Add the CAS file ~/Downloads/mygame.cas to snapcas and make its image for
+  phc28s-ram64k-carnivore2. Follow steps 1 to 4 of "Add a game" in AGENTS.md.
 ```
 
 ### Copy your games to the card
