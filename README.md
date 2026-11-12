@@ -49,8 +49,9 @@ loaders expect one machine's memory layout, one slot order, or no disk interface
 Of the 1,545 games, `RELICS` needs more memory than the machines with 1,544 have.
 
 Your MSX is not in the list? [Open an issue](https://github.com/xesco/snapcas/issues)
-and tell us your MSX model, its RAM, and what is in each cartridge slot, for example
-"Toshiba HX-10, 64 KB, Carnivore2 in slot 1".
+and tell me your MSX model, its RAM, and what is in each cartridge slot, for example
+"Toshiba HX-10, 64 KB, Carnivore2 in slot 1". I will add support for your machine and
+patch all the needed games for you.
 
 ## Requirements
 
