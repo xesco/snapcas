@@ -96,6 +96,10 @@ game on that MSX.
    > Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
    > steps 1 to 5 of "Add a machine" in AGENTS.md.
 
+   Or [open an issue](https://github.com/xesco/snapcas/issues) with your MSX's model
+   and what is in each cartridge slot. I will add support for your machine and patch
+   all the needed games for you.
+
 4. Make the game's `.SNP` file for your machine:
 
    ```
