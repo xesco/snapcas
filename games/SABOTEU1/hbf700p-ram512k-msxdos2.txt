@@ -5,3 +5,8 @@
 # cartridge. On hbf700p-ram512k-msxdos2 itself the game fails: point 1: fail: vdp14
 # is 07, expected 00. `make games` wrote this line.
 capture hbf700p-msxdos2
+
+# The snapshot at the first interrupt after the load leaves the VDP's VRAM pointer at
+# 0 in SCREEN 2, and the restorer sets that pointer with a carry into R#14, which
+# openMSX makes only in MSX2 screen modes. A later snapshot has another pointer.
+snapshot at 112
