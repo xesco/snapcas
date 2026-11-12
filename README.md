@@ -1,35 +1,14 @@
 # snapcas
 
-`snapcas` lets you play MSX tape games on your real MSX, without a tape player. It
-is a program for your computer and for your MSX. On the computer, it turns a game's
-CAS file into a single `.SNP` file. You copy that file to your MSX's disk or SD card
-and type one command on the MSX. The game then loads and starts right away.
-
-The goal of the project is to play any CAS file on any MSX as the original tape
-did, whatever cartridges the MSX has and in whatever slot order. That includes games
-whose original tape fails on some machines, because its loader expects one machine's
-memory layout or no disk interface, or other issues.
-
-It works in three steps:
-
-1. It loads the game's tape (the CAS file) in `openMSX`, an MSX emulator that is set
-   up like your own MSX.
-2. Once the game has loaded, it saves the contents of the MSX's memory to the `.SNP`
-   file. This is like taking a photo or a snapshot of the game.
-3. On your real MSX, the program `SNAPCAS.COM` puts that memory back, and the game
-   continues from there.
-
-Some games read the tape again while you play, for example to load the next level.
-The `.SNP` file also holds the rest of the tape, so those games work too. Some
-games do not work on every MSX, and `snapcas` changes them with patches so that they
-work on yours.
+`snapcas` lets you play MSX tape games on your real MSX, without a tape player. On
+your computer, it loads a game's CAS file in `openMSX`, set up like your own MSX,
+and saves the game's memory in a single `.SNP` file. You copy that file to your
+MSX's disk or SD card. Then you run `SNAPCAS.COM` on the MSX, and the game starts.
 
 `snapcas` knows 1,545 games and 10 MSX configurations, each an MSX model with its
-cartridges. You can add your own games and configurations. `snapcas` does not hold
-the CAS files of these games. It downloads a game's CAS file from
-[File-Hunter](https://download.file-hunter.com) when you make the game's `.SNP`
-file. What it holds for each game is a few small text files that say how to load
-the game on a particular configuration and list the game's patches.
+cartridges, and you can add your own. It does not hold the CAS files. It downloads a
+game's CAS file from [File-Hunter](https://download.file-hunter.com) when you make
+the `.SNP` file.
 
 ## Why another tool
 
