@@ -5,3 +5,7 @@
 # line can still make such a game work later. Each line: the machine, the game
 # file's folder, and what fails in plain openMSX.
 
+nms8245-ram512k-sunriseide DIZZY-DI Resets after the load, and ends in Nextor's BASIC
+nms8245-ram512k-sunriseide ECHEC Stops with Bad drive name in 85
+nms8245-ram512k-sunriseide REFLEX Stops with Out of memory in 0
+xp800-sdmapper LADY-SAF Resets after the load, also without the SD Mapper, and ends in BASIC

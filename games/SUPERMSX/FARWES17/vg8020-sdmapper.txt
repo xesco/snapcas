@@ -1,0 +1,7 @@
+# Lines for vg8020-sdmapper, the Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1.
+
+# The capture runs on vg8020, the Philips VG-8020 without cartridges, so without a
+# disk system. On vg8020-sdmapper itself the game fails: build.py:
+# /Users/xesco/src/snapcas/games/SUPERMSX/FARWES17/game.txt:14: the bytes at AC29
+# are not the patch's old bytes. `make games` wrote this line.
+capture vg8020

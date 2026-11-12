@@ -1,0 +1,8 @@
+# Lines for xp800-sdmapper, the Gradiente Expert XP-800 (MSX1, 64 KB) with an SD
+# Mapper v1.
+
+# The capture runs on xp800, the Gradiente Expert XP-800 without cartridges, so
+# without a disk system. On xp800-sdmapper itself the game fails: build.py: the 26
+# bytes below SP 50F0h are not in a RAM page that the snapshot keeps. `make games`
+# wrote this line.
+capture xp800

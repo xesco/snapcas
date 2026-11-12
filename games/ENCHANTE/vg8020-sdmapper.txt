@@ -1,0 +1,7 @@
+# Lines for vg8020-sdmapper, the Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1.
+
+# The capture runs on vg8020, the Philips VG-8020 without cartridges, so without a
+# disk system. On vg8020-sdmapper itself the game fails: build.py: the 26 bytes
+# below SP 0009h cross a page boundary or include FFFFh. `make games` wrote this
+# line.
+capture vg8020

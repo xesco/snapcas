@@ -4,3 +4,4 @@
 # leaves room for the images' segments.
 openmsx -machine Philips_NMS_8245 -ext ram512k -ext SunriseIDE_Nextor
 disk hda
+variant nms8245

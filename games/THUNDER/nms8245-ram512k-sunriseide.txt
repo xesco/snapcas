@@ -1,0 +1,9 @@
+# Lines for nms8245-ram512k-sunriseide, the Philips NMS 8245 (MSX2, 128 KB) with a
+# 512 KB RAM cartridge and a Sunrise IDE.
+
+# The game fills memory with PUSH over the tape service's part of page 3, and
+# reads side 2 during play, so the whole service goes into T0. T0 needs the game's
+# page 0 RAM outside DOS's mapper, so the capture runs on nms8245, the Philips NMS
+# 8245 without cartridges.
+capture nms8245
+service t0

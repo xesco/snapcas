@@ -1,0 +1,6 @@
+# Lines for vg8020-sdmapper, the Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1.
+
+# The capture runs on vg8020, the Philips VG-8020 without cartridges, so without a
+# disk system. On vg8020-sdmapper itself the game fails: point 3: fail: SNAPCAS.COM
+# starts again 40.8 seconds after the restore. `make games` wrote this line.
+capture vg8020
