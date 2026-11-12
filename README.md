@@ -182,10 +182,9 @@ If you want to play your own CAS file, you can add the game to the project.
 | [Playing a game](docs/PLAYING.md) | What the MSX needs, and the keys that control the tape while you play |
 | [The `snapcas` command](docs/CLI.md) | Every `snapcas.py` command and its options |
 | [Machine and game files](docs/FILES.md) | Every line of a machine file and of a game file |
-| AGENTS.md, "Add a machine" | The steps to add your MSX by hand |
-| AGENTS.md, "Add a game" | The steps to add your own game by hand |
-| AGENTS.md, "Fix a game that fails" | The steps to fix a game by hand |
-| AGENTS.md | Every task in full, step by step, for an AI agent or for you |
+| [Adding a machine](AGENTS.md#add-a-machine) | The steps to add your MSX by hand |
+| [Adding a game](AGENTS.md#add-a-game) | The steps to add your own game by hand |
+| [Fixing a game](AGENTS.md#fix-a-game-that-fails) | The steps to fix a game by hand |
 | [Your own games](custom/README.md) | Your own games |
 | [DOS system files](dos/README.md) | The DOS system files that `--check` needs |
 | [The `snapcas` design](docs/DESIGN.md) | What each part of `snapcas` does and why |
