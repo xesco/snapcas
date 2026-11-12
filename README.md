@@ -1,14 +1,14 @@
 # snapcas
 
-`snapcas` lets you play MSX tape games on your MSX, without a tape player. On your
-computer, it loads a game's CAS file in `openMSX`, set up like your own MSX,
-and saves the game's memory in a single `.SNP` file. You copy that file to your
-MSX's disk or SD card. Then you run `SNAPCAS.COM` on the MSX, and the game starts.
+`snapcas` lets you play tape games on your MSX without a tape player. On your
+computer, it loads a CAS file in `openMSX`, set up like your own machine, and saves
+the game's memory in a single `.SNP` file. You copy that file to a disk or SD card.
+Then you run `SNAPCAS.COM` on the MSX, and the game starts.
 
-`snapcas` knows 1,545 games and 10 MSX configurations, each an MSX model with its
-cartridges, and you can add your own. It does not hold the CAS files. It downloads a
-game's CAS file from [File-Hunter](https://download.file-hunter.com) when you make
-the `.SNP` file.
+`snapcas` knows 1,545 games and 10 configurations, each an MSX model with its
+cartridges, and you can add your own. It does not hold the CAS files. It downloads
+them from [File-Hunter](https://download.file-hunter.com) when you make the `.SNP`
+file.
 
 ## Why another tool
 
