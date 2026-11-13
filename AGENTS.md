@@ -3,8 +3,9 @@
 This page is for an AI agent that works on `snapcas`. The page gives each task as
 steps in order. Each step names the files that the step changes and the command that
 checks the step. Tables give the fix for each message that a step can print. The
-page has five tasks: to guide a user, to make a game's image, to add a machine, to
-add a game, and to fix a game that fails. The [README](README.md) gives the tasks in
+page has six tasks: to guide a user, to make a game's image, to add a machine, to
+add a game, to fix a game that fails, and to fix a game that fails on the MSX. The
+[README](README.md) gives the tasks in
 short form for a person. The reasons behind the rules are in
 [docs/DESIGN.md](docs/DESIGN.md). The formats of the files are in
 [docs/FILES.md](docs/FILES.md), and the games that taught each rule are in
@@ -73,7 +74,7 @@ step does.
    |---|---|
    | A message of `SNAPCAS` at the DOS prompt | Mostly the MSX is not the machine of the image. Ask again what is in each slot, and go back to step 3 |
    | The game stops when it loads from the tape | Give the user the tape's keys ([docs/PLAYING.md, Tape keys](docs/PLAYING.md#tape-keys)) |
-   | The game fails later | Go back to step 4 with what the user did and saw |
+   | The game hangs, reboots, or fails later | [Fix a game that fails on the MSX](#fix-a-game-that-fails-on-the-msx) |
 
 ## Make a game's image
 
@@ -589,6 +590,38 @@ changed. When the code in `bin/` or `tools/`, the DOS files, or `openMSX`'s vers
 changed, the command reruns every game. A change to `game.txt` holds on every
 machine, so also run `make games` on each machine that has results in `out/games/`.
 Last, run `make test`.
+
+## Fix a game that fails on the MSX
+
+All four points of the check pass, and the game still fails on the user's MSX. The
+check runs the image for 60 seconds in `openMSX` and does not play the game, so it
+cannot see every failure ([docs/DESIGN.md, Check](docs/DESIGN.md#check)). Do not run
+`./snapcas.py try`. Ask the user to run it. Ask the user what the screen shows when
+the game fails (a photo is best), what played before, and what the user pressed. Then
+find the row:
+
+| The user sees | Cause | Fix |
+|---|---|---|
+| `... not found`, `is not a snapcas image`, `the file is cut short` | A wrong name or folder, or a bad copy | `./snapcas.py sync` again, and check the `CD` folder |
+| `made for another version of SNAPCAS.COM` | The image is older than the card's `SNAPCAS.COM` | `./snapcas.py snap` again, then `sync` |
+| `made for another machine`, `slot 0 ... is not RAM`, `slot 0 is not expanded as at the capture`, `slot 0 is DOS's mapper ...` | The image is for another machine, or the machine file does not describe this one | Ask for the model and slots again. Otherwise [Add a machine](#add-a-machine) |
+| `DOS's pages are not in one memory mapper`, `MSX-DOS 1 needs a memory mapper ...`, `no page 1 or 2 can hold ...`, `a page's segment is beyond ...` | The MSX has no suitable memory mapper | No line fixes it. Tell the user |
+| `DOS has too few free mapper segments`, `needs N ... DOS has M`, `more than 64 pages ...` | The mapper is too small | No line fixes it. Tell the user the numbers |
+| `a page 0 is in another subslot`, `rom keep needs ...`, `service t0 needs ...`, `T0 cannot take ...` | The game file's `rom keep` or `service t0` does not suit this machine | A `capture` variant whose RAM is outside DOS's mapper, or remove the line from the machine's game file |
+| The machine reboots, to the boot screen or into DOS | The loader crashes after the restore. Point 3 can miss it | A `capture` variant, or a slot patch ([Patch the code](#3-patch-the-code)) |
+| The screen stops and no key works | Unknown. Talvisota on `phc28s-ram64k-carnivore2` needed `capture phc28s-ram64k` | `capture <variant>` with the variant without the disk system |
+| The game waits for music that never ends | `PLAY` that runs at the snapshot does not resume on a real PHC-28S | `snapshot at <seconds>` after the music |
+| The game stops while it reads the tape, or the screen turns yellow | The game needs the tape's keys, or keeps data where the tape service's entries are | Give the user the tape keys ([docs/PLAYING.md](docs/PLAYING.md#tape-keys)). Otherwise `service t0` or `service at <address>`, with `patch` lines, as Altered Beast's game file has |
+| Wrong pixels while the game loads from the tape | Unknown. The tape service may return bytes faster than the VDP accepts | No fix is known. For a shipped game, add a line to `tests/snapcas-failures.txt`. For a custom game, tell the user |
+| The joystick or keys do nothing, or the game acts by itself | The game reads a port that the machine leaves in another state, as Navy Moves and Ghostbusters II do | `patch` lines, as in `games/NAVY-MOV/game.txt`. Ask whether the keyboard works |
+| A silent menu, or a title that flashes until a key | The game does this in plain `openMSX` too | Not a failure. Run `python3 -I tools/plain.py <GAME> <machine>` to confirm |
+
+After each fix, run `./snapcas.py snap <GAME> <machine> --check`, which must still
+pass. Then ask the user to run `./snapcas.py sync` and to play past the screen where
+the game failed. When it still fails, ask again what the screen shows. When the plain
+load in `openMSX` fails the same way, add a line to `tests/openmsx-failures.txt` for
+a shipped game ([Decide whether openMSX itself fails](#5-decide-whether-openmsx-itself-fails)).
+For a custom game, tell the user.
 
 ## More
 

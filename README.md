@@ -166,6 +166,18 @@ CD \SNAPCAS\G
 > While you play, three keys control the tape. You need them only for a game that
 > loads its levels from the tape ([Tape keys](docs/PLAYING.md#tape-keys)).
 
+### Fix a game that fails on the MSX
+
+If the game fails on the MSX although all four `check` lines say `pass`, the check
+cannot see it, because it does not play the game. Tell an AI coding agent what the
+screen shows when the game fails, and what you pressed:
+
+```
+> Gauntlet hangs on my phc28s-ram64k-carnivore2. The screen shows the title and
+  then stops. Fix it: follow "Fix a game that fails on the MSX" in AGENTS.md. Then
+  run snap with --check again.
+```
+
 ## Add a custom game
 
 If you want to play your own CAS file, you can add the game to the project.
