@@ -130,13 +130,25 @@ also tests the file in `openMSX`. The command prints four lines that start with
 
 ### Fix a game that fails
 
-You need this step only if a line says `fail`, or if the command stops with an
-error. Then the game needs a fix for your MSX. An AI coding agent can find the fix
-for you:
+You need this step only if a game fails. An AI coding agent can find the fix for
+you.
+
+If a `check` line says `fail`, or if the command stops with an error, the game needs
+a fix for your MSX:
 
 ```
 > Gauntlet fails on phc28s-ram64k-carnivore2. Fix it: follow steps 1 to 4 of
   "Fix a game that fails" in AGENTS.md. Then run snap with --check again.
+```
+
+If all four `check` lines say `pass` and the game still fails on the MSX, the check
+cannot see it, because it does not play the game. Tell the agent what the screen
+shows when the game fails, and what you pressed:
+
+```
+> Gauntlet hangs on my phc28s-ram64k-carnivore2. The screen shows the title and
+  then stops. Fix it: follow "Fix a game that fails on the MSX" in AGENTS.md. Then
+  run snap with --check again.
 ```
 
 ### Copy the game to the card
@@ -165,18 +177,6 @@ CD \SNAPCAS\G
 > [!TIP]
 > While you play, three keys control the tape. You need them only for a game that
 > loads its levels from the tape ([Tape keys](docs/PLAYING.md#tape-keys)).
-
-### Fix a game that fails on the MSX
-
-If the game fails on the MSX although all four `check` lines say `pass`, the check
-cannot see it, because it does not play the game. Tell an AI coding agent what the
-screen shows when the game fails, and what you pressed:
-
-```
-> Gauntlet hangs on my phc28s-ram64k-carnivore2. The screen shows the title and
-  then stops. Fix it: follow "Fix a game that fails on the MSX" in AGENTS.md. Then
-  run snap with --check again.
-```
 
 ## Add a custom game
 
