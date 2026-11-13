@@ -13,7 +13,7 @@ file.
 ## Why another tool
 
 I wrote `snapcas` because most of the games I like did not work with what was available.
-A tool that plays a CAS file as it is depends on the game's own loader, and many
+A tool that plays a CAS file as it is, depends on the game's own loader, and many
 loaders expect one machine's memory layout, one slot order, or no disk interface.
 
 `snapcas` handles those games in these ways:
