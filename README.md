@@ -77,6 +77,10 @@ git clone https://github.com/xesco/snapcas.git
 cd snapcas
 ```
 
+Or download `snapcas-<version>.zip` from the
+[latest release](https://github.com/xesco/snapcas/releases/latest) and unzip it. The
+release also holds `SNAPCAS.COM` on its own.
+
 ### Find the game
 
 ```

@@ -54,3 +54,16 @@ when a game fails that neither of two lists names. `tests/openmsx-failures.txt`
 holds the games that fail in `openMSX` itself, and `tests/snapcas-failures.txt`
 holds the known failures of `snapcas`. A first run takes hours. Ctrl-C stops a run,
 and the next run keeps the results of the games that finished.
+
+## Version
+
+The version is MAJOR.MINOR, and `src/version.inc` holds it with the year and the
+author. MAJOR goes up when `IMAGE_FORMAT` in `src/service.inc` changes, because then
+`SNAPCAS.COM` refuses the images of an earlier version. MINOR goes up at each other
+release. A release changes `src/version.inc`, runs `make all`, and commits both. The
+git tag `v<MAJOR>.<MINOR>` on that commit, pushed to GitHub, makes the release:
+`.github/workflows/release.yml` checks the tag against `src/version.inc`, and
+publishes a zip of the repository at the tag and `SNAPCAS.COM` on its own. The
+[latest release](https://github.com/xesco/snapcas/releases/latest) is the one that
+users download. `SNAPCAS.COM` prints the version, the year and the author when it
+starts, as DOS does, and `./snapcas.py --version` prints the same.

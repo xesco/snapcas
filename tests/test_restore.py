@@ -22,34 +22,44 @@ class Usage(unittest.TestCase):
     """The first SNAPCAS.COM of PLAN.md's step 1: the assembler, the disk
     image, the boot keys and the screen reading."""
 
-    def test_usage_and_errors(self):
-        folder = os.path.join(WORK, "usage")
+    def screen(self, name, autoexec, end):
+        """Runs the lines of autoexec on the PHC-28S under Nextor, with the
+        test's images on its disk, and returns the screen once it shows end.
+        Each run of SNAPCAS prints its banner first, so a screen holds only a few
+        runs."""
+        folder = os.path.join(WORK, "usage", name)
         os.makedirs(folder, exist_ok=True)
-        # Under MSX-DOS 2 the argument is a path, here to BAD.SNP in the
-        # folder G, with the extension and without it.
-        files = {"AUTOEXEC.BAT": b"SNAPCAS\r\nSNAPCAS NONE\r\nSNAPCAS SHORT\r\nSNAPCAS BAD\r\n"
-                                 b"MD G\r\nCOPY BAD.SNP G\r\nSNAPCAS G\\BAD.SNP\r\nSNAPCAS /M \\G\\BAD\r\n"
-                                 b"SNAPCAS G\\NONE\r\nSNAPCAS OLD\r\n",
+        files = {"AUTOEXEC.BAT": autoexec,
                  "BAD.SNP": b"SNAPDISK" + bytes(4088), "OLD.SNP": b"SNAPCAS2" + bytes(4088), "SHORT.SNP": b"SNA"}
-        for name, data in files.items():
-            with open(os.path.join(folder, name), "wb") as f:
+        for file, data in files.items():
+            with open(os.path.join(folder, file), "wb") as f:
                 f.write(data)
         disk = os.path.join(folder, "disk.dsk")
         msx.make_disk(disk, [os.path.join(support.NEXTOR, "NEXTOR.SYS"), os.path.join(support.NEXTOR, "COMMAND2.COM"),
-                             support.COM] + [os.path.join(folder, name) for name in files])
+                             support.COM] + [os.path.join(folder, file) for file in files])
         machine = msx.read_machine(msx.machine_path(support.PHC28S))
-        screen = support.screen_after(machine, disk, "OLD.SNP: made", os.path.join(folder, "screen.txt"))
+        return support.screen_after(machine, disk, end, os.path.join(folder, "screen.txt"))
+
+    def test_usage_and_errors(self):
+        screen = self.screen("errors", b"SNAPCAS\r\nSNAPCAS NONE\r\nSNAPCAS SHORT\r\nSNAPCAS BAD\r\nSNAPCAS OLD\r\n",
+                             "OLD.SNP: made")
+        self.assertIn("SNAPCAS.COM version ", screen)
+        self.assertIn("Copyright (", screen)
         self.assertIn("Usage: SNAPCAS <game> [/M]", screen)
         self.assertIn("Restores <game>.SNP, a snapcas image.", screen)
         self.assertIn("NONE.SNP not found", screen)
         self.assertIn("SHORT.SNP is not a snapcas image", screen)
         self.assertIn("BAD.SNP is not a snapcas image", screen)
-        self.assertIn("G\\BAD.SNP is not a snapcas image", screen)
-        self.assertIn("\\G\\BAD.SNP is not a snapcas image", screen)
-        self.assertIn("G\\NONE.SNP not found", screen)
         # The message wraps at the screen's width.
         self.assertIn("OLD.SNP: made for another version of SNAPCAS.COM", " ".join(screen.split()))
 
+    def test_a_path_names_the_image_under_msx_dos_2(self):
+        # BAD.SNP in the folder G, with the extension and without it.
+        screen = self.screen("path", b"MD G\r\nCOPY BAD.SNP G\r\nSNAPCAS G\\BAD.SNP\r\nSNAPCAS /M \\G\\BAD\r\n"
+                                     b"SNAPCAS G\\NONE\r\n", "G\\NONE.SNP not found")
+        self.assertIn("G\\BAD.SNP is not a snapcas image", screen)
+        self.assertIn("\\G\\BAD.SNP is not a snapcas image", screen)
+        self.assertIn("G\\NONE.SNP not found", screen)
 
 class Stops(unittest.TestCase):
     """The restorer's stops for an image that the machine cannot restore, on

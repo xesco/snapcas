@@ -51,7 +51,7 @@ help:
 # a rule of its own, with its binary's sources, because git holds the binaries
 # and not the symbol files: a clone gets them by an assembly that leaves the
 # binaries alone.
-SNAPCAS_SRC := src/snapcas.asm src/service.inc src/slots.inc src/worker.inc
+SNAPCAS_SRC := src/snapcas.asm src/service.inc src/slots.inc src/worker.inc src/version.inc
 SERVICE_SRC := src/service.asm src/service.inc src/tape.inc
 SYMBOLS := $(OUT)/snapcas.sym $(OUT)/service.sym
 

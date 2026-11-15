@@ -52,6 +52,7 @@ STACK   equ 4000h
 HOLD_MAX equ 64         ; the most holding segments that the worker copies
 
         include "service.inc"
+        include "version.inc"
 
 ; The offsets of a record's data in the image come from these sizes by shifts,
 ; and the tables are walked by these sizes.
@@ -61,6 +62,12 @@ HOLD_MAX equ 64         ; the most holding segments that the worker copies
         org 0100h
 
 start:
+        ; The banner, as DOS's own: the version, the year and the author.
+        ; tests/support.py's restorer_run jumps from banner to banner_end.
+banner:
+        ld de,t_banner
+        call print
+banner_end:
         ; /M in the command line, its length at 0080h and its text after it,
         ; asks for the manual tape (INTERNALS.md, The manual tape). It is read
         ; first, before a DOS call can use 0080h.
@@ -2067,6 +2074,8 @@ print_dec:
 
         include "slots.inc"
 
+t_banner:   db "SNAPCAS.COM version ",VERSION,13,10
+            db "Copyright (",YEAR,") ",AUTHOR,13,10,13,10,"$"
 t_usage:    db "Usage: SNAPCAS <game> [/M]",13,10
             db "Restores <game>.SNP, a snapcas image.",13,10
             db "/M: the tape moves only with RETURN,",13,10

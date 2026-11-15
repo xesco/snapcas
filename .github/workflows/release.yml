@@ -1,0 +1,32 @@
+# A release for each tag v<MAJOR>.<MINOR> (docs/BUILD.md, Version): a zip of the
+# repository at the tag, which holds the built bin/, and SNAPCAS.COM on its own
+# for a card. The tag must match the version in src/version.inc.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the tag against src/version.inc
+        run: |
+          version=$(sed -n 's/^ *define VERSION "\(.*\)"/\1/p' src/version.inc)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "the tag $GITHUB_REF_NAME does not match src/version.inc's $version"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - name: Make the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git archive --format=zip --prefix="snapcas-$VERSION/" -o "snapcas-$VERSION.zip" "$GITHUB_REF_NAME"
+          gh release create "$GITHUB_REF_NAME" --title "snapcas $VERSION" --generate-notes \
+            "snapcas-$VERSION.zip" bin/SNAPCAS.COM
