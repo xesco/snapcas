@@ -32,6 +32,11 @@ CD \SNAPCAS\G
 \BIN\SNAPCAS GAUNTLET
 ```
 
+Under MSX-DOS 2 and Nextor, the name can also be a path, such as
+`\BIN\SNAPCAS \SNAPCAS\G\GAUNTLET`. A path separates its folders with `\`, which
+the MSX shows as its yen sign, because DOS reads a `/` as an option. MSX-DOS 1 has no
+folders.
+
 ## Tape keys
 
 Some games read the tape again while you play, for example to load the next level.

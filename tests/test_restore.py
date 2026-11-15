@@ -25,7 +25,11 @@ class Usage(unittest.TestCase):
     def test_usage_and_errors(self):
         folder = os.path.join(WORK, "usage")
         os.makedirs(folder, exist_ok=True)
-        files = {"AUTOEXEC.BAT": b"SNAPCAS\r\nSNAPCAS NONE\r\nSNAPCAS SHORT\r\nSNAPCAS BAD\r\nSNAPCAS OLD\r\n",
+        # Under MSX-DOS 2 the argument is a path, here to BAD.SNP in the
+        # folder G, with the extension and without it.
+        files = {"AUTOEXEC.BAT": b"SNAPCAS\r\nSNAPCAS NONE\r\nSNAPCAS SHORT\r\nSNAPCAS BAD\r\n"
+                                 b"MD G\r\nCOPY BAD.SNP G\r\nSNAPCAS G\\BAD.SNP\r\nSNAPCAS /M \\G\\BAD\r\n"
+                                 b"SNAPCAS G\\NONE\r\nSNAPCAS OLD\r\n",
                  "BAD.SNP": b"SNAPDISK" + bytes(4088), "OLD.SNP": b"SNAPCAS2" + bytes(4088), "SHORT.SNP": b"SNA"}
         for name, data in files.items():
             with open(os.path.join(folder, name), "wb") as f:
@@ -40,6 +44,9 @@ class Usage(unittest.TestCase):
         self.assertIn("NONE.SNP not found", screen)
         self.assertIn("SHORT.SNP is not a snapcas image", screen)
         self.assertIn("BAD.SNP is not a snapcas image", screen)
+        self.assertIn("G\\BAD.SNP is not a snapcas image", screen)
+        self.assertIn("\\G\\BAD.SNP is not a snapcas image", screen)
+        self.assertIn("G\\NONE.SNP not found", screen)
         # The message wraps at the screen's width.
         self.assertIn("OLD.SNP: made for another version of SNAPCAS.COM", " ".join(screen.split()))
 
@@ -58,13 +65,17 @@ class Stops(unittest.TestCase):
         symbols = support.symbols("snapcas")
         ram, vram = service["REC_RAM"], service["REC_VRAM"]
         # The second read of a record fails, as at a disk error: the file's
-        # size in the restorer's FCB is 0 by then, so DOS reads nothing. The
-        # first VRAM block is written by then.
+        # size in the restorer's FCB is 0 by then, so MSX-DOS 1 reads nothing,
+        # and its handle is FFh, which MSX-DOS 2 has not opened. The first
+        # VRAM block is written by then.
         fail = f"""
 set ::reads 0
 debug set_bp {symbols["read_this"]} $::snapcas {{safe {{
     incr ::reads
-    if {{$::reads == 2}} {{ debug write_block memory {symbols["fcb"] + FCB_FILESIZE} [binary format H* 00000000] }}
+    if {{$::reads == 2}} {{
+        debug write_block memory {symbols["fcb"] + FCB_FILESIZE} [binary format H* 00000000]
+        debug write memory {symbols["handle"]} 0xFF
+    }}
 }}}}
 """
 

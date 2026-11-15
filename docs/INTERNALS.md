@@ -751,8 +751,9 @@ below 4000h, and it holds the worker twice, assembled to run in pages 1 and 2. T
 restorer keeps DOS's stack, in page 3, because MSX-DOS 2's mapper routines page the
 DOS kernel into page 0. It uses a stack in page 0 only while it selects another slot
 in page 3, and the worker keeps its own stack in its own page. The restorer reads
-the image with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`, which MSX-DOS 1
-has and which MSX-DOS 2 and Nextor keep. For DOS's mapper, it takes these from each
+the image under MSX-DOS 1 with the FCB functions `_FOPEN`, `_SETDTA` and `_RDBLK`,
+which take a name without a folder. Under MSX-DOS 2 and Nextor it opens the image
+by its path with `_OPEN`, and reads it with `_SEEK` and `_READ`. For DOS's mapper, it takes these from each
 DOS:
 
 | | MSX-DOS 2 and Nextor | MSX-DOS 1 |
@@ -782,8 +783,11 @@ nothing of the game. Every stop for an image that the machine cannot restore com
 in the plan, so the stop's message shows on DOS's screen
 ([The restorer's stops](#the-restorers-stops)).
 
-1. Opens `<GAME>.SNP`, whose name DOS has placed in the FCB at 005Ch, with the
-   extension set to SNP. Without a name, it prints its usage. It reads the image's
+1. Opens `<GAME>.SNP`. The argument is the command line's first word that is not
+   an option, and the restorer adds `.SNP` when its last item has no extension.
+   Under MSX-DOS 2 and Nextor the restorer opens that path. Under MSX-DOS 1 it opens
+   the name that DOS has placed in the FCB at 005Ch, with the extension set to SNP.
+   Without an argument, it prints its usage. It reads the image's
    first 4,096 bytes, and checks, in this order:
    - That the image starts with `SNAPCAS` and the format's number of this
      `SNAPCAS.COM` ([FORMATS.md, Image](FORMATS.md#image)). For an image with
@@ -795,7 +799,8 @@ in the plan, so the stop's message shows on DOS's screen
    - That the CRC-16 of the main ROM and of the sub-ROM equal the image's. The
      worker runs in page 2 and reads the ROMs while pages 0 and 1 select the ROM.
    - That the file holds the header and tables and 16,384 bytes for each record
-     that has data, by the size that `_FOPEN` leaves in the FCB.
+     that has data, by the size that `_FOPEN` leaves in the FCB, or that a `_SEEK`
+     to the file's end returns.
    - The records. The slot of each RAM page must be expanded on this machine when
      the slot was expanded at the capture, and only then. A RAM page outside a
      mapper must not be in DOS's mapper's slot, where the page's copy would write
@@ -847,7 +852,7 @@ in the plan, so the stop's message shows on DOS's screen
      segment in step 6.
    - Each other service segment gets one of the segments left, and so does the
      worker.
-3. Reads the records in this order, through the FCB's random record field: the RAM
+3. Reads the records in this order, by their offsets in the file: the RAM
    pages of slots other than DOS's mapper, the service segments, the RAM pages of
    DOS's mapper, and the VRAM blocks. The VRAM blocks come last, because the first
    one blanks the display and writes over DOS's text. It places each record:

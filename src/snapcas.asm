@@ -18,6 +18,9 @@ _STROUT equ 09h         ; print the string at DE, ended by "$"
 _FOPEN  equ 0Fh         ; open the file of the FCB at DE
 _SETDTA equ 1Ah         ; read at DE
 _RDBLK  equ 27h         ; read HL records of the FCB at DE
+_OPEN   equ 43h         ; MSX-DOS 2 only: open the file whose path is at DE
+_READ   equ 48h         ; MSX-DOS 2 only: read HL bytes of handle B into DE
+_SEEK   equ 4Ah         ; MSX-DOS 2 only: move handle B to DE:HL
 _DOSVER equ 6Fh         ; MSX-DOS 2 only: the version in B
 
 DOSFCB  equ 005Ch       ; DOS parses the first argument into this FCB
@@ -58,10 +61,6 @@ HOLD_MAX equ 64         ; the most holding segments that the worker copies
         org 0100h
 
 start:
-        ld a,(DOSFCB+1)
-        cp " "
-        ld de,t_usage
-        jp z,stop_message
         ; /M in the command line, its length at 0080h and its text after it,
         ; asks for the manual tape (INTERNALS.md, The manual tape). It is read
         ; first, before a DOS call can use 0080h.
@@ -89,6 +88,40 @@ start:
         ld (manual),a
         jr .option
 .options:
+        call get_path
+        ld de,t_usage
+        jp z,stop_message
+        ; MSX-DOS 2 and Nextor open the argument by its path, so that it can
+        ; name a folder. MSX-DOS 1 has no folders, and its FCB holds a drive
+        ; and a name only. MSX-DOS 1 has no function 6Fh and leaves B as it is.
+        ld b,0
+        ld c,_DOSVER
+        call BDOS
+        ld a,b
+        cp 2
+        jr c,.fcb
+        ld a,1
+        ld (by_path),a
+        ld de,path
+        ld a,1                  ; open mode: no writes
+        ld c,_OPEN
+        call BDOS
+        or a
+        ld de,t_notfound
+        jp nz,stop_name
+        ld a,b
+        ld (handle),a
+        ; The file's size goes where _FOPEN puts it, for check_size: a move
+        ; to the file's end returns it. read_bytes moves from the start.
+        ld a,2                  ; from the file's end
+        ld de,0
+        ld hl,0
+        ld c,_SEEK
+        call BDOS
+        ld (fcb+FCB_FILESIZE),hl
+        ld (fcb+FCB_FILESIZE+2),de
+        jr .opened
+.fcb:
         ; Copy the drive and the name into our own FCB, which already holds
         ; the extension SNP. The FCB at 005Ch cannot be used as it is: its
         ; random record field overlaps the command line at 0080h.
@@ -104,6 +137,7 @@ start:
         jp nz,stop_name
         ld hl,1
         ld (fcb+FCB_RECSIZE),hl ; records of 1 byte
+.opened:
         ld hl,H_SIZE
         ld (count),hl
         ld hl,HDR
@@ -1480,6 +1514,30 @@ read_record:
 read_bytes:
         push ix
         push iy
+        ld a,(by_path)
+        or a
+        jr z,.fcb
+        push hl                 ; the buffer
+        ex de,hl                ; the offset's low word
+        ld d,b                  ; and its high word
+        ld e,c
+        ld a,(handle)
+        ld b,a
+        xor a                   ; from the file's start
+        ld c,_SEEK
+        call BDOS
+        pop de
+        or a
+        jr nz,.done
+        ld a,(handle)
+        ld b,a
+        ld hl,(count)
+        ld c,_READ
+        call BDOS
+        or a
+        jr z,.compare
+        jr .done
+.fcb:
         ld (fcb+FCB_RANDOM),de
         ld (fcb+FCB_RANDOM+2),bc
         ex de,hl
@@ -1489,9 +1547,11 @@ read_bytes:
         ld de,fcb
         ld c,_RDBLK
         call BDOS
+.compare:
         ld de,(count)
         or a
         sbc hl,de
+.done:
         pop iy
         pop ix
         ret
@@ -1848,9 +1908,25 @@ print:
         pop ix
         ret
 
-; Prints the image's name: the FCB's name without its trailing spaces, then
-; ".SNP".
+; Prints the image's name: its path, or under MSX-DOS 1 the FCB's name without
+; its trailing spaces, then ".SNP".
 name:
+        ld a,(by_path)
+        or a
+        jr z,.fcb
+        ld hl,path
+.path:
+        ld a,(hl)
+        or a
+        ret z
+        push hl
+        ld e,a
+        ld c,_CONOUT
+        call BDOS
+        pop hl
+        inc hl
+        jr .path
+.fcb:
         ld hl,fcb+1
         ld b,8
 .char:
@@ -1870,6 +1946,85 @@ name:
         ld de,t_ext
         ld c,_STROUT
         jp BDOS
+
+; Copies the image's argument from the command line at 0080h into path, ended by
+; 0, and adds ".SNP" when the path's last item has no extension. The argument is
+; the first word that is not an option, and it ends at a space, a "/" or the
+; line's end. Returns Z when there is no argument.
+get_path:
+        ld hl,0080h
+        ld b,(hl)
+        inc hl
+        ld de,path
+.skip:
+        ld a,b
+        or a
+        jr z,.end
+        ld a,(hl)
+        cp "/"
+        jr z,.option
+        cp " "+1
+        jr nc,.copy
+        inc hl
+        dec b
+        jr .skip
+.option:
+        inc hl
+        dec b
+        ld a,b
+        or a
+        jr z,.end
+        ld a,(hl)
+        cp " "+1
+        jr nc,.option
+        jr .skip
+.copy:
+        ld c,0                  ; 1 after a "." in the last item
+.char:
+        ld a,b
+        or a
+        jr z,.end
+        ld a,(hl)
+        cp " "+1
+        jr c,.end
+        cp "/"
+        jr z,.end
+        cp "."
+        jr nz,.sep
+        ld c,1
+.sep:
+        cp 5Ch                  ; "\", which the MSX shows as its yen sign
+        jr z,.item
+        cp ":"
+        jr nz,.store
+.item:
+        ld c,0
+.store:
+        ld (de),a
+        inc de
+        inc hl
+        dec b
+        jr .char
+.end:
+        ld a,e
+        cp low path
+        jr nz,.ext
+        ld a,d
+        cp high path
+        jr z,.done              ; no argument
+.ext:
+        ld a,c
+        or a
+        jr nz,.done
+        ld hl,t_ext
+        ld bc,4
+        ldir
+.done:
+        xor a
+        ld (de),a
+        ld a,(path)
+        or a
+        ret
 
 ; Prints A in decimal, without leading zeros.
 print_dec:
@@ -1955,6 +2110,9 @@ fcb:        db 0                ; drive, from the argument
             db "SNP"
             ds FCB_SIZE-12,0
 
+by_path:    db 0                ; 1 when the image is open by its path, under MSX-DOS 2
+handle:     db 0                ; then its handle
+path:       ds 128+5            ; the argument, with ".SNP" and a 0
 dos2:       db 0
 dos_slot:   db 0                ; DOS's mapper's slot ID
 m_ps:       db 0                ; its primary slot
