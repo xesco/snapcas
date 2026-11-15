@@ -152,6 +152,8 @@ game file. Each kind of automatic patch is one file in `tools/patches/`:
 | `ramsearch.tcl` | The capture's watch for a slot register write that cuts off the code that made it, and its patch that keeps page 3's slot ([The RAM search patch](#the-ram-search-patch)) |
 | `pagecopy.py` | The forms of the loaders' code that copies page 3's slot to the other pages, and their places in the tape files ([The page copy patch](#the-page-copy-patch)) |
 | `pagecopy.tcl` | The capture's decision, by the slot map, of which forms to patch ([The page copy patch](#the-page-copy-patch)) |
+| `searchslot.py` | The start and the end of the loaders' RAM search that gives page 1 the slot of page 2, and the end's places in the tape files ([The search slot patch](#the-search-slot-patch)) |
+| `searchslot.tcl` | The capture's patch of each such end, on every machine ([The search slot patch](#the-search-slot-patch)) |
 | `irqslot.py` | The interrupt handler that writes the slot register from the game's copy of it, and its places in the tape files ([The interrupt slot patch](#the-interrupt-slot-patch)) |
 | `irqslot.tcl` | The capture's decision, by the machine's generation, to patch the handler ([The interrupt slot patch](#the-interrupt-slot-patch)) |
 
@@ -292,8 +294,9 @@ stopped. The script takes the following steps, which are the procedures `step1` 
    ([The RAM's subslot in every page](#the-rams-subslot-in-every-page)). It then
    types `CLEAR200,&HF380`, which sets `HIMEM` to a cassette machine's F380h.
 3. Notes the slots selected in each page, and runs the `start` hook of the patch
-   kinds, which writes the slot map ([Slot patches](#slot-patches)) and decides on
-   the page copy patch ([The page copy patch](#the-page-copy-patch)). It then
+   kinds, which writes the slot map ([Slot patches](#slot-patches)), decides on
+   the page copy patch ([The page copy patch](#the-page-copy-patch)), and patches
+   each RAM search of [The search slot patch](#the-search-slot-patch). It then
    inserts the tape file of side 1, with the game file's `side1` patches written
    into a copy in `snap/`, into the cassette player. It types the load command for
    the first header's type ([FORMATS.md, CAS data](FORMATS.md#cas-data)):
@@ -613,6 +616,43 @@ In `OR n`, n holds the slot map's replacement for page 1. On the PHC-28S without
 Carnivore2, n is 15h for the first three forms, and 04h, the RAM cartridge in page
 1, for the last two. A machine whose RAM for page 3 holds RAM in pages 0 and 1, as
 the VG-8020's slot 3 does, never gets the patch.
+
+### The search slot patch
+
+A loader of Dinamic's and of other Spanish publishers, a program named `slots` at
+9000h, searches for RAM in page 0 and then in page 1, in each primary slot and in
+each subslot of an expanded slot. It leaves the slot register's value with the RAM
+that it found in C, and stores it. Its end then stores a second value, BASIC's with
+page 2's slot in page 1:
+
+```
+IN A,(0A8h) / LD C,A / SRL A / SRL A / AND 0Ch / OR C / LD (nn),A
+```
+
+The game's blocks write to page 1 by one value or the other, and some games read
+page 1 by the other value. On most machines the two values name the same slot. On
+the PHC-28S with the Carnivore2, BASIC's page 2 is the Carnivore2's mapper in slot
+2-2, but the Carnivore2's subslot register selects subslot 1 in page 1, which holds
+no RAM. The search finds the RAM cartridge in slot 1. So After the War writes its
+font to nothing, and its menu shows bars for letters. Mega Phoenix resets during its
+load, and its snapshot is BASIC's start screen. The check passes either way, because
+the restored machine equals the snapshot.
+
+The capture patches the end itself, in two parts:
+
+1. Before each capture, `capture.py` looks for the search in the tape files: its
+   start, `DI / IN A,(0A8h) / LD B,A / EX AF,AF' / LD A,B / AND 30h / LD B,A /
+   IN A,(0A8h) / AND 0F0h / DEC A`, `F3 DB A8 47 08 78 E6 30 47 DB A8 E6 F0 3D`, and
+   144 bytes after it the end above, `DB A8 4F CB 3F CB 3F E6 0C B1 32`.
+2. At step 3, before the load command, the capture patches each end, on every
+   machine, to `LD A,C / AND 0Ch / LD C,A / IN A,(0A8h) / AND 0F3h / OR C / NOP`,
+   `79 E6 0C 4F DB A8 E6 F3 B1 00`. It writes the patches to `snap/patches.txt` and
+   runs the capture again, as for a slot patch.
+
+The patched end stores BASIC's value with page 1's slot from the search, which holds
+RAM in page 1 on every machine where the search ran. Where page 2's slot holds that
+RAM, the value is the same as before. The search is in a block that `BLOAD` reads,
+which has no sum. In the test collection, 31 tapes have this search.
 
 ### The interrupt slot patch
 
