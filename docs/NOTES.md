@@ -77,6 +77,16 @@ far take these forms:
 | A shorter variant of `slots` that keeps the slots it finds | Underground | The capture without the Carnivore2. Which value leads the game to its reset is not known |
 | Pages 2 and 3's slots copied into pages 0 and 1: `AND F0h`, then four `RLCA`s, `RRCA`s or `SRA A`s of the slot register's value, then `OR` with the first, with `AND 0Fh` before it after `RRCA`s or `SRA A`s | The Wall from Super MSX 7, whose LOADER is at DD00h. Each part of a tape made by CasLink3: Hang-On, Lunar Ball and Quartet. Level 9's adventures, which read their A-code in pages 0 and 1: Emerald Isle, Red Moon, Time and Magik II, Return to Eden, Silicon Dreams II, The Worm in Paradise, and the four parts of The Secret Diary of Adrian Mole | The page copy patch, to `LD A,15h`, and the capture without the Carnivore2 |
 
+The `slots` program of Budokan, Michel Futbol Master and Professional Tennis
+Simulator searches for RAM in pages 0 and 1, and its end copies page 2's slot into
+page 1's bits beside the value that the search found. After the War writes its font
+by the copy and reads it by the search's value, so on the PHC-28S with the
+Carnivore2 its menu showed bars for letters, and Mega Phoenix reset during its load,
+so that its image was BASIC's start screen. The check passed for both. The search slot patch now makes the copy the search's
+value in the 31 tapes that hold this search
+([INTERNALS.md, The search slot patch](INTERNALS.md#the-search-slot-patch)). The
+games with a `capture` line for this form keep it.
+
 The forms with fixed code are the bit tests and the copies of pages 2 and 3. Those
 forms are the page copy patch's
 ([INTERNALS.md, The page copy patch](INTERNALS.md#the-page-copy-patch)), and the

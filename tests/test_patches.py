@@ -1,6 +1,6 @@
 """The automatic patches of tools/patches/ (docs/INTERNALS.md, The tools'
-code, Scan, Slot patches, The RAM search patch, The page copy patch and The
-interrupt slot patch): each
+code, Scan, Slot patches, The RAM search patch, The page copy patch, The
+search slot patch and The interrupt slot patch): each
 kind's patterns, on bytes made for each case, and the settings that the
 capture's Tcl gets. The capture's watches run in tests/test_capture.py, and
 the patches of real games in tests/test_snap.py. Pure tier."""
@@ -163,6 +163,45 @@ class RamSearch(unittest.TestCase):
         for context in (patches.Context(), patches.Context(entry_page=0xFC), patches.Context(tape=False)):
             self.assertEqual(patches.ramsearch.find(search, context), [])
             self.assertEqual(patches.find(search, context), [])
+
+
+# A RAM search as in After the War's block "slots": its start, the 130 bytes
+# that test the slots, and its end with its store at FA78h.
+SEARCH_SLOT = patches.searchslot.START + bytes(130) + patches.searchslot.END + bytes.fromhex("78 FA FB C9")
+
+
+class SearchSlot(unittest.TestCase):
+    """The search slot patch: a RAM search that stores for page 1 the slot of
+    BASIC's page 2, and not the slot that it found."""
+
+    def test_the_end_is_found_144_bytes_after_the_start(self):
+        self.assertEqual(patches.searchslot.ends(SEARCH_SLOT), [144])
+        self.assertEqual(patches.searchslot.ends(bytes(7) + SEARCH_SLOT + SEARCH_SLOT), [151, 151 + len(SEARCH_SLOT)])
+
+    def test_an_end_at_another_distance_or_alone_is_left_alone(self):
+        self.assertEqual(patches.searchslot.ends(patches.searchslot.START + bytes(131) + patches.searchslot.END), [])
+        self.assertEqual(patches.searchslot.ends(bytes(144) + patches.searchslot.END), [])
+
+    def test_the_patch_takes_page_1s_slot_from_c_and_keeps_the_store(self):
+        # LD A,C / AND 0Ch / LD C,A / IN A,(0A8h) / AND 0F3h / OR C / NOP over
+        # IN A,(0A8h) / LD C,A / SRL A / SRL A / AND 0Ch / OR C.
+        self.assertEqual(patches.searchslot.OLD, bytes.fromhex("DB A8 4F CB 3F CB 3F E6 0C B1"))
+        self.assertEqual(patches.searchslot.NEW, bytes.fromhex("79 E6 0C 4F DB A8 E6 F3 B1 00"))
+        self.assertEqual(patches.searchslot.END[len(patches.searchslot.OLD):], b"\x32")
+
+    def test_the_capture_gets_each_end_and_the_patch_as_settings(self):
+        tcl = patches.searchslot.tcl(SEARCH_SLOT, bytes(3) + SEARCH_SLOT)
+        for setting in ("set ::searchslot {{1 144} {2 147}}\n",
+                        "set ::searchslot_old {219 168 79 203 63 203 63 230 12 177}\n",
+                        "set ::searchslot_new {121 230 12 79 219 168 230 243 177 0}\n"):
+            self.assertIn(setting, tcl)
+        self.assertLess(tcl.index("set ::searchslot_new"), tcl.index("proc searchslot_start"))
+        self.assertIn("hook start searchslot_start", tcl)
+        self.assertIn("set ::searchslot {}\n", patches.searchslot.tcl(b"", b""))
+
+    def test_the_scan_leaves_the_search_alone(self):
+        for context in (patches.Context(), WITH_ENTRIES, patches.Context(tape=False)):
+            self.assertEqual(patches.searchslot.find(SEARCH_SLOT, context), [])
 
 
 # The interrupt handler of Aventuras AD's interpreter, with the game's copy of

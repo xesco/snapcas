@@ -486,6 +486,7 @@ patches two. These forms need no line:
 | The same, run from page 3, that moves page 3 to a slot where the code differs | [The RAM search patch](docs/INTERNALS.md#the-ram-search-patch), which keeps page 3 |
 | A stub of `TAPION` that selects the ROM in page 0 as `AND H / LD L,A`, in the mode without a part in page 3 | The scan, in the build ([Without a part in page 3](docs/INTERNALS.md#without-a-part-in-page-3)) |
 | Level 9's, CasLink3's, and Engesoft's copies of page 3's slot to the other pages | [The page copy patch](docs/INTERNALS.md#the-page-copy-patch) |
+| The end of the RAM search in the `slots` program of Dinamic's loaders, which gives page 1 the slot of page 2 and not the slot that the search found | [The search slot patch](docs/INTERNALS.md#the-search-slot-patch) |
 | The interrupt handler of Aventuras AD's interpreter, which writes the slot register from the game's copy of it, on an MSX2 | [The interrupt slot patch](docs/INTERNALS.md#the-interrupt-slot-patch) |
 
 `log.txt` names each write that the capture saw and did not patch, with
