@@ -23,7 +23,9 @@ Exit status: 0 on success, 1 for an error in the command line or the input
 files, 2 when openMSX fails or a wait times out, 3 when a check fails: that of
 the first step that fails. 130 when Ctrl-C stops the command.
 """
+import argparse
 import os
+import re
 import subprocess
 import sys
 
@@ -237,10 +239,28 @@ def list_machines(args):
     return 0
 
 
+def version():
+    """The version, the year and the author, from src/version.inc, as
+    SNAPCAS.COM prints them."""
+    with open(os.path.join(ROOT, "src", "version.inc")) as f:
+        values = dict(re.findall(r'^\s*define\s+(\w+)\s+"([^"]*)"', f.read(), re.M))
+    return f"snapcas version {values['VERSION']}\nCopyright ({values['YEAR']}) {values['AUTHOR']}"
+
+
+class Version(argparse.Action):
+    """--version: prints the version's two lines as they are, which argparse's
+    own version action would join into one."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        print(version())
+        parser.exit()
+
+
 def main():
     if os.path.isdir(EMU_HOME):
         os.environ.setdefault("OPENMSX_HOME", EMU_HOME)
     parser = msx.Parser(prog="snapcas.py", description="Make snapcas images of MSX cassette games.")
+    parser.add_argument("--version", action=Version, nargs=0, help="print the version and exit")
     verbs = parser.add_subparsers(dest="verb", required=True, metavar="<command>", parser_class=msx.Parser)
     snap_ = verbs.add_parser("snap", help="make a game's image for a machine",
                              description="Make a game's image for a machine: download its tape files that are "

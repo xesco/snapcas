@@ -38,6 +38,7 @@ The command takes a verb that says what to do, and the verb's own arguments:
 | `list [text] [--all]` | Lists the games that `snapcas` supports, or searches them by name ([Find a game or a machine](#find-a-game-or-a-machine)) |
 | `machines` | Lists the machines that the command makes images for |
 
+`./snapcas.py --version` prints the version ([BUILD.md, Version](BUILD.md#version)).
 `./snapcas.py --help` lists the verbs, and `./snapcas.py snap --help` shows the
 arguments and options of `snap`.
 

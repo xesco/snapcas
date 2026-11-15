@@ -446,8 +446,10 @@ def restorer_run(machine, dos_folder, folder, files, lines, tcl):
     """Boots a machine with a disk of the DOS files, SNAPCAS.COM, the files
     and an AUTOEXEC.BAT of the lines, with the Tcl before the boot. The Tcl
     ends the run. A breakpoint's condition $::snapcas holds while SNAPCAS.COM
-    is the program at 0100h."""
+    is the program at 0100h. The restorer's banner is left out, so that the
+    screen holds more of the messages."""
     emulator()
+    restorer = symbols("snapcas")
     os.makedirs(folder, exist_ok=True)
     paths = [os.path.join(dos_folder, name) for name in sorted(os.listdir(dos_folder))] + [COM]
     for name, data in dict(files, **{"AUTOEXEC.BAT": "".join(line + "\r\n" for line in lines).encode()}).items():
@@ -460,7 +462,8 @@ def restorer_run(machine, dos_folder, folder, files, lines, tcl):
     with open(COM, "rb") as f:
         com = " ".join(str(b) for b in f.read(3))
     script = (f"set ::snapcas {{[debug read_block memory 0x0100 3] eq [binary format c3 {{{com}}}]}}\n"
-              + msx.tcl("tcl/memory.tcl") + tcl
+              + msx.tcl("tcl/memory.tcl")
+              + f"debug set_bp {restorer['banner']} $::snapcas {{reg PC {restorer['banner_end']}}}\n" + tcl
               + "\nlater 300 { error {the run did not end within 300 seconds} }\n"
               + "safe {boot {" + msx.boot_steps(machine) + "} {}}\n")
     msx.run([*machine.args, f"-{machine.disk}", disk], script, timeout=600)

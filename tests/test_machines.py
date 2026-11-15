@@ -242,7 +242,10 @@ class Shipped(unittest.TestCase):
             cls.restored = dict(zip(machines, pool.map(single_load, machines)))
 
     def restores(self, name):
-        self.assertTrue(SHIPPED[name])
+        # Since vg8235 left, no shipped machine boots MSX-DOS 1. The restorer's
+        # tests under MSX-DOS 1 run on test/nms8250-dos1 (Corpus).
+        if not SHIPPED[name]:
+            self.skipTest(f"no shipped machine boots {name}")
         for machine in SHIPPED[name]:
             with self.subTest(machine=machine):
                 # The check's own boot, before the restore, is no reboot
