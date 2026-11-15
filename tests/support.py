@@ -581,7 +581,7 @@ def restorer_plans(machine, dos_folder, folder, files, options=""):
     if os.path.exists(out):
         os.remove(out)
     fields = dict({name: (restorer[name], length) for name, length in PLAN.items()},
-                  map=(restorer["HDR"] + service()["H_MAP"], 4), name=(restorer["fcb"] + 1, 8))
+                  map=(restorer["HDR"] + service()["H_MAP"], 4), path=(restorer["path"], 133))
     tcl = f"""
 # The ROMs and the file's size are not checked: the restorer's check_roms and
 # check_size return at once.
@@ -611,5 +611,8 @@ debug set_bp {restorer["read_records"]} $::snapcas {{safe {{
         with open(out) as f:
             for text in f.read().split("end\n")[:-1]:
                 plan = {name: bytes.fromhex(value) for name, value in (line.split() for line in text.splitlines())}
-                plans[plan.pop("name").decode().strip()] = plan
+                # The image's path, as the restorer took it from the command
+                # line: the name, with ".SNP", and a 0.
+                path = plan.pop("path").split(b"\0")[0].decode()
+                plans[path.rsplit("\\", 1)[-1].rsplit(".", 1)[0]] = plan
     return plans, screen

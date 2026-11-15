@@ -241,8 +241,9 @@ A destination named `SNAPCAS` or `BIN` stops the command, because the destinatio
 the folder that holds `SNAPCAS` and `BIN`. Two images that go to the same place also
 stop the command, before it copies anything.
 
-`SNAPCAS.COM` opens the image in the current folder, so on the MSX the player goes
-to the image's folder first:
+Under MSX-DOS 1, `SNAPCAS.COM` opens the image in the current folder. Under MSX-DOS 2
+and Nextor, it also takes a path, such as `\SNAPCAS\G\GAUNTLET`. Either way, the
+player can go to the image's folder first:
 
 ```
 CD \SNAPCAS\G
