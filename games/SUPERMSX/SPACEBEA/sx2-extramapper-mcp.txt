@@ -1,0 +1,38 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# SPACE1's code at D770h finds RAM for pages 0 and 1 by the slot register
+# alone, keeps the values at FFFDh and FFFEh, and copies the game to page 0.
+# Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1, so the
+# patch writes slot 0's subslot register instead: 55h for RAM in every page
+# around the copy, then its old value.
+patch side1:53D3 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 88 11 00 00 01 00 50 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 88 11 00 00 01 00 50 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+# SPACE2 keeps FFFDh's value at FDFBh and BASIC's slot register value at FDFCh,
+# and during play swaps between them by the slot register alone: BASIC for the
+# BIOS's GTSTCK, GTTRIG and TAPIN, and RAM in every page for its own code. The
+# patches make each LD A,(0FDFCh) / OUT (0A8h),A write 50h, BASIC, to slot 0's
+# subslot register, and each LD A,(0FDFBh) / OUT (0A8h),A write 55h.
+patch side1:56CC 3A FC FD D3 A8 > 3E 50 32 FF FF
+patch side1:56E5 3A FB FD D3 A8 > 3E 55 32 FF FF
+patch side1:5B93 3A FB FD D3 A8 > 3E 55 32 FF FF
+patch side1:5DD7 3A FC FD D3 A8 > 3E 50 32 FF FF
+patch side1:5E67 3A FB FD D3 A8 > 3E 55 32 FF FF
+patch side1:5E6F 3A FC FD D3 A8 > 3E 50 32 FF FF
+patch side1:5E8C 3A FC FD D3 A8 > 3E 50 32 FF FF
+
+# The game runs without interrupts, so nothing calls SX2RES. The image's wrapper
+# at FCC9h, before the tape service's entries, calls SX2RES and jumps to a RET
+# at FC66h.
+rescall FC66
+
+# An entry at FC4Ch, in BASIC's zeros of TRPTBL, which the game leaves alone,
+# counts its calls in the byte at FC67h and calls the wrapper at every 32nd. The
+# wrapper disables the interrupts, so the entry enables them again when they
+# were on, from LD A,I. Then it does LD HL,9F56h and returns.
+patch page3:3C4C 00 00 00 00 00 00 00 00 00 00 > F5 ED 57 F5 3A 67 FC C6 08 32
+patch page3:3C56 00 00 00 00 00 00 00 00 00 00 > 67 FC 30 03 CD C9 FC F1 E2 62
+patch page3:3C60 00 00 00 00 00 00 00 > FC FB F1 21 56 9F C9
+
+# The routine at 9569h reads the keyboard and the joystick, about 1300 times a
+# second. It calls the entry in place of LD HL,9F56h, about 40 times a second.
+patch page2:1569 21 56 9F > CD 4C FC

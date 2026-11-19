@@ -1,0 +1,13 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` program at DDA4h looks for RAM in page 1 by the slot
+# register alone. Here the BIOS and the RAM share slot 0, so it finds none,
+# leaves the value at DE7Dh equal to BASIC's at DE7Eh, and the BASIC loader
+# stops at "NO COMPATIBLE". The program now keeps BASIC's value and stores 54h,
+# RAM in pages 1 to 3, at DE7Dh, then returns.
+patch side1:2E66 F3 DB A8 32 7E DE CB 97 CB 9F > F3 DB A8 32 7E DE 3E 54 32 7D
+patch side1:2E70 32 7D DE D3 A8 > DE C3 02 DE 00
+
+# The `carga` program selects that RAM in page 1 with LD A,(0DE7Dh) /
+# OUT (0A8h),A at ACD5h. It writes 54h to slot 0's subslot register instead.
+patch side1:2F07 3A 7D DE D3 A8 > 3E 54 32 FF FF

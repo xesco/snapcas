@@ -1,0 +1,47 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Gremlin's loader at D800h runs a RAM search, which finds the RAM in 0-1 but
+# leaves slot 0's subslot register at 55h, RAM in page 0, and enables the
+# interrupts, which then run the RAM at 0038h: the load stopped after the
+# search. Its result at FFFEh, the slot register's value for the RAM, is 00h
+# here, where the BIOS and the RAM share slot 0. The patch skips the search,
+# so the register stays 50h, BASIC.
+patch side1:1C4 47 08 78 E6 > 4F 08 18 78
+
+# Each later block selects the RAM by that value and gives BASIC back by the
+# slot register alone. The patches write slot 0's subslot register instead: 55h
+# for RAM in every page, as the value at FFFEh selects elsewhere, then 50h.
+patch side1:272 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:29A DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+patch side1:7971 3A FE FF D3 A8 > 3E 55 32 FF FF
+
+# Where a block gives BASIC back with AND 0F0h on that value and OUT (0A8h),A,
+# the patches drop the block's first DI, which the loader has already done,
+# move the code up a byte, and end it with LD (0FFFFh),A: 55h AND 0F0h, 50h.
+patch side1:1E91 F3 3A FE FF D3 A8 01 00 19 11 > 3E 55 32 FF FF 01 00 19 11 00
+patch side1:1E9B 00 08 21 00 88 ED B0 E6 F0 D3 > 08 21 00 88 ED B0 E6 F0 32 FF
+patch side1:1EA5 A8 > FF
+patch side1:38B1 F3 3A FE FF D3 A8 01 80 22 11 > 3E 55 32 FF FF 01 80 22 11 00
+patch side1:38BB 00 40 21 00 88 ED B0 E6 F0 D3 > 40 21 00 88 ED B0 E6 F0 32 FF
+patch side1:38C5 A8 > FF
+
+# The loader checks each block by the XOR of its bytes, which must be 0. The
+# patches change each changed block's last byte, its sum, to keep that.
+patch side1:253 0C > FA
+patch side1:1E72 9E > C5
+patch side1:3892 23 > 80
+patch side1:5C32 8E > 2D
+patch side1:C5F2 28 > 31
+
+# The game runs without interrupts, so the image has no call of SX2RES. The
+# rescode line puts the image's call routine at D330h, in zeros of page 3 that
+# the game leaves alone, and the rescall line gives it a wrapper at D35Dh that
+# calls SX2RES and jumps to the game's routine at A1ABh. The zeros are between a
+# table that ends at D328h and RAM that the game never loads, from D380h.
+rescode D330
+rescall A1AB
+
+# The routine at A170h reads the joystick with the routine at A1ABh, about 50
+# times a second in the title and 18 in play. It calls the wrapper in place of
+# that routine.
+patch page2:2170 CD AB A1 > CD 5D D3

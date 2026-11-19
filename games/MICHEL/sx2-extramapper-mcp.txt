@@ -1,0 +1,25 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:149 47 08 78 E6 > 4F 08 18 78
+patch side1:1CF 3A FF FF 2F > 3E 54 00 00
+
+# The game takes the interrupt in interrupt mode 2, with its table at FE00h
+# full of FDh, so that every vector is FDFDh, and JP C2DCh at FDFDh. When the
+# play starts, its code at C1F5h writes the table and the jump again, over the
+# image's wrapper of the vector. So the rescall line names the routine, and
+# the jump at FDFDh goes to the wrapper at FD56h, which calls SX2RES and jumps
+# to C2DCh, in the snapshot and in the code that writes it again.
+rescall C2DC
+
+# The snapshot's JP C2DCh at FDFDh. With the rescall line's address, the build
+# leaves the table and the jump as they are.
+patch page3:3DFE DC C2 > 56 FD
+
+# LD HL,C2DCh before LD (0FDFEh),HL.
+patch page3:0205 21 DC C2 > 21 56 FD

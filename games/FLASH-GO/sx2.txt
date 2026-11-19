@@ -1,0 +1,11 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game sets its stack at the top of memory, with LD SP,0000h in three
+# places. Its first push writes FFFFh, which is the subslot register of the
+# SX-2's RAM, and the write deselects the RAM. An MSX2+'s BIOS also keeps its
+# copies of VDP registers 23 and 25 to 27 in FFF6h and FFFAh to FFFCh, and the
+# main ROM's slot at FFF7h. The patches set the stack below all of them, at
+# FFE7h.
+patch side1:1D70 31 00 00 > 31 E7 FF
+patch side1:1D8A 31 00 00 > 31 E7 FF
+patch side1:2728 31 00 00 > 31 E7 FF

@@ -1,0 +1,8 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game fills FD09h to FD50h in page 3, where the tape service's part goes,
+# so the build used the mode without a part in page 3, whose T0 has no room for
+# the call of SX2RES (rescall t0mode). The part's entries go to CCE1h and its
+# code to CC3Dh, zeros above HIMEM, AAFFh, where the game's BASIC program
+# keeps nothing. T0 then calls SX2RES at each interrupt.
+service at CCE1 CC3D

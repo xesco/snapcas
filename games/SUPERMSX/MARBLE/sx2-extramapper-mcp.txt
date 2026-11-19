@@ -1,0 +1,41 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loaders find RAM for pages 0 and 1 by the slot register alone, keep
+# the values at FFFDh and FFFEh, and select them later by the slot register
+# again. Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1, so
+# the patches write slot 0's subslot register instead: 54h for RAM in pages 1
+# to 3, 55h for RAM in every page, 50h for BASIC, with SLTTBL's entry for slot 0
+# at FCC5h where a ROM image looks up its slot, and 84h as RAM's slot ID.
+patch side1:489A 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 90 11 00 40 01 00 40 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 90 11 00 40 01 00 40 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:A1A5 3A FD FF D3 A8 > 3E 55 32 FF FF
+patch side1:DF0A 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 90 11 00 00 01 00 40 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 90 11 00 00 01 00 40 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:11F72 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 40 21 00 90 11 00 40 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 F1 32 FF FF 00 00 00
+patch side1:17AD1 06 FF C5 CD 9F FD C1 10 F9 F3 3A FE FF D3 A8 3A FD FF E6 03 > F3 3E 54 32 FF FF 32 C5 FC 00 00 00 00 00 00 3E 84 00 00 00
+patch side1:1BAAA 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 60 3C 21 00 90 11 68 42 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 60 3C 21 00 90 11 68 42 ED B0 F1 32 FF FF 00 00 00
+patch side1:23C5A 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 90 11 00 10 01 00 20 ED B0 21 00 A9 11 C0 43 01 00 10 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 90 11 00 10 01 00 20 ED B0 21 00 A9 11 C0 43 01 00 10 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:269CF DB A8 F5 3A FE FF D3 A8 01 00 2D 21 00 A3 11 00 53 ED B0 F1 D3 A8 > 3E 54 32 FF FF 01 00 2D 21 00 A3 11 00 53 ED B0 3A C5 FC 32 FF FF
+patch side1:2B4B4 06 FF C5 CD 9F FD C1 10 F9 F3 3A FD FF D3 A8 > F3 3E 55 32 FF FF 32 C5 FC 00 00 00 00 00 00
+
+# The game takes its interrupts with RET at 0038h, which leaves the VDP's
+# interrupt set, so a call from 0038h would run thousands of times a second. Its
+# main loop waits with EI / HALT / IN A,(99h) / EI, about 44 times a second. A
+# routine at A3C0h, as in Knight Lore's file for this machine, in zeros of page
+# 2 that the game leaves alone in a minute of play with keys, uses no BIOS
+# routine. It keeps all the registers and the interrupts, selects slot 3's
+# subslot 0 in page 1 with slot 3's subslot register, selects slot 3 in page 1
+# with the slot register, and calls SX2RES's entry at 4040h when it starts F5h
+# DBh. Then it gives both registers back. At A41Dh, IN A,(99h) / CALL A3C0h / EI
+# / RET.
+patch page2:23C0 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:23CA 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page2:23D4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page2:23DE 00 00 00 00 00 00 00 00 00 00 > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page2:23E8 00 00 00 00 00 00 00 00 00 00 > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page2:23F2 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 C1
+patch page2:23FC 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:2406 00 00 00 00 00 00 00 00 00 00 > D3 A8 F1 E2 0D A4 FB 08 F1 08
+patch page2:2410 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:241A 00 00 00 00 00 00 00 00 00 00 > C1 F1 C9 DB 99 CD C0 A3 FB C9
+
+# The main loop's IN A,(99h) / EI at 4420h becomes CALL A41Dh.
+patch page1:420 DB 99 FB > CD 1D A4

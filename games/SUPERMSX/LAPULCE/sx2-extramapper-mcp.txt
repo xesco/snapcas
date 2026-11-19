@@ -1,0 +1,13 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game sets its stack at FFFFh, with LD SP,0FFFFh in three places, and calls
+# the BIOS to set the screen. An MSX2+'s BIOS keeps its copies of VDP registers
+# 23 and 25 to 27 in FFF6h and FFFAh to FFFCh, and writes them in that call,
+# over the game's return addresses, so the machine resets. It also reads the
+# main ROM's slot at FFF7h. The patches set the stack below all of them, at
+# FFE7h, as on sx2.
+patch side1:6FEE 31 FF FF > 31 E7 FF
+
+patch side1:700E 31 FF FF > 31 E7 FF
+
+patch side1:72E9 31 FF FF > 31 E7 FF

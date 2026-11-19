@@ -1,0 +1,14 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at E000h gives pages 0 and 1 the subslots of pages 2 and 3, and
+# then page 0 slot 0 and page 1 page 2's slot by the slot register. That keeps
+# the BIOS in page 0 where the RAM has a primary slot of its own, but here,
+# where the BIOS and the RAM share slot 0, it leaves the RAM of 0-1 in page 0,
+# and the loader's TAPION ran RAM. The patch writes 54h, the BIOS in page 0
+# and the RAM in pages 1 to 3, and jumps over the rest of the computation.
+patch side1:C8 21 FF FF 7E EE FF E6 > 3E 54 32 FF FF 18 0C
+
+# Before it copies page 1 to page 0 and starts the game, the loader gives page
+# 0 page 1's slot by the slot register alone. The patch writes 55h, the RAM in
+# every page, and jumps over the rest.
+patch side1:1F5 DB A8 E6 FC 47 CB 3F > 3E 55 32 FF FF 18 05

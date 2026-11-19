@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loaders find RAM for pages 0 and 1 by the slot register alone, keep
+# the values at FFFDh and FFFEh, and select them later by the slot register
+# again. Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1, so
+# the patches write slot 0's subslot register instead: 54h for RAM in pages 1
+# to 3, 55h for RAM in every page, 50h for BASIC, with SLTTBL's entry for slot 0
+# at FCC5h where a ROM image looks up its slot, and 84h as RAM's slot ID.
+patch side1:B884 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 40 21 00 90 11 00 40 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 F1 32 FF FF 00 00 00
+patch side1:F8E5 06 FF C5 CD 9F FD C1 10 F9 F3 3A FE FF D3 A8 > F3 3E 54 32 FF FF 32 C5 FC 00 00 00 00 00 00

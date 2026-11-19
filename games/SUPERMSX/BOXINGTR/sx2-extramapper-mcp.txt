@@ -1,0 +1,68 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loaders find RAM for pages 0 and 1 by the slot register alone, keep
+# the values at FFFDh and FFFEh, and select them later by the slot register
+# again. Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1, so
+# the patches write slot 0's subslot register instead: 54h for RAM in pages 1
+# to 3, 55h for RAM in every page, 50h for BASIC, with SLTTBL's entry for slot 0
+# at FCC5h where a ROM image looks up its slot, and 84h as RAM's slot ID.
+patch side1:3D6E 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 90 11 00 00 01 00 40 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 90 11 00 00 01 00 40 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:7DDC 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 40 21 00 90 11 00 40 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 F1 32 FF FF 00 00 00
+patch side1:A23C 06 FF C5 CD 9F FD C1 10 F9 CD 72 00 F3 3A FD FF D3 A8 > CD 72 00 F3 3E 55 32 FF FF 32 C5 FC 00 00 00 00 00 00
+patch side1:E2CD 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 90 11 00 00 01 00 40 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 90 11 00 00 01 00 40 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:12336 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 40 21 00 90 11 00 40 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 F1 32 FF FF 00 00 00
+patch side1:13F56 06 FF C5 CD 9F FD C1 10 F9 F3 3A FD FF D3 A8 > F3 3E 55 32 FF FF 32 C5 FC 00 00 00 00 00 00
+patch side1:16AC7 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 38 21 00 88 11 00 48 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 38 21 00 88 11 00 48 ED B0 F1 32 FF FF 00 00 00
+patch side1:16B23 3A FE FF D3 A8 > 3E 54 32 FF FF
+patch side1:1BD87 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 18 21 00 90 11 00 60 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 18 21 00 90 11 00 60 ED B0 F1 32 FF FF 00 00 00
+patch side1:21A79 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 16 21 00 90 11 00 60 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 16 21 00 90 11 00 60 ED B0 F1 32 FF FF 00 00 00
+patch side1:21AE8 DB A8 F5 3A FE FF D3 A8 21 00 60 11 00 D0 01 E3 15 ED B0 F1 D3 A8 > 3E 54 32 FF FF 21 00 60 11 00 D0 01 E3 15 ED B0 3A C5 FC 32 FF FF
+
+# The game is Rocky. It takes its interrupts with RET at 0038h and never reads
+# the VDP's status, so after the first frame each EI gives an interrupt, 3000
+# to 17000 a second, and the game runs as fast as its loops, with no frame
+# clock. A call of SX2RES at each interrupt slows the game down, so the patches
+# below call the wrapper at FCC9h from the game's loops, and its jump goes to
+# the RET at 0038h, which returns to them.
+rescall 0038
+
+# callw, at FA00h, in the PLAY queues, which the game leaves alone: calls the
+# wrapper with interrupts off, and gives the interrupt flag back. It keeps
+# every register.
+patch page3:3A00 00 00 00 00 00 00 00 00 00 00 > F5 ED 57 F3 F5 CD C9 FC F1 E2
+patch page3:3A0A 00 00 00 00 00 > 0D FA FB F1 C9
+
+# The fight's delay at 9318h polls the controls 16 times 256 times by CALL
+# 95CEh, with B the inner count, and A and the flags free. At FA0Fh: LD A,B /
+# AND 3Fh / CP 35h / JP NZ,95CEh / CALL callw / JP 95CEh, 4 calls in 256
+# polls, 40 a second. The inner count starts at F5h, not 0, 245 polls: the
+# 176 polls fewer take the time that the test and the calls add, so the delay
+# keeps its length, as on sx2-noexp0.
+patch page3:3A0F 00 00 00 00 00 00 00 00 00 00 > 78 E6 3F FE 35 C2 CE 95 CD 00
+patch page3:3A19 00 00 00 00 > FA C3 CE 95
+patch page2:1320 06 00 C5 28 0D CD CE 95 > 06 F5 C5 28 0D CD 0F FA
+patch page2:1337 06 00 C5 CD CE 95 > 06 F5 C5 CD 0F FA
+
+# The delay at 0225h, between rounds and in the fight, counts BC down with a
+# CALL 022Fh, a RET, in its loop. The loop moves to FA1Dh, where a test of C
+# and a JP take the CALL's and the RET's T-states and M1 cycles, and it calls
+# callw when C is 0 and B a multiple of 4, every 1024 counts, 60 a second
+# while the delay runs.
+patch page3:3A1D 00 00 00 00 00 00 00 00 00 00 > 79 B7 28 0A C3 24 FA 0B 78 B1
+patch page3:3A27 00 00 00 00 00 00 00 00 00 00 > 20 F4 C1 C9 78 E6 03 20 F4 CD
+patch page3:3A31 00 00 00 00 > 00 FA 18 EF
+patch page0:0226 CD 2F 02 > C3 1D FA
+
+# The menu's loop at 992Ch and the loop at 9EA6h that waits for the initials
+# read the keyboard by CALL 961Fh, about 15000 times a second. At FA35h and
+# FA43h a count at FA52h calls callw every 256 reads, 50 a second.
+patch page3:3A35 00 00 00 00 00 00 00 00 00 00 > 3A 52 FA 3D 32 52 FA CC 00 FA
+patch page3:3A3F 00 00 00 00 > AF C3 1F 96
+patch page3:3A43 00 00 00 00 00 00 00 00 00 00 > F5 3A 52 FA 3D 32 52 FA CC 00
+patch page3:3A4D 00 00 00 00 00 > FA F1 C3 1F 96
+patch page2:192C CD 1F 96 > CD 35 FA
+patch page2:1EA6 CD 1F 96 > CD 43 FA
+
+# The pause, after STOP, waits for SPACE in a loop at 95E8h that reads the
+# keyboard by CALL 961Fh too, with A the row and the flags free: to FA43h.
+patch page2:15EA CD 1F 96 > CD 43 FA

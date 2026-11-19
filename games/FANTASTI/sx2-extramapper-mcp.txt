@@ -1,0 +1,41 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game never reads the tape after its load: the load ends at the tape's end.
+# Without the tape service the restorer keeps the BIOS in page 0, in another
+# subslot of DOS's mapper's slot.
+service no
+
+# FFSCHK finds the RAM of pages 0 and 1 with RDSLT and WRSLT, here slot ID 84h,
+# the Extra-Mapper in 0-1. FF1 and FF2 select it with their copy of ENASLT,
+# unpack their block into page 0 or 1, and give the page back with the slot
+# register alone, which leaves the page on the RAM of 0-1, so BASIC stopped at
+# 0001h. The patches give the page back with slot ID 80h, the main ROM, through
+# the same copy of ENASLT, in place of the POP AF / OUT (0A8h),A, and move the
+# error exit 1 byte up, to the block's last byte, which nothing reads.
+patch side1:3697 20 1E AF 32 FF 87 F3 DB A8 F5 3A FD 87 26 00 CD 0A BA 21 07 88 11 00 00 CD 60 B9 F1 D3 A8 FB C9 3E FF 32 FF 87 C9 FF > 20 1F AF 32 FF 87 F3 3A FD 87 26 00 CD 0A BA 21 07 88 11 00 00 CD 60 B9 3E 80 26 00 CD 0A BA FB C9 3E FF 32 FF 87 C9
+patch side1:5BB3 20 1E AF 32 FF 87 F3 DB A8 F5 3A FE 87 26 40 CD 3E AC 21 07 88 11 00 40 CD 94 AB F1 D3 A8 FB C9 3E FF 32 FF 87 C9 AE > 20 1F AF 32 FF 87 F3 3A FE 87 26 40 CD 3E AC 21 07 88 11 00 40 CD 94 AB 3E 80 26 40 CD 3E AC FB C9 3E FF 32 FF 87 C9
+
+# FF3, copied to 8000h, keeps two slot register values, at F7E5h the BIOS in
+# page 0 and RAM in page 1, at F7E6h RAM in both, and switches page 0 with
+# LD A,(0F7E5h) or LD A,(0F7E6h) / OUT (0A8h),A. Here both are 00h. The patches
+# write slot 0's subslot register instead: 54h for F7E5h, 55h for F7E6h.
+patch side1:5C57 3A E5 F7 D3 A8 > 3E 54 32 FF FF
+patch side1:64EC 3A E6 F7 D3 A8 > 3E 55 32 FF FF
+patch side1:64FA 3A E5 F7 D3 A8 > 3E 54 32 FF FF
+patch side1:6536 3A E6 F7 D3 A8 > 3E 55 32 FF FF
+patch side1:65DB 3A E5 F7 D3 A8 > 3E 54 32 FF FF
+
+# The game builds code in page 3 with the same selections, among them its
+# H.TIMI routine at DC05h, which calls the music at 0249h in page 0's RAM: with
+# the BIOS there, the BIOS's code ran and wrote BBh to the subslot register.
+# The main loop calls E46Ch, which installs that routine, at 8096h. The call
+# goes to 8004h, in the ROM header's INIT code, which FF3's start at 8037h
+# skips. There a routine rewrites each of the six selections at CD91h, CD9Dh,
+# DC0Ch, DC14h, E4B2h and E4C4h that still starts with 3Ah, as above, and
+# jumps to E46Ch.
+patch side1:5C9C CD 6C E4 > CD 04 80
+patch side1:5C0A 00 00 00 00 00 00 DB A8 0F 0F 0F 0F E6 03 4F 06 00 21 C1 FC 09 B6 4F 23 23 23 23 7E E6 30 0F 0F B1 F5 26 40 CD B4 80 32 E5 F7 F1 26 00 CD B4 80 32 > 21 29 80 06 06 5E 23 56 23 1A FE 3A 20 12 3E 3E 12 13 1A D6 91 12 13 3E 32 12 13 3E FF 12 13 12 10 E3 C3 6C E4 91 CD 9D CD 0C DC 14 DC B2 E4 C4 E4
+
+# FF3 checks a 16-bit sum of the 16 KB that it copies, against the value of its
+# LD DE,574Ch. The sum with the patches above.
+patch side1:9C1D 11 4C 57 > 11 71 53

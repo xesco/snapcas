@@ -1,0 +1,42 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loader `slots` finds RAM by the slot register alone, keeps BASIC's
+# slot register value at FFFDh and the RAM's at FFFEh, and selects them later by
+# the slot register again. Here the BIOS and the RAM share slot 0, so both
+# values are 00h and each switch does nothing. The patches skip the search and
+# make each use of the two values a write of slot 0's subslot register
+# instead: 50h for BASIC and 55h for RAM in every page.
+patch side1:71D 47 08 78 E6 > 4F 08 18 78
+patch side1:799 20 DA > 18 0B
+patch side1:87D 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:892 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:8CE 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:8FF 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:945 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:8A6F 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:8AB8 3A FD FF D3 A8 > 3E 50 32 FF FF
+patch side1:CBE3 3A FE FF D3 A8 > 3E 55 32 FF FF
+
+# After its copy to 4000h with the RAM in every page, the loader gives pages 0
+# and 1 back to BASIC with AND 0F0h / OUT (0A8h),A on the RAM's value, and a
+# later routine does the same from FFFEh. With 55h that writes 50h to the slot
+# register, slot 1 in pages 2 and 3, which holds nothing. The patches write 50h
+# to slot 0's subslot register instead, with the NOP after the first OUT.
+patch side1:955 E6 F0 D3 A8 00 > 3E 50 32 FF FF
+patch side1:8A7F 3A FE FF E6 F0 D3 A8 > 3E 50 32 FF FF 00 00
+
+# The game writes over the tape service's part of page 3 at its default place.
+# The part goes to D3E1h to D47Eh, as on sx2, which hold zeros at the snapshot
+# and in the check's minute of play.
+service at D3E1
+
+# The game takes its interrupts at 0038h in its RAM in page 0, with PUSH AF / IN
+# A,(99h) / POP AF / JP 9A97h, so nothing called SX2RES. It also uses the zeros
+# at FCC9h in page 3, where the image's wrapper for the call goes with the tape
+# service. The wrapper goes to D500h, in zeros of page 3 that the game leaves
+# alone in a minute of play with keys. It calls SX2RES and jumps to 9A97h.
+rescode D500
+rescall 9A97
+
+# The jump at 003Ch goes to the wrapper.
+patch page0:3D 97 9A > 00 D5

@@ -1,0 +1,14 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# ENDUR1 and ENDUR2 search RAM for pages 0 and 1 at 9200h. Here the search finds
+# the RAM in slot 0-1 by slot 0's subslot register, which it leaves at 55h, RAM
+# in every page. After the copy, each block selects BASIC again by the slot
+# register alone, at 92C1h, so pages 0 and 1 keep the RAM and BASIC crashes.
+# The patches make that routine write 50h, BASIC's value, to slot 0's subslot
+# register, and remove the LD A,B / LD (92C3h),A that would write the old slot
+# register value into the routine. ENDUR3 starts the game with the RAM that
+# the search left, as on other machines.
+patch side1:17EF9 78 32 C3 92 > 00 00 00 00
+patch side1:17F17 F5 3E 00 D3 A8 F1 C9 > 3E 50 32 FF FF C9 00
+patch side1:1C021 78 32 C3 92 > 00 00 00 00
+patch side1:1C03F F5 3E 00 D3 A8 F1 C9 > 3E 50 32 FF FF C9 00

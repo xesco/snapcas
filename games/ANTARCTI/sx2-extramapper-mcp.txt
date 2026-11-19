@@ -1,0 +1,12 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at E000h looks for RAM in page 1 by the slot register alone, and
+# finds none, because the BIOS and the Extra-Mapper are both in slot 0. BASIC
+# then prints that the system lacks the memory and stops. The patch returns at
+# once, so the loader takes its first value, 00h, and BASIC goes on.
+patch side1:146 DB A8 > C9 A8
+
+# The loader at E045h writes that value to the slot register to put RAM in
+# page 1, copies the ROM image from 9000h to 4000h and starts it. The patch
+# writes 54h to FFFFh, the BIOS in page 0 and the Extra-Mapper in pages 1 to 3.
+patch side1:18B 21 44 E0 7E D3 A8 > 3E 54 32 FF FF 00

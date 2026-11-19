@@ -1,0 +1,27 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loader `slots` finds RAM by the slot register alone, keeps BASIC's
+# slot register value at FFFDh and the RAM's at FFFEh, and selects them later by
+# the slot register again. Here the BIOS and the RAM share slot 0, so both
+# values are 00h and each switch does nothing. The patches skip the search and
+# make each use of the two values a write of slot 0's subslot register
+# instead: 50h for BASIC and 55h for RAM in every page.
+patch side1:4A4 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:4B9 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:4F5 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:526 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:3A78 47 08 78 E6 > 4F 08 18 78
+patch side1:3AF4 20 DA > 18 0B
+patch side1:3BD8 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:3BED 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:3C29 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:3C5A 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:BBB3 3A FE FF D3 A8 > 3E 55 32 FF FF
+
+# The snapshot is at 011Ch, just before the game patches its BIOS trampoline at
+# 07A7h from 9FFEh/9FFFh and copies it to D800h. Here BIOS and RAM share slot 0,
+# so A8h switches leave page 0 on RAM. Copy an 8-byte subslot-0 helper
+# (sub0=54h) to D844h in place of 011Ch..0130h, and patch 07A7h to call D844h
+# for BIOS and write FFFFh=55h to return to RAM.
+patch page0:011C 32 B3 07 3A FF 9F 32 A9 07 32 BA 07 32 CE 07 32 D9 07 32 E3 07 > 21 29 01 11 44 D8 01 08 00 ED B0 18 08 F5 3E 54 32 FF FF F1 C9
+patch page0:07A7 F5 3E 00 D3 A8 F1 CD 41 01 F3 F5 3E 09 D3 A8 F1 C9 F5 3E 00 D3 A8 F1 FE 07 20 02 CB F9 D5 59 CD 93 00 D1 18 E4 F5 3E 00 D3 A8 F1 CD D8 00 18 D9 F5 3E 00 D3 A8 F1 CD D5 00 18 CE 3E 00 D3 A8 CD 90 00 18 C5 > CD 44 D8 CD 41 01 00 00 F3 F5 3E 55 32 FF FF F1 C9 CD 44 D8 00 00 00 FE 07 20 02 CB F9 D5 59 CD 93 00 D1 18 E3 CD 44 D8 00 00 00 CD D8 00 18 D8 CD 44 D8 00 00 00 CD D5 00 18 CD CD 44 D8 00 CD 90 00 18 C4

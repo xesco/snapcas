@@ -1,0 +1,23 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# When play starts the game fills E904h to FE3Bh, from 6A36h, 6A55h and 669Dh,
+# over FCE9h to FD5Bh, where the build puts the image's call of SX2RES, its
+# wrapper for the game's interrupt routine and its stack. The code goes to
+# E7ECh and the stack to E834h, in zeros of page 3 that the game leaves alone
+# in a minute of play with keys.
+rescode E7EC
+resstack E834
+
+# When play starts the game writes RET at 0038h, at CF9Ch, and runs without
+# interrupts, so the calls stopped there. In play it sets the VDP's address
+# hundreds of times a second, with the routine at BEB5h and a copy of it at
+# D1D8h, which read the VDP's status register 0 first. The routine jumps to
+# E81Fh, in more of those zeros: PUSH AF / IN A,(99h) / RLCA / CALL C,0E7ECh,
+# which calls res3 when bit 7 shows a new frame, so at most once a frame, then
+# the routine's IN A,(99h) again and the rest of it. The copy calls the routine.
+patch page3:281F 00 00 00 00 00 00 00 00 00 00 > F5 DB 99 07 DC EC E7 DB 99 7D
+patch page3:2829 00 00 00 00 00 00 00 00 00 00 > D3 99 7C E6 7F F6 40 D3 99 F1
+patch page3:2833 00 > C9
+patch page2:3EB5 F5 DB 99 > C3 1F E8
+patch page3:11D8 F5 DB 99 7D D3 99 7C E6 7F F6 > CD B5 BE 00 00 00 00 00 00 00
+patch page3:11E2 40 D3 99 F1 > 00 00 00 00

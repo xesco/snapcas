@@ -2,3 +2,22 @@
 cas REFLEXB.CAS
 sha1 502c32a1061f716980deee35909a042a46e77cf4
 url https://download.file-hunter.com/Games/MSX1/CAS/Reflex%20(1987)(Players%20Software)(Side%20B)%5BRUN%27CAS-%27%5D.zip
+
+# The level editor's code at C000h calls the MSX1 BIOS's routines at their
+# own addresses, 0744h, 07CDh and 07D7h, for LDIRVM, WRTVRM and RDVRM. On an
+# MSX2 those addresses hold other code: 0744h copies VRAM to RAM, so the first
+# call writes 600h bytes over page 0 from 0000h, where an image with the tape
+# service keeps T0, and the next interrupt crashes. The patches call the BIOS's
+# jump table entries 005Ch, 004Dh and 004Ah instead, which reach the same
+# routines on every MSX.
+patch side1:167 CD 44 07 > CD 5C 00
+patch side1:173 CD 44 07 > CD 5C 00
+patch side1:1D4 CD CD 07 > CD 4D 00
+patch side1:1FF CD CD 07 > CD 4D 00
+patch side1:229 CD CD 07 > CD 4D 00
+patch side1:26A CD D7 07 > CD 4A 00
+patch side1:295 CD D7 07 > CD 4A 00
+patch side1:2AB CD D7 07 > CD 4A 00
+patch side1:2FE CD D7 07 > CD 4A 00
+patch side1:31D CD CD 07 > CD 4D 00
+patch side1:32A CD CD 07 > CD 4D 00

@@ -1,0 +1,26 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so nothing calls SX2RES. The image's wrapper
+# at FCC9h, before the tape service's entries, calls SX2RES and jumps to a RET
+# at FC68h.
+rescall FC68
+
+# Two entries at FC4Ch, in BASIC's zeros of TRPTBL, which the game leaves alone,
+# count their calls in the bytes from FC7Ch and call the wrapper at every 1024th
+# of the first and every 128th of the second, then do the instructions that
+# their calls replace and return.
+patch page3:3C4C 00 00 00 00 00 00 00 00 00 00 > F5 3A 7C FC C6 01 32 7C FC 30
+patch page3:3C56 00 00 00 00 00 00 00 00 00 00 > 0D 3A 7D FC C6 40 32 7D FC 30
+patch page3:3C60 00 00 00 00 00 00 00 00 00 00 > 03 CD C9 FC F1 AF D3 AA C9 F5
+patch page3:3C6A 00 00 00 00 00 00 00 00 00 00 > 3A 7C FC C6 02 32 7C FC 30 03
+patch page3:3C74 00 00 00 00 00 00 00 00 > CD C9 FC F1 21 70 07 C9
+
+# The title waits for 1, 2 or 3 in a loop at F102h that calls the key test at
+# 0675h, about 27000 times a second. The test calls the first entry in place of
+# XOR A / OUT (0AAh),A, about 25 times a second.
+patch page0:675 AF D3 AA > CD 4C FC
+
+# In play the routine at 0755h reads the game's keys, about 3800 times a second.
+# It calls the second entry in place of LD HL,0770h, about 30 times a second.
+patch page0:758 21 70 07 > CD 69 FC

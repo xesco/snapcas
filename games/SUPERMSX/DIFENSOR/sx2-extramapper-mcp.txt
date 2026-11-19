@@ -1,0 +1,14 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's search for RAM in page 1 at 9000h keeps its result at FFFEh, and
+# DIFEN2 and DIFEN3 select it by the slot register alone. Here the BIOS and the
+# RAM are both in slot 0, in subslots 0 and 1, so the slot register cannot
+# select the RAM. The first patch skips the search to its end. The others write
+# slot 0's subslot register instead: 54h for the BIOS in page 0 and RAM in
+# pages 1 to 3, and after DIFEN2's copy to page 1, 50h for BASIC, where the
+# copy wrote AND 0F0h / OUT (0A8h),A. That routine's RET moves into the unused
+# text after it.
+patch side1:11E69 47 08 78 E6 > 4F 08 18 42
+patch side1:11EE6 3A FE FF D3 A8 > 3E 54 32 FF FF
+patch side1:11EF6 E6 F0 D3 A8 C9 67 > D6 04 32 FF FF C9
+patch side1:14755 3A FE FF D3 A8 > 3E 54 32 FF FF

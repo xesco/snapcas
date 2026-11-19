@@ -1,0 +1,29 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The loader's block at 8661h first looks for RAM in page 1 in slots 1, 2 and 3
+# by the slot register alone, at 866Bh, to copy the game's pictures there, and
+# sets the flag at 9C40h when it finds none. Here the RAM is subslot 1 of slot
+# 0, so the game ran without them. The patch writes 54h, RAM in pages 1 to 3, to
+# slot 0's subslot register and to SLTTBL's entry for slot 0 at FCC5h, from
+# which the BIOS writes the register again, tests slot 0 in page 1 and jumps to
+# the copy: LD A,54h / LD (0FFFFh),A / LD (0FCC5h),A / LD A,B / CALL 8691h /
+# JR 8688h. Its freed bytes at 8679h hold a routine that gives BASIC its ROM in
+# pages 0 and 1 back, 50h in both places, and BASIC's slot register value:
+# LD A,50h / LD (0FFFFh),A / LD (0FCC5h),A / LD A,(86A2h) / JP 013Bh.
+patch side1:2B18 3E 04 B0 CD 91 86 28 15 3E 08 B0 CD 91 86 28 0D 3E 0C B0 CD 91 86 28 05 3E FF 32 40 9C > 3E 54 32 FF FF 32 C5 FC 78 CD 91 86 18 0F 3E 50 32 FF FF 32 C5 FC 3A A2 86 C3 3B 01 00
+
+# After the copy the block returns to BASIC by LD A,(86A2h) / CALL 013Bh. It
+# calls the routine at 8679h instead.
+patch side1:2B5C 3A A2 86 CD 3B 01 FB C9 > CD 79 86 FB C9 00 00 00
+
+# The loader's routine at C67Ah looks for RAM in page 1 in slots 1, 2 and 3 by
+# the slot register alone, keeps the value at 8A2Fh, and stops at JR NZ,$ when
+# it finds none. Here the RAM is subslot 1 of slot 0, beside the BIOS, and page
+# 1 of slot 3 is a ROM, so the load stopped there. The patch writes 54h, RAM in
+# pages 1 to 3, to slot 0's subslot register and to SLTTBL's entry for slot 0
+# at FCC5h, from which the BIOS writes the register again, and tests slot 0 in
+# page 1: LD A,54h / LD (0FFFFh),A / LD (0FCC5h),A / LD A,B / CALL 0C6B3h /
+# JR NZ,$. The tape holds the routine twice.
+patch side1:6B41 F6 04 CD B3 C6 28 10 3E 08 B0 CD B3 C6 28 08 3E 0C B0 CD B3 C6 20 FE > 3E 54 32 FF FF 32 C5 FC 78 CD B3 C6 20 FE 00 00 00 00 00 00 00 00 00
+patch side1:B509 F6 04 CD B3 C6 28 10 3E 08 B0 CD B3 C6 28 08 3E 0C B0 CD B3 C6 20 FE > 3E 54 32 FF FF 32 C5 FC 78 CD B3 C6 20 FE 00 00 00 00 00 00 00 00 00

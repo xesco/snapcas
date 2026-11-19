@@ -1,0 +1,36 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the snapshot keeps the RAM page 3-0-0-3.bin in slot 3-0, which
+# the machine's resident program holds: the game needs RAM in another slot. `make
+# games` wrote this line.
+capture sx2-extramapper-noram30
+
+# The loader's RAM search, for pages 1 and 0, skips the primary slot that BASIC
+# has in the page, and here that is slot 0, where the RAM is, in 0-1: it
+# printed Cannot find 64K of RAM. The patches make both searches return 84h,
+# the slot ID of 0-1, which ENASLT selects in page 1 by itself, and remove the
+# WRSLT of a JP (HL) at 003Dh of that RAM.
+patch side1:85D 26 40 CD B4 8C > 3E 84 00 00 00
+patch side1:86D 26 00 CD B4 8C > 3E 84 00 00 00
+patch side1:875 21 3D 00 1E E9 CD 14 > 00 00 00 00 00 00 00
+
+# The loader and the game reach routines that need the RAM in page 0 through
+# CALSLT to that JP (HL). Where the RAM shares slot 0 with the BIOS, CALSLT
+# switches page 0 under its own code. The loader's call becomes DI, 55h, the
+# RAM in every page, to slot 0's subslot register, the call, and 50h, BASIC.
+patch side1:688 21 00 40 3A 7E F3 CD 24 00 21 > F3 3E 55 32 FF FF CD 71 8B 3E
+patch side1:692 71 8B DD 21 3D 00 > 50 32 FF FF 18 0D
+
+# The game's routine at 98ACh, which gets the VDP's port from 0006h and calls
+# CALSLT, becomes LD C,98h, the SX-2's port, DI, 55h, a call of a JP (HL), and
+# a jump to LD A,54h / LD (0FFFFh),A / RET. Both go where the loader checked its
+# own sum at the start, which the first patches remove. The last patch keeps
+# the sum that ends the game's block.
+patch side1:5AD 21 00 86 01 B8 07 CD BD 89 7B > 18 07 3E 54 32 FF FF C9 E9 00
+patch side1:5B7 BE C0 23 7A BE C0 > 00 00 00 00 00 00
+patch side1:4BDC 3A 06 00 4F FD 2A 7C F3 DD 21 > 0E 98 F3 3E 55 32 FF FF CD 6F
+patch side1:4BE6 3D 00 C3 1C > 8A C3 69 8A
+patch side1:73A6 69 03 > 02 02

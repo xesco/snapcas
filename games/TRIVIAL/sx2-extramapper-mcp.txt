@@ -1,0 +1,35 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game copies the BIOS to the RAM of page 0, puts its own code there from
+# 268Ch, and sets the hooks H.KEYI and H.TIMI to JP 2701h, a RET, and JP 2702h,
+# its timer routine, both in that RAM. On an MSX2 the BIOS calls the sub-ROM,
+# and an interrupt in the sub-ROM goes to the handler of the main ROM, not to
+# the copy. The hooks then jump to 2701h and 2702h in the ROM, where an LDIR
+# of 65,536 bytes can run. Here the ROM and the RAM are both in slot 0, in
+# subslots 0 and 1, so the slot register cannot tell them apart, and slot 0's
+# subslot register can, but its test does not fit in the hooks. The first
+# patch makes H.KEYI a RET and H.TIMI a JP FD69h. The second puts there, in
+# SLTWRK's entries for slot 3-0, which hold no ROM here, LD A,(0FFFFh) / RRCA
+# / RET C / JP 2702h: the timer routine runs when page 0 is in subslot 1, the
+# RAM, and not in subslot 0, the ROM.
+patch side1:4687 C3 01 27 00 00 C3 02 27 00 00 > C9 00 00 00 00 C3 69 FD 00 00
+patch page3:3D69 00 00 00 00 00 00 00 00 > 3A FF FF 0F D8 C3 02 27
+
+# The game runs on its copy of the BIOS's interrupt routine in its RAM page 0,
+# which calls H.KEYI, but the snapshot keeps that RAM page 0, so the image's T0
+# makes no call of SX2RES. The image's wrapper calls SX2RES through the tape
+# service's entry code and jumps to the RET at FD9Dh. It goes to FB03h, in the
+# work area of an RS-232C interface, which stays at zeros on the SX-2, which has
+# none.
+rescall FD9D
+rescode FB03
+
+# H.KEYI calls the wrapper: CALL 0FB03h / RET, in the snapshot and in the
+# hooks that the game copies from 26B7h at its start, after the patch above.
+patch page3:3D9A C9 C9 C9 > CD 03 FB
+patch side1:4687 C9 00 00 00 > CD 03 FB C9
+
+# The build writes the wrapper's 17 bytes but, with the tape service, does not
+# list them for the check, which then finds them changed. This patch changes
+# nothing and lists them.
+patch page3:3B03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00

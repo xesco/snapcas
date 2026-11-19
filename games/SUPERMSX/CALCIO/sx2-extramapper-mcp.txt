@@ -1,0 +1,11 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader finds the RAM in page 1 by slot and subslot and writes slot 0's
+# subslot register itself, but not SLTTBL's entry for slot 0 at FCC5h, which
+# keeps BASIC's 50h. The ROM image finds its own slot there, takes ID 80h, the
+# BIOS's slot 0-0, and selects it in page 2, so its code in page 2 is gone and
+# the game crashes within 5 seconds. The patches make the loader's last
+# routine, at D23Ch and moved to FACCh, copy the register's value into FCC5h
+# before its jump to the ROM image. They take 7 of the routine's zero bytes.
+patch side1:3B2F 2A 88 F9 3A 8A F9 B7 20 01 F1 > 3A FF FF 2F 32 C5 FC 2A 88 F9
+patch side1:3B39 E9 00 00 00 00 00 00 00 00 00 > 3A 8A F9 B7 20 01 F1 E9 00 00

@@ -1,0 +1,28 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The capture runs without the 2048 KB mapper in 3-0, which the game's RAM would
+# otherwise take, and SX2RES holds it.
+capture sx2-extramapper-noram30
+
+# The ROM image never reads the tape again: the rest of the tape is the next
+# game's. Without the tape service the restorer keeps the BIOS in page 0, in
+# another subslot of DOS's mapper's slot.
+service no
+
+# Each binary of Engesoft's loader gives page 1 the slot of page 2 by the slot
+# register alone, copies the ROM image to page 1 or 2, and starts it. Here the
+# BIOS and the RAM are both in slot 0, in subslots 0 and 1, so page 1 keeps the
+# ROM. The patch writes 54h to slot 0's subslot register in place of that code:
+# the BIOS in page 0 and RAM in pages 1 to 3.
+patch side1:61B1 DB A8 E6 F0 47 1F 1F E6 0C B0 D3 A8 > 3E 54 32 FF FF 00 00 00 00 00 00 00
+patch side1:A202 DB A8 E6 F0 47 1F 1F E6 0C B0 D3 A8 > 3E 54 32 FF FF 00 00 00 00 00 00 00
+
+# The first binary then gives page 1 the ROM's slot again. The patch writes 50h
+# to the subslot register, the BIOS in pages 0 and 1, in place of that code.
+patch side1:61C8 DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: point 4: fail: the screen shows Type mismatch in 23 10.0 seconds after the
+# restore. `make games` wrote this line.
+capture sx2-extramapper-noram30

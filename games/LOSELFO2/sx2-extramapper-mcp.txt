@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The interpreter's routines at CF84h and CF8Fh, and its start at CFCFh,
+# select BASIC's ROM and the game's RAM in pages 0 and 1 by B008h and B009h,
+# with the slot register alone. Both values are 00h here, where the BIOS and
+# the RAM share slot 0, so the game never sees the BIOS: its key wait calls
+# CHSNS in its RAM and hangs with interrupts off. The patches write slot 0's
+# subslot register instead: 50h for BASIC, 55h for RAM in every page. The
+# copy at D053h that follows each write keeps that value.
+patch side1:D9F1 3A 08 B0 D3 A8 > 3E 50 32 FF FF
+patch side1:D9FC 3A 09 B0 D3 A8 > 3E 55 32 FF FF
+patch side1:DA3C 3A 09 B0 D3 A8 > 3E 55 32 FF FF
+
+# The snapshot keeps the game's RAM in page 0, so the image calls SX2RES only
+# from the jump at 0038h of that RAM, and the game waits for keys with the
+# BIOS in page 0, whose interrupt routine calls H.KEYI. H.KEYI calls the
+# image's routine at FD29h too. The BIOS's routine keeps every register.
+patch page3:3D9A C9 C9 C9 > CD 29 FD

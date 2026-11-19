@@ -1,0 +1,9 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# RAMCA, the screens' loader at DA69h that runs after the snapshot, looks for
+# RAM in pages 1 and 0 with RDSLT and WRSLT, from slot 3 down to slot 0, and its
+# subslots. It took the 2048 KB mapper in slot 3-0, which SX2RES holds, and
+# copies the screens to 4000h-813Bh there, and the game crashed after the
+# restore. The patch starts the search at EXPTBL's entry for slot 0, FCC1h,
+# and tries that slot alone, where the search finds the Extra-Mapper in 0-1.
+patch side1:1C09 DD 21 C4 FC 06 04 > DD 21 C1 FC 06 01

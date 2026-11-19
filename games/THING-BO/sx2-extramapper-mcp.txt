@@ -1,0 +1,55 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Gremlin's loader runs a RAM search at 9000h that finds the RAM of pages 0 and
+# 1 in 0-1 and leaves slot 0's subslot register at 55h, RAM in page 0, when it
+# returns with EI, so the next interrupt runs RAM at 0038h and the load stopped
+# there. It also keeps the RAM's slot register value at FFFEh, which is 00h
+# here, as BASIC's, since the BIOS and the RAM share slot 0. Each later block
+# selects the RAM with LD A,(0FFFEh) / OUT (0A8h),A, and goes back to BASIC
+# with AND 0F0h / OUT (0A8h),A.
+
+# The search is skipped, as on African Trail Simulator: LD C,A / EX AF,AF' /
+# JR to its end, which leaves the subslot register as it is. The loader checks
+# each block by the exclusive OR of its bytes, so a NOP after the search's RET
+# takes the change too.
+patch side1:1C4 47 08 78 E6 > 4F 08 18 78
+patch side1:249 00 > F6
+
+# The two copies of the game's pages 0 and 1, at 8700h, select the RAM with
+# LD A,55h / LD (0FFFFh),A. After the LDIR, AND 0F0h leaves 50h in A, and
+# DEC BC / LD (BC),A writes it to FFFFh: BASIC again. A byte after the RET,
+# which the next block loads over, keeps each block's exclusive OR.
+patch side1:272 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:282 E6 F0 D3 A8 FB C9 > E6 F0 0B 02 FB C9
+patch side1:288 38 > 53
+patch side1:4392 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:43A2 E6 F0 D3 A8 FB C9 > E6 F0 0B 02 FB C9
+patch side1:43A8 5B > 30
+
+# The last block selects the RAM in every page and jumps to the game at 0380h.
+patch side1:C5D2 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:C5DA 21 > 38
+
+# The image has no call of SX2RES: the game uses the zeros in page 3 where the
+# image's code for the call goes, or has no room there that the check allows. A
+# routine at 3A08h, as in Knight Lore's file for this machine, in zeros of page
+# 0 that the game leaves alone in a minute of play with keys, uses no BIOS
+# routine. It keeps all the registers and the interrupts, selects slot 3's
+# subslot 0 in page 1 with slot 3's subslot register, selects slot 3 in page 1
+# with the slot register, and calls SX2RES's entry at 4040h when it starts F5h
+# DBh. Then it gives both registers back. At 3A65h, CALL 3A08h / JP 0037h.
+patch page0:3A08 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page0:3A12 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page0:3A1C 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page0:3A26 00 00 00 00 00 00 00 00 00 00 > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page0:3A30 00 00 00 00 00 00 00 00 00 00 > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page0:3A3A 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 C1
+patch page0:3A44 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page0:3A4E 00 00 00 00 00 00 00 00 00 00 > D3 A8 F1 E2 55 3A FB 08 F1 08
+patch page0:3A58 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page0:3A62 00 00 00 00 00 00 00 00 00 > C1 F1 C9 CD 08 3A C3 37 00
+
+# The game takes its interrupts with RET at 0038h, in its RAM in page 0. A RET
+# at 0037h, in an FFh byte that the game leaves alone, and at 0038h a jump to
+# 3A65h.
+patch page0:37 FF C9 FF FF > C9 C3 65 3A

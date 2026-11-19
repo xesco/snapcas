@@ -1,0 +1,35 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the snapshot keeps the RAM page 3-0-0-3.bin in slot 3-0, which
+# the machine's resident program holds: the game needs RAM in another slot. `make
+# games` wrote this line.
+capture sx2-extramapper-noram30
+
+# After the snapshot the game puts its own routine into H.KEYI, over the image's
+# call of SX2RES, which then stops: JP D160h copied from D488h. The image's
+# wrapper calls SX2RES and jumps to it. Its routine at 62E2h, copied from 62CAh,
+# needs no wrapper: it calls the hook that it saved at 62CDh, a call of SX2RES
+# once the patch below keeps one in the hook that the game turns off.
+rescall D160
+
+# The game installs the wrapper's address instead, FD00h after resb at FCC9h, as
+# build.txt's resvector gives it.
+patch page3:1489 60 D1 > 00 FD
+
+# To turn its routine off the game copies the hook that it saved at 62CDh into
+# H.KEYI with RET first, from 62D2h, and the calls stop. The patch makes it
+# write JP FCC9h there instead, a jump to the image's resb, which calls SX2RES
+# and returns, as the image's H.KEYI does at the restore. The saved hook keeps
+# its first byte: only the game's routine calls the hook, and the game saves it
+# again before it puts the routine back.
+patch page1:22D2 21 CD 62 36 C9 11 9A > F3 21 C9 FC 22 9B FD
+patch page1:22D9 FD 01 05 00 F3 ED B0 > 3E C3 32 9A FD FB C9
+
+# To turn its routine off the game copies RET into H.KEYI from D4A5h, which
+# D48Bh only reads, and the calls stop. The patch makes those bytes JP FCC9h, a
+# jump to the image's resb, which calls SX2RES and returns, as the image's
+# H.KEYI does at the restore.
+patch page3:14A5 C9 C9 C9 > C3 C9 FC

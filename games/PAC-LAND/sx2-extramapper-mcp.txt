@@ -1,0 +1,9 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at E8E9h finds the RAM of pages 1 and 0 with RDSLT and WRSLT,
+# selects page 1 with ENASLT, writes JP 0E916h at 0000h of the RAM, and enters
+# it with CALSLT. Here that RAM is 0-1, in the BIOS's own slot 0, and the CPU
+# ran away in those BIOS calls for page 0, before E916h, so the load stopped
+# there. The loader instead writes 55h, RAM in every page, to slot 0's subslot
+# register from page 3 and jumps to E916h.
+patch side1:29 21 00 40 CD AC EA CD 24 > 3E 55 32 FF FF C3 16 E9

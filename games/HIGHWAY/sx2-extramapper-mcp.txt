@@ -1,0 +1,24 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Dinamic's RAM search starts at slot 3 and finds SX2RES's mapper in 3-0, or,
+# run from page 3, cuts off its own code there. The patch starts it at slot 0,
+# where it finds the Extra-Mapper in 0-1.
+patch side1:1F57 3E 03 > 3E 00
+
+# After the load, the loader gives page 1 back with A left over from page 0's
+# restore, a slot register value, which leaves page 1 on the RAM in 0-1 here.
+# The patch gives page 1 page 0's slot ID from F931h, the main ROM, with H = 40h
+# for the page and the same calls.
+patch side1:1EFF 3A 31 F9 21 00 00 CD 59 96 21 00 40 CD 59 96 FB C9 > 3A 31 F9 60 68 F5 CD 59 96 F1 26 40 CD 59 96 FB C9
+
+# The game runs without interrupts, so the image has no call of SX2RES. The
+# rescode line puts the image's call routine at FC50h, in zeros of page 3 that
+# the game leaves alone, and the rescall line gives it a wrapper at FC7Dh that
+# calls SX2RES and jumps to the game's routine at 046Fh. The zeros are the
+# BIOS's TRPTBL, which the game, without the BIOS, never uses.
+rescode FC50
+rescall 046F
+
+# In play the routine at 00E4h reads the joystick with the routine at 046Fh,
+# about 40 times a second. It calls the wrapper in place of that routine.
+patch page0:EA CD 6F 04 > CD 7D FC

@@ -1,0 +1,30 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game writes EDh to FFFEh and B0h to FFFFh, an LDIR, each time that it
+# clears a part of its memory, and then jumps to an LDIR and RET at B274h. It
+# never runs the two bytes at FFFEh. On a machine whose RAM is in an expanded
+# slot, FFFFh is the slot's subslot register, and the write of B0h deselects
+# the RAM in page 2. The game has no other RAM here. The patch replaces the
+# write to FFFFh, 32 FF FF at AC97h, with OR A and CP 7Bh, which change only
+# the flags. The tape holds each byte XOR the two bytes of its address, and the
+# loader checks the sum of the bytes, which the new bytes keep.
+patch side1:27E7 09 > 8C
+patch side1:27E8 CB > CA
+patch side1:27E9 CA > 4E
+
+# The game runs without interrupts, so the image's call of SX2RES from H.KEYI
+# never runs. A routine at FCD9h, in the zeros of SLTATR and SLTWRK, reads the
+# VDP's status register 0, which the game never reads there. When its bit 7
+# shows a new frame, it keeps IX, IY and the alternate registers and calls the
+# image's routine at FD29h, so at most once a frame. An entry at FCFCh calls it,
+# then does LD A,E / OR 0D0h and returns.
+patch page3:3CD9 00 00 00 00 00 00 00 00 00 00 > F5 DB 99 07 30 1B DD E5 FD E5
+patch page3:3CE3 00 00 00 00 00 00 00 00 00 00 > D9 C5 D5 E5 08 F5 08 D9 CD 29
+patch page3:3CED 00 00 00 00 00 00 00 00 00 00 > FD D9 08 F1 08 E1 D1 C1 D9 FD
+patch page3:3CF7 00 00 00 00 00 00 00 00 00 00 > E1 DD E1 F1 C9 CD D9 FC 7B F6
+patch page3:3D01 00 00 > D0 C9
+
+# The game selects each row of the keyboard with the routine at 9B1Dh, LD A,E /
+# OR 0D0h / OUT (0AAh),A / RET, in the title and in play. It calls the entry
+# above in place of LD A,E / OR 0D0h.
+patch page2:1B1D 7B F6 D0 > CD FC FC

@@ -1,0 +1,50 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1, but its results, FA77h
+# for the found RAM, FA75h for BASIC and FA78h for BASIC with that RAM in page
+# 1, are all 00h here, where the BIOS and the RAM share slot 0. The patches skip
+# the search and give FA76h, the subslot register's value that each block
+# writes to FFFFh after it selects the found RAM, 55h: RAM in every page.
+patch side1:149 47 08 78 E6 > 4F 08 18 78
+patch side1:1CF 3A FF FF 2F > 3E 55 00 00
+
+# Each block selects the found RAM with FA77h, BASIC with FA75h and BASIC with
+# RAM in page 1 with FA78h, by the slot register alone. The patches write slot
+# 0's subslot register instead: 55h, 50h and 54h.
+patch side1:426F 3A 78 FA D3 A8 > 3E 54 32 FF FF
+patch side1:4285 3A 75 FA D3 A8 > 3E 50 32 FF FF
+patch side1:82B7 3A 77 FA D3 A8 > 3E 55 32 FF FF
+patch side1:82D8 3A 75 FA D3 A8 > 3E 50 32 FF FF
+patch side1:830A 3A 77 FA D3 A8 > 3E 55 32 FF FF
+
+# The last block copies parts of the game from page 0 and selects FA78h's
+# slots by the slot register after its last copy, before it starts the game at
+# 7841h. The patches move the copy's setup over the load of FA78h and end it
+# with a write of 54h, the BIOS in page 0 and RAM in pages 1 to 3, to FFFFh.
+patch side1:8320 3A 78 FA 11 C0 DA 21 4C 1A 01 > 11 C0 DA 21 4C 1A 01 3A 25 ED
+patch side1:832A 3A 25 ED B0 D3 A8 > B0 3E 54 32 FF FF
+
+# The game takes its interrupts in its own routine at BEBEh, with its stack in
+# page 1, where SX2RES's entry is, so nothing called SX2RES: the image's call
+# routine leaves the call out while the stack is in page 1. The game also uses
+# the zeros at FD29h and FCC9h. The call's code goes to D764h, in zeros of page
+# 3 that the game leaves alone in a minute of play with keys: res3, then the
+# wrapper at D791h, which calls res3 and jumps to D7A1h.
+rescode D764
+rescall D7A1
+
+# At D797h, LD (D7A8h),SP / LD SP,D81Ah / JP D791h: the call runs on a stack of
+# 112 bytes in the zeros up to D81Ah. At D7A1h, LD SP,(D7A8h) / JP BEBEh gives
+# the game its stack back and runs its routine.
+patch page3:1797 00 00 00 00 00 00 00 00 00 00 > ED 73 A8 D7 31 1A D8 C3 91 D7
+patch page3:17A1 00 00 00 00 00 00 00 > ED 7B A8 D7 C3 BE BE
+
+# The game's interrupts run in mode 2 with I BFh, and an MSX's bus gives FFh, so
+# the CPU reads the vector at BFFFh and C000h. It goes to D797h.
+patch page2:3FFF BE > 97
+patch page3:0 BE > D7
+
+# The game's stack is in page 1, the page of SX2RES's entry, and the zeros at
+# FCC9h to FD88h have no room for the call's own stack. D270h holds zeros that
+# the game leaves alone, so the stack goes there.
+resstack D270

@@ -1,0 +1,31 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1, so only
+# slot 0's subslot register tells them apart. These lines are for the loader's
+# own code, on top of the pending automatic patch of its slots search, without
+# which the load still stops at the search. Line 3 of the BASIC loader writes
+# page 3's subslot in every page to FFFFh with POKE -1,A, 55h here, which takes
+# BASIC's ROM from pages 0 and 1. The patch makes it POKE 255,A, a write to the
+# ROM.
+patch side1:1ED 98 F2 12 2C 41 > 98 0F FF 2C 41
+
+# The menu calls the game's routines in page 1 with interrupts on, and first
+# writes DFCAh, the RAM in every page, to FFFFh. The patch writes 54h: the BIOS
+# in page 0 and RAM in pages 1 to 3.
+patch side1:9D2 3A CA DF 32 FF FF > 3E 54 32 FF FF 00
+
+# The menu returns to BASIC by the slot register alone, with DFCBh. The patch
+# writes 50h, BASIC's ROM in pages 0 and 1, to FFFFh.
+patch side1:9D9 3A CB DF D3 A8 > 3E 50 32 FF FF
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:3A3 3A CC DF D3 A8 > 3E 55 32 FF FF
+patch side1:4F9 3A CC DF D3 A8 > 3E 55 32 FF FF
+patch side1:A71 47 08 78 E6 > 4F 08 18 78
+patch side1:B1F 3A CC DF D3 A8 > 3E 55 32 FF FF
+patch side1:B47 DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00

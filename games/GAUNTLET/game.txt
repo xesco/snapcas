@@ -20,6 +20,3 @@ patch side1:AED4 CD E4 00 > CD E4 FC
 # The block ends with a 16-bit sum of its bytes, and the 2F4h that the three
 # patches add goes into it.
 patch side1:E2F3 45 F0 > 39 F3
-
-# Its RAM search adds page 0's RAM slot to the slot register's page 0 bits.
-rom keep

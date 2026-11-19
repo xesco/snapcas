@@ -1,0 +1,20 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# USE64K, at DD00h, looks for RAM in pages 0 and 1 by slot IDs 3, 2 and 1,
+# primary slots only, from DE72h, and resets the machine when none holds RAM.
+# Here slot 3's subslot 0 is SX2RES's mapper, which an image cannot keep, and
+# the RAM is the Extra-Mapper in slot 0-1. The patch makes the first ID 84h,
+# slot 0-1, which USE64K's copy of ENASLT at DD70h selects with its subslot.
+patch side1:B50 3E 03 > 3E 84
+
+# USE64K and the game give pages 0 and 1 back to the BIOS with slot ID 00h, and
+# the copy of ENASLT then changes only the slot register, which leaves the page
+# on the RAM of slot 0-1. The patches make the copy take ID 00h as 80h, slot
+# 0-0, the main ROM. Its jump to the code for expanded slots, at DD73h, goes to
+# unused bytes at DD7Dh: JP M,0DDB5h / OR A / JR NZ,0DD76h / LD A,80h /
+# JP 0DDB5h. The code for expanded slots ends at DDC6h with JR 0DD70h, which
+# now goes to DD88h: CALL 0DD90h / JR 0DD76h, the primary slot's part, so that
+# ID 00h does not come back to the new code.
+patch side1:A51 FA B5 DD > C3 7D DD
+patch side1:A5B E5 CD ED DD 4F 06 00 7D A4 B2 21 C5 FC 09 77 E1 > FA B5 DD B7 20 F3 3E 80 C3 B5 DD CD 90 DD 18 E9
+patch side1:AA4 18 A8 > 18 C0

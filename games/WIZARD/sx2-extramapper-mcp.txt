@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game runs on the BIOS's interrupt routine, with the BIOS in page 0, but
+# the snapshot keeps its RAM page 0, so the image's T0 makes no call of SX2RES,
+# and H.KEYI holds RET. The image's wrapper calls SX2RES through the tape
+# service's entry code and jumps to the RET at FD9Dh, in H.KEYI after the patch
+# below. sub0 takes FCC9h, so the wrapper goes to FB03h, in the work area of an
+# RS-232C interface, which stays at zeros on the SX-2, which has none.
+rescall FD9D
+rescode FB03
+
+# H.KEYI calls the wrapper: CALL 0FB03h / RET.
+patch page3:3D9A C9 C9 C9 > CD 03 FB
+
+# The build writes the wrapper's 17 bytes but, with the tape service, does not
+# list them for the check, which then finds them changed. This patch changes
+# nothing and lists them.
+patch page3:3B03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00

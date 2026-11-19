@@ -1,0 +1,51 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loader `slots` finds RAM by the slot register alone, keeps BASIC's
+# slot register value at FFFDh and the RAM's at FFFEh, and selects them later by
+# the slot register again. Here the BIOS and the RAM share slot 0, so both
+# values are 00h and each switch does nothing. The patches skip the search and
+# make each use of the two values a write of slot 0's subslot register
+# instead: 50h for BASIC and 55h for RAM in every page.
+patch side1:4A4 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:4B9 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:4F5 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:526 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:3970 47 08 78 E6 > 4F 08 18 78
+patch side1:39EC 20 DA > 18 0B
+patch side1:3AD0 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:3AE5 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:3B21 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:3B52 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+
+# The game's two slot routines at 4322h and 4331h select the BIOS in page 0
+# and RAM elsewhere, and RAM in every page, by OUT (0A8h),A with the values
+# that the stub at C010h writes into them, from the slot register. Here those
+# are 00h and switch nothing. The first two patches make each routine's OUT
+# (0A8h),A a LD (0FFFFh),A: slot 0's subslot register. The last 49h, LD C,C,
+# keeps the XOR of the block, which the loader checks. The third makes the
+# stub, which the loader enters at C010h with RAM in every page, put 55h and
+# 54h into the routines and select 54h, the BIOS in page 0, before it jumps to
+# the game. Its third byte, in the code before C010h that never runs, keeps
+# the block's XOR.
+patch side1:7969 D3 A8 00 00 00 00 > 32 FF FF 00 00 49
+patch side1:7978 D3 A8 00 00 00 00 > 32 FF FF 00 00 49
+patch side1:F66B F3 3E AA D3 A8 21 00 90 11 00 80 01 00 40 ED B0 DB A8 32 35 43 E6 FC 32 26 43 D3 A8 C3 62 40 00 > F3 3E 8B D3 A8 21 00 90 11 00 80 01 00 40 ED B0 3E 55 32 35 43 3E 54 32 26 43 32 FF FF C3 62 40
+
+# The game runs on the BIOS's interrupt routine, with its own routines in
+# H.KEYI: JP 49B6h at the title, JP 831Eh in play, and JP 441Ch. The snapshot
+# keeps the RAM page 0 that the game selects at times, so the image's T0 makes
+# no call of SX2RES. The image's wrappers, one for each routine, call SX2RES
+# and jump to it. They go to C480h, in zeros of page 3 that the game leaves
+# alone in a minute of play with keys: 49B6h's at C480h, 831Eh's at C491h and
+# 441Ch's at C4A2h. BASIC's trap table TRPTBL at FC66h is no place for them:
+# the BIOS's keyboard scan sets STRIG(0)'s flag at FC70h when space is pressed.
+rescall 49B6 831E 441C
+rescode C480
+
+# The game's three writes of H.KEYI jump to the wrappers, in the snapshot's
+# RAM: 49B6h's at 4990h, 441Ch's at 440Dh and 831Eh's at 833Ah. The snapshot's
+# H.KEYI, JP 49B6h from the title's write, jumps to its wrapper too.
+patch page1:0990 21 B6 49 > 21 80 C4
+patch page1:040D 21 1C 44 > 21 A2 C4
+patch page2:033A 21 1E 83 > 21 91 C4
+patch page3:3D9B B6 49 > 80 C4

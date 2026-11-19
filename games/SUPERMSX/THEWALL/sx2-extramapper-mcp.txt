@@ -1,0 +1,74 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the snapshot keeps the RAM page 3-0-2-1.bin in slot 3-0, which
+# the machine's resident program holds: the game needs RAM in another slot. `make
+# games` wrote this line.
+capture sx2-extramapper-noram30
+
+# The loader at DD00h finds the RAM in page 1 by ENASLT and then gives pages 0
+# and 1 the slot of pages 2 and 3 by the slot register alone, 00h here, where
+# the BIOS and the RAM share slot 0. Page 0 keeps the BIOS, so the game's load
+# from 0360h is lost there and its jump to 0360h runs the BIOS. The patch
+# writes 55h, RAM in every page, to slot 0's subslot register in place of the
+# value's computation, and the loader then stores and writes 00h as before.
+patch side1:3896 E6 F0 47 07 07 07 07 B0 > 3E 55 32 FF FF AF 00 00
+
+# After the load the loader selects BASIC in pages 0 and 1, and then the game
+# in every page, by FFFEh and the slot register alone. The patches write 50h,
+# BASIC, and 55h to the subslot register instead.
+patch side1:39DB 3A FE FF E6 F0 D3 A8 > 3E 50 32 FF FF 00 00
+patch side1:3A02 3A FE FF D3 A8 > 3E 55 32 FF FF
+
+# The game moves 4000h to BFFFh up to 8000h to FFFFh, by an LDDR of 8001h bytes
+# from C000h to 0000h. FFFFh is slot 0's subslot register here, and the move's
+# second byte deselects the RAM. The patch makes the move 7FFFh bytes, from
+# BFFEh to FFFEh. The two bytes left out are those for 0000h and for FFFFh.
+patch side1:3A16 21 00 C0 11 00 00 01 01 80 > 21 FE BF 11 FE FF 01 FF 7F
+
+# The loader keeps an exclusive OR of the block's bytes and compares it with
+# the byte after the block. The patch gives that byte the value for the changed
+# block, CCh XOR 81h.
+patch side1:F6B5 CC > 4D
+
+# The game loads nothing more from the tape: the rest of the tape holds the
+# compilation's other games. In play it clears FB00h to FDFFh, over the tape
+# service's part, and the call of SX2RES with the tape service runs through that
+# part. So the image has no tape service.
+service no
+
+# The game runs without interrupts but in the title, so nothing calls SX2RES.
+# Its RAM in page 0 keeps the BIOS away, so the BIOS's hooks are unused, and the
+# game never writes them. The patches below clear 51 bytes of them from FF40h
+# for the image's code of the call: its call routine res3 and its wrapper at
+# FF6Dh, which calls res3 and jumps to a RET at FF86h.
+patch page3:3F40 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F4A C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F54 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F5E C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F68 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F72 C9 > 00
+rescode FF40
+rescall FF86
+
+# Two entries at FF73h, in more of the hooks. The first counts its calls in the
+# byte at FF8Fh and calls the wrapper at every 256th; the second calls it each
+# time. Each then does the instructions that its call replaces and returns.
+patch page3:3F73 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > F5 3A 8F FF C6 01 32 8F FF 30
+patch page3:3F7D C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 03 CD 6D FF F1 DB AA E6 F0 C9
+patch page3:3F87 C9 C9 C9 C9 C9 C9 C9 C9 > CD 6D FF 3E 0F D3 A0 C9
+
+# The routine at B789h tests a key, about 9000 times a second in play. It calls
+# the first entry in place of IN A,(0AAh) / AND 0F0h, about 35 times a second.
+patch page2:3790 DB AA E6 F0 > CD 73 FF 00
+
+# The title reads the joystick with the routine at B73Eh, about 50 times a
+# second. It calls the second entry in place of LD A,0Fh / OUT (0A0h),A.
+patch page2:373E 3E 0F D3 A0 > CD 87 FF 00
+
+# When play starts, at 8379h, the game clears E000h to FDFFh, over FD49h to
+# FD88h, where the build puts res3's stack and its end, so the next call ran
+# the cleared bytes. Put the stack at FF10h in the unused C9h BIOS hook area.
+resstack FF10

@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image has no call of SX2RES. The tape
+# service's part is at DEE1h, so the rescode line puts the image's two wrappers
+# at FCC9h, in the zeros of SLTATR, which the game, without the BIOS, leaves
+# alone. The wrapper at FCC9h calls SX2RES and jumps to the game's routine at
+# E0BFh, the one at FCDAh to its routine at E2F3h. The wrappers disable the
+# interrupts, which the game takes none of.
+rescode FCC9
+rescall E0BF E2F3
+
+# The game's loop calls the routine at E0BFh from E41Ch, about 7 times a second
+# in the title and in play, and in play the routine at E47Fh calls the routine
+# at E2F3h about 26 times a second. Both call the wrappers in place of those
+# routines.
+patch page3:241C CD BF E0 > CD C9 FC
+patch page3:247B CD F3 E2 > CD DA FC

@@ -1,0 +1,19 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at E000h first selects page 1's slot, BASIC's ROM in 0-0, in page
+# 2 with ENASLT. Here that writes slot 0's subslot register and leaves no RAM
+# in page 2, where the loader then copies its RAM search. Where slot 0 is not
+# expanded the call writes the slot register alone, which the loader writes
+# again next. The patch removes the call.
+patch side1:48 CD 24 00 > 00 00 00
+
+# The loader's two RAM searches, for page 1 and then for page 0, find the RAM
+# in 0-1, but their result at FFFEh is 00h here, where the BIOS and the RAM
+# share slot 0, so the loader's switches by the slot register alone do
+# nothing. The patches skip both searches and make the two switches writes of
+# slot 0's subslot register: 54h, RAM in pages 1 to 3, before the game's load,
+# and 55h, RAM in every page, before its start at 4000h.
+patch side1:D4 3A FE FF D3 A8 > 3E 54 32 FF FF
+patch side1:FD 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:275 47 08 78 E6 > 4F 08 18 42
+patch side1:2C5 47 08 78 E6 > 4F 08 18 3F

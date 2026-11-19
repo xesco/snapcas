@@ -1,0 +1,23 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The second file copies the game's code to RAM in page 1, which it selects in
+# slot 2 with WSLREG, A8h, and then gives page 1 back to BASIC, A0h. The SX-2 has
+# no RAM in slot 2: its RAM in page 1 is subslot 1 of slot 0, beside the BIOS.
+# So each LD A,n / CALL WSLREG becomes LD A,n / LD (0FFFFh),A with that subslot,
+# 54h, or BASIC's, 50h.
+patch side1:1B37 3E A8 CD 3B 01 > 3E 54 32 FF FF
+patch side1:1B47 3E A0 CD 3B 01 > 3E 50 32 FF FF
+
+# The game's start selects that RAM in page 1.
+patch side1:402E 3E A8 CD 3B 01 > 3E 54 32 FF FF
+
+# The game's return to BASIC.
+patch side1:5280 3E A0 CD 3B 01 > 3E 50 32 FF FF
+
+# At the start of play, 31 seconds after the restore with keys at 15 and 30,
+# the game points H.KEYI to its routine at 57B9h, over the image's CALL resb,
+# so SX2RES got no more calls. That routine returns to the BIOS's interrupt
+# routine.
+# The BIOS's interrupt routine still calls H.TIMI after it, so H.TIMI calls
+# resb at FD29h too: CALL 0FD29h / RET.
+patch page3:3D9F C9 8B E4 40 C9 > CD 29 FD C9 C9

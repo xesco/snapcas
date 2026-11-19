@@ -1,0 +1,20 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The title takes the interrupt in the game's routine at A872h, through JP at
+# 0038h in its RAM page 0. Once a key leaves the title, the game runs with the
+# interrupts off and polls, so the wrapper of A872h no longer runs. The routine
+# at A22Eh, which reads a row of the keyboard and the joystick, runs 6 times in
+# each frame of the game's loop, about 50 times a second. So the image gets a
+# second wrapper, at FD5Ch after the first one at FD56h, for A22Eh.
+rescall A872 A22E
+
+# The snapshot's JP 0A872h at 0038h goes to the first wrapper. With the rescall
+# line's addresses, the build leaves that jump as it is.
+patch page0:0039 72 A8 > 56 FD
+
+# The three calls of A22Eh call the second wrapper, which calls SX2RES and
+# jumps to A22Eh.
+patch page2:210E CD 2E A2 > CD 5C FD
+patch page2:22D4 CD 2E A2 > CD 5C FD
+patch page2:22E8 CD 2E A2 > CD 5C FD

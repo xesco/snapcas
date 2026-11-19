@@ -1,0 +1,35 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The block pon, at 86C4h, keeps the slot register at 871Ch and page 3's slot
+# in every page at 871Dh, and selects one or the other by the slot register
+# alone, in two routines at 8710h and 8716h, around its copies of the game to
+# pages 0 and 1. Here BASIC and the RAM, the Extra-Mapper in 0-1, are both in
+# slot 0, so the copies go to the ROM. The patches write slot 0's subslot
+# register instead: 55h, RAM in every page, at 8710h, and 50h, BASIC's value,
+# at 8716h.
+patch side1:3B3A 3A 1D 87 D3 A8 C9 > 3E 55 32 FF FF C9
+patch side1:3B40 3A 1C 87 D3 A8 C9 > 3E 50 32 FF FF C9
+
+# The game's image has no call of SX2RES, and the game writes over the BIOS's
+# slot routines and tables in page 3. A routine at 8130h, in FFh bytes of page 2
+# that the game leaves alone, uses no BIOS routine. It keeps all the registers
+# and the interrupts, selects slot 3's subslot 0 in page 1 with slot 3's subslot
+# register, selects slot 3 in page 1 with the slot register, and calls SX2RES's
+# entry at 4040h when it starts F5h DBh. Then it gives both registers back. The
+# routine runs in page 2, because it moves pages 1 and 3. An entry at 818Dh
+# calls the routine, then does LD A,D / OUT (0AAh),A and returns.
+patch page2:130 FF FF FF FF FF FF FF FF FF FF > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:13A FF FF FF FF FF FF FF FF FF FF > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page2:144 FF FF FF FF FF FF FF FF FF FF > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page2:14E FF FF FF FF FF FF FF FF FF FF > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page2:158 FF FF FF FF FF FF FF FF FF FF > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page2:162 FF FF FF FF FF FF FF FF FF FF > 08 3A 41 40 FE DB CC 40 40 C1
+patch page2:16C FF FF FF FF FF FF FF FF FF FF > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:176 FF FF FF FF FF FF FF FF FF FF > D3 A8 F1 E2 7D 81 FB 08 F1 08
+patch page2:180 FF FF FF FF FF FF FF FF FF FF > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:18A FF FF FF FF FF FF FF FF FF FF > C1 F1 C9 CD 30 81 7A D3 AA C9
+
+# The game selects a row of the keyboard at 2341h, LD A,D / OUT (0AAh),A, before
+# it reads the row, about 30 times a second. It calls the entry at 818Dh in
+# place of those instructions.
+patch page0:2341 7A D3 AA > CD 8D 81

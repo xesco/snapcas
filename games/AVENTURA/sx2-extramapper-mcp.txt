@@ -1,0 +1,50 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The BASIC loader writes E03Eh, the subslot register's value that its RAM
+# search leaves, to FFFFh. Here page 3 is in slot 0 beside BASIC's ROM, so the
+# value takes the ROM away from BASIC. The patch makes it POKE the value at
+# E041h, the register's value that the loader saved at its start: 50h.
+patch side1:C0 33 45 > 34 31
+
+# The loader's `slots` RAM search finds the RAM in 0-1, but its result and
+# BASIC's slot register value are both 00h here, where the BIOS and the RAM
+# share slot 0. The patches skip the search and give E03Eh, which the blocks
+# write to FFFFh after they select the found slot, 55h: RAM in every page.
+patch side1:149 47 08 78 E6 > 4F 08 18 78
+patch side1:1CF 3A FF FF 2F > 3E 55 00 00
+
+# Each block selects the found slot with E03Fh and BASIC's with E040h by the
+# slot register alone, which does nothing here. The patches write slot 0's
+# subslot register instead: 55h for RAM in every page, 50h for BASIC.
+patch side1:20F 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:237 DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+patch side1:1E3D 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:1E53 3A 40 E0 D3 A8 > 3E 50 32 FF FF
+patch side1:1E5F 3A 40 E0 D3 A8 > 3E 50 32 FF FF
+patch side1:6F6F 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:6F85 3A 40 E0 D3 A8 > 3E 50 32 FF FF
+patch side1:911F 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:9142 3A 40 E0 D3 A8 > 3E 50 32 FF FF
+patch side1:C527 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+
+# The interpreter's routines at CF84h and CF8Fh, and its start at CFCFh,
+# select BASIC's ROM and the game's RAM in page 0 by B008h and B009h, copies
+# of E040h and E03Fh. The patches write 50h and 55h to FFFFh instead, and the
+# copy at D053h that follows each write keeps that value.
+patch side1:8F3B 3A 08 B0 D3 A8 > 3E 50 32 FF FF
+patch side1:8F46 3A 09 B0 D3 A8 > 3E 55 32 FF FF
+patch side1:8F86 3A 09 B0 D3 A8 > 3E 55 32 FF FF
+
+# The interpreter's interrupt handler at CF9Ah selects the game's RAM by B009h
+# and restores the slots by the copy at D053h, with the slot register alone.
+# The patches rewrite it in its own 51 bytes: it saves the slot register and
+# FFFFh, selects slot 0 and 55h, calls the game's routine at B010h, selects
+# 50h for the BIOS's handler at 0038h, and writes both values back. An
+# interrupt during a call of the sub-ROM, in slot 3-1, thus also gets the
+# game's page 0.
+patch side1:8F50 F3 F5 E5 DD E5 3A 53 D0 > F3 F5 E5 DD E5 DB A8 F5
+patch side1:8F58 F5 3A 09 B0 D3 A8 32 53 > 3A FF FF 2F F5 AF D3 A8
+patch side1:8F60 D0 2A 11 B0 DD 21 67 D1 > 3E 55 32 FF FF 2A 11 B0
+patch side1:8F68 CD 10 B0 3A 08 B0 D3 A8 > DD 21 67 D1 CD 10 B0 3E
+patch side1:8F70 32 53 D0 00 00 FF F3 F1 > 50 32 FF FF FF F3 F1 32
+patch side1:8F78 D3 A8 32 53 D0 DD E1 E1 > FF FF F1 D3 A8 DD E1 E1

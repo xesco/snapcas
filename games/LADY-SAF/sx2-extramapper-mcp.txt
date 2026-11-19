@@ -1,0 +1,8 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at 9010h looks for RAM in page 1 by the slot register alone, in
+# slots 1 and 2, and otherwise takes slot 3 without a test. Here the RAM is in
+# slot 0-1, beside the BIOS in 0-0. The patch writes 54h to slot 0's subslot
+# register instead, RAM in pages 1 to 3, and jumps to the code at 9042h that
+# copies the loader to page 1.
+patch side1:32F8 CD 38 01 47 CB D7 CD 3B 01 > 3E 54 32 FF FF C3 42 90 00

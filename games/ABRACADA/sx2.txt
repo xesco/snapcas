@@ -1,0 +1,10 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game's routines at E06Bh and E078h select its RAM with a slot register
+# value that the game finds itself, and then write the byte at E0EDh to FFFFh,
+# the subslot register. The tape holds AAh there, subslot 2 in every page, where
+# the Philips and Sony MSX2s have their RAM. The SX-2's RAM is in subslot 0, so
+# the write takes the RAM away, the hook H.KEYI reads FFh, an RST 38h, and the
+# interrupt handler calls itself until the machine resets. The patch makes the
+# byte 00h, subslot 0 in every page.
+patch side1:567 AA > 00

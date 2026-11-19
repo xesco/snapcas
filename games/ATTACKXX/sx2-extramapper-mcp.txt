@@ -1,0 +1,47 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The block LOADER looks for RAM in pages 0 and 1 through slot 0's subslot
+# register, finds the RAM of 0-1, keeps the slot register's values at F3DCh
+# and F3DDh, copies itself to 2500h, and gives BASIC back by the slot register
+# alone, which here leaves the RAM in pages 0 and 1: BASIC then ran RAM. The
+# patches replace the search: 55h, the RAM in every page, for the copy, the
+# result 00h, which is the slot register's value here, and 50h after it.
+patch side1:1DA2 E6 F0 21 00 00 FD 21 4A A4 CD > 3E 55 32 FF FF AF 32 DD F3 32
+patch side1:1DAC D3 A3 21 00 40 FD 21 4C A4 CD > DC F3 21 00 88 11 00 25 01 00
+patch side1:1DB6 D3 A3 32 DD F3 E6 FC 47 F1 F5 > 1A ED B0 F1 D3 A8 3E 50 32 FF
+patch side1:1DC0 E6 03 B0 > FF 18 11
+
+# The block CODE copies itself to 4000h with F3DDh's value in the slot
+# register. The patches write 55h for the copy and 50h after it instead.
+patch side1:5CAB DB A8 F5 3A DD F3 D3 A8 21 00 > 3E 55 32 FF FF 21 00 88 11 00
+patch side1:5CB5 88 11 00 40 01 E4 3D ED B0 F1 > 40 01 E4 3D ED B0 3E 50 32 FF
+patch side1:5CBF D3 A8 FB C9 > FF FB C9 00
+
+# The game keeps those values at EA00h and EA01h and selects the BIOS in page
+# 0 or the RAM in every page by the slot register alone. Each selection
+# becomes a write of slot 0's subslot register: 54h for EA00h, 55h for EA01h.
+patch side1:5D03 3A 00 EA D3 A8 > 3E 54 32 FF FF
+patch side1:4659 3A 00 EA D3 A8 > 3E 54 32 FF FF
+patch side1:4661 3A 01 EA D3 A8 > 3E 55 32 FF FF
+patch side1:4690 3A 00 EA D3 A8 > 3E 54 32 FF FF
+patch side1:469C 3A 01 EA D3 A8 > 3E 55 32 FF FF
+patch side1:46A8 3A 01 EA D3 A8 > 3E 55 32 FF FF
+patch side1:4CF2 3A 00 EA D3 A8 > 3E 54 32 FF FF
+patch side1:4DA6 3A 01 EA D3 A8 > 3E 55 32 FF FF
+patch side1:4F72 3A 00 EA D3 A8 > 3E 54 32 FF FF
+patch side1:4FE1 3A 01 EA D3 A8 > 3E 55 32 FF FF
+patch side1:51D8 3A 01 EA D3 A8 > 3E 55 32 FF FF
+patch side1:5D1A 3A 01 EA D3 A8 > 3E 55 32 FF FF
+
+# The game's interrupt routine at 7326h selects the BIOS for SNSMAT and the
+# RAM after it with LD A,n / OUT (0A8h),A, and the game writes EA00h's and
+# EA01h's values into the two n. The first patch makes AND A / JP P,738Fh
+# ADD A,A / JR NC,738Fh, the same test a byte shorter, and the room LD A,54h /
+# LD (0FFFFh),A. The second drops a CPL to write 55h: the routine then stores
+# 55h at 7D76h where it stored the CPL of the value, 55h for the RAM in slot 2
+# that the game was written for. The last patches remove the game's two writes
+# of the values into the routine.
+patch side1:51FC A7 F2 8F 73 3E A8 D3 A8 > 87 30 56 3E 54 32 FF FF
+patch side1:5219 AA D3 A8 20 0C 2F > 55 32 FF FF 20 0B
+patch side1:5D0B 32 3B 73 > 00 00 00
+patch side1:5D11 32 53 73 > 00 00 00

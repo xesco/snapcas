@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Line 60 of the BASIC loader gives pages 0 and 1 the subslots of pages 2 and
+# 3, with POKE-1,P. Here BASIC and the RAM, the Extra-Mapper in 0-1, are both in
+# slot 0, so the POKE puts the RAM in place of BASIC's ROM and the program
+# stops. Where page 3 is in a slot that is not expanded, the POKE writes a byte
+# of RAM and changes nothing. The patch makes it a REM.
+patch side1:93 50 4F 4B 45 > 52 45 4D 20
+
+# The loaders at DB97h, in KROM1's first block, and at DB28h, in its second,
+# look for RAM in page 1 by the slot register alone, in slots 3, 1, 2 and 0.
+# Here none of those is RAM in page 1, and the first test writes to the
+# MegaSD's ROM in 3-2. After each loader keeps the slot register with PUSH AF,
+# the patch writes 54h to slot 0's subslot register, the BIOS in page 0 and
+# the Extra-Mapper in pages 1 to 3, and jumps to where the search goes on when
+# it finds RAM: DBD4h, the copy to page 1, and DB62h, the jump to the game.
+patch side1:727D CB D7 CB DF CD BD DB CB > 3E 54 32 FF FF C3 D4 DB
+patch side1:CCBB CB D7 CB DF CD 4B DB CB > 3E 54 32 FF FF C3 62 DB

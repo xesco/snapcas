@@ -1,0 +1,11 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# After the snapshot the game copies JP 9875h from 986Bh into H.KEYI, over the
+# image's call of SX2RES, which then stops. The image's wrapper calls SX2RES and
+# jumps to 9875h.
+rescall 9875
+
+# The game copies the wrapper's address, FD60h after resb at FD29h, into H.KEYI.
+# The patch leaves the template for H.TIMI, at 9870h, as it is.
+patch page2:186C 75 98 > 60 FD

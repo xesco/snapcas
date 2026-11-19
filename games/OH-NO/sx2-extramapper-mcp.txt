@@ -1,0 +1,15 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# Ten seconds after the restore the game copies JP 853Bh into H.KEYI from
+# 8538h, over the image's CALL resb, and later turns it off and on with RET,
+# so SX2RES got no more calls. The routine at 853Bh drops the BIOS's return
+# address and returns from the interrupt itself. The image gets a wrapper that
+# calls SX2RES and jumps to 853Bh, at FD60h, and the template's JP 853Bh
+# becomes JP 0FD60h.
+rescall 853B
+patch page2:0539 3B 85 > 60 FD
+
+# While H.KEYI holds RET, the BIOS's interrupt routine goes on to H.TIMI, so
+# H.TIMI calls resb at FD29h too: CALL 0FD29h / RET.
+patch page3:3D9F C9 8B E4 40 C9 > CD 29 FD C9 C9

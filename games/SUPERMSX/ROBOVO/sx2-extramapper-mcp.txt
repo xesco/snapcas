@@ -1,0 +1,17 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at D000h looks for RAM in page 1 in slots 1 to 3 by the slot
+# register alone, keeps BASIC's value at FD89h and the RAM's at FD8Ah, and
+# swaps between them by the slot register again. Here the RAM of page 1 is
+# 0-1, in the BIOS's slot 0, so the search finds none and the loader stops at
+# "MEMORIA INSUFFICIENTE". The swaps write slot 0's subslot register instead:
+# 54h for RAM in pages 1 to 3, 50h for BASIC.
+
+# The search becomes LD A,54h / LD (0FFFFh),A / JP 0D07Fh, the copy of the
+# game to page 1, and the return after the copy writes 50h.
+patch side1:F90F CD 38 01 47 32 89 FD F6 > 3E 54 32 FF FF C3 7F D0
+patch side1:F998 3A 89 FD CD 3B 01 C9 > 3E 50 32 FF FF C9 00
+
+# The second block's routine at E000h moves page 1 to 8010h the same way.
+patch side1:119EB 3A 8A FD D3 A8 > 3E 54 32 FF FF
+patch side1:119FB 3A 89 FD D3 A8 > 3E 50 32 FF FF

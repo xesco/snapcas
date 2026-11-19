@@ -1,0 +1,39 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game's page 3 has no 158 free bytes from an address xxE1h for the tape
+# service's part, and it keeps RAM of its own in page 0, so the mode without a
+# part in page 3, whose T0 needs page 0 outside DOS's mapper, cannot take it.
+# Here the only RAM is that mapper. So the part goes apart, in its free bytes
+# from DA48h to DB41h, as on sx2-noexp0: its entries at DAE1h to DAFAh, and its
+# code block at DA48h to DACBh. These hold zeros at the snapshot, and the game
+# writes none of them in a minute of play.
+service at DAE1 DA48
+
+# The game runs with the VDP's interrupt off, so the image has no call of
+# SX2RES, and its stack is in page 1, which the routine gives to SX2RES. It
+# calls its routine at 37D2h, DI / PUSH AF / IN A,(99h) / POP AF / EI / RET,
+# about 1400 times a second in play. A routine at 8D90h, as in Knight Lore's
+# file for this machine, in zeros of page 2 that the game leaves alone in a
+# minute of play with keys, uses no BIOS routine. It keeps all the registers and
+# the interrupts, selects slot 3's subslot 0 in page 1 with slot 3's subslot
+# register, selects slot 3 in page 1 with the slot register, and calls SX2RES's
+# entry at 4040h when it starts F5h DBh. Then it gives both registers back. At
+# 8DEDh, the same routine, which calls 8D90h on every 32nd call, counted at
+# 8E0Fh, with LD (8E0Dh),SP / LD SP,9090h before and LD SP,(8E0Dh) after: the
+# call runs on a stack in zeros below 9090h.
+patch page2:D90 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:D9A 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page2:DA4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page2:DAE 00 00 00 00 00 00 00 00 00 00 > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page2:DB8 00 00 00 00 00 00 00 00 00 00 > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page2:DC2 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 C1
+patch page2:DCC 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:DD6 00 00 00 00 00 00 00 00 00 00 > D3 A8 F1 E2 DD 8D FB 08 F1 08
+patch page2:DE0 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:DEA 00 00 00 00 00 00 00 00 00 00 > C1 F1 C9 F3 F5 DB 99 3A 0F 8E
+patch page2:DF4 00 00 00 00 00 00 00 00 00 00 > 3C E6 1F 32 0F 8E 20 0E ED 73
+patch page2:DFE 00 00 00 00 00 00 00 00 00 00 > 0D 8E 31 90 90 CD 90 8D ED 7B
+patch page2:E08 00 00 00 00 00 > 0D 8E F1 FB C9
+
+# The routine at 37D2h jumps to 8DEDh.
+patch page0:37D2 F3 F5 DB > C3 ED 8D

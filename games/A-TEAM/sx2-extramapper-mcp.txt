@@ -1,0 +1,29 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The BASIC loader copies page 3's subslot into every page of slot 0's subslot
+# register by a computed POKE -1, which gives 55h here, where the BIOS and the
+# RAM share slot 0, and takes BASIC's ROM away from pages 0 and 1. The patch
+# makes the computation keep pages 0 and 1 on the ROM: 50h.
+patch side1:38 1D 41 10 62 50 > 1D 41 10 00 00
+
+# The binary at FA00h has three routines, at FA00h, FA17h and FA2Eh, that
+# select the game's RAM in every page with FFFEh and the slot register alone,
+# copy a part of the game, and give BASIC its pages 0 and 1 back, or page 0
+# for the BIOS before the jump to 6000h. Both values are 00h here, where the
+# BIOS and the RAM share slot 0, so the copies go to the ROM and the jump runs
+# BASIC. The patches write 55h, 50h and 54h to slot 0's subslot register
+# instead. The first two routines differ only in DE and now share one body,
+# and the third takes H and D alone, as its first LDIR leaves L and E at 00h.
+patch side1:5F06 F3 3A FE FF D3 A8 21 00 88 11 > 11 00 00 F3 3E 55 32 FF FF 21
+patch side1:5F11 00 > 88
+patch side1:5F19 D3 A8 FB C9 F3 3A FE FF D3 A8 > 18 07 00 00 11 00 40 18 E7 32
+patch side1:5F23 21 00 88 11 00 40 01 00 40 ED > FF FF FB C9 00 00 00 00 00 00
+patch side1:5F2D B0 E6 F0 D3 A8 FB C9 F3 3A FE > 00 00 00 00 00 00 00 F3 3E 55
+patch side1:5F37 FF D3 A8 > 32 FF FF
+patch side1:5F45 21 00 80 11 00 C0 01 01 80 ED > 26 80 16 C0 01 01 80 ED B8 3D
+patch side1:5F4F B8 E6 FC D3 A8 C3 00 60 > 32 FF FF C3 00 60 00 00
+
+# The load ends at the tape's end and the game reads nothing more. With the
+# tape service the snapshot's RAM for page 0 leaves the image no call of
+# SX2RES; without it the BIOS in page 0 at the snapshot gives the H.KEYI call.
+service no

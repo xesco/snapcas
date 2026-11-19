@@ -1,0 +1,38 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The title runs without interrupts, and the game takes them in play in
+# interrupt mode 2, with its stack in page 1 throughout, where SX2RES is, so a
+# call there is left out. In play the game fills F200h to FFF0h with 70h and
+# E200h to EFF0h with zeros, over the image's call at FD29h, and the interrupt
+# that the build sends to its wrapper there crashed. The image's code for the
+# call, its call routine res3 and its wrapper at D9B3h, which calls res3 and
+# jumps to a RET at DA14h, goes to D986h instead, in zeros below the game's
+# fills.
+rescode D986
+rescall DA14
+
+# An entry at D9D9h for the interrupt keeps the game's stack pointer at D9EAh,
+# takes a stack below DAC0h, in the same zeros, calls the wrapper, takes the
+# game's stack back and jumps to the game's routine at 5A5Ah.
+patch page3:19D9 00 00 00 00 00 00 00 00 00 00 > ED 73 EA D9 31 C0 DA CD B3 D9
+patch page3:19E3 00 00 00 00 00 00 00 > ED 7B EA D9 C3 5A 5A
+
+# The game's vector table at 5800h, for its I of 58h, holds 5Ah, so the CPU
+# calls 5A5Ah. The vector at 58FFh, which the CPU reads with FFh on the data
+# bus, as on an MSX, goes to the entry at D9D9h instead.
+patch page1:18FF 5A 5A > D9 D9
+
+# An entry at D9ECh disables the interrupts, as the title's code does next,
+# counts its calls in the bytes from DA17h and at every 1024th keeps the game's
+# stack pointer at DA15h, takes the stack below DAC0h, calls the wrapper and
+# takes the game's stack back. Then it does LD A,0F0h / DI and returns.
+patch page3:19EC 00 00 00 00 00 00 00 00 00 00 > F3 F5 3A 17 DA C6 01 32 17 DA
+patch page3:19F6 00 00 00 00 00 00 00 00 00 00 > 30 18 3A 18 DA C6 40 32 18 DA
+patch page3:1A00 00 00 00 00 00 00 00 00 00 00 > 30 0E ED 73 15 DA 31 C0 DA CD
+patch page3:1A0A 00 00 00 00 00 00 00 00 00 00 > B3 D9 ED 7B 15 DA F1 3E F0 F3
+patch page3:1A14 00 > C9
+
+# The title waits for 1, 2 or 3 in a loop at 99BAh that reads the keyboard's row
+# 0, about 30000 times a second. It calls the entry in place of LD A,0F0h / DI.
+patch page2:19BA 3E F0 F3 > CD EC D9

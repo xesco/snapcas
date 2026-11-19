@@ -1,0 +1,74 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1, but its results, D896h
+# for the found RAM and D898h for BASIC, are both 00h here, where the BIOS and
+# the RAM share slot 0. The patches skip the search and give D897h, the subslot
+# register's value that the routine at D8F4h writes to FFFFh after it selects
+# the found RAM, 55h: RAM in every page.
+patch side1:221 47 08 78 E6 > 4F 08 18 78
+patch side1:2A3 3A FF FF 2F > 3E 55 00 00
+
+# The routines at D8F4h, D901h and 8800h select the found RAM with D896h and
+# give the slots back to BASIC by the slot register alone. The patches write
+# slot 0's subslot register instead: 55h for RAM in every page, 50h for BASIC.
+patch side1:1A5 3A 96 D8 D3 A8 > 3E 55 32 FF FF
+patch side1:1B1 3A 98 D8 D3 A8 > 3E 50 32 FF FF
+patch side1:2D7 3A 96 D8 D3 A8 > 3E 55 32 FF FF
+patch side1:2FF DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+
+# The blocks GRAF1 and GRAF2 select slot 3 in every page and write AAh to
+# FFFFh, subslot 2 in every page, where the Philips and Sony MSX2s have their
+# RAM, copy a part of the game to 0300h, and select slot 0 in pages 0 and 1.
+# Here slot 3-0 holds the resident program's RAM. The patches write 55h, RAM
+# in every page, and then 50h, BASIC, to slot 0's subslot register instead.
+patch side1:6581 3E FF D3 A8 3E AA 32 FF FF > 3E 55 32 FF FF 00 00 00 00
+patch side1:6595 3E F0 D3 A8 FB C9 > 3E 50 32 FF FF C9
+patch side1:AC49 3E FF D3 A8 3E AA 32 FF FF > 3E 55 32 FF FF 00 00 00 00
+patch side1:AC5D 3E F0 D3 A8 FB C9 > 3E 50 32 FF FF C9
+
+# The game takes its interrupts with RET at 0038h and never reads the VDP's
+# status, so after the first frame each EI gives an interrupt, 3000 to 17000 a
+# second, and the game runs as fast as its loops, with no frame clock. A call
+# of SX2RES at each interrupt slows the game down, so the image places the
+# call routine alone, and the patches below call it from the game's loops.
+rescode FCC9
+
+# call1, at FCF6h after the routine: calls the routine with interrupts off,
+# and gives the interrupt flag back. It keeps every register.
+patch page3:3CF6 00 00 00 00 00 00 00 00 00 00 > F5 ED 57 F3 F5 CD C9 FC F1 E2
+patch page3:3D00 00 00 00 00 00 > 03 FD FB F1 C9
+
+# The fight's delay at 9318h polls the controls 16 times 256 times by CALL
+# 95CEh, with B the inner count, and A and the flags free. At FD05h: LD A,B /
+# AND 3Fh / CP 37h / JP NZ,95CEh / CALL call1 / JP 95CEh, 4 calls in 256
+# polls, 40 a second. The inner count starts at F7h, not 0, 247 polls: the
+# 144 polls fewer take the time that the test and the calls add, so the delay
+# keeps its length, as on sx2-noexp0.
+patch page3:3D05 00 00 00 00 00 00 00 00 00 00 > 78 E6 3F FE 37 C2 CE 95 CD F6
+patch page3:3D0F 00 00 00 00 > FC C3 CE 95
+patch page2:1320 06 00 C5 28 0D CD CE 95 > 06 F7 C5 28 0D CD 05 FD
+patch page2:1337 06 00 C5 CD CE 95 > 06 F7 C5 CD 05 FD
+
+# The delay at 0225h, between rounds and in the fight, counts BC down with a
+# CALL 022Fh, a RET, in its loop. The loop moves to FD13h, where a test of C
+# and a JP take the CALL's and the RET's T-states and M1 cycles, and it calls
+# call1 when C is 0 and B a multiple of 4, every 1024 counts, 60 a second
+# while the delay runs.
+patch page3:3D13 00 00 00 00 00 00 00 00 00 00 > 79 B7 28 0A C3 1A FD 0B 78 B1
+patch page3:3D1D 00 00 00 00 00 00 00 00 00 00 > 20 F4 C1 C9 78 E6 03 20 F4 CD
+patch page3:3D27 00 00 00 00 > F6 FC 18 EF
+patch page0:0226 CD 2F 02 > C3 13 FD
+
+# The menu's loop at 992Ch and the loop at 9EA6h that waits for the initials
+# read the keyboard by CALL 961Fh, about 15000 times a second. At FD2Bh and
+# FD39h a count at FD48h calls call1 every 256 reads, 50 a second.
+patch page3:3D2B 00 00 00 00 00 00 00 00 00 00 > 3A 48 FD 3D 32 48 FD CC F6 FC
+patch page3:3D35 00 00 00 00 > AF C3 1F 96
+patch page3:3D39 00 00 00 00 00 00 00 00 00 00 > F5 3A 48 FD 3D 32 48 FD CC F6
+patch page3:3D43 00 00 00 00 00 > FC F1 C3 1F 96
+patch page2:192C CD 1F 96 > CD 2B FD
+patch page2:1EA6 CD 1F 96 > CD 39 FD
+
+# The pause, after STOP, waits for SPACE in a loop at 95E8h that reads the
+# keyboard by CALL 961Fh too, with A the row and the flags free: to FD39h.
+patch page2:15EA CD 1F 96 > CD 39 FD

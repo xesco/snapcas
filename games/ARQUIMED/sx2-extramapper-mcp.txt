@@ -1,0 +1,25 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:211 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:21F 3A 40 E0 D3 A8 > 3E 50 32 FF FF
+patch side1:231 DB A8 4F CB 3F CB 3F E6 0C B1 D3 A8 > 3E 54 32 FF FF 00 00 00 00 00 00 00
+patch side1:271 47 08 78 E6 > 4F 08 18 78
+patch side1:2F7 3A FF FF 2F > 3E 54 00 00
+patch side1:32F 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:357 DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+patch side1:6E9D 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:6EB3 3A 40 E0 D3 A8 > 3E 50 32 FF FF
+
+# After it selects the found RAM, the loader writes E03Eh, the subslot value
+# that its search kept, to FFFFh, and then calls 4D6Bh or copies into page 0.
+# The patch above makes E03Eh 54h, which leaves BASIC's ROM in page 0. These
+# patches write 55h instead, RAM in every page, as the found slot gives where
+# the RAM has a slot of its own.
+patch side1:216 3A 3E E0 32 FF FF > 3E 55 00 32 FF FF
+patch side1:6EA2 3A 3E E0 32 FF FF > 3E 55 00 32 FF FF

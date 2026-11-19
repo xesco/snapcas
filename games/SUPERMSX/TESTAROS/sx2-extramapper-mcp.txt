@@ -1,0 +1,16 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The load stops at the end of the game's part of the tape, at tape position
+# 48319 of 48320, and the game reads no more of it. With the tape service, T0
+# would need page 0 of DOS's mapper, slot 0-1, but at the snapshot the game has
+# the BIOS of slot 0-0 there, which the restorer refuses. So the image goes
+# without the tape service.
+service no
+
+# After the snapshot the game copies JP 89FCh, a RET, from 89F2h, with JP 89FDh
+# for H.TIMI, into H.KEYI, over the image's call of SX2RES, which then stops.
+# The image's wrapper calls SX2RES and jumps to 89FCh.
+rescall 89FC
+
+# The game copies the wrapper's address, FD60h after resb at FD29h, into H.KEYI.
+patch page2:9F3 FC 89 > 60 FD

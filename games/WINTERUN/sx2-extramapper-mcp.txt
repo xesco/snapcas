@@ -1,0 +1,8 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: point 2: fail: the game writes FD64h, in the tape service's part of page 3,
+# from 3809h. `make games` wrote this line.
+capture sx2-extramapper-noram30

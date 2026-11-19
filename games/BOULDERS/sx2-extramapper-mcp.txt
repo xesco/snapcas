@@ -1,0 +1,28 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game puts its stack at the top of memory, with LD SP,0FFFDh, and calls the
+# BIOS to set the screen with two return addresses there, in FFF9h to FFFCh. An
+# MSX2+'s BIOS keeps its copies of VDP registers 25 to 27 in FFFAh to FFFCh, and
+# writes them in that call, over the return addresses, so the game returns to
+# 0000h and the machine resets. The BIOS also writes its copy of register 23 at
+# FFF6h and reads the main ROM's slot at FFF7h, and FFFFh is slot 0's subslot
+# register here. The patches put the stack below all of them, at FFE7h, as on
+# sx2.
+patch side1:FEE 31 FD FF > 31 E7 FF
+patch side1:16BC 31 FD FF > 31 E7 FF
+
+# After the snapshot the game puts its own routines into H.KEYI, over the
+# image's call of SX2RES, which then stops: JP D58Fh written with LD HL,0D58Fh
+# at C6B8h, D3EDh and D447h, JP D3F4h written with LD HL,0D3F4h at D380h, and JP
+# C6B6h written with LD HL,0C6B6h at C711h. The image's wrappers call SX2RES and
+# jump to each routine.
+rescall D58F D3F4 C6B6
+
+# The game installs the wrappers' addresses instead, FD00h, FD06h and FD0Ch
+# after resb at FCC9h, as build.txt's resvector gives them, one patch for each
+# writer.
+patch page3:6B9 8F D5 > 00 FD
+patch page3:13EE 8F D5 > 00 FD
+patch page3:1448 8F D5 > 00 FD
+patch page3:1381 F4 D3 > 06 FD
+patch page3:712 B6 C6 > 0C FD

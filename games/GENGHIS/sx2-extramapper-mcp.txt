@@ -1,0 +1,26 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:15C 3A 15 89 D3 A8 > 3E 55 32 FF FF
+patch side1:16C 3A 16 89 D3 A8 > 3E 50 32 FF FF
+patch side1:174 3A 15 89 D3 A8 > 3E 55 32 FF FF
+patch side1:891 47 08 78 E6 > 4F 08 18 78
+patch side1:917 3A FF FF 2F > 3E 54 00 00
+
+# The game runs without interrupts, so the image has no call of SX2RES. The
+# rescall line gives the image's call routine at FD29h a wrapper at FD56h that
+# calls SX2RES and jumps to FD5Ch, in the zeros after it, which does LD
+# DE,2710h, the first instruction of the game's delay routine at 3426h, and
+# jumps to the rest of the routine at 3429h.
+rescall FD5C
+patch page3:3D5C 00 00 00 00 00 00 > 11 10 27 C3 29 34
+
+# The game waits with the delay routine at 3426h, about 10 times a second in the
+# title and in play, from 22 places. The routine jumps to the wrapper in place
+# of its first instruction.
+patch page0:3426 11 10 27 > C3 56 FD

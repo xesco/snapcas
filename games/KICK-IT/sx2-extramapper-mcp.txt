@@ -1,0 +1,20 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the snapshot keeps the RAM page 3-0-0-3.bin in slot 3-0, which
+# the machine's resident program holds: the game needs RAM in another slot. `make
+# games` wrote this line.
+capture sx2-extramapper-noram30
+
+# After the snapshot the game puts its own routine into H.KEYI, over the image's
+# call of SX2RES, which then stops: JP 4639h for its music, copied from 48E2h.
+# The image's wrapper calls SX2RES and jumps to it. Its routine at 449Ch, copied
+# from 4499h, needs no wrapper: it calls the hook that it saved at 405Eh, the
+# image's call or the music's wrapper.
+rescall 4639
+
+# The game installs the wrapper's address instead, FD60h after resb at FD29h, as
+# build.txt's resvector gives it.
+patch page1:8E3 39 46 > 60 FD

@@ -1,0 +1,6 @@
+# Lines for nms8245-ram512k-sunriseide, the Philips NMS 8245 (MSX2, 128 KB) with a 512 KB RAM cartridge and a Sunrise IDE.
+
+# Its RAM search adds page 0's RAM slot to the slot register's page 0 bits, so
+# page 0 keeps the ROM. On sx2-extramapper-mcp DOS's mapper shares slot 0 with
+# the ROM, page 0's bits are 0 there, and the restorer refuses rom keep.
+rom keep

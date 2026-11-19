@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# CasLink3's loader copies FFFFh's fields of pages 2 and 3 to pages 0 and 1 to
+# load into RAM, 55h here. Its last routine gives page 0 back to the BIOS by the
+# slot register alone, which leaves page 0 on the RAM in 0-1, because the BIOS
+# and the RAM are both in slot 0. The patch writes 54h, the BIOS in page 0 and
+# RAM in pages 1 to 3, to FFFFh and to SLTTBL's entry for slot 0 at FCC5h, from
+# which ROM games find their slot, and starts the game as before.
+patch side1:8501 2A 07 90 E5 2A 03 90 ED 5B 05 90 EB 37 3F ED 52 44 4D 21 F7 90 ED 5B 03 90 ED B0 E1 F1 E6 FC D3 A8 FB E9 00 > 2A 07 90 E5 2A 05 90 ED 5B 03 90 B7 ED 52 44 4D 21 F7 90 ED B0 E1 F1 3E 54 32 FF FF 32 C5 FC FB E9 00 00 00
+
+# The game sets its stack at F380h and waits in its main loop with HALT at
+# 603Dh, so each interrupt leaves 603Eh at F37Eh, right before the BIOS's
+# RDPRIM at F380h, OUT (0A8h),A. The build's scan takes 3E 60 D3 A8 there for
+# LD A,60h / OUT (0A8h),A and patches the return address, so the game returns
+# to 003Eh and crashes. The first patch sets the stack 2 bytes lower, at
+# F37Eh. The second keeps the block's sum at 9009h, which the loader checks.
+patch side1:4417 31 80 F3 > 31 7E F3
+patch side1:4297 24 > 22

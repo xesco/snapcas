@@ -1,0 +1,48 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` program at DDA4h looks for RAM in page 1 by the slot
+# register alone. Here the BIOS and the RAM share slot 0, so it finds none,
+# leaves the value at DE7Dh equal to BASIC's at DE7Eh, and the BASIC loader
+# stops at "NO COMPATIBLE". The program now keeps BASIC's value and stores 54h,
+# RAM in pages 1 to 3, at DE7Dh, then returns.
+patch side1:249E F3 DB A8 32 7E DE CB 97 CB 9F > F3 DB A8 32 7E DE 3E 54 32 7D
+patch side1:24A8 32 7D DE D3 A8 > DE C3 02 DE 00
+
+# The `carga` program selects that RAM in page 1 with LD A,(0DE7Dh) /
+# OUT (0A8h),A at ACD5h. It writes 54h to slot 0's subslot register instead.
+patch side1:2566 3A 7D DE D3 A8 > 3E 54 32 FF FF
+
+# After the load, the code at AD08h moves the game up with LD DE,0FFFFh /
+# LD HL,0F37Fh / LD BC,0B1E0h / LDDR. Its first byte, a byte of BASIC's work
+# area, goes to FFFFh, which here is slot 0's subslot register, and it takes
+# the RAM in page 1 away from the running code. The move ends at FFFEh instead
+# and leaves that byte out.
+patch side1:2599 11 FF FF 21 7F F3 01 E0 B1 > 11 FE FF 21 7E F3 01 DF B1
+
+# The game runs with its interrupts off, so the image has no call of SX2RES, and
+# its stack is in page 1, which the routine gives to SX2RES. The game reads a
+# row of the keyboard in its routine at A0D8h, about 28 times a second. A
+# routine at A2C0h, as in Knight Lore's file for this machine, in zeros of page
+# 2 that the game leaves alone in a minute of play with keys, uses no BIOS
+# routine. It keeps all the registers and the interrupts, selects slot 3's
+# subslot 0 in page 1 with slot 3's subslot register, selects slot 3 in page 1
+# with the slot register, and calls SX2RES's entry at 4040h when it starts F5h
+# DBh. Then it gives both registers back. At A31Dh, OUT (0AAh),A / IN A,(0A9h),
+# then LD (A330h),SP / LD SP,A3C0h / CALL A2C0h / LD SP,(A330h) / RET: the call
+# runs on a stack in zeros below A3C0h.
+patch page2:22C0 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:22CA 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page2:22D4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page2:22DE 00 00 00 00 00 00 00 00 00 00 > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page2:22E8 00 00 00 00 00 00 00 00 00 00 > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page2:22F2 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 C1
+patch page2:22FC 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:2306 00 00 00 00 00 00 00 00 00 00 > D3 A8 F1 E2 0D A3 FB 08 F1 08
+patch page2:2310 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:231A 00 00 00 00 00 00 00 00 00 00 > C1 F1 C9 D3 AA DB A9 ED 73 30
+patch page2:2324 00 00 00 00 00 00 00 00 00 00 > A3 31 C0 A3 CD C0 A2 ED 7B 30
+patch page2:232E 00 00 > A3 C9
+
+# The routine's OUT (0AAh),A / IN A,(0A9h) at A0DFh becomes CALL A31Dh and a
+# NOP.
+patch page2:20DF D3 AA DB A9 > CD 1D A3 00

@@ -1,0 +1,16 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper
+# on and SX2RES running.
+
+# The game's start at 4010h fills FD00h to FEFFh with RET and then puts JP 405Dh
+# in H.KEYI, so at the snapshot page 3 has no room for the call of SX2RES: the
+# image has none. FD29h to FD68h are SLTWRK's entries of slots 1 and 2, empty
+# on the SX-2, and nothing reads the RETs there. The patch gives them back their
+# zeros, where the build puts the call, and H.KEYI calls SX2RES and then jumps
+# to 405Dh.
+patch page3:3D29 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3D33 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3D3D C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3D47 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3D51 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3D5B C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3D65 C9 C9 C9 C9 > 00 00 00 00

@@ -1,0 +1,16 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The block LOADER finds the RAM in 0-1 for pages 0 and 1 with its own search,
+# which leaves slot 0's subslot register at 55h, but keeps the result as slot
+# register values alone, 00h here, in the operands of its routines at FA01h,
+# BIOS in page 0 and RAM in page 1, and FA08h, RAM in every page, and of the
+# game's at 7333h, RAM in every page, and 733Ah, the BIOS in page 0. So the
+# loader called the BIOS's tape routines with RAM in page 0. The first two
+# patches skip the stores of those operands, and the others make the four
+# routines write 54h or 55h to FFFFh. No caller needs their AF.
+patch side1:1EE 79 32 > 18 15
+patch side1:248 3A 0A > 18 0A
+patch side1:277 F5 3E 00 D3 A8 F1 C9 > 3E 54 32 FF FF C9 00
+patch side1:27E F5 3E 00 D3 A8 F1 C9 > 3E 55 32 FF FF C9 00
+patch side1:4D8B F5 3E 00 D3 A8 F1 C9 > 3E 55 32 FF FF C9 00
+patch side1:4D92 F5 3E 00 D3 A8 F1 C9 > 3E 54 32 FF FF C9 00

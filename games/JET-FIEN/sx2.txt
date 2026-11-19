@@ -1,0 +1,18 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game runs in the RAM of page 0, and its hook H.KEYI is an RST 30h, an
+# inter-slot call, of its routine at 0109h there. The routine at 059Ah finds
+# page 0's slot in the slot register and keeps only the slot's number, 3, as
+# the hook's slot ID, without the subslot. While the BIOS calls the sub-ROM,
+# which the SX-2 has in slot 3-1, page 0 of slot 3 shows the sub-ROM, and an
+# interrupt then sends the hook's call into it. The first patch makes the
+# routine's AND 3 an LD A,83h, the ID of slot 3-0, so that the BIOS selects the
+# RAM's subslot for the call and puts the sub-ROM's back after it.
+patch side1:4023 E6 03 > 3E 83
+
+# The tape's loader checks each block. The block's header holds the 16-bit sum
+# of the block's bytes, and its own last byte but one makes the 8-bit sum of
+# its first 23 bytes zero. The patches give both the values for the changed
+# block: the sum 1A10h for 1A38h, and 63h for 3Bh.
+patch side1:3B5A 38 > 10
+patch side1:3B5E 3B > 63

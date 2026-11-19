@@ -1,0 +1,25 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader looks for RAM in page 0 and then in page 1 by slot IDs 3, 2 and 1,
+# primary slots only, from 9108h, and says THIS MACHINE IS NOT 64K when none
+# holds RAM. Here slot 3's subslot 0 is SX2RES's mapper, which an image cannot
+# keep, and the RAM is the Extra-Mapper in slot 0-1. The patch makes the first
+# ID 84h, slot 0-1, which the loader's copy of ENASLT selects with its subslot.
+# The second patch does the same in the game's copy at EF51h.
+patch side1:17B6 3E 03 > 3E 84
+patch side1:95CF 3E 03 > 3E 84
+
+# After each test the loader gives the page back with slot ID 00h, at 90C1h and
+# in the game's copy at EF0Ah. Here that changes only the slot register and
+# leaves the page on the RAM of slot 0-1, so BASIC's ROM is gone. The patches
+# give the page back with ID 80h, slot 0-0, the main ROM.
+patch side1:176F 3E 00 > 3E 80
+patch side1:9588 3E 00 > 3E 80
+
+# The game's copy of the loader's ENASLT at EECCh computes the subslot field
+# with ADD A,55h / DEC D / JP P,..., but the copy's jump goes to 00E4h, TAPIN,
+# in place of its own ADD at EEE4h, and its AND E is an INC BC. The loader's
+# own routine has both right. A subslot above 0 takes the jump, so with slot
+# 0-1 above the game waits for the tape with interrupts off. The patch gives
+# the copy the original's bytes.
+patch side1:9566 E4 00 03 > E4 EE A3

@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image has no call of SX2RES, and its
+# stack is in page 1, where SX2RES's entry is, so the image's call routine would
+# leave the call out. The rescall line gives the routine at FD29h a wrapper at
+# FD56h that calls SX2RES and jumps to the RET at FD71h.
+rescall FD71
+
+# An entry at FD60h, in zeros of page 3 that the game leaves alone, keeps SP at
+# FD72h, calls the wrapper with its stack in the zeros below FD29h, takes SP
+# back and jumps to the game's routine at E3CDh.
+patch page3:3D60 00 00 00 00 00 00 00 00 00 00 > ED 73 72 FD 31 29 FD CD 56 FD
+patch page3:3D6A 00 00 00 00 00 00 00 00 > ED 7B 72 FD C3 CD E3 C9
+
+# In play the game calls the routine at E3CDh from E3C1h, about 21 times a
+# second. It calls the entry at FD60h in place of that routine.
+patch page3:23C1 CD CD E3 > CD 60 FD

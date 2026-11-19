@@ -1,0 +1,36 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader looks for RAM in pages 0 and 1 by the slot register alone, and
+# keeps three slot register values at E0EAh to E0ECh: RAM in pages 0 and 1,
+# RAM in page 1, and BASIC's. Here the RAM is in slot 0-1, beside the BIOS in
+# 0-0, so the search finds none. The patch leaves the search out, and the
+# patches below select the RAM by slot 0's subslot register instead: 55h for
+# RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC's ROM in pages
+# 0 and 1.
+patch side1:36C CD 00 90 > 00 00 00
+
+# The loader reads the first block into page 1: 54h.
+patch side1:370 3A EB E0 D3 A8 > 3E 54 32 FF FF
+
+# It copies part of the block to page 0: 55h.
+patch side1:37F 3A EA E0 D3 A8 > 3E 55 32 FF FF
+
+# It gives back BASIC's slots, before and after the second block: 50h.
+patch side1:38F 3A EC E0 D3 A8 > 3E 50 32 FF FF
+patch side1:39E 3A EC E0 D3 A8 > 3E 50 32 FF FF
+
+# The routines at E06Bh and E078h select the RAM for the game's code with a
+# value from E0EAh or E0EBh and then write E0EDh, AAh, to the subslot
+# register. The patches write 55h and 54h there instead.
+patch side1:4E6 3A EA E0 D3 A8 3A ED E0 > 3E 55 00 00 00 00 00 00
+patch side1:4F3 3A EB E0 D3 A8 3A ED E0 > 3E 54 00 00 00 00 00 00
+
+# The routine at E085h gives back BASIC's slots by the slot register alone,
+# which leaves the RAM in pages 0 and 1 here. The patch writes 50h to the
+# subslot register instead.
+patch side1:4FF 3A EC E0 D3 A8 > 3E 50 32 FF FF
+
+# A routine of the game's main block selects the RAM in the same way, and gives
+# back BASIC's slots after its copy: 55h, then 50h.
+patch side1:C28A 3A EA E0 D3 A8 3A ED E0 > 3E 55 00 00 00 00 00 00
+patch side1:C2A0 3A EC E0 D3 A8 > 3E 50 32 FF FF

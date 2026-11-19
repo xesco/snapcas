@@ -1,0 +1,35 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at EF00h copies the game to 0100h with RAM in every page, through
+# LD A,0AAh / OUT (0A8h),A, slot 2 in every page, and gives pages 0 and 1 back
+# to BASIC with LD A,0A0h / OUT (0A8h),A. Here BASIC and the RAM, the
+# Extra-Mapper in 0-1, are both in slot 0, so each needs a write to slot 0's
+# subslot register, which does not fit in place. The BASIC loader's line 10
+# first puts two routines in BASIC's line buffer at F5F0h, which the program no
+# longer uses: LD A,55h / LD (0FFFFh),A / RET, RAM in every page, and the same
+# with 50h, BASIC's value, at F5F6h. The text moves into the padding after it.
+patch side1:28 4E 20 32 3A 42 4C 4F 41 > 4E 20 32 3A 46 4F 52 20
+patch side1:30 44 22 63 61 73 3A 22 2C > 49 3D 30 20 54 4F 20 31
+patch side1:38 52 0D 0A 1A 1A 1A 1A 1A > 31 3A 52 45 41 44 20 41
+patch side1:40 1A 1A 1A 1A 1A 1A 1A 1A > 3A 50 4F 4B 45 20 26 48
+patch side1:48 1A 1A 1A 1A 1A 1A 1A 1A > 46 35 46 30 2B 49 2C 41
+patch side1:50 1A 1A 1A 1A 1A 1A 1A 1A > 3A 4E 45 58 54 3A 42 4C
+patch side1:58 1A 1A 1A 1A 1A 1A 1A 1A > 4F 41 44 22 63 61 73 3A
+patch side1:60 1A 1A 1A 1A 1A 1A 1A 1A > 22 2C 52 0D 0A 32 30 20
+patch side1:68 1A 1A 1A 1A 1A 1A 1A 1A > 44 41 54 41 20 36 32 2C
+patch side1:70 1A 1A 1A 1A 1A 1A 1A 1A > 38 35 2C 35 30 2C 32 35
+patch side1:78 1A 1A 1A 1A 1A 1A 1A 1A > 35 2C 32 35 35 2C 32 30
+patch side1:80 1A 1A 1A 1A 1A 1A 1A 1A > 31 2C 36 32 2C 38 30 2C
+patch side1:88 1A 1A 1A 1A 1A 1A 1A 1A > 35 30 2C 32 35 35 2C 32
+patch side1:90 1A 1A 1A 1A 1A 1A 1A 1A > 35 35 2C 32 30 31 0D 0A
+
+# The first LD A,0A0h / OUT (0A8h),A, at EF01h, selects slot 2 in pages 2 and
+# 3, which BASIC has in slot 0 here already. It becomes four NOPs.
+patch side1:147 3E A0 D3 A8 > 00 00 00 00
+
+# The selections of RAM in every page at EF1Dh and EF45h, before the copy and
+# before the jump to the game, call F5F0h. The one of BASIC's pages at EF2Ch,
+# after the copy, calls F5F6h.
+patch side1:163 3E AA D3 A8 > CD F0 F5 00
+patch side1:172 3E A0 D3 A8 > CD F6 F5 00
+patch side1:18B 3E AA D3 A8 > CD F0 F5 00

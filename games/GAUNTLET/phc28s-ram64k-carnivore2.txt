@@ -1,0 +1,6 @@
+# Lines for phc28s-ram64k-carnivore2, the Sanyo PHC-28S (MSX1, 16 KB) with a 64 KB RAM cartridge and a Carnivore2.
+
+# Its RAM search adds page 0's RAM slot to the slot register's page 0 bits, so
+# page 0 keeps the ROM. On sx2-extramapper-mcp DOS's mapper shares slot 0 with
+# the ROM, page 0's bits are 0 there, and the restorer refuses rom keep.
+rom keep

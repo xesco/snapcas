@@ -1,0 +1,13 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image's call of SX2RES from T0 never
+# runs. The image's wrapper at FCC9h, before the tape service's entries, calls
+# SX2RES and jumps to the BIOS's LDIRVM. The wrapper disables the interrupts,
+# and the game's own calls of the BIOS enable them again.
+rescall 005C
+
+# The routine at D12Dh copies the name table's buffer at E000h to the VRAM with
+# LDIRVM once in each pass of the game's loop, in the title and in play. It
+# calls the wrapper in place of LDIRVM.
+patch page3:1136 CD 5C 00 > CD C9 FC

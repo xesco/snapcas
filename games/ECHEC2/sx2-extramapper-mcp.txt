@@ -1,0 +1,15 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The program's RAM search at BB00h tries each slot register value for pages 0
+# and 1 and keeps the first that shows RAM in both. Here the BIOS and BASIC are
+# in slot 0-0 and the RAM in slot 0-1, so no slot register value shows RAM
+# there, and the search runs on into page 2's bits. The patch makes it return
+# at once, with BASIC's slots in place.
+patch side1:3FFE F3 > C9
+
+# The program then switches pages 0 and 1 to its RAM at BB39h, and back to BASIC
+# at BB45h, by the slot register alone. Here both are in slot 0 and differ only
+# in its subslot register. The patches write that register: 55h, slot 0-1 in
+# every page, and 50h, slot 0-0 in pages 0 and 1 as BASIC has it.
+patch side1:4037 3A FE BA F3 D3 A8 > F3 3E 55 32 FF FF
+patch side1:4043 3A FF BA D3 A8 > 3E 50 32 FF FF

@@ -1,0 +1,63 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game takes the interrupt in routines of its own, with JP nnnn at 0038h in
+# its RAM in page 0, and installs a new one at each load: JP 6100h for the title
+# and the story screens, the blocks of ID 40h to 49h, JP 0500h for the first
+# part of the game, the blocks of ID 00h and 80h, and JP 0600h for the second
+# and the third, 01h with 81h and 02h with 82h. So nothing called SX2RES. The
+# image gets a wrapper for each, which calls SX2RES and jumps to the routine:
+# at F9A0h for 6100h, at F9B1h for 0500h, and at F9C2h for 0600h.
+rescall 6100 0500 0600
+
+# The three wrappers take 51 bytes, and the 24 bytes at FCC9h, before the tape
+# service's part, hold one. F9A0h is in the BIOS's PLAY queues, zeros that the
+# game leaves alone: its blocks load up to F897h, and no code writes there.
+rescode F9A0
+
+# The snapshot's JP 6100h at 0038h, in its RAM page 0, becomes JP 0F9A0h. With
+# the rescall line's addresses, the build leaves that jump as it is.
+patch page0:0039 00 61 > A0 F9
+
+# The block of ID 41h in the snapshot's page 1 writes JP 6100h at 0038h: its
+# LD HL,6100h becomes LD HL,0F9A0h.
+patch page1:22CD 00 61 > A0 F9
+
+# Each block that the game loads later holds the same code at 62CAh, or, for
+# the parts of the game, LD HL,0500h or LD HL,0600h before LD (0039h),HL. The
+# patches change the address in each block to its wrapper's, and each block's
+# last byte, which makes the XOR of the block's bytes FFh, as the game's loader
+# checks. Blocks 42h, 43h and 44h:
+patch side1:311E 00 61 > A0 F9
+patch side1:3FB0 C7 > FF
+patch side1:429E 00 61 > A0 F9
+patch side1:52BB 76 > 4E
+patch side1:55A6 00 61 > A0 F9
+patch side1:662D 1A > 22
+
+# Block 00h, the first part's routine at 0500h.
+patch side1:6C12 00 05 > B1 F9
+patch side1:7853 00 > 4D
+
+# Blocks 45h, 46h and 47h.
+patch side1:10616 00 61 > A0 F9
+patch side1:11680 0C > 34
+patch side1:1196E 00 61 > A0 F9
+patch side1:128E2 14 > 2C
+patch side1:12BCE 00 61 > A0 F9
+patch side1:13C28 85 > BD
+
+# Block 81h, the second part's routine at 0600h.
+patch side1:15238 00 06 > C2 F9
+patch side1:1EA88 6E > 53
+
+# Block 48h.
+patch side1:1ED76 00 61 > A0 F9
+patch side1:1FDCB 68 > 50
+
+# Block 82h, the third part's routine at 0600h.
+patch side1:2132A 00 06 > C2 F9
+patch side1:28A90 F6 > CB
+
+# Block 49h.
+patch side1:28D7E 00 61 > A0 F9
+patch side1:29E90 F1 > C9

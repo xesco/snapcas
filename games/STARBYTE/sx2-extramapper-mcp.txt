@@ -1,0 +1,27 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader starb1, at AB00h, looks for RAM in page 0 by the slot register
+# alone, keeps the value at 87FFh, and copies part of the game there. ejec, at
+# FA80h, selects that value again for its copies and gives page 0 the BIOS back
+# with AND 0FCh. Here the BIOS and the RAM are both in slot 0, in subslots 0 and
+# 1, so the search finds SX2RES's mapper in 3-0. The patches write 51h, the
+# Extra-Mapper in page 0, to slot 0's subslot register for the copies, 00h to
+# 87FFh, and 50h, BASIC's value, in place of the AND 0FCh.
+patch side1:4106 F3 DB A8 F5 E6 FC CD 0E AB 28 > F3 3E 51 32 FF FF AF 32 FF 87
+patch side1:4110 1F 3C 18 F8 47 D3 A8 21 00 00 > 21 00 88 11 C0 1D 01 40 22 ED
+patch side1:411A CD 21 AB 78 C0 21 00 40 > B0 3E 50 32 FF FF FB C9
+patch side1:94EF 3A FF 87 D3 A8 > 3E 51 32 FF FF
+patch side1:950A DB A8 E6 FC D3 A8 > 3E 50 32 FF FF 00
+
+# The BASIC loader copies page 3's subslot into every page of slot 0's subslot
+# register by a computed POKE -1, which gives 55h here, where the BIOS and the
+# RAM share slot 0, and takes BASIC's ROM away from pages 0 and 1. The patch
+# makes the computation keep pages 0 and 1 on the ROM: 50h.
+patch side1:54 58 2A 34 2B 58 > 30 2A 34 2B 30
+
+# When a key starts the game, it points H.KEYI to its routine at B900h, over
+# the image's CALL resb, so SX2RES got no more calls. That routine returns to
+# the BIOS's interrupt routine.
+# The BIOS's interrupt routine still calls H.TIMI after it, so H.TIMI calls
+# resb at FD29h too: CALL 0FD29h / RET.
+patch page3:3D9F C9 8B E4 40 C9 > CD 29 FD C9 C9

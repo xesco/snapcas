@@ -1,0 +1,31 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The title and the play take the interrupt in the game's routine at 0A7Fh,
+# through JP at 0038h in its RAM page 0, which the code at 0A75h writes. The
+# menu runs with the interrupts off: its loop at 8031h reads the keys with
+# 0B3Fh about 15,000 times a second, too often for a call of SX2RES in each.
+# So the image gets a wrapper for 0A7Fh at F600h and one for 0B3Fh at F611h,
+# for a counter that the menu's loop calls. The play starts with 0 in the
+# menu.
+rescall 0A7F 0B3F
+
+# The two wrappers take 34 bytes, and the 24 bytes at FCC9h, before the tape
+# service's part, hold one. F600h is in zeros that the game leaves alone, also
+# in the play.
+rescode F600
+
+# The snapshot's JP 0A7Fh at 0038h, and LD HL,0A7Fh in the code that writes
+# it, go to the first wrapper. With the rescall line's addresses, the build
+# leaves that jump as it is.
+patch page0:0039 7F 0A > 00 F6
+patch page0:0A77 21 7F 0A > 21 00 F6
+
+# A counter at F630h, which sends one in 256 of the menu loop's calls of 0B3Fh
+# to the second wrapper, about 60 times a second, and the others straight to
+# 0B3Fh. F642h holds the count.
+patch page3:3630 00 00 00 00 00 00 00 00 00 > F5 3A 42 F6 3C 32 42 F6 20
+patch page3:3639 00 00 00 00 00 00 00 00 00 > 04 F1 C3 11 F6 F1 C3 3F 0B
+
+# The menu's loop calls the counter.
+patch page2:0031 CD 3F 0B > CD 30 F6

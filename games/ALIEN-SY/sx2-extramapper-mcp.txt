@@ -1,0 +1,31 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# For its double-width text the game builds a table of 256 words in FE00h to
+# FFFFh, at 9F16h, and reads it at B739h with twice the byte as the offset. On a
+# machine whose RAM is in an expanded slot, FFFFh is the slot's subslot
+# register, and the last word deselects the RAM. Here all RAM is in slot 0-1.
+# The patches put the table two bytes lower, in FDFEh to FFFDh. The builder
+# starts at FDFEh. The reader's six bytes become LD L,A, LD H,7Fh, DEC HL,
+# ADD HL,HL and NOP, which give FDFEh plus twice the byte. FDFEh and FDFFh hold
+# 00h in every block of the tape that loads them, after a table that ends at
+# FDFDh, and the table's first word, for the byte 00h, is 0000h. The last patch
+# gives the byte after the block the exclusive OR of the changed block, which
+# the loader checks.
+patch side1:81D7 21 00 FE > 21 FE FD
+patch side1:99FA 87 6F CE FE 95 67 > 6F 26 7F 2B 29 00
+patch side1:E0D9 18 > FB
+
+# The game runs without interrupts, so the image has no call of SX2RES. The
+# rescode line puts the image's two wrappers at D3A0h, in zeros of page 3 that
+# the game leaves alone, before the tape service's part at D3E1h. The wrapper at
+# D3A0h calls SX2RES and jumps to the game's routine at A21Ch, the one at D3B1h
+# to its routine at 9D01h. The wrappers disable the interrupts, which the game
+# takes none of.
+rescode D3A0
+rescall A21C 9D01
+
+# The title's loop at 0679h calls the routine at A21Ch from 069Ah, about 9 times
+# a second, and in play the routine at C676h calls the routine at 9D01h about 16
+# times a second. Both call the wrappers in place of those routines.
+patch page0:69A CD 1C A2 > CD A0 D3
+patch page3:67B CD 01 9D > CD B1 D3

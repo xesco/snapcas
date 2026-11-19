@@ -1,0 +1,21 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:1E89 47 08 78 E6 > 4F 08 18 78
+patch side1:1F0F 3A FF FF 2F > 3E 54 00 00
+patch side1:66FD 3A 77 FA D3 A8 > 3E 55 32 FF FF
+patch side1:6715 3A 75 FA D3 A8 > 3E 50 32 FF FF
+
+# The game takes its interrupts with RET at 0038h, in its RAM in page 0, so
+# nothing called SX2RES. The image's wrapper calls SX2RES and jumps to a RET at
+# 0037h.
+rescall 0037
+
+# The RET at 0037h, in FFh bytes that the game leaves alone, and at 0038h a jump
+# to the wrapper, FD56h after res3 at FD29h.
+patch page0:37 FF C9 FF FF > C9 C3 56 FD

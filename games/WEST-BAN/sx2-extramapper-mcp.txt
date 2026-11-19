@@ -1,0 +1,6 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game's stack is in page 1, the page of SX2RES's entry, and the zeros at
+# FCC9h to FD88h have no room for the call's own stack. FC70h holds zeros that
+# the game leaves alone, so the stack goes there.
+resstack FC70

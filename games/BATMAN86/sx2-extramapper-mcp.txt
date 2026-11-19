@@ -1,0 +1,16 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The block scr is the same as in games/BATMAN, and these are its lines at this
+# tape's offsets. The routine at E0E3h looks for RAM in pages 0 and 1 by the
+# slot register alone, slots 0 to 3 in both, and copies a block of the game
+# there. Here BASIC and the RAM, the Extra-Mapper in 0-1, are both in slot 0, so
+# it finds the RAM of SX2RES's mapper in 3-0 for page 0. The patch writes 55h,
+# RAM in every page, to slot 0's subslot register and jumps to the copy at
+# E104h. The freed bytes at E0EFh get 50h, BASIC's subslot register, with EI
+# and RET.
+patch side1:1D39 DB A8 F5 E5 C5 E6 F0 47 0E 00 > DB A8 F5 E5 C5 3E 55 32 FF FF
+patch side1:1D43 79 E6 0F B0 D3 A8 21 00 00 > 18 15 3E 50 32 FF FF FB C9
+
+# After the copy of the block b1, OUT (0A8h),A / EI / RET at E0CFh gives pages
+# 0 and 1 back to BASIC. The patch jumps to E0EFh, which does that here.
+patch side1:1D25 D3 A8 FB C9 > C3 EF E0 00

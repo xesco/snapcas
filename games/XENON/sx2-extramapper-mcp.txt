@@ -1,0 +1,8 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game uses the zeros at FD29h and FCC9h in page 3, where the image's code
+# for the call of SX2RES goes, so nothing called SX2RES. Put the code and its
+# stack in the unused C9h BIOS hook area at FF01h..FFA7h.
+rescode FF01
+resstack FF40

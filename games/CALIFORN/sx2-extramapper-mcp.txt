@@ -1,0 +1,30 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader cg at DB00h puts RAM in pages 0 and 1 by the slot register alone:
+# it keeps BASIC's value at DE0Ah, also its flag of that state, copies the
+# slots of pages 2 and 3 to pages 0 and 1, and keeps the result at DE0Bh. Its
+# routines select BASIC's value for each BIOS call and the RAM's after it. Here
+# the BIOS and the Extra-Mapper share slot 0, so the slot register holds 00h
+# in both states and nothing switches. The patches make each of them a write
+# of slot 0's subslot register: 50h for BASIC, 54h for the BIOS in page 0, and
+# 55h for the Extra-Mapper in every page.
+
+# DB6Eh: the switch to RAM keeps 50h at DE0Ah and 55h at DE0Bh.
+patch side1:1B4 DB A8 32 0A DE E6 F0 4F 1F 1F 1F 1F E6 0F B1 D3 A8 32 0B DE > 3E 50 32 0A DE 3E 55 32 FF FF 32 0B DE 00 00 00 00 00 00 00
+
+# DBAFh: the switch back to BASIC, before a reset, writes 50h and keeps it at
+# DE0Bh.
+patch side1:1F5 3A 0A DE B7 C8 D3 A8 32 0B DE AF 32 0A DE C9 > 3E 50 32 FF FF 32 0B DE AF 32 0A DE C9 00 00
+
+# DBF9h: the call of a BIOS routine at IY writes 50h before the call and the
+# value at DE0Bh after it. Before the switch to RAM, that value is 50h too: the
+# last patch sets DE0Bh's first value.
+patch side1:23F F5 3A 0A DE B7 28 0F D3 A8 F1 CD 15 DC F5 3A 0B DE D3 A8 F1 F3 C9 F1 CD 15 DC F3 C9 > F5 3E 50 32 FF FF F1 CD 15 DC F5 3A 0B DE 32 FF FF F1 F3 C9 00 00 00 00 00 00 00 00
+patch side1:451 00 > 50
+
+# DF25h: the call of a cassette routine of the BIOS, which the game makes with
+# RAM in every page, writes 54h before the call and 55h after it. Its end,
+# from DF47h, takes 3 more bytes, the dead ones after its RET.
+patch side1:56B E5 F5 ED 57 F3 DB A8 F5 E6 FC D3 A8 E1 F1 E5 > E5 F5 ED 57 F3 F5 3E 54 32 FF FF E1 F1 E5 00
+patch side1:57D F5 E1 F1 D3 A8 18 09 > F5 E1 F1 3E 55 18 09
+patch side1:58D E2 4B DF FB E5 F1 E1 C9 10 18 F0 > 32 FF FF E2 4E DF FB E5 F1 E1 C9

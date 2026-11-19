@@ -1,0 +1,23 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loader `slots` finds RAM by a search that leaves slot 0's subslot
+# register at 55h, RAM in page 0, when it returns with EI, so the load stopped
+# right after it. It keeps BASIC's slot register value at FFFDh and the RAM's
+# at FFFEh, and selects them later by the slot register again. Here the BIOS
+# and the RAM share slot 0, so both values are 00h and each switch does
+# nothing. The patches skip the search and make each use of the two values a
+# write of slot 0's subslot register instead: 50h for BASIC and 55h for RAM in
+# every page.
+patch side1:10729 47 08 78 E6 > 4F 08 18 78
+patch side1:107A5 20 DA > 18 0B
+patch side1:10889 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:1089E 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:108DA 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:1090B 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+
+# The block's routine at C8EBh selects the RAM with LD A,(0FFFEh) /
+# OUT (0A8h),A to copy the game to page 1. It writes 55h to slot 0's subslot
+# register instead. The loader checks each block by the exclusive OR of its
+# bytes, so a NOP after the routine's RET, at C90Eh, takes the change too.
+patch side1:18169 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:18188 00 > 19

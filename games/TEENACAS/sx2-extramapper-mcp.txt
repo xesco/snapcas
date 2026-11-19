@@ -1,0 +1,42 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:149 47 08 78 E6 > 4F 08 18 78
+patch side1:1CF 3A FF FF 2F > 3E 54 00 00
+patch side1:1D75 3A 77 FA D3 A8 > 3E 55 32 FF FF
+patch side1:1D80 3A 75 FA D3 A8 > 3E 50 32 FF FF
+patch side1:59F7 3A 77 FA D3 A8 > 3E 55 32 FF FF
+patch side1:5A07 3A 75 FA D3 A8 > 3E 50 32 FF FF
+patch side1:9A3C 3A 77 FA D3 A8 > 3E 55 32 FF FF
+patch side1:9A4C 3A 75 FA D3 A8 > 3E 50 32 FF FF
+patch side1:F795 3A 77 FA D3 A8 > 3E 55 32 FF FF
+
+# 3.6 seconds after the end of the load the game copies its code over page
+# 3, over the image's call of SX2RES. The snapshot comes after that, at 227
+# seconds, where the game runs.
+snapshot at 227
+
+# The game runs with its interrupts off and no BIOS in page 0, so the image
+# has no call of SX2RES from an interrupt. The call routine res3 goes to E8C0h,
+# in zeros of page 3 that the game leaves alone in a minute of play with keys,
+# and the game's own code calls it.
+rescode E8C0
+
+# The game reads the keyboard with its routine at 2478h, in its title and in
+# play, thousands of times a second, and never reads the VDP's status. A
+# routine at B000h, in zeros of page 2 that the game leaves alone, reads that
+# status and, when its frame flag is set, at most once a frame, calls res3 at
+# E8C0h on a stack of its own below B27Ch, because the game's stack is in
+# page 1, which res3 selects for SX2RES. Then it does the two instructions
+# that the next patch replaces, DI and LD HL,24ADh, and returns.
+patch page2:3000 00 00 00 00 00 00 00 00 00 00 > F3 F5 DB 99 07 30 0E ED 73 7E
+patch page2:300A 00 00 00 00 00 00 00 00 00 00 > B2 31 7C B2 CD C0 E8 ED 7B 7E
+patch page2:3014 00 00 00 00 00 00 > B2 F1 21 AD 24 C9
+
+# The keyboard routine's first instructions call the routine at B000h.
+patch page0:2478 F3 21 AD 24 > CD 00 B0 00

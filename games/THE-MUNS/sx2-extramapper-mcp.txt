@@ -1,0 +1,36 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# When play starts, from AFB1h, the game fills F41Fh to FD99h, over the image's
+# call of SX2RES at FD29h and its stack at FCE9h, and in a minute of play with
+# keys it leaves no zeros of page 3 alone. Its RAM in page 0 keeps the BIOS
+# away, so the BIOS's hooks are unused, and the game never writes FF00h to
+# FFC8h. The patches clear 121 bytes of those hooks from FF20h: the code at
+# FF20h, res3 and two wrappers, and the call's stack at FF59h.
+patch page3:3F20 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F2A C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F34 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F3E C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F48 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F52 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F5C C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F66 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F70 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F7A C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F84 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F8E C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F98 C9 > 00
+rescode FF20
+resstack FF59
+
+# The game's jump at 0038h goes to its title's interrupt routine at B937h, and
+# when play starts, at B855h and at D4D6h, the game writes D556h, its routine
+# for play, there, so the calls stopped. The wrapper at FF4Dh calls SX2RES and
+# jumps to B937h, the one at FF53h to D556h.
+rescall B937 D556
+
+# The jump at 0038h and the three writes of its address install the wrappers:
+# B7B9h for the title, B855h and D4D6h for play.
+patch page0:39 37 B9 > 4D FF
+patch page2:37BA 37 B9 > 4D FF
+patch page2:3856 56 D5 > 53 FF
+patch page3:14D7 56 D5 > 53 FF

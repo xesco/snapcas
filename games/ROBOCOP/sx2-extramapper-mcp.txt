@@ -1,0 +1,48 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader looks for RAM in page 1 by the slot register alone, and steps on
+# into pages 2 and 3, where it cuts off its own code. Here the RAM is in slot
+# 0-1, beside the BIOS in 0-0. The patch writes 54h to slot 0's subslot
+# register instead, RAM in pages 1 to 3, and keeps 00h at 4000h, where the
+# loader keeps the value.
+patch side1:38 DB A8 E6 F3 21 00 45 D3 A8 > 3E 54 32 FF FF AF 00 00 00
+patch side1:41 77 BE 28 04 C6 04 18 F6 > 00 00 00 00 00 00 00 00
+
+# The loader then looks for RAM in page 0 in the same way, before it starts the
+# game. The patch writes 55h, RAM in every page, and keeps 00h at 4001h.
+patch side1:65 DB A8 E6 FC D3 A8 77 > 3E 55 32 FF FF AF 00
+patch side1:6C BE 28 03 3C 18 F7 > 00 00 00 00 00 00
+
+# The loader's tape routine gives page 0 to slot 0 by the slot register alone.
+# The patch writes 54h, the BIOS in page 0.
+patch side1:78 DB A8 E6 FC D3 A8 > 3E 54 32 FF FF 00
+
+# The game's own tape routine selects the BIOS in page 0 with the value at
+# 4000h, and the RAM again with the value at 4001h. The patches write 54h and
+# 55h to the subslot register instead.
+patch side1:45F9 3A 00 40 D3 A8 > 3E 54 32 FF FF
+patch side1:463A 3A 01 40 D3 A8 > 3E 55 32 FF FF
+
+# The game keeps its own data in F000h to FFFFh and a copy of the system area in
+# 2000h to 2FFFh, and it copies that back to F000h to FFFFh before each load
+# from the tape. FFFFh is slot 0's subslot register here, and a write there
+# deselects the RAM. The patches make the game's two fills of F000h to FFFFh and
+# the copy from 2000h end at FFFEh. The second fill is rewritten to run down
+# from FFFEh in the same 12 bytes.
+patch side1:17FE 01 00 10 > 01 FF 0F
+patch side1:1B7B 21 00 F0 3E FF 77 > 21 FE FF 3E FF 77
+patch side1:1B81 2C 20 FC 24 20 F9 > 2B CB 64 20 FA 00
+patch side1:45F4 01 00 10 > 01 FF 0F
+
+# The game enables its interrupts only after it writes JP 4219h at 0038h again,
+# over the build's wrapper, so SX2RES was never called. The patches make both
+# copies of that code in page 2 write the wrapper's address, FCC9h.
+patch page2:594 19 > C9
+patch page2:599 42 > FC
+patch page2:28D8 19 > C9
+patch page2:28DD 42 > FC
+
+# Side 2 loads the same code again, by the game's tape routine, which checks no
+# sum.
+patch side2:18F0 19 > C9
+patch side2:18F5 42 > FC

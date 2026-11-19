@@ -1,0 +1,20 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: point 3: fail: SNAPCAS.COM starts again 6.0 seconds after the restore.
+# `make games` wrote this line.
+capture sx2-extramapper-noram30
+
+# The second binary, at D610h, looks for RAM in page 1 in slots 3, 2 and 1 by
+# the slot register alone, through WSLREG, copies part of the game there, and
+# keeps the value at F3A7h. The third, at BF68h, selects that value again and
+# runs the game. Here the RAM is in slot 0-1, beside the BIOS in 0-0. The
+# patches write 54h to slot 0's subslot register in place of both selections,
+# the BIOS in page 0 and RAM in pages 1 to 3, and 50h, BASIC's value, where the
+# second binary gives page 1 back.
+patch side1:567E 3A 68 D6 E6 F3 48 CB 21 CB 21 > 3A 68 D6 32 69 D6 3E 54 32 FF
+patch side1:5688 B1 32 69 D6 CD 3B 01 > FF 00 00 00 00 00 00
+patch side1:56C0 3A 68 D6 CD 3B 01 > 3E 50 32 FF FF 00
+patch side1:7CF6 3A A7 F3 CD 3B 01 > 3E 54 32 FF FF 00

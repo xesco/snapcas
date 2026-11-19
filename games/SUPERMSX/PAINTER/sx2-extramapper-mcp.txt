@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's copy of Panel Panic zeroed out the voice routine at BE20h..BEAFh
+# and replaced OUT (0A8h),A with IN A,(0A8h) in BF00h, leaving the write to
+# FFFFh at BF31h in place. Because BE1Ch still calls BED6h to select RAM in
+# page 0 and then slides through the zeros to RET without restoring the main
+# ROM, slot 0 being expanded switches page 0 to RAM and crashes. Make BED6h
+# return at once and update the block's XOR checksum at D158h (DFh -> E3h).
+patch side1:C7FF F5 > C9
+patch side1:D158 DF > E3

@@ -1,0 +1,42 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Level 9's interpreter swaps between BASIC's slots and its 64 KB of RAM by the
+# slot register alone, in its code, its interrupt routine and its task switch.
+# Here BASIC and the RAM are both in slot 0, so each swap writes slot 0's
+# subslot register instead: 50h for BASIC, 55h for RAM in every page. Its RAM
+# search finds no RAM by the slot register here and then loops forever, so the
+# load stopped there. The search stores the two values instead, and its unused
+# bytes hold the small routines that the swaps which keep the old value call.
+patch side1:9DA 3A 34 D3 D3 A8 > 3E 50 32 FF FF
+patch side1:A14 DB A8 32 34 D3 16 30 01 00 80 > 3E 50 32 34 D3 3E 55 32 35 D3
+patch side1:A1E 7A EE FF 5F 21 4B CD C5 DB A8 > 18 41 F1 32 FF FF F1 C9 E1 3A
+patch side1:A28 A3 47 7A A6 B0 D3 A8 C1 0A 2F > FF FF 2F F5 E9 E1 F1 32 FF FF
+patch side1:A32 02 > E9
+patch side1:A62 3A 35 D3 D3 A8 > 3E 55 32 FF FF
+patch side1:ADE 3A 34 D3 D3 A8 > 3E 50 32 FF FF
+patch side1:B00 3A 35 D3 D3 A8 > 3E 55 32 FF FF
+patch side1:E59 3A 35 D3 D3 A8 > 3E 55 32 FF FF
+patch side1:E6B 3A 34 D3 D3 A8 > 3E 50 32 FF FF
+patch side1:EC7 3A 35 D3 D3 A8 > 3E 55 32 FF FF
+patch side1:ED5 3A 35 D3 D3 A8 > 3E 55 32 FF FF
+patch side1:F17 3A 34 D3 D3 A8 > 3E 50 32 FF FF
+patch side1:F24 3A 35 D3 D3 A8 > 3E 55 32 FF FF
+patch side1:F8A 3A 35 D3 D3 A8 > 3E 55 32 FF FF
+patch side1:F94 3A 34 D3 D3 A8 > 3E 50 32 FF FF
+patch side1:FD9 DB A8 F5 > CD 18 CD
+patch side1:FF6 F1 D3 A8 > CD 1F CD
+patch side1:1032 DB A8 F5 3A 34 D3 D3 A8 CD 38 > 3A FF FF 2F F5 3E 50 32 FF FF
+patch side1:103C 00 F1 D3 A8 F1 C9 > CD 38 00 C3 12 CD
+
+# Each run of the interpreter's init, as at a restart, fills the vector table
+# at F200h and puts JP 0D31Ch, its interrupt routine, at F1F1h, in place of the
+# vector that the build sends to its wrapper. So the image's wrapper at FD56h
+# calls SX2RES and jumps to that routine, and the patches below send the
+# interrupt to the wrapper.
+rescall D31C
+
+# The init's LD HL,0D31Ch, at CD6Bh, becomes LD HL,0FD56h, the wrapper.
+patch page3:D6C 1C D3 > 56 FD
+
+# The snapshot's JP 0D31Ch at F1F1h jumps to the wrapper too.
+patch page3:31F2 1C D3 > 56 FD

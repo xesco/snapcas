@@ -1,0 +1,38 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Level 9's interpreter swaps between BASIC's slots and its 64 KB of RAM by the
+# slot register alone, in its code and its interrupt routine. Here BASIC and
+# the RAM are both in slot 0, so each swap writes slot 0's subslot register
+# instead: 50h for BASIC, 55h for RAM in every page. The swaps that keep the old
+# value go through small routines in the interpreter's unused bytes. The later
+# versions' own RAM search, which finds no RAM by the slot register here, stores
+# the two values instead.
+patch side1:21C2 3A 3D EF D3 A8 > 3E 50 32 FF FF
+patch side1:21FC DB A8 32 3D EF 16 30 01 00 80 > 3E 50 32 3D EF 3E 55 32 3E EF
+patch side1:2206 7A EE FF 5F 21 43 EB C5 > 18 41 F1 32 FF FF F1 C9
+patch side1:224A 3A 3E EF D3 A8 > 3E 55 32 FF FF
+patch side1:22A4 3A 3D EF D3 A8 > 3E 50 32 FF FF
+patch side1:22C2 3A 3E EF D3 A8 > 3E 55 32 FF FF
+patch side1:2495 3A 3E EF D3 A8 > 3E 55 32 FF FF
+patch side1:24A7 3A 3D EF D3 A8 > 3E 50 32 FF FF
+patch side1:2503 3A 3E EF D3 A8 > 3E 55 32 FF FF
+patch side1:2511 3A 3E EF D3 A8 > 3E 55 32 FF FF
+patch side1:2586 3A 3D EF D3 A8 > 3E 50 32 FF FF
+patch side1:2593 3A 3E EF D3 A8 > 3E 55 32 FF FF
+patch side1:25FD 3A 3E EF D3 A8 > 3E 55 32 FF FF
+patch side1:2607 3A 3D EF D3 A8 > 3E 50 32 FF FF
+patch side1:262A F5 DB A8 F5 3A 3D EF D3 A8 CD > F5 3A FF FF 2F F5 3E 50 32 FF
+patch side1:2634 38 00 F1 D3 A8 F1 C9 > FF CD 38 00 C3 0A EB
+
+# Each run of the interpreter's init, as at a restart, fills the vector table
+# at F200h and puts JP 0EF2Ch, its interrupt routine, at F1F1h, in place of the
+# vector that the build sends to its wrapper. So the image's wrapper at FD56h
+# calls SX2RES and jumps to that routine, and the patches below send the
+# interrupt to the wrapper.
+rescall EF2C
+
+# The init's LD HL,0EF2Ch, at EB63h, becomes LD HL,0FD56h, the wrapper.
+patch page3:2B64 2C EF > 56 FD
+
+# The snapshot's JP 0EF2Ch at F1F1h jumps to the wrapper too.
+patch page3:31F2 2C EF > 56 FD

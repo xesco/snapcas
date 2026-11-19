@@ -1,0 +1,11 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game runs on the BIOS's interrupt routine, with the BIOS in page 0, but
+# the snapshot catches the BIOS in a call of the sub-ROM, with slot 3 in page
+# 1, so the build put no call of SX2RES in H.KEYI (rescall slotbusy). The
+# image's wrapper calls SX2RES and jumps to the RET at FD9Dh, in H.KEYI after
+# the patch below. The game's sub-ROM calls go on as before.
+rescall FD9D
+
+# H.KEYI calls the wrapper, FD56h after res3 at FD29h: CALL 0FD56h / RET.
+patch page3:3D9A C9 C9 C9 > CD 56 FD

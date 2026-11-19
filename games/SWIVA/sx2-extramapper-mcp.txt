@@ -1,0 +1,11 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game's page 3 has no 158 free bytes from an address xxE1h below the
+# BIOS's work area for the tape service's part, so the service would take the
+# mode without a part in page 3, whose T0 needs the game's page 0 RAM outside
+# DOS's mapper. Here that RAM is in the Extra-Mapper, DOS's mapper, and the
+# SX-2's other RAM, in slot 3-0, is SX2RES's. So the service keeps its part of
+# page 3, at F9E1h to FA7Eh, in the BIOS's work area. Those bytes hold zeros at
+# the snapshot, and neither the game nor the BIOS writes them in the check's
+# minute of play. A later load of the game could.
+service at F9E1

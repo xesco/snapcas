@@ -1,0 +1,11 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# When play starts the game jumps to 7663h, which moves 8001h to EE00h up to
+# 9201h to FE00h with an LDDR. The image's interrupt routine, the wrapper at
+# FCC9h to which the jump at 0038h of the game's RAM goes, is in that range,
+# so the next interrupt runs the game's data and the game hangs. The patches
+# make the move's LD DE,0FE00h a call of 7690h, in unused FFh bytes below the
+# stack, which gives 0038h back the game's own routine at 7271h and loads DE.
+# SX2RES then has no calls once play starts.
+patch page1:3663 11 00 FE > CD 90 76
+patch page1:3690 FF FF FF FF FF FF FF FF FF FF > 21 71 72 22 39 00 11 00 FE C9

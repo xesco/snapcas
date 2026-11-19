@@ -1,0 +1,38 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader and the game select RAM by the slot register alone, with values
+# that assume the RAM in slot 3: FFh for RAM in every page, FCh for the BIOS in
+# page 0, and F0h for BASIC. Here the BIOS and the Extra-Mapper share slot 0,
+# and slot 3 holds SX2RES's mapper in 3-0, so they need writes of slot 0's
+# subslot register: 55h, 54h and 50h.
+
+# The block ldir at BB80h copies the level code to 1388h, in page 0's RAM. The
+# patch rewrites it with 55h and 50h. Its two more bytes are data that the
+# block zydro later loads over.
+patch side1:202E F3 3E FF D3 A8 21 74 BD 11 88 13 01 BC 02 ED B0 3E F0 D3 A8 FB C9 21 44 > F3 3E 55 32 FF FF 21 74 BD 11 88 13 01 BC 02 ED B0 3E 50 32 FF FF FB C9
+
+# Two routines in place of a dead, cut short copy of the routine at CB97h, at
+# CC2Ch in zydro: the first writes 55h, the second 54h, and each leaves the
+# slot register value that it replaces in A.
+patch side1:451F F3 3E FF D3 A8 21 74 BD 11 10 27 01 F4 01 ED B0 > 3E 55 32 FF FF 3E FF C9 3E 54 32 FF FF 3E FC C9
+
+# Each LD A,0FFh / OUT (0A8h),A and LD A,0FCh / OUT (0A8h),A of the game
+# becomes a call of the routine: at the game's start, C73Ch, and in the
+# routine at CB97h that swaps the level code in page 0 with BD74h.
+patch side1:402F 3E FC D3 A8 > CD 34 CC 00
+patch side1:448B 3E FF D3 A8 > CD 2C CC 00
+patch side1:44AB 3E FC D3 A8 > CD 34 CC 00
+patch side1:44B4 3E FF D3 A8 > CD 2C CC 00
+patch side1:44C3 3E FC D3 A8 > CD 34 CC 00
+
+# The game runs on the BIOS's interrupt routine, with the BIOS in page 0, but
+# the snapshot keeps its RAM page 0, so the image's T0 makes no call of SX2RES,
+# and H.KEYI holds RET. The image's wrapper calls SX2RES through the tape
+# service's entry code and jumps to the RET at FD9Dh, in H.KEYI after the patch
+# below. sub0 takes FCC9h, so the wrapper goes to FB03h, in the work area of an
+# RS-232C interface, which stays at zeros on the SX-2, which has none.
+rescall FD9D
+rescode FB03
+
+# H.KEYI calls the wrapper: CALL 0FB03h / RET.
+patch page3:3D9A C9 C9 C9 > CD 03 FB

@@ -1,0 +1,14 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's RAM search at 88C9h tries the slots from 3 down to 0, each
+# subslot of an expanded slot, through its own copy of ENASLT. It finds the
+# 2048 KB mapper in slot 3-0 first, which SX2RES holds, and later selects slot 3
+# in page 3 under its own code. The patch starts the search at slot 0, where
+# it finds the Extra-Mapper in slot 0-1 after the main ROM in 0-0.
+patch side1:1B968 3E 03 > 3E 00
+
+# The game never reads the tape again: the rest of the tape is the next game's.
+# It keeps data in page 0's RAM and runs with the BIOS in page 0, in another
+# subslot of DOS's mapper's slot, which the tape service's T0 cannot hold.
+# Without the tape service the restorer keeps the BIOS there.
+service no

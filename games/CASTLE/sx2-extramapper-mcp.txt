@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game takes the interrupt in its routine at CD6Ch through H.KEYI, which
+# the image chains after its CALL resb. When it starts again, its code at
+# C000h writes JP 0CD6Ch into H.KEYI over the image's call, so SX2RES got no
+# more calls. The image gets a wrapper that calls SX2RES and jumps to CD6Ch,
+# at FD00h, and C000h's LD HL,0CD6Ch takes the wrapper's address.
+rescall CD6C
+patch page3:0004 6C CD > 00 FD

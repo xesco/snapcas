@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image's call of SX2RES from H.KEYI
+# never runs. A routine at FCD9h, in the zeros of SLTATR and SLTWRK, reads the
+# VDP's status register 0, which the game never reads. When its bit 7 shows a
+# new frame, it keeps IX, IY and the alternate registers and calls the image's
+# routine at FD29h, so at most once a frame. Then it does LD C,A / IN A,(0AAh),
+# the bytes of the call below, and returns.
+patch page3:3CD9 00 00 00 00 00 00 00 00 00 00 > F5 DB 99 07 30 1B DD E5 FD E5
+patch page3:3CE3 00 00 00 00 00 00 00 00 00 00 > D9 C5 D5 E5 08 F5 08 D9 CD 29
+patch page3:3CED 00 00 00 00 00 00 00 00 00 00 > FD D9 08 F1 08 E1 D1 C1 D9 FD
+patch page3:3CF7 00 00 00 00 00 00 00 00 > E1 DD E1 F1 4F DB AA C9
+
+# The game reads each row of the keyboard through the routine at 7C0Fh: PUSH BC
+# / LD C,A / IN A,(0AAh) / ... / IN A,(0A9h) / POP BC / RET. It calls the
+# routine above in place of those instructions.
+patch page1:3C10 4F DB AA > CD D9 FC

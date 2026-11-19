@@ -6,3 +6,14 @@
 cas SUPER-27.CAS
 sha1 0dfacc50927cc042385de204ea208888d2b35dd8
 url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.27%20(febbraio%201990)%20-%20cas_27.zip
+
+# The loader ends with EI and JP 0100h, and the game's code there starts with 14
+# NOPs and then LD HL,25F6h and LD (0039h),HL, which give its interrupt routine's
+# JP at 0038h, which the loader writes, its address. A VDP interrupt that is
+# pending at the EI, as it is on an MSX2 after the loader's SCREEN 2 with its
+# interrupts off, comes before that, and the JP goes to the bytes that the RAM
+# holds at 0039h. The first patch makes the EI a NOP, and the second makes the
+# first 7 NOPs LD HL,25F6h, LD (0039h),HL and EI. The game then sets the address
+# again, as before.
+patch side1:4A3A FB > 00
+patch side1:896 00 00 00 00 00 00 00 > 21 F6 25 22 39 00 FB

@@ -1,0 +1,16 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The block `cm1` finds the RAM in 0-1 for pages 0 and 1 with its own search,
+# which writes slot 0's subslot register, but it keeps the result as a slot
+# register value alone, 00h here, in the operands of its routines at 92C5h,
+# which selects the RAM, and 92CCh, which gives the slots back to BASIC. So
+# BASIC got back the RAM in pages 0 and 1. The patches remove the stores and
+# make the routines write 55h, RAM in every page, and 50h, BASIC, to FFFFh.
+patch side1:7C3 79 32 C7 92 78 32 CE 92 > 00 00 00 00 00 00 00 00
+patch side1:7EB F5 3E 00 D3 A8 F1 C9 > 3E 55 32 FF FF C9 00
+patch side1:7F2 F5 3E 00 D3 A8 F1 C9 > 3E 50 32 FF FF C9 00
+
+# The block `cm2` does the same before it starts the game, with its routine at
+# 92B6h. The patches make that routine write 55h to FFFFh.
+patch side1:32ED 79 32 B8 92 78 32 BF 92 > 00 00 00 00 00 00 00 00
+patch side1:3304 F5 3E 00 D3 A8 F1 C9 > 3E 55 32 FF FF C9 00

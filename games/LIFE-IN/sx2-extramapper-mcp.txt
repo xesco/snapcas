@@ -1,0 +1,21 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the snapshot keeps the RAM page 3-0-0-3.bin in slot 3-0, which
+# the machine's resident program holds: the game needs RAM in another slot. `make
+# games` wrote this line.
+capture sx2-extramapper-noram30
+
+# Eight seconds after the restore the game copies JP 0A2BAh into H.KEYI from
+# A2A7h, over the image's CALL resb, so SX2RES got no more calls. The image
+# gets a wrapper that calls SX2RES and jumps to A2BAh, at FD60h, and the
+# template's JP 0A2BAh becomes JP 0FD60h.
+rescall A2BA
+patch page2:22A8 BA A2 > 60 FD
+
+# From A2AAh the game also writes RET into H.KEYI, for some seconds at a time.
+# Then the BIOS's interrupt routine goes on to H.TIMI, so H.TIMI calls resb at
+# FD29h too: CALL 0FD29h / RET.
+patch page3:3D9F C9 C9 C9 C9 C9 > CD 29 FD C9 C9

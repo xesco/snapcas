@@ -1,0 +1,12 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image's call of SX2RES from T0 never
+# runs. The image's wrapper at FCC9h, before the tape service's entries, calls
+# SX2RES and jumps to the game's routine at D863h. The wrapper disables the
+# interrupts, which the game takes none of.
+rescall D863
+
+# In play the game's loop at C8C0h calls the routine at D863h about 48 times a
+# second. It calls the wrapper in place of that routine.
+patch page3:8C9 CD 63 D8 > CD C9 FC

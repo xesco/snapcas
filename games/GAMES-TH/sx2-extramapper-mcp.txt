@@ -1,0 +1,32 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at 9200h finds the RAM in 0-1 for pages 0 and 1 with its own
+# search, which writes slot 0's subslot register and leaves the RAM in page 0,
+# but it keeps the result as a slot register value alone, 00h here, in the
+# operands of its routines at F9D4h, the BIOS in page 0 and the RAM in pages 1
+# to 3, and F9DBh, the RAM in every page. So its TAPION ran RAM. The patches
+# remove the stores and make the routines write 54h and 55h to FFFFh.
+patch side1:1FB 32 DD F9 > 00 00 00
+patch side1:207 32 D6 F9 > 00 00 00
+patch side1:252 F5 3E 00 D3 A8 F1 C9 > 3E 54 32 FF FF C9 00
+patch side1:259 F5 3E 00 D3 A8 F1 C9 > 3E 55 32 FF FF C9 00
+
+# The game has the same two routines at 57B8h and 57BFh, for its loads of the
+# events, and writes the loader's values at F000h and F001h into them. The
+# patches do the same to them.
+patch side1:24EA 32 C1 57 > 00 00 00
+patch side1:24F6 32 BA 57 > 00 00 00
+patch side1:5B08 F5 3E 00 D3 A8 F1 C9 > 3E 54 32 FF FF C9 00
+patch side1:5B0F F5 3E 00 D3 A8 F1 C9 > 3E 55 32 FF FF C9 00
+
+# The game takes its interrupts at 0038h in its RAM in page 0, with PUSH AF /
+# IN A,(99h) / CALL 4FA4h / POP AF / JP 3E65h, so nothing called SX2RES. The
+# image's wrapper calls SX2RES and jumps to 3E65h.
+rescall 3E65
+
+# The jump at 003Fh goes to the wrapper, FCC9h, and so do the game's three
+# copies of LD HL,3E65h / LD (0040h),HL, which write that jump again.
+patch page0:40 65 3E > C9 FC
+patch page0:39B2 65 3E > C9 FC
+patch page0:2A14 65 3E > C9 FC
+patch page2:3214 65 3E > C9 FC

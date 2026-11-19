@@ -1,0 +1,30 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# At the snapshot the game asks whether to load its high scores, with the BIOS
+# of slot 0-0 in page 0, and it keeps a RAM page for page 0 in DOS's mapper in
+# slot 0-1, which its own copy of ENASLT selects. So T0 cannot replace the BIOS
+# there, and the restorer stops: a page 0 is in another subslot of DOS's
+# mapper's slot. The only block left on the tape is HISCOR, the optional table
+# of high scores, so the image goes without the tape service.
+service no
+
+# The game takes the interrupt in routines of its own through H.KEYI, and
+# writes H.KEYI from ten places: JP 0D160h and five RETs from D488h and D4A5h,
+# its routines at BA83h and BB0Bh by LD (0FD9Bh),IX, and RET around its calls
+# of the BIOS. So SX2RES got no more calls once play started. The patches move
+# the game's hook to FB03h, zeros that the game and the BIOS leave alone: FB03h
+# gets the snapshot's H.KEYI, and H.KEYI gets JP 0FB03h, so the image chains
+# the game's hook after its CALL resb. Each write of the game then goes to
+# FB03h and FB04h instead of FD9Ah and FD9Bh.
+patch page3:3B03 00 00 00 > C9 B7 9B
+patch page3:3D9A C9 B7 9B > C3 03 FB
+patch page2:1D13 9A FD > 03 FB
+patch page2:1D95 9A FD > 03 FB
+patch page2:1D9E 9B FD > 04 FB
+patch page2:1DA1 9A FD > 03 FB
+patch page2:33A6 9A FD > 03 FB
+patch page2:38A0 9B FD > 04 FB
+patch page2:3C68 9A FD > 03 FB
+patch page2:3CF3 9A FD > 03 FB
+patch page3:147F 9A FD > 03 FB
+patch page3:148F 9A FD > 03 FB

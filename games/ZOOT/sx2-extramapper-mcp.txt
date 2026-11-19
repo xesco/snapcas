@@ -1,0 +1,45 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at E000h looks for RAM in page 1 with RDSLT and WRSLT in slots 1
+# to 3, by the primary slot alone, and jumps to 0 when it finds none. Here the
+# RAM is the Extra-Mapper in 0-1, which shares slot 0 with the BIOS, so the
+# loader resets the machine, and the BIOS's boot then selects SX2RES's mapper
+# in 3-0. LD HL,4000h at E005h becomes JR E031h, which skips the search.
+patch side1:5CB3 21 00 40 > 18 2A 00
+
+# The loader then keeps the slot register in F301h and F302h and selects page
+# 1's slot with WSLREG. The patch keeps the slot register, page 1 in slot 0,
+# in both, and writes 54h to slot 0's subslot register: the BIOS in page 0 and
+# the Extra-Mapper in pages 1 to 3.
+patch side1:5CDF 3A 5D E0 07 07 32 00 F3 > CD 38 01 32 01 F3 32 02
+patch side1:5CE7 47 CD 38 01 32 01 F3 E6 > F3 3E 54 32 FF FF 00 00
+patch side1:5CEF F3 B0 32 02 F3 CD 3B 01 > 00 00 00 00 00 00 00 00
+
+# After its copy to page 1, LD A,(F301h) / CALL WSLREG gives page 1 back to
+# BASIC. The patch writes 50h, BASIC's subslot register, for that.
+patch side1:5D02 3A 01 F3 CD 3B 01 > 3E 50 32 FF FF 00
+
+# The game's start selects page 1 at D003h with LD A,(F302h) / CALL WSLREG.
+# The patch selects the Extra-Mapper there with 54h, as above.
+patch side1:A539 3A 02 F3 CD 3B 01 > 3E 54 32 FF FF 00
+
+# The game runs without interrupts, so the image's call of SX2RES from H.KEYI
+# never runs. A routine at FCD9h, in the zeros of SLTATR and SLTWRK, reads the
+# VDP's status register 0, which the game never reads there. When its bit 7
+# shows a new frame, it keeps IX, IY and the alternate registers and calls the
+# image's routine at FD29h, so at most once a frame, and enables the interrupts
+# again, which that routine's RDSLT disables. Two entries call it: the one at
+# FCFDh then jumps to the BIOS's GTTRIG, the one at FD03h to the BIOS's SNSMAT.
+patch page3:3CD9 00 00 00 00 00 00 00 00 00 00 > F5 DB 99 07 30 1C DD E5 FD E5
+patch page3:3CE3 00 00 00 00 00 00 00 00 00 00 > D9 C5 D5 E5 08 F5 08 D9 CD 29
+patch page3:3CED 00 00 00 00 00 00 00 00 00 00 > FD D9 08 F1 08 E1 D1 C1 D9 FD
+patch page3:3CF7 00 00 00 00 00 00 00 00 00 00 > E1 DD E1 FB F1 C9 CD D9 FC C3
+patch page3:3D01 00 00 00 00 00 00 00 00 > D8 00 CD D9 FC C3 41 01
+
+# The title waits for a trigger with the routine at D580h, which reads GTTRIG.
+# It calls the entry at FCFDh in place of GTTRIG.
+patch page3:1581 CD D8 00 > CD FD FC
+
+# In play the game reads the keyboard's rows with SNSMAT from ACE9h, about 100
+# times a second. It calls the entry at FD03h in place of SNSMAT.
+patch page2:2CE9 CD 41 01 > CD 03 FD

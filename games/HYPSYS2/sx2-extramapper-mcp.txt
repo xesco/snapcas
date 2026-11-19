@@ -1,0 +1,14 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image has no call of SX2RES. The
+# rescall line gives the image's call routine at FD29h two wrappers that call
+# SX2RES: at FD56h, which jumps to the game's routine at B26Dh, and at FD5Ch,
+# which jumps to its routine at B484h.
+rescall B26D B484
+
+# In play the game calls the routine at B26Dh from C215h, and its loop at BA7Ch
+# calls the routine at B484h from BA85h, together about 16 times a second. Both
+# call the wrappers in place of those routines.
+patch page3:215 CD 6D B2 > CD 56 FD
+patch page2:3A85 CD 84 B4 > CD 5C FD

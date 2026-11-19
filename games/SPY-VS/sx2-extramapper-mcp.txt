@@ -1,0 +1,15 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's RAM search at D000h steps page 1 through slots 1, 2 and 3 with
+# WSLREG, by the primary slot alone. Here the RAM is the Extra-Mapper in 0-1,
+# which shares slot 0 with the BIOS, so the search finds none, runs into page
+# 2's bits and takes away its own stack. The patch makes D000h write 54h to
+# slot 0's subslot register, the BIOS in page 0 and the Extra-Mapper in pages 1
+# to 3, and return. At D006h it puts the way back to BASIC for D019h: POP AF,
+# 50h to the subslot register, EI and RET.
+patch side1:49CE 21 00 40 CD 38 01 E6 F3 > 3E 54 32 FF FF C9 F1 3E
+patch side1:49D6 4F 79 C6 04 4F CD > 50 32 FF FF FB C9
+
+# D019h copies the game to page 1 and gives page 1 back to BASIC with POP AF /
+# CALL WSLREG / EI / RET. The patch jumps to D006h, which gives it back.
+patch side1:49FA F1 CD 3B 01 FB C9 > C3 06 D0 00 00 00

@@ -1,0 +1,33 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loaders find RAM for pages 0 and 1 by the slot register alone, keep
+# the values at FFFDh and FFFEh, and select them later by the slot register
+# again. Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1, so
+# the patches write slot 0's subslot register instead: 54h for RAM in pages 1
+# to 3, 55h for RAM in every page, 50h for BASIC, with SLTTBL's entry for slot 0
+# at FCC5h where a ROM image looks up its slot, and 84h as RAM's slot ID.
+patch side1:6ABB 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 > 3E 55 32 FF FF 32 C5 FC 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:E942 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 40 21 00 90 11 00 40 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 F1 32 FF FF 00 00 00
+patch side1:129A1 06 FF C5 CD 9F FD C1 10 F9 F3 3A FE FF D3 A8 > F3 3E 54 32 FF FF 32 C5 FC 00 00 00 00 00 00
+patch side1:16612 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 90 11 00 00 01 00 40 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 90 11 00 00 01 00 40 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:1667A 3A FD FF D3 A8 > 3E 55 32 FF FF
+patch side1:18A3A 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 40 21 00 90 11 00 40 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 F1 32 FF FF 00 00 00
+patch side1:1CA99 06 FF C5 CD 9F FD C1 10 F9 F3 3A FE FF D3 A8 > F3 3E 54 32 FF FF 32 C5 FC 00 00 00 00 00 00
+
+# The title takes the interrupt in the game's routine at A872h, through JP at
+# 0038h in its RAM page 0. Once a key leaves the title, the game runs with the
+# interrupts off and polls, so the wrapper of A872h no longer runs. The routine
+# at A22Eh, which reads a row of the keyboard and the joystick, runs 6 times in
+# each frame of the game's loop, about 50 times a second. So the image gets a
+# second wrapper, at FD5Ch after the first one at FD56h, for A22Eh.
+rescall A872 A22E
+
+# The snapshot's JP 0A872h at 0038h goes to the first wrapper. With the rescall
+# line's addresses, the build leaves that jump as it is.
+patch page0:0039 72 A8 > 56 FD
+
+# The three calls of A22Eh call the second wrapper, which calls SX2RES and
+# jumps to A22Eh.
+patch page2:210E CD 2E A2 > CD 5C FD
+patch page2:22D4 CD 2E A2 > CD 5C FD
+patch page2:22E8 CD 2E A2 > CD 5C FD

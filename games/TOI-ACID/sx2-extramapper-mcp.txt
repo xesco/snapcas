@@ -1,0 +1,41 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so nothing calls SX2RES. Its RAM in page 0
+# keeps the BIOS away, so the BIOS's hooks are unused, and the game never writes
+# them. The patches below clear 51 bytes of them from FF40h for the image's code
+# of the call: its call routine res3 and its wrapper at FF6Dh, which calls res3
+# and jumps to a RET at FF84h.
+patch page3:3F40 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F4A C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F54 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F5E C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F68 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F72 C9 > 00
+rescode FF40
+rescall FF84
+
+# The game's stack is in page 1, where SX2RES is, so res3 would leave the call
+# out. Two entries at FF73h, in more of the hooks, the second counting its calls
+# in the byte at FFA6h and calling the wrapper at every 2nd, keep the game's
+# stack pointer, take a stack below FF40h, in the hooks, for the wrapper, and
+# take the game's stack back. Each then does the instructions that its call
+# replaces and returns.
+patch page3:3F73 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > ED 73 A4 FF 31 40 FF CD 6D FF
+patch page3:3F7D C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > ED 7B A4 FF AF D3 AA C9 F5 3A
+patch page3:3F87 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > A6 FF C6 80 32 A6 FF 30 0E ED
+patch page3:3F91 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 73 A4 FF 31 40 FF CD 6D FF ED
+patch page3:3F9B C9 C9 C9 C9 C9 C9 C9 C9 C9 > 7B A4 FF F1 D3 AA DB A9 C9
+
+# The title waits for a key at D1E3h, which reads the keyboard's row 0 about 7
+# times a second. It calls the first entry in place of XOR A / OUT (0AAh),A.
+patch page3:11E6 AF D3 AA > CD 73 FF
+
+# In play the routine at BFC0h reads the game's keys, about 50 times a second.
+# It calls the second entry in place of OUT (0AAh),A / IN A,(0A9h).
+patch page2:3FC7 D3 AA DB A9 > CD 85 FF 00
+
+# The game's stack is in page 1, the page of SX2RES's entry, and the zeros at
+# FCC9h to FD88h have no room for the call's own stack. Put the stack at FF01h
+# in the unused C9h BIOS hook area, below the trampoline's stack at FF40h.
+resstack FF01

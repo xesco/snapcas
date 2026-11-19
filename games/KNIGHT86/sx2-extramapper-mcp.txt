@@ -1,0 +1,15 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader looks for RAM in page 1 by the primary slots alone, copies 16 KB of the
+# game there and keeps the slot register's value in FD9Ch, a byte of H.KEYI. The
+# SX-2's RAM in page 1 is subslot 1 of slot 0, beside the BIOS in subslot 0. The
+# patch selects that subslot for the copy and puts the BIOS's back after it:
+# RSLREG / PUSH AF / LD A,(0FFFFh) / CPL / PUSH AF / AND 0F3h / OR 04h /
+# LD (0FFFFh),A / LD HL,8AF1h / LD DE,4000h / LD BC,4000h / LDIR / POP AF /
+# LD (0FFFFh),A / POP AF / WSLREG / EI / RET.
+patch side1:1B42 CD 38 01 F5 E6 F3 4F CD 3B 01 21 00 40 36 FF 7E FE FF 20 05 34 7E B7 28 0F 3E 04 81 30 E8 AF 32 9C FD F1 CD 3B 01 FB C9 79 32 9C FD 21 F1 8A 11 00 40 01 00 40 ED B0 18 E9 > CD 38 01 F5 3A FF FF 2F F5 E6 F3 F6 04 32 FF FF 21 F1 8A 11 00 40 01 00 40 ED B0 F1 32 FF FF F1 CD 3B 01 FB C9 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+# The game's start selects that RAM in page 1, with BIOS's slot register value,
+# and the RAM's subslot: LD A,54h / LD (0FFFFh),A, in place of LD A,(0FD9Ch) /
+# WSLREG.
+patch side1:4932 3A 9C FD CD 3B 01 > 3E 54 32 FF FF 00

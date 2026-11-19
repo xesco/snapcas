@@ -1,0 +1,15 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The routine at 0D9Ch counts with INC (HL) after LD HL,(0127h), where it means
+# LD HL,0127h: the two bytes at 0127h hold FFh, so the counter is the byte at
+# FFFFh. On a machine whose RAM is in an expanded slot, FFFFh is the slot's
+# subslot register, and the routine's LD (HL),0FEh deselects the RAM. The SX-2
+# has no other RAM. The patch makes the instruction LD HL,0127h, so the counter
+# is the byte at 0127h, which no other code of the game reads or writes after
+# it gets its FFh. The counter then goes through the same values.
+patch side1:1360 2A 27 01 > 21 27 01
+
+# The loader keeps the exclusive OR of each block's 1024 bytes and compares it
+# with the byte after the block. The second patch gives that byte the value for
+# the changed block, 6Dh XOR 0Bh.
+patch side1:16C2 6D > 66

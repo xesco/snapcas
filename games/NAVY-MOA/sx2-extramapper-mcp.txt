@@ -1,0 +1,31 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:1E29 3A D5 DD D3 A8 > 3E 50 32 FF FF
+patch side1:1E69 47 08 78 E6 > 4F 08 18 78
+patch side1:1EEF 3A FF FF 2F > 3E 54 00 00
+
+# The routine at DDC2h selects the found RAM, DDD7h, and then writes DDD6h,
+# the subslot value that the search kept, to FFFFh before the loader copies
+# from page 0. The patches rewrite it to write 55h, RAM in every page, and give
+# it a second entry at DDC7h that writes 54h. The loader's last call, before
+# it jumps to the game at 8A4Dh, goes there in place of BASIC's routine at
+# DDCFh. The game looks for RAM in page 1 by ENASLT, slots 0 to 3 in turn, and
+# keeps the last. With BASIC's ROM in page 1 that is slot 3, where page 1 is
+# empty here, and the game crashes. With 54h the search finds the RAM in slot 0,
+# as on a machine whose RAM has a slot of its own.
+patch side1:1E1D 3A D7 DD D3 A8 3A D6 DD > 3E 55 18 02 3E 54 32 FF
+patch side1:1E25 32 FF FF C9 > FF C9 00 00
+patch side1:1E16 CD CF DD C3 4D 8A > CD C7 DD C3 4D 8A
+
+# The game uses the zeros at FD29h and FCC9h in page 3, and on game start
+# (key 0) its routine at C5C6h zeroes E73Ch to E8BBh. Put the call routine and
+# its stack in the unused C9h BIOS hook area at FE18h..FEE3h, which the game
+# leaves alone in play.
+rescode FE18
+resstack FE50

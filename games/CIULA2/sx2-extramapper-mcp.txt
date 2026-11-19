@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:149 47 08 78 E6 > 4F 08 18 78
+patch side1:1CF 3A FF FF 2F > 3E 54 00 00
+patch side1:20F 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:237 DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+patch side1:5D3E 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:5D4E 3A 40 E0 D3 A8 > 3E 50 32 FF FF
+patch side1:9D86 3A 3F E0 D3 A8 > 3E 55 32 FF FF
+patch side1:9D96 3A 40 E0 D3 A8 > 3E 50 32 FF FF
+patch side1:E417 3A 08 B0 D3 A8 > 3E 50 32 FF FF
+patch side1:E41F 3A 09 B0 D3 A8 > 3E 55 32 FF FF

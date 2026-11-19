@@ -9,3 +9,134 @@ cas SUPER19B.CAS
 sha1 f2627777fcf65ba6e4a781f22eb9f9477d5c969d
 url https://download.file-hunter.com/Games/MSX1/CAS/Super%20MSX%20n.19%20(febbraio%201989)%20-%20cas_19.zip
 start BALLER
+
+# The game calls the MSX1 BIOS's routines at their own addresses, past the
+# BIOS's jump table: 0538h INIT32, 057Fh WRTVDP, 05D2h INIGRP, 0744h LDIRVM,
+# 07CDh WRTVRM, 07D7h RDVRM, 0848h CLS, 0B15h ERAFNK, 1102h WRTPSG, 11EEh GTSTCK
+# and 1253h GTTRIG. An MSX2's BIOS has other code there, and the game resets the
+# machine. Each patch calls the routine's entry in the jump table, which an MSX1
+# jumps from to the same address: the 161 calls of the blocks BALLE1 to BALLE3.
+patch side1:A485 CD D2 05 > CD 72 00
+patch side1:A4A8 CD 44 07 > CD 5C 00
+patch side1:A4F3 CD 44 07 > CD 5C 00
+patch side1:A52D CD 44 07 > CD 5C 00
+patch side1:A543 CD 44 07 > CD 5C 00
+patch side1:A7D6 CD 02 11 > CD 93 00
+patch side1:A8E9 CD 44 07 > CD 5C 00
+patch side1:A8F6 CD 44 07 > CD 5C 00
+patch side1:A99A CD D7 07 > CD 4A 00
+patch side1:A9E1 CD D7 07 > CD 4A 00
+patch side1:AE2C CD CD 07 > CD 4D 00
+patch side1:AE73 CD CD 07 > CD 4D 00
+patch side1:AF6A CD CD 07 21 04 1B CD CD 07 > CD 4D 00 21 04 1B CD 4D 00
+patch side1:AF76 CD CD 07 21 0C 1B CD CD 07 > CD 4D 00 21 0C 1B CD 4D 00
+patch side1:AF82 CD CD 07 21 44 1B CD CD 07 > CD 4D 00 21 44 1B CD 4D 00
+patch side1:AF94 CD CD 07 > CD 4D 00
+patch side1:AFC5 CD 44 07 > CD 5C 00
+patch side1:AFD2 CD 44 07 > CD 5C 00
+patch side1:AFDF CD 44 07 > CD 5C 00
+patch side1:AFF6 CD CD 07 2B 7A CD CD 07 > CD 4D 00 2B 7A CD 4D 00
+patch side1:B076 CD 44 07 > CD 5C 00
+patch side1:B087 CD 44 07 > CD 5C 00
+patch side1:B094 CD 44 07 > CD 5C 00
+patch side1:B0A0 CD 44 07 > CD 5C 00
+patch side1:B0AD CD 44 07 > CD 5C 00
+patch side1:B0E2 CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B0F0 CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B0FE CD CD 07 > CD 4D 00
+patch side1:B106 CD CD 07 > CD 4D 00
+patch side1:B10F CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B11D CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B12B CD CD 07 > CD 4D 00
+patch side1:B133 CD CD 07 > CD 4D 00
+patch side1:B13C CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B14A CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B158 CD CD 07 > CD 4D 00
+patch side1:B160 CD CD 07 > CD 4D 00
+patch side1:B169 CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B177 CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B185 CD CD 07 > CD 4D 00
+patch side1:B18D CD CD 07 > CD 4D 00
+patch side1:B196 CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B1A4 CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B1B2 CD CD 07 > CD 4D 00
+patch side1:B1BA CD CD 07 > CD 4D 00
+patch side1:B1C3 CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B1D1 CD CD 07 23 3E 79 CD CD 07 > CD 4D 00 23 3E 79 CD 4D 00
+patch side1:B1DF CD CD 07 > CD 4D 00
+patch side1:B1E7 CD CD 07 > CD 4D 00
+patch side1:B1F5 CD CD 07 3C 23 CD CD 07 > CD 4D 00 3C 23 CD 4D 00
+patch side1:B200 CD CD 07 3C 23 CD CD 07 > CD 4D 00 3C 23 CD 4D 00
+patch side1:B219 CD CD 07 C6 03 09 CD CD 07 > CD 4D 00 C6 03 09 CD 4D 00
+patch side1:B274 CD 53 12 > CD D8 00
+patch side1:B2F3 CD D7 07 > CD 4A 00
+patch side1:B316 CD CD 07 > CD 4D 00
+patch side1:B409 CD CD 07 2B 7A CD CD 07 > CD 4D 00 2B 7A CD 4D 00
+patch side1:B42A CD CD 07 2B 7A CD CD 07 > CD 4D 00 2B 7A CD 4D 00
+patch side1:BBE9 CD D2 05 > CD 72 00
+patch side1:BC0C CD 44 07 > CD 5C 00
+patch side1:BC57 CD 44 07 > CD 5C 00
+patch side1:BD23 CD 44 07 > CD 5C 00
+patch side1:BD2B CD 53 12 > CD D8 00
+patch side1:BD33 CD 53 12 > CD D8 00
+patch side1:BD81 CD 44 07 > CD 5C 00
+patch side1:BEEB CD 38 05 CD 15 0B > CD 6F 00 CD CC 00
+patch side1:BEFA CD 44 07 > CD 5C 00
+patch side1:BF09 CD 44 07 > CD 5C 00
+patch side1:BF15 CD 44 07 > CD 5C 00
+patch side1:BF21 CD 44 07 3E 01 CD 53 12 > CD 5C 00 3E 01 CD D8 00
+patch side1:BF32 CD 53 12 B7 28 EC AF CD 48 08 > CD D8 00 B7 28 EC AF CD C3 00
+patch side1:BF48 CD 44 07 > CD 5C 00
+patch side1:BF54 CD 44 07 AF CD 53 12 > CD 5C 00 AF CD D8 00
+patch side1:BF5E CD 48 08 > CD C3 00
+patch side1:BF6D CD 44 07 > CD 5C 00
+patch side1:BF7A CD 44 07 > CD 5C 00
+patch side1:EBEE CD 38 05 CD 15 0B > CD 6F 00 CD CC 00
+patch side1:EBF8 CD 7F 05 > CD 47 00
+patch side1:EC04 CD 44 07 > CD 5C 00
+patch side1:EC10 CD 44 07 > CD 5C 00
+patch side1:EC26 CD 44 07 > CD 5C 00
+patch side1:EC2F CD 53 12 > CD D8 00
+patch side1:EC3A CD 53 12 > CD D8 00
+patch side1:EC4E CD 44 07 3E 01 CD 53 12 > CD 5C 00 3E 01 CD D8 00
+patch side1:EC5D CD 53 12 > CD D8 00
+patch side1:EC7E CD 44 07 3E 01 CD 53 12 > CD 5C 00 3E 01 CD D8 00
+patch side1:EC8D CD 53 12 > CD D8 00
+patch side1:ECA1 CD 44 07 3E 01 CD 53 12 > CD 5C 00 3E 01 CD D8 00
+patch side1:ECB0 CD 53 12 > CD D8 00
+patch side1:ECF4 CD 44 07 > CD 5C 00
+patch side1:ED00 CD 44 07 > CD 5C 00
+patch side1:ED0C CD 44 07 > CD 5C 00
+patch side1:ED34 CD 44 07 > CD 5C 00
+patch side1:EDCF CD CD 07 21 09 1B CD CD 07 > CD 4D 00 21 09 1B CD 4D 00
+patch side1:EDDD CD CD 07 21 0D 1B CD CD 07 > CD 4D 00 21 0D 1B CD 4D 00
+patch side1:EDF2 CD CD 07 21 0D 1B CD CD 07 > CD 4D 00 21 0D 1B CD 4D 00
+patch side1:EE00 CD CD 07 21 09 1B CD CD 07 > CD 4D 00 21 09 1B CD 4D 00
+patch side1:EE1E CD EE 11 > CD D5 00
+patch side1:EE26 CD 53 12 > CD D8 00
+patch side1:EE46 CD EE 11 > CD D5 00
+patch side1:EE6B CD EE 11 > CD D5 00
+patch side1:EE8E CD 53 12 > CD D8 00
+patch side1:EE9A CD 53 12 > CD D8 00
+patch side1:EF5F CD CD 07 21 44 1B CD CD 07 > CD 4D 00 21 44 1B CD 4D 00
+patch side1:EF6E CD CD 07 21 45 1B CD CD 07 > CD 4D 00 21 45 1B CD 4D 00
+patch side1:F147 CD CD 07 > CD 4D 00
+patch side1:F171 CD CD 07 > CD 4D 00
+patch side1:F19D CD CD 07 > CD 4D 00
+patch side1:F1D5 CD D7 07 CB 0F CD CD 07 > CD 4A 00 CB 0F CD 4D 00
+patch side1:F1E3 CD D7 07 CB 07 CD CD 07 > CD 4A 00 CB 07 CD 4D 00
+patch side1:F22B CD D7 07 > CD 4A 00
+patch side1:F2B7 CD D7 07 > CD 4A 00
+patch side1:F33A CD D7 07 > CD 4A 00
+patch side1:F3C6 CD D7 07 > CD 4A 00
+patch side1:F449 CD D7 07 > CD 4A 00
+patch side1:F4E4 CD D7 07 > CD 4A 00
+patch side1:F576 CD D7 07 > CD 4A 00
+patch side1:F611 CD D7 07 > CD 4A 00
+patch side1:F66F CD CD 07 > CD 4D 00
+patch side1:F68F CD CD 07 > CD 4D 00
+patch side1:F6AF CD CD 07 > CD 4D 00
+patch side1:F6D0 CD CD 07 > CD 4D 00
+patch side1:F6F0 CD CD 07 > CD 4D 00
+patch side1:F710 CD CD 07 > CD 4D 00
+patch side1:F730 CD CD 07 > CD 4D 00

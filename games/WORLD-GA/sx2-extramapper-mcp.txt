@@ -1,0 +1,30 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at DB00h switches to RAM in pages 0 and 1 at DB54h by the slot
+# register alone, keeps BASIC's value at DE02h, and takes 00h there for BASIC's
+# slots, the mode before the switch. Here BASIC's value is 00h, where the BIOS
+# and the RAM share slot 0, so the switch does nothing: the game's main file,
+# which goes from 0100h, is lost in the ROM and the game searches the tapes
+# for it. The patches keep the mode in slot 0's subslot register: 50h for
+# BASIC, 55h for RAM in every page. The switch stores 50h at DE02h and calls a
+# routine at DC01h that writes 50h or 55h by DE02h and keeps AF. Its 6 bytes
+# after the switch, at DB78h, call that routine and jump to DF37h.
+patch side1:1B4 DB A8 32 02 DE E6 F0 4F 1F 1F > 3E 50 32 02 DE CD 01 DC 18 0A
+patch side1:1BE 1F 1F E6 0F B1 D3 A8 32 03 DE > CD 01 DC C3 37 DF 00 00 00 00
+
+# The way back to BASIC writes DE02h's 50h to the subslot register.
+patch side1:1FA D3 A8 32 03 DE > 32 FF FF 00 00
+
+# The routine at DBF6h calls the BIOS routine at IY with BASIC's slots, and
+# then selects the mode again. The patches write 50h, call the routine through
+# the JP (IY) moved to DC11h, and end in the routine at DC01h.
+patch side1:23C F5 3A 02 DE B7 28 0F D3 A8 F1 > F5 3E 50 32 FF FF F1 CD 11 DC
+patch side1:246 CD 12 DC F5 3A 03 DE D3 A8 F1 > F3 F5 3A 02 DE B7 3E 50 28 02
+patch side1:250 F3 C9 F1 CD 12 DC F3 C9 FD E9 > 3E 55 32 FF FF F1 C9 FD E9 00
+
+# The tape routine at DF15h selects the BIOS in page 0 by the slot register
+# alone for TAPION, TAPIN and STMOTR. The patches write 54h, the BIOS in page 0
+# and RAM in pages 1 to 3, and after the call jump to DB78h, which selects the
+# mode again and goes on at DF37h as before.
+patch side1:560 DB A8 F5 E6 FC D3 A8 E1 F1 E5 > F5 3E 54 32 FF FF E1 F1 E5 00
+patch side1:56D F5 E1 F1 D3 A8 18 09 > F5 E1 F1 C3 78 DB 00

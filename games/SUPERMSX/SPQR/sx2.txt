@@ -1,0 +1,10 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game's page 3 has no 158 free bytes from an address xxE1h for the tape
+# service's part, and it keeps RAM of its own in page 0, so the mode without a part
+# in page 3, whose T0 needs page 0 of DOS's mapper, cannot take it. The SX-2 has no
+# other RAM for a capture variant. So the part goes apart, in two free areas, DAACh
+# to DB61h and F5D1h to F662h: its entries at DAE1h to DAFAh, and its code block at
+# F5D1h to F654h. These hold zeros at the snapshot, and the game writes none of them
+# in a minute of play.
+service at DAE1 F5D1

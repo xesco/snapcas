@@ -1,0 +1,16 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Dinamic's RAM search starts at slot 3 and finds SX2RES's mapper in 3-0, or,
+# run from page 3, cuts off its own code there. The patch starts it at slot 0,
+# where it finds the Extra-Mapper in 0-1.
+patch side1:5B5E 3E 03 > 3E 00
+patch side1:635A 3E 03 > 3E 00
+patch side1:6AFF 3E 03 > 3E 00
+
+# 1.4 seconds after the end of the load the game keeps a copy of the BIOS in
+# its RAM of page 0 and takes its interrupts in mode 2. The call of SX2RES
+# from H.KEYI, through the BIOS's slot routines, crashed the game there. The
+# snapshot comes after that start, at 189 seconds, where the game runs in mode
+# 2, so the image wraps the game's own interrupt routine with res3, which uses
+# no BIOS routine.
+snapshot at 189

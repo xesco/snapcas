@@ -1,0 +1,23 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game keeps RAM of its own in page 0, so the mode without a part in page 3,
+# whose T0 needs page 0 of DOS's mapper, cannot take it, and the SX-2 has no
+# other RAM for a capture variant. Page 3 has no free run of 158 bytes, nor of
+# the 132 of the part's code. The game's interrupts run in mode 2 with I FDh, and
+# it fills FD00h to FE00h with FEh. An MSX's bus gives FFh in the interrupt's
+# cycle, so the CPU reads only FDFFh and FE00h, and the 255 bytes before them are
+# free. Each level's code fills the table again, after its load. These two patches
+# make the fills of the later levels, on each side, start at FDFFh with a count
+# of 1, so that they write only FDFFh and FE00h. The fill of the first load stays.
+patch side1:15503 21 00 FD 7C 06 00 > 21 FF FD 7C 06 01
+patch side2:9F3B 21 00 FD 7C 06 00 > 21 FF FD 7C 06 01
+
+# The part's entries go to FDE1h to FDFAh, and its code to FD10h to FD93h, in that
+# free part of the table. These patches give both places the zeros that the build
+# needs.
+service at FDE1 FD10
+patch page3:3D10 FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch page3:3D31 FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch page3:3D52 FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch page3:3D73 FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch page3:3DE1 FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE FE > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
