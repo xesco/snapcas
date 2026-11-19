@@ -85,26 +85,27 @@ def served_value(value):
     return ((value >> 6) & 3) * 0x55
 
 
-def serve(data, entries):
+def serve(data, entry_page):
     """Makes each patched builder in data, a bytearray of a RAM page or of a
     tape, the builder for the tape service: n selects the RAM's subslot in
-    every page, and with entries, the image's default mode, the call goes to
-    the entry at FCE1h. The free byte keeps the XOR. Returns the builders'
-    offsets."""
+    every page, and with an entry page, the image's default mode, the call
+    goes to the entry at E1h of that page, FCE1h unless the part moved. With
+    None, the mode without a part in page 3, the call stays. The free byte
+    keeps the XOR. Returns the builders' offsets."""
     found = [m.start() for m in PATCHED.finditer(data)
              if data[m.end():m.end() + len(CALL)] == CALL]
     for at in found:
         new = bytearray(data[at:at + len(BUILDER)])
         new[VALUE] = served_value(new[VALUE])
-        if entries:
-            new[CALL_HIGH] = 0xFC
+        if entry_page is not None:
+            new[CALL_HIGH] = entry_page
         new[2] = 0
         new[2] = xor(BUILDER) ^ xor(new)
         data[at:at + len(BUILDER)] = new
     return found
 
 
-def serve_live(page3, entries):
+def serve_live(page3, entry_page):
     """Makes the patched trampoline at FC9Ah in page3, the bytes of the
     snapshot's RAM page in page 3, the trampoline for the tape service, as
     serve makes the builder: a snapshot within a load goes on with it, and
@@ -114,8 +115,8 @@ def serve_live(page3, entries):
     if not LIVE.match(bytes(page3), at):
         return None
     page3[at + 1] = served_value(page3[at + 1])
-    if entries:
-        page3[at + 5] = 0xFC
+    if entry_page is not None:
+        page3[at + 5] = entry_page
     return at
 
 

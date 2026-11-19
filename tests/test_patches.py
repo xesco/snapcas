@@ -409,34 +409,42 @@ class Tramp(unittest.TestCase):
     def test_the_build_makes_each_patched_builder_call_the_service(self):
         patched = patches.tramp.patched(0, 1) + patches.tramp.CALL
         data = bytearray(bytes(2) + patched + patched)
-        self.assertEqual(patches.tramp.serve(data, True), [2, 33])
+        self.assertEqual(patches.tramp.serve(data, 0xFC), [2, 33])
         served = bytes(data[2:30])
         # LD (HL),55h, RAM in every page, and the call of the entry at FCE1h.
         self.assertEqual(trampoline(served), bytes.fromhex("36 55 D9 CD E1 FC D9 71 C9") + served[2:3])
         self.assertEqual(served[22:], patches.tramp.NEW_CALLER)
         self.assertEqual(patches.tramp.xor(served), patches.tramp.xor(patches.tramp.BUILDER))
         self.assertEqual(bytes(data[33:61]), served)
+        # A part at another entry page takes the call there.
+        data = bytearray(patched)
+        patches.tramp.serve(data, 0xEA)
+        self.assertEqual(trampoline(bytes(data))[3:6], bytes.fromhex("CD E1 EA"))
+        self.assertEqual(patches.tramp.xor(data[:28]), patches.tramp.xor(patches.tramp.BUILDER))
         # In the mode without a part in page 3, the call stays at 00E1h, where
         # page 0 then shows T0.
         data = bytearray(patched)
-        patches.tramp.serve(data, False)
+        patches.tramp.serve(data, None)
         self.assertEqual(trampoline(bytes(data)), bytes.fromhex("36 55 D9 CD E1 00 D9 71 C9") + data[2:3])
         self.assertEqual(patches.tramp.xor(data[:28]), patches.tramp.xor(patches.tramp.BUILDER))
         # The tape's builder, and a patched one without its call, stay.
         for kept in (bytearray(BUILDER), bytearray(patches.tramp.patched(0, 1) + bytes(3))):
             before = bytes(kept)
-            self.assertEqual(patches.tramp.serve(kept, True), [])
+            self.assertEqual(patches.tramp.serve(kept, 0xFC), [])
             self.assertEqual(bytes(kept), before)
 
     def test_a_patched_trampoline_at_fc9a_calls_the_service(self):
         page3 = bytearray(0x4000)
-        self.assertIsNone(patches.tramp.serve_live(page3, True))
+        self.assertIsNone(patches.tramp.serve_live(page3, 0xFC))
         # The loader has changed the call's low byte for TAPIN.
         page3[0x3C9A:0x3CA4] = bytes.fromhex("36 54 D9 CD E4 00 D9 71 C9 C4")
-        self.assertEqual(patches.tramp.serve_live(page3, True), 0x3C9A)
+        self.assertEqual(patches.tramp.serve_live(page3, 0xFC), 0x3C9A)
         self.assertEqual(bytes(page3[0x3C9A:0x3CA4]), bytes.fromhex("36 55 D9 CD E4 FC D9 71 C9 C4"))
+        page3[0x3C9A:0x3CA4] = bytes.fromhex("36 54 D9 CD E4 00 D9 71 C9 C4")
+        self.assertEqual(patches.tramp.serve_live(page3, 0xEA), 0x3C9A)
+        self.assertEqual(bytes(page3[0x3C9D:0x3CA0]), bytes.fromhex("CD E4 EA"))
         page3[0x3C9A:0x3CA4] = trampoline(BUILDER)
-        self.assertIsNone(patches.tramp.serve_live(page3, True))
+        self.assertIsNone(patches.tramp.serve_live(page3, 0xFC))
 
     def test_the_capture_gets_each_builder_and_each_form_as_settings(self):
         tcl = patches.tramp.tcl(bytes(1) + BUILDER, bytes(2) + BUILDER)

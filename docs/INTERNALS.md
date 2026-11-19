@@ -1025,8 +1025,9 @@ RAM pages before the scan and in the tapes that the service serves:
 
 - n holds the RAM's subslot in every page, 55h on the SX-2. `build.py` takes the
   subslot from n's page 3 field.
-- In the default mode the call goes to the entry at FCE1h, as the scan sends a
-  stub there ([Scan](#scan)). In the mode without a part in page 3 the call stays
+- In the default mode the call goes to the entry at xxE1h of the part's entry
+  page, FCE1h unless the part moved ([Build](#build)), as the scan sends a stub
+  there ([Scan](#scan)). In the mode without a part in page 3 the call stays
   at 00E1h, where page 0 then shows T0
   ([Without a part in page 3](#without-a-part-in-page-3)).
 - The free byte keeps the XOR again, so a builder in a block that the game reads
@@ -1136,8 +1137,16 @@ when the failure comes in its 60 seconds and ends in a reboot or in a BASIC erro
   free bytes from an xxE1h, but has the 26 there and the rest elsewhere, as Power
   Drift's has on the SX-2. `build.py` adds the code block's move to each address
   that `SERVICE.BIN`'s part 7 lists, after it has moved the part to xx. It stops
-  when a block is outside page 3 or past FFFEh, is not zero at the snapshot, holds
-  one of the tail's bytes, or overlaps the other block. The restorer fills in
+  when a block is outside page 3 or past FFFEh, is not free at the snapshot, holds
+  one of the tail's bytes, or overlaps the other block. A block of a `service at`
+  line is free when its bytes are zero. A block in the BIOS's hooks, FD9Ah to
+  FFC8h, can also hold RET (C9h), which the BIOS writes in an unused hook. FFE7h to
+  FFFAh can hold anything: they are the BIOS's copies of VDP registers 8 to 23,
+  `MINROM` and the copy of register 25, on an MSX2 or later. A game that never
+  calls the BIOS leaves them alone, and neither the tape service nor the restorer
+  reads them. So the entries can go at FFE1h, with their code block in the hooks,
+  as Power Drift's have on `sx2-extramapper-mcp`, where the game's buffer takes
+  every xxE1h below. The restorer fills in
   `E_SLOT` to `E_FC` by the entry page alone, so it does not know where the code
   block is. The check guards both blocks.
 - Prints the most mapper segments that the image can require.

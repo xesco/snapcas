@@ -3,8 +3,15 @@
 # The game's page 3 has no 158 free bytes from an address xxE1h for the tape
 # service's part, and it keeps RAM of its own in page 0, so the mode without a part
 # in page 3, whose T0 needs page 0 of DOS's mapper, cannot take it. The SX-2 has no
-# other RAM for a capture variant. So the part goes apart, in its free bytes from
-# EA2Dh to EAFFh: its entries at EAE1h to EAFAh, and its code block at EA2Dh to
-# EAB0h. These hold zeros at the snapshot, and the game writes none of them in a
-# minute of play.
-service at EAE1 EA2D
+# other RAM for a capture variant. So the part goes apart. The game draws its menu
+# and the race in a buffer from EA00h to FEFFh, which takes every xxE1h below
+# FFE1h. Its entries go at FFE1h to FFFAh, over the BIOS's copies of VDP registers
+# 8 to 23 and MINROM: the game has its own page 0 and interrupt routine and never
+# calls the BIOS, and neither it nor the tape service reads them. Its code block
+# goes at FF01h to FF84h, in hooks that hold RET. The game reads and writes none
+# of these bytes in its menu or in a race of course A.
+service at FFE1 FF01
+
+# FFE4h, in the BIOS's reserved bytes below those copies, holds FFh here, and a
+# block of service at takes zeros there. The game never reads or writes it.
+patch page3:3FE4 FF > 00

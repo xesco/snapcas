@@ -298,7 +298,7 @@ class Synthetic(unittest.TestCase):
         image = build.Image(Snapshot(snap), build.read_service(SERVICE), self.game())
         tape1, _, ranges = image.serve_trampolines(side1, b"")
         served = bytearray(new)
-        patches.tramp.serve(served, True)
+        patches.tramp.serve(served, 0xFC)
         self.assertEqual(image.snapshot.selected_ram(0).data[0x100:0x100 + len(new)], served)
         self.assertEqual(tape1, side1[:-len(new)] + served)
         self.assertEqual(image.p3.data[0x3C9A:0x3CA0], bytes.fromhex("36 55 D9 CD E4 FC"))
@@ -1078,6 +1078,23 @@ class Service(unittest.TestCase):
             self.built(a_game("at", entry_page=0xF9, code_at=0x10000 - len(code) + 1))
         with self.assertRaisesRegex(build.BuildError, "blocks at F9E1h and F9F0h overlap"):
             self.built(a_game("at", entry_page=0xF9, code_at=0xF9F0))
+
+    def test_service_at_puts_the_entries_over_the_bioss_copies_of_vdp_registers(self):
+        # FFE7h to FFFAh, RG8SAV to RG25SAV with MINROM, hold what the BIOS
+        # left, and the hooks below them hold RET.
+        page3 = bytearray(0x4000)
+        page3[0x3F01:0x3FC9] = b"\xC9" * 0xC8
+        page3[0x3FE7], page3[0x3FF7] = 0x08, 0x80
+        built = self.built(a_game("at", entry_page=0xFF, code_at=0xFF01), ram={"3-x-3-0": bytes(page3)})
+        s = support.service().at(0xFF, 0xFF01)
+        self.assertIn(f"part {0xFFE1} {s['E_STOP']} {s['E_CODE']} 0\n", built.facts)
+        self.assertEqual(s["E_STOP"], 0xFFFA)
+        # A byte that is not zero before them, at FFE6h, still stops the build,
+        # and so does one of them for a part that the build places itself.
+        page3[0x3FE6] = 0x01
+        with self.assertRaisesRegex(build.BuildError, "FFE1h to FFFAh are not zero at the snapshot"):
+            self.built(a_game("at", entry_page=0xFF, code_at=0xFF01), ram={"3-x-3-0": bytes(page3)})
+        self.assertFalse(build.explicit_free(Snapshot(self.snapshot.folder).load().selected_ram(3), 0xFFE1, 0xFFFA))
 
     def test_without_a_part_in_page_3_t0_holds_the_service_and_the_borrowed_page(self):
         built = self.built(a_game("t0"), tapepos="000008")

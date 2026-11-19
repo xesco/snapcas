@@ -283,6 +283,24 @@ def port_writes(snapshot, v9938):
     return w
 
 
+# The BIOS's copies of VDP registers 8 to 23 (RG8SAV), MINROM and RG25SAV, on an
+# MSX2 or later. A game that never calls the BIOS leaves them alone, and the
+# tape service and the restorer never read them, so a game file's service at
+# can put a block of the part over them, whatever they hold (INTERNALS.md,
+# Build).
+VDP_SAVES = (0xFFE7, 0xFFFA)
+
+
+def explicit_free(p3, first, last):
+    """Whether a game file's service at can put a block at first to last of
+    p3, the game's RAM page of page 3: its bytes are zero at the snapshot, or
+    C9h when the block is in the BIOS's hooks, which the BIOS fills with RET,
+    or they are among the BIOS's copies of VDP registers."""
+    ret = BIOS_HOOKS[0] <= first and last <= BIOS_HOOKS[1]
+    return all(b == 0 or (ret and b == 0xC9) or VDP_SAVES[0] <= at <= VDP_SAVES[1]
+               for at, b in zip(range(first, last + 1), p3.data[first & 0x3FFF:(last & 0x3FFF) + 1]))
+
+
 def find_entry_page(p3, service, wanted=None, tail=None):
     """The entry page of the service's part of page 3 in p3, the game's RAM
     page of page 3. The part starts at E1h of the entry page: the game file's,
@@ -294,9 +312,8 @@ def find_entry_page(p3, service, wanted=None, tail=None):
     length = len(service.parts["page3"])
     default = service["P3_FREE"], service["P3_FREE_END"]
 
-    def free(first, last, allow_ret=False):
-        allowed = (0, 0xC9) if (allow_ret and BIOS_HOOKS[0] <= first and last <= BIOS_HOOKS[1]) else (0,)
-        return all(b in allowed for b in p3.data[first & 0x3FFF:(last & 0x3FFF) + 1])
+    def free(first, last):
+        return not any(p3.data[first & 0x3FFF:(last & 0x3FFF) + 1])
 
     def span(entry_page):
         first = entry_page * 256 + (service["E_ENTRY"] & 0xFF)
@@ -307,7 +324,7 @@ def find_entry_page(p3, service, wanted=None, tail=None):
     if wanted is not None:
         if span(wanted)[1] > 0xFFFE:
             raise BuildError(f"a part of the tape service at {span(wanted)[0]:04X}h would pass FFFEh")
-        if not free(*span(wanted), allow_ret=True):
+        if not explicit_free(p3, *span(wanted)):
             raise BuildError(f"{span(wanted)[0]:04X}h to {span(wanted)[1]:04X}h are not zero at the snapshot")
         return wanted
     if free(*default) and clear(*default):
@@ -320,16 +337,15 @@ def find_entry_page(p3, service, wanted=None, tail=None):
 
 def check_split_part(p3, service, tail):
     """Stops unless the part's two blocks, the entries and the code block that
-    a game file's service at puts apart, are in page 3, are zero at the
-    snapshot (or unused C9h BIOS hooks), hold none of the tail's bytes, and do
-    not overlap."""
+    a game file's service at puts apart, are in page 3, are free at the
+    snapshot (explicit_free), hold none of the tail's bytes, and do not
+    overlap."""
     spans = [(first, first + len(data) - 1) for first, data in service.blocks()]
     for first, last in spans:
         if first < 0xC000 or last > 0xFFFE:
             raise BuildError(f"a block of the tape service at {first:04X}h to {last:04X}h is not in page 3 "
                              "below FFFFh")
-        allowed = (0, 0xC9) if (BIOS_HOOKS[0] <= first and last <= BIOS_HOOKS[1]) else (0,)
-        if any(b not in allowed for b in p3.data[first & 0x3FFF:(last & 0x3FFF) + 1]):
+        if not explicit_free(p3, first, last):
             raise BuildError(f"{first:04X}h to {last:04X}h are not zero at the snapshot")
         if tail is not None and tail <= last and tail + TAIL_SIZE > first:
             raise BuildError(f"the tail at {tail:04X}h overlaps {first:04X}h to {last:04X}h")
@@ -511,7 +527,7 @@ class Image(ResidentMixin):
         changed ranges of the RAM for the check."""
         if not self.mode.service:
             return side1, side2, []
-        entries, ranges = not self.mode.t0, []
+        entries, ranges = self.mode.entry_page, []
         for ram_page in self.snapshot.ram_pages:
             found = [(at, len(patches.tramp.BUILDER)) for at in patches.tramp.serve(ram_page.data, entries)]
             if ram_page is self.p3:
