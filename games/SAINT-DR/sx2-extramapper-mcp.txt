@@ -31,10 +31,27 @@ patch page3:379 07 07 07 07 07 07 07 07 07 07 07 > 00 00 00 00 00 00 00 00 00 00
 service at C2E1 C300
 
 # The game runs with interrupts off and has no interrupt routine, so the image
-# has nothing to call SX2RES from. Its loop of play, 14 times a second, ends
-# with CALL 0EF0Fh at C8F6h. The call goes to the image's wrapper instead, in
-# the map at C390h, which calls SX2RES and jumps to EF0Fh.
-patch page3:390 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-rescode C390
-rescall EF0F
-patch page3:8F6 CD 0F EF > CD 90 C3
+# has nothing to call SX2RES from. Three calls of the game go to the image's
+# wrappers instead, in the map from C200h, 17 bytes each. A wrapper calls SX2RES
+# and jumps to the routine that the game called.
+patch page3:200 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch page3:211 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch page3:222 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 07 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+rescode C200
+rescall EF0F EF48 5AF6
+
+# The loop of play, 14 times a second, ends with CALL 0EF0Fh at C8F6h: the
+# first wrapper, at C200h.
+patch page3:8F6 CD 0F EF > CD 00 C2
+
+# The loop of the title, at 9920h, runs 200 times a second and prints its text
+# with CALL 0EF48h at 9930h. The call goes to a routine in the map at C240h,
+# which takes the second wrapper, at C211h, when the low 2 bits of the loop's
+# counter at 9AAEh are zero, 50 times a second, and jumps to EF48h otherwise:
+# LD A,(9AAEh) / AND 3 / JP NZ,0EF48h / JP 0C211h.
+patch page3:240 07 07 07 07 07 07 07 07 07 07 07 > 3A AE 9A E6 03 C2 48 EF C3 11 C2
+patch page2:1930 CD 48 EF > CD 40 C2
+
+# The wait for a key, at 5B7Dh, where the snapshot is, reads the keyboard 27
+# times a second with CALL 5AF6h at 5BA9h: the third wrapper, at C222h.
+patch page1:1BA9 CD F6 5A > CD 22 C2
