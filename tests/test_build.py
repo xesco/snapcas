@@ -986,14 +986,37 @@ class Service(unittest.TestCase):
 
     def test_t0_in_place_of_the_rom_needs_no_sub0(self):
         s = support.service()
-        for built in (self.slot0_built(pages=(1, 2, 3)), self.slot0_built(sub0="55")):
-            # Without RAM for page 0, T0 replaces the ROM. With page 0 in page
-            # 3's subslot, the slot register alone selects the mapper there.
-            page3 = self.page3_of(built)
-            self.assertEqual(page3[(s["e_run.call"] & 0x3FFF):][:3], b"\xCD" + struct.pack("<H", s["tramp"]))
-            self.assertEqual(support.Header(built.header)["H_FLAGS"], 0)
-            self.assertNotIn("sub0 ", built.facts)
-            self.assertFalse(any(page3[s["P3_FREE"] & 0x3FFF:s["E_ENTRY"] & 0x3FFF]))
+        built = self.slot0_built(pages=(1, 2, 3))
+        # Without RAM for page 0, T0 replaces the ROM for good, so sub0 is not needed.
+        page3 = self.page3_of(built)
+        self.assertEqual(page3[(s["e_run.call"] & 0x3FFF):][:3], b"\xCD" + struct.pack("<H", s["tramp"]))
+        self.assertEqual(support.Header(built.header)["H_FLAGS"], 0)
+        self.assertNotIn("sub0 ", built.facts)
+        self.assertFalse(any(page3[s["P3_FREE"] & 0x3FFF:s["E_ENTRY"] & 0x3FFF]))
+
+    def test_slot0_ram_in_page_0_gets_sub0_for_later_rom_switches(self):
+        # With RAM in expanded slot 0 (0-1) in page 0 at the snapshot, the game
+        # may still switch page 0 back to the main ROM (0-0) when calling tape
+        # entries later in play, so e_run needs sub0.
+        built, s = self.slot0_built(sub0="55"), support.service()
+        self.assertEqual(support.Header(built.header)["H_FLAGS"], s["FLAG_P0"])
+        self.assertIn(f"sub0 {s['P3_FREE']} {s['P3_FREE'] + 22}\n", built.facts)
+
+    def test_sub0_falls_back_when_fcc9_is_occupied(self):
+        # When FCC9h..FCD9h is taken (for example by a rescall wrapper), sub0
+        # falls back to unused zeros in TRPTBL (FC4Ch..FC9Dh) or C9h BIOS hooks.
+        page3 = bytearray(build.PAGE)
+        page3[0xFC4C & 0x3FFF:0xFC9E & 0x3FFF] = b"\x01" * (0xFC9E - 0xFC4C)
+        page3[0xFF01 & 0x3FFF:0xFF40 & 0x3FFF] = b"\xC9" * (0xFF40 - 0xFF01)
+        ram = {f"0-1-{page}-{3 - page}": bytes(build.PAGE) for page in (0, 1, 2, 3)}
+        ram["0-1-3-0"] = bytes(page3)
+        snap = Snapshot(support.snapshot(support.temp(self), service=True, ram=ram,
+                                         a8="00", sub0="55", sub3="F8", mapper0_1=None, **{"mapper0-1": "20"}))
+        resident = msx.Resident(0x83, 0x4040, b"\xF5\xDB\xFD\xF5\x3E")
+        built = build.build(snap, SERVICE, a_game(rescall=[0x9574]), support.BASIC_TAPE, b"", (), resident=resident)
+        s = support.service()
+        self.assertEqual(support.Header(built.header)["H_FLAGS"], s["FLAG_P0"])
+        self.assertIn(f"sub0 {0xFF01} {0xFF01 + 22}\n", built.facts)
 
     def test_rom_keep_keeps_the_rom_with_sub0(self):
         built, s = self.slot0_built(a_game(rom_keep=True), pages=(1, 2, 3)), support.service()

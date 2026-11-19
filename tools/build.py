@@ -294,8 +294,9 @@ def find_entry_page(p3, service, wanted=None, tail=None):
     length = len(service.parts["page3"])
     default = service["P3_FREE"], service["P3_FREE_END"]
 
-    def free(first, last):
-        return not any(p3.data[first & 0x3FFF:(last & 0x3FFF) + 1])
+    def free(first, last, allow_ret=False):
+        allowed = (0, 0xC9) if (allow_ret and BIOS_HOOKS[0] <= first and last <= BIOS_HOOKS[1]) else (0,)
+        return all(b in allowed for b in p3.data[first & 0x3FFF:(last & 0x3FFF) + 1])
 
     def span(entry_page):
         first = entry_page * 256 + (service["E_ENTRY"] & 0xFF)
@@ -306,7 +307,7 @@ def find_entry_page(p3, service, wanted=None, tail=None):
     if wanted is not None:
         if span(wanted)[1] > 0xFFFE:
             raise BuildError(f"a part of the tape service at {span(wanted)[0]:04X}h would pass FFFEh")
-        if not free(*span(wanted)):
+        if not free(*span(wanted), allow_ret=True):
             raise BuildError(f"{span(wanted)[0]:04X}h to {span(wanted)[1]:04X}h are not zero at the snapshot")
         return wanted
     if free(*default) and clear(*default):
@@ -320,13 +321,15 @@ def find_entry_page(p3, service, wanted=None, tail=None):
 def check_split_part(p3, service, tail):
     """Stops unless the part's two blocks, the entries and the code block that
     a game file's service at puts apart, are in page 3, are zero at the
-    snapshot, hold none of the tail's bytes, and do not overlap."""
+    snapshot (or unused C9h BIOS hooks), hold none of the tail's bytes, and do
+    not overlap."""
     spans = [(first, first + len(data) - 1) for first, data in service.blocks()]
     for first, last in spans:
         if first < 0xC000 or last > 0xFFFE:
             raise BuildError(f"a block of the tape service at {first:04X}h to {last:04X}h is not in page 3 "
                              "below FFFFh")
-        if any(p3.data[first & 0x3FFF:(last & 0x3FFF) + 1]):
+        allowed = (0, 0xC9) if (BIOS_HOOKS[0] <= first and last <= BIOS_HOOKS[1]) else (0,)
+        if any(b not in allowed for b in p3.data[first & 0x3FFF:(last & 0x3FFF) + 1]):
             raise BuildError(f"{first:04X}h to {last:04X}h are not zero at the snapshot")
         if tail is not None and tail <= last and tail + TAIL_SIZE > first:
             raise BuildError(f"the tail at {tail:04X}h overlaps {first:04X}h to {last:04X}h")
@@ -625,9 +628,12 @@ class Image(ResidentMixin):
         """Whether the entry code needs sub0 (INTERNALS.md, Page 0 in another
         subslot of DOS's mapper's slot): with the part in page 3, page 3 is in
         an expanded slot, and page 0, or a RAM page kept for page 0, is in
-        another subslot of that slot. Not when T0 replaces the main ROM in page
-        0, which needs no RAM page for page 0 and no rom keep: the restorer
-        then gives page 0 the mapper's subslot for good."""
+        another subslot of that slot — or page 3 is in expanded slot 0 (with a
+        non-zero subslot, sharing slot 0 with the main ROM in 0-0), where a
+        game that keeps RAM in page 0 may switch page 0 back to 0-0 to call
+        the BIOS or tape entries. Not when T0 replaces the main ROM in page 0,
+        which needs no RAM page for page 0 and no rom keep: the restorer then
+        gives page 0 the mapper's subslot for good."""
         snapshot, mode = self.snapshot, self.mode
         if not mode.service or mode.t0 or self.p3 is None:
             return False
@@ -636,40 +642,60 @@ class Image(ResidentMixin):
             return False
         page0 = [snapshot.selected_slot(0)] + [(r.name.ps, r.name.ss) for r in snapshot.ram_pages
                                                 if r.name.page == 0]
-        if not any(p == ps and s != ss for p, s in page0):
-            return False
         main_rom = snapshot.selected_slot(0)[0] == 0 and snapshot.selected_slot(0)[1] in (None, 0)
-        return not (main_rom and len(page0) == 1 and not self.game.rom_keep)
+        if main_rom and len(page0) == 1 and not self.game.rom_keep:
+            return False
+        return any(p == ps and s != ss for p, s in page0) or (ps == 0 and ss != 0)
 
     def place_sub0(self):
-        """With needs_sub0, writes sub0 (src/service.asm) into zeros of the
-        game's page 3 and points e_run's call of tramp at it: at FCC9h, before
-        the part at its default place, or the same bytes before the moved
-        part's entries, xxC9h, clear of the tail and of the call's code.
-        Returns the patched ranges for the check, and none when no place has
-        room: the restorer then stops as without sub0."""
+        """With needs_sub0, writes sub0 (src/service.asm) into unused bytes of
+        the game's page 3 and points e_run's call of tramp at it: at FCC9h
+        before the default part (or xxC9h before a moved part), or when that is
+        taken (for example by a resident-call wrapper at FCC9h), in zeros of
+        BASIC's TRPTBL (FC4Ch..FC9Dh) or unused C9h BIOS hooks (FF01h..FFC7h),
+        clear of the tail, the call's code, and the part's blocks. Returns the
+        patched ranges for the check, and none when no place has room: the
+        restorer then stops as without sub0."""
         service = self.service
         if not self.needs_sub0():
             return []
         start, end = service["sub0"], len(service.parts["call"])
         code = bytearray(service.parts["call"][start:end])
-        at = service["E_ENTRY"] - (service["E_ENTRY"] & 0xFF) + (service["P3_FREE"] & 0xFF)
-        last = at + len(code) - 1
+        size = len(code)
         taken = [(self.tail.address, self.tail.address + TAIL_SIZE - 1)]
         if self.code_span:
             taken.append(self.code_span)
         taken += [(first, first + len(data) - 1) for first, data in service.blocks()]
-        if any(self.p3.data[at & 0x3FFF:(last & 0x3FFF) + 1]) or any(a <= last and b >= at for a, b in taken):
+
+        def fits(at, allowed=(0,)):
+            last = at + size - 1
+            if at < 0xC000 or last > 0xFFFE:
+                return False
+            if any(a <= last and b >= at for a, b in taken):
+                return False
+            return all(b in allowed for b in self.p3.data[at & 0x3FFF:(last & 0x3FFF) + 1])
+
+        default_at = service["E_ENTRY"] - (service["E_ENTRY"] & 0xFF) + (service["P3_FREE"] & 0xFF)
+        default_allowed = (0, 0xC9) if (BIOS_HOOKS[0] <= default_at and default_at + size - 1 <= BIOS_HOOKS[1]) else (0,)
+        candidates = [(default_at, default_allowed)]
+        # Fall back to unused C9h BIOS hooks (FF01h..FFC7h) or BASIC's TRPTBL
+        # (FC4Ch..FC9Dh) when xxC9h is already occupied (e.g. by a rescall
+        # wrapper at FCC9h).
+        if not fits(default_at, default_allowed):
+            candidates += [(addr, (0, 0xC9)) for addr in range(0xFF01, BIOS_HOOKS[1] - size + 1)]
+            candidates += [(addr, (0,)) for addr in range(0xFC4C, 0xFC9E - size + 1)]
+        at = next((addr for addr, allowed in candidates if fits(addr, allowed)), None)
+        if at is None:
             return []
         def field(name):
             return service[f"sub0.{name}"] - start
         struct.pack_into("<H", code, field("save") + 1, at + field("back") + 1)
         code[field("ss") + 1] = self.snapshot.selected_slot(3)[1]
         struct.pack_into("<H", code, field("tramp") + 1, service["tramp"])
-        self.p3.data[at & 0x3FFF:(at & 0x3FFF) + len(code)] = code
+        self.p3.data[at & 0x3FFF:(at & 0x3FFF) + size] = code
         struct.pack_into("<H", self.p3.data, (service["e_run.call"] + 1) & 0x3FFF, at)
         self.sub0_at = at
-        return ram_ranges(self.snapshot, self.p3, at & 0x3FFF, len(code))
+        return ram_ranges(self.snapshot, self.p3, at & 0x3FFF, size)
 
     def write_borrowed(self, t0):
         """T0's data for the page that TAPIN borrows: the slot register's mask
