@@ -16,3 +16,8 @@ patch page3:3CF7 00 00 00 00 00 00 00 00 > E1 DD E1 F1 4F DB AA C9
 # / LD C,A / IN A,(0AAh) / ... / IN A,(0A9h) / POP BC / RET. It calls the
 # routine above in place of those instructions.
 patch page1:3C10 4F DB AA > CD D9 FC
+
+# When play starts, the game overwrites F380h..F399h (RDPRIM/WRPRIM/CLPRIM)
+# with game data, crashing resb on its next RDSLT call. Clear WRPRIM so the
+# build emits res3 instead, which needs no BIOS slot routine.
+patch page3:3385 D3 A8 73 > 00 00 00

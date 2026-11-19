@@ -16,3 +16,10 @@ patch side1:1F12 3A 0F F3 D3 A8 > 3E 50 32 FF FF
 # next changes the block's last byte, its XOR.
 patch side1:BA37 3A 10 F3 D3 A8 > 3E 55 32 FF FF
 patch side1:C5FB 83 > 78
+
+# At 8B08h the game uses LD B,80h / LD E,L / LD D,H / LDIR from 8C59h as a
+# busy-wait delay, copying 8C59h..0C58h onto itself. That triggers page 3
+# write watches over the call of SX2RES and writes inverted FFFFh back to
+# slot 0's subslot register at FFFFh. Lower B to 30h so the loop stays in
+# page 2 (8C59h..BC58h).
+patch page2:B09 80 > 30

@@ -9,15 +9,11 @@
 patch side1:579A 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF E6 FC 32 FD FF 21 00 88 11 00 01 01 00 4F ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 88 11 00 01 01 00 4F ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 patch side1:A6FE 06 FF C5 CD 9F FD C1 10 F9 F3 3A FE FF D3 A8 > F3 3E 55 32 FF FF 32 C5 FC 00 00 00 00 00 00
 
-# As on sx2-noexp0: the game's page 3 has no 158 free bytes from an address
-# xxE1h for the tape service's part, and it keeps RAM of its own in page 0, so
-# the mode without a part in page 3, whose T0 needs page 0 of DOS's mapper,
-# cannot take it. So the part goes apart, in two free areas: its entries at
-# DAE1h to DAFAh, and its code block at F5D1h to F654h.
-service at DAE1 F5D1
+# As on sx2-noexp0, the game's page 3 has no 158 free bytes from xxE1h, and in
+# play it writes DAF6h and F63Bh. Split the tape service into the unused C9h
+# BIOS hook area: entries at FEE1h..FEFAh and code block at FF01h..FF84h.
+service at FEE1 FF01
 
-# The game uses the zeros at FCC9h in page 3, where the image's wrapper for the
-# call of SX2RES goes with the tape service, so nothing called SX2RES. The
-# wrapper goes to FD20h, in zeros of page 3 that the game leaves alone in a
-# minute of play with keys.
-rescode FD20
+# The game uses FCC9h and FD20h in play. Put the wrapper in the unused C9h BIOS
+# hook area at FF90h (above the split tape service code block at FF01h..FF84h).
+rescode FF90

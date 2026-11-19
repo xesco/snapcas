@@ -28,21 +28,22 @@ patch side1:BD75 3A 78 FA D3 A8 > 3E 55 32 FF FF
 snapshot at 224
 
 # The game runs with its interrupts off and no BIOS in page 0, so the image
-# has no call of SX2RES from an interrupt. The call routine res3 goes to F900h,
-# in zeros of page 3 that the game leaves alone in a minute of play with keys,
-# and the game's own code calls it.
-rescode F900
+# has no call of SX2RES from an interrupt. In play E940h clears xx00h..xx6Bh of
+# upper pages and E150h clears D7xxh. Put res3 at EF80h and its stack at EFB0h,
+# in the unused zeros at EF70h..EFFFh.
+rescode EF80
+resstack EFB0
 
 # The game tests each key with its routine at ED3Bh, in its title and in play,
 # thousands of times a second, and never reads the VDP's status. A routine at
-# D710h, in zeros of page 3 that the game leaves alone, reads that status and,
-# when its frame flag is set, at most once a frame, calls res3 at F900h on a
-# stack of its own below D8F0h, because the game's stack is in page 1, which
-# res3 selects for SX2RES. Then it does the instructions that the next patch
-# replaces, PUSH BC / PUSH AF / SRA A, and jumps back to ED3Fh.
-patch page3:1710 00 00 00 00 00 00 00 00 00 00 > F5 DB 99 07 30 0E ED 73 FE D8
-patch page3:171A 00 00 00 00 00 00 00 00 00 00 > 31 F0 D8 CD 00 F9 ED 7B FE D8
-patch page3:1724 00 00 00 00 00 00 00 00 > F1 C5 F5 CB 2F C3 3F ED
+# EFD0h (clear of E150h's clear of D6E1h..DABFh and E940h's clear of xx00h..xx6Bh)
+# reads that status and, when its frame flag is set, at most once a frame, calls
+# res3 at EF80h on a stack of its own below EFFCh, because the game's stack is
+# in page 1, which res3 selects for SX2RES. Then it does the instructions that
+# the next patch replaces, PUSH BC / PUSH AF / SRA A, and jumps back to ED3Fh.
+patch page3:2FD0 00 00 00 00 00 00 00 00 00 00 > F5 DB 99 07 30 0E ED 73 FE EF
+patch page3:2FDA 00 00 00 00 00 00 00 00 00 00 > 31 FC EF CD 80 EF ED 7B FE EF
+patch page3:2FE4 00 00 00 00 00 00 00 00 > F1 C5 F5 CB 2F C3 3F ED
 
-# The key routine's first instructions jump to the routine at D710h.
-patch page3:2D3B C5 F5 CB 2F > C3 10 D7 00
+# The key routine's first instructions jump to the routine at EFD0h.
+patch page3:2D3B C5 F5 CB 2F > C3 D0 EF 00

@@ -3,3 +3,13 @@ cas SCRAMBLE.CAS
 side2 SCRAMBLB.CAS
 sha1 d56987b24478e45f4e63dbc8c3bc488f366a1b0c 341cc5d190fcce973cf66beea871c05d8e3514e7
 url https://download.file-hunter.com/Games/MSX1/CAS/Scramble%20Spirits%20(1990)(Grandslam%20Entertainments)(Side%20A)%5BBLOAD%27CAS-%27%2CR%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Scramble%20Spirits%20(1990)(Grandslam%20Entertainments)(Side%20B)%5BBLOAD%27CAS-%27%2CR%5D.zip
+
+# The game writes port FEh, the ZX Spectrum's border and sound port, in two
+# routines of its sound: LD A,(HL) / OUT (0FEh),A, and IN A,(0FEh) / XOR 10h /
+# OUT (0FEh),A, which toggles the Spectrum's speaker. On a machine with a memory
+# mapper, port FEh is the mapper's register of page 2, so page 2 shows another
+# segment, the game runs into data, and the CPU loops on RST 38h. The patches
+# replace each OUT (0FEh),A with LD A,A and LD D,D, which do nothing and keep
+# both the sum and the exclusive OR of the block, as in Double Dragon's file.
+patch side1:ED48 D3 FE > 7F 52
+patch side1:ED72 D3 FE > 7F 52

@@ -22,6 +22,10 @@ patch side1:917 3A FF FF 2F > 3E 54 00 00
 # the routine at 1020h.
 rescode EF70
 rescall EFB0 3EE3 2506
+
+# When play starts, the game writes over res3's default stack in SLTWRK
+# (FD71h..FD88h), crashing the next call. Use res3g on the game's stack.
+resstack no
 patch page3:2FB0 00 00 00 00 00 00 00 > D5 11 40 1F C3 20 10
 
 # The game waits with the delay routine at 101Ch, from 10 places. The routine

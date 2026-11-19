@@ -11,3 +11,7 @@ patch side1:2E70 32 7D DE D3 A8 > DE C3 02 DE 00
 # The `carga` program selects that RAM in page 1 with LD A,(0DE7Dh) /
 # OUT (0A8h),A at ACD5h. It writes 54h to slot 0's subslot register instead.
 patch side1:2F07 3A 7D DE D3 A8 > 3E 54 32 FF FF
+
+# The game runs without BIOS interrupts (H.KEYI never runs), and on play start
+# its routine at D110h zeroes F7FEh..FFFDh over the default call of SX2RES.
+rescall no

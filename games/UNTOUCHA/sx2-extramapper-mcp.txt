@@ -9,3 +9,10 @@
 # SX2RES then has no calls once play starts.
 patch page1:3663 11 00 FE > CD 90 76
 patch page1:3690 FF FF FF FF FF FF FF FF FF FF > 21 71 72 22 39 00 11 00 FE C9
+
+# The move up to FE00h also overwrites the tape service's default part at
+# FCE1h..FD7Eh. Split the tape service into the unused C9h BIOS hook area above
+# FE00h: entries at FEE1h..FEFAh, code block at FF01h..FF84h, and wrapper at
+# FF90h (leaving FEC9h free for sub0).
+service at FEE1 FF01
+rescode FF90
