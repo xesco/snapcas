@@ -14,3 +14,8 @@ patch side1:2F7 3A 77 FA D3 A8 > 3E 55 32 FF FF
 patch side1:31F DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
 patch side1:1F1F 3A 77 FA D3 A8 > 3E 55 32 FF FF
 patch side1:1F47 DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+
+# When play starts, the game writes FD57h in SLTWRK over the call of SX2RES.
+# Put the call routine and its stack in unused zeros at EF70h.
+rescode EF70
+resstack EFB0

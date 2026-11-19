@@ -6,3 +6,8 @@
 # fails: build.py: page 3 is not a RAM page that the snapshot keeps. `make games`
 # wrote this line.
 capture sx2-extramapper-noram30
+
+# When play starts, the game writes FD5Bh in SLTWRK over the call of SX2RES.
+# Put the call routine and its stack in unused zeros at E8C0h.
+rescode E8C0
+resstack E900

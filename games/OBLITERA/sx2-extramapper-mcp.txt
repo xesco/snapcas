@@ -1,0 +1,6 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# When play starts, the game writes FD29h in SLTWRK over the call of SX2RES.
+# Put the call routine and its stack in unused zeros at F440h.
+rescode F440
+resstack F480

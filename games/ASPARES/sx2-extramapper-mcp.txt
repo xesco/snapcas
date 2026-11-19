@@ -1,0 +1,5 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# When play starts, the game writes FCDFh in SLTATR over res3's default stack.
+# Put the stack in the unused C9h BIOS hook area.
+resstack FF01

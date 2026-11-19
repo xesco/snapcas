@@ -36,3 +36,7 @@ patch page3:1A14 00 > C9
 # The title waits for 1, 2 or 3 in a loop at 99BAh that reads the keyboard's row
 # 0, about 30000 times a second. It calls the entry in place of LD A,0F0h / DI.
 patch page2:19BA 3E F0 F3 > CD EC D9
+
+# When play starts, the game writes FD71h in SLTWRK over res3's default stack.
+# Put the stack in unused zeros at F9A0h.
+resstack D9C0

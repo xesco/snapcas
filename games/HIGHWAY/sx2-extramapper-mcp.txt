@@ -22,3 +22,7 @@ rescall 046F
 # In play the routine at 00E4h reads the joystick with the routine at 046Fh,
 # about 40 times a second. It calls the wrapper in place of that routine.
 patch page0:EA CD 6F 04 > CD 7D FC
+
+# When play starts, the game writes FD71h in SLTWRK over res3's default stack.
+# Put the stack in BASIC's unused TRPTBL at FC4Ch..FC9Dh.
+resstack FC84

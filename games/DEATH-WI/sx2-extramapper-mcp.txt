@@ -43,3 +43,7 @@ rescall 9A97
 
 # The jump at 003Ch goes to the wrapper.
 patch page0:3D 97 9A > 2D D6
+
+# When play starts, the game writes FD71h in SLTWRK over res3's default stack.
+# Put the stack in the unused C9h BIOS hook area.
+resstack FF01

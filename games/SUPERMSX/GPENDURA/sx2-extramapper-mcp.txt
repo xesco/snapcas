@@ -12,3 +12,8 @@ patch side1:17EF9 78 32 C3 92 > 00 00 00 00
 patch side1:17F17 F5 3E 00 D3 A8 F1 C9 > 3E 50 32 FF FF C9 00
 patch side1:1C021 78 32 C3 92 > 00 00 00 00
 patch side1:1C03F F5 3E 00 D3 A8 F1 C9 > 3E 50 32 FF FF C9 00
+
+# When play starts, the game writes FD41h in SLTWRK over the call of SX2RES.
+# Put the call routine and its stack in unused zeros at C298h.
+rescode C298
+resstack C2D0

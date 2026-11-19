@@ -32,3 +32,8 @@ patch page3:3C90 00 00 > C3 5C
 # many times a second, in the title and in play. Its first LDIRVM calls the
 # entry at FC86h.
 patch page1:1DB CD 5C 00 > CD 86 FC
+
+# In play the game copies a table over FD00h to FE7Fh, over the default call of SX2RES.
+# Put the call routine and its stack in the unused C9h BIOS hook area.
+rescode FF01
+resstack FF50

@@ -17,3 +17,8 @@ patch side1:D4 3A FE FF D3 A8 > 3E 54 32 FF FF
 patch side1:FD 3A FE FF D3 A8 > 3E 55 32 FF FF
 patch side1:275 47 08 78 E6 > 4F 08 18 42
 patch side1:2C5 47 08 78 E6 > 4F 08 18 3F
+
+# When play starts, the game writes FCCFh in SLTATR over the call of SX2RES.
+# Put the call routine and its stack in the unused C9h BIOS hook area.
+rescode FF01
+resstack FF40

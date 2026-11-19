@@ -52,3 +52,7 @@ patch page0:37 FF C9 FF FF > C9 C3 5D DA
 # A,0Eh / OUT (0A0h),A / RET.
 patch page3:1A63 00 00 00 00 00 00 00 00 > CD 30 DA 3E 0E D3 A0 C9
 patch page2:374A 3E 0E D3 A0 > CD 63 DA 00
+
+# When play starts, the game writes FD71h in SLTWRK over res3's default stack.
+# Put the stack in the unused C9h BIOS hook area.
+resstack FE18
