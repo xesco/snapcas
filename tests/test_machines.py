@@ -195,7 +195,8 @@ class RamSearch(unittest.TestCase):
         of the search on its tape."""
         data, search = support.read_tape(tape), patches.ramsearch.SEARCH
         copies = [at for at in range(len(data)) if data.startswith(search, at)]
-        return ([p.line for p in self.restored[name].snapshot.capture_patches()],
+        # The tape's copy of ENASLT gets a patch of its own (Enaslt).
+        return ([p.line for p in self.restored[name].snapshot.capture_patches() if p.line.endswith("CB FF > 00 00")],
                 [f"patch side1:{at + patches.ramsearch.AT:X} CB FF > 00 00" for at in copies])
 
     def test_the_capture_patches_mots_search_on_the_phc28s_and_the_image_passes(self):
@@ -217,6 +218,29 @@ class RamSearch(unittest.TestCase):
         self.assertEqual((found, len(expected)), (expected, 2))
 
 
+class Enaslt(unittest.TestCase):
+    """The ENASLT copy patch on Made in Spain (INTERNALS.md, The ENASLT copy
+    patch): on the SX-2 with its Extra-Mapper on, where BASIC's slot register is
+    00h, the copy's AND B clears the subslot register, and the loader finds no
+    RAM in page 3."""
+
+    def test_each_copy_of_made_in_spains_enaslt_is_patched_and_the_image_passes(self):
+        machine = "sx2-extramapper-mcp"
+        if firmware_missing(machine):
+            self.skipTest("the test home lacks the SX-2's firmware")
+        support.tape("MADE-IN.CAS")
+        folder = support.shipped_copy(os.path.join(WORK, "games", "enaslt-made-in"), "MADE-IN")
+        restored = support.restore(folder, machine)
+        support.assert_passes(self, restored)
+        data = support.read_tape("MADE-IN.CAS")
+        # The tape holds the copy twice, and its selection of page 1 twice.
+        expected = [f"patch side1:{offset:X} {old.hex(' ').upper()} > {new.hex(' ').upper()}"
+                    for offset, old, new in patches.enaslt.places(data)]
+        self.assertEqual(len(expected), 4)
+        lines = [p.line for p in restored.snapshot.capture_patches()]
+        self.assertEqual([line for line in lines if line in expected], expected)
+
+
 # A single-load game that fits each shipped machine, the NMS 8250's 128 KB
 # included.
 SINGLE = "CALDERO.CAS"
@@ -224,6 +248,13 @@ SINGLE = "CALDERO.CAS"
 # machines/ is one, so a new machine needs no line here.
 SHIPPED = {name: [m for m in msx.user_machines() if msx.read_machine(msx.machine_path(m)).dos_files == name]
            for name in ("nextor", "msxdos1", "msxdos2")}
+
+
+def firmware_missing(machine):
+    """Whether the test home lacks a file of the machine's firmware: the
+    models of sx2 and sx2-noexp0 need the user's own OCM-BIOS.DAT
+    (Makefile)."""
+    return bool(msx.missing_firmware(msx.read_machine(msx.machine_path(machine))))
 
 
 def single_load(machine):
@@ -237,7 +268,8 @@ def single_load(machine):
 class Shipped(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        machines = [m for name, group in SHIPPED.items() if os.path.isdir(support.dos(name)) for m in group]
+        machines = [m for name, group in SHIPPED.items() if os.path.isdir(support.dos(name)) for m in group
+                    if not firmware_missing(m)]
         with concurrent.futures.ThreadPoolExecutor(6) as pool:
             cls.restored = dict(zip(machines, pool.map(single_load, machines)))
 
@@ -246,11 +278,16 @@ class Shipped(unittest.TestCase):
         # tests under MSX-DOS 1 run on test/nms8250-dos1 (Corpus).
         if not SHIPPED[name]:
             self.skipTest(f"no shipped machine boots {name}")
+        missing = [m for m in SHIPPED[name] if firmware_missing(m)]
         for machine in SHIPPED[name]:
+            if machine in missing:
+                continue
             with self.subTest(machine=machine):
                 # The check's own boot, before the restore, is no reboot
                 # (PLAN.md, step 16): point 3 passes with the others.
                 support.assert_passes(self, self.restored[machine])
+        if missing:
+            self.skipTest(f"{', '.join(missing)} without firmware that make firmware could not make")
 
     def test_every_shipped_machine_is_in_a_group(self):
         self.assertEqual(sorted(m for group in SHIPPED.values() for m in group), msx.user_machines())

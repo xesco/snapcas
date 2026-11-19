@@ -91,7 +91,7 @@ the tests:
 
 | Machine file | DOS | Why |
 |---|---|---|
-| `fsa1-mfrsd`, `hb75p-carnivore2`, `nms8245-ram512k-sunriseide`, `nms8250-carnivore2`, `phc28s-ram64k-carnivore2`, `vg8020-carnivore2`, `vg8020-sdmapper`, `xp800-sdmapper` | Nextor | Shipped |
+| `fsa1-mfrsd`, `hb75p-carnivore2`, `nms8245-ram512k-sunriseide`, `nms8250-carnivore2`, `phc28s-ram64k-carnivore2`, `sx2`, `sx2-extramapper-mcp`, `sx2-noexp0`, `vg8020-carnivore2`, `vg8020-sdmapper`, `xp800-sdmapper` | Nextor | Shipped |
 | `hb75p-mfrsd` | Nextor 2.10, from the ROM disk in the cartridge's flash | Shipped |
 | `hbf700p-ram512k-msxdos2` | `DOS_DIR/msxdos2/`, with the `msxdos2` cartridge in the machine file | Shipped |
 | `test/nms8250-dos1` | `DOS_DIR/msxdos1/`, from the NMS 8250's own disk ROM | No shipped machine runs MSX-DOS 1 |
@@ -844,4 +844,37 @@ Jack the Nipper, Barbarian, Chuckie Egg in two dumps, Spartan X, Knight Lore, Al
 Syndrome, Mortadelo y Filemon, Trivial Pursuit, and Choplift, Tetratlon, Toruk, Digy
 Dung and Container of the Super MSX tapes. Each was captured, built and checked by
 itself on this machine. The collection was not run on any machine after the step.
+
+## Step 31: the SX-2, an MSX2+
+
+This step adds the MSX2+ and the machine `sx2`, KdL's OCM-PLD on the SX-2, whose
+model `make firmware` makes from the SX-2's `OCM-BIOS.DAT` and openMSX's FS-A1WSX.
+It adds a machine file's `width`, the subslot POKE patch, the hook fill patch, T0's
+call of the sub-ROM in T0's own slot, and a `service at` with the part's code block
+apart ([NOTES.md, The SX-2](NOTES.md#the-sx-2)). The hook fill patch replaces the
+patch lines of 10 game files of the NMS 8250 and 8245.
+
+| Test | What it proves |
+|---|---|
+| `Shipped` in `tests/test_machines.py`: Caldero on `sx2` | The model boots, and an image passes the check |
+| `Procedures` in `tests/test_capture.py`: the `width` line, a BIOS call of the sub-ROM, a POKE to FFFFh on RAM in subslots 0 and 2, and a hook fill on an MSX1 | The capture types the width, knows the sub-ROM's call, patches the POKE only for another subslot, and leaves an MSX1's fill alone |
+| `SubPoke` and `HookFill` in `tests/test_patches.py` | Each form's places on a tape, and the forms that are left alone |
+| `SubRom` and `SubRomSplit` in `tests/test_service.py`, on a machine with the sub-ROM in the slot of DOS's mapper | A game that calls the sub-ROM through the BIOS then reads the tape, with the part whole and split |
+| `SplitGuard` in `tests/test_service.py`, and the split cases of `tests/test_build.py` | The check guards both blocks of a split part, and the build refuses a block that is not free |
+| `make test` without `OCM-BIOS.DAT` | The `sx2` tests are skipped with the reason, and `snap` names `make firmware` |
+| The SX-2's model in an openMSX home with only `make firmware`'s ROMs | The model boots to BASIC 3.0 and Nextor without another ROM of the user's |
+| Choplift, Container, Digy Dung, Tetratlon and Toruk without their patch lines on `nms8250-carnivore2` and `nms8245-ram512k-sunriseide`, by hand | The hook fill patch replaces the lines |
+
+The results of the step, from the collections after it:
+
+| Machine | Game files that pass | Notes |
+|---|---|---|
+| `sx2` | 1,545 | 1,540 in the collection, then Bomb Hazard, BMX Simulator, Aventura 2, Chase H.Q. and Ke Rulen los Petas, each by itself |
+
+The other machines' collections were not run after the step. The subslot POKE and
+hook fill patches change their images of 83 and 32 game files where they apply, and
+English Words and Digy Dung, which passed on the FS-A1 and HB-F700P with a snapshot
+of a failed load, can fail there. So can Ci-U-Than Trilogy II and III on the
+machines whose RAM is in an expanded slot, and BMX Simulator on `nms8250-carnivore2`,
+whose images run in a loop or in stale bytes.
 

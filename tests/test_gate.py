@@ -100,7 +100,14 @@ class Report(unittest.TestCase):
                     "patched 3-x-2 16 17\npatched 3-x-3 0 1\npart 64737 64769 64760 0\ncpos 16384 16390\nended 456 464\n")
         self.assertEqual(check.read_facts(folder), {
             "service": "1", "tail": "61414 25 3 21", "free": "64713 64904", "patched": "3-x-2 16 17 3-x-3 0 1",
-            "part": "64737 64769 64760 0", "moved": "", "cpos": "16384 16390", "ended": "456 464"})
+            "part": "64737 64769 64760 0", "partcode": "", "moved": "", "cpos": "16384 16390", "ended": "456 464",
+            "rescall": "", "resvector": "", "rescode": "", "resstack": "", "sub0": ""})
+        # A part whose code block a game file puts apart.
+        with open(os.path.join(folder, "build.txt"), "w") as f:
+            f.write("service 1\ntail 61414 25 3 21\npart 55777 55802 55800 0\npartcode 55880 56015\n"
+                    "moved 55777 55802 55880 56037\n")
+        facts = check.read_facts(folder)
+        self.assertEqual((facts["partcode"], facts["moved"]), ("55880 56015", "55777 55802 55880 56037"))
         # A build.txt without the tape service, or of an older build.
         with open(os.path.join(folder, "build.txt"), "w") as f:
             f.write("service 0\ntail 61414 25 3 21\n")

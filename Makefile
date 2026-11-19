@@ -66,25 +66,29 @@ $(OUT)/snapcas.sym: $(SNAPCAS_SRC) $(SJASMPLUS)
 	$(SJASMPLUS) --nologo --sym=$@ $<
 
 # The second assembly, with the page 3 part one page lower, shows which bytes
-# move with it. Each assembly also writes the symbols that service.asm exports,
-# which tools/relocs.py appends for build.py.
+# move with it, and the third, with the part's code block 0111h bytes higher,
+# which addresses move with that block. Each assembly also writes the symbols
+# that service.asm exports, which tools/relocs.py appends for build.py.
 bin/SERVICE.BIN: $(SERVICE_SRC) tools/relocs.py $(SJASMPLUS)
 	mkdir -p bin $(OUT)
 	$(SJASMPLUS) --nologo --raw=$(OUT)/service-fc.bin --exp=$(OUT)/service-fc.exp $<
 	$(SJASMPLUS) --nologo -DP3_PAGE=0FBh --raw=$(OUT)/service-fb.bin --exp=$(OUT)/service-fb.exp $<
-	python3 -I tools/relocs.py $(OUT)/service-fc.bin $(OUT)/service-fc.exp $(OUT)/service-fb.bin $(OUT)/service-fb.exp $@
+	$(SJASMPLUS) --nologo -DCODE_MOVED=0FE0Ch --raw=$(OUT)/service-cm.bin --exp=$(OUT)/service-cm.exp $<
+	python3 -I tools/relocs.py $(OUT)/service-fc.bin $(OUT)/service-fc.exp $(OUT)/service-fb.bin $(OUT)/service-fb.exp \
+	  $(OUT)/service-cm.bin $(OUT)/service-cm.exp $@
 
 # service.asm exports symbols, so each of its assemblies names a file for them.
 $(OUT)/service.sym: $(SERVICE_SRC) $(SJASMPLUS)
 	mkdir -p $(OUT)
 	$(SJASMPLUS) --nologo --sym=$@ --exp=$(OUT)/service.exp $<
 
-# Three test games, each with the symbol file that its tests read, by a rule of
+# Four test games, each with the symbol file that its tests read, by a rule of
 # its own: borrow, for the tape service through a borrowed page outside a
 # mapper, contract, which calls each entry of the tape service and keeps what
-# it returns, and guard, which writes the service's part of page 3, for the
-# check's point 2.
-TEST_GAME_NAMES := borrow contract guard
+# it returns, guard, which writes the service's part of page 3, for the
+# check's point 2, and subrom, which calls the sub-ROM through T0 and then
+# reads the tape.
+TEST_GAME_NAMES := borrow contract guard subrom
 TEST_GAMES := $(foreach game,$(TEST_GAME_NAMES),$(OUT)/$(game).bin $(OUT)/$(game).sym)
 
 $(TEST_GAME_NAMES:%=$(OUT)/%.bin): $(OUT)/%.bin: tests/%.asm $(SJASMPLUS)
@@ -180,6 +184,131 @@ $(HBF700P_NOEXP0):
 	test "$$(grep -c '</secondary>' $@.tmp)" = 2
 	mv $@.tmp $@
 
+# The machines sx2 and sx2-noexp0: the SX-2, an FPGA MSX2+ on KdL's OCM-PLD
+# firmware, whose slots copy the Panasonic FS-A1WSX's. Its ROMs are KdL's own,
+# in the SD card's OCM-BIOS.DAT, which snapcas cannot ship: SX2_BIOS names the
+# user's copy, by default OCM-BIOS.DAT in the system ROMs. The file is the disk
+# ROM's 128 KB, then 16 KB blocks: the main ROM in 8 and 9, BASIC'n in 10,
+# MSX-MUSIC in 11, the sub-ROM in 12, Kanji BASIC in 13 and 14, the ROM of slot
+# 0-3 in 15, on the SX-2 the ESP8266's Wi-Fi BIOS, and the Kanji font in 16 to
+# 31. The models take the devices of openMSX's FS-A1WSX, and their slots are
+# the SX-2's: 2048 KB of RAM in 3-0; the sub-ROM and Kanji BASIC in 3-1; a
+# Sunrise IDE with Nextor in 3-2, in place of the MegaSD, which openMSX lacks;
+# and BASIC'n in 3-3. OCM_SX-2.xml has slot 0 expanded, as the SX-2 starts: the
+# main ROM in 0-0, MSX-MUSIC in 0-2 and the Wi-Fi BIOS in 0-3, with 0-1 empty
+# while the extra mapper is off. openMSX has no ESP8266, so the Wi-Fi BIOS finds
+# none. OCM_SX-2_noexp0.xml has slot 0 as SETSMART -F9FD leaves it: not
+# expanded, with only the main ROM. OCM_SX-2_extramapper.xml has the
+# Extra-Mapper of 4096 KB on in 0-1, and OCM_SX-2_extramapper_noram30.xml is
+# that model without the 2048 KB mapper in 3-0, for the capture of a game whose
+# loader finds that RAM before the Extra-Mapper (machines/capture/).
+SX2_BIOS ?= $(SYSTEMROMS)/OCM-BIOS.DAT
+SX2 := $(EMU_HOME)/share/machines/OCM_SX-2.xml
+SX2_NOEXP0 := $(EMU_HOME)/share/machines/OCM_SX-2_noexp0.xml
+SX2_EXTRAMAPPER := $(EMU_HOME)/share/machines/OCM_SX-2_extramapper.xml
+SX2_NORAM30 := $(EMU_HOME)/share/machines/OCM_SX-2_extramapper_noram30.xml
+SX2_ROMS := $(EMU_HOME)/share/systemroms/snapcas/sx2
+define SX2_PY
+import hashlib, os, re, sys
+import xml.etree.ElementTree as ET
+fsa1wsx, ide, bios, roms, slot0, out = sys.argv[1:]
+data = open(bios, "rb").read()
+K = 0x4000
+if len(data) != 32 * K:
+    sys.exit(bios + " is not an SX-2's OCM-BIOS.DAT of 512 KB")
+parts = dict(main=(8, 2, b"\xf3\xc3"), xbasic=(10, 1, b"AB"), music=(11, 1, b"AB"), sub=(12, 1, b"CD"),
+             kanji=(13, 2, b"AB"), slot03=(15, 1, b""), kanjifont=(16, 16, b""))
+os.makedirs(roms, exist_ok=True)
+rom = {}
+for name, (block, count, head) in parts.items():
+    part = data[block * K:(block + count) * K]
+    if not part.startswith(head):
+        sys.exit(bios + ": block " + str(block) + " is not the " + name + " ROM of an MSX2+ OCM-BIOS.DAT")
+    rom_path = os.path.join(roms, "sx2-" + name + ".rom")
+    tmp_path = f"{rom_path}.{os.getpid()}.tmp"
+    open(tmp_path, "wb").write(part)
+    os.replace(tmp_path, rom_path)
+    rom[name] = "<rom><filename>sx2-" + name + ".rom</filename><sha1>" + hashlib.sha1(part).hexdigest() + "</sha1></rom>"
+model = open(fsa1wsx).read()
+font = re.compile(r"(?s)(<Kanji id=\"Kanji ROM\">\s*)<rom>.*?</rom>")
+if len(font.findall(model)) != 1:
+    sys.exit(fsa1wsx + " has not one Kanji ROM")
+model = font.sub(lambda m: m.group(1) + rom["kanjifont"], model)
+sunrise = re.search(r"(?s)<SunriseIDE .*?</SunriseIDE>", open(ide).read()).group(0)
+first, last = model.index('<primary slot="0">'), model.rindex("</primary>") + len("</primary>")
+main = f"""<ROM id="MSX BIOS with BASIC ROM">{rom["main"]}<mem base="0x0000" size="0x8000"/></ROM>"""
+# The Extra-Mapper in 0-1, which SETSMART's code 57h turns on.
+extra = """<secondary slot="1"/>"""
+if slot0.startswith("extramapper"):
+    extra = """<secondary slot="1">
+        <MemoryMapper id="Extra-Mapper"><size>4096</size><mem base="0x0000" size="0x10000"/></MemoryMapper>
+      </secondary>"""
+if slot0 == "expanded" or slot0.startswith("extramapper"):
+    main = f"""<secondary slot="0">
+        {main}
+      </secondary>
+      {extra}
+      <secondary slot="2">
+        <MSX-MUSIC id="MSX Music">{rom["music"]}<sound><volume>9000</volume></sound><ym2413-core>NukeYKT</ym2413-core><io base="0x7C" num="2" type="O"/><mem base="0x4000" size="0x4000"/></MSX-MUSIC>
+      </secondary>
+      <secondary slot="3">
+        <ROM id="Slot 0-3 ROM">{rom["slot03"]}<mem base="0x4000" size="0x4000"/></ROM>
+      </secondary>"""
+# Slot 3-0's mapper of 2048 KB, which extramapper-noram30 leaves out.
+main_ram = """<MemoryMapper id="Main RAM"><size>2048</size><mem base="0x0000" size="0x10000"/></MemoryMapper>"""
+if slot0 == "extramapper-noram30":
+    main_ram = ""
+slots = f"""<primary slot="0">
+      {main}
+    </primary>
+    <primary external="true" slot="1"/>
+    <primary external="true" slot="2"/>
+    <primary slot="3">
+      <secondary slot="0">
+        {main_ram}
+      </secondary>
+      <secondary slot="1">
+        <ROM id="MSX Sub ROM">{rom["sub"]}<mem base="0x0000" size="0x4000"/></ROM>
+        <ROM id="MSX Kanji Driver with BASIC">{rom["kanji"]}<mem base="0x4000" size="0x8000"/></ROM>
+      </secondary>
+      <secondary slot="2">
+        {sunrise}
+      </secondary>
+      <secondary slot="3">
+        <ROM id="BASIC'n">{rom["xbasic"]}<mem base="0x4000" size="0x4000"/></ROM>
+      </secondary>
+    </primary>"""
+text = model[:first] + slots + model[last:]
+ET.fromstring(text)
+open(out, "w").write(text)
+endef
+export SX2_PY
+$(SX2): $(SX2_BIOS)
+	mkdir -p $(dir $@)
+	python3 -I -c "$$SX2_PY" $(OPENMSX_SHARE)/machines/Panasonic_FS-A1WSX.xml $(OPENMSX_SHARE)/extensions/SunriseIDE_Nextor.xml $< $(SX2_ROMS) expanded $@.tmp
+	mv $@.tmp $@
+$(SX2_EXTRAMAPPER): $(SX2_BIOS)
+	mkdir -p $(dir $@)
+	python3 -I -c "$$SX2_PY" $(OPENMSX_SHARE)/machines/Panasonic_FS-A1WSX.xml $(OPENMSX_SHARE)/extensions/SunriseIDE_Nextor.xml $< $(SX2_ROMS) extramapper $@.tmp
+	mv $@.tmp $@
+$(SX2_NORAM30): $(SX2_BIOS)
+	mkdir -p $(dir $@)
+	python3 -I -c "$$SX2_PY" $(OPENMSX_SHARE)/machines/Panasonic_FS-A1WSX.xml $(OPENMSX_SHARE)/extensions/SunriseIDE_Nextor.xml $< $(SX2_ROMS) extramapper-noram30 $@.tmp
+	mv $@.tmp $@
+$(SX2_NOEXP0): $(SX2_BIOS)
+	mkdir -p $(dir $@)
+	python3 -I -c "$$SX2_PY" $(OPENMSX_SHARE)/machines/Panasonic_FS-A1WSX.xml $(OPENMSX_SHARE)/extensions/SunriseIDE_Nextor.xml $< $(SX2_ROMS) noexp0 $@.tmp
+	mv $@.tmp $@
+# Without the user's OCM-BIOS.DAT, make leaves the SX-2's machines out, and make
+# firmware says where the file goes.
+# The Sunrise IDE's Nextor ROM, which the models' slot 3-2 loads, so that the
+# SX-2's machines need no other file of the user's than OCM-BIOS.DAT.
+SUNRISE_NEXTOR := $(EMU_HOME)/share/systemroms/snapcas/Nextor-2.1.1.SunriseIDE.ROM
+$(SUNRISE_NEXTOR): | $(SYSTEMROMS_LINK)
+	python3 -I tools/fetch.py https://github.com/Konamiman/Nextor/releases/download/v2.1.1/Nextor-2.1.1.SunriseIDE.ROM 205af7f7893aa0328be23f66b3afe3132c7dee59cf4bbc493408475a201c7ad6 $@
+SX2_FIRMWARE := $(if $(wildcard $(SX2_BIOS)),$(SX2) $(SX2_NOEXP0) $(SX2_EXTRAMAPPER) $(SX2_NORAM30) $(SUNRISE_NEXTOR))
+SX2_MISSING := $(if $(SX2_FIRMWARE),,the SX-2's machines need its OCM-BIOS.DAT from its SD card at $(SX2_BIOS), or SX2_BIOS= naming it)
+
 # The tests' tape files, which git holds. A test does not skip without its
 # tape, so one that the folder lacks stops make test here.
 TEST_TAPES := $(addprefix tests/tapes/, \
@@ -191,7 +320,7 @@ TEST_TAPES := $(addprefix tests/tapes/, \
   GAUNTLEB.CAS GAUNTLET.CAS GHOSTB85.CAS ITALIA.CAS JET-BOMB.CAS KNIGHTMA.CAS \
   KONAMI.CAS LAZERBYK.TSX LICENCE.TSX LIVINGST.CAS MAD-MIDE.CAS MAD-MIX.CAS \
   MADE-IN.CAS MOONWALK.CAS MORTADEL.CAS MOTB.CAS MOTORIST.CAS NONAMED.CAS \
-  PICOPICO.TSX ROCKYA.CAS SIR-FRED.CAS SOOTLANB.CAS SOOTLAND.CAS SUPER-09.CAS \
+  PICOPICO.TSX ROCKYA.CAS SIR-FRED.CAS SOOTLANB.CAS SOOTLAND.CAS SUPER-09.CAS SUPER-1.CAS \
   SUPERM18.CAS SUPERMOB.CAS TETRIS.CAS THING-BO.CAS TOUR-91.CAS TOUR-91B.CAS \
   TUAREG.CAS TURBO-GI.CAS UCHI87.CAS WORLD-CU.CAS YIE-AR.CAS YIE-ARII.CAS \
   ZANAC.CAS)
@@ -205,7 +334,7 @@ $(TEST_TAPES):
 unit: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS)
 	python3 -I tests/run.py --pure
 
-test: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS) $(TEST_GAMES) $(TEST_TAPES) $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(NMS8250_4M) $(HBF700P_NOEXP0)
+test: bin/SNAPCAS.COM bin/SERVICE.BIN $(SYMBOLS) $(TEST_GAMES) $(TEST_TAPES) $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(NMS8250_512K) $(NMS8250_4M) $(HBF700P_NOEXP0) $(SX2_FIRMWARE)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) NEXTOR_DIR=$(abspath $(NEXTOR)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I tests/run.py
 
@@ -221,17 +350,18 @@ FIX ?= 1
 
 # The run over every shipped game file on a machine (docs/INTERNALS.md, The games
 # run), apart from make test because it takes hours.
-games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(HBF700P_NOEXP0)
+games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(HBF700P_NOEXP0) $(SX2_FIRMWARE)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) DOS_DIR=$(abspath $(DOS_DIR)) \
 	  python3 -I tools/games.py $(MACHINE) $(if $(DOS),--dos $(DOS)) $(if $(FULL),--full) $(if $(filter 0,$(FIX)),--no-fix)
 
 # The openMSX home that snapcas.py uses, with the firmware of the machines that
 # need it.
-firmware: $(FIRMWARE) $(HBF700P_NOEXP0)
+firmware: $(FIRMWARE) $(HBF700P_NOEXP0) $(SX2_FIRMWARE)
+	$(if $(SX2_MISSING),@echo "$(SX2_MISSING)" >&2)
 
 # bin/ stays, because git holds its files.
 clean:
-	rm -rf $(OUT)/test $(SYMBOLS) $(OUT)/service-fc.bin $(OUT)/service-fb.bin $(OUT)/service-fc.exp $(OUT)/service-fb.exp $(OUT)/service.exp \
+	rm -rf $(OUT)/test $(SYMBOLS) $(OUT)/service-fc.bin $(OUT)/service-fb.bin $(OUT)/service-cm.bin $(OUT)/service-fc.exp $(OUT)/service-fb.exp $(OUT)/service-cm.exp $(OUT)/service.exp \
 	  $(TEST_GAMES)
 
 .PHONY: help all unit test games firmware clean

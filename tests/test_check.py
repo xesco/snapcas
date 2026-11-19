@@ -1,5 +1,5 @@
 """The check on games (docs/INTERNALS.md, Check): point 3, which fails a reboot
-of the machine after the restore, point 4, which fails a game that stops at a
+of the machine after the restore or a crash into RST 38h, point 4, which fails a game that stops at a
 BASIC error, what check.tcl leaves in the report when one of its own
 callbacks fails, and point 1's limit for the restore. check.py's reading of a report is in tests/test_gate.py, and
 point 2's guard in tests/test_service.py. Emulator tier."""
@@ -39,6 +39,9 @@ GAMES = {
     # Resets the VG-8020 on purpose after the restore, and one savestate catches
     # the boot screen before the game starts.
     "s16-raider": ("SUPERMSX/RAIDER18", "vg8020-carnivore2", False),
+    # Its loader leaves page 2 in the VG-8020's empty slot 2, and the restored
+    # game runs FFh bytes there, RST 38h, as at its capture.
+    "s16-miner": ("SUPERMSX/MINER", "vg8020-carnivore2", False),
 }
 
 
@@ -94,6 +97,9 @@ class Reboots(unittest.TestCase):
     def test_a_restore_that_skips_the_captures_reset_fails_point_3(self):
         support.assert_fails(self, self.restored["s16-konami"], 3, "the restored game does not")
 
+    def test_a_crash_into_rst_38h_fails_point_3(self):
+        support.assert_fails(self, self.restored["s16-miner"], 3, "the CPU runs FFh bytes")
+
     def test_a_reset_on_the_phc28s_is_noted(self):
         self.passes_with_note("s16-bumper", "the machine resets")
 
@@ -131,7 +137,7 @@ class Script(unittest.TestCase):
                     "pages": "0",
                     "kv": "{pc 0000 a8 00}", "capreset": "{}", "state": "snapcas-test", "name": "TEST",
                     "com": "{0 0 0}", "stop": "{}", "tail": "{0 25 3 21}", "free": "{}", "service": "0",
-                    "patched": "{}", "part": "{}", "moved": "{}", "cpos": "{}", "ended": "{}"}
+                    "patched": "{}", "part": "{}", "partcode": "{}", "moved": "{}", "cpos": "{}", "ended": "{}"}
         script = ("".join(f"set ::C({k}) {v}\n" for k, v in settings.items())
                   + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/check.tcl") + start)
         support.cbios(script)

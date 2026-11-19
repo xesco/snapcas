@@ -28,7 +28,7 @@ tables and the tape files' formats. Why each holds what it holds is in
 | `sub0` to `sub3`, `-` when not expanded | For a slot that `EXPTBL` marks expanded, the byte at FFFFh, inverted, read while page 3 selects that slot |
 | `fc` to `ff`, `-` without a mapper | `MSX Memory Mapper I/O`: the values written, which each mapper masks to its size |
 | `mapper<ps>-<ss>`, one for each mapper that holds a kept RAM page | The mapper's size in segments, for the mapper in primary slot `<ps>` and subslot `<ss>` (`x` when not expanded), as in the RAM pages' file names. A register of `fc` to `ff` selects the segment that is the register's value modulo this size. A snapshot of an older capture has no such line, and the build then takes the register's value as the segment |
-| `vdp0` to `vdp23`, `vdp32` to `vdp45` | `VDP regs`, which holds only 0 to 7 with an MSX1 VDP |
+| `vdp0` to `vdp23`, `vdp32` to `vdp45`, and `vdp25` to `vdp27` with a V9958 | `VDP regs`, which holds only 0 to 7 with an MSX1 VDP. The MSX2+'s V9958, whose ID in status register 1 is 2, adds registers 25 to 27 |
 | `pal0` to `pal15` | `VDP palette` |
 | `vramptr` | `VRAM pointer`, 14 bits, with bits 14 to 16 from register 14 |
 | `vramwrite` | `VRAM access status`: 1 after a write setup, 0 after a read setup |
@@ -134,7 +134,7 @@ restorer is assembled with these names, and `build.py` reads them from
 | 10 | 2 | CRC-16 of the sub-ROM's 16 KB, or 0 on an MSX1 |
 | 12 | 1 | Number of records |
 | 13 | 1 | Number of port writes |
-| 14 | 1 | Flags: bit 0 set for `rom keep`, bit 1 for `service t0` ([FILES.md, Game file](FILES.md#game-file)) |
+| 14 | 1 | Flags: bit 0 set for `rom keep`, bit 1 for `service t0` ([FILES.md, Game file](FILES.md#game-file)), bit 2 when the entry code has `sub0` ([INTERNALS.md, Page 0 in another subslot of DOS's mapper's slot](INTERNALS.md#page-0-in-another-subslot-of-dos-mappers-slot)) |
 | 15 | 1 | The page of the tape service's part of page 3: FCh unless the part moved, or 0 without the tape service. The part's entries start at E1h of that page |
 | 16 | 24 | AF, BC, DE, HL, AF', BC', DE', HL', IX, IY, SP, PC |
 | 40 | 1 | I |
@@ -210,7 +210,7 @@ The tail is 26 bytes of code that the restorer and `build.py` complete.
    the order that the `VDP palette` debuggable holds them, red and blue first. Then
    32 to register 17, for auto-increment, and registers 32 to 45 to port 9Bh.
 4. VDP registers 0 to 7, or 0 to 23, to port 99h, as a value and 80h plus the
-   register's number.
+   register's number. On a V9958, registers 25 to 27 follow in the same way.
 5. The VRAM pointer to port 99h: its low byte, then its high bits with 40h for a
    write setup. A read setup writes the pointer minus 1, because the VDP reads ahead
    and advances the pointer. When the pointer's low 14 bits are 0, register 14 is
@@ -222,22 +222,24 @@ The tail is 26 bytes of code that the restorer and `build.py` complete.
 
 | Offset | Size | Field |
 |---|---|---|
-| 0 | 1 | Version: 15. `build.py` stops with an error on any other |
-| 1 | 1 | Number of parts: 7 |
+| 0 | 1 | Version: 18. `build.py` stops with an error on any other |
+| 1 | 1 | Number of parts: 9 |
 | 2 | 4 per part | Each part's offset and length in the file, 2 bytes each |
 
-The first five parts hold the code that `build.py` places. In these parts, the
+The first six parts hold the code that `build.py` places. In these parts, the
 operands and the data that `build.py` and the restorer fill in are set to 0:
 
 | Part | What it holds |
 |---|---|
 | 0 | The tail ([Tail](#tail)) |
 | 1 | T0's stubs, for 19DDh to 1B44h ([INTERNALS.md, Tape service](INTERNALS.md#tape-service)) |
-| 2 | The service's part of page 3, for FCE1h to FD6Fh |
+| 2 | The service's part of page 3, for FCE1h to FD7Eh: the entries and their data, to E_STOP, then the code block from P3_CODE |
 | 3 | The code segment's data and routines, from 0000h, up to the tape's start |
 | 4 | T0's data and routines without a part in page 3, for 19DDh to 1B44h ([INTERNALS.md, Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)) |
-| 5 | The symbols, in the order of their names. For each symbol, the part holds its value in 2 bytes, its name's length in 1 byte, and its name in ASCII |
-| 6 | The offsets in the file of the bytes that move with the part of page 3, 2 bytes each. The bytes that move are the high bytes of the addresses in that part, those of part 5's symbols among them |
+| 5 | The calls of a machine's resident program for an image without the tape service: `res3`, by the slot register, for a wrapper of the game's own interrupt routine, then `resb`, through the BIOS's `RDSLT` and `CALSLT`, for H.KEYI, each with a stack of its own, then `res3g` and `resbg`, the same calls on the game's stack, of the same lengths, for a page 3 without room for that stack, and then `res3e` and `resbe`, the ends of `res3` and `resb`, which `build.py` writes after their stacks. `build.py` writes one routine into zeros of the game's page 3, at FD29h or FCC9h, with the addresses of its stack and its end ([INTERNALS.md, The resident program's call](INTERNALS.md#the-resident-programs-call)). Then `sub0`, which `build.py` writes before the part of page 3 with its fields ([INTERNALS.md, Page 0 in another subslot of DOS's mapper's slot](INTERNALS.md#page-0-in-another-subslot-of-dos-mappers-slot)) |
+| 6 | The symbols, in the order of their names. For each symbol, the part holds its value in 2 bytes, its name's length in 1 byte, and its name in ASCII |
+| 7 | The offsets in the file of the bytes that move with the part of page 3, 2 bytes each. The bytes that move are the high bytes of the addresses in that part, those of part 6's symbols among them |
+| 8 | The offsets in the file of the addresses that move with the part's code block, 2 bytes each. Each is the low byte of a whole address in the code block, those of part 6's symbols among them. `tools/relocs.py` finds them in a third assembly with the code block 0111h bytes higher, and stops at a byte that moves with the block and is not half of such an address |
 
 The symbols are the only source of the service's addresses for `build.py`, and
 `build.py` looks up each symbol by its name. The symbols are the labels and
@@ -255,12 +257,13 @@ assembly:
 | The names that start with `t0m.`, and `T_SEGS_MAX` | The same for T0 without a part in page 3: its routines for the jump table's entries, as `t0m.tapion`, its fields, with those of the borrowed page, as `t0m.D_PAGE_MASK`, and the most segments of the tape |
 | `TAIL_PORT`, `TAIL_STACK`, `TAIL_SP`, `TAIL_EI`, `TAIL_JP`, `TAIL_PC`, `TAIL_AF` | The offsets in the tail of the bytes that `build.py` fills in, and of the two that the check reads. The check reads the port of the worker's page's mapper register, and the jump to the game ([Tail](#tail)) |
 | `IMAGE_FORMAT`, `H_SIZE`, `DATA_SIZE`, the names that start with `H_`, `REC_SIZE`, `WRITE_SIZE`, `PLACE_SIZE` | The image's layout: the format's number as the mark's last character, the header's 4,096 bytes, a record's 16,384 bytes of data, each header field's offset, and the size of an entry of each table ([Image](#image)) |
-| `FLAG_ROM_KEEP`, `FLAG_T0` | The bits of the header's flags: 1 and 2 |
+| `FLAG_ROM_KEEP`, `FLAG_T0`, `FLAG_P0` | The bits of the header's flags: 1, 2 and 4 |
+| `sub0`, `sub0.save`, `sub0.ss`, `sub0.tramp`, `sub0.back`, `e_run.call`, `tramp` | `sub0` in part 5 and its fields, the entry code's call of the trampoline, which `build.py` points at `sub0`, and the trampoline |
 | `REC_MAPPER`, `REC_RAM`, `REC_SERVICE`, `REC_VRAM`, `REC_ZEROS` | The record types, 1 to 5 |
 
 The Makefile assembles `src/service.asm` twice, with the part of page 3 at FCE1h and
 at FBE1h, one page lower. `tools/relocs.py` appends each assembly's symbols as
-part 5. It then lists the bytes that differ between the two assemblies as the last
+part 6. It then lists the bytes that differ between the two assemblies as the last
 part. These bytes differ by exactly 1, and the assembly at FCE1h is the file. To
 move the part, `build.py` adds the difference of the pages to each listed byte. As
 a result, a symbol in the part has the moved part's address.

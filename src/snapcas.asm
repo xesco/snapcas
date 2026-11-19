@@ -825,10 +825,20 @@ check_records:
         ; DOS's mapper's slot become the mapper's subslot below. When the
         ; snapshot's page 0 is in another subslot of that slot, as the ROM of
         ; a game file with rom keep can be, it would become the mapper's RAM,
-        ; so the restorer stops with the message at DE.
+        ; so the restorer stops with the message at DE. With sub0, the entry
+        ; code selects the mapper's subslot in page 0 itself, while it runs,
+        ; so page 0's bits stay the snapshot's here and in SLTTBL.
         ld a,(dos_slot)
         bit 7,a
         ret z
+        push de
+        call sub0_on
+        pop de
+        jr nz,.static
+        ld a,1
+        ld (p0_live),a
+        ret
+.static:
         ld a,(HDR+H_A8)
         and 3
         ld hl,m_ps
@@ -851,6 +861,21 @@ check_records:
         call dos_sub
         call subslot_bits
         ld (hl),a
+        ret
+
+; Returns Z when the image's entry code has sub0 (FLAG_P0, with the part in
+; page 3) and the snapshot's page 3 is in DOS's mapper, whose slot's subslot
+; register sub0 then writes at FFFFh (INTERNALS.md, Page 0 in another subslot
+; of DOS's mapper's slot).
+sub0_on:
+        ld a,(HDR+H_FLAGS)
+        and FLAG_P0|FLAG_T0
+        cp FLAG_P0
+        ret nz
+        ld b,3
+        call selected_slot
+        ld hl,dos_slot
+        cp (hl)
         ret
 
 ; Returns in A the value at HL with its page 0 bits set to DOS's mapper's
@@ -1676,8 +1701,8 @@ fill_tail:
 ; With the tape service, fills in the game's page 3 in the record's data at HL:
 ; DOS's mapper's slot ID, T0's segment and the code segment, T0's segment for
 ; mapper register FCh when T0 replaces the ROM, and DOS's mapper's subslot in
-; the page 0 bits of SLTTBL. Without a part in page 3, only SLTTBL. Keeps BC
-; and HL.
+; the page 0 bits of SLTTBL, unless sub0 selects that subslot itself. Without
+; a part in page 3, only SLTTBL. Keeps BC and HL.
 fill_page3:
         push bc
         push hl
@@ -1706,6 +1731,9 @@ fill_page3:
 .part:
         pop hl
 .slttbl:
+        ld a,(p0_live)
+        or a
+        jr nz,.done             ; sub0 selects the subslot itself
         ld a,(dos_slot)
         bit 7,a
         jr z,.done
@@ -2142,6 +2170,7 @@ service:    db 0                ; nonzero with the tape service
 p0:         db 0                ; the RAM pages for page 0, as in check_records
 t0_a8:      db 0                ; the slot register with DOS's mapper in page 0
 t0_rom:     db 0                ; 1 when T0 replaces the ROM
+p0_live:    db 0                ; 1 when sub0 gives page 0 the mapper's subslot
 t0_fixed:   db 0                ; 1 when T0 must be segment t0_fix
 t0_fix:     db 0
 t0_direct:  db 0                ; 1 when T0 is read straight into t0_fix

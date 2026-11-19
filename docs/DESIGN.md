@@ -1,6 +1,6 @@
 # `snapcas` design
 
-`snapcas` starts a cassette game from disk on one real MSX1 or MSX2. `openMSX` loads
+`snapcas` starts a cassette game from disk on one real MSX1, MSX2 or MSX2+. `openMSX` loads
 the game from its tape file, in its own cassette player, on a copy of the user's
 machine. `snapcas` saves the machine's state when the game is ready. On the real
 machine, the restorer, `SNAPCAS.COM`, restores that state and transfers control to
@@ -229,7 +229,7 @@ the last test ([INTERNALS.md, Check](INTERNALS.md#check)).
 - DOS's four pages must be in one memory mapper, with enough free segments for the
   image's holding segments, the image's service segments, and the worker. A game
   with a long tape needs a large mapper.
-- A game with the tape service needs one of two things. Either its page 3 keeps 143
+- A game with the tape service needs one of two things. Either its page 3 keeps 158
   bytes from an address xxE1h free for the service's part of page 3, at the snapshot
   and in every later load ([Build](#build)). Or the game meets the conditions of the
   mode without a part in page 3

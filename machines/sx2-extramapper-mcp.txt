@@ -1,0 +1,29 @@
+# SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running. The SX-2
+# is an FPGA MSX on KdL's OCM-PLD firmware, here as the sx2-mcp project leaves
+# it: its resident program SX2RES, 2.8 or later, sends SETSMART's codes 57h,
+# the Extra-Mapper on, and FCh, the warm reset with the 2048 KB mapper, at
+# boot. Slot 0 is expanded: the main ROM in 0-0, the Extra-Mapper of 4096 KB in
+# 0-1, MSX-MUSIC in 0-2 and the Wi-Fi's BIOS in 0-3. The BIOS and DOS take the
+# Extra-Mapper: RAMAD0 to RAMAD3 at F341h are 84h. The 2048 KB mapper in 3-0 is
+# SX2RES's, and the MegaSD with Nextor is in 3-2. The cartridge slots 1 and 2
+# are empty. The machine sx2 is the SX-2 with the Extra-Mapper off. The
+# Makefile makes the model from openMSX's FS-A1WSX and the ROMs of the SX-2's
+# own OCM-BIOS.DAT, from its SD card, which goes in openMSX's system ROMs
+# (make firmware). openMSX has no ESP8266, so the Wi-Fi's BIOS finds none.
+openmsx -machine OCM_SX-2_extramapper
+disk hda
+firmware machines/OCM_SX-2_extramapper.xml
+# SX2RES keeps its game entry at 4040h of every segment of slot 3-0, where it
+# starts PUSH AF / IN A,(0FDh) / PUSH AF / LD A,n. A restore writes the game's
+# page 3 as captured, without SX2RES's hooks, so each image calls the entry
+# itself, from T0, H.KEYI or a wrapper (docs/INTERNALS.md, The resident program's
+# call), and the build refuses an image with RAM in 3-0. The check puts PUSH
+# AF / IN A,(0FDh) / PUSH AF / LD A,0 / POP AF / POP AF / RET there in openMSX.
+# The capture variant without the 2048 KB mapper in 3-0 serves the games that
+# keep a RAM page there.
+resident 3-0 4040 F5 DB FD F5 3E 00 F1 F1 C9
+variant sx2-extramapper-noram30
+# KdL's sub-ROM writes its defaults to the clock chip at every boot, among them
+# a text width of 80, and BASIC starts with it, where an MSX2 starts with 37.
+# The image restores the captured width.
+width 37

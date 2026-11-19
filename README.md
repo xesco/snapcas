@@ -5,7 +5,7 @@ computer, it loads a CAS file in `openMSX`, set up like your own machine, and sa
 the game's memory in a single `.SNP` file. You copy that file to a disk or SD card.
 Then you run `SNAPCAS.COM` on the MSX, and the game starts.
 
-`snapcas` knows 1,545 games and 10 configurations, each an MSX model with its
+`snapcas` knows 1,544 games and 13 configurations, each an MSX model with its
 cartridges, and you can add your own. It does not hold the CAS files. It downloads
 them from [File-Hunter](https://download.file-hunter.com) when you make the `.SNP`
 file.

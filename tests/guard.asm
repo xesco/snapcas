@@ -8,8 +8,8 @@
 ; about 40 seconds, so that the capture takes its snapshot first, and what the
 ; game does next comes within the check's 60 seconds. It reads the number of
 ; bytes at reads from the tape, through the tape service, unless that number
-; is 0. Then it writes the first byte of the service's part of page 3, unless
-; the byte at writes is 0. It ends at passed, or at failed when a tape routine
+; is 0. Then it writes the byte at target, by default the first byte of the
+; service's part of page 3, unless the byte at writes is 0. It ends at passed, or at failed when a tape routine
 ; returns carry.
 
 TAPION  equ 00E1h       ; MSX Red Book, chapter 4: the BIOS's tape entries
@@ -41,8 +41,9 @@ start:
         ld a,(writes)
         or a
         jr z,passed
-        ld a,(PART)
-        ld (PART),a             ; the same value, so the entry stays whole
+        ld hl,(target)
+        ld a,(hl)
+        ld (hl),a               ; the same value, so the part stays whole
 passed:
         jr passed
 failed:
@@ -68,6 +69,7 @@ read:
 loads:  db 0
 reads:  db 0
 writes: db 0
+target: dw PART
         ds 64,0
 stack:
 code_end:

@@ -87,11 +87,69 @@ def file_hash(h, path):
         h.update(f.read())
 
 
+# The files under tools/ that can change a capture's snapshot. Changes to
+# bin/, tools/build.py, tools/check.py, tools/tcl/check.tcl, dos/, or
+# SNAPCAS_KEYS leave existing snapshots valid, so games.py can skip capture.
+CAPTURE_TOOLS = (
+    "capture.py", "cas.py", "gamefile.py", "msx.py", "openmsx-settings.xml",
+    "snapshot.py", "tape.py", "tsx.py", "patches",
+    os.path.join("tcl", "capture.tcl"), os.path.join("tcl", "memory.tcl"),
+)
+
+
+def capture_tools_hash(version):
+    """The hash of what every snapshot depends on: openMSX's version and the
+    capture-affecting files in tools/."""
+    h = hashlib.sha1(version.encode())
+    for rel in CAPTURE_TOOLS:
+        path = os.path.join(ROOT, "tools", rel)
+        if os.path.isdir(path):
+            for folder, dirs, files in sorted(os.walk(path)):
+                dirs.sort()
+                for name in sorted(files):
+                    if not name.endswith(".pyc"):
+                        file_hash(h, os.path.join(folder, name))
+        elif os.path.isfile(path):
+            file_hash(h, path)
+    return h.hexdigest()
+
+
+def snapshot_hash_path(machine, name):
+    """Path of the capture-inputs hash stored beside a snapshot."""
+    return os.path.join(gamefile.out_folder(machine, os.path.join(GAMES, name)), "snap", ".hash")
+
+
+def snapshot_valid(machine, name, cap_hash):
+    """Whether the work folder already holds a snapshot built from cap_hash."""
+    snap = os.path.join(gamefile.out_folder(machine, os.path.join(GAMES, name)), "snap")
+    mark = os.path.join(snap, ".hash")
+    if not (os.path.isfile(os.path.join(snap, "state.txt")) and os.path.isfile(mark)):
+        return False
+    try:
+        with open(mark) as f:
+            return f.read().strip() == cap_hash
+    except OSError:
+        return False
+
+
+def mark_snapshot(machine, name, cap_hash):
+    """Records cap_hash beside a completed snapshot so later runs can reuse it."""
+    snap = os.path.join(gamefile.out_folder(machine, os.path.join(GAMES, name)), "snap")
+    if os.path.isfile(os.path.join(snap, "state.txt")):
+        try:
+            with open(os.path.join(snap, ".hash"), "w") as f:
+                f.write(cap_hash + "\n")
+        except OSError:
+            pass
+
+
 def tools_hash(dos, version):
     """The hash of what every result depends on: the code in bin/ and tools/,
     the DOS files that the check boots, in the folder dos, and openMSX's
     version."""
     h = hashlib.sha1(version.encode())
+    # The check's keys change the results (check.py, SNAPCAS_KEYS).
+    h.update(os.environ.get("SNAPCAS_KEYS", "").encode())
     for top in (os.path.join(ROOT, "bin"), os.path.join(ROOT, "tools"), dos):
         for folder, dirs, files in sorted(os.walk(top)):
             dirs.sort()
@@ -116,7 +174,9 @@ def inputs_hash(machine, name, tools):
     for cas in (game.tape, game.side2):
         if cas and os.path.isfile(os.path.join(gamefile.DOWNLOADS, cas)):
             file_hash(h, os.path.join(gamefile.DOWNLOADS, cas))
-    file_hash(h, msx.machine_path(machine))
+    for m in msx.machine_chain(machine):
+        if os.path.isfile(msx.machine_path(m)):
+            file_hash(h, msx.machine_path(m))
     if game.capture:
         file_hash(h, msx.variant_path(game.capture))
     return h.hexdigest()
@@ -138,16 +198,18 @@ STOPPED = threading.Event()
 LOCK = threading.Lock()
 
 
-def run_game(machine, name, dos, variants=False):
+def run_game(machine, name, dos, variants=False, skip_capture=False):
     """Captures, builds and checks one game file on the machine, and returns
     the pipeline.Result. With variants, the steps run on the machine's capture
     variants only, and the result names the first that passes
-    (pipeline.variant_trials). The steps run in pipeline.py as a program, which
-    moves the image of a game that passes to images/, as snapcas.py snap does,
-    so that snapcas.py sync copies it to a card. The program gets a process
-    group of its own, so that stop_games stops it with its openMSX."""
-    command = [sys.executable, "-I", os.path.join(HERE, "pipeline.py"), os.path.join(GAMES, name), machine,
-               "--dos", dos] + (["--variants"] if variants else [])
+    (pipeline.variant_trials). With skip_capture, reuses the existing snapshot
+    and runs build and check only. The steps run in pipeline.py as a program,
+    which moves the image of a game that passes to images/, as snapcas.py snap
+    does, so that snapcas.py sync copies it to a card. The program gets a
+    process group of its own, so that stop_games stops it with its openMSX."""
+    command = ([sys.executable, "-I", os.path.join(HERE, "pipeline.py"), os.path.join(GAMES, name), machine,
+                "--dos", dos] + (["--variants"] if variants else [])
+               + (["--skip-capture"] if skip_capture else []))
     with LOCK:
         if STOPPED.is_set():
             return pipeline.broken("games.py: stopped")
@@ -225,12 +287,16 @@ def main():
         in_snapcas = read_failures(SNAPCAS_FAILURES, args.machine, names)
         if in_openmsx & in_snapcas:
             raise ListError(f"{sorted(in_openmsx & in_snapcas)[0]} is in both lists of failures for {args.machine}")
-        tools = tools_hash(dos, msx.version())
+        version = msx.version()
+        tools = tools_hash(dos, version)
+        cap_tools = capture_tools_hash(version)
     except (OSError, msx.MachineError, ListError) as e:
         print(f"games.py: {e}", file=sys.stderr)
         return 1
 
-    path = os.path.join(REPORTS, args.machine + ".txt")
+    # The results with the check's keys go apart from those without.
+    keys = "-keys" if os.environ.get("SNAPCAS_KEYS") == "1" else ""
+    path = os.path.join(REPORTS, args.machine + keys + ".txt")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     # The cache holds each game file's inputs' hash beside its result.
     cache = {} if args.full else read_cache(path + ".cache")
@@ -245,11 +311,14 @@ def main():
         if missing:
             errors[name] = "no " + " or ".join(missing) + " in downloads/"
     hashes = {name: inputs_hash(args.machine, name, tools) for name in names}
+    cap_hashes = {name: inputs_hash(args.machine, name, cap_tools) for name in names}
     # A pass whose image is gone from images/ runs again, to make the image.
     todo = [name for name, h in hashes.items()
             if name not in errors and (name not in cache or cache[name][0] != h or (
                 cache[name][1] == pipeline.PASS and image_missing(args.machine, name, games[name])))]
-    print(f"{args.machine}: {len(names) - len(todo) - len(errors)} unchanged, {len(todo)} to run, "
+    reuse = set() if args.full else {name for name in todo if snapshot_valid(args.machine, name, cap_hashes[name])}
+    reused_note = f" ({len(reuse)} reusing snapshot)" if reuse else ""
+    print(f"{args.machine}: {len(names) - len(todo) - len(errors)} unchanged, {len(todo)} to run{reused_note}, "
           f"{len(errors)} without their tapes in downloads/", flush=True)
     results = {name: cache[name][1] for name in names if name in cache}
     results.update(errors)
@@ -257,7 +326,8 @@ def main():
     kept = set(results) - set(todo)
     pool = concurrent.futures.ThreadPoolExecutor(args.workers)
     try:
-        jobs = {pool.submit(run_game, args.machine, name, dos): name for name in todo}
+        jobs = {pool.submit(run_game, args.machine, name, dos,
+                            **({"skip_capture": True} if name in reuse else {})): name for name in todo}
         for done, job in enumerate(concurrent.futures.as_completed(jobs), 1):
             name = jobs[job]
             result = job.result()
@@ -266,6 +336,8 @@ def main():
                   flush=True)
             if not result.transient:
                 kept.add(name)
+                if name not in reuse:
+                    mark_snapshot(args.machine, name, cap_hashes[name])
                 # Each result goes to the cache at once, so that a run that
                 # stops keeps what it has done.
                 with open(path + ".cache", "a") as f:
@@ -286,6 +358,8 @@ def main():
                                           *capture_comments(args.machine, result.variant, results[name]))
                 # The line changes the game file's inputs, and its result.
                 hashes[name] = inputs_hash(args.machine, name, tools)
+                cap_hashes[name] = inputs_hash(args.machine, name, cap_tools)
+                mark_snapshot(args.machine, name, cap_hashes[name])
                 results[name] = result.message
                 fixed.append(name)
                 with open(path + ".cache", "a") as f:

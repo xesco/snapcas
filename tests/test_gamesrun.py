@@ -101,7 +101,7 @@ class Run(unittest.TestCase):
         # The capture variant whose trial passes, for each game that has one.
         self.variants = {}
 
-        def run_game(machine, name, dos, variants=False):
+        def run_game(machine, name, dos, variants=False, skip_capture=False):
             self.assertEqual((machine, dos), (MACHINE, self.dos))
             if variants:
                 self.tried.append(name)
@@ -109,8 +109,10 @@ class Run(unittest.TestCase):
                     return pipeline.Result(None, 0, pipeline.PASS, False, self.variants[name], "/images/GAME.SNP")
                 return pipeline.Result("check", 3, pipeline.NO_VARIANT, False, None, None)
             self.ran.append(name)
+            if skip_capture:
+                self.reused.append(name)
             return self.results[name]
-        self.tried = []
+        self.tried, self.reused = [], []
         for patch in (mock.patch.object(games, "GAMES", self.games), mock.patch.object(games, "REPORTS", self.reports),
                       mock.patch.object(games, "OPENMSX_FAILURES", self.lists["openmsx"]),
                       mock.patch.object(games, "SNAPCAS_FAILURES", self.lists["snapcas"]),
@@ -342,6 +344,21 @@ class Run(unittest.TestCase):
         status, out, _, _ = self.run_games()
         self.assertEqual(status, 3)
         self.assertIn("ALPHA  ValueError: bad  (not kept)\n", out)
+
+    def test_snapshot_is_reused_when_only_build_or_check_tools_change(self):
+        # First run records a valid snapshot for ALPHA.
+        self.run_games()
+        self.reused.clear()
+        self.tools = "tools-v2"
+        with mock.patch.object(games, "snapshot_valid", side_effect=lambda m, name, h: name == "ALPHA"):
+            status, out, _, ran = self.run_games()
+        self.assertEqual((status, ran, self.reused), (0, self.NAMES, ["ALPHA"]))
+        self.assertIn("4 to run (1 reusing snapshot)", out)
+        # --full disables snapshot reuse.
+        self.reused.clear()
+        with mock.patch.object(games, "snapshot_valid", return_value=True):
+            self.run_games("--full")
+        self.assertEqual(self.reused, [])
 
 
 if __name__ == "__main__":

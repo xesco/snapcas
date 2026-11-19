@@ -10,6 +10,8 @@ import support
 import build
 from cas import HEADER as CAS_HEADER
 import gamefile
+import msx
+import patches
 from snapshot import Snapshot
 
 SERVICE = support.SERVICE
@@ -32,10 +34,10 @@ class Crc(unittest.TestCase):
 
 
 class PortWrites(unittest.TestCase):
-    def state(self, v9938=True, **values):
+    def state(self, v9938=True, v9958=False, **values):
         """A snapshot with the state that the test gives."""
         values = dict(dict(psgsel="0E", ppic="50", vramptr="00000", vramwrite="1"), **values)
-        return Snapshot(support.snapshot(support.temp(self), v9938=v9938, **values))
+        return Snapshot(support.snapshot(support.temp(self), v9938=v9938, v9958=v9958, **values))
 
     def test_psg_register_7_and_the_selected_register(self):
         w = build.port_writes(self.state(psg7="3F", psgsel="0E"), False)
@@ -62,6 +64,13 @@ class PortWrites(unittest.TestCase):
         self.assertEqual(w[68:70], [(0x99, 32), (0x99, 0x91)])
         self.assertEqual([p for p, _ in w[70:84]], [0x9B] * 14)
         self.assertEqual(len(w), 34 + 2 + 32 + 2 + 14 + 48 + 2)
+
+    def test_v9958_registers_after_register_23(self):
+        # An MSX2+'s registers 25 to 27 follow the V9938's 0 to 23, before the
+        # pointer.
+        w = build.port_writes(self.state(v9958=True, vdp25="03", vdp26="11", vdp27="07"), True)
+        self.assertEqual(w[-8:-2], [(0x99, 0x03), (0x99, 0x99), (0x99, 0x11), (0x99, 0x9A), (0x99, 0x07), (0x99, 0x9B)])
+        self.assertEqual(len(w), 34 + 2 + 32 + 2 + 14 + 48 + 6 + 2)
 
     def test_msx1_order(self):
         # The PSG's 16 registers, its selected register, the PPI's port C,
@@ -128,7 +137,7 @@ class ServiceFile(unittest.TestCase):
 
     def test_another_number_of_parts_is_refused(self):
         self.data[1] += 1
-        with self.assertRaisesRegex(build.BuildError, "8 parts, expected 7"):
+        with self.assertRaisesRegex(build.BuildError, "10 parts, expected 9"):
             build.read_service(self.changed())
 
     def test_another_version_or_an_empty_file_is_refused(self):
@@ -274,6 +283,41 @@ class Synthetic(unittest.TestCase):
         self.assertIn("page0:0100 11 E1 00 D5 11 D9 CD D5 > 11 E1 FC D5 11 D9 CD D5  stub of TAPION\n", scanned)
         self.assertEqual(data[0][0x100 + 18:0x100 + 20], bytes([0xA4, 0x6F]))
 
+    def test_the_patched_builders_call_the_tape_service(self):
+        # The capture's trampoline patch, in page 0 and in a block that the
+        # game has not read, and its trampoline at FC9Ah: each calls the
+        # entries in page 3, with the RAM's subslot in page 0.
+        new = patches.tramp.patched(0, 1) + patches.tramp.CALL
+        page0 = bytearray(build.PAGE)
+        page0[0x100:0x100 + len(new)] = new
+        page3 = bytearray(build.PAGE)
+        page3[0x3C9A:0x3CA4] = bytes.fromhex("36 54 D9 CD E4 00 D9 71 C9 C4")
+        snap = self.snapshot({"1-x-0-x": bytes(page0), "3-x-3-0": bytes(page3)}, a8="C1", sp="F000", service="1",
+                             **{"mapper3-x": "20"})
+        side1 = CAS_HEADER + b"\xD0" * 10 + b"GAME  " + CAS_HEADER + new
+        image = build.Image(Snapshot(snap), build.read_service(SERVICE), self.game())
+        tape1, _, ranges = image.serve_trampolines(side1, b"")
+        served = bytearray(new)
+        patches.tramp.serve(served, True)
+        self.assertEqual(image.snapshot.selected_ram(0).data[0x100:0x100 + len(new)], served)
+        self.assertEqual(tape1, side1[:-len(new)] + served)
+        self.assertEqual(image.p3.data[0x3C9A:0x3CA0], bytes.fromhex("36 55 D9 CD E4 FC"))
+        self.assertEqual(ranges, ["1-x-0 256 283", "3-x-3 15514 15519"])
+        _, _, _, scanned, checked = build.build(Snapshot(snap), SERVICE, self.game(), side1)
+        self.assertIn("patched 1-x-0 256 283\n", checked)
+        # The stub's call already goes to the entries, so the scan lists
+        # nothing of it.
+        self.assertNotIn("stub of TAPION", scanned)
+
+    def test_without_the_tape_service_the_builders_keep_the_bios(self):
+        new = patches.tramp.patched(0, 1) + patches.tramp.CALL
+        page0 = bytearray(build.PAGE)
+        page0[0x100:0x100 + len(new)] = new
+        snap = self.snapshot({"1-x-0-x": bytes(page0), "3-x-3-0": bytes(build.PAGE)}, a8="C1", sp="F000",
+                             **{"mapper3-x": "20"})
+        _, data, _, _, _ = build.build(Snapshot(snap), SERVICE, self.game())
+        self.assertEqual(data[0][0x100:0x100 + len(new)], new)
+
     def test_a_record_number_is_at_most_254(self):
         # The header holds each table's length in one byte, so a record's
         # number, in the header and in a place, is below 255.
@@ -286,6 +330,420 @@ class Synthetic(unittest.TestCase):
         self.assertEqual(len(full), service["H_SIZE"])
         with self.assertRaisesRegex(build.BuildError, "too many records, port writes or places"):
             image.header(records + records[:1], [], [])
+
+
+class ResidentCall(unittest.TestCase):
+    """The call of a machine's resident program from T0's jump at 0038h
+    (FILES.md, Machine file, resident; INTERNALS.md, The resident program's
+    call)."""
+
+    # In slot 2-0, with its entry in page 1.
+    RESIDENT = msx.Resident(0x82, 0x4040, bytes.fromhex("F5 DB FD F5 3E 00 F1 F1 C9"))
+
+    def page3(self, keyi=build.EMPTY_HOOK):
+        """The game's page 3: SLTTBL's byte of slot 2, the BIOS's slot
+        routines at F380h, and H.KEYI."""
+        page3 = bytearray(build.PAGE)
+        page3[(build.SLTTBL + 2) & 0x3FFF] = 0xF8
+        first = build.BIOS_SLOT_CODE_AT & 0x3FFF
+        page3[first:first + len(build.BIOS_SLOT_CODE)] = build.BIOS_SLOT_CODE
+        at = build.H_KEYI & 0x3FFF
+        page3[at:at + 5] = keyi
+        return page3
+
+    def build(self, game=None, ram=None, **state):
+        ram = ram or {"3-x-3-0": bytes(self.page3())}
+        values = dict(a8="C0", fc="00", fd="00", fe="00", ff="00", sp="F000", pc="0000", im="1", sub2="F8")
+        service = state.pop("service", True)
+        snap = support.snapshot(support.temp(self), ram=ram, service=service,
+                                **dict(values, **state, **{"mapper3-x": "20"}))
+        # The BIOS's jump to its interrupt routine.
+        with open(os.path.join(snap, "rom.bin"), "r+b") as f:
+            f.seek(0x38)
+            f.write(bytes([0xC3, 0x3C, 0x0C]))
+        return build.build(Snapshot(snap), SERVICE, game or a_game(), resident=self.RESIDENT)
+
+    def t0(self, header, data):
+        h, s = support.Header(header), build.read_service(SERVICE)
+        types = [r[0] for r in h.records]
+        first = types.index(s["REC_SERVICE"])
+        return data[sum(1 for t in types[:first] if t != s["REC_ZEROS"])]
+
+    def test_t0s_jump_at_0038h_calls_the_program_and_goes_on_to_the_bios(self):
+        header, data, _, _, checked = self.build()
+        s, t0 = build.read_service(SERVICE), self.t0(header, data)
+        self.assertEqual(t0[0x38:0x3B], bytes([0xC3]) + struct.pack("<H", s["t_res"]))
+        self.assertEqual(t0[s["t_res.jump"]:s["t_res.jump"] + 3], bytes([0xC3, 0x3C, 0x0C]))
+        self.assertEqual(t0[s["t_res.call"]:s["t_res.call"] + 3], bytes([0xCD, 0x40, 0x40]))
+        # Page 1: the slot register's mask, and slot 2 there.
+        self.assertEqual([t0[s[f"t_res.{name}"] + 1] for name in ("mask", "slot")], [0xF3, 0x08])
+        # DI / LD (.back+1),SP / LD SP,T_STACK: its stack in T0, below t_tapion.
+        self.assertEqual(t0[s["t_res"]:s["t_res"] + 8], bytes([0xF3, 0xED, 0x73]) + struct.pack("<H", s["t_res.back"] + 1)
+                         + bytes([0x31]) + struct.pack("<H", s["T_STACK"]))
+        self.assertEqual(s["T_STACK"], s["t_tapion"])
+        self.assertEqual(t0[s["T_STACK"] - 4 - s["RES_STACK"]:s["T_STACK"]], bytes(4 + s["RES_STACK"]))
+        # The entry's first two bytes, at 4040h and 4041h.
+        self.assertEqual((t0[s["t_res.at1"] + 1:s["t_res.at1"] + 3], t0[s["t_res.is1"] + 1]), (b"\x40\x40", 0xF5))
+        self.assertEqual((t0[s["t_res.at2"] + 1:s["t_res.at2"] + 3], t0[s["t_res.is2"] + 1]), (b"\x41\x40", 0xDB))
+        self.assertIn("rescall t0\n", checked)
+
+    def test_the_programs_subslot_goes_into_its_slots_register_and_sltttbl(self):
+        header, data, _, _, checked = self.build()
+        h, s = support.Header(header), build.read_service(SERVICE)
+        # F8h has subslot 2 in page 1, and the program is in subslot 0.
+        self.assertEqual(header[s["H_SUB"] + 2], 0xF0)
+        at = (build.SLTTBL + 2) & 0x3FFF
+        self.assertEqual(data[0][at], 0xF0)
+        self.assertIn(f"patched 3-x-3 {at} {at}\n", checked)
+
+    def test_a_game_off_the_bioss_interrupt_routine_gets_no_call_from_t0(self):
+        cases = ((dict(im="2"), None, "im2"), (dict(), a_game(rom_keep=True), "romkeep"),
+                 # Page 1 in slot 2 at the snapshot, with subslot 2 there.
+                 (dict(a8="C8"), None, "slotbusy"))
+        for state, game, kind in cases:
+            with self.subTest(kind=kind):
+                header, data, _, _, checked = self.build(game=game, **state)
+                self.assertIn(f"rescall {kind}\n", checked)
+                self.assertEqual(header[build.read_service(SERVICE)["H_SUB"] + 2], 0xF8)
+                self.assertEqual(self.t0(header, data)[0x38:0x3B], bytes([0xC3, 0x3C, 0x0C]))
+
+    def test_rescall_no_leaves_the_call_out(self):
+        header, data, _, _, checked = self.build(game=a_game(rescall="no"))
+        self.assertIn("rescall off\n", checked)
+        self.assertEqual(self.t0(header, data)[0x38:0x3B], bytes([0xC3, 0x3C, 0x0C]))
+
+    def core(self, data, size, offset=0, at=None):
+        at = ((build.CALL_AT if at is None else at) & 0x3FFF) + offset
+        return data[0][at:at + size]
+
+    def resb(self, s, name):
+        """A field of resb, from the routine's start."""
+        return s[f"resb.{name}"] - s["resb"]
+
+    def test_without_the_tape_service_h_keyi_calls_a_routine_in_sltwrk_at_fd29h(self):
+        header, data, _, _, checked = self.build(service=False)
+        s = build.read_service(SERVICE)
+        # Only resb, the call through the BIOS's RDSLT and CALSLT, of 55 bytes.
+        routine = s.parts["call"][s["resb"]:s["res3g"]]
+        self.assertEqual(len(routine), 55)
+        code = self.core(data, len(routine))
+        f = lambda name: self.resb(s, name)
+        # The slot ID 82h for RDSLT, the entry's bytes.
+        self.assertEqual([code[f(name) + 1] for name in ("id1", "is1", "id2", "is2")], [0x82, 0xF5, 0x82, 0xDB])
+        # LD A,I / JP PE,.on / LD A,I / .on: DI, which keeps IFF2 for the end.
+        self.assertEqual(code[4:12], bytes([0xED, 0x57, 0xEA]) + struct.pack("<H", build.CALL_AT + f("on"))
+                         + bytes([0xED, 0x57, 0xF3]))
+        # Its stack, RESB_STACK zeros just below its end, resbe, placed after
+        # resb in SLTWRK (FD60h..FD87h) rather than dipping into SLTATR:
+        # LD (resbe.back+1),SP / LD SP,resbe.
+        size = s["sub0"] - s["resbe"]
+        stack = build.CALL_AT + len(routine)
+        end = stack + s["RESB_STACK"]
+        self.assertGreaterEqual(stack, build.SLTWRK)
+        self.assertEqual(code[f("save"):f("save") + 4], bytes([0xED, 0x73]) + struct.pack("<H", end + 1))
+        self.assertEqual(code[f("stack"):f("stack") + 3], bytes([0x31]) + struct.pack("<H", end))
+        self.assertEqual(code[f("tail"):f("tail") + 3], bytes([0xC3]) + struct.pack("<H", end))
+        self.assertIn(f"resstack {stack} {end + size - 1}\n", checked)
+        self.assertEqual(self.core(data, s["RESB_STACK"], at=stack), bytes(s["RESB_STACK"]))
+        # resbe: LD SP,0 / POP DE, BC, HL / JP PO,.off / EI / .off: POP AF / RET.
+        self.assertEqual(self.core(data, size, at=end), bytes([0x31, 0, 0, 0xD1, 0xC1, 0xE1, 0xE2])
+                         + struct.pack("<H", end + 10) + bytes([0xFB, 0xF1, 0xC9]))
+        self.assertIn(f"patched 3-x-3 {end & 0x3FFF} {(end & 0x3FFF) + size - 1}\n", checked)
+        # The entry for the first RDSLT, and INC HL for the second.
+        self.assertEqual(code[f("at1") + 1:f("at1") + 3], b"\x40\x40")
+        # LD IY,8200h and LD IX,4040h for CALSLT.
+        self.assertEqual(code[f("iy"):f("iy") + 4], bytes([0xFD, 0x21, 0x00, 0x82]))
+        self.assertEqual(code[f("call"):f("call") + 4], bytes([0xDD, 0x21, 0x40, 0x40]))
+        # H.KEYI: CALL the routine / RET.
+        keyi = build.H_KEYI & 0x3FFF
+        self.assertEqual(data[0][keyi:keyi + 5], bytes([0xCD]) + struct.pack("<H", build.CALL_AT) + b"\xC9\xC9")
+        self.assertIn("rescall hook\n", checked)
+        # The segment of the game's page 3 follows, 0 here.
+        self.assertIn(f"rescode {build.CALL_AT} {build.CALL_AT + len(routine) - 1} 0\n", checked)
+        self.assertEqual(header[s["H_SUB"] + 2], 0xF0)
+
+    def test_a_hook_in_use_runs_after_the_call(self):
+        keyi = build.H_KEYI & 0x3FFF
+        page3 = self.page3(bytes([0xC3, 0x00, 0x90, 0xC9, 0xC9]))
+        _, data, _, _, checked = self.build(service=False, ram={"3-x-3-0": bytes(page3)})
+        s = build.read_service(SERVICE)
+        size = s["res3g"] - s["resb"]
+        chain = build.CALL_AT + size
+        self.assertEqual(data[0][keyi:keyi + 5], bytes([0xC3]) + struct.pack("<H", chain) + b"\xC9\xC9")
+        # CALL the routine / the game's old hook.
+        self.assertEqual(self.core(data, 8, size), bytes([0xCD]) + struct.pack("<H", build.CALL_AT)
+                         + bytes([0xC3, 0x00, 0x90, 0xC9, 0xC9]))
+        self.assertIn(f"rescode {build.CALL_AT} {chain + 7} 0\n", checked)
+
+    def test_a_games_own_routine_in_mode_2_gets_a_wrapper_without_the_tape_service(self):
+        # The vector at the I register's page, FFh and 00h: in the RAM of page 3.
+        page3 = self.page3()
+        page3[0x3DFF] = 0x34
+        page3[0x3E00] = 0x92
+        header, data, _, _, checked = self.build(service=False, ram={"3-x-3-0": bytes(page3)}, im="2", i="FD")
+        s = build.read_service(SERVICE)
+        # Only res3, which selects the program's slot by the slot register.
+        size = s["resb"]
+        wrapper = build.CALL_AT + size
+        # The vector goes to the wrapper: CALL the routine / JP the game's 9234h.
+        self.assertEqual(bytes(data[0][0x3DFF:0x3E01]), struct.pack("<H", wrapper))
+        self.assertEqual(self.core(data, 6, size), bytes([0xCD]) + struct.pack("<H", build.CALL_AT)
+                         + bytes([0xC3, 0x34, 0x92]))
+        self.assertIn(f"resvector {wrapper} {0x9234}\n", checked)
+        self.assertIn("rescall im2\n", checked)
+
+    def test_rescall_on_the_h_keyi_call_puts_the_wrapper_after_resb(self):
+        # A game that writes its own routine into H.KEYI after the snapshot, as
+        # Choper does: H.KEYI calls resb, and the wrapper follows resb.
+        _, data, _, _, checked = self.build(service=False, game=a_game(rescall=[0x42C2]))
+        s = build.read_service(SERVICE)
+        size = s["res3g"] - s["resb"]
+        wrapper = build.CALL_AT + size
+        self.assertEqual(self.core(data, 6, size), bytes([0xCD]) + struct.pack("<H", build.CALL_AT)
+                         + bytes([0xC3, 0xC2, 0x42]))
+        self.assertIn(f"resvector {wrapper} {0x42C2}\n", checked)
+        self.assertIn("rescall hook\n", checked)
+
+    def test_rescall_with_two_routines_puts_a_wrapper_for_each(self):
+        # A title's routine and a play's, as Police Academy installs.
+        _, data, _, _, checked = self.build(service=False, game=a_game(rescall=[0xD160, 0x42A7]))
+        s = build.read_service(SERVICE)
+        # resb and two wrappers take 67 bytes, more than the 64 at FD29h, so
+        # they go to FCC9h.
+        size, at = s["res3g"] - s["resb"], s["P3_FREE"]
+        first = at + size
+        self.assertEqual(self.core(data, 12, size, at), bytes([0xCD]) + struct.pack("<H", at)
+                         + bytes([0xC3, 0x60, 0xD1, 0xCD]) + struct.pack("<H", at) + bytes([0xC3, 0xA7, 0x42]))
+        self.assertIn(f"resvector {first} {0xD160} {first + 6} {0x42A7}\n", checked)
+        # With the tape service, the wrappers take 17 bytes each, and the room
+        # before the part's entries holds one.
+        with self.assertRaisesRegex(build.BuildError, "rescall needs 34 bytes"):
+            self.build(game=a_game(rescall=[0xD160, 0x42A7]))
+
+    def test_without_room_in_the_zeros_the_automatic_call_is_left_out(self):
+        page3 = self.page3()
+        for at in (build.CALL_AT, build.read_service(SERVICE)["P3_FREE"]):
+            page3[at & 0x3FFF] = 0x55
+        header, data, _, _, checked = self.build(service=False, ram={"3-x-3-0": bytes(page3)})
+        self.assertIn("rescall p3busy\n", checked)
+        self.assertNotIn("rescode", checked)
+        keyi = build.H_KEYI & 0x3FFF
+        self.assertEqual(data[0][keyi:keyi + 5], build.EMPTY_HOOK)
+        self.assertEqual(header[build.read_service(SERVICE)["H_SUB"] + 2], 0xF8)
+
+    def test_without_room_the_game_files_rescall_stops_the_build(self):
+        page3 = self.page3()
+        for at in (build.CALL_AT, build.read_service(SERVICE)["P3_FREE"]):
+            page3[at & 0x3FFF] = 0x55
+        with self.assertRaisesRegex(build.BuildError, "rescall needs .* bytes of zeros at FD29h or FCC9h"):
+            self.build(game=a_game(rescall=[0x9234]), service=False, ram={"3-x-3-0": bytes(page3)})
+
+    def test_rescode_puts_the_call_where_the_game_file_says(self):
+        # Death Wish uses FD29h and FCC9h, and leaves D393h on alone.
+        page3 = self.page3()
+        for at in (build.CALL_AT, build.read_service(SERVICE)["P3_FREE"]):
+            page3[at & 0x3FFF] = 0x55
+        _, data, _, _, checked = self.build(service=False, game=a_game(rescode=0xD393),
+                                            ram={"3-x-3-0": bytes(page3)})
+        s = build.read_service(SERVICE)
+        size = s["res3g"] - s["resb"]
+        keyi = build.H_KEYI & 0x3FFF
+        self.assertEqual(data[0][keyi:keyi + 5], bytes([0xCD, 0x93, 0xD3, 0xC9, 0xC9]))
+        self.assertIn(f"rescode {0xD393} {0xD393 + size - 1} 0\n", checked)
+        self.assertIn("rescall hook\n", checked)
+        # With the tape service, the wrapper goes there too, clear of the part.
+        _, data, _, _, checked = self.build(game=a_game(rescall=[0xB45B], rescode=0xD393))
+        self.assertEqual(data[0][0x1393:0x1393 + 3], bytes([0xF5, 0xC5, 0xD5]))
+        self.assertIn(f"resvector {0xD393} {0xB45B}\n", checked)
+        # The check ignores a difference there.
+        self.assertIn(f"patched 3-x-3 {0x1393} {0x1393 + 16}\n", checked)
+        with self.assertRaisesRegex(build.BuildError, f"rescall needs 17 bytes of zeros at {s['E_ENTRY'] - 4:04X}h"):
+            self.build(game=a_game(rescall=[0xB45B], rescode=s["E_ENTRY"] - 4))
+
+    def test_rescode_places_the_routine_alone_for_a_game_without_interrupts(self):
+        # A game with its RAM in page 0, in slot 1, calls the routine from its
+        # main loop.
+        ram = {"1-x-0-x": bytes(build.PAGE), "3-x-3-0": bytes(self.page3())}
+        _, data, _, _, checked = self.build(service=False, game=a_game(rescode=0xD393), ram=ram, a8="C1")
+        s = build.read_service(SERVICE)
+        at = (0xD393 & 0x3FFF) + s["res3.call"]
+        self.assertIn(bytes([0xCC, 0x40, 0x40]), [bytes(d[at:at + 3]) for d in data])
+        self.assertIn(f"rescode {0xD393} {0xD393 + s['resb'] - 1} 0\n", checked)
+        self.assertIn("rescall page0\n", checked)
+        _, _, _, _, checked = self.build(service=False, ram=ram, a8="C1")
+        self.assertNotIn("rescode", checked)
+
+    def test_without_the_bioss_slot_routines_h_keyi_calls_res3(self):
+        # Super Cobra clears F380h to F7DBh: RDSLT and CALSLT would run zeros,
+        # so H.KEYI calls res3, which selects the slot by the slot register.
+        page3 = self.page3()
+        first = build.BIOS_SLOT_CODE_AT & 0x3FFF
+        page3[first:first + len(build.BIOS_SLOT_CODE)] = bytes(len(build.BIOS_SLOT_CODE))
+        _, data, _, _, checked = self.build(service=False, ram={"3-x-3-0": bytes(page3)})
+        s = build.read_service(SERVICE)
+        code = self.core(data, s["resb"])
+        # CALL Z, after the test of the entry's second byte.
+        self.assertEqual(code[s["res3.call"]:s["res3.call"] + 3], bytes([0xCC, 0x40, 0x40]))
+        keyi = build.H_KEYI & 0x3FFF
+        self.assertEqual(data[0][keyi:keyi + 5], bytes([0xCD]) + struct.pack("<H", build.CALL_AT) + b"\xC9\xC9")
+        self.assertIn(f"rescode {build.CALL_AT} {build.CALL_AT + s['resb'] - 1} 0\n", checked)
+
+    def test_without_room_in_sltwrk_the_call_goes_to_the_zeros_at_fcc9h(self):
+        # A game's data at FD59h: the routine goes to SLTATR, as before SLTWRK.
+        page3 = self.page3()
+        page3[(build.CALL_AT & 0x3FFF) + 0x30] = 0x55
+        _, data, _, _, checked = self.build(service=False, ram={"3-x-3-0": bytes(page3)})
+        s = build.read_service(SERVICE)
+        size = s["res3g"] - s["resb"]
+        call = self.resb(s, "call")
+        self.assertEqual(self.core(data, 4, call, at=s["P3_FREE"]), bytes([0xDD, 0x21, 0x40, 0x40]))
+        keyi = build.H_KEYI & 0x3FFF
+        self.assertEqual(data[0][keyi:keyi + 5], bytes([0xCD]) + struct.pack("<H", s["P3_FREE"]) + b"\xC9\xC9")
+        self.assertIn(f"rescode {s['P3_FREE']} {s['P3_FREE'] + size - 1} 0\n", checked)
+        # Nothing below FCC9h is SLTATR's, so the stack and resbe follow the code.
+        last = s["P3_FREE"] + size + s["RESB_STACK"] + s["sub0"] - s["resbe"] - 1
+        self.assertIn(f"resstack {s['P3_FREE'] + size} {last}\n", checked)
+
+    def test_the_routine_has_its_stack_whatever_page_the_games_stack_is_in(self):
+        # A game's stack in page 1, the entry's page, as Desperado's: the
+        # routine's own stack takes the call, and res3 keeps its 45 bytes, so
+        # the wrapper after it stays at FD56h.
+        page3 = self.page3()
+        page3[0x3DFF], page3[0x3E00] = 0x34, 0x92
+        ram = {"3-x-3-0": bytes(page3), "3-x-1-1": bytes(build.PAGE)}
+        _, data, _, _, checked = self.build(service=False, ram=ram, im="2", i="FD", sp="7CFA", a8="CC", fd="01")
+        s = build.read_service(SERVICE)
+        self.assertEqual(s["resb"] - s["res3"], 45)
+        self.assertIn(f"resvector {0xFD56} {0x9234}\n", checked)
+        # The records hold page 1's RAM, then page 3's.
+        code = self.core(data[1:], 45)
+        # The stack, RES3_STACK bytes, and res3e, the routine's end, below it.
+        size = s["resbe"] - s["res3e"]
+        end = build.CALL_AT - size
+        self.assertEqual(code[s["res3.stack"]:s["res3.stack"] + 3], bytes([0x31]) + struct.pack("<H", end))
+        self.assertEqual([code[s[f"res3.{n}"]:s[f"res3.{n}"] + 3] for n in ("fail", "tail")],
+                         [bytes([0xC2]) + struct.pack("<H", end), bytes([0xC3]) + struct.pack("<H", end)])
+        self.assertIn(f"resstack {end - s['RES3_STACK']} {build.CALL_AT - 1}\n", checked)
+        # res3e: POP AF / OUT (0A8h),A / LD SP,0 / JP PO,.off / EI / .off: POP AF / RET.
+        self.assertEqual(bytes(data[1][(end & 0x3FFF):(end & 0x3FFF) + size]),
+                         bytes([0xF1, 0xD3, 0xA8, 0x31, 0, 0, 0xE2]) + struct.pack("<H", end + 10) + bytes([0xFB, 0xF1, 0xC9]))
+
+    def test_without_room_for_the_stack_the_routine_runs_on_the_games_stack(self):
+        # SLTATR and SLTWRK hold a game's bytes but at FD29h, so resbg takes
+        # resb's place, with the test of the stack's page.
+        page3 = self.page3()
+        s = build.read_service(SERVICE)
+        for at in range(s["P3_FREE"], s["P3_FREE_END"] + 1):
+            if not build.CALL_AT <= at < build.CALL_AT + 64:
+                page3[at & 0x3FFF] = 0x55
+        _, data, _, _, checked = self.build(service=False, ram={"3-x-3-0": bytes(page3)})
+        size = s["res3g"] - s["resb"]
+        self.assertEqual(s["res3e"] - s["resbg"], size)
+        code = self.core(data, size)
+        f = lambda name: s[f"resbg.{name}"] - s["resbg"]
+        self.assertEqual([code[f(name) + 1] for name in ("page", "id1", "is1")], [0x40, 0x82, 0xF5])
+        self.assertEqual(code[f("call"):f("call") + 4], bytes([0xDD, 0x21, 0x40, 0x40]))
+        self.assertIn("rescall hook\n", checked)
+        self.assertIn(f"rescode {build.CALL_AT} {build.CALL_AT + size - 1} 0\n", checked)
+        self.assertNotIn("resstack", checked)
+
+    def test_the_stack_keeps_clear_of_the_bytes_below_the_games_stack(self):
+        # The game's stack at FD88h can grow across all of SLTATR and SLTWRK
+        # (FC88h..FD88h), so res3g takes res3's place.
+        page3 = self.page3()
+        page3[0x3DFF], page3[0x3E00] = 0x34, 0x92
+        _, data, _, _, checked = self.build(service=False, ram={"3-x-3-0": bytes(page3)}, im="2", i="FD", sp="FD88")
+        s = build.read_service(SERVICE)
+        self.assertNotIn("resstack", checked)
+        code = self.core(data, 45)
+        self.assertEqual(code[s["res3g.page"] - s["res3g"] + 1], 0x40)
+        self.assertIn(f"resvector {0xFD56} {0x9234}\n", checked)
+        # With the game's stack at FD28h (FC28h..FD28h), below CALL_AT is taken
+        # but the 24-byte stack fits after the wrapper in SLTWRK (FD5Ch..FD73h).
+        _, _, _, _, checked2 = self.build(service=False, ram={"3-x-3-0": bytes(page3)}, im="2", i="FD", sp="FD28")
+        size = s["RES3_STACK"] + s["resbe"] - s["res3e"]
+        self.assertIn(f"resstack {0xFD5C} {0xFD5C + size - 1}\n", checked2)
+
+    def test_resstack_puts_the_stack_where_the_game_file_says(self):
+        page3 = self.page3()
+        s = build.read_service(SERVICE)
+        for at in range(s["P3_FREE"], s["P3_FREE_END"] + 1):
+            if not build.CALL_AT <= at < build.CALL_AT + 64:
+                page3[at & 0x3FFF] = 0x55
+        _, data, _, _, checked = self.build(service=False, game=a_game(resstack=0xD400),
+                                            ram={"3-x-3-0": bytes(page3)})
+        self.assertIn(f"resstack {0xD400} {0xD400 + s['RESB_STACK'] + s['sub0'] - s['resbe'] - 1}\n", checked)
+        code = self.core(data, 55)
+        f = lambda name: self.resb(s, name)
+        self.assertEqual(code[f("stack"):f("stack") + 3], bytes([0x31]) + struct.pack("<H", 0xD400 + s["RESB_STACK"]))
+        page3[0x1410] = 1
+        with self.assertRaisesRegex(build.BuildError,
+                                    f"resstack needs {s['RESB_STACK'] + s['sub0'] - s['resbe']} bytes of zeros at D400h"):
+            self.build(service=False, game=a_game(resstack=0xD400), ram={"3-x-3-0": bytes(page3)})
+        with self.assertRaisesRegex(build.BuildError, "resstack goes only with an image without the tape service"):
+            self.build(game=a_game(resstack=0xD400))
+        # resstack no: resbg, on the game's stack, where resb has room.
+        _, data, _, _, checked = self.build(service=False, game=a_game(resstack="no"))
+        self.assertNotIn("resstack", checked)
+        self.assertEqual(self.core(data, 55)[s["resbg.page"] - s["resbg"] + 1], 0x40)
+
+    def test_explicit_rescode_and_resstack_accept_unused_c9_bios_hooks(self):
+        page3 = self.page3()
+        s = build.read_service(SERVICE)
+        # Fill FF20h..FF9Fh (inside BIOS_HOOKS FD9Ah..FFC8h) with RET (0xC9).
+        for at in range(0xFF20, 0xFFA0):
+            page3[at & 0x3FFF] = 0xC9
+        _, _, _, _, checked = self.build(service=False, game=a_game(rescode=0xFF20, resstack=0xFF60),
+                                         ram={"3-x-3-0": bytes(page3)})
+        self.assertIn(f"rescode {0xFF20} {0xFF20 + 55 - 1} 0\n", checked)
+        stack_len = s["RESB_STACK"] + s["sub0"] - s["resbe"]
+        self.assertIn(f"resstack {0xFF60} {0xFF60 + stack_len - 1}\n", checked)
+        # Outside BIOS_HOOKS, C9h is still rejected.
+        page3[0x1400] = 0xC9
+        with self.assertRaises(build.BuildError):
+            self.build(service=False, game=a_game(resstack=0xD400), ram={"3-x-3-0": bytes(page3)})
+
+    def test_rescall_puts_a_wrapper_before_the_part_for_the_games_own_routine(self):
+        header, data, _, _, checked = self.build(game=a_game(rescall=[0xB45B]))
+        h, s = support.Header(header), build.read_service(SERVICE)
+        at = s["P3_FREE"] & 0x3FFF
+        # PUSH AF, BC, DE, HL / LD HL,resc / CALL e_run / POP HL, DE, BC, AF / JP 0B45Bh.
+        self.assertEqual(data[0][at:at + 17], bytes([0xF5, 0xC5, 0xD5, 0xE5, 0x21]) + struct.pack("<H", s["resc"])
+                         + b"\xCD" + struct.pack("<H", s["e_run"]) + bytes([0xE1, 0xD1, 0xC1, 0xF1, 0xC3, 0x5B, 0xB4]))
+        self.assertIn(f"resvector {s['P3_FREE']} {0xB45B}\n", checked)
+        # resc, in the code segment after T0, has the program's fields too.
+        types = [r[0] for r in h.records]
+        first = types.index(s["REC_SERVICE"])
+        code = data[sum(1 for t in types[:first] if t != s["REC_ZEROS"]) + 1]
+        self.assertEqual(code[s["resc.call"]:s["resc.call"] + 3], bytes([0xCD, 0x40, 0x40]))
+        self.assertEqual([code[s[f"resc.{name}"] + 1] for name in ("mask", "slot", "is1", "is2")],
+                         [0xF3, 0x08, 0xF5, 0xDB])
+        # LD (resc_sp),SP / LD SP,resc_stack: its stack in the code segment.
+        self.assertEqual(code[s["resc"] + 4:s["resc"] + 7], bytes([0x31]) + struct.pack("<H", s["resc_stack"]))
+        # Without the call from T0, the wrapper still needs the program's subslot.
+        header, _, _, _, checked = self.build(game=a_game(rescall=[0xB45B]), im="2")
+        self.assertIn("rescall im2\n", checked)
+        self.assertEqual(header[s["H_SUB"] + 2], 0xF0)
+
+    def test_rescall_cannot_go_with_t0_without_a_part_in_page_3(self):
+        with self.assertRaisesRegex(build.BuildError, "cannot go with the tape service without a part in page 3"):
+            self.build(game=a_game(rescall=[0xB45B], service="t0"))
+
+    def test_with_the_part_rescalls_wrapper_needs_its_place_at_the_default_area(self):
+        page3 = self.page3()
+        page3[build.read_service(SERVICE)["P3_FREE"] & 0x3FFF] = 1
+        with self.assertRaisesRegex(build.BuildError, "rescall needs 17 bytes of zeros"):
+            self.build(game=a_game(rescall=[0xB45B]), ram={"3-x-3-0": bytes(page3)})
+
+    def test_without_a_ram_page_3_there_is_no_call(self):
+        # Page 3 in the ROM's slot 0 at the snapshot, without the tape service.
+        _, _, _, _, checked = self.build(service=False, ram={"3-x-1-0": bytes(build.PAGE)}, a8="0C", sp="7000")
+        self.assertIn("rescall nopage3\n", checked)
+
+    def test_ram_in_the_resident_programs_slot_stops_the_build(self):
+        ram = {"2-0-1-x": bytes(build.PAGE), "3-x-3-0": bytes(build.PAGE)}
+        with self.assertRaisesRegex(build.BuildError, "which the machine's resident program holds"):
+            self.build(ram=ram, a8="C8")
 
 
 class ServicePart(unittest.TestCase):
@@ -483,6 +941,64 @@ class Service(unittest.TestCase):
         running = self.built(ppic="40")
         self.assertEqual(running.data[2][s["E_STOP"] & 0x3FFF], 0)
 
+    def slot0_built(self, game=None, pages=(0, 1, 2, 3), page3=None, **state):
+        """An image of a snapshot on a machine with the main ROM in slot 0-0
+        and DOS's mapper in 0-1, as the SX-2 with its Extra-Mapper: page 0
+        selects the ROM and pages 1 to 3 the mapper, whose segments the
+        snapshot keeps for the pages, page 0 among them by default."""
+        ram = {f"0-1-{page}-{3 - page}": bytes(build.PAGE) for page in pages}
+        if page3 is not None:
+            ram["0-1-3-0"] = page3
+        return self.built(game, ram=ram, **dict({"a8": "00", "sub0": "54", "mapper0-1": "20"}, **state))
+
+    def page3_of(self, built):
+        return built.data[support.Header(built.header)["H_P3REC"]]
+
+    def test_page_0_in_another_subslot_of_page_3s_slot_gets_sub0(self):
+        # The snapshot keeps RAM for page 0, so T0 does not replace the ROM,
+        # and the slot register alone selects the ROM in page 0.
+        built, s = self.slot0_built(), support.service()
+        page3, at = self.page3_of(built), s["P3_FREE"]
+        code = s.parts["call"][s["sub0"]:]
+        self.assertEqual(len(code), 23)
+        placed = page3[at & 0x3FFF:(at & 0x3FFF) + len(code)]
+        # LD (nn),A keeps the register's value in LD A,n's operand, OR n has
+        # page 3's subslot, 1, and the call goes to tramp.
+        back = at + s["sub0.back"] - s["sub0"]
+        self.assertEqual(struct.unpack_from("<H", placed, s["sub0.save"] - s["sub0"] + 1)[0], back + 1)
+        self.assertEqual(placed[s["sub0.ss"] - s["sub0"] + 1], 1)
+        self.assertEqual(struct.unpack_from("<H", placed, s["sub0.tramp"] - s["sub0"] + 1)[0], s["tramp"])
+        self.assertEqual(placed[:4], bytes([0x3A, 0xFF, 0xFF, 0x2F]))
+        # e_run calls sub0 in place of tramp.
+        self.assertEqual(page3[(s["e_run.call"] & 0x3FFF):][:3], b"\xCD" + struct.pack("<H", at))
+        self.assertEqual(support.Header(built.header)["H_FLAGS"], s["FLAG_P0"])
+        self.assertIn(f"sub0 {at} {at + len(code) - 1}\n", built.facts)
+        self.assertIn(f"patched 0-1-3 {at & 0x3FFF} {(at & 0x3FFF) + len(code) - 1}\n", built.facts)
+
+    def test_sub0_goes_before_a_moved_part(self):
+        # A byte at FCC9h moves the part to F1E1h, and sub0 to F1C9h.
+        page3 = bytearray(build.PAGE)
+        page3[0xFCC9 & 0x3FFF] = 1
+        built, s = self.slot0_built(page3=bytes(page3)), support.service().at(0xF1)
+        self.assertEqual(support.Header(built.header)["H_P3"], 0xF1)
+        self.assertIn(f"sub0 {0xF1C9} {0xF1C9 + 22}\n", built.facts)
+        self.assertEqual(self.page3_of(built)[(s["e_run.call"] & 0x3FFF):][:3], bytes([0xCD, 0xC9, 0xF1]))
+
+    def test_t0_in_place_of_the_rom_needs_no_sub0(self):
+        s = support.service()
+        for built in (self.slot0_built(pages=(1, 2, 3)), self.slot0_built(sub0="55")):
+            # Without RAM for page 0, T0 replaces the ROM. With page 0 in page
+            # 3's subslot, the slot register alone selects the mapper there.
+            page3 = self.page3_of(built)
+            self.assertEqual(page3[(s["e_run.call"] & 0x3FFF):][:3], b"\xCD" + struct.pack("<H", s["tramp"]))
+            self.assertEqual(support.Header(built.header)["H_FLAGS"], 0)
+            self.assertNotIn("sub0 ", built.facts)
+            self.assertFalse(any(page3[s["P3_FREE"] & 0x3FFF:s["E_ENTRY"] & 0x3FFF]))
+
+    def test_rom_keep_keeps_the_rom_with_sub0(self):
+        built, s = self.slot0_built(a_game(rom_keep=True), pages=(1, 2, 3)), support.service()
+        self.assertEqual(support.Header(built.header)["H_FLAGS"], s["FLAG_ROM_KEEP"] | s["FLAG_P0"])
+
     def test_service_at_moves_the_part_and_names_its_place(self):
         built = self.built(a_game("at", entry_page=0xF9))
         s = support.service().at(0xF9)
@@ -496,6 +1012,49 @@ class Service(unittest.TestCase):
         last = 0xF9E1 + len(support.service().parts["page3"]) - 1
         with self.assertRaisesRegex(build.BuildError, f"the tail at F9E6h overlaps F9E1h to {last:04X}h"):
             self.built(a_game("at", entry_page=0xF9), sp="FA00")
+
+    def test_service_at_with_a_code_address_puts_the_code_block_apart(self):
+        # The entries at F9E1h and the code block at F000h, in the snapshot's
+        # page 3, whose bytes are zero.
+        built = self.built(a_game("at", entry_page=0xF9, code_at=0xF000))
+        s = support.service().at(0xF9, 0xF000)
+        page3 = built.data[2]
+        (entries, at_entries), (code, at_code) = [(first, data) for first, data in s.blocks()]
+        self.assertEqual((entries, code, s.split), (0xF9E1, 0xF000, True))
+        self.assertEqual(page3[entries & 0x3FFF:][:3], at_entries[:3])
+        self.assertEqual(page3[code & 0x3FFF:][:len(at_code)], at_code)
+        # Each address in the code block keeps its offset there: the entry of
+        # TAPIOF's jump to tapiof, and in T0's stubs the jumps to tramp.
+        whole = support.service().at(0xF9)
+        moved = 0xF000 - whole["P3_CODE"]
+        jump = struct.unpack_from("<H", whole.parts["page3"], 0xF9E7 - 0xF9E1 + 1)[0]
+        self.assertEqual(struct.unpack_from("<H", page3, (0xF9E7 & 0x3FFF) + 1)[0], jump + moved)
+        stubs, split_stubs = whole.parts["stubs"], s.parts["stubs"]
+        changed = [n for n in range(len(stubs)) if stubs[n] != split_stubs[n]]
+        self.assertTrue(changed)
+        for n in changed[::2]:
+            self.assertEqual(struct.unpack_from("<H", split_stubs, n)[0],
+                             struct.unpack_from("<H", stubs, n)[0] + moved)
+        self.assertEqual(built.data[3][s["T0_CODE"]:s["T0_END"]][:len(split_stubs)], split_stubs)
+        # The check guards both blocks, without the code block's scratch bytes.
+        self.assertIn(f"part {0xF9E1} {s['E_STOP']} {s['E_CODE']} 0\n", built.facts)
+        self.assertIn(f"partcode {0xF000} {s['e_sp'] - 1}\n", built.facts)
+        self.assertIn(f"moved {0xF9E1} {s['E_STOP']} {0xF000} {0xF000 + len(at_code) - 1}\n", built.facts)
+
+    def test_a_code_block_that_is_not_free_stops_the_build(self):
+        s = support.service().at(0xF9, 0xF000)
+        code = s.blocks()[1][1]
+        # Bytes that are not zero, the tail, a block that passes FFFEh, and the
+        # two blocks on each other.
+        with self.assertRaisesRegex(build.BuildError, "F000h to .* are not zero at the snapshot"):
+            self.built(a_game("at", entry_page=0xF9, code_at=0xF000),
+                       ram={"3-x-3-0": bytes(0x3000) + b"\x01" + bytes(0xFFF)})
+        with self.assertRaisesRegex(build.BuildError, "the tail at F0..h overlaps F000h"):
+            self.built(a_game("at", entry_page=0xF9, code_at=0xF000), sp="F020")
+        with self.assertRaisesRegex(build.BuildError, "is not in page 3 below FFFFh"):
+            self.built(a_game("at", entry_page=0xF9, code_at=0x10000 - len(code) + 1))
+        with self.assertRaisesRegex(build.BuildError, "blocks at F9E1h and F9F0h overlap"):
+            self.built(a_game("at", entry_page=0xF9, code_at=0xF9F0))
 
     def test_without_a_part_in_page_3_t0_holds_the_service_and_the_borrowed_page(self):
         built = self.built(a_game("t0"), tapepos="000008")
@@ -522,6 +1081,51 @@ class Service(unittest.TestCase):
         with self.assertRaisesRegex(build.BuildError, "the tape needs 17 segments, more than 16"):
             self.built(a_game("t0"), side1=long[:16 * build.PAGE + 100])
         self.built(a_game("t0"), side1=long[:16 * build.PAGE])
+
+    # CALSLT's two places and the routine that the first one calls, as every
+    # MSX2's BIOS has them, at their addresses there (INTERNALS.md, T0 and the
+    # sub-ROM in one slot).
+    CALSLT_CALL = (0x02FA, "F1 CD 78 03 F5 FD E1 E5 C5 4F 06 00 7D A4 B2 21 C5 FC 09 77")
+    CALSLT_JUMP = (0x02E6, "DB A8 F5 A1 B0 D9 C3 8C F3")
+    CALSLT_ROUTINE = (0x0378, "F5 7A E6 C0 4F F1 F5 57 DB A8 47 E6 3F B1 D3 A8 7A 0F 0F E6 03 57 3E AB C6 55 15 F2 90 03 "
+                              "A3 57 7B 2F 67 3A FF FF 2F 6F A4 B2 32 FF FF 78 D3 A8 F1 E6 03 C9")
+
+    def built_on(self, places, game=None):
+        """An image of a snapshot whose rom.bin has the bytes of places."""
+        snap = support.snapshot(support.temp(self), service=True)
+        with open(os.path.join(snap, "rom.bin"), "r+b") as f:
+            for address, code in places:
+                f.seek(address)
+                f.write(bytes.fromhex(code))
+        return build.build(Snapshot(snap), SERVICE, game or a_game(), support.BASIC_TAPE)
+
+    def test_an_msx2s_calslt_goes_to_t0s_code(self):
+        t0, s = self.built_on((self.CALSLT_CALL, self.CALSLT_JUMP, self.CALSLT_ROUTINE)).data[3], support.service()
+        # The call goes to t_s, whose jump goes on to the BIOS's routine, and
+        # the jump goes to t_c in place of CLPRIM.
+        self.assertEqual(t0[0x02FB:0x02FE], bytes([0xCD]) + struct.pack("<H", s["t_s"]))
+        self.assertEqual(t0[s["t_s.jump"]:s["t_s.jump"] + 3], bytes.fromhex("C3 78 03"))
+        self.assertEqual(t0[0x02EC:0x02EF], bytes([0xC3]) + struct.pack("<H", s["t_c"]))
+        # The routine itself stays, for the calls that t_s sends on.
+        self.assertEqual(t0[0x0378:0x0378 + 52], bytes.fromhex(self.CALSLT_ROUTINE[1]))
+
+    def test_a_rom_without_all_of_calslts_code_keeps_it(self):
+        # Without the routine that the call names, as on a BIOS with other
+        # code there, and with the jump twice.
+        other = (0x0378, "00" + self.CALSLT_ROUTINE[1][2:])
+        twice = (0x0400, self.CALSLT_JUMP[1])
+        for places in ((self.CALSLT_CALL, self.CALSLT_JUMP), (self.CALSLT_CALL, self.CALSLT_JUMP, other),
+                       (self.CALSLT_CALL, self.CALSLT_JUMP, self.CALSLT_ROUTINE, twice)):
+            t0, s = self.built_on(places).data[3], support.service()
+            self.assertEqual(t0[0x02FB:0x02FE], bytes.fromhex("CD 78 03"))
+            self.assertEqual(t0[0x02EC:0x02EF], bytes.fromhex("C3 8C F3"))
+            self.assertEqual(t0[s["T0_CODE"]:s["T0_END"]], s.parts["stubs"])
+
+    def test_without_a_part_in_page_3_calslt_stays(self):
+        # That mode has no code in page 3 for the call.
+        t0 = self.built_on((self.CALSLT_CALL, self.CALSLT_JUMP, self.CALSLT_ROUTINE), a_game("t0")).data[3]
+        self.assertEqual(t0[0x02FB:0x02FE], bytes.fromhex("CD 78 03"))
+        self.assertEqual(t0[0x02EC:0x02EF], bytes.fromhex("C3 8C F3"))
 
     def test_a_rom_whose_tape_entries_are_not_the_bioss_stops_the_build(self):
         snap = support.snapshot(support.temp(self), service=True)

@@ -1,0 +1,20 @@
+# SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded. The SX-2 is an
+# FPGA MSX on KdL's OCM-PLD firmware. Its main ROM is in slot 0-0, MSX-MUSIC in
+# 0-2 and the Wi-Fi's BIOS in 0-3; its RAM is in 3-0 and its MegaSD with Nextor
+# in 3-2, and its cartridge slots 1 and 2 are empty. OCMINFO's F4 screen shows
+# that setting: CPU clock Standard, cartridge slots 1 and 2 External, RAM mapper
+# 2048KB, internal MegaSD ON. The extra mapper, in 0-1, stays off. The machine
+# sx2-noexp0 is the SX-2 after SETSMART -F9FD, with slot 0 not expanded. The
+# Makefile makes the model from openMSX's FS-A1WSX and the ROMs of the SX-2's
+# own OCM-BIOS.DAT, from its SD card, which goes in openMSX's system ROMs
+# (make firmware). openMSX has no ESP8266, so the Wi-Fi's BIOS finds none.
+openmsx -machine OCM_SX-2
+disk hda
+firmware machines/OCM_SX-2.xml
+variant sx2-noexp0
+# KdL's sub-ROM writes its defaults to the clock chip at every boot, among them
+# a text width of 80, and BASIC starts with it, where an MSX2 starts with 37.
+# Text games would show in 80 columns, and a program that sets WIDTH 32 on its
+# graphics screen, as English Words does, gets the text screen from an MSX2+'s
+# sub-ROM. The image restores the captured width.
+width 37

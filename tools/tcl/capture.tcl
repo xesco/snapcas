@@ -17,6 +17,7 @@
 #   ::S(headers2) the positions of side 2's headers, from side 1's start
 #   ::S(nosvc)    1 when the game file has service no
 #   ::S(subkeep)  1 when the game file has subslots keep
+#   ::S(width)    the machine file's width, or 0
 #   ::S(keys)     [list time tcl] pairs, times from the load command
 #   ::S(lastkey)  the last keys time
 #   ::S(tries)    [list name tcl] pairs: the keys that may continue a load
@@ -36,7 +37,7 @@
 #               step 5; wait in step 6, until the snapshot's moment; snap while
 #               take_snapshot reads the machine; stopping once the capture has
 #               ended (prelude.tcl)
-#   msx2, exbrsa  1 on an MSX2, and the sub-ROM's slot ID, read in step 2
+#   msx2, exbrsa  1 on an MSX2 or an MSX2+, and the sub-ROM's slot ID, read in step 2
 #   t0          the moment of the load command
 #   elapsed     the emulated seconds since then, counted across rewinds
 #   restarts    the restarts of step 5 so far
@@ -274,10 +275,20 @@ proc insert_side2 {} {
 # in the BIOS's tape code, waits for side 2: the player turns the tape over, so
 # side 2 goes in, and the read goes on after side 2's first header, or at side
 # 2's start when it holds no standard block. A motor that a game only switches,
-# with no read, does not turn the tape over.
+# with no read, does not turn the tape over. The player is at the end in the
+# last 10 milliseconds of the tape, where TAPIN can still read side 1's last
+# byte, so the wait must last 0.05 seconds: Thunder Blade's loader got side 2's
+# signal for its last block's sum byte, and hung.
 proc turn_over {} {
-    if {$::S(side2tape) eq "" || $::st(side2in) || ![motor_on] || ![at_end]} { return }
-    if {![in_tape_code [reg PC]]} { return }
+    if {$::S(side2tape) eq "" || $::st(side2in) || ![motor_on] || ![at_end] || ![in_tape_code [reg PC]]} {
+        set ::st(end_wait) ""
+        return
+    }
+    if {![info exists ::st(end_wait)] || $::st(end_wait) eq ""} {
+        set ::st(end_wait) [now]
+        return
+    }
+    if {[now] - $::st(end_wait) < 0.05} { return }
     insert_side2
     next_header
 }
@@ -327,9 +338,12 @@ proc wait_ok {} {
 # slot's ROMs. An MSX1 stays as it is: its loaders find its own RAM, which is
 # not in an expanded slot. A game file's subslots keep leaves the register
 # alone, for a game that puts its stack at FFFFh once it finds 64 KB.
+# Slot 0 keeps its register: the main ROM is in its subslot 0, and RAM there in
+# every page would deselect the ROM in pages 0 and 1, as BASIC's RAM in 0-1 of
+# an SX-2 with its Extra-Mapper on.
 proc ram_in_every_page {} {
     set ps [expr {([debug read ioports 0xA8] >> 6) & 3}]
-    if {$::S(subkeep) || !$::run(msx2) || ![expanded $ps]} return
+    if {$::S(subkeep) || !$::run(msx2) || $ps == 0 || ![expanded $ps]} return
     set ss [expr {([subslot_reg $ps] >> 6) & 3}]
     set value [expr {$ss * 0x55}]
     set_subslot_reg $ps $value
@@ -340,8 +354,9 @@ proc ram_in_every_page {} {
 #    its slot, and set HIMEM as on a cassette machine.
 proc step2 {} {
     set v [debug read memory 0x002D]
-    if {$v > 1} { fail "the machine is not an MSX1 or an MSX2: 002Dh holds $v" }
-    set ::run(msx2) $v
+    if {$v > 2} { fail "the machine is not an MSX1, an MSX2 or an MSX2+: 002Dh holds $v" }
+    # An MSX2+ is an MSX2 here: its sub-ROM and its VDP's registers 0 to 23.
+    set ::run(msx2) [expr {$v >= 1}]
     read_exptbl
     # EXBRSA at FAF8h: the slot ID of the MSX2 sub-ROM.
     set ::run(exbrsa) [debug read memory 0xFAF8]
@@ -350,7 +365,10 @@ proc step2 {} {
     debug write memory 0xF37D 0
     for {set a 0xFCC9} {$a <= 0xFD88} {incr a} { debug write memory $a 0 }
     ram_in_every_page
-    type "CLEAR200,&HF380\r"
+    # A machine file's width sets BASIC's text width first, for a BIOS that
+    # starts BASIC with another width than the loaders expect.
+    set width [expr {$::S(width) ? "WIDTH$::S(width):" : ""}]
+    type "${width}CLEAR200,&HF380\r"
     later 3 step3
 }
 
@@ -360,6 +378,8 @@ proc step3 {} {
     foreach ps {0 1 2 3} {
         set ::st(sub$ps) [expr {[expanded $ps] ? [subslot_reg $ps] : -1}]
     }
+    # The subslot register of the sub-ROM's slot as BASIC leaves it, for step 6.
+    set ::run(subrom_sub) [expr {$::run(msx2) ? $::st(sub[lindex [slot_parts $::run(exbrsa)] 0]) : -1}]
     set ::st(sel) {}
     set ::st(log) {}
     set ::st(pos) 0
@@ -520,7 +540,33 @@ proc watch_motor {name} {
 }
 
 # 6. The snapshot, at the entry of the next interrupt that the CPU accepts
-#    while no VDP command runs and both VDP latches are empty.
+#    while no VDP command runs, both VDP latches are empty, and no call of the
+#    sub-ROM is under way in the slot of the game's RAM.
+#
+# With the tape service, the restorer gives page 0 of DOS's mapper's slot the
+# mapper's subslot, for T0 (INTERNALS.md, T0 and the sub-ROM in one slot). While
+# the BIOS calls the sub-ROM in that slot, the slot's subslot register has the
+# sub-ROM's subslot in page 0, and the call's return needs it there. That is so
+# in the sub-ROM's own code and in the main ROM's code that the sub-ROM calls.
+# So an interrupt passes while the sub-ROM's slot is also page 3's and its
+# register has the sub-ROM's subslot in page 0. A machine whose BASIC leaves
+# that subslot there, as step 3 found, has no such sign of a call.
+#
+# On any MSX2, with or without the tape service, a call is also under way while
+# page 0 shows the sub-ROM: page 0's slot is the sub-ROM's, and that slot's
+# register has the sub-ROM's subslot in page 0. A snapshot there restores the
+# sub-ROM's code half way through, with page 0's state that the restore does not
+# give back: on sx2-extramapper-mcp, where page 3 is in slot 0 and the sub-ROM in
+# 3-1, Reversi rebooted and eight games crashed after such a snapshot.
+proc in_subrom_call {} {
+    if {!$::run(msx2)} { return 0 }
+    lassign [slot_parts $::run(exbrsa)] ps ss
+    if {$ss eq "x"} { return 0 }
+    set a8 [debug read ioports 0xA8]
+    if {($a8 & 3) == $ps && ([tracked_sub $ps] & 3) == $ss} { return 1 }
+    if {!$::st(service) || (($a8 >> 6) & 3) != $ps} { return 0 }
+    expr {($::run(subrom_sub) & 3) != $ss && ([tracked_sub $ps] & 3) == $ss}
+}
 proc vdp_quiet {} {
     if {[debug read "VDP register latch status" 0] != 0} { return 0 }
     if {[v9938]} {
@@ -546,7 +592,7 @@ proc step6 {} {
 }
 proc at_handler {} {
     set ::run(accepted) 0
-    if {$::run(phase) ne "wait" || ![vdp_quiet]} { return }
+    if {$::run(phase) ne "wait" || ![vdp_quiet] || [in_subrom_call]} { return }
     decide "snapshot at an interrupt's entry"
     take_snapshot
 }
@@ -588,14 +634,14 @@ proc fallback2 {tries} {
         return
     }
     set waited [format %.3f [expr {$tries * $::QUIET_STEP}]]
-    if {![vdp_quiet]} {
+    if {![vdp_quiet] || [in_subrom_call]} {
         if {$tries < $::QUIET_TRIES} {
             later $::QUIET_STEP [list fallback2 [expr {$tries + 1}]]
             return
         }
-        decide "the VDP is not quiet after $waited seconds more"
+        decide "the VDP is not quiet, or a call of the sub-ROM is under way, after $waited seconds more"
     } elseif {$tries > 0} {
-        decide "the snapshot waited $waited seconds for a quiet VDP"
+        decide "the snapshot waited $waited seconds for a quiet VDP and no call of the sub-ROM"
     }
     decide "snapshot without an interrupt"
     take_snapshot

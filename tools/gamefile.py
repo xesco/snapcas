@@ -11,7 +11,7 @@ import shlex
 import textwrap
 import urllib.parse
 
-from msx import KEYS
+from msx import KEYS, machine_chain
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # The tape files that snapcas.py snap downloads, and the images that it moves
@@ -22,6 +22,11 @@ DOWNLOADS = os.environ.get("SNAPCAS_DOWNLOADS", os.path.join(ROOT, "downloads"))
 IMAGES = os.path.join(ROOT, "images")
 # The user's own game files, each with its tape files, which git ignores.
 CUSTOM = os.path.join(ROOT, "custom")
+
+
+# The most routines that a game file's rescall names: a game that installs one
+# routine for its title and another for its play, and a few more.
+RESCALL_MAX = 4
 
 
 class GameFileError(Exception):
@@ -49,8 +54,23 @@ class Game:
         # For service at xxE1, the entry page: the high byte, xx, of the
         # addresses of the service's part of page 3. Otherwise None.
         self.entry_page = None
+        # For service at with a second address, the address in page 3 of the
+        # code block of the service's part. Otherwise None.
+        self.code_at = None
         self.capture = None      # the machine file for the capture, if not the user's
         self.rom_keep = False    # rom keep: page 0 keeps the ROM, and T0 does not replace it
+        # rescall: the game's own interrupt routines, a list of up to
+        # RESCALL_MAX, each of which a wrapper in page 3 jumps to after its call
+        # of the machine's resident program, "no" to leave the call out, or
+        # None.
+        self.rescall = None
+        # rescode: the address in page 3 for the image's code of that call, in
+        # place of the build's own places, or None.
+        self.rescode = None
+        # resstack: the address in page 3 of the stack of that call's routine,
+        # without the tape service, in place of the build's own places, "no"
+        # for the routine on the game's stack, or None.
+        self.resstack = None
         # subslots keep: the capture leaves the subslot register of BASIC's RAM
         # slot as BASIC has it (INTERNALS.md, The RAM's subslot in every page).
         self.subslots_keep = False
@@ -310,9 +330,12 @@ def read_game(folder, machine=None):
     game = Game(folder)
     with open(path, encoding="utf-8") as f:
         lines = [(path, n, line) for n, line in enumerate(f.read().splitlines(), 1)]
-    if machine is not None and os.path.exists(machine_file(folder, machine)):
-        with open(machine_file(folder, machine), encoding="utf-8") as f:
-            lines += [(machine_file(folder, machine), n, line) for n, line in enumerate(f.read().splitlines(), 1)]
+    if machine is not None:
+        for m in machine_chain(machine):
+            mpath = machine_file(folder, m)
+            if os.path.exists(mpath):
+                with open(mpath, encoding="utf-8") as f:
+                    lines += [(mpath, n, line) for n, line in enumerate(f.read().splitlines(), 1)]
     service_files = set()
     for file, number_, line in lines:
         where = f"{file}:{number_}"
@@ -375,20 +398,37 @@ def read_game(folder, machine=None):
                 raise GameFileError(f"{where}: a file holds one service line")
             service_files.add(file)
             if args in (["no"], ["t0"]):
-                game.service, game.entry_page = args[0], None
-            elif len(args) == 2 and args[0] == "at" and re.fullmatch(r"[C-Fc-f][0-9A-Fa-f][Ee]1", args[1]):
+                game.service, game.entry_page, game.code_at = args[0], None, None
+            elif (len(args) in (2, 3) and args[0] == "at" and re.fullmatch(r"[C-Fc-f][0-9A-Fa-f][Ee]1", args[1])
+                  and (len(args) == 2 or re.fullmatch(r"[C-Fc-f][0-9A-Fa-f]{3}", args[2]))):
                 game.service, game.entry_page = "at", int(args[1][:2], 16)
-                if game.entry_page == 0xFF:
+                game.code_at = int(args[2], 16) if len(args) == 3 else None
+                if game.entry_page == 0xFF and game.code_at is None:
                     raise GameFileError(f"{where}: a part of the tape service at FFE1h would pass FFFEh, "
                                         "the last byte that it can take")
             else:
-                raise GameFileError(f"{where}: service takes no, at and an address xxE1 in page 3, or t0")
+                raise GameFileError(f"{where}: service takes no, at and an address xxE1 in page 3, with the "
+                                    "address of the part's code block after it or not, or t0")
         elif key == "capture":
             game.capture = args[0]
         elif key == "rom":
             if args[0] != "keep":
                 raise GameFileError(f"{where}: rom takes keep")
             game.rom_keep = True
+        elif key == "rescall":
+            if game.rescall is not None or not (args == ["no"] or 1 <= len(args) <= RESCALL_MAX and all(
+                    re.fullmatch(r"[0-9A-Fa-f]{4}", a) for a in args)):
+                raise GameFileError(f"{where}: rescall takes up to {RESCALL_MAX} addresses of four hex digits, "
+                                    "or no, once")
+            game.rescall = "no" if args == ["no"] else [int(a, 16) for a in args]
+        elif key == "rescode":
+            if game.rescode is not None or len(args) != 1 or not re.fullmatch(r"[C-Fc-f][0-9A-Fa-f]{3}", args[0]):
+                raise GameFileError(f"{where}: rescode takes one address of four hex digits in page 3, once")
+            game.rescode = int(args[0], 16)
+        elif key == "resstack":
+            if game.resstack is not None or len(args) != 1 or not re.fullmatch(r"[C-Fc-f][0-9A-Fa-f]{3}|no", args[0]):
+                raise GameFileError(f"{where}: resstack takes one address of four hex digits in page 3, or no, once")
+            game.resstack = "no" if args[0] == "no" else int(args[0], 16)
         elif key == "subslots":
             if args[0] != "keep":
                 raise GameFileError(f"{where}: subslots takes keep")

@@ -12,8 +12,8 @@
 #   ::C(com)      the first 3 bytes of SNAPCAS.COM
 #   ::C(stop)     the address of the restorer's stop_message and the 3 bytes
 #                 there, or nothing without out/snapcas.sym
-#   ::C(service), ::C(tail), ::C(free), ::C(patched), ::C(part), ::C(moved),
-#   ::C(cpos), ::C(ended)
+#   ::C(service), ::C(tail), ::C(free), ::C(patched), ::C(part), ::C(partcode),
+#   ::C(moved), ::C(cpos), ::C(ended), ::C(sub0)
 #                 build.txt's facts, under their names (tools/build.py,
 #                 Image.facts)
 #
@@ -148,6 +148,20 @@ proc at_start {} {
     } else {
         read_exptbl
         set ::dosslot [debug read memory 0xF344]
+        seed_resident
+    }
+}
+# The machine's resident program (FILES.md, Machine file, resident), which
+# openMSX lacks: its code at its entry in every segment of the RAM in its slot,
+# where the program keeps it, so that the image calls it.
+proc seed_resident {} {
+    if {![llength $::C(resident)]} return
+    lassign $::C(resident) slot address
+    set device [lindex [machine_info slot [expr {$slot & 3}] [expr {($slot >> 2) & 3}] [expr {$address >> 14}]] 0]
+    set size [debug size $device]
+    for {set at [expr {$address & 0x3FFF}]} {$at < $size} {incr at 0x4000} {
+        set a $at
+        foreach b [lrange $::C(resident) 2 end] { debug write $device $a $b; incr a }
     }
 }
 # The restorer's message is on the screen a moment after stop_message starts:
@@ -174,8 +188,24 @@ proc at_tail {} {
     set ::n 0
     watch_part
     set ::restored [machine_info time]
+    watch_rescall
+    watch_rescode
     for_point 3 watch_reset
+    watch_rst38
+    press_keys
     later 10 point2
+}
+
+# With the check's keys (check.py, SNAPCAS_KEYS), space (15s, 45s), 0 (25s) and
+# 1 (35s) are pressed for 0.3 seconds after the restore, which starts most
+# games from their title (including menus that start on 0 or 1), so that the
+# points and the resident program's calls cover some play too.
+proc press_keys {} {
+    if {!$::C(keys)} return
+    foreach {s row mask} {15 8 1  25 0 1  35 0 2  45 8 1} {
+        later $s [list keymatrixdown $row $mask]
+        later [expr {$s + 0.3}] [list keymatrixup $row $mask]
+    }
 }
 
 # Point 2: the game runs for 60 seconds, saved every 10 seconds, and must not
@@ -189,7 +219,86 @@ proc point2 {} {
     write_point2
     for_point 3 write_point3
     for_point 4 { write_point 4 $::basic_errors }
+    write_rescall
     stop
+}
+
+# Whether the image calls the machine's resident program (build.py,
+# call_resident): from T0 or H.KEYI, from a wrapper, or from the game's code,
+# which a game file's patches make call the routine that rescode places alone.
+proc rescalls {} { expr {$::C(rescall) in {t0 hook} || $::C(resvector) ne "" || $::C(rescode) ne ""} }
+# The calls of the machine's resident program (FILES.md, Machine file,
+# resident), by every image on a machine with one, as a game file's own routine
+# can make them too: their number in the 60 seconds and the last one's time. write_rescall puts them in
+# rescall.txt beside the report, apart from the points: a game that takes the
+# interrupt for a routine of its own only ends the calls.
+proc watch_rescall {} {
+    if {[llength $::C(resident)] == 0} return
+    lassign $::C(resident) slot address
+    set ::rescall(calls) 0
+    set ::rescall(last) 0
+    set ::rescall(tens) {0 0 0 0 0 0}
+    set where [expr {$slot & 0x80 ? "[expr {$slot & 3}] [expr {($slot >> 2) & 3}]" : $slot & 3}]
+    debug set_bp $address "\[pc_in_slot $where\]" { count_rescall }
+}
+# The call's code in zeros of the game's page 3, ::C(rescode) = {first last
+# segment}, which a game must leave alone as it does the tape service's part:
+# a write from outside it, to the snapshot's page 3, fails point 2, because the
+# next interrupt would run the game's bytes. Its stack and its end after the
+# stack, ::C(resstack) = {first last}, are zeros of page 3 too: a write there
+# from outside the code while the stack pointer is outside them is the game's,
+# and the next call would write over the game's bytes or run them. The routine
+# writes the game's stack pointer into its end.
+set ::res_writes {}
+set ::stack_writes {}
+proc watch_rescode {} {
+    if {[llength $::C(rescode)] == 0} return
+    lassign $::C(rescode) first last
+    debug set_watchpoint write_mem [list $first $last] {} {safe rescode_write}
+    if {[llength $::C(resstack)]} {
+        debug set_watchpoint write_mem $::C(resstack) {} {safe resstack_write}
+    }
+}
+proc in_page3 {} {
+    lassign $::C(rescode) first last segment
+    if {([debug read ioports 0xA8] >> 6) != ([want a8] >> 6)} { return 0 }
+    expr {$segment < 0 || [debug read {MSX Memory Mapper I/O} 3] == $segment}
+}
+proc rescode_write {} {
+    lassign $::C(rescode) first last
+    set pc [reg pc]
+    if {$pc >= $first && $pc <= $last} return
+    if {![in_page3]} return
+    set address [format %04X $::wp_last_address]
+    if {![dict exists $::res_writes $address] && [dict size $::res_writes] < 40} {
+        dict set ::res_writes $address [format %04X $pc]
+    }
+}
+proc resstack_write {} {
+    lassign $::C(resstack) first last
+    lassign $::C(rescode) cfirst clast
+    set sp [reg sp]
+    set pc [reg pc]
+    if {$sp >= $first && $sp <= $last + 1} return
+    if {$pc >= $cfirst && $pc <= $clast} return
+    if {![in_page3]} return
+    set address [format %04X $::wp_last_address]
+    if {![dict exists $::stack_writes $address] && [dict size $::stack_writes] < 40} {
+        dict set ::stack_writes $address [format %04X $pc]
+    }
+}
+proc count_rescall {} {
+    incr ::rescall(calls)
+    set ::rescall(last) [after_restore]
+    set ten [expr {min(5, int($::rescall(last) / 10))}]
+    lset ::rescall(tens) $ten [expr {[lindex $::rescall(tens) $ten] + 1}]
+}
+proc write_rescall {} {
+    if {[llength $::C(resident)] == 0} return
+    set f [open [file join [file dirname $::C(report)] rescall.txt] w]
+    puts $f "calls $::rescall(calls) last $::rescall(last)"
+    puts $f "tens $::rescall(tens)"
+    close $f
 }
 
 # Point 3: in the same 60 seconds the restored machine must not reboot
@@ -225,6 +334,30 @@ proc watch_reset {} {
 proc noted_reset {} {
     if {[llength $::resets] < 10} { lappend ::resets "the machine resets [after_restore] seconds after the restore" }
 }
+# A crashed game counts as a reboot: a jump into an empty slot, or into RAM that
+# holds FFh, runs RST 38h at each byte, and each one enters 0038h with the
+# address after the FFh byte on the stack. An interrupt enters 0038h too, so an
+# entry counts only when the byte before its return address is FFh. Games that
+# run make up to about 1,700 such entries in the 60 seconds, and the crashes seen
+# 260,000 and more. Rocky enters 0038h a million times by interrupts, whose VDP
+# status it never reads, and makes none. So more than RST38_MAX entries fail the
+# point. A crash can also take the stack down among the restart addresses below
+# 0100h, where RST 38h pushes its return addresses over the code that it runs, so
+# the byte before them is seldom FFh. Such a crash wraps the stack around: Tales
+# of Popolon's crash on sx2-extramapper-mcp enters 0038h with 128 values of SP
+# below 0100h, from 00FEh down to 0000h. The Living Daylights and Saboteur keep
+# their stack there by design, and enter 0038h with 2 to 4 values, all above
+# 00EDh. So more than LOW_SP_MAX values of SP below 0100h fail the point too.
+set ::RST38_MAX 100000
+set ::rst38 0
+set ::LOW_SP_MAX 32
+array set ::low_sp {}
+proc watch_rst38 {} {
+    debug set_bp 0x0038 {} {
+        if {[peek [expr {([peek16 [reg sp]] - 1) & 0xFFFF}]] == 0xFF} { incr ::rst38 }
+        if {[reg sp] < 0x100} { set ::low_sp([reg sp]) 1 }
+    }
+}
 # Point 4: in the same 60 seconds the game must not stop at a BASIC error
 # (INTERNALS.md, Check, point 4). BASIC prints the message, with "in" and the line
 # number in a program, and then Ok, in a text mode. The message counts only with
@@ -258,6 +391,12 @@ proc write_point3 {} {
     if {$::C(capreset) ne "" && [llength $::resets] == 0} {
         lappend ::reboots "the capture resets the machine $::C(capreset) seconds after the snapshot, and the restored game does not"
     }
+    if {[array size ::low_sp] > $::LOW_SP_MAX} {
+        lappend ::reboots "the CPU enters 0038h with [array size ::low_sp] values of SP below 0100h, as when a crash wraps the stack around"
+    }
+    if {$::rst38 > $::RST38_MAX} {
+        lappend ::reboots "the CPU runs FFh bytes, RST 38h, $::rst38 times in [after_restore] seconds, as after a crash"
+    }
     set failed [expr {[llength $::reboots] || [llength $::boots] >= 2}]
     set f [open $::C(report) a]
     puts $f [expr {$failed ? "point 3: fail" : "point 3: pass"}]
@@ -266,8 +405,12 @@ proc write_point3 {} {
 }
 
 # The watch on the service's part of page 3 without its scratch bytes,
-# ::C(part) = {first last E_CODE segment}. A write counts when it comes from
-# code outside the part and goes to the snapshot's page 3: its slot in the slot
+# ::C(part) = {first last E_CODE segment}, and on its code block without them,
+# ::C(partcode) = {first last}, when a game file's service at puts that block
+# apart from the entries, and on sub0, ::C(sub0) = {first last}, when the
+# build put it into page 3. A write counts when it comes from code outside the
+# part's blocks and sub0, which keeps a value in its own code, and goes to the
+# snapshot's page 3: its slot in the slot
 # register and, in a mapper, its segment in register FFh. The service's own
 # writes come from the part's code, which sets E_STOP for TAPIOF and STMOTR, and
 # from the code segment, in page 0, which sets it for the manual tape. So a
@@ -318,6 +461,12 @@ proc watch_part {} {
     if {[llength $::C(part)] == 0} return
     lassign $::C(part) first last
     debug set_watchpoint write_mem [list $first $last] {} {safe part_write}
+    if {[llength $::C(partcode)]} {
+        debug set_watchpoint write_mem $::C(partcode) {} {safe part_write}
+    }
+    if {[llength $::C(sub0)]} {
+        debug set_watchpoint write_mem $::C(sub0) {} {safe part_write}
+    }
     if {[llength $::C(ended)] == 0} return
     lassign $::C(ended) one two
     debug set_bp $one {[in_code_segment] && ([reg AF] & 0x40)} {safe at_tape_end}
@@ -327,6 +476,14 @@ proc part_write {} {
     lassign $::C(part) first last code segment
     set pc [reg pc]
     if {$pc >= $first && $pc <= $last} return
+    if {[llength $::C(partcode)]} {
+        lassign $::C(partcode) cfirst clast
+        if {$pc >= $cfirst && $pc <= $clast} return
+    }
+    if {[llength $::C(sub0)]} {
+        lassign $::C(sub0) sfirst slast
+        if {$pc >= $sfirst && $pc <= $slast} return
+    }
     if {([debug read ioports 0xA8] >> 6) != ([want a8] >> 6)} return
     if {$segment >= 0 && [debug read {MSX Memory Mapper I/O} 3] != $segment} return
     if {$pc < 0x4000 && [in_service_segment]} return
@@ -340,6 +497,12 @@ proc write_point2 {} {
     set lines {}
     dict for {address pc} $::part_writes {
         lappend lines "the game writes ${address}h, in the tape service's part of page 3, from ${pc}h"
+    }
+    dict for {address pc} $::res_writes {
+        lappend lines "the game writes ${address}h, in the call of the machine's resident program in page 3, from ${pc}h"
+    }
+    dict for {address pc} $::stack_writes {
+        lappend lines "the game writes ${address}h, in the stack of the call of the machine's resident program in page 3, from ${pc}h"
     }
     write_point 2 $lines
 }
@@ -424,7 +587,13 @@ proc state_mask {name} {
             # the snapshot, that page's bits of the slot's subslot register can
             # differ (INTERNALS.md, Restorer, step 1).
             set ps [lindex $m 1]
-            if {$ps != ($::dosslot & 3)} { return 0xFF }
+            # The image selects the resident program's subslot in its entry's
+            # page of its slot (build.py, call_resident).
+            set res 0xFF
+            if {[rescalls] && ([lindex $::C(resident) 0] & 0x83) == (0x80 | $ps)} {
+                set res [expr {~(3 << (2 * ([lindex $::C(resident) 1] >> 14))) & 0xFF}]
+            }
+            if {$ps != ($::dosslot & 3)} { return $res }
             set wpage [expr {[debug read memory [expr {$::tail(at) + $::tail(port)}]] - 0xFC}]
             set mask $::p0mask
             if {(([want a8] >> (2 * $wpage)) & 3) != $ps} { set mask [expr {$mask & ~(3 << (2 * $wpage))}] }

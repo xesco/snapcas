@@ -87,6 +87,20 @@ value in the 31 tapes that hold this search
 ([INTERNALS.md, The search slot patch](INTERNALS.md#the-search-slot-patch)). The
 games with a `capture` line for this form keep it.
 
+Arkos I to III, Satan's four tapes, Made in Spain, Paris-Dakar and seven more
+stopped on `sx2-extramapper-mcp` at `page 3 is not a RAM page that the snapshot
+keeps`. Their loaders search for RAM by RDSLT and WRSLT, also in subslots, and
+select it with a copy of ENASLT whose write of the subslot register has `AND B`
+where the BIOS has `AND H`. B is the old slot register, 00h on that machine,
+where every page selects slot 0, so the write cleared the subslot register.
+After that fix, nine of them still stopped partway, because they give page 1
+back to BASIC by EXPTBL's entry for slot 1, 00h, which leaves an expanded slot 0
+on its RAM. The ENASLT copy patch fixes both on every machine
+([INTERNALS.md, The ENASLT copy patch](INTERNALS.md#the-enaslt-copy-patch)), and
+the 14 games load their whole tape there. Satan's four need `rescall no` on that
+machine, because the game clears the bytes of page 3 where the image calls
+SX2RES.
+
 The forms with fixed code are the bit tests and the copies of pages 2 and 3. Those
 forms are the page copy patch's
 ([INTERNALS.md, The page copy patch](INTERNALS.md#the-page-copy-patch)), and the
@@ -252,7 +266,7 @@ These game files failed for another cause:
 
 | Game | Cause | Result |
 |---|---|---|
-| Choplift, Tetratlon, Toruk, Digy Dung, Container, of the Super MSX tapes | The game's loader fills FD9Ah to FFF6h with C9h, to clear the hooks. On an MSX2, FFE7h to FFF6h hold the BIOS's copies of VDP registers 8 to 23. The game then sets the screen mode, the sub-ROM writes the registers from the copies, and register 15 gets 09h. The interrupt handler then reads status register 9, the interrupt stays active, and the handler's stack runs through the memory | A patch ends the fill at FFE6h, on this machine only |
+| Choplift, Tetratlon, Toruk, Digy Dung, Container, of the Super MSX tapes | The game's loader fills FD9Ah to FFF6h with C9h, to clear the hooks. On an MSX2, FFE7h to FFF6h hold the BIOS's copies of VDP registers 8 to 23. The game then sets the screen mode, the sub-ROM writes the registers from the copies, and register 15 gets 09h. The interrupt handler then reads status register 9, the interrupt stays active, and the handler's stack runs through the memory | A patch of each game file ended the fill at FFE6h, on this machine only. The hook fill patch now ends it at FFC9h on every MSX2 ([INTERNALS.md, The hook fill patch](INTERNALS.md#the-hook-fill-patch)), and the game files lost the lines. It also found Container's second fill, which the game file had missed |
 | Trivial Pursuit | The game copies the BIOS to the RAM of page 0, puts its own code there from 268Ch, and sets H.KEYI and H.TIMI to jump to 2701h and 2702h in that RAM. An interrupt in the sub-ROM goes to the main ROM's handler, whose hooks then jump to 2701h and 2702h in the ROM, where an LDIR of 65,536 bytes can run | A patch makes H.KEYI a `RET`, and H.TIMI a test of the slot register that runs the routine only when page 0 is in slot 1 or 3, on this machine only |
 | Mortadelo y Filemon | `OUT (0FEh),A`, the ZX Spectrum's border port, at 5B13h and FF5Dh. Port FEh is a memory mapper's register of page 2, and both RAMs of this machine are mappers | Patches replace each with `LD A,A` and `LD D,D`, on this machine only |
 
@@ -278,6 +292,135 @@ Crazy Golf, Cubit and Humphrey load their loader at FFCAh to FFFEh, over an MSX2
 copies of VDP registers 8 to 23 and the main ROM's slot at FFF7h. Their patches load
 it at FB03h. The Queens Footsteps Part 1 calls 0115h, as Part 2 does, and has the
 same patch.
+
+## The SX-2
+
+The SX-2 is an MSX2+ whose RAM is in slot 3-0, beside the sub-ROM in 3-1 and its
+Nextor disk in 3-2. Its first collection failed 46 game files, for five causes that
+no other machine had.
+
+KdL's sub-ROM sets 80 columns at each boot, so BASIC's programs that `LOCATE` or
+`PRINT` for 37 or 40 columns broke their screens. The capture now types the machine
+file's `width` before the load. English Words passed the check before, on every
+machine, because its snapshot is BASIC's prompt; it is not a game that the check
+can tell from a failed load.
+
+83 game files `POKE &HFFFF,&HAA` or `POKE -1,170` to select subslot 2 in every page,
+the RAM of the MSX2s that the tapes knew. On the SX-2 that selects the sub-ROM's
+neighbour, and the program loses its RAM. The subslot POKE patch gives the POKE the
+RAM's subslot
+([INTERNALS.md, The subslot POKE patch](INTERNALS.md#the-subslot-poke-patch)).
+
+T0 replaces the BIOS's page 0 in DOS's mapper, and on the SX-2 that mapper's slot is
+the sub-ROM's too. A BIOS call of the sub-ROM there selected T0's slot in page 0,
+so T0 now calls the sub-ROM by its subslot
+([INTERNALS.md, T0 and the sub-ROM in one slot](INTERNALS.md#t0-and-the-sub-rom-in-one-slot)).
+
+Power Drift, The Running Man and SPQR left no 158 free bytes in page 3, and keep RAM
+of their own in page 0, so neither the part nor T0 had a place. A game file's
+`service at` now takes a second address, for the part's code block, apart from its
+26 bytes of entries. Thunder Blade, Continental Circus, Bronx, Swiva and Il Giusti
+needed only the part moved.
+
+Choplift, Tetratlon, Toruk, Digy Dung and Container fill the hooks with RET past
+FFC9h, as on the NMS 8250
+([The RAM's subslot in every page](#the-rams-subslot-in-every-page)). 32 game files
+have such a fill, and the other 27 passed only because the check's minute never set
+a screen after it. The hook fill patch now ends each at FFC9h on an MSX2.
+
+Bomb Hazard ends its loader with `EI / JP 0100h`, and the game sets its interrupt
+routine's address at 0039h only after 14 NOPs there. On an MSX2 a VDP interrupt is
+pending at the `EI`, and the `JP` at 0038h goes to the bytes that the RAM holds. The
+VG-8020's RAM held an address that worked by chance. Its `game.txt` now enables the
+interrupts after the address, on every machine.
+
+The last four game files needed lines of their own:
+
+| Game | Cause | Fix |
+|---|---|---|
+| BMX Simulator | Before its copy to 0100h, the loader gives pages 0 and 1 the slot of page 3. For an expanded slot it sets only the subslot register and leaves the ROM in the slot register, so the copy is lost, the game's tables read FFh, and a routine at 95F5h rotates bytes from HL down past 0000h to FFFFh. The other machines take a capture variant | A patch makes the branch that skips the slot register two NOPs |
+| Aventuras AD's 13 game files | The interpreter's interrupt handler selects its RAM in page 0 by the slot register alone, and calls its routine at 013Ch there. An interrupt during a call of the sub-ROM, in 3-1 beside the RAM, finds the sub-ROM in page 0. Aventura 2 resets so in its capture, and the 12 others passed only because no interrupt came at such a moment | Patches put a routine in 13 unused bytes after the handler, which pushes the subslot register, selects subslot 0 around the call and writes the register back |
+| Ci-U-Than Trilogy II and III | Their last file writes two NOPs over the setup's `IM 2` when the slot of page 3 is expanded, and the game then runs in mode 1 with no handler at 0038h. Their images on other machines with such a slot run in the bytes that page 0's RAM held | A patch keeps `IM 2` |
+| Chase H.Q. | Page 3's longest run of zeros is 74 bytes, fewer than the 132 of the part's code block, and the game keeps RAM of its own in page 0 | The part goes into the unused 255 bytes of the game's table of interrupt mode 2, whose fill each level's code no longer repeats there |
+| Ke Rulen los Petas | Page 3 has no run of zeros of 26 bytes, and the game keeps RAM of its own in page 0 | The load reads the tape to its last block, so `service no` in `game.txt` |
+
+On `sx2-extramapper-mcp`, BASIC's RAM is the Extra-Mapper in slot 0-1, beside the
+main ROM in 0-0. The capture's step that selects BASIC's RAM in every page of its
+slot put RAM over the ROM in pages 0 and 1, and every load crashed at the load
+command. The step now leaves slot 0 alone
+([INTERNALS.md, The RAM's subslot in every page](INTERNALS.md#the-rams-subslot-in-every-page)).
+Gauntlet's `rom keep`, which the restorer refuses where the ROM and DOS's mapper
+share slot 0, moved to the game files of the other machines.
+
+Gauntlet showed that a hook cannot hold the call of SX2RES. An image with the call
+in H.KEYI lost it 0.4 seconds after the restore, when the title wrote `JP 8C9Eh`,
+its own handler, there. With that handler moved to H.TIMI, the game's `RET` to
+FD9Ah at 8758h, before its load, took the call again. The call is now in T0
+([INTERNALS.md, The resident program's call](INTERNALS.md#the-resident-programs-call)),
+and SX2RES answers through the title and the menus without a line. The main game
+then puts `JP 0B45Bh` at 0038h in its own RAM in page 0, which is T0's segment, and
+writes its data over all of T0. Its game file for `sx2-extramapper-mcp` has
+`rescall B45B`, and patches the main game's `LD HL,0B45Bh` to the wrapper's address,
+FCC9h, with the block's sum. The calls stop for the load, whose interrupts are off,
+and go on through the main game and its levels.
+
+Thor keeps its code in the RAM of pages 0 and 1 and reaches the BIOS only from its
+interrupt handler, by the slot register alone: its loader searches the primary slots
+0 to 3 for that RAM. The SX-2's RAM there is subslot 1 of slot 0, beside the BIOS in
+subslot 0, so the search took the mapper in slot 3-0, which SX2RES holds, and on the
+capture variant without that mapper it ended on an empty slot and the snapshot held
+a crash that the check passed: the CPU ran FFh, `RST 38h`, through page 2. Its game
+file for `sx2-extramapper-mcp` gives the search subslot 1 of slot 0, and makes each
+switch between the BIOS and the RAM a write of slot 0's subslot register, 50h or
+55h: the loader's end, the handler's template of 20 bytes, the two entries of the
+second file, and the game's read of the BIOS's character patterns. Both files'
+sums follow. The second loader at 8838h, with a search of its own, never runs. The
+image plays on the SX-2 with SX2RES running.
+
+Five more games selected an empty slot at their snapshot on `sx2-extramapper-mcp`,
+and the check passed them: their loaders want RAM in page 1 from a cartridge slot,
+and the SX-2 has it only as subslot 1 of slot 0. Each game file for that machine now
+selects the subslot with a write of slot 0's subslot register, 54h for the RAM in
+page 1 and 50h for BASIC's ROM there, in place of each slot register write:
+
+| Game | The loader | The patch |
+|---|---|---|
+| Knight Tyme | Searches page 1 by the primary slots with WSLREG, copies 16 KB there, and keeps the slot in FD9Ch, a byte of H.KEYI | The search becomes the copy with the subslot, and the game's start writes 54h in place of reading FD9Ch |
+| Map Game | Tries ENASLT with slots 3, 2 and 1 for page 1, and gets the BIOS back with slot 0 | Slot 0-1, 84h, as the first try and as the slot it keeps, and slot 0-0, 80h, for the BIOS |
+| Checkmate! and Checkmate! First Moves | Select slot 2 with the slot register for a copy of 16 KB to page 1 and at the game's start | The copy routine, longer in its free bytes, and the start, in the bytes of an LD SP that loads SP's own value |
+| Finders Keepers | Selects slot 2 with WSLREG for its copy, at its start and back to BASIC | Each LD A,n / CALL WSLREG becomes LD A,n / LD (0FFFFh),A, of the same length |
+
+All five load to the tape's end and run in `openMSX`, with SX2RES's calls from H.KEYI.
+
+Of the 378 failures of the first run on `sx2-extramapper-mcp`, 223 logged the stack
+at FFFFh, 99 of them at F164h, where page 3 holds FFh: the CPU ran `RST 38h` there
+after a crash, and the stack only showed it. 97 failing games have a BASIC
+`POKE -1,170`, which the subslot POKE patch turned into 55h, RAM in every page of
+slot 0 and so no BASIC. In the main ROM's slot the patch now writes 50h. In a test
+of four, Eagle, Silfi and Choplifter then loaded and passed.
+The run gained 34 games. The Karate, Xerider and Japan, of the Super MSX
+compilation, had passed with 55h as crashed snapshots: BASIC died at the POKE, and
+the snapshot held garbage in page 0 with interrupts off.
+
+220 game files hold the tape loader that Opera Soft, Topo Soft, Dro Soft and other
+Spanish publishers shared. It reads each block through a trampoline at FC9Ah, which
+selects the BIOS in page 0 by the slot register alone. On `sx2-extramapper-mcp` the
+RAM in 0-1 stays in page 0, and the call runs the game's bytes. 57 of the game
+files failed. 85 of the other 163 had passed with a load that stopped long before
+the same game's on `sx2-noexp0`: Ice-Breaker's at 14 of 268 seconds, Double
+Dragon's at 31 of 544. The check saw no crash in those snapshots. The trampoline
+patch writes slot 0's subslot register instead
+([INTERNALS.md, The trampoline patch](INTERNALS.md#the-trampoline-patch)). A first
+design wrote 55h, RAM in every page, after each call. Budokan calls the loader
+with the BIOS in page 0, at 54h, and crashed with it, so the patch puts back the
+value that the builder found. The loader checks its headerless blocks by an XOR of
+their bytes, so the patch keeps the XOR, with a byte of the trampoline that never
+runs. Of the 57 game files, 45 now load as far as on `sx2-noexp0` and pass. Some
+needed lines for their loaders besides the patch: the RAM searches of Hammer Boy,
+Jack the Nipper and seven Super MSX game files, Casanova's write of FFFFh as on
+`sx2`, and the part's place for Thunder Blade and Il Giusti. Thunder Blade also
+showed that the capture turned the tape over while the loader still read side 1's
+last byte, so the turn now waits 0.05 seconds.
 
 ## Build
 
@@ -379,6 +522,21 @@ and a failed point 3 fails the check. A hang is not a reboot, and point 3 does n
 see a hang. American Football, captured with the Carnivore2, stops in the BIOS on
 the VG-8020 with its interrupts off. Its game file now captures it without the
 Carnivore2 ([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)).
+
+Seven images passed all four points and still crashed: Containe on `fsa1-mfrsd`,
+Miner on `vg8020-carnivore2` and `vg8020-sdmapper`, and Post Mortem, Naked Alien,
+Rail Station and Vertigo on `sx2-extramapper-mcp`. Each snapshot leaves a page in
+an empty slot, and the game jumps there, or into RAM that holds FFh. Each FFh
+byte is `RST 38h`, so the CPU enters 0038h at each byte and never resets. Over the
+check's 60 seconds those images ran 260,000 to 13.4 million FFh bytes, counted as
+entries to 0038h whose return address follows an FFh byte. Gauntlet ran none and
+Pharaoh 1,710. A count of all entries does not do: Rocky takes a million
+interrupts there, because its handler is a RET that never reads the VDP's status,
+and runs no FFh byte. So point 3 fails an image that runs more than 100,000 FFh
+bytes. Chuckie Egg on `fsa1-mfrsd` runs 479,000 and fails too. A page
+in an empty slot at the snapshot is not a sign by itself: X-Spelunker on
+`hb75p-mfrsd` and Pharaoh on `phc28s-ram64k-carnivore2` leave such a page and never
+use it.
 
 During the same 60 seconds the game must not stop at a BASIC error, and point 4
 checks that. A BASIC program, or a loader written in BASIC, that meets an error

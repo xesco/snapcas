@@ -136,7 +136,8 @@ class RomKeep(unittest.TestCase):
     """The Victor HC-90A has its main ROM in slot 0-0 and its mapper, DOS's,
     in slot 0-2. The tape service needs the mapper's subslot in page 0's bits
     of slot 0's subslot register, so the snapshot's page 0 cannot stay in
-    another subslot of slot 0."""
+    another subslot of slot 0, unless the image's entry code has sub0, which
+    selects the subslot itself while page 3 is the mapper's (FLAG_P0)."""
 
     @classmethod
     def setUpClass(cls):
@@ -166,6 +167,43 @@ class RomKeep(unittest.TestCase):
 
     def test_another_page_0_in_dos_mappers_slot_stops(self):
         self.assertIn(support.said("SUBROM.SNP: a page 0 is in another subslot of DOS's mapper's slot"), self.screen)
+
+
+@support.needs_dos("msxdos2")
+class RomKeepSub0(unittest.TestCase):
+    """The same machine, with images whose entry code has sub0 (FLAG_P0): it
+    selects DOS's mapper's subslot in page 0 itself while it runs, when page
+    3 is in DOS's mapper, so page 0 can stay in another subslot of slot 0
+    (INTERNALS.md, Page 0 in another subslot of DOS's mapper's slot)."""
+
+    @classmethod
+    def setUpClass(cls):
+        dos = support.dos("msxdos2")
+        work = os.path.join(WORK, "stops", "hc90a-sub0")
+        service = support.service()
+        facts = support.restorer_facts("test/hc90a-msxdos2", dos, work)
+        segment = (service["REC_SERVICE"], 0, 0, 0, 0)
+        rom, subrom = {"H_A8": 0x00, "H_SUB": (0xA8, 0, 0, 0)}, {"H_A8": 0x00, "H_SUB": (0xA9, 0, 0, 0)}
+        # 13 service segments, more than the 12 that DOS leaves free of the
+        # 16, so that the restorer stops at the count after the check.
+        files = {
+            "KEEPP0.SNP": support.synthetic_image(facts["crcs"], [segment] * 13,
+                                                  H_FLAGS=service["FLAG_ROM_KEEP"] | service["FLAG_P0"], **rom),
+            "SUBP0.SNP": support.synthetic_image(facts["crcs"], [segment] * 13, H_FLAGS=service["FLAG_P0"],
+                                                 **subrom),
+            # sub0 writes page 3's subslot register, which is not DOS's
+            # mapper's when page 3 is in slot 1.
+            "P3OTHER.SNP": support.synthetic_image(facts["crcs"], [segment], H_FLAGS=service["FLAG_P0"],
+                                                   H_A8=0x40, H_SUB=(0xA9, 0, 0, 0)),
+        }
+        cls.screen = support.restorer_screen("test/hc90a-msxdos2", dos, work, files)
+
+    def test_the_rom_of_rom_keep_and_the_sub_rom_stay_in_page_0(self):
+        for name in ("KEEPP0", "SUBP0"):
+            self.assertRegex(self.screen, support.said(rf"{name}.SNP: needs 14 free mapper segments, and DOS has \d+"))
+
+    def test_page_3_outside_dos_mappers_slot_stops(self):
+        self.assertIn(support.said("P3OTHER.SNP: a page 0 is in another subslot of DOS's mapper's slot"), self.screen)
 
 
 @support.needs_dos("msxdos1")

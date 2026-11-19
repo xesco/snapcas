@@ -154,8 +154,16 @@ game file. Each kind of automatic patch is one file in `tools/patches/`:
 | `pagecopy.tcl` | The capture's decision, by the slot map, of which forms to patch ([The page copy patch](#the-page-copy-patch)) |
 | `searchslot.py` | The start and the end of the loaders' RAM search that gives page 1 the slot of page 2, and the end's places in the tape files ([The search slot patch](#the-search-slot-patch)) |
 | `searchslot.tcl` | The capture's patch of each such end, on every machine ([The search slot patch](#the-search-slot-patch)) |
+| `enaslt.py` | The loaders' copy of ENASLT's subslot write with `AND B`, their selection of page 1 by EXPTBL's slot 1 entry, and their places in the tape files ([The ENASLT copy patch](#the-enaslt-copy-patch)) |
+| `enaslt.tcl` | The capture's patch of each such place, on every machine ([The ENASLT copy patch](#the-enaslt-copy-patch)) |
 | `irqslot.py` | The interrupt handler that writes the slot register from the game's copy of it, and its places in the tape files ([The interrupt slot patch](#the-interrupt-slot-patch)) |
 | `irqslot.tcl` | The capture's decision, by the machine's generation, to patch the handler ([The interrupt slot patch](#the-interrupt-slot-patch)) |
+| `subpoke.py` | A BASIC program's `POKE &HFFFF,&HAA`, as text and as tokens, and its places in the tape files ([The subslot POKE patch](#the-subslot-poke-patch)) |
+| `subpoke.tcl` | The capture's decision, by the subslot of BASIC's RAM, to patch the POKE's value ([The subslot POKE patch](#the-subslot-poke-patch)) |
+| `hookfill.py` | A loader's fill of the hooks with RET that goes past FFC9h, and its places in the tape files ([The hook fill patch](#the-hook-fill-patch)) |
+| `hookfill.tcl` | The capture's decision, by the machine's generation, to end the fill at FFC9h ([The hook fill patch](#the-hook-fill-patch)) |
+| `tramp.py` | The loaders' builder of a trampoline that reaches `TAPION` by the slot register alone, its places in the tape files, its patched form, and the build's form for the tape service ([The trampoline patch](#the-trampoline-patch)) |
+| `tramp.tcl` | The capture's decision, by the slots of the main ROM and of BASIC's RAM, to patch the builder ([The trampoline patch](#the-trampoline-patch)) |
 
 The Python file of each kind has the same two functions. `find(data, context)`
 returns the kind's findings in data, for the scan. `tcl(side1, side2)` returns the
@@ -282,7 +290,8 @@ stopped. The script takes the following steps, which are the procedures `step1` 
    then boots the machine with no disk, presses the `boot` keys, and waits for
    BASIC's `Ok`. After `Ok`, it waits 10 seconds more, as a person would, because a
    disk system can still be busy just after `Ok`.
-2. Stops with an error unless the ROM's byte at 002Dh is 0 (MSX1) or 1 (MSX2). It
+2. Stops with an error unless the ROM's byte at 002Dh is 0 (MSX1), 1 (MSX2) or 2
+   (MSX2+), which the capture treats as an MSX2. It
    reads `EXPTBL` at FCC1h and `EXBRSA` at FAF8h, the slot IDs of the ROMs, once,
    because a game can overwrite page 3. It then removes the disk system from page 3
    with `debug write`. It writes RET (C9h) in every hook from FD9Ah to FFC9h and at
@@ -292,11 +301,15 @@ stopped. The script takes the following steps, which are the procedures `step1` 
    claims them and the tape service can use them. On an MSX2 whose BASIC has its RAM
    in an expanded slot, it selects the RAM's subslot in every page of that slot
    ([The RAM's subslot in every page](#the-rams-subslot-in-every-page)). It then
-   types `CLEAR200,&HF380`, which sets `HIMEM` to a cassette machine's F380h.
+   types `CLEAR200,&HF380`, which sets `HIMEM` to a cassette machine's F380h. A
+   machine file's `width` line puts `WIDTH` and its width before it, in the same line
+   ([FILES.md, Machine file](FILES.md#machine-file)).
 3. Notes the slots selected in each page, and runs the `start` hook of the patch
    kinds, which writes the slot map ([Slot patches](#slot-patches)), decides on
    the page copy patch ([The page copy patch](#the-page-copy-patch)), and patches
-   each RAM search of [The search slot patch](#the-search-slot-patch). It then
+   each RAM search of [The search slot patch](#the-search-slot-patch), each
+   place of [The ENASLT copy patch](#the-enaslt-copy-patch) and each builder of
+   [The trampoline patch](#the-trampoline-patch). It then
    inserts the tape file of side 1, with the game file's `side1` patches written
    into a copy in `snap/`, into the cassette player. It types the load command for
    the first header's type ([FORMATS.md, CAS data](FORMATS.md#cas-data)):
@@ -304,9 +317,11 @@ stopped. The script takes the following steps, which are the procedures `step1` 
    motor has stopped for 1 second. When the game file has `side2` and the game reads
    past side 1's end, the capture inserts side 2 at its start, as a player turns the
    tape over. A read past side 1's end is a `TAPION` call at that end, or a read
-   with the motor on there. After the turn, the tape position goes on in side 2,
-   after side 2's first header, or at side 2's start when side 2 holds no standard
-   block.
+   with the motor on there that waits 0.05 seconds. In the tape's last 10
+   milliseconds `TAPIN` can still be reading side 1's last byte, and Thunder
+   Blade's loader hung on the sum of a last block that side 2 cut off. After the
+   turn, the tape position goes on in side 2, after side 2's first header, or at
+   side 2's start when side 2 holds no standard block.
 4. Presses the `keys`, and logs these events with their times:
    - The tape position, kept as the tape service would keep it. The position comes
      from breakpoints at the addresses that the jump table entries 00E1h and 00E4h
@@ -366,7 +381,12 @@ stopped. The script takes the following steps, which are the procedures `step1` 
    log when the try's key does not continue the load, because the restored game gets
    no such key.
 6. Takes the snapshot when the CPU next accepts an interrupt while no VDP command is
-   running (status register 2, bit 0, is 0) and both VDP latches are empty. A probe
+   running (status register 2, bit 0, is 0) and both VDP latches are empty. On an
+   MSX2 it lets an interrupt pass while page 0 shows the sub-ROM, page 0's slot
+   being the sub-ROM's with the sub-ROM's subslot in page 0, because the restore
+   does not give such a page 0 back. With the tape service, it also lets one pass
+   while the BIOS calls the sub-ROM in the slot of the game's RAM
+   ([T0 and the sub-ROM in one slot](#t0-and-the-sub-rom-in-one-slot)). A probe
    breakpoint on `z80.acceptIRQ` marks the acceptance. A breakpoint at the handler's
    address takes the snapshot there, where the CPU has pushed the return address and
    interrupts are off. The handler's address is 0038h in interrupt modes 0 and 1, or
@@ -375,9 +395,11 @@ stopped. The script takes the following steps, which are the procedures `step1` 
    CPU is then halted. `openMSX` shows a halted CPU as a program counter just after
    a HALT (76h) that does not move. This snapshot needs the same quiet VDP, because
    a game that keeps its interrupts off can be between the two writes that set a VDP
-   register. So the capture looks again every 3 milliseconds, up to 100 times, and
-   then takes the snapshot as it is. The log says how long the capture waited, or
-   that the VDP is not quiet. When the game gets the tape service and the CPU is in
+   register. It also needs no call of the sub-ROM under way, as above, because a
+   game with its interrupts off can be in such a call. So the capture looks again
+   every 3 milliseconds, up to 100 times, and then takes the snapshot as it is. The
+   log says how long the capture waited, or that the VDP is not quiet or a call of
+   the sub-ROM is under way. When the game gets the tape service and the CPU is in
    the BIOS's tape code, the snapshot goes back to the last `TAPION` call's entry,
    because T0 replaces that code. The program counter is then at `TAPION`'s jump
    table entry, 00E1h. The call has not run there, so the restored game makes the
@@ -396,6 +418,157 @@ either side 1 is not read or the game file has `side2`, unless the game file has
 joystick choice of players, gets its snapshot at that screen after the key tries of
 step 5. The player chooses on the real machine, and the tape service supplies the
 rest.
+
+### The resident program's call
+
+A machine file's `resident` line names a program that stays in RAM of a slot and
+must keep running under the game ([FILES.md, Machine file](FILES.md#machine-file)).
+The SX-2's SX2RES is one: it serves its network requests from the timer interrupt,
+through the BIOS's hooks in page 3. A restore writes the game's page 3 over those
+hooks, so the image calls the program's entry itself, in one of three ways, by what
+the game's interrupt is at the snapshot.
+
+**From T0, with the tape service.** A hook is no place for the call: Gauntlet puts
+its own handler in H.KEYI at its title, writes `RET` there before its load, and
+then takes the interrupt at 0038h for a routine in its own RAM. So the call is in
+T0, the image's copy of the BIOS's page 0. `build.py` sends T0's jump at 0038h to
+`t_res`, in the free bytes of T0's stubs, and `t_res` ends with the jump to the
+BIOS's interrupt routine. `t_res` selects the program's primary slot in the entry's
+page, calls the entry, and writes the slot register back. It uses no BIOS routine.
+It leaves the call out when the entry does not start with the program's first two
+bytes, which is so without the program and while its slot shows another subslot.
+
+**From H.KEYI, without the tape service.** Such an image has no T0, and a ROM is
+in page 0, so the BIOS's interrupt routine runs and calls H.KEYI first. A snapshot
+can catch the BIOS in a call of the sub-ROM, with page 0 in the sub-ROM's slot, and
+the game still runs on the BIOS's routine, so only a RAM page kept for page 0 rules
+this call out. The build writes `resb` (part 5 of `SERVICE.BIN`) into zeros of the
+game's page 3, and writes `CALL resb / RET` into H.KEYI. `resb` reads the entry's
+first two bytes with the BIOS's `RDSLT` and calls it with `CALSLT`, which select the
+program's subslot in the entry's page and give the slot's subslot register back.
+`t_res`'s way, the slot register alone, assumes that the slot's subslot register
+still selects the program in that page, and a game that calls another ROM of the
+slot, as the MegaSD's Nextor in 3-2 on the SX-2, leaves it on that ROM: Smack Wacker
+on `sx2-extramapper-mcp` called the program 16 times and then never again.
+`resb` keeps the main registers and the interrupts' state (below).
+`CALSLT` changes IX, IY and the alternate registers, which the BIOS's interrupt routine keeps around H.KEYI. `RDSLT` and
+`CALSLT` run the BIOS's slot routines in page 3 at F380h, so a snapshot whose F380h
+does not hold them as the BIOS writes them gets `res3` in H.KEYI: Super Cobra
+clears F380h to F7DBh, and `resb` reset it. Every patch that the build makes in a
+RAM page is a patched range for the check under each page that selects the page's
+segment: Double Dragon maps one segment of 0-1 in pages 2 and 3, so its vector at
+E2FFh is also A2FFh. It takes FD29h, the
+entries of `SLTWRK` for slots 1 and 2, the work area of ROMs in the cartridge
+slots, which nothing writes when those slots are empty, as on the SX-2. When those
+64 bytes are not zero at the snapshot, it takes FCC9h, the start of `SLTATR`. A
+ROM image's loader often marks its slot there: the loader of Aackosoft's tapes
+writes 20h at FCCAh, and Satan clears FCCEh to FCF5h, so with the routine at FCC9h
+those games failed point 2. A game that resets the machine after the restore, to
+start a ROM image in RAM, loses the call wherever it is: the BIOS's boot tests and
+sets up page 3's system area again. Its machine's game file has `rescall no`. When the game's H.KEYI is in use
+at the snapshot, the build copies its five bytes after a `CALL resb` at the end of
+the routine, and H.KEYI jumps there, so the game's hook runs after the call.
+
+**From a wrapper, for a game's own routine.** A game that has its own interrupt
+routine at the snapshot, a jump at 0038h in its RAM in page 0 or a vector for
+interrupt mode 2, makes no call from T0 or H.KEYI. The build sends the vector to a
+wrapper that calls the program and jumps to the game's routine: without the tape
+service, `CALL res3 / JP routine` after `res3` in the same zeros, and with it a
+wrapper of 17 bytes at FCC9h, before the part's entries, which calls `resc` in the
+code segment through `e_run`, the entry code of `TAPION` and `TAPIN`. `resc` is
+`t_res`'s call, and the code segment is the image's own, so the game cannot write
+over it. A game that installs its routine
+after the snapshot, as Gauntlet's main game does, gets the same wrapper from its
+game file's `rescall` line and a `patch` that makes it install the wrapper's
+address ([FILES.md, Game file](FILES.md#game-file)). During the call of `resc` the
+code segment is in page 0, so the program sees it there in place of the game's
+page 0.
+
+**The call's own stack.** The program switches to a stack of its own at entry
+(SX2RES 2.8+ uses 6 bytes below the stack pointer before switching), staying
+within 8 bytes below the stack pointer at its entry, and the call's return
+address takes 2 more. A game's stack
+in the entry's page would vanish while the program's slot is there, and many
+games, Desperado and Pac-Mania among them, keep their stack in page 1. So each
+call switches to a stack of its own for the call and gives the game's back after
+it, whatever page the game's stack is in, and the game's stack keeps only the
+interrupt's return address and a few registers. `t_res` takes bytes of T0,
+below `t_tapion`, in the BIOS's TAPOUT, which nothing runs. `resc` takes 18
+bytes of the code segment, after its own code: a game's stack in page 0 is the
+code segment during the call, where the program's pushes would write the tape's
+bytes, as they did in Continental Circus when `resc` ran on the game's stack.
+`res3` and `resb` take zeros of the game's page 3 for their stacks, 12 and 28
+bytes, and for their ends, `res3e` and `resbe`, 12 bytes each just after the
+stack: 24 and 40 bytes. `res3`'s stack holds the slot register too, and
+`resb`'s the interrupts' state, `CALSLT`'s 14 bytes down to the entry, its
+call's return address and CLPRIM's among them, as `openMSX` shows on the SX-2,
+and 4 to spare. `RDSLT` takes 12. `build.py` looks for them in SLTATR and
+SLTWRK, FCC9h to FD88h, preferring SLTWRK (FD09h to FD88h) over SLTATR
+(FCC9h to FD08h), where the BIOS's ROM search and some games write: just below
+or just after the code in SLTWRK first, then beside it in SLTATR, then the
+highest that have room, clear of the tail, of the 256 bytes below the
+snapshot's stack pointer, where the game's stack can grow, and of 16 bytes on
+each side of the game file's patches of page 3, whose code can keep its data in
+zeros beside it, as Pentagram's at FCE8h. A game file's `resstack` line names
+another place ([FILES.md, Game file](FILES.md#game-file)).
+Each call turns the interrupts off before it takes its stack, so no interrupt
+runs on that stack and no call uses it twice: an interrupt that comes before the
+`DI` runs its own call to the end before the first call goes on. `res3` and
+`resb` turn the interrupts on again at their end when they were on at the call,
+for a game whose main loop calls them through its game file's patches (note that
+`resb`'s `CALSLT` clobbers `IX`, `IY` and `AF'`, which the BIOS saves around
+`H.KEYI` but a main loop does not). `LD A,I`
+gives that state, IFF2, in the P/V flag before the `DI`, and a second `LD A,I`
+when the first gives 0, because a Z80 that takes an interrupt at the end of
+`LD A,I` gives 0 there. From H.KEYI or a game's interrupt routine the state is
+off, so the interrupts stay off. `t_res` and `resc` run with the interrupts off
+always, from the interrupt and from `e_run`, and so does a 17-byte wrapper,
+which returns with them off, as `TAPION` does. `res3` and `resb` keep their
+lengths, 45 and 55 bytes, so the code after them keeps its place: the game files
+that call `resb` at FD29h, or jump to the wrapper after `res3` at FD56h. Without
+room for the stack, `res3g` and `resbg` take their places, the same calls on the
+game's stack, which leave the call out when the game's stack is in the entry's
+page, and which leave the interrupts as `RDSLT` and the program leave them. On
+`sx2-extramapper-mcp`, 125 of the 1150 images without the tape service that call
+the program have such a routine, and 11 of those keep their stack in page 1. The
+zeros of SLTATR and SLTWRK at the snapshot can still be a game's: Service Ace
+clears D700h to FCFFh, over the stack below FD29h. The check watches the stack and
+its end and fails point 2 at such a write, and the game file's `resstack` names
+other zeros, or `resstack no` gives the routine on the game's stack back.
+
+The program's slot must show its subslot in the entry's page. The SX-2 keeps Nextor's
+subslot there, which a restored game does not use. So `build.py` writes the
+program's subslot into that page's bits of the header's subslot register of the
+slot, and of the slot's byte of `SLTTBL` in the game's page 3, from which the BIOS
+writes the register again.
+
+The code in page 3 is in the zeros of the snapshot only. When the game uses the
+bytes, the image has no call and the kind is `p3busy`, and the game file's `rescall`
+stops the build instead. A game file's `rescode` line names another place in page 3
+for the code, zeros that the game leaves alone, as Death Wish's does. The check
+watches the code's bytes and fails point 2 when the game writes them, because the
+next interrupt would run the game's bytes. The game's later writes to H.KEYI only
+end the calls.
+
+`build.txt`'s `rescall` line says what the image does:
+
+| Line | The image |
+|---|---|
+| `rescall t0` | Calls the program from T0, at each interrupt of the BIOS's routine |
+| `rescall hook` | Calls the program from H.KEYI, with the routine at FD29h, or at FCC9h when the game uses FD29h |
+| `rescall im2`, `im0` | Not from T0 or H.KEYI: the game is not in interrupt mode 1. A wrapper, when the vector is in the snapshot's RAM |
+| `rescall page0` | Not from T0 or H.KEYI: without the tape service, the snapshot keeps a RAM page for page 0; with it, page 0 is not the main ROM at the snapshot, or the snapshot keeps RAM for page 0. A wrapper, when the snapshot has a jump at 0038h there |
+| `rescall romkeep` | Does not: the game file's `rom keep` keeps the ROM in page 0 |
+| `rescall t0mode` | Does not: the tape service has no part in page 3, and its T0 has no room |
+| `rescall slotbusy` | Does not: the game itself selects the program's slot in the entry's page, with another subslot |
+| `rescall p3busy` | Does not: the game uses the zeros that the code needs, at FD29h and at FCC9h without the tape service, at FCC9h with it. A `rescode` line gives another place |
+| `rescall nopage3` | Does not: the snapshot keeps no RAM page 3 |
+| `rescall off` | Does not: the game file's `rescall no` |
+
+With wrappers, `resvector` follows with each wrapper's address and the game's
+routine, with code in page 3, `rescode` with its first and last address and the
+segment of page 3, and with its stack there, `resstack` with the stack's first and
+last address, all in decimal.
 
 ### The RAM's subslot in every page
 
@@ -422,6 +595,11 @@ same slots.
 An MSX1 stays as it is. Its own RAM is in a slot that is not expanded, and its
 loaders find that RAM. On the VG-8020 with a Carnivore2, the step made Jack the
 Nipper load into the Carnivore2's RAM, where its write of FFFFh deselects the RAM.
+
+Slot 0 stays as it is too. The main ROM is in its subslot 0, and BASIC's RAM in
+another subslot of slot 0 in every page would deselect the ROM in pages 0 and 1.
+The SX-2 with its Extra-Mapper on, `sx2-extramapper-mcp`, keeps BASIC's RAM in slot
+0-1, and every load crashed at the load command before this rule.
 
 A game file's `subslots keep` leaves the step out
 ([FILES.md, Game file](FILES.md#game-file)). The line is for a game that puts its
@@ -499,7 +677,9 @@ that no game file needs a line for them. It does this in four parts:
 
 The patches in `snap/patches.txt` change the tape after the game file's `patch`
 lines. `build.py` applies them as well, so the tape service serves the tape that the
-capture loaded.
+capture loaded. With the tape service, `build.py` gives the trampoline patch's
+builders their form for the service
+([The trampoline patch](#the-trampoline-patch)).
 
 The capture looks for the code in three ways, and takes the first that finds it:
 
@@ -527,6 +707,13 @@ any operand:
 |---|---|
 | The byte before `3E` | Those of an instruction with a one-byte operand: `06 0E 16 1E 26 2E 36 3E C6 CE D6 DE E6 EE F6 FE D3 DB 10 18 20 28 30 38`, or with a two-byte operand, as below |
 | The second byte before `3E` | Those of an instruction with a two-byte operand: `01 11 21 31 22 2A 32 3A C2 C3 C4 CA CC CD D2 D4 DA DC E2 E4 EA EC F2 F4 FA FC` |
+
+The scan also skips a form whose `OUT` is the first instruction of the BIOS's
+slot routines in page 3, `RDPRIM` at F380h, `D3 A8 5E 18 03 D3 A8 73`. The two
+bytes before it are not code: X-Racing halts with its stack at F380h, and the
+return address 603Eh that each interrupt leaves at F37Eh reads as `LD A,60h`.
+The scan's patch of that word sent the restored game to another address on
+every machine.
 
 The scan also skips a real `LD A,n` after an operand that has the value of such an
 opcode, and the watch patches that `LD A,n` when it runs before the snapshot.
@@ -654,6 +841,44 @@ RAM in page 1 on every machine where the search ran. Where page 2's slot holds t
 RAM, the value is the same as before. The search is in a block that `BLOAD` reads,
 which has no sum. In the test collection, 31 tapes have this search.
 
+### The ENASLT copy patch
+
+The loaders of 14 Spanish tapes, Arkos, Satan, Made in Spain and others, carry a
+copy of the BIOS's ENASLT, with which they select RAM that their own search finds
+by RDSLT and WRSLT. The copy writes the subslot register with one instruction
+other than the BIOS's:
+
+```
+LD A,(0FFFFh) / CPL / LD L,A / AND B / OR D / LD (0FFFFh),A
+```
+
+The BIOS has `AND H`, the mask of the other pages' subslots. B holds the slot
+register's old value. On a machine whose RAM is in slot 3, B's bits are 1s in the
+pages that select slot 3, so the other pages keep their subslots. On
+`sx2-extramapper-mcp` every page selects slot 0, B is 00h, and the write clears
+the subslot register: pages 2 and 3 lose their RAM, and the capture stops at
+`page 3 is not a RAM page that the snapshot keeps`.
+
+The same loaders give page 1 back to BASIC's ROM with `LD H,40h / LD A,(0FCC2h)`
+and the copy. FCC2h is EXPTBL's entry for slot 1, 00h, which selects slot 0 by the
+slot register alone. Where slot 0 is not expanded that is the ROM, but on an SX-2
+it leaves page 1 on the RAM of slot 0-1, and the game's next call of BASIC's ROM
+runs RAM.
+
+The capture patches both itself, in two parts:
+
+1. Before each capture, `capture.py` looks for the copy's write,
+   `3A FF FF 2F 6F A0 B2 32 FF FF`, in the tape files, and, in a tape that holds it,
+   for the selection of page 1, `26 40 3A C2 FC`.
+2. At step 3, before the load command, the capture patches each place on every
+   machine: `AND B`, A0h, becomes `AND H`, A4h, and FCC2h becomes FCC1h, the main
+   ROM's slot ID. It writes the patches to `snap/patches.txt` and runs the capture
+   again, as for a slot patch.
+
+The patched code is the BIOS's own, so it works on every machine. Where slot 0 is
+not expanded, FCC1h and FCC2h both hold 00h. The copies are in blocks that `BLOAD`
+reads, which have no sum.
+
 ### The interrupt slot patch
 
 The interpreter of Aventuras AD's adventures keeps a copy of the slot register's
@@ -679,6 +904,143 @@ code, and the machine resets. The capture patches the handler itself, in two par
 The handler stays in memory while the game is played, so the patch is on the tape,
 where it also reaches a copy that a later load reads. The 14 tapes that hold the
 handler are in [NOTES.md](NOTES.md#the-interrupt-slot-patch).
+
+### The subslot POKE patch
+
+Some tapes do the user's `POKE -1,170` themselves
+([The RAM's subslot in every page](#the-rams-subslot-in-every-page)). Their BASIC
+loader holds `POKE &HFFFF,&HAA`, which writes AAh to the subslot register of page
+3's slot and selects subslot 2 in every page. The tapes were made for the Philips
+and Sony MSX2s, whose RAM is in subslot 2. On a machine whose RAM is in another
+subslot of an expanded slot, the POKE takes the RAM away from under the program,
+and the machine resets. The SX-2's RAM is in slot 3-0. The capture patches the
+POKE's value, in two parts:
+
+1. Before each capture, `capture.py` looks for the POKE in the tape files. The
+   address is `&HFFFF`, `-1`, `65535` or `65535!`. The value is `&HAA` or `170`, or
+   `&HA8` or `168`, which selects subslot 2 in pages 1 to 3 and leaves subslot 0
+   in page 0, as Lady Safari's `POKE -1,168` does. A program saved as text holds
+   the statement's characters, with or without a space around the comma. A
+   tokenized program holds `98 0C FF FF 2C` or `98 F2 12 2C`, and then `0C AA 00`
+   or `0F AA`, or the same with `A8`.
+2. At step 3, before the load command, the capture reads the subslot that page 3
+   selects, when page 3's slot is expanded. Each POKE then gets that subslot in
+   the same pages as its value. For `AA` that is every page, the value that step 2
+   writes to the register: 00h, 55h or FFh for subslot 0, 1 or 3. For `A8` it is
+   pages 1 to 3: 00h, 54h or FCh. In the main ROM's slot, as on
+   `sx2-extramapper-mcp`, whose BASIC has its RAM in slot 0-1 beside the BIOS in
+   0-0, the RAM's subslot in pages 0 and 1 would take BASIC away from the program.
+   There both values get the subslot in pages 2 and 3 only, and subslot 0 in pages
+   0 and 1: 50h for subslot 1. The text keeps its length, as `00` for `AA` and
+   `000` for `170`. The capture writes the patches to `snap/patches.txt` and runs
+   again, as for a slot patch. A machine whose RAM is in subslot 2, or in a slot
+   that is not expanded, where the POKE writes RAM, keeps the tape's bytes.
+
+The patch is on the tape, so it also reaches a program that a later load reads. In
+the test collection, 101 game files have the POKE, 91 of them from the tapes of
+the magazine Super MSX.
+
+### The hook fill patch
+
+Many loaders turn the BIOS's hooks off by filling them with RET (C9h):
+`LD HL,0FD9Ah / LD DE,0FD9Bh / LD BC,nn / LD (HL),0C9h / LDIR`. Most of Super
+MSX's tapes fill 025Ch or 0260h bytes, to FFF6h or FFFAh, past the hooks' end at
+FFC9h. On an MSX1 those bytes are unused. An MSX2 keeps its copies of VDP registers
+8 to 23 there, `RG8SAV` to `RG23SAV` at FFE7h to FFF6h, and an MSX2+'s sub-ROM writes
+them to the VDP when it sets a screen. Register 15 then gets C9h, so it selects
+status register 9, and the BIOS's interrupt handler reads that register in place of
+status register 0. The VDP's interrupt stays on, the handler's `EI` lets it in
+again, and the stack runs down through memory. On the SX-2 Digy Dung, Choplifter,
+Container, Tetra-Tlon and Toruk crash so.
+
+1. Before each capture, `capture.py` looks for the fill in the tape files, and keeps
+   each one whose count reaches past FFC9h.
+2. At step 3, before the load command, the capture gives each such fill the count
+   022Fh on an MSX2 or an MSX2+, which ends it at FFC9h, as some of the same tapes'
+   fills do. The capture writes the patches to `snap/patches.txt` and runs again,
+   as for a slot patch. An MSX1 keeps the tape's bytes.
+
+In the test collection, 32 game files have such a fill, all but one of them on the
+magazine Super MSX's tapes.
+
+### The trampoline patch
+
+The tape loader of many Spanish tapes, from Opera Soft, Topo Soft, Dro Soft and
+others, reads each block through a trampoline that it builds on the stack, in the
+10 bytes from FC9Ah:
+
+```
+LD DE,0C961h / PUSH DE / LD DE,0EDD9h / PUSH DE / LD DE,00E1h / PUSH DE /
+LD DE,0CDD9h / PUSH DE / LD DE,069EDh / PUSH DE / PUSH HL / EXX /
+LD C,0A8h / IN H,(C) / AND H / LD L,A / CALL 0FC9Ah
+```
+
+The pushes leave `OUT (C),L / EXX / CALL 00E1h / EXX / OUT (C),H / RET`, and L is
+the slot register's value with slot 0 in page 0. So the trampoline selects the main
+ROM in page 0 by the slot register alone, calls `TAPION`, and writes the slot
+register back. The loader then changes the call's low byte at FC9Eh to E4h for
+`TAPIN` and to F3h for `STMOTR`. On `sx2-extramapper-mcp` the main ROM is in slot
+0-0 and the game's RAM is in 0-1. The slot register already selects slot 0 there,
+so a loader that has its RAM in page 0 keeps it there. The call then runs the
+game's bytes at 00E1h, and the load crashes. In the test collection, 220 game files
+hold the builder, and 57 of them failed on that machine.
+
+The capture patches the builder itself, in two parts:
+
+1. Before each capture, `capture.py` looks for the builder, with the
+   `CALL 0FC9Ah` after it, in the tape files.
+2. At step 3, before the load command, the capture patches each builder when the
+   main ROM's slot is expanded, BASIC's page 3 is in that primary slot but in
+   another subslot, and that subslot holds RAM in page 0. The ROM's subslot comes
+   from `EXPTBL`, and the RAM's from the page 3 field of the slot's subslot
+   register. The capture writes the patches to `snap/patches.txt` and runs again,
+   as for a slot patch. Every other machine keeps the tape's bytes.
+
+The patched builder leaves `LD (HL),n / EXX / CALL 00E1h / EXX / LD (HL),C / RET`,
+and its caller becomes `LD HL,0FFFFh / LD A,(HL) / CPL / LD C,A`. So the
+trampoline writes the subslot register in place of the slot register. n holds the
+ROM's subslot in page 0 and the RAM's in pages 1 to 3, 54h on the SX-2. C holds the
+register's value from when the builder ran, and the second write puts that value
+back, as `OUT (C),H` puts back the slot register. The loader uses its H, L and C
+only for the trampoline, and A and the flags are free before the first call. The
+RET moves up a byte, so the trampoline's last byte, at FCA3h, never runs. The patch
+sets that byte so that the XOR of the builder's 28 bytes stays the same, because
+the loader checks each headerless block by an XOR of its bytes. 56 game files
+hold a copy of the builder in such a block.
+
+| Bytes | Tape | Patched on the SX-2 |
+|---|---|---|
+| Builder | `11 61 C9 D5 11 D9 ED D5 11 E1 00 D5 11 D9 CD D5 11 ED 69 D5 E5 D9` | `11 C9 C4 D5 11 D9 71 D5 11 E1 00 D5 11 D9 CD D5 11 36 54 D5 E5 D9` |
+| Caller | `0E A8 ED 60 A4 6F` | `21 FF FF 7E 2F 4F` |
+| Trampoline at FC9Ah | `ED 69 D9 CD E1 00 D9 ED 61 C9` | `36 54 D9 CD E1 00 D9 71 C9 C4` |
+
+After the restore, the tape service takes the calls. Its entry at FCE1h selects
+DOS's mapper's primary slot in page 0 and leaves the subslot register as it is, so
+page 0 must show DOS's mapper's subslot at the call. That is the RAM's subslot,
+where DOS's mapper is, and not the ROM's. A loader that runs with BASIC's ROM in
+page 0, as Budokan's does, would leave the ROM there with the tape's trampoline,
+and the patched one selects the ROM there itself. So with the tape service,
+`build.py` gives each patched builder its form for the service, in the snapshot's
+RAM pages before the scan and in the tapes that the service serves:
+
+- n holds the RAM's subslot in every page, 55h on the SX-2. `build.py` takes the
+  subslot from n's page 3 field.
+- In the default mode the call goes to the entry at FCE1h, as the scan sends a
+  stub there ([Scan](#scan)). In the mode without a part in page 3 the call stays
+  at 00E1h, where page 0 then shows T0
+  ([Without a part in page 3](#without-a-part-in-page-3)).
+- The free byte keeps the XOR again, so a builder in a block that the game reads
+  after the snapshot needs no `patch` line, as it would on other machines.
+
+A snapshot within a load holds the patched trampoline at FC9Ah, and the patched
+builder's registers, HL = FFFFh and C. `build.py` gives that trampoline the same
+form, so the restored loader goes on with it. A snapshot that goes back to a
+`TAPION` call's entry has the ROM's subslot in page 0 there, which the restorer
+refuses on the SX-2 with `a page 0 is in another subslot of DOS's mapper's slot`,
+so the form serves a snapshot taken elsewhere in the load. The check gets the changed bytes of
+the RAM as patched ranges. Without the tape service the image keeps the capture's
+form, whose call reaches the BIOS's `TAPION` as on the machine that the tape was
+written for.
 
 ### The capture with slot 0 not expanded
 
@@ -757,7 +1119,7 @@ when the failure comes in its 60 seconds and ends in a reboot or in a BASIC erro
 - Puts the service's part of page 3 at FCE1h when FCC9h to FD88h are zero at the
   snapshot, as the capture leaves them. A game can use that area itself. The part
   then goes to xxE1h of the highest page xx below the BIOS's work area at F380h
-  whose 143 bytes from there are zero, or to the game file's `service at`. The
+  whose 158 bytes from there are zero, or to the game file's `service at`. The
   tail's 26 bytes are zero at the snapshot too, when the stack is empty there. So
   `build.py` finds the tail's address first and takes no place that holds one of the
   tail's bytes. It stops with an error when the game file's `service at` holds one,
@@ -765,8 +1127,19 @@ when the failure comes in its 60 seconds and ends in a reboot or in a BASIC erro
   the game fills later, so a moved part is checked by playing to the game's next
   load. The part moves by its page alone. The entries keep their low bytes, E1h to
   F3h, and the scan's patches write xxh instead of FCh. `build.py` adds xx minus FCh
-  to each byte that `SERVICE.BIN`'s last part lists, and writes xx in the image's
+  to each byte that `SERVICE.BIN`'s part 6 lists, and writes xx in the image's
   header ([FORMATS.md, SERVICE.BIN](FORMATS.md#servicebin)).
+- Puts the part in two blocks when the game file's `service at` gives a second
+  address. The part's first 26 bytes, the entries with their data to `E_STOP`, go
+  to xxE1h, and its code block, with the scratch bytes and the stack, goes to the
+  second address, at any byte in page 3. That is for a game whose page 3 has no 158
+  free bytes from an xxE1h, but has the 26 there and the rest elsewhere, as Power
+  Drift's has on the SX-2. `build.py` adds the code block's move to each address
+  that `SERVICE.BIN`'s part 7 lists, after it has moved the part to xx. It stops
+  when a block is outside page 3 or past FFFEh, is not zero at the snapshot, holds
+  one of the tail's bytes, or overlaps the other block. The restorer fills in
+  `E_SLOT` to `E_FC` by the entry page alone, so it does not know where the code
+  block is. The check guards both blocks.
 - Prints the most mapper segments that the image can require.
 
 `build.py` holds no address of the service's code. It reads each address by its name
@@ -862,7 +1235,10 @@ in the plan, so the stop's message shows on DOS's screen
      0 is in another subslot of that slot, page 0 would become the mapper's RAM, so
      the restorer stops. The main ROM of a game file with `rom keep` is such a page
      0 on a machine that has its ROM and DOS's mapper in one slot. The Victor HC-90A
-     has them in slots 0-0 and 0-2.
+     has them in slots 0-0 and 0-2. The restorer does not stop when the image's
+     entry code has `sub0` and the snapshot's page 3 is in DOS's mapper. Page 0's
+     bits then stay the snapshot's, here and in `SLTTBL`
+     ([Page 0 in another subslot of DOS's mapper's slot](#page-0-in-another-subslot-of-dos-mappers-slot)).
    - That page 1 or page 2, other than the tail's page, can hold the worker at the
      end. When DOS's mapper is in an expanded slot, the worker must keep the
      mapper's subslot in its page while it writes that slot's subslot register. The
@@ -934,7 +1310,7 @@ in the plan, so the stop's message shows on DOS's screen
      the ROM.
    - With the tape service, when DOS's mapper is in an expanded slot, DOS's mapper's
      subslot in the page 0 bits of `SLTTBL` in the game's page 3, as step 1 set them
-     in that slot's subslot register.
+     in that slot's subslot register. Not when step 1 left them for `sub0`.
    - In each place that the header lists, the slot register value that selects
      DOS's mapper in page 0.
 4. Waits until `JIFFY` has advanced by 180, so that a floppy drive's motor stops,
@@ -971,8 +1347,8 @@ returns to DOS:
 | `slot N is not expanded as at the capture: the machine file does not describe this machine` | 1 | A RAM page's slot is expanded on this machine and was not at the capture, or the reverse |
 | `slot N is DOS's mapper, and the image has RAM without a mapper there` | 1 | A RAM page outside a mapper is in DOS's mapper's slot |
 | `a page's segment is beyond this machine's mapper` | 1 | A RAM page of DOS's mapper has a segment that the mapper lacks |
-| `a page 0 is in another subslot of DOS's mapper's slot` | 1 | With the tape service, a RAM page kept for page 0, or the snapshot's page 0 when T0 does not replace the ROM, is in DOS's mapper's primary slot with another subslot |
-| `rom keep needs the main ROM outside DOS's mapper's slot` | 1 | The game file has `rom keep`, and the snapshot's page 0 selects the main ROM in another subslot of DOS's mapper's primary slot |
+| `a page 0 is in another subslot of DOS's mapper's slot` | 1 | With the tape service, a RAM page kept for page 0, or the snapshot's page 0 when T0 does not replace the ROM, is in DOS's mapper's primary slot with another subslot. For the snapshot's page 0, not when the entry code has `sub0` and page 3 is in DOS's mapper |
+| `rom keep needs the main ROM outside DOS's mapper's slot` | 1 | The game file has `rom keep`, and the snapshot's page 0 selects the main ROM in another subslot of DOS's mapper's primary slot, unless the entry code has `sub0` and page 3 is in DOS's mapper |
 | `service t0 needs page 0 outside DOS's mapper` | 1 | Without a part in page 3, a RAM page kept for page 0 is in DOS's mapper |
 | `service t0 needs DOS's mapper's subslot in the borrowed page` | 1 | Without a part in page 3, the snapshot's subslot register of DOS's mapper's slot selects another subslot in the page that `TAPIN` borrows |
 | `no page 1 or 2 can hold the restorer's worker at the end` | 1 | None of step 1's three rules gives the worker a page |
@@ -1006,10 +1382,11 @@ The tape service keeps the tape in service segments, and has these parts:
 | Entry code | Page 3, after `TAPIOF` and `STMOTR` | For the entries of `TAPION` and `TAPIN`, selects DOS's mapper in page 0, calls the routine through the trampoline, and selects the game's page 0 again |
 | Trampoline | Page 3, after the entry code | Selects the code segment in page 0, calls a routine there, and selects T0 again |
 | Reader | Page 3, after the trampoline | Reads a tape byte. Its code is `OUT (C),D / LD E,(HL) / OUT (C),B / RET` |
-| Stack | Page 3, after the reader, to FD6Fh | The entry code's scratch bytes, 3 for the game's stack pointer and slot register, then its stack, 22 bytes |
+| Subslot call | Page 3, after the reader | Calls a routine in page 0 of T0's own slot, for T0's `CALSLT` ([T0 and the sub-ROM in one slot](#t0-and-the-sub-rom-in-one-slot)) |
+| Stack | Page 3, after the subslot call, to FD7Eh | The entry code's scratch bytes, 3 for the game's stack pointer and slot register, then its stack, 22 bytes |
 
 These parts in page 3, from the entries to the stack, are the service's part of
-page 3. The part is 143 bytes long, and goes from FCE1h to FD6Fh by default.
+page 3. The part is 158 bytes long, and goes from FCE1h to FD7Eh by default.
 
 `build.py` builds T0 from `rom.bin`, so it first checks that each jump table entry
 below jumps to its address, as in the standard MSX BIOS. The restorer's ROM check
@@ -1081,7 +1458,8 @@ in page 0, and calls the routine through the trampoline. Then it selects the gam
 page 0 and stack again, with mapper register FCh set to the value at FCF9h, and
 returns with interrupts off. It returns the registers as the trampoline does, so an
 entry and T0's stub of the same routine leave the same registers. The entry code's
-deepest path takes 20 of the stack's 22 bytes. That path is a read under the header
+deepest path takes 20 of the stack's 22 bytes, or all 22 with `sub0`
+([Page 0 in another subslot of DOS's mapper's slot](#page-0-in-another-subslot-of-dos-mappers-slot)). That path is a read under the header
 compare of `TAPION` or `TAPIN` that moves the tape to another side and flashes. The
 data of the part is before its code
 ([FORMATS.md, The entry code's data](FORMATS.md#the-entry-codes-data)).
@@ -1117,6 +1495,102 @@ addresses at 0055h and 005Ah in the code segment. The colours are these:
 | Side 1's start | Light green, 3 |
 | Side 2's start | Light red, 9 |
 | RETURN plays on | Light yellow, 11 |
+
+### T0 and the sub-ROM in one slot
+
+An MSX2's BIOS calls its sub-ROM through `CALSLT`. For a routine in an expanded
+slot, `CALSLT` first writes the routine's subslot to the slot's subslot register,
+and then selects the slot in the routine's page, from `CLPRIM` in page 3. Its own
+code runs in page 0 meanwhile. That is safe for the ROM, which is in another slot
+than the sub-ROM. T0 is in DOS's mapper. On a machine that has the sub-ROM in the
+mapper's slot, as the SX-2 has them in slots 3-1 and 3-0, the write to the subslot
+register puts the sub-ROM in page 0 at once, under `CALSLT`'s code in T0. BASIC
+calls the sub-ROM often on such a machine, and the game crashes at the first call.
+The shipped machines with a RAM cartridge do not have the two in one slot.
+
+So T0's `CALSLT` makes such a call in another way, in three parts:
+
+1. `build.py` sends two places of `CALSLT` in T0 to T0's own code, in the free
+   bytes after `TAPIN`'s stub. The first is the call of the BIOS's routine that
+   writes the subslot register, at 02FBh. The second is the jump to `CLPRIM`, at
+   02ECh. `build.py` finds the places by their code, and makes the change only when
+   page 0 has each place once and the routine that the call names. Every MSX2 and
+   MSX2+ BIOS in `openMSX`'s system ROMs has them, at these addresses. An MSX1's
+   BIOS and C-BIOS do not, and their T0 keeps the BIOS's code.
+2. `t_s` takes the call. For a routine in page 0 of the slot that pages 0 and 3 are
+   in, it leaves the subslot register as it is, keeps the routine's subslot in a
+   byte of T0, and returns what the BIOS's routine returns. Any other call goes on
+   to the BIOS's routine.
+3. `t_c` takes the jump. Without a subslot kept, it goes on to `CLPRIM`. With one,
+   it jumps to the subslot call in page 3, which writes the routine's subslot to
+   the register, calls the routine through the BIOS's `JP (IX)` at F398h, and
+   writes the register back. Only those 15 bytes run while T0 is out of page 0.
+   An interrupt during the routine goes to the sub-ROM's own handler, as on the
+   ROM.
+
+`CALSLT` then writes the register's old value again, as it does after every call.
+The page 3 of the game is in the mapper's slot whenever T0's page 0 is, on a
+machine with one RAM, and `t_s` leaves a call alone when it is not.
+
+The capture keeps a snapshot out of such a call. The restorer gives page 0 of the
+mapper's slot the mapper's subslot, for T0, and a call of the sub-ROM that is under
+way needs the sub-ROM's subslot there when it returns. So with the tape service,
+step 6 lets an interrupt pass while the sub-ROM's slot is page 3's and its subslot
+register has the sub-ROM's subslot in page 0. That holds in the sub-ROM's code and
+in the main ROM's code that the sub-ROM calls. A machine whose BASIC leaves the
+sub-ROM's subslot in page 0, as step 3 reads it, gets no such wait. Without the
+tape service, step 6 still lets an interrupt pass while page 0 itself shows the
+sub-ROM. On `sx2-extramapper-mcp`, where page 3 is in slot 0 and the sub-ROM in
+3-1, Reversi rebooted after such a snapshot and 8 more games crashed, and 7 got no
+call of the resident program, until their game files moved the snapshot by hand.
+
+The mode without a part in page 3 has no code there, so its T0 keeps the BIOS's
+`CALSLT`, and a game in that mode must not call the sub-ROM on such a machine.
+
+`tests/subrom.asm` calls the sub-ROM through `CHGMOD` and through `EXTROM`, and
+then reads the tape through T0's jump table. It runs on
+`test/nms8250-512k-sunriseide`, an NMS 8250 with only its own mapper, which has
+the sub-ROM in slot 3-0 and the mapper in 3-2.
+
+### Page 0 in another subslot of DOS's mapper's slot
+
+The entry code selects DOS's mapper in page 0 by the slot register alone. That
+needs the mapper's subslot in page 0's bits of its slot's subslot register, and the
+restorer writes it there for good ([Restorer](#restorer), step 1). On a machine
+whose main ROM and DOS's mapper share a slot, that write would take the ROM from a
+game whose page 0 is the ROM. The SX-2 with its Extra-Mapper has the ROM in 0-0 and
+DOS's mapper in 0-1. T0 replaces the ROM only when the snapshot keeps no RAM page
+for page 0 in DOS's mapper. A game that keeps such a page switches its page 0
+between the ROM and its RAM through the subslot register, as Mandragore does.
+
+For such a game, the entry code selects the subslot itself, while it runs. `build.py`
+writes `sub0`, 23 bytes of the call part of `SERVICE.BIN`, into the zeros at FCC9h,
+before the part's entries, or at xxC9h before a part that moved to page xx. It
+points the entry code's call of the trampoline at `sub0`, and sets bit 2 of the
+image's flags. `sub0` reads the subslot register at FFFFh, writes page 3's subslot
+into page 0's bits, calls the trampoline, and writes the value that it read back.
+The value is the one when the entry ran, because the game switches its page 0 at
+any time. Interrupts are off meanwhile, and pages 1 to 3 keep their bits. `sub0`
+writes the register at FFFFh, which is the register of page 3's slot. So it works
+only while page 3 is in DOS's mapper, and the restorer checks that at the snapshot.
+The call of `sub0` takes 2 more bytes of the entry code's stack, so its deepest
+path takes all 22.
+
+`build.py` writes `sub0` when the image has the part in page 3, page 3 is in an
+expanded slot, and the snapshot's page 0, or a RAM page kept for page 0, is in
+another subslot of that slot. It leaves `sub0` out when T0 replaces the ROM: page 0
+selects the main ROM, the snapshot keeps no RAM page for page 0, and the game file
+has no `rom keep`. It also leaves `sub0` out when no place has 23 zero bytes, clear
+of the tail and of the resident program's wrapper. The restorer then stops as
+before. The restorer leaves page 0's bits as the snapshot has them, in the subslot
+register and in `SLTTBL`, when the image has bit 2 and the snapshot's page 3 is in
+DOS's mapper. It still stops for a RAM page kept for page 0 in another subslot of
+DOS's mapper's slot. `build.txt`'s `sub0` line gives the check the first and the
+last byte of `sub0`, which the check guards as it guards the part.
+
+Only the tape calls that reach the entries go through `sub0`. A game whose page 0
+stays the ROM, and that loads through the ROM's own jump table, as BASIC's `BLOAD`
+does, reaches the BIOS's tape code and not the service.
 
 ### The manual tape
 
@@ -1163,7 +1637,7 @@ automatic, as it does for a game without the tape service, and goes on.
 ### Without a part in page 3
 
 A game can use all of its page 3 over time, as Moonwalker does. Moonwalker's main
-game loads its code into FCC9h to FD88h, and no 143 bytes of Moonwalker's page 3
+game loads its code into FCC9h to FD88h, and no 158 bytes of Moonwalker's page 3
 stay free from one load to the next. For such a game, the game file's `service t0`
 puts the whole tape service into T0, and nothing of the service stays in page 3.
 `build.py` also takes this mode itself when no part of page 3 has room at the
@@ -1275,7 +1749,7 @@ image:
 - The tail's address, and the offsets of the tail's bytes that the check reads.
 - The area FCC9h to FD88h.
 - The bytes that the build patched.
-- The tape service's part of page 3.
+- The tape service's part of page 3, and `sub0` when the build wrote it.
 - The addresses of the tape position and of the tape's end.
 - The addresses of the service's two jumps at the tape's end.
 
@@ -1316,7 +1790,8 @@ the disk and the `boot` keys, and writes its report to `check/report.txt`:
    to show the screen, because it takes screenshots only with a renderer. Meanwhile
    the game must not write the tape service's part of page 3, when the image has
    one. An image without a part in page 3 has nothing to watch, so it passes the
-   point. The part's last bytes, from `e_sp` to the stack's top, do not count,
+   point. `sub0` counts as part of the part, and its write of its own operand does
+   not count. The part's last bytes, from `e_sp` to the stack's top, do not count,
    because the service sets them on each call before it reads them. A watchpoint on
    the part's other addresses notes each write that the game makes there. A write is
    the game's when its code is outside the part, and when the slot register and
@@ -1346,13 +1821,15 @@ the disk and the `boot` keys, and writes its report to `check/report.txt`:
    The point sees only the writes of its 60 seconds, not those that come after a
    key, a level or another side.
 3. During the same 60 seconds the restored machine must not reboot. Points 1 and 2
-   do not see a reboot. Any of three signs fails the point:
+   do not see a reboot or a crash. Any of four signs fails the point:
 
    | Sign | What it shows |
    |---|---|
    | `SNAPCAS.COM` starts again, and the breakpoint at 0100h that reads RAMAD3 fires after the restore | A reset has booted DOS from the check's disk, and its `AUTOEXEC.BAT` runs the restorer again |
    | The screen's text holds `MSX  system` at two or more of the six savestates | The machine stays on the MSX1 BIOS's boot screen, or comes back to it in a loop of resets. `MSX  system` is that screen's first line. A reset on purpose shows the boot screen for a few seconds before the game starts, so a single savestate can catch it. BASIC's banner holds `MSX BASIC` instead, so a BASIC game whose restored screen still holds the banner does not count. The MSX2 BIOS draws its boot screen as graphics, so this sign holds only on an MSX1 |
    | The capture's log holds a reset after the snapshot, less than 60 seconds after it, and the check notes none | The restored game does not do what the loaded one did. The capture goes on for 29 seconds after the moment that it saves for the snapshot ([Capture](#capture), step 5), so its log holds the resets of those seconds. A snapshot at a `TAPION` call's entry is earlier than that moment, so a reset can come later after it |
+   | The CPU runs more than 100,000 FFh bytes | The game crashed into an empty slot or into RAM that holds FFh. Each FFh byte is `RST 38h`, which enters 0038h with the address after the byte on the stack. An interrupt enters 0038h too, so the check counts an entry only when the byte before its return address is FFh. Games that run make up to about 1,700 such entries in 60 seconds, and the crashes seen 260,000 and more. Such a crash passes the other signs, because the machine neither resets nor shows a boot screen |
+   | The CPU enters 0038h with more than 32 values of SP below 0100h | A crash took the stack down among the restart addresses and around past 0000h, where `RST 38h` pushes its return addresses over the code that it runs, so the byte before them is seldom FFh and the count above misses the crash. Tales of Popolon on `sx2-extramapper-mcp` enters 0038h with 128 such values, from 00FEh down to 0000h, after its loader writes slot 0's subslot register with its stack. A game that keeps its stack there by design, as The Living Daylights and Saboteur do, enters 0038h with 2 to 4 values |
 
    The point judges where the machine ends, not the reset, because a loader can
    reset the machine on purpose after the restore and then start the game. A
@@ -1361,8 +1838,8 @@ the disk and the `boot` keys, and writes its report to `check/report.txt`:
    alone does not fail the point. The check reads EXPTBL, for the main ROM's slot,
    when `SNAPCAS.COM` starts, because the BIOS of some machines has not set it when
    the boot steps end. The report adds `point 3: fail` and the sign, or else
-   `point 3: pass`, and a failed point 3 fails the check. A hang is not a reboot,
-   and point 3 does not see it.
+   `point 3: pass`, and a failed point 3 fails the check. A hang in a loop of the
+   game's own code is not a crash into FFh, and point 3 does not see it.
 4. During the same 60 seconds the game must not stop at a BASIC error. A BASIC
    program, or a loader written in BASIC, that meets an error prints one of BASIC's
    error messages, such as `Syntax error in 100`. It then waits at `Ok`, in a text
@@ -1372,6 +1849,24 @@ the disk and the `boot` keys, and writes its report to `check/report.txt`:
    player to press F5 or type `RUN`, shows no error message, so it passes. The
    report adds `point 4: fail` and the message, or else `point 4: pass`, and a
    failed point 4 fails the check.
+
+On a machine with a `resident` line ([FILES.md, Machine file](FILES.md#machine-file)),
+`openMSX` lacks the resident program. So when `SNAPCAS.COM` starts, the check writes
+the line's code at the program's entry in every segment of the RAM in its slot. The
+check counts the entry's calls in the 60 seconds, from the image's call
+([The resident program's call](#the-resident-programs-call)) or from a routine that
+the game file's patches add. It writes `check/rescall.txt`, apart from the
+points: `calls N last S`, the number and the seconds after the restore of the last
+one, and `tens`, the calls in each 10 seconds.
+
+With `SNAPCAS_KEYS=1` in the environment, the check presses space for 0.3 seconds at
+15, 30 and 45 seconds after the restore. Most games start from their title then, so
+the points and the calls cover some play: Robocop on `sx2-extramapper-mcp` calls the
+resident program only once a key starts it. `make games` then writes its results to
+`out/games/<machine>-keys.txt`, apart from those without keys. A game that takes the interrupt for a routine of its own still passes, and
+calls the program no more. Point 2 also fails when the game writes the call's code
+in page 3, but for the routine's own write of the game's stack pointer into it, and
+when the game writes the call's stack there while the stack pointer is outside it.
 
 The check passes only when the report holds all four points as passed. `check.tcl`
 writes point 1 at the restore and points 2 to 4 together, after the 60 seconds. So a

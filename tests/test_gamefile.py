@@ -57,6 +57,32 @@ class Lines(Folder):
                           (2, None, 0xAE88, b"\xCD", b"\xC9", "side2:AE88")])
         self.assertTrue(game.patches[0].where.endswith("game.txt:19"))
 
+    def test_rescall_takes_the_games_interrupt_routine(self):
+        self.assertEqual(self.read("cas GAME.CAS\nrescall b45B\n").rescall, [0xB45B])
+        # A routine for the title and one for the play.
+        self.assertEqual(self.read("cas GAME.CAS\nrescall D160 42A7\n").rescall, [0xD160, 0x42A7])
+        self.assertEqual(self.read("cas GAME.CAS\nrescall no\n").rescall, "no")
+        self.assertIsNone(self.read("cas GAME.CAS\n").rescall)
+        for line in ("rescall B45", "rescall B45B no", "rescall 1111 2222 3333 4444 5555", "rescall B45B\nrescall B45B",
+                     "rescall yes"):
+            with self.subTest(line=line), self.assertRaisesRegex(gamefile.GameFileError, "rescall takes up to 4 addresses"):
+                self.read(f"cas GAME.CAS\n{line}\n")
+
+    def test_rescode_takes_an_address_in_page_3(self):
+        self.assertEqual(self.read("cas GAME.CAS\nrescode d393\n").rescode, 0xD393)
+        self.assertIsNone(self.read("cas GAME.CAS\n").rescode)
+        for line in ("rescode 8000", "rescode D39", "rescode D393 D394", "rescode D393\nrescode D393", "rescode"):
+            with self.subTest(line=line), self.assertRaisesRegex(gamefile.GameFileError, "rescode takes one address"):
+                self.read(f"cas GAME.CAS\n{line}\n")
+
+    def test_resstack_takes_an_address_in_page_3(self):
+        self.assertEqual(self.read("cas GAME.CAS\nresstack d393\n").resstack, 0xD393)
+        self.assertEqual(self.read("cas GAME.CAS\nresstack no\n").resstack, "no")
+        self.assertIsNone(self.read("cas GAME.CAS\n").resstack)
+        for line in ("resstack 8000", "resstack D39", "resstack D393 D394", "resstack D393\nresstack D393", "resstack"):
+            with self.subTest(line=line), self.assertRaisesRegex(gamefile.GameFileError, "resstack takes one address"):
+                self.read(f"cas GAME.CAS\n{line}\n")
+
     def test_a_game_file_with_only_its_tape_has_the_defaults(self):
         game = self.read("cas GAME.CAS\n")
         self.assertEqual((game.name, game.side2, game.sha1, game.urls, game.load, game.start), ("GAME", None, [], [],
@@ -97,10 +123,10 @@ class Lines(Folder):
                 ("snapshot 130", "game.txt:2: snapshot takes at and a time"),
                 ("snapshot at", "game.txt:2: snapshot takes at and a time"),
                 ("snapshot at -5", "game.txt:2: the time -5 is negative"),
-                ("service", "game.txt:2: service takes no, at and an address xxE1 in page 3, or t0"),
-                ("service at FCE0", "service takes no, at and an address xxE1 in page 3, or t0"),
-                ("service at BFE1", "service takes no, at and an address xxE1 in page 3, or t0"),
-                ("service yes", "service takes no, at and an address xxE1 in page 3, or t0"),
+                ("service", "game.txt:2: service takes no, at and an address xxE1 in page 3, with the address of the part.s code block after it or not, or t0"),
+                ("service at FCE0", "service takes no, at and an address xxE1 in page 3, with the address of the part.s code block after it or not, or t0"),
+                ("service at BFE1", "service takes no, at and an address xxE1 in page 3, with the address of the part.s code block after it or not, or t0"),
+                ("service yes", "service takes no, at and an address xxE1 in page 3, with the address of the part.s code block after it or not, or t0"),
                 ("rom drop", "game.txt:2: rom takes keep"),
                 ("subslots drop", "game.txt:2: subslots takes keep"),
                 ("patch page3:1F 3E FC", "game.txt:2: patch takes a place, the old bytes, > and as many new bytes"),

@@ -43,10 +43,12 @@ def read_facts(out):
     """build.txt's facts (INTERNALS.md, Check), under their names: the service
     flag, the tail's address and fields, the area that the service's part of
     page 3 takes by default, the patched ranges, and the tape service's part,
-    moved part, tape positions' addresses and the addresses of its jumps at
-    the tape's end, each as a Tcl list, empty when the image has none."""
-    facts = {"service": "0", "tail": "", "free": "", "patched": [], "part": "", "moved": "", "cpos": "",
-             "ended": ""}
+    its code block when a game file puts it apart, moved part, tape positions'
+    addresses and the addresses of its jumps at
+    the tape's end, sub0's bytes in page 3, and the call of the machine's
+    resident program, each as a Tcl list, empty when the image has none."""
+    facts = {"service": "0", "tail": "", "free": "", "patched": [], "part": "", "partcode": "", "moved": "",
+             "cpos": "", "ended": "", "rescall": "", "resvector": "", "rescode": "", "resstack": "", "sub0": ""}
     with open(os.path.join(out, "build.txt")) as f:
         for line in f:
             if line.strip() and not line.startswith("#"):
@@ -141,10 +143,11 @@ def restore_seconds(size):
     return max(RESTORE, READ_START + size // READ_RATE)
 
 
-def settings(snapshot, report, name, state_name, facts, size):
+def settings(snapshot, report, name, state_name, facts, size, resident=None):
     """Tcl variables for check.tcl: its own, the names and values of the
     snapshot's state as kv, and build.txt's facts under their names. size is
-    the image's size in bytes."""
+    the image's size in bytes, and resident the machine's resident program or
+    None."""
     with open(COM, "rb") as f:
         com = f.read()
     s = {
@@ -158,6 +161,11 @@ def settings(snapshot, report, name, state_name, facts, size):
         "name": msx.tcl_word(name),
         "com": msx.tcl_bytes(com[:3]),
         "stop": "{" + stop_address(com, SYMBOLS) + "}",
+        # The check's keys: 1 presses space during the 60 seconds (check.tcl,
+        # press_keys).
+        "keys": "1" if os.environ.get("SNAPCAS_KEYS") == "1" else "0",
+        "resident": "{" + ("" if resident is None else
+                           " ".join(str(n) for n in (resident.slot_id, resident.address, *resident.code))) + "}",
         **{key: "{" + value + "}" for key, value in facts.items()},
     }
     return "".join(f"set ::C({k}) {v}\n" for k, v in s.items())
@@ -187,7 +195,8 @@ def check(game_arg, machine_name, dos_dir):
         state_name = f"snapcas-check-{os.getpid()}"
         if not facts["tail"]:
             raise OSError(f"{out}/build.txt: no tail line; run build.py again")
-        script = (settings(snapshot, report, game.name, state_name, facts, os.path.getsize(image))
+        script = (settings(snapshot, report, game.name, state_name, facts, os.path.getsize(image),
+                           machine.resident)
                   + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/check.tcl")
                   + "\nsafe {boot {" + msx.boot_steps(machine) + "} "
                   # On a machine that boots DOS from its own disk, the check's disk

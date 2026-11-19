@@ -155,6 +155,18 @@ class Pipeline(unittest.TestCase):
         write_image.assert_called_once_with("GAME", "machine", gamefile.DOWNLOADS, variant="variant")
         check.assert_not_called()
 
+    def test_skip_capture_runs_build_and_check_without_capture(self):
+        shown = []
+        with mock.patch.object(pipeline.capture, "capture") as cap, \
+                mock.patch.object(pipeline.build, "write_image", return_value=("G", "G.SNP", "3 records")) as wb, \
+                mock.patch.object(pipeline.check, "check", return_value=(0, PASSES)) as chk:
+            step = pipeline.steps("GAME", "machine", "dos", show=shown.append, skip_capture=True)
+        self.assertEqual(step.status, 0)
+        cap.assert_not_called()
+        wb.assert_called_once()
+        chk.assert_called_once()
+        self.assertEqual([s.name for s in shown], ["build", "check"])
+
 
 if __name__ == "__main__":
     unittest.main()

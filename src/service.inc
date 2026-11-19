@@ -22,6 +22,14 @@ E_FC      equ E_SLOT+3          ; build.py: the game's mapper register FCh;
                                 ; restorer: T0's segment when T0 replaces the ROM
 E_STOP    equ E_SLOT+4          ; 1 while the manual tape is stopped; build.py:
                                 ; 1 when the motor is off at the snapshot
+; The code block of the part, which follows the entries unless the Makefile's
+; third assembly gives it another address, for the list of the addresses that
+; move with it.
+        ifdef CODE_MOVED
+P3_CODE   equ CODE_MOVED
+        else
+P3_CODE   equ E_STOP+1
+        endif
 ; The restorer writes E_SLOT, E_T0, E_CODE and E_FC one after the other.
         assert E_T0 = E_SLOT+1 && E_CODE = E_T0+1 && E_FC = E_CODE+1
 
@@ -29,6 +37,22 @@ E_STOP    equ E_SLOT+4          ; 1 while the manual tape is stopped; build.py:
 ; FCE1h: SLTATR and SLTWRK, which no cassette game's BIOS uses.
 P3_FREE     equ 0FCC9h          ; its first byte
 P3_FREE_END equ 0FD88h          ; its last byte
+
+; The stacks of the calls of a machine's resident program (INTERNALS.md, The
+; resident program's call), in bytes. The program switches to a stack of its
+; own at entry (SX2RES 2.8+ uses 6 bytes below SP before switching), staying
+; within 8 bytes below SP at its entry, and the call's return address takes 2
+; more, RES_STACK. res3 keeps the slot register and the interrupts' state on its
+; stack too, 2 bytes, RES3_STACK (12 + 12 for res3e = 24 bytes). resb reaches
+; the entry through the BIOS's CALSLT, which takes 14 bytes on the SX-2 down to
+; the entry (RDSLT takes 12), plus 2 for the interrupts' state, 8 for the entry
+; and 4 to spare for another BIOS's CALSLT: RESB_STACK (28 + 12 for resbe = 40
+; bytes, which fits in SLTWRK after resb without touching SLTATR). resc and
+; t_res, whose stacks cost the game nothing, have RES_SPARE bytes to spare too.
+RES_STACK  equ 2+8
+RES3_STACK equ 2+RES_STACK
+RESB_STACK equ 2+14+8+4
+RES_SPARE  equ 8
 
 ; T0: the BIOS's tape code, which the service replaces (MSX Red Book, chapter
 ; 4). OUTDO's code follows it.
@@ -105,6 +129,10 @@ PLACE_SIZE equ 3                ; a place: its record's number, its offset in th
 FLAG_ROM_KEEP equ 1             ; bit 0: the game file's rom keep, so T0 does not
                                 ; replace the ROM
 FLAG_T0   equ 2                 ; bit 1: the tape service without a part in page 3
+FLAG_P0   equ 4                 ; bit 2: sub0 sets page 0's bits of page 3's
+                                ; subslot register around each call of the
+                                ; code segment (INTERNALS.md, Page 0 in another
+                                ; subslot of DOS's mapper's slot)
 ; A record's type.
 REC_MAPPER  equ 1               ; a RAM page in a mapper: slot ID, page, segment
 REC_RAM     equ 2               ; a RAM page outside a mapper: slot ID, page, 0

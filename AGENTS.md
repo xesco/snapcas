@@ -219,8 +219,10 @@ holds the disk:
 | The machine's own floppy drive | `disk diska`, or `disk diska 360` for a single-sided drive | `hbf700p-ram512k-msxdos2` |
 
 The DOS is Nextor unless a `dosfiles` line names `msxdos1` or `msxdos2`. A machine
-whose firmware starts a menu in a graphics mode needs either a `hold` line, or
-`press` lines that choose BASIC in the menu. The FS-A1's `hold del 6` is such a
+whose BASIC starts with another width than 37 or 40 needs a `width` line, as `sx2`
+has `width 37` for KdL's sub-ROM, which sets 80 columns. A machine whose firmware
+starts a menu in a graphics mode needs either a `hold` line, or `press` lines that
+choose BASIC in the menu. The FS-A1's `hold del 6` is such a
 `hold` line, and the `hb75p` capture variant has such `press` lines.
 [docs/FILES.md, Machine file](docs/FILES.md#machine-file) describes each line.
 
@@ -454,7 +456,7 @@ step's message names the failure:
 | `the game's stack reaches FFFFh, the subslot register of slot N`, in `snap/log.txt` | The game's stack is at the top of memory, and page 3 is in an expanded slot. The push writes the slot's subslot register and deselects the game's RAM | A capture variant whose RAM is in a slot that is not expanded. On a machine without one, a patch of the game's `LD SP,0000h` to `LD SP,0FFFEh`, as in Space Beater's game file |
 | `page 3 is not a RAM page that the snapshot keeps` | The load failed on this machine. The loader selected a slot without RAM in page 3, where its own code runs. `snap/log.txt` names the write, with `cuts off its code` | A capture variant, or a slot patch |
 | `page 3 has no room for the tape service's part, and rom keep needs it` | The game fills page 3, and the game file's `rom keep` does not allow the mode without a part in page 3 | `service at <address>` with an address xxE1h in page 3 that the game leaves alone, or the game file without `rom keep` |
-| `the tape service without a part in page 3 keeps T0 in page 0 of DOS's mapper` | Either the game fills page 3 or its game file has `service t0`. The game also keeps RAM of DOS's mapper in page 0, where that mode puts T0 | A capture variant, whose RAM is outside DOS's mapper, or `service at <address>` |
+| `the tape service without a part in page 3 keeps T0 in page 0 of DOS's mapper` | Either the game fills page 3 or its game file has `service t0`. The game also keeps RAM of DOS's mapper in page 0, where that mode puts T0 | A capture variant, whose RAM is outside DOS's mapper, or `service at <address>`. When page 3 has no 158 free bytes in one run, `service at <address> <code>` puts the 26 bytes of entries at the address xxE1h and the 132 bytes of the part's code at `<code>`, two runs that the game leaves alone, as Power Drift's `sx2.txt` does |
 | `the bytes at ... are not the patch's old bytes` | The patch was made for another dump | Make the patch again for this dump, with the `sha1` of its tape |
 | `point 1: fail`, `the restorer stopped: ...` | The restorer refused the image and returned to DOS. The line holds the restorer's message | The message says what to fix. Often the problem is too few free segments |
 | `point 1: fail`, `the tail's jump did not run within 120 seconds`, or more for a large image | The restore never reached the game, and the restorer printed no message. The report's screen shows where the restore stopped | DOS's message says what to fix. A restorer that hangs is a failure of `snapcas`, so add a line to `tests/snapcas-failures.txt` |
@@ -462,7 +464,8 @@ step's message names the failure:
 | `point 1: fail`, `vdp14 is 07, expected 00` and `vramptr is 1C000, expected 00000` | The snapshot's VRAM pointer is 0 in an MSX1 screen mode. The restorer sets that pointer with a carry into register 14, which `openMSX` makes only in MSX2 screen modes | `snapshot at <seconds>` with a moment later, when the pointer has moved, as in Saboteur 2's file for `hbf700p-ram512k-msxdos2` |
 | `point 1: fail` with differences | The restored machine differs from the snapshot | A failure of `snapcas`, so add a line to `tests/snapcas-failures.txt` |
 | `point 2: fail`, `the game writes XXXXh, in the tape service's part of page 3` | The game keeps data where the tape service's part goes | `service at <address>` with an address xxE1h in page 3 that the game leaves alone, or `service t0` |
-| `point 3: fail` | The restored machine rebooted, mostly because the loader crashed after the restore | A capture variant, or a slot patch |
+| `point 2: fail`, `the game writes XXXXh, in the stack of the call of the machine's resident program in page 3` | The game keeps data where the build put the call's own stack, in the zeros of `SLTATR` and `SLTWRK` | `resstack <address>` with zeros in page 3 that the game leaves alone, as Service Ace's file for `sx2-extramapper-mcp` has |
+| `point 3: fail` | The restored machine rebooted, or the CPU ran more than 100,000 FFh bytes, RST 38h, or entered 0038h with more than 32 values of SP below 0100h, mostly because the loader crashed after the restore | A capture variant, or a slot patch |
 | `point 4: fail` with a BASIC error, such as `Overflow in 130` | The game's BASIC program stops at an error | A patch of the program's text, such as the patch in Field Master's game file |
 
 `log.txt` holds the line `load stopped at tape position ..., screen: ...`. That line
@@ -487,7 +490,11 @@ patches two. These forms need no line:
 | A stub of `TAPION` that selects the ROM in page 0 as `AND H / LD L,A`, in the mode without a part in page 3 | The scan, in the build ([Without a part in page 3](docs/INTERNALS.md#without-a-part-in-page-3)) |
 | Level 9's, CasLink3's, and Engesoft's copies of page 3's slot to the other pages | [The page copy patch](docs/INTERNALS.md#the-page-copy-patch) |
 | The end of the RAM search in the `slots` program of Dinamic's loaders, which gives page 1 the slot of page 2 and not the slot that the search found | [The search slot patch](docs/INTERNALS.md#the-search-slot-patch) |
+| A loader's copy of ENASLT that writes the subslot register with `AND B`, not the BIOS's `AND H`, and its selection of page 1 by EXPTBL's slot 1 entry, as in Arkos and Satan | [The ENASLT copy patch](docs/INTERNALS.md#the-enaslt-copy-patch) |
 | The interrupt handler of Aventuras AD's interpreter, which writes the slot register from the game's copy of it, on an MSX2 | [The interrupt slot patch](docs/INTERNALS.md#the-interrupt-slot-patch) |
+| A BASIC loader's `POKE &HFFFF,&HAA` or `POKE -1,170`, on a machine whose RAM is in an expanded slot and not in subslot 2 | [The subslot POKE patch](docs/INTERNALS.md#the-subslot-poke-patch) |
+| A loader's fill of the hooks with RET that goes past FFC9h, over an MSX2's copies of VDP registers, on an MSX2 | [The hook fill patch](docs/INTERNALS.md#the-hook-fill-patch) |
+| The trampoline at FC9Ah of Opera Soft's, Topo Soft's and Dro Soft's loaders, which reaches `TAPION` by the slot register alone, on a machine whose RAM shares the main ROM's slot, as `sx2-extramapper-mcp` | [The trampoline patch](docs/INTERNALS.md#the-trampoline-patch) |
 
 `log.txt` names each write that the capture saw and did not patch, with
 `for a patch line`. The log names each address and value once, and leaves out the
@@ -608,7 +615,8 @@ find the row:
 | `made for another machine`, `slot 0 ... is not RAM`, `slot 0 is not expanded as at the capture`, `slot 0 is DOS's mapper ...` | The image is for another machine, or the machine file does not describe this one | Ask for the model and slots again. Otherwise [Add a machine](#add-a-machine) |
 | `DOS's pages are not in one memory mapper`, `MSX-DOS 1 needs a memory mapper ...`, `no page 1 or 2 can hold ...`, `a page's segment is beyond ...` | The MSX has no suitable memory mapper | No line fixes it. Tell the user |
 | `DOS has too few free mapper segments`, `needs N ... DOS has M`, `more than 64 pages ...` | The mapper is too small | No line fixes it. Tell the user the numbers |
-| `a page 0 is in another subslot`, `rom keep needs ...`, `service t0 needs ...`, `T0 cannot take ...` | The game file's `rom keep` or `service t0` does not suit this machine | A `capture` variant whose RAM is outside DOS's mapper, or remove the line from the machine's game file |
+| `a page 0 is in another subslot`, `rom keep needs ...` | Page 0 is in another subslot of DOS's mapper's slot, and the image lacks `sub0`, which selects the mapper there while the tape service runs: page 3 is outside DOS's mapper, or page 3 has no 23 zero bytes for `sub0` at FCC9h, so `build.txt` has no `sub0` line | A `capture` variant whose RAM is outside DOS's mapper, or remove `rom keep` from the machine's game file |
+| `service t0 needs ...`, `T0 cannot take ...` | The game file's `service t0` does not suit this machine | A `capture` variant whose RAM is outside DOS's mapper, or remove the line from the machine's game file |
 | The machine reboots, to the boot screen or into DOS | The loader crashes after the restore. Point 3 can miss it | A `capture` variant, or a slot patch ([Patch the code](#3-patch-the-code)) |
 | The screen stops and no key works | Unknown. Talvisota on `phc28s-ram64k-carnivore2` needed `capture phc28s-ram64k` | `capture <variant>` with the variant without the disk system |
 | The game waits for music that never ends | `PLAY` that runs at the snapshot does not resume on a real PHC-28S | `snapshot at <seconds>` after the music |

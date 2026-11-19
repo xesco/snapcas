@@ -16,7 +16,7 @@ new way to make an image.
 | Python 3, with its standard library only | The tools are Python 3 programs. The download uses `urllib` and `zipfile`, so the user installs nothing with pip |
 | `openMSX` 22.0, on the path or named by `OPENMSX` | The capture and the check run in `openMSX` |
 | The system ROMs of the user's machine, in `openMSX`'s `share/systemroms` | `openMSX` needs the system ROMs to emulate the machine, and `snapcas` cannot ship them. When a ROM is missing, the command shows `openMSX`'s message, and that message names the ROM |
-| `make firmware`, once, for the machines `fsa1-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper` and `hbf700p-ram512k-msxdos2` | `make firmware` downloads the firmware that `snapcas` cannot ship: the SD Mapper's Nextor, and a MegaFlashROM flash with only Nextor in it. For `hbf700p-ram512k-msxdos2` it downloads nothing. It makes an HB-F700P whose slot 0 is not expanded, from `openMSX`'s own file, because many loaders fail on the real slot 0. Everything goes into `out/cache/openmsx-home/`, an `openMSX` home that links to your system ROMs. `snapcas` uses that home. To use another home, set `OPENMSX_HOME` to its folder. Without the firmware, `snap` and `try` stop and name `make firmware` |
+| `make firmware`, once, for the machines `fsa1-mfrsd`, `vg8020-sdmapper`, `xp800-sdmapper`, `hbf700p-ram512k-msxdos2` and the three SX-2 machines | `make firmware` downloads the firmware that `snapcas` cannot ship: the SD Mapper's Nextor, and a MegaFlashROM flash with only Nextor in it. For `hbf700p-ram512k-msxdos2` it downloads nothing. It makes an HB-F700P whose slot 0 is not expanded, from `openMSX`'s own file, because many loaders fail on the real slot 0. For the SX-2's machines it makes their four models from the ROMs in the SX-2's own `OCM-BIOS.DAT`, which you copy from its SD card into your system ROMs, or name with `make firmware SX2_BIOS=<file>`. Without that file, `make firmware` says so and leaves those machines out. Everything goes into `out/cache/openmsx-home/`, an `openMSX` home that links to your system ROMs. `snapcas` uses that home. To use another home, set `OPENMSX_HOME` to its folder. Without the firmware, `snap` and `try` stop and name `make firmware` |
 | A network connection, the first time that the user makes a game | The tapes come from File-Hunter, and `snapcas` cannot ship the tapes either |
 
 The user gets `snapcas` as a clone or a zip of the repository. In the repository's
@@ -154,6 +154,9 @@ hbf700p-ram512k-msxdos2     Sony HB-F700P (MSX2, 256 KB) with a 512 KB RAM cartr
 nms8245-ram512k-sunriseide  Philips NMS 8245 (MSX2, 128 KB) with a 512 KB RAM cartridge and a Sunrise IDE
 nms8250-carnivore2          Philips NMS 8250 (MSX2, 128 KB) with a Carnivore2
 phc28s-ram64k-carnivore2    Sanyo PHC-28S (MSX1, 16 KB) with a 64 KB RAM cartridge and a Carnivore2
+sx2                         SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded
+sx2-extramapper-mcp         SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running
+sx2-noexp0                  SX-2 (MSX2+, 2048 KB) with its slot 0 not expanded
 vg8020-carnivore2           Philips VG-8020 (MSX1, 64 KB) with a Carnivore2
 vg8020-sdmapper             Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1
 xp800-sdmapper              Gradiente Expert XP-800 (MSX1, 64 KB) with an SD Mapper v1
@@ -177,7 +180,7 @@ sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d
 url https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Gauntlet%20(1986)(US%20Gold)(Side%20B)%5BRUN%27CAS-%27%5D.zip
 ```
 
-Each of the 1545 shipped game files has a `url` line
+Each of the 1544 shipped game files has a `url` line
 ([FILES.md, Game file][gamefile]).
 
 For each side, the command does these steps:

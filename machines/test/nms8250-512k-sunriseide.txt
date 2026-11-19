@@ -1,0 +1,6 @@
+# An NMS 8250 whose single mapper holds 512 KB, made by the Makefile, with a
+# Sunrise IDE under Nextor: DOS's mapper is the machine's own, in slot 3-2, and
+# the sub-ROM is in slot 3-0. So T0 and the sub-ROM are in one slot, as on a
+# machine without a RAM cartridge.
+openmsx -machine Philips_NMS_8250_512k -ext SunriseIDE_Nextor
+disk hda
