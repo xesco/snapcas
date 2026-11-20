@@ -2,8 +2,6 @@
 
 This document explains how `tools/build.py`, `tools/resident.py`, and `bin/SERVICE.BIN` serve multi-load tapes from mapper RAM and keep machine-resident programs (such as SX2RES) running during gameplay.
 
-**Internals:** [Capture](capture.md) · [Automatic Patches](patches.md) · **Tape Service & Resident Calls** · [Restorer & Check](restorer-and-check.md)
-
 ## Tape service
 
 Single-load games receive no tape service—the restored machine is identical to the snapshot. Multi-load games (`service 1` in `state.txt`, unless overridden by `service no`) embed all remaining tape data (including Side 2) in DOS mapper segments and intercept BIOS cassette calls `00E1h`–`00F3h` (`TAPION`, `TAPIN`, `TAPIOF`, `TAPOON`, `TAPOUT`, `TAPOOF`, `STMOTR`).
@@ -48,9 +46,9 @@ On machines where DOS's mapper and the MSX2/MSX2+ sub-ROM share one expanded slo
 ## Manual tape
 
 Passing `/M` to `SNAPCAS.COM` sets the code segment's mode byte (`0054h`) to `1` (ignored in `T0` mode). `E_STOP` (`xxFAh`) tracks whether the virtual motor is stopped (initialized from snapshot `ppic` bit 4, and set by `TAPIOF`, `STMOTR`, or end-of-side). On the next `TAPION`, the service waits for a keypress—flashing the border (VDP R#7, restored from `RG7SAV` or snapshot R#7):
-- `RETURN` (yellow): resume playback (waits for key release so the game never sees `RETURN`; advances to Side B if Side A ended).
-- `GRAPH` (green): rewind to Side A start and play.
-- `CODE` (red): jump to Side B start and play.
+- `RETURN` (yellow): resume playback (waits for key release so the game never sees `RETURN`; advances to Side 2 if Side 1 ended).
+- `GRAPH` (green): rewind to Side 1 start and play.
+- `CODE` (red): jump to Side 2 start and play.
 - `CTRL+STOP`: abort with carry set.
 
 In automatic mode (`0054h = 0`), `GRAPH` and `CODE` are still polled on `TAPION` for manual rewinds/flips.

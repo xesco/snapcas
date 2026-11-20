@@ -47,16 +47,7 @@ Lists the 13 shipped machine configurations and their descriptions (see [MACHINE
 $ ./snapcas.py machines
 fsa1-mfrsd                  Panasonic FS-A1 (MSX2, 64 KB) with a MegaFlashROM SCC+ SD
 hb75p-carnivore2            Sony HB-75P (MSX1, 64 KB) with a Carnivore2
-hb75p-mfrsd                 Sony HB-75P (MSX1, 64 KB) with a MegaFlashROM SCC+ SD
-hbf700p-ram512k-msxdos2     Sony HB-F700P (MSX2, 256 KB) with a 512 KB RAM cartridge, under MSX-DOS 2
-nms8245-ram512k-sunriseide  Philips NMS 8245 (MSX2, 128 KB) with a 512 KB RAM cartridge and a Sunrise IDE
-nms8250-carnivore2          Philips NMS 8250 (MSX2, 128 KB) with a Carnivore2
-phc28s-ram64k-carnivore2    Sanyo PHC-28S (MSX1, 16 KB) with a 64 KB RAM cartridge and a Carnivore2
-sx2                         SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded
-sx2-extramapper-mcp         SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running
-sx2-noexp0                  SX-2 (MSX2+, 2048 KB) with its slot 0 not expanded
-vg8020-carnivore2           Philips VG-8020 (MSX1, 64 KB) with a Carnivore2
-vg8020-sdmapper             Philips VG-8020 (MSX1, 64 KB) with an SD Mapper v1
+...
 xp800-sdmapper              Gradiente Expert XP-800 (MSX1, 64 KB) with an SD Mapper v1
 ```
 

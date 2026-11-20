@@ -2,8 +2,6 @@
 
 This document covers how `bin/SNAPCAS.COM` restores a `.SNP` image on real hardware, how `tools/check.py` verifies it in `openMSX`, and how `tools/games.py` runs the full collection.
 
-**Internals:** [Capture](capture.md) · [Automatic Patches](patches.md) · [Tape Service & Resident Calls](service-and-resident.md) · **Restorer & Check**
-
 ## Restorer
 
 `src/snapcas.asm` assembles to `bin/SNAPCAS.COM`, which runs under MSX-DOS 1, MSX-DOS 2, or Nextor. It performs five phases:

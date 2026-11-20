@@ -2,8 +2,6 @@
 
 This document covers how `tools/capture.py` and `tools/tcl/capture.tcl` load a cassette game in `openMSX` and produce a snapshot folder.
 
-**Internals:** **Capture** · [Automatic Patches](patches.md) · [Tape Service & Resident Calls](service-and-resident.md) · [Restorer & Check](restorer-and-check.md)
-
 ## Pipeline
 
 `tools/capture.py` boots a headless, muted `openMSX` instance configured from the machine file (or a capture variant) and executes six stages:
@@ -59,9 +57,7 @@ When building the image for the real machine, `build.py` sets the corresponding 
 
 ## Capture cache
 
-`tools/games.py` and `tools/pipeline.py` cache capture separately from build and check:
-- `out/work/<machine>/<game>/snap/.hash` stores a SHA-256 over the tape files, game/machine files, `openMSX` version, and capture-only tools (`CAPTURE_TOOLS`: `capture.py`, `cas.py`, `tsx.py`, `tape.py`, `gamefile.py`, `msx.py`, `tools/patches/*`, `tools/tcl/capture.tcl`).
-- Changes to `build.py`, `resident.py`, `check.py`, `bin/SNAPCAS.COM`, `bin/SERVICE.BIN`, or `SNAPCAS_KEYS` do **not** invalidate `snap/.hash`, so `make games` and `tools/pipeline.py --skip-capture` reuse existing snapshots and re-run only build and check.
+`tools/games.py` caches capture (`snap/.hash`) separately from build and check so build/check/restorer changes reuse existing snapshots via `tools/pipeline.py --skip-capture`. See [Batch Runner](restorer-and-check.md#batch-runner) for the exact hash inputs.
 
 ## Tools code layout
 

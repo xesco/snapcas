@@ -2,8 +2,6 @@
 
 This document catalogs the automatic patchers in `tools/patches/` that fix recurring MSX cassette loader bugs across hundreds of tapes without per-game overrides.
 
-**Internals:** [Capture](capture.md) · **Automatic Patches** · [Tape Service & Resident Calls](service-and-resident.md) · [Restorer & Check](restorer-and-check.md)
-
 ## Overview
 
 `snapcas` follows a strict rule: individual game bugs are fixed in `games/<GAME>/`, while patterns repeating across many tapes are fixed once in `tools/patches/`. Each patcher is self-contained (a Python module plus an optional `.tcl` watch fragment) and reports findings via `tools/patches/finding.py`.

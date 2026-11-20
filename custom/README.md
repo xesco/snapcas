@@ -23,4 +23,4 @@ Pass `custom/<GAME>` to `snapcas.py`:
 ./snapcas.py try custom/MYGAME phc28s-ram64k-carnivore2
 ```
 
-`snap` reads local tapes directly without downloading and writes images to `images/<machine>/custom/MYGAME/`. `sync` copies them to `SNAPCAS/CUSTOM/` on your card. See [AGENTS.md](../AGENTS.md) for the full custom-game workflow.
+`snap` reads local tapes directly without downloading and writes images to `images/<machine>/custom/MYGAME/`. `sync` copies them to `SNAPCAS/CUSTOM/` on your card.

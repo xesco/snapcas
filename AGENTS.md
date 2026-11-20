@@ -14,17 +14,12 @@ This runbook is for AI coding agents working on `snapcas`. It defines hard rules
 | Fix individual games in game files, not in code | Only add code/patchers in `tools/patches/` when one pattern repeats across many tapes |
 | Put a blank line and explanatory comment above every line added to a game file | Matches shipped style and records why each fix exists |
 
-## Repository map
+## Key debugging paths
+
+For the full repository folder layout, see [docs/BUILD.md](docs/BUILD.md#repository-layout). These are the files you read most often when debugging:
 
 | Path | Purpose |
 |---|---|
-| `machines/<machine>.txt` | Machine definition ([docs/FILES.md](docs/FILES.md#machine-file)) |
-| `machines/capture/<variant>.txt` | Capture variant with fewer cartridges or unexpanded slot 0 |
-| `games/<GAME>/game.txt` | Cross-machine game file |
-| `games/<GAME>/<machine>.txt` | Machine-specific overrides (inherited via `parent` if set) |
-| `custom/<GAME>/` | Local user game file + tapes (git-ignored; [custom/README.md](custom/README.md)) |
-| `images/<machine>/<GAME>/<GAME>.SNP` | Built image copied by `sync` |
-| `bin/SNAPCAS.COM`, `bin/SERVICE.BIN` | Prebuilt MSX restorer and service payload |
 | `out/games/<machine>.txt` | Results of `make games` (one line per game) |
 | `out/work/<machine>/<GAME>/snap/log.txt` | Capture log (typed commands, `TAPION`, motor, resets, stop screen, unpatched slot writes) |
 | `out/work/<machine>/<GAME>/snap/error.txt` | Capture failure message |
@@ -117,13 +112,13 @@ Test a single-load game, a multi-load game, and a variant-captured game (adding 
 | `check: the boot text '...' did not appear` | Fix `boot` text/keys. |
 
 ### 6. Update docs and run tests
-Update [docs/FILES.md](docs/FILES.md#shipped-machines), [docs/MACHINES.md](docs/MACHINES.md#supported-machines), [docs/CLI.md](docs/CLI.md#machines), and the machine count in [README.md](README.md). `tests/test_machines.py` tests every file in `machines/` automatically—run `make test`.
+Add the machine to [docs/MACHINES.md](docs/MACHINES.md#supported-machines) and update the machine count in [README.md](README.md). `tests/test_machines.py` tests every file in `machines/` automatically—run `make test`.
 
 ### 7. Run the full collection
 ```sh
 make games MACHINE=<machine>
 ```
-Runs all 1,544 games (~30 min), auto-retrying capture variants and writing `capture` lines into `<machine>.txt` (`FIX=0` disables retry). Do not edit `bin/` or `tools/` mid-run (hash changes trigger full rebuilds). Fix remaining failures, then update the machine game-file count in [docs/FILES.md](docs/FILES.md#shipped-machines).
+Runs all 1,544 games (~30 min), auto-retrying capture variants and writing `capture` lines into `<machine>.txt` (`FIX=0` disables retry). Do not edit `bin/` or `tools/` mid-run (hash changes trigger full rebuilds). Fix remaining failures, then update the working-games count in [docs/MACHINES.md](docs/MACHINES.md#supported-machines).
 
 ## Add a game
 
@@ -207,9 +202,3 @@ When all 4 check points pass in `openMSX` but the game fails on real hardware, a
 | Silent menu or flashing title | Same in plain `openMSX` | Verify with `tools/plain.py`; not a bug |
 
 After each fix, verify with `snap --check`, ask the user to `sync` and test past the failure point, and iterate if needed.
-
-## See also
-
-- [README.md](README.md) · [docs/PLAYING.md](docs/PLAYING.md) · [docs/CLI.md](docs/CLI.md) · [docs/MACHINES.md](docs/MACHINES.md)
-- [docs/FILES.md](docs/FILES.md) · [docs/BUILD.md](docs/BUILD.md) · [docs/DESIGN.md](docs/DESIGN.md) · [docs/FORMATS.md](docs/FORMATS.md) · [docs/NOTES.md](docs/NOTES.md)
-- [Capture](docs/internals/capture.md) · [Automatic Patches](docs/internals/patches.md) · [Tape Service & Resident Calls](docs/internals/service-and-resident.md) · [Restorer & Check](docs/internals/restorer-and-check.md)

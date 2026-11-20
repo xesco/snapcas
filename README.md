@@ -97,19 +97,7 @@ This walkthrough builds *Gauntlet* for a Sanyo PHC-28S (`phc28s-ram64k-carnivore
 
 ## Using your own CAS files
 
-Drop your tape file(s) and a one-line `game.txt` into `custom/<GAME>/` ([custom/README.md](custom/README.md)), then build and sync as usual:
-
-```sh
-./snapcas.py snap custom/MYGAME phc28s-ram64k-carnivore2 --check
-./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
-```
-
-Custom games sync to `\SNAPCAS\CUSTOM`:
-
-```text
-CD \SNAPCAS\CUSTOM
-\BIN\SNAPCAS MYGAME
-```
+Put your `.CAS` file(s) and a one-line `game.txt` in `custom/<GAME>/`, then run `snap custom/<GAME> <machine> --check` and `sync`—custom games land in `\SNAPCAS\CUSTOM` on your card. See [custom/README.md](custom/README.md) for the exact folder layout and commands.
 
 ## Documentation
 

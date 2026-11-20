@@ -6,7 +6,7 @@ This guide is for MSX users running `.SNP` images on real hardware. It covers st
 
 You need an MSX with a memory mapper and a disk or SD card interface running Nextor, MSX-DOS 2, or MSX-DOS 1.
 
-Copy `bin/SNAPCAS.COM` and your `.SNP` images to your disk. If you used `./snapcas.py sync` ([CLI.md](CLI.md#sync)), `SNAPCAS.COM` is in `\BIN` and images sit in alphabetical folders (`\SNAPCAS\A`–`Z`, `\SNAPCAS\0-9`, or `\SNAPCAS\CUSTOM`):
+Copy `bin/SNAPCAS.COM` and your `.SNP` images to your disk. If you used `./snapcas.py sync`, `SNAPCAS.COM` is in `\BIN` and images sit in alphabetical folders (`\SNAPCAS\A`–`Z`, `\SNAPCAS\0-9`, or `\SNAPCAS\CUSTOM`):
 
 ```text
 CD \SNAPCAS\G
@@ -58,9 +58,9 @@ If an image passed `--check` in `openMSX` but fails on your real MSX, check the 
 
 | What you see | Cause | What to do |
 |---|---|---|
-| `made for another machine: its ROMs differ` | Image was built for a different MSX model or BIOS ROM. | Rebuild using the machine matching your exact model and ROMs ([MACHINES.md](MACHINES.md#supported-machines)). |
-| `slot X page Y is not RAM` or `slot 0 is not expanded as at the capture` | Cartridge slot order or SX-2 slot-0 setting differs from the image's target machine. | Match your exact cartridge slots (for SX-2, check [SX-2 configurations](MACHINES.md#sx-2-configurations)). |
+| `made for another machine: its ROMs differ` | Image was built for a different MSX model or BIOS ROM. | Rebuild using the machine matching your exact model and ROMs. |
+| `slot X page Y is not RAM` or `slot 0 is not expanded as at the capture` | Cartridge slot order or SX-2 slot-0 setting differs from the image's target machine. | Match your exact cartridge slots (for SX-2, see [SX-2 configurations](MACHINES.md#sx-2-configurations)). |
 | `needs N free mapper segments, and DOS has M` | The game needs more free mapper RAM than your hardware has. | This game cannot fit in your current mapper; a larger mapper is required. |
 | `made for another version of SNAPCAS.COM` | `SNAPCAS.COM` on your card is older than the `.SNP` image. | Run `./snapcas.py sync` or copy the current `bin/SNAPCAS.COM` to your card. |
-| Game waits indefinitely during a level load | Game expects a rewind, side flip, or manual tape start. | Use [Tape keys](#tape-keys) or launch with `/M` ([Manual tape mode](#manual-tape-mode)). |
+| Game waits indefinitely during a level load | Game expects a rewind, side flip, or manual tape start. | Use the tape keys above or launch with `/M`. |
 | Game hangs, corrupts graphics, or reboots | Hardware difference or gameplay path not exercised by the 60-second check. | Note what appears on screen and what you pressed, and use the on-MSX debugging workflow in [AGENTS.md](../AGENTS.md). |

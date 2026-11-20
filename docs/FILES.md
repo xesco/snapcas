@@ -82,25 +82,7 @@ In shipped files, every directive after `cas`/`tsx`/`side2`/`sha1`/`url`/`name` 
 
 A file `games/<GAME>/<machine>.txt` overrides or appends to `game.txt` when building for `<machine>`. If a machine defines `parent <parent>`, the loader reads `game.txt` → `<parent>.txt` → `<machine>.txt` in order.
 
-Put machine-dependent directives in `<machine>.txt`: `capture`, slot-register `patch` lines, `subslots keep`, machine-only `service` / `rom` / `snapshot`, and `rescall` / `rescode` / `resstack`.
-
-## Shipped machines
-
-| Machine | Summary | Machine game files | Capture variants |
-|---|---|---|---|
-| `fsa1-mfrsd` | Panasonic FS-A1 (MSX2, 64 KB), MegaFlashROM SCC+ SD (Nextor) | 72 | `fsa1` |
-| `hb75p-carnivore2` | Sony HB-75P (MSX1, 64 KB), Carnivore2 | 77 | `hb75p` |
-| `hb75p-mfrsd` | Sony HB-75P (MSX1, 64 KB), MegaFlashROM SCC+ SD (stock) | 70 | `hb75p` |
-| `hbf700p-ram512k-msxdos2` | Sony HB-F700P (MSX2, 256 KB), 512 KB RAM, MSX-DOS 2 | 265 | `hbf700p-msxdos2`, `hbf700p-noexp0-ram512k-msxdos2`, `hbf700p-noexp0-msxdos2` |
-| `nms8245-ram512k-sunriseide` | Philips NMS 8245 (MSX2, 128 KB), 512 KB RAM, Sunrise IDE | 31 | `nms8245` |
-| `nms8250-carnivore2` | Philips NMS 8250 (MSX2, 128 KB), Carnivore2 | 89 | `nms8250` |
-| `phc28s-ram64k-carnivore2` | Sanyo PHC-28S (MSX1, 16 KB), 64 KB RAM, Carnivore2 | 86 | `phc28s-ram64k`, `phc28s-empty-carnivore2` |
-| `sx2` | SX-2 (MSX2+, 2048 KB), slot 0 expanded | 50 | `sx2-noexp0` |
-| `sx2-extramapper-mcp` | SX-2 (MSX2+, 6144 KB), Extra-Mapper + SX2RES | 770 | `sx2-extramapper-noram30` |
-| `sx2-noexp0` | SX-2 (MSX2+, 2048 KB), slot 0 unexpanded (`parent sx2`) | 0 | — |
-| `vg8020-carnivore2` | Philips VG-8020 (MSX1, 64 KB), Carnivore2 | 125 | `vg8020` |
-| `vg8020-sdmapper` | Philips VG-8020 (MSX1, 64 KB), SD Mapper v1 | 161 | `vg8020` |
-| `xp800-sdmapper` | Gradiente Expert XP-800 (MSX1, 64 KB), SD Mapper v1 | 170 | `xp800` |
+Put machine-dependent directives in `<machine>.txt`: `capture`, slot-register `patch` lines, `subslots keep`, machine-only `service` / `rom` / `snapshot`, and `rescall` / `rescode` / `resstack`. For the full list of shipped machines and their capture variants, see [MACHINES.md](MACHINES.md#supported-machines).
 
 ## Compilations
 

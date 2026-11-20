@@ -1,6 +1,6 @@
 # Hardware & Game Notes
 
-This reference preserves the MSX hardware quirks and game case studies that shaped `snapcas`'s rules and automatic patchers. Use it when debugging a new failure or designing a patch. For the patcher implementations themselves, see [docs/internals/patches.md](internals/patches.md).
+This reference preserves the MSX hardware quirks and game case studies behind the rules and automatic patchers in `snapcas`. Use it when debugging a new failure or designing a patch. For the patcher implementations themselves, see [docs/internals/patches.md](internals/patches.md).
 
 ## Loaders and slots
 
@@ -34,7 +34,7 @@ When page 3 sits in an expanded slot (all RAM on NMS 8250 and SX-2; Carnivore2 o
 - **Register contracts:** *Gauntlet*'s level loader relies on `TAPIN` returning with `B = 0` (matching the BIOS), so `SERVICE.BIN` preserves `B = 0` in both page 3 and `T0` modes.
 - **Side 1 padding:** *Saint Dragon* expects `TAPIN` to return `FFh` bytes during Side 1 trailing padding while flipping sides.
 - **Post-end writes:** *7 Card Stud* writes variables into `FD00h` after reading its last tape block; check point 2 ignores writes to the tape service once the tape reaches its end.
-- **Late overwrites:** *Altered Beast* overwrites `FCE1h` after loading Side B (past the 60 s check) and *Desperado* / *Gunsmoke* zero `FD68h` inside the reader when starting a phase; both use `service t0`.
+- **Late overwrites:** *Altered Beast* overwrites `FCE1h` after loading Side 2 (past the 60 s check) and *Desperado* / *Gunsmoke* zero `FD68h` inside the reader when starting a phase; both use `service t0`.
 - **Split placement:** *Power Drift*, *The Running Man*, and *SPQR* keep page 0 RAM in DOS's mapper (blocking `service t0`) and lack 158 contiguous free bytes at any `xxE1h`, motivating split `service at <xxE1> <code>` (and `FFE1h` entries for BIOS-free games like *Power Drift*). *Chase H.Q.* places its service inside an unused 255-byte `IM 2` vector table.
 - **Same segment in two pages:** *Double Dragon* maps one mapper segment into two pages simultaneously, so the build tracks RAM by `(slot, segment)` and stores explicit tail/page-3 record indices in the image header.
 - **Mapper capacity:** *Relics* requires 32–33 free mapper segments, exceeding 512 KB cartridges (26 free under MSX-DOS 2); supporting a second mapper would require a format change and ~500 lines for a single title.
@@ -57,4 +57,4 @@ When page 3 sits in an expanded slot (all RAM on NMS 8250 and SX-2; Carnivore2 o
   - 220 Spanish games (Opera Soft, Topo Soft, Dro Soft) share an `FC9Ah` tape trampoline that selects BIOS via `A8h` alone; the trampoline patcher converts it to slot 0's subslot register while preserving block XOR checksums and restoring the caller's original subslot (needed by *Budokan*, which enters with `54h` rather than `55h`).
   - *Gauntlet* overwrites `H.KEYI` (`FD9Ah`) 0.4 s after restore, motivating SX2RES calls from `T0` (`t_res`) and `rescall` wrappers (`rescall B45B`) for games that replace `0038h` in page 0 RAM.
   - *Thor*, *Knight Tyme*, *Map Game*, *Checkmate!*, *Finders Keepers*, and *Super MSX*/*Engesoft* loaders that probe primary slots for page 1 RAM patch their switches to slot 0's subslot register (`54h`/`55h`/`50h`) and update `SLTTBL` (`FCC5h`) when the game later calls `ENASLT`.
-- **Open question:** The RAM-search patcher on a machine where found RAM lives in an expanded slot other than page 3's slot selects whichever subslot that slot's subslot register already holds.
+- **Open question:** On a machine where found RAM lives in an expanded slot other than page 3, the RAM-search patcher selects whichever subslot is already active in that slot's subslot register.
