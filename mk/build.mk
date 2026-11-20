@@ -5,7 +5,7 @@ SJASMPLUS_URL     := https://github.com/z00m128/sjasmplus/releases/download/v$(S
 SJASMPLUS_SHA256  := 0b5013f07e8d8505f9e296529655668b6fdf0268625c19e883b0fff484e209f1
 SJASMPLUS         := $(CACHE)/tools/sjasmplus
 
-SNAPCAS_SRC := src/snapcas.asm src/service.inc src/slots.inc src/worker.inc src/version.inc
+SNAPCAS_SRC := src/snapcas.asm src/plan.inc src/segments.inc src/records.inc src/messages.inc src/service.inc src/slots.inc src/worker.inc src/version.inc
 SERVICE_SRC := src/service.asm src/service.inc src/tape.inc
 SYMBOLS     := $(OUT)/snapcas.sym $(OUT)/service.sym
 

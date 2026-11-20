@@ -24,6 +24,7 @@ files, 2 when openMSX fails or a wait times out, 3 when a check fails: that of
 the first step that fails. 130 when Ctrl-C stops the command.
 """
 import argparse
+import difflib
 import os
 import re
 import subprocess
@@ -35,6 +36,7 @@ sys.path.insert(0, TOOLS)
 import card  # noqa: E402
 import check  # noqa: E402
 import download  # noqa: E402
+import fetch  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
 import pipeline  # noqa: E402
@@ -46,10 +48,6 @@ NEXTOR = os.path.join(msx.DOS, "nextor")
 # The openMSX home that make firmware makes, with the user's system ROMs and the
 # firmware of the machines that need it (Makefile).
 EMU_HOME = os.path.join(ROOT, "out", "cache", "openmsx-home")
-# Nextor 2.1.0's tools.zip, which holds NEXTOR.SYS 2.11 and COMMAND2.COM 2.44,
-# and its SHA-256: the Makefile pins the same file.
-NEXTOR_ZIP = ("https://github.com/Konamiman/Nextor/releases/download/v2.1.0/tools.zip",
-              "5792ff3fe7ab684b8afd405cdd898e25f6efdb84ca1f2cb9ac1428cc848d924e")
 
 # What each point of check.py's report checks (docs/internals/restorer-and-check.md, Check).
 POINTS = {1: "the restored machine equals the snapshot",
@@ -62,35 +60,46 @@ class Choice(Exception):
     """A game or a machine that the command line does not name."""
 
 
-def games_with(text):
+def all_games():
+    """All shipped and custom games as (name, title, first_url, is_shipped)."""
+    shipped = gamefile.game_names()
+    custom = gamefile.custom_names()
+    entries = [(name, *gamefile.title_and_url(gamefile.game_folder(name)), True) for name in shipped]
+    entries += [(name, *gamefile.title_and_url(gamefile.game_folder(name)), False) for name in custom]
+    return entries
+
+
+def games_with(text, entries=None):
     """The games whose folder or title holds the text, in any case, as
     (folder, title)."""
     text = text.lower()
-    games = [(name, gamefile.title(gamefile.game_folder(name)))
-             for name in gamefile.game_names() + gamefile.custom_names()]
-    return [(name, title) for name, title in games if text in name.lower() or text in title.lower()]
+    if entries is None:
+        entries = all_games()
+    return [(name, title) for name, title, _, _ in entries
+            if text in name.lower() or text in title.lower()]
 
 
-def compilation_programs():
-    """The game files that list shows only with --all: a compilation's
-    programs, in a collection's folder such as SUPERMSX/GOLF, or one of 4 or
-    more game files from one zip, as Turbo Pack A's are. Fewer game files from
-    one zip are a game's parts or versions, as RUR-1 and RUR-2 are."""
-    names = gamefile.game_names()
+def compilation_programs(entries):
+    """Shipped programs shown only with --all: a collection's programs (with /),
+    or one of 4 or more shipped game files sharing a single zip URL."""
     by_zip = {}
-    for name in names:
-        with open(os.path.join(gamefile.game_folder(name), "game.txt"), encoding="utf-8") as f:
-            url = next((line.split()[1] for line in f if line.startswith("url ")), None)
-        if url:
+    for name, _, url, is_shipped in entries:
+        if is_shipped and url:
             by_zip.setdefault(url, []).append(name)
     shared = {name for group in by_zip.values() if len(group) >= 4 for name in group}
-    return {name for name in names if "/" in name} | shared
+    return {name for name, _, _, is_shipped in entries if is_shipped and "/" in name} | shared
 
 
 def columns(rows):
     """Lines of two columns, the first as wide as its widest value."""
     width = max((len(a) for a, _ in rows), default=0)
     return [f"{a:{width}}  {b}".rstrip() for a, b in rows]
+
+
+def suggest(arg, choices):
+    """A 'did you mean' suffix for close matches, or ''."""
+    close = difflib.get_close_matches(arg.lower(), choices.keys(), n=3, cutoff=0.6)
+    return f" (did you mean {', '.join(choices[m] for m in close)}?)" if close else ""
 
 
 def find_game(arg):
@@ -102,13 +111,14 @@ def find_game(arg):
         return gamefile.game_folder(names[arg.lower()])
     if os.path.isfile(os.path.join(arg, "game.txt")):
         return os.path.abspath(arg)
-    raise Choice(f'no game is named "{arg}": snapcas.py list shows the games')
+    raise Choice(f'no game is named "{arg}": snapcas.py list shows the games{suggest(arg, names)}')
 
 
 def find_machine(arg):
     """The name of the machine that arg names."""
     if not os.path.isfile(msx.machine_path(arg)):
-        raise Choice(f'no machine is named "{arg}": snapcas.py machines shows the machines')
+        machines = {m.lower(): m for m in msx.user_machines()}
+        raise Choice(f'no machine is named "{arg}": snapcas.py machines shows the machines{suggest(arg, machines)}')
     return arg
 
 
@@ -120,10 +130,10 @@ def tool(name, *args):
 def nextor():
     """Downloads Nextor's DOS files into dos/nextor/ when they are missing, and
     returns the folder."""
-    if all(os.path.isfile(os.path.join(NEXTOR, f)) for f in ("NEXTOR.SYS", "COMMAND2.COM")):
+    if all(os.path.isfile(os.path.join(NEXTOR, f)) for f in fetch.NEXTOR_FILES):
         return NEXTOR
     print(f"download  Nextor 2.1.0's NEXTOR.SYS and COMMAND2.COM into {os.path.relpath(NEXTOR, ROOT)}/", flush=True)
-    if tool("fetch.py", *NEXTOR_ZIP, NEXTOR, "NEXTOR.SYS", "COMMAND2.COM") != 0:
+    if tool("fetch.py", "--nextor", NEXTOR) != 0:
         raise Choice("Nextor's files could not be downloaded; --dos <dir> names other DOS files")
     return NEXTOR
 
@@ -221,9 +231,13 @@ def list_games(args):
     """Prints the games whose folder or title holds the text, and their number.
     A compilation's programs only with --all; without it, the count says how
     many of them hold the text."""
-    games = games_with(args.text or "")
-    programs = compilation_programs()
-    shown = games if args.all else [(name, title) for name, title in games if name not in programs]
+    entries = all_games()
+    games = games_with(args.text or "", entries)
+    if args.all:
+        shown = games
+    else:
+        programs = compilation_programs(entries)
+        shown = [(name, title) for name, title in games if name not in programs]
     for line in columns(shown):
         print(line)
     hidden = len(games) - len(shown)

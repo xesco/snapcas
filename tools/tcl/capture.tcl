@@ -14,12 +14,6 @@ proc since_load {} { expr {[now] - $::run(t0)} }
 proc logev {msg} { lappend ::st(log) [list [since_load] $msg] }
 proc decide {msg} { lappend ::run(decisions) [list [since_load] $msg] }
 
-proc read_binary {path} {
-    set f [open $path rb]
-    set data [read $f]
-    close $f
-    return $data
-}
 proc write_file {name data} {
     set f [open [file join $::S(snap) $name] wb]
     puts -nonewline $f $data

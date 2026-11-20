@@ -90,3 +90,15 @@ proc typed_at_prompt {hex done} {
   type [binary format H* $hex]
   uplevel #0 $done
 }
+
+proc read_binary {path} {
+  set f [open $path rb]
+  set data [read $f]
+  close $f
+  return $data
+}
+proc write_text {path text {mode w}} {
+  set f [open $path $mode]
+  puts $f $text
+  close $f
+}
