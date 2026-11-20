@@ -13,19 +13,15 @@ service no
 # register alone, copies the ROM image to page 1 or 2, and starts it. Here the
 # BIOS and the RAM are both in slot 0, in subslots 0 and 1, so page 1 keeps the
 # ROM. The patch writes 54h to slot 0's subslot register in place of that code:
-# the BIOS in page 0 and RAM in pages 1 to 3.
+# the BIOS in page 0 and RAM in pages 1 to 3. The second binary also updates
+# SLTTBL's entry for slot 0 at FCC5h so the ROM startup's ENASLT at 405Dh maps
+# page 2 to RAM in subslot 1 rather than subslot 0.
 patch side1:4590 DB A8 E6 F0 47 1F 1F E6 0C B0 D3 A8 > 3E 54 32 FF FF 00 00 00 00 00 00 00
-patch side1:85D7 DB A8 E6 F0 47 1F 1F E6 0C B0 D3 A8 > 3E 54 32 FF FF 00 00 00 00 00 00 00
+patch side1:85D7 DB A8 E6 F0 47 1F 1F E6 0C B0 D3 A8 > 3E 54 32 FF FF 32 C5 FC 00 00 00 00
 
 # The first binary then gives page 1 the ROM's slot again. The patch writes 50h
 # to the subslot register, the BIOS in pages 0 and 1, in place of that code.
 patch side1:45A7 DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
-
-# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
-# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
-# fails: point 4: fail: the screen shows Type mismatch in 25 10.0 seconds after the
-# restore. `make games` wrote this line.
-capture sx2-extramapper-noram30
 
 # The game runs without interrupts, so the image's call of SX2RES from H.KEYI
 # never runs. A routine at FCD9h, in the zeros of SLTATR and SLTWRK, reads the

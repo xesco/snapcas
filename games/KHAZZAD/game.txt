@@ -2,3 +2,8 @@
 cas KHAZZAD.CAS
 sha1 3fd741f9a5aad6d79b1bdafcde65e6b91f08aaea
 url https://download.file-hunter.com/Games/MSX1/CAS/Khazzad-Dum%20(1989)(SPE)(es)%5BRUN%27CAS-%27%5D.zip
+
+# At D463h the game calls 046Fh, the MSX1 BIOS internal address of BREAKX. On
+# MSX2 and MSX2+ 046Fh is inside CHKRAM, so starting play resets the machine.
+# Call the official BIOS entry at 00B7h instead.
+patch side1:9DF7 CD 6F 04 > CD B7 00

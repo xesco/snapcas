@@ -2,3 +2,9 @@
 cas JOHNY-CO.CAS
 sha1 0527f8b087fade055e5cf789fbc6dd5329d3d416
 url https://download.file-hunter.com/Games/MSX1/CAS/Johny%20Comomolo%20in%203-2-1%20Fire%20(1986)(Dro%20Soft)%5BRUN%27CAS-%27%5D.zip
+
+# The launcher at B5A5h sets SP to FFFFh, inside the MSX BIOS work area. On
+# MSX2 and MSX2+ calls to INIGRP (0072h) go through EXTROM and overwrite the
+# stack and MAINROM (FFF7h), causing a warm boot when a key is pressed. Move the
+# stack to F380h, below the BIOS work area.
+patch side1:181 31 FF FF > 31 80 F3

@@ -14,3 +14,21 @@ patch side1:1B586 06 FF C5 CD 9F FD C1 10 F9 CD 72 00 F3 3A FD FF D3 A8 > CD 72 
 patch side1:2955C 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 90 11 00 00 01 00 40 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 90 11 00 00 01 00 40 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 patch side1:2D3B5 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 40 21 00 90 11 00 40 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 F1 32 FF FF 00 00 00
 patch side1:2D41A 3A FD FF D3 A8 > 3E 55 32 FF FF
+
+# When space starts the game, its stub at 9C15h writes 55h, 54h and 50h into the
+# operands at 0054h, 0047h and 0038h, then jumps to 0000h, which copies 003Dh to
+# 49D4h. That routine copies the BIOS into RAM in page 0, 1 KB at a time through
+# 4E20h, by the slot register alone (OUT (0A8h),A). Here both the BIOS and RAM
+# are in slot 0, so the selections must write slot 0's subslot register at FFFFh
+# instead. Keeping LD A,nn at 0046h and 0053h lets 9C15h patch the operands at
+# 0047h and 0054h cleanly, and LD B,4 replaces LD BC,400h since C is 0 after the
+# preceding LDIR. The return to BASIC at 0037h writes 50h the same way.
+patch side1:2558F 3E 30 D3 A8 FB C9 > 3E 50 0B 02 FB C9
+patch side1:2559E 3E 3C D3 A8 01 00 04 > 3E 54 32 FF FF 06 04
+patch side1:255AB 3E 3F D3 A8 01 00 04 > 3E 55 32 FF FF 06 04
+
+# The unpacker that runs from 0000h when play starts rewrites all of D07Eh to
+# FFFDh with the game, over the image's call of SX2RES and its stack, wherever
+# they are, and then the game writes RET at 0038h and runs without interrupts.
+# So the image has no call.
+rescall no
