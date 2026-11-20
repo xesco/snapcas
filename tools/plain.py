@@ -54,30 +54,17 @@ def main():
     out = os.path.join(work, "plain.txt")
     if os.path.exists(out):
         os.remove(out)
-    # A machine without boot lines, such as the HB-F700P, is still booting 10
-    # seconds after power-on, and loses what is typed then. So the load
-    # command waits for BASIC's Ok, as in the capture's step 1.
-    script = (f"proc plain {{}} {{\n"
-              f"    wait_screen Ok 120 {{ later {AFTER_BOOT} plain_load }} "
-              f"{{ error {{BASIC's Ok did not appear within 120 seconds}} }}\n"
-              f"}}\n"
-              f"proc plain_load {{}} {{\n"
-              f"    set ::autoruncassettes off\n"
-              f"    cassetteplayer insert {msx.tcl_word(os.path.abspath(tape))}\n"
-              f"    set len [cassetteplayer getlength]\n"
-              f"    {msx.tcl_type(command + chr(13))}\n"
-              + (f"    later [expr {{$len + 5}}] {{{msx.tcl_type('RUN' + chr(13))}}}\n" if command == "CLOAD" else "")
-              + f"    later [expr {{$len + {AFTER_TAPE}}}] plain_screen\n"
-              f"}}\n"
-              f"proc plain_screen {{}} {{\n"
-              f"    set f [open {msx.tcl_word(out)} w]\n"
-              f"    puts $f [screen]\n"
-              f"    close $f\n"
-              f"    stop\n"
-              f"}}\n"
-              # On a machine that boots DOS from its own disk, BASIC comes
-              # from DOS.
-              f"safe {{boot {{{msx.boot_steps(machine)}}} {{{msx.at_prompt(machine, 'BASIC', 'plain')}}}}}\n")
+    settings = {
+        "tape": msx.tcl_word(os.path.abspath(tape)),
+        "load": msx.tcl_word((command + "\r").encode("latin-1").hex()),
+        "run_after": msx.tcl_word("RUN\r".encode("latin-1").hex() if command == "CLOAD" else ""),
+        "after_boot": str(AFTER_BOOT),
+        "after_tape": str(AFTER_TAPE),
+        "out": msx.tcl_word(out),
+    }
+    script = ("".join(f"set ::P({k}) {v}\n" for k, v in settings.items())
+              + msx.tcl("tcl/plain.tcl")
+              + f"safe {{boot {{{msx.boot_steps(machine)}}} {{{msx.at_prompt(machine, 'BASIC', 'plain')}}}}}\n")
     try:
         stderr = msx.run(machine.args, script, timeout=1800)
     except Exception as e:
@@ -94,4 +81,7 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)

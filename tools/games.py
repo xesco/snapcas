@@ -42,14 +42,15 @@ import sys
 import threading
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import gamefile  # noqa: E402
 import msx  # noqa: E402
+import paths  # noqa: E402
 import pipeline  # noqa: E402
 
-GAMES = os.path.join(ROOT, "games")
-REPORTS = os.path.join(ROOT, "out", "games")
+ROOT = paths.ROOT
+GAMES = paths.GAMES
+REPORTS = os.path.join(paths.OUT, "games")
 # The game files that fail on a machine in openMSX itself, and those that fail
 # because of snapcas (docs/BUILD.md, step 9).
 OPENMSX_FAILURES = os.path.join(ROOT, "tests", "openmsx-failures.txt")
@@ -91,9 +92,10 @@ def file_hash(h, path):
 # bin/, tools/build.py, tools/check.py, tools/tcl/check.tcl, dos/, or
 # SNAPCAS_KEYS leave existing snapshots valid, so games.py can skip capture.
 CAPTURE_TOOLS = (
-    "capture.py", "cas.py", "gamefile.py", "msx.py", "openmsx-settings.xml",
-    "snapshot.py", "tape.py", "tsx.py", "patches",
+    "capture.py", "cas.py", "gamefile.py", "machine.py", "msx.py", "openmsx-settings.xml",
+    "paths.py", "snapshot.py", "tape.py", "tsx.py", "patches",
     os.path.join("tcl", "capture.tcl"), os.path.join("tcl", "memory.tcl"),
+    os.path.join("tcl", "prelude.tcl"),
 )
 
 
@@ -261,119 +263,67 @@ def group(title, names, results):
         print(title + "\n" + "\n".join(f"  {name}: {results[name]}" for name in names))
 
 
-def main():
-    parser = msx.Parser(description="Make and check every shipped game file's image on a machine.")
-    parser.add_argument("machine", help="a machine file's name below machines/, without .txt")
-    parser.add_argument("--dos", help="the folder that holds the DOS system files (default: the machine's, "
-                                      "below dos/)")
-    parser.add_argument("--full", action="store_true", help="give every game file a new result")
-    parser.add_argument("--no-fix", action="store_true",
-                        help="do not try a game file that fails on the machine's capture variants, and write "
-                             "no capture line")
-    parser.add_argument("--workers", type=int, default=11,
-                        help="the number of games to run at once (default: 11, as openMSX keeps about one "
-                             "core busy)")
-    args = parser.parse_args()
-    if not os.path.isfile(msx.machine_path(args.machine)):
-        print(f"games.py: {msx.machine_path(args.machine)}: no such machine file", file=sys.stderr)
-        return 1
-    names = gamefile.game_names()
-    try:
-        # What stops the run is found before it starts, not hours later.
-        msx.check_firmware(args.machine)
-        dos = os.path.abspath(args.dos) if args.dos else msx.dos_folder(args.machine)
-        msx.dos_files(dos)
-        in_openmsx = read_failures(OPENMSX_FAILURES, args.machine, names)
-        in_snapcas = read_failures(SNAPCAS_FAILURES, args.machine, names)
-        if in_openmsx & in_snapcas:
-            raise ListError(f"{sorted(in_openmsx & in_snapcas)[0]} is in both lists of failures for {args.machine}")
-        version = msx.version()
-        tools = tools_hash(dos, version)
-        cap_tools = capture_tools_hash(version)
-    except (OSError, msx.MachineError, ListError) as e:
-        print(f"games.py: {e}", file=sys.stderr)
-        return 1
-
-    # The results with the check's keys go apart from those without.
-    keys = "-keys" if os.environ.get("SNAPCAS_KEYS") == "1" else ""
-    path = os.path.join(REPORTS, args.machine + keys + ".txt")
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    # The cache holds each game file's inputs' hash beside its result.
-    cache = {} if args.full else read_cache(path + ".cache")
-    errors, games = {}, {}
+def load_games(machine, names):
+    """Reads each game file and flags games missing their tapes in downloads/."""
+    games, errors = {}, {}
     for name in names:
         try:
-            games[name] = game = gamefile.read_game(os.path.join(GAMES, name), args.machine)
+            games[name] = game = gamefile.read_game(os.path.join(GAMES, name), machine)
         except gamefile.GameFileError as e:
             errors[name] = str(e)
             continue
         missing = [t for t in (game.tape, game.side2) if t and not os.path.isfile(os.path.join(gamefile.DOWNLOADS, t))]
         if missing:
             errors[name] = "no " + " or ".join(missing) + " in downloads/"
-    hashes = {name: inputs_hash(args.machine, name, tools) for name in names}
-    cap_hashes = {name: inputs_hash(args.machine, name, cap_tools) for name in names}
-    # A pass whose image is gone from images/ runs again, to make the image.
-    todo = [name for name, h in hashes.items()
-            if name not in errors and (name not in cache or cache[name][0] != h or (
-                cache[name][1] == pipeline.PASS and image_missing(args.machine, name, games[name])))]
-    reuse = set() if args.full else {name for name in todo if snapshot_valid(args.machine, name, cap_hashes[name])}
-    reused_note = f" ({len(reuse)} reusing snapshot)" if reuse else ""
-    print(f"{args.machine}: {len(names) - len(todo) - len(errors)} unchanged, {len(todo)} to run{reused_note}, "
-          f"{len(errors)} without their tapes in downloads/", flush=True)
-    results = {name: cache[name][1] for name in names if name in cache}
-    results.update(errors)
-    # The results that the cache keeps: not those of a run that broke.
-    kept = set(results) - set(todo)
-    pool = concurrent.futures.ThreadPoolExecutor(args.workers)
-    try:
-        jobs = {pool.submit(run_game, args.machine, name, dos,
-                            **({"skip_capture": True} if name in reuse else {})): name for name in todo}
-        for done, job in enumerate(concurrent.futures.as_completed(jobs), 1):
-            name = jobs[job]
-            result = job.result()
+    return games, errors
+
+
+def run_batch(pool, machine, dos, todo, reuse, hashes, cap_hashes, path, results, kept):
+    """Runs every game in todo in parallel, appending non-transient results to the cache."""
+    jobs = {pool.submit(run_game, machine, name, dos,
+                        **({"skip_capture": True} if name in reuse else {})): name for name in todo}
+    for done, job in enumerate(concurrent.futures.as_completed(jobs), 1):
+        name = jobs[job]
+        result = job.result()
+        results[name] = result.message
+        print(f"{done}/{len(todo)}  {name}  {results[name]}" + ("  (not kept)" if result.transient else ""),
+              flush=True)
+        if not result.transient:
+            kept.add(name)
+            if name not in reuse:
+                mark_snapshot(machine, name, cap_hashes[name])
+            with open(path + ".cache", "a") as f:
+                f.write(f"{name}\t{hashes[name]}\t{results[name]}\n")
+
+
+def retry_variants(pool, machine, dos, again, hashes, cap_hashes, tools, cap_tools, path, results):
+    """Tries failing games on capture variants, writing capture lines for any that pass."""
+    fixed = []
+    if not again:
+        return fixed
+    print(f"{machine}: {len(again)} game files that fail to try on the capture variants", flush=True)
+    jobs = {pool.submit(run_game, machine, name, dos, True): name for name in again}
+    for done, job in enumerate(concurrent.futures.as_completed(jobs), 1):
+        name = jobs[job]
+        result = job.result()
+        if result.variant:
+            gamefile.add_capture_line(os.path.join(GAMES, name), machine, result.variant,
+                                      *capture_comments(machine, result.variant, results[name]))
+            hashes[name] = inputs_hash(machine, name, tools)
+            cap_hashes[name] = inputs_hash(machine, name, cap_tools)
+            mark_snapshot(machine, name, cap_hashes[name])
             results[name] = result.message
-            print(f"{done}/{len(todo)}  {name}  {results[name]}" + ("  (not kept)" if result.transient else ""),
-                  flush=True)
-            if not result.transient:
-                kept.add(name)
-                if name not in reuse:
-                    mark_snapshot(args.machine, name, cap_hashes[name])
-                # Each result goes to the cache at once, so that a run that
-                # stops keeps what it has done.
-                with open(path + ".cache", "a") as f:
-                    f.write(f"{name}\t{hashes[name]}\t{results[name]}\n")
-        fixed = []
-        variants = [] if args.no_fix else msx.read_machine(msx.machine_path(args.machine)).variants
-        # A game file that fails in openMSX itself fails on a variant too.
-        again = [name for name in names if variants and name in kept and name not in errors
-                 and results[name] != pipeline.PASS and not games[name].capture and name not in in_openmsx]
-        if again:
-            print(f"{args.machine}: {len(again)} game files that fail to try on the capture variants", flush=True)
-        jobs = {pool.submit(run_game, args.machine, name, dos, True): name for name in again}
-        for done, job in enumerate(concurrent.futures.as_completed(jobs), 1):
-            name = jobs[job]
-            result = job.result()
-            if result.variant:
-                gamefile.add_capture_line(os.path.join(GAMES, name), args.machine, result.variant,
-                                          *capture_comments(args.machine, result.variant, results[name]))
-                # The line changes the game file's inputs, and its result.
-                hashes[name] = inputs_hash(args.machine, name, tools)
-                cap_hashes[name] = inputs_hash(args.machine, name, cap_tools)
-                mark_snapshot(args.machine, name, cap_hashes[name])
-                results[name] = result.message
-                fixed.append(name)
-                with open(path + ".cache", "a") as f:
-                    f.write(f"{name}\t{hashes[name]}\t{results[name]}\n")
-            print(f"{done}/{len(again)}  {name}  " + (f"capture {result.variant}" if result.variant else
-                                                    result.message + ("  (not kept)" if result.transient else "")),
-                  flush=True)
-    except KeyboardInterrupt:
-        pool.shutdown(wait=False, cancel_futures=True)
-        stop_games()
-        print(f"\ngames.py: stopped by Ctrl-C. {path}.cache keeps the results so far, and the next run "
-              "goes on from them", file=sys.stderr)
-        return 130
-    pool.shutdown()
+            fixed.append(name)
+            with open(path + ".cache", "a") as f:
+                f.write(f"{name}\t{hashes[name]}\t{results[name]}\n")
+        print(f"{done}/{len(again)}  {name}  " + (f"capture {result.variant}" if result.variant else
+                                                result.message + ("  (not kept)" if result.transient else "")),
+              flush=True)
+    return fixed
+
+
+def write_report(path, names, results, kept, hashes, in_openmsx, in_snapcas, fixed):
+    """Writes the report and cache files, prints failure groups, and returns exit status."""
     with open(path, "w") as report, open(path + ".cache", "w") as f:
         for name in names:
             report.write(f"{name}\t{results[name]}\n")
@@ -394,6 +344,72 @@ def main():
           sorted(failed & in_snapcas), results)
     group("These game files fail, and neither list holds them:", new, results)
     return 3 if new else 0
+
+
+def main():
+    parser = msx.Parser(description="Make and check every shipped game file's image on a machine.")
+    parser.add_argument("machine", help="a machine file's name below machines/, without .txt")
+    parser.add_argument("--dos", help="the folder that holds the DOS system files (default: the machine's, "
+                                      "below dos/)")
+    parser.add_argument("--full", action="store_true", help="give every game file a new result")
+    parser.add_argument("--no-fix", action="store_true",
+                        help="do not try a game file that fails on the machine's capture variants, and write "
+                             "no capture line")
+    parser.add_argument("--workers", type=int, default=11,
+                        help="the number of games to run at once (default: 11, as openMSX keeps about one "
+                             "core busy)")
+    args = parser.parse_args()
+    if not os.path.isfile(msx.machine_path(args.machine)):
+        print(f"games.py: {msx.machine_path(args.machine)}: no such machine file", file=sys.stderr)
+        return 1
+    names = gamefile.game_names()
+    try:
+        msx.check_firmware(args.machine)
+        dos = os.path.abspath(args.dos) if args.dos else msx.dos_folder(args.machine)
+        msx.dos_files(dos)
+        in_openmsx = read_failures(OPENMSX_FAILURES, args.machine, names)
+        in_snapcas = read_failures(SNAPCAS_FAILURES, args.machine, names)
+        if in_openmsx & in_snapcas:
+            raise ListError(f"{sorted(in_openmsx & in_snapcas)[0]} is in both lists of failures for {args.machine}")
+        version = msx.version()
+        tools = tools_hash(dos, version)
+        cap_tools = capture_tools_hash(version)
+    except (OSError, msx.MachineError, ListError) as e:
+        print(f"games.py: {e}", file=sys.stderr)
+        return 1
+
+    keys = "-keys" if os.environ.get("SNAPCAS_KEYS") == "1" else ""
+    path = os.path.join(REPORTS, args.machine + keys + ".txt")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    cache = {} if args.full else read_cache(path + ".cache")
+    games, errors = load_games(args.machine, names)
+    hashes = {name: inputs_hash(args.machine, name, tools) for name in names}
+    cap_hashes = {name: inputs_hash(args.machine, name, cap_tools) for name in names}
+    todo = [name for name, h in hashes.items()
+            if name not in errors and (name not in cache or cache[name][0] != h or (
+                cache[name][1] == pipeline.PASS and image_missing(args.machine, name, games[name])))]
+    reuse = set() if args.full else {name for name in todo if snapshot_valid(args.machine, name, cap_hashes[name])}
+    reused_note = f" ({len(reuse)} reusing snapshot)" if reuse else ""
+    print(f"{args.machine}: {len(names) - len(todo) - len(errors)} unchanged, {len(todo)} to run{reused_note}, "
+          f"{len(errors)} without their tapes in downloads/", flush=True)
+    results = {name: cache[name][1] for name in names if name in cache}
+    results.update(errors)
+    kept = set(results) - set(todo)
+    pool = concurrent.futures.ThreadPoolExecutor(args.workers)
+    try:
+        run_batch(pool, args.machine, dos, todo, reuse, hashes, cap_hashes, path, results, kept)
+        variants = [] if args.no_fix else msx.read_machine(msx.machine_path(args.machine)).variants
+        again = [name for name in names if variants and name in kept and name not in errors
+                 and results[name] != pipeline.PASS and not games[name].capture and name not in in_openmsx]
+        fixed = retry_variants(pool, args.machine, dos, again, hashes, cap_hashes, tools, cap_tools, path, results)
+    except KeyboardInterrupt:
+        pool.shutdown(wait=False, cancel_futures=True)
+        stop_games()
+        print(f"\ngames.py: stopped by Ctrl-C. {path}.cache keeps the results so far, and the next run "
+              "goes on from them", file=sys.stderr)
+        return 130
+    pool.shutdown()
+    return write_report(path, names, results, kept, hashes, in_openmsx, in_snapcas, fixed)
 
 
 if __name__ == "__main__":

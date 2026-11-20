@@ -62,92 +62,94 @@ def kcs_time(body):
     return pilot * pilots + len(data) * framing + ones * pulses1 * one + (8 * len(data) - ones) * pulses0 * zero
 
 
+def _need(data, block, at, n):
+    if at + n > len(data):
+        raise TsxError(f"block {block:02X}h at {at - 1:X}h goes past the file's end")
+
+
+def _append(found, data, is_standard, start, end, t, length):
+    found.append((is_standard, bytes(data[start:end]), start, t / T_STATES, (t + length) / T_STATES))
+    return t + length
+
+
+def _read_speed_block(data, block, at, t, found):
+    if block == 0x10:
+        _need(data, block, at, 4)
+        pause, n = u(data, at, 2), u(data, at + 2, 2)
+        _need(data, block, at, 4 + n)
+        body = data[at + 4:at + 4 + n]
+        pilots = 8063 if body and body[0] < 128 else 3223
+        t = _append(found, data, False, at + 4, at + 4 + n, t, pilots * 2168 + 667 + 735 + bits_time(body, 855, 1710))
+        return at + 4 + n, t + pause * T_STATES // 1000
+    _need(data, block, at, 18)
+    pilot, sync1, sync2, zero, one, pilots = (u(data, at + 2 * k, 2) for k in range(6))
+    used, pause, n = data[at + 12], u(data, at + 13, 2), u(data, at + 15, 3)
+    _need(data, block, at, 18 + n)
+    if used > 8:
+        raise TsxError(f"block 11h at {at - 1:X}h uses {used} bits of its last byte")
+    body = data[at + 18:at + 18 + n]
+    t = _append(found, data, False, at + 18, at + 18 + n, t,
+                pilots * pilot + sync1 + sync2 + bits_time(body, zero, one, used=used))
+    return at + 18 + n, t + pause * T_STATES // 1000
+
+
+def _read_kcs_block(data, at, t, found):
+    _need(data, 0x4B, at, 4)
+    n = u(data, at, 4)
+    _need(data, 0x4B, at, 4 + n)
+    if n < 12:
+        raise TsxError(f"block 4Bh at {at - 1:X}h is shorter than its 12 bytes of settings")
+    body = data[at:at + 4 + n]
+    t = _append(found, data, standard(body), at + 16, at + 4 + n, t, kcs_time(body))
+    return at + 4 + n, t + u(body, 4, 2) * T_STATES // 1000
+
+
+# Metadata/grouping blocks with no signal: block_id -> (header_bytes, len_offset, len_size).
+_SKIP_BLOCKS = {0x21: (1, 0, 1), 0x30: (1, 0, 1), 0x32: (2, 0, 2), 0x35: (20, 16, 4)}
+
+
 def read(data):
     """The file's blocks that hold bytes or signal, as the fields of
     tape.Block: standard, the bytes, their offset in the file, and the
-    player's seconds at the block's start and end. A block that the file's
-    end cuts stops the reader, as a file cut in a download has."""
+    player's seconds at the block's start and end."""
     if data[:8] != SIGNATURE:
         raise TsxError("not a TSX file: no ZXTape! signature")
     at, t, found = 10, 0, []
-
-    def need(n):
-        if at + n > len(data):
-            raise TsxError(f"block {block:02X}h at {at - 1:X}h goes past the file's end")
-
-    def add(is_standard, start, end, length):
-        nonlocal t
-        found.append((is_standard, bytes(data[start:end]), start, t / T_STATES, (t + length) / T_STATES))
-        t += length
-
     while at < len(data):
         block, at = data[at], at + 1
-        if block == 0x10:
-            need(4)
-            pause, n = u(data, at, 2), u(data, at + 2, 2)
-            need(4 + n)
-            body = data[at + 4:at + 4 + n]
-            pilots = 8063 if body and body[0] < 128 else 3223
-            add(False, at + 4, at + 4 + n, pilots * 2168 + 667 + 735 + bits_time(body, 855, 1710))
-            t += pause * T_STATES // 1000
-            at += 4 + n
-        elif block == 0x11:
-            need(18)
-            pilot, sync1, sync2, zero, one, pilots = (u(data, at + 2 * k, 2) for k in range(6))
-            used, pause, n = data[at + 12], u(data, at + 13, 2), u(data, at + 15, 3)
-            need(18 + n)
-            if used > 8:
-                raise TsxError(f"block 11h at {at - 1:X}h uses {used} bits of its last byte")
-            body = data[at + 18:at + 18 + n]
-            add(False, at + 18, at + 18 + n, pilots * pilot + sync1 + sync2 + bits_time(body, zero, one, used=used))
-            t += pause * T_STATES // 1000
-            at += 18 + n
+        if block in (0x10, 0x11):
+            at, t = _read_speed_block(data, block, at, t, found)
+        elif block == 0x4B:
+            at, t = _read_kcs_block(data, at, t, found)
         elif block == 0x12:
-            need(4)
+            _need(data, block, at, 4)
             t += u(data, at, 2) * u(data, at + 2, 2)
             at += 4
         elif block == 0x13:
-            need(1)
+            _need(data, block, at, 1)
             n = data[at]
-            need(1 + 2 * n)
+            _need(data, block, at, 1 + 2 * n)
             t += sum(u(data, at + 1 + 2 * k, 2) for k in range(n))
             at += 1 + 2 * n
         elif block == 0x15:
-            need(8)
+            _need(data, block, at, 8)
             sample, pause, used, n = u(data, at, 2), u(data, at + 2, 2), data[at + 4], u(data, at + 5, 3)
-            need(8 + n)
-            # A recording of the signal, with no bytes to read or patch.
-            add(False, at + 8, at + 8, sample * (8 * max(n - 1, 0) + used))
+            _need(data, block, at, 8 + n)
+            t = _append(found, data, False, at + 8, at + 8, t, sample * (8 * max(n - 1, 0) + used))
             t += pause * T_STATES // 1000
             at += 8 + n
         elif block == 0x20:
-            need(2)
+            _need(data, block, at, 2)
             t += u(data, at, 2) * T_STATES // 1000
             at += 2
-        elif block in (0x21, 0x30):
-            need(1)
-            need(1 + data[at])
-            at += 1 + data[at]
         elif block == 0x22:
             pass
-        elif block == 0x32:
-            need(2)
-            need(2 + u(data, at, 2))
-            at += 2 + u(data, at, 2)
-        elif block == 0x35:
-            need(20)
-            need(20 + u(data, at + 16, 4))
-            at += 20 + u(data, at + 16, 4)
-        elif block == 0x4B:
-            need(4)
-            n = u(data, at, 4)
-            need(4 + n)
-            if n < 12:
-                raise TsxError(f"block 4Bh at {at - 1:X}h is shorter than its 12 bytes of settings")
-            body = data[at:at + 4 + n]
-            add(standard(body), at + 16, at + 4 + n, kcs_time(body))
-            t += u(body, 4, 2) * T_STATES // 1000
-            at += 4 + n
+        elif block in _SKIP_BLOCKS:
+            hdr, off, size = _SKIP_BLOCKS[block]
+            _need(data, block, at, hdr)
+            total = hdr + u(data, at + off, size)
+            _need(data, block, at, total)
+            at += total
         else:
             raise TsxError(f"block {block:02X}h at {at - 1:X}h is not one that snapcas reads")
     return found

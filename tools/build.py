@@ -19,9 +19,9 @@ import re
 import struct
 import sys
 
-HERE =os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
+HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import paths  # noqa: E402
 import tape  # noqa: E402
 import gamefile  # noqa: E402
 import msx  # noqa: E402
@@ -46,123 +46,16 @@ from resident import (  # noqa: E402
     ram_ranges,
     rescall_kind,
 )
+from service import MARK, PARTS, SERVICE, SERVICE_VERSION, Service, read_service  # noqa: E402
 from snapshot import PAGE, Snapshot, SnapshotError  # noqa: E402
 
-SERVICE = os.path.join(ROOT, "bin", "SERVICE.BIN")
-SERVICE_VERSION = 20
-# The image's mark without its last character, the format's number, which is
-# SERVICE.BIN's symbol IMAGE_FORMAT. The image's layout has no other copy
-# here: its offsets, flags and record types are SERVICE.BIN's symbols, from
-# src/service.inc (FORMATS.md, Image).
-MARK = b"SNAPCAS"
+ROOT = paths.ROOT
 
 
 def crc16(data):
     """CRC-16/CCITT-FALSE: polynomial 1021h, initial value FFFFh, not
     reflected, no final XOR."""
     return binascii.crc_hqx(data, 0xFFFF)
-
-
-# SERVICE.BIN's parts, in the order of its table (FORMATS.md, SERVICE.BIN).
-PARTS = ("tail", "stubs", "page3", "code", "t0", "call", "symbols", "relocs", "coderelocs")
-
-
-class Service:
-    """SERVICE.BIN (FORMATS.md, SERVICE.BIN): its parts' bytes and the
-    assembly's symbols, by name. Its part of page 3 is at an entry page, the
-    high byte of the part's addresses: the one that it was assembled for, or
-    another. Its code block follows the entries, or is at code_at. The last two
-    parts list the bytes that move with the part and the addresses that move
-    with its code block, and the symbols in it are among them, so every
-    address is the one that the entry page and code_at give it."""
-
-    def __init__(self, data, entry_page=None, code_at=None):
-        self.source = bytes(data)
-        data = bytearray(data)
-        table = dict(zip(PARTS, struct.iter_unpack("<HH", bytes(data[2:2 + 4 * len(PARTS)]))))
-        # The entry page that the part was assembled for, before any byte moves.
-        self.assembled = self.read_symbols(data, *table["symbols"])["E_PAGE"]
-        offset, length = table["relocs"]
-        for (n,) in struct.iter_unpack("<H", bytes(data[offset:offset + length])):
-            data[n] = (data[n] + (self.assembled if entry_page is None else entry_page) - self.assembled) & 0xFF
-        # The code block's place after the entries, at this entry page.
-        self.code_follows = self.read_symbols(data, *table["symbols"])["P3_CODE"]
-        if code_at is not None:
-            offset, length = table["coderelocs"]
-            for (n,) in struct.iter_unpack("<H", bytes(data[offset:offset + length])):
-                value = struct.unpack_from("<H", data, n)[0]
-                struct.pack_into("<H", data, n, (value + code_at - self.code_follows) & 0xFFFF)
-        self.parts = {name: bytes(data[offset:offset + length]) for name, (offset, length) in table.items()}
-        self.symbols = self.read_symbols(data, *table["symbols"])
-        self.entry_page = self.symbols["E_PAGE"]
-
-    @staticmethod
-    def read_symbols(data, offset, length):
-        """The symbols' part as {name: value}: for each symbol, its value in 2
-        bytes, its name's length in 1 and its name."""
-        symbols, at = {}, offset
-        while at < offset + length:
-            value, size = struct.unpack_from("<HB", data, at)
-            symbols[bytes(data[at + 3:at + 3 + size]).decode("ascii")] = value
-            at += 3 + size
-        return symbols
-
-    def __getitem__(self, name):
-        """A symbol's value."""
-        if name not in self.symbols:
-            raise BuildError(f"SERVICE.BIN has no symbol {name}: build it from this snapcas")
-        return self.symbols[name]
-
-    def field(self, name, t0_mode):
-        """The address of a field of the service's data, by its name in
-        src/tape.inc: in the code segment, or in T0 for the mode without a part
-        in page 3, whose copy is the module t0m."""
-        return self[("t0m." if t0_mode else "") + name]
-
-    def at(self, entry_page, code_at=None):
-        """This SERVICE.BIN with its part of page 3 at an entry page, and its
-        code block at code_at or after the entries."""
-        return Service(self.source, entry_page, code_at)
-
-    @property
-    def split(self):
-        """Whether the part's code block is not after its entries."""
-        return self["P3_CODE"] != self.code_follows
-
-    def blocks(self):
-        """The part's two blocks, as (first address, bytes): the entries with
-        their data, and the code block."""
-        part = self.parts["page3"]
-        cut = self.code_follows - self["E_ENTRY"]
-        return [(self["E_ENTRY"], part[:cut]), (self["P3_CODE"], part[cut:])]
-
-    @property
-    def mark(self):
-        """The image's mark: MARK and the format's number."""
-        return MARK + bytes([self["IMAGE_FORMAT"]])
-
-    @property
-    def moved(self):
-        """Whether the part of page 3 is at another entry page than its
-        assembly's."""
-        return self.entry_page != self.assembled or self.split
-
-
-def read_service(path):
-    """SERVICE.BIN as a Service, checked against its version byte, its number
-    of parts and the tail's length."""
-    with open(path, "rb") as f:
-        data = f.read()
-    if not data or data[0] != SERVICE_VERSION:
-        raise BuildError(f"{path}: version {data[0] if data else 'none'}, "
-                         f"expected {SERVICE_VERSION}: build it from this snapcas")
-    if data[1] != len(PARTS):
-        raise BuildError(f"{path}: {data[1]} parts, expected {len(PARTS)}: build it from this snapcas")
-    service = Service(data)
-    if len(service.parts["tail"]) != TAIL_SIZE:
-        raise BuildError(f"{path}: a tail of {len(service.parts['tail'])} bytes, expected {TAIL_SIZE}: "
-                         "build it from this snapcas")
-    return service
 
 
 # The entries of the BIOS's jump table for the tape (MSX Red Book, chapter 4),
@@ -1034,4 +927,7 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)

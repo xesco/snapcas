@@ -11,17 +11,16 @@ import shlex
 import textwrap
 import urllib.parse
 
-from msx import KEYS, machine_chain
+from machine import KEYS, machine_chain
+import paths
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# The tape files that snapcas.py snap downloads, and the images that it moves
-# there from the work folders.
+ROOT = paths.ROOT
 # The tests set SNAPCAS_DOWNLOADS to their own tapes, so that make finds them
 # there and downloads nothing.
-DOWNLOADS = os.environ.get("SNAPCAS_DOWNLOADS", os.path.join(ROOT, "downloads"))
-IMAGES = os.path.join(ROOT, "images")
+DOWNLOADS = os.environ.get("SNAPCAS_DOWNLOADS", paths.DOWNLOADS)
+IMAGES = paths.IMAGES
 # The user's own game files, each with its tape files, which git ignores.
-CUSTOM = os.path.join(ROOT, "custom")
+CUSTOM = paths.CUSTOM
 
 
 # The most routines that a game file's rescall names: a game that installs one
@@ -172,16 +171,8 @@ def custom_names():
             if os.path.isfile(os.path.join(CUSTOM, name, "game.txt"))]
 
 
-def title(folder):
-    """A game's title, which names the File-Hunter file that it comes from
-    (FILES.md, Shipped files): a game's first comment line, its File-Hunter
-    name, which is its zip's name or the zip's name, / and the CAS file in it.
-    A compilation's program's first comment names the program before its first
-    comma, as in "Africa Film, the fourth game on the tape Super MSX n.23", so
-    its title is its zip's name, from its url line, / and that name. A CAS
-    file whose name starts with its zip's name, as the zip's name with
-    [LOADERFIX] added, is named by the zip alone. Or "" for a game file that
-    starts with no comment."""
+def title_and_url(folder):
+    """A game's title (see title()) and its first url line's link, or None."""
     with open(os.path.join(folder, "game.txt"), encoding="utf-8") as f:
         lines = f.read().splitlines()
     comments = []
@@ -190,19 +181,24 @@ def title(folder):
             break
         comments.append(line[1:].strip())
     zips = next((line.split()[1:] for line in lines if line.startswith("url ")), [])
+    first_url = zips[0] if zips else None
     if not comments:
-        return ""
+        return "", first_url
     # A compilation's program's folder is two levels below games/.
     below = os.path.relpath(os.path.abspath(folder), os.path.join(ROOT, "games"))
     if not below.startswith("..") and os.sep in below:
         program = " ".join(comments).split(",", 1)[0]
-        if zips:
-            return zip_name(zips[0]) + " / " + program
-        return program
+        return (zip_name(first_url) + " / " + program if first_url else program), first_url
     zip_part, _, cas = comments[0].partition(" / ")
     if cas and os.path.splitext(cas)[0].startswith(zip_part):
-        return zip_part
-    return comments[0]
+        return zip_part, first_url
+    return comments[0], first_url
+
+
+def title(folder):
+    """A game's title, which names the File-Hunter file that it comes from
+    (FILES.md, Shipped files), or "" for a game file with no leading comment."""
+    return title_and_url(folder)[0]
 
 
 def zip_name(url):
@@ -323,11 +319,14 @@ def add_capture_line(folder, machine, variant, heading, why):
     return path
 
 
-def read_game(folder, machine=None):
-    """The game of folder's game.txt, then of the machine's file there, when
-    machine is given and the file exists."""
+_SINGLE_ARG_KEYS = frozenset(
+    ("cas", "tsx", "side2", "load", "start", "name", "continue", "capture", "rom", "subslots")
+)
+
+
+def _read_lines(folder, machine):
+    """Lines of game.txt and any inherited machine files, as (path, line_no, text)."""
     path = os.path.join(folder, "game.txt")
-    game = Game(folder)
     with open(path, encoding="utf-8") as f:
         lines = [(path, n, line) for n, line in enumerate(f.read().splitlines(), 1)]
     if machine is not None:
@@ -336,107 +335,105 @@ def read_game(folder, machine=None):
             if os.path.exists(mpath):
                 with open(mpath, encoding="utf-8") as f:
                     lines += [(mpath, n, line) for n, line in enumerate(f.read().splitlines(), 1)]
-    service_files = set()
-    for file, number_, line in lines:
-        where = f"{file}:{number_}"
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        try:
-            words = shlex.split(line)
-        except ValueError as e:
-            raise GameFileError(f"{where}: {e}")
-        key, args = words[0], words[1:]
-        if key in ("cas", "tsx", "side2", "load", "start", "name", "continue", "capture", "rom", "subslots") and len(args) != 1:
-            raise GameFileError(f"{where}: {key} takes one value")
-        if key in ("cas", "tsx"):
-            if game.tape is not None:
-                raise GameFileError(f"{where}: a game file has one cas or tsx line")
-            if os.path.splitext(args[0])[1].lower() != "." + key:
-                raise GameFileError(f"{where}: {key} takes a .{key.upper()} file")
-            game.tape = args[0]
-        elif key == "load":
-            game.load = args[0]
-        elif key == "start":
-            game.start = args[0]
-        elif key == "side2":
-            game.side2 = args[0]
-        elif key == "sha1":
-            if not 1 <= len(args) <= 2 or not all(re.fullmatch(r"[0-9a-f]{40}", a) for a in args):
-                raise GameFileError(f"{where}: sha1 takes one or two 40-digit SHA-1s")
-            game.sha1 = args
-        elif key == "url":
-            if not 1 <= len(args) <= 2 or not all(re.fullmatch(r"https://\S+\.(zip|ZIP)", a) for a in args):
-                raise GameFileError(f"{where}: url takes one or two https links to zip files")
-            game.urls = args
-        elif key == "name":
-            if not re.fullmatch(r"[A-Z0-9]{1,8}", args[0]):
-                raise GameFileError(f"{where}: name takes up to 8 capital letters and digits")
-            game.name = args[0]
-        elif key == "keys":
-            if len(args) != 2:
-                raise GameFileError(f"{where}: keys takes a time and a key name or a text")
-            quoted = '"' in line.split(None, 2)[2]
-            if not quoted and args[1] not in KEYS:
-                raise GameFileError(f"{where}: {args[1]} is not a key name")
-            try:
-                args[1].encode("latin-1")
-            except UnicodeEncodeError:
-                raise GameFileError(f"{where}: the text holds a character that is not in Latin-1")
-            game.keys.append((number(args[0], where), "text" if quoted else "key", args[1]))
-        elif key == "continue":
-            if args[0] not in KEYS:
-                raise GameFileError(f"{where}: {args[0]} is not a key name")
-            game.continue_key = args[0]
-        elif key == "snapshot":
-            if len(args) != 2 or args[0] != "at":
-                raise GameFileError(f"{where}: snapshot takes at and a time")
-            game.snapshot_at = number(args[1], where)
-        elif key == "service":
-            # One line in each file, and the machine's file's replaces
-            # game.txt's.
-            if file in service_files:
-                raise GameFileError(f"{where}: a file holds one service line")
-            service_files.add(file)
-            if args in (["no"], ["t0"]):
-                game.service, game.entry_page, game.code_at = args[0], None, None
-            elif (len(args) in (2, 3) and args[0] == "at" and re.fullmatch(r"[C-Fc-f][0-9A-Fa-f][Ee]1", args[1])
-                  and (len(args) == 2 or re.fullmatch(r"[C-Fc-f][0-9A-Fa-f]{3}", args[2]))):
-                game.service, game.entry_page = "at", int(args[1][:2], 16)
-                game.code_at = int(args[2], 16) if len(args) == 3 else None
-                if game.entry_page == 0xFF and game.code_at is None:
-                    raise GameFileError(f"{where}: a part of the tape service at FFE1h would pass FFFEh, "
-                                        "the last byte that it can take")
-            else:
-                raise GameFileError(f"{where}: service takes no, at and an address xxE1 in page 3, with the "
-                                    "address of the part's code block after it or not, or t0")
-        elif key == "capture":
-            game.capture = args[0]
-        elif key == "rom":
-            if args[0] != "keep":
-                raise GameFileError(f"{where}: rom takes keep")
-            game.rom_keep = True
-        elif key == "rescall":
-            if game.rescall is not None or not (args == ["no"] or 1 <= len(args) <= RESCALL_MAX and all(
-                    re.fullmatch(r"[0-9A-Fa-f]{4}", a) for a in args)):
-                raise GameFileError(f"{where}: rescall takes up to {RESCALL_MAX} addresses of four hex digits, "
-                                    "or no, once")
-            game.rescall = "no" if args == ["no"] else [int(a, 16) for a in args]
-        elif key == "rescode":
-            if game.rescode is not None or len(args) != 1 or not re.fullmatch(r"[C-Fc-f][0-9A-Fa-f]{3}", args[0]):
-                raise GameFileError(f"{where}: rescode takes one address of four hex digits in page 3, once")
-            game.rescode = int(args[0], 16)
-        elif key == "resstack":
-            if game.resstack is not None or len(args) != 1 or not re.fullmatch(r"[C-Fc-f][0-9A-Fa-f]{3}|no", args[0]):
-                raise GameFileError(f"{where}: resstack takes one address of four hex digits in page 3, or no, once")
-            game.resstack = "no" if args[0] == "no" else int(args[0], 16)
-        elif key == "subslots":
-            if args[0] != "keep":
-                raise GameFileError(f"{where}: subslots takes keep")
-            game.subslots_keep = True
-        elif key == "patch":
-            game.patches.append(read_patch(args, where))
-        else:
-            raise GameFileError(f"{where}: unknown key {key}")
+    return path, lines
+
+
+def _parse_service(game, args, file, where, service_files):
+    if file in service_files:
+        raise GameFileError(f"{where}: a file holds one service line")
+    service_files.add(file)
+    if args in (["no"], ["t0"]):
+        game.service, game.entry_page, game.code_at = args[0], None, None
+        return
+    if (len(args) in (2, 3) and args[0] == "at" and re.fullmatch(r"[C-Fc-f][0-9A-Fa-f][Ee]1", args[1])
+            and (len(args) == 2 or re.fullmatch(r"[C-Fc-f][0-9A-Fa-f]{3}", args[2]))):
+        game.service, game.entry_page = "at", int(args[1][:2], 16)
+        game.code_at = int(args[2], 16) if len(args) == 3 else None
+        if game.entry_page == 0xFF and game.code_at is None:
+            raise GameFileError(f"{where}: a part of the tape service at FFE1h would pass FFFEh, "
+                                "the last byte that it can take")
+        return
+    raise GameFileError(f"{where}: service takes no, at and an address xxE1 in page 3, with the "
+                        "address of the part's code block after it or not, or t0")
+
+
+def _parse_keys(game, args, line, where):
+    if len(args) != 2:
+        raise GameFileError(f"{where}: keys takes a time and a key name or a text")
+    quoted = '"' in line.split(None, 2)[2]
+    if not quoted and args[1] not in KEYS:
+        raise GameFileError(f"{where}: {args[1]} is not a key name")
+    try:
+        args[1].encode("latin-1")
+    except UnicodeEncodeError:
+        raise GameFileError(f"{where}: the text holds a character that is not in Latin-1")
+    game.keys.append((number(args[0], where), "text" if quoted else "key", args[1]))
+
+
+def _parse_directive(game, key, args, line, file, where, service_files):
+    if key in _SINGLE_ARG_KEYS and len(args) != 1:
+        raise GameFileError(f"{where}: {key} takes one value")
+    if key in ("cas", "tsx"):
+        if game.tape is not None:
+            raise GameFileError(f"{where}: a game file has one cas or tsx line")
+        if os.path.splitext(args[0])[1].lower() != "." + key:
+            raise GameFileError(f"{where}: {key} takes a .{key.upper()} file")
+        game.tape = args[0]
+    elif key in ("load", "start", "side2", "capture"):
+        setattr(game, key, args[0])
+    elif key == "sha1":
+        if not 1 <= len(args) <= 2 or not all(re.fullmatch(r"[0-9a-f]{40}", a) for a in args):
+            raise GameFileError(f"{where}: sha1 takes one or two 40-digit SHA-1s")
+        game.sha1 = args
+    elif key == "url":
+        if not 1 <= len(args) <= 2 or not all(re.fullmatch(r"https://\S+\.(zip|ZIP)", a) for a in args):
+            raise GameFileError(f"{where}: url takes one or two https links to zip files")
+        game.urls = args
+    elif key == "name":
+        if not re.fullmatch(r"[A-Z0-9]{1,8}", args[0]):
+            raise GameFileError(f"{where}: name takes up to 8 capital letters and digits")
+        game.name = args[0]
+    elif key == "keys":
+        _parse_keys(game, args, line, where)
+    elif key == "continue":
+        if args[0] not in KEYS:
+            raise GameFileError(f"{where}: {args[0]} is not a key name")
+        game.continue_key = args[0]
+    elif key == "snapshot":
+        if len(args) != 2 or args[0] != "at":
+            raise GameFileError(f"{where}: snapshot takes at and a time")
+        game.snapshot_at = number(args[1], where)
+    elif key == "service":
+        _parse_service(game, args, file, where, service_files)
+    elif key == "rom":
+        if args[0] != "keep":
+            raise GameFileError(f"{where}: rom takes keep")
+        game.rom_keep = True
+    elif key == "rescall":
+        if game.rescall is not None or not (args == ["no"] or 1 <= len(args) <= RESCALL_MAX and all(
+                re.fullmatch(r"[0-9A-Fa-f]{4}", a) for a in args)):
+            raise GameFileError(f"{where}: rescall takes up to {RESCALL_MAX} addresses of four hex digits, "
+                                "or no, once")
+        game.rescall = "no" if args == ["no"] else [int(a, 16) for a in args]
+    elif key == "rescode":
+        if game.rescode is not None or len(args) != 1 or not re.fullmatch(r"[C-Fc-f][0-9A-Fa-f]{3}", args[0]):
+            raise GameFileError(f"{where}: rescode takes one address of four hex digits in page 3, once")
+        game.rescode = int(args[0], 16)
+    elif key == "resstack":
+        if game.resstack is not None or len(args) != 1 or not re.fullmatch(r"[C-Fc-f][0-9A-Fa-f]{3}|no", args[0]):
+            raise GameFileError(f"{where}: resstack takes one address of four hex digits in page 3, or no, once")
+        game.resstack = "no" if args[0] == "no" else int(args[0], 16)
+    elif key == "subslots":
+        if args[0] != "keep":
+            raise GameFileError(f"{where}: subslots takes keep")
+        game.subslots_keep = True
+    elif key == "patch":
+        game.patches.append(read_patch(args, where))
+    else:
+        raise GameFileError(f"{where}: unknown key {key}")
+
+
+def _validate_game(game, folder, path):
     if game.tape is None:
         raise GameFileError(f"{path}: needs a cas or tsx line")
     if not game.name:
@@ -446,9 +443,25 @@ def read_game(folder, machine=None):
         raise GameFileError(f"{path}: side2 takes a file of side 1's format")
     if game.urls and len(game.urls) != (2 if game.side2 else 1):
         raise GameFileError(f"{path}: url takes a link for each side")
-    # rom keep leaves the game only the entries in page 3, which service t0
-    # removes (FILES.md, Game file).
     if game.rom_keep and game.service == "t0":
         raise GameFileError(f"{folder}: rom keep needs the tape service's part of page 3, so it cannot "
                             "go with service t0")
+
+
+def read_game(folder, machine=None):
+    """The game of folder's game.txt, then of the machine's file there, when
+    machine is given and the file exists."""
+    path, lines = _read_lines(folder, machine)
+    game = Game(folder)
+    service_files = set()
+    for file, number_, line in lines:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        where = f"{file}:{number_}"
+        try:
+            words = shlex.split(line)
+        except ValueError as e:
+            raise GameFileError(f"{where}: {e}")
+        _parse_directive(game, words[0], words[1:], line, file, where, service_files)
+    _validate_game(game, folder, path)
     return game

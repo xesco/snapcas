@@ -171,12 +171,8 @@ def settings(snapshot, report, name, state_name, facts, size, resident=None):
     return "".join(f"set ::C({k}) {v}\n" for k, v in s.items())
 
 
-def check(game_arg, machine_name, dos_dir):
-    """Runs the restorer of a game's image in openMSX on a machine, as
-    check.py's arguments name them, with the DOS system files of dos_dir.
-    Returns the verdict, 0 when the check passes and 3 when it fails, and the
-    report's text. Raises msx.Failure for an error in the input files and for a
-    run without a whole report."""
+def _prepare_check(game_arg, machine_name, dos_dir):
+    """Loads check inputs and builds the Tcl script and output paths."""
     try:
         folder = gamefile.game_folder(game_arg)
         game = gamefile.read_game(folder, machine_name)
@@ -188,45 +184,52 @@ def check(game_arg, machine_name, dos_dir):
         if not os.path.exists(image):
             raise OSError(f"{image}: no image; run build.py first")
         facts = read_facts(out)
-        check_dir = os.path.join(out, "check")
-        report = os.path.join(check_dir, "report.txt")
-        # The savestates' names hold the process ID, so that checks can run
-        # side by side.
-        state_name = f"snapcas-check-{os.getpid()}"
         if not facts["tail"]:
             raise OSError(f"{out}/build.txt: no tail line; run build.py again")
+        check_dir = os.path.join(out, "check")
+        report = os.path.join(check_dir, "report.txt")
+        state_name = f"snapcas-check-{os.getpid()}"
+        boot_after = (msx.at_prompt(machine, f"{machine.dos[1]}:\rAUTOEXEC", "start_check")
+                      if machine.dos else "start_check")
         script = (settings(snapshot, report, game.name, state_name, facts, os.path.getsize(image),
                            machine.resident)
                   + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/check.tcl")
-                  + "\nsafe {boot {" + msx.boot_steps(machine) + "} "
-                  # On a machine that boots DOS from its own disk, the check's disk
-                  # is another drive, where AUTOEXEC.BAT runs SNAPCAS.
-                  + "{" + (msx.at_prompt(machine, f"{machine.dos[1]}:\rAUTOEXEC", "start_check")
-                           if machine.dos else "start_check") + "}}\n")
+                  + f"\nsafe {{boot {{{msx.boot_steps(machine)}}} {{{boot_after}}}}}\n")
     except (OSError, gamefile.GameFileError, msx.MachineError) as e:
         raise msx.Failure(1, f"check.py: {e}")
+    return game, machine, dos, image, check_dir, report, state_name, script
 
+
+def _make_check_disk(check_dir, game_name, dos, image, disk_size):
+    """Creates the check directory, AUTOEXEC.BAT, and boot disk image."""
     shutil.rmtree(check_dir, ignore_errors=True)
     os.makedirs(check_dir)
     autoexec = os.path.join(check_dir, "AUTOEXEC.BAT")
     with open(autoexec, "w", newline="") as f:
-        f.write(f"SNAPCAS {game.name}\r\n")
+        f.write(f"SNAPCAS {game_name}\r\n")
     disk = os.path.join(check_dir, "disk.dsk")
     try:
-        msx.make_disk(disk, dos + [COM, image, autoexec], machine.disk_size)
+        msx.make_disk(disk, dos + [COM, image, autoexec], disk_size)
     except msx.DiskError as e:
         raise msx.Failure(2, f"check.py: {e}", broke=e.broke)
-    # An earlier run with the same process ID can have left savestates.
+    return disk
+
+
+def check(game_arg, machine_name, dos_dir):
+    """Runs the restorer of a game's image in openMSX on a machine, as
+    check.py's arguments name them, with the DOS system files of dos_dir.
+    Returns (verdict, report_text): 0 on pass, 3 on fail."""
+    game, machine, dos, image, check_dir, report, state_name, script = _prepare_check(
+        game_arg, machine_name, dos_dir)
+    disk = _make_check_disk(check_dir, game.name, dos, image, machine.disk_size)
     msx.remove_savestates(state_name)
     try:
         stderr = msx.run([*machine.args, f"-{machine.disk}", os.path.abspath(disk)], script, timeout=TIMEOUT)
-        # The savestates of point 2, from openMSX's savestate folder.
         for path in msx.savestates(state_name):
             shutil.move(path, os.path.join(check_dir, os.path.basename(path)[len(state_name) + 1:]))
     except Exception as e:
         raise msx.Failure(2, f"check.py: openMSX failed: {e}", broke=True)
     finally:
-        # Those that a stopped openMSX leaves.
         msx.remove_savestates(state_name)
     if not os.path.exists(report):
         raise msx.Failure(2, f"check.py: openMSX stopped before the report; see {check_dir}{msx.last_output(stderr)}",
@@ -255,4 +258,7 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)

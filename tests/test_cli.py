@@ -155,6 +155,16 @@ class Snap(unittest.TestCase):
                 self.assertEqual(result.returncode, 1)
                 self.assertIn(f'no machine is named "{text}": snapcas.py machines shows the machines', result.stderr)
 
+    def test_a_typo_suggests_close_matches(self):
+        game = snapcas("snap", "gauntlt", "vg8020-carnivore2")
+        self.assertEqual(game.returncode, 1)
+        self.assertIn("did you mean", game.stderr)
+        self.assertIn("GAUNTLET", game.stderr)
+        machine = snapcas("snap", "gauntlet", "vg8020-carnivor")
+        self.assertEqual(machine.returncode, 1)
+        self.assertIn("did you mean", machine.stderr)
+        self.assertIn("vg8020-carnivore2", machine.stderr)
+
     def test_dos_without_check_stops(self):
         result = snapcas("snap", "gauntlet", "phc28s-ram64k-carnivore2", "--dos", "dos")
         self.assertEqual(result.returncode, 1)

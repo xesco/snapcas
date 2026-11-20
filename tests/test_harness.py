@@ -65,7 +65,7 @@ class Setup(unittest.TestCase):
     """The tests' own setup (docs/BUILD.md, Test setup)."""
 
     def test_the_makefile_lists_each_tape_of_the_tests(self):
-        with open(os.path.join(support.ROOT, "Makefile")) as f:
+        with open(os.path.join(support.ROOT, "mk", "test.mk")) as f:
             text = f.read().split("TEST_TAPES := $(addprefix tests/tapes/,", 1)[1].split(")", 1)[0]
         self.assertEqual(sorted(text.replace("\\", " ").split()), sorted(os.listdir(support.TAPES)))
 

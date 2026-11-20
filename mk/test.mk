@@ -4,7 +4,7 @@ NEXTOR := $(DOS_DIR)/nextor
 
 # Nextor 2.1.0 tools.zip (NEXTOR.SYS 2.11 and COMMAND2.COM 2.44).
 $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM &:
-	python3 -I tools/fetch.py https://github.com/Konamiman/Nextor/releases/download/v2.1.0/tools.zip 5792ff3fe7ab684b8afd405cdd898e25f6efdb84ca1f2cb9ac1428cc848d924e $(NEXTOR) NEXTOR.SYS COMMAND2.COM
+	python3 -I tools/fetch.py --nextor $(NEXTOR)
 
 TEST_TAPES := $(addprefix tests/tapes/, \
   001-ARIO.CAS 016-ROBE.CAS 022-MOON.CAS 035-EDGY.CAS 4X4OFFRO.TSX 7-CARD.CAS \

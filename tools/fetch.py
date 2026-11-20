@@ -2,6 +2,7 @@
 """Download a file and check it against its SHA-256.
 
 Usage: fetch.py URL SHA256 OUT [MEMBER...]
+       fetch.py --nextor OUT
 
 Without MEMBER arguments, the download is saved as OUT. With them, the download
 is a zip file, and each MEMBER is extracted into the folder OUT. The download is
@@ -23,6 +24,10 @@ import zipfile
 
 # Real seconds that the server may take to answer or to send more bytes.
 TIMEOUT = 120
+# Nextor 2.1.0's tools.zip (NEXTOR.SYS 2.11 and COMMAND2.COM 2.44).
+NEXTOR_ZIP = ("https://github.com/Konamiman/Nextor/releases/download/v2.1.0/tools.zip",
+              "5792ff3fe7ab684b8afd405cdd898e25f6efdb84ca1f2cb9ac1428cc848d924e")
+NEXTOR_FILES = ("NEXTOR.SYS", "COMMAND2.COM")
 
 
 def save(path, data):
@@ -32,9 +37,12 @@ def save(path, data):
 
 
 def main():
-    if len(sys.argv) < 4:
+    if len(sys.argv) == 3 and sys.argv[1] == "--nextor":
+        url, sha, out, members = *NEXTOR_ZIP, sys.argv[2], list(NEXTOR_FILES)
+    elif len(sys.argv) >= 4:
+        url, sha, out, members = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:]
+    else:
         sys.exit(__doc__.strip())
-    url, sha, out, members = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:]
     try:
         with urllib.request.urlopen(url, timeout=TIMEOUT) as reply:
             data = reply.read()
