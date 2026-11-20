@@ -1,0 +1,34 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The capture runs without the 2048 KB mapper in 3-0, which the game's RAM would
+# otherwise take, and SX2RES holds it.
+capture sx2-extramapper-noram30
+
+# The ROM image never reads the tape again: the rest of the tape is the next
+# game's. Without the tape service the restorer keeps the BIOS in page 0, in
+# another subslot of DOS's mapper's slot.
+service no
+
+# Engesoft's loader gives page 1 the slot of page 3 by the slot register alone,
+# copies the ROM image to page 1 and starts it. Here the BIOS and the RAM are
+# both in slot 0, in subslots 0 and 1, so page 1 keeps the ROM. The patch writes
+# 54h to slot 0's subslot register in place of that code: the BIOS in page 0 and
+# RAM in pages 1 to 3.
+patch side1:85DA DB A8 CB 7F 28 02 CB DF CB 77 28 02 CB D7 D3 A8 > 3E 54 32 FF FF 00 00 00 00 00 00 00 00 00 00 00
+
+# The first binary does the same, keeps the slot register with PUSH AF, and
+# gives it back with POP AF / OUT (0A8h),A after the copy, where a write of the
+# subslot register has no room. Its patch pushes 50h, the BIOS in pages 0 and
+# 1, writes 54h, and puts POP AF / LD (0FFFFh),A / RET at D00Dh, in the bytes
+# that the patch frees. The restore jumps there.
+patch side1:4581 DB A8 F5 CB 7F 28 02 CB DF CB 77 28 02 CB D7 D3 A8 > 3E 50 F5 3E 54 32 FF FF 18 05 F1 32 FF FF C9 00 00
+patch side1:459D F1 D3 A8 > C3 0D D0
+
+# The ROM image's start at 405Ah finds its own slot from the slot register and
+# the BIOS's EXPTBL and SLTTBL, and selects it in page 2 with ENASLT. SLTTBL
+# still gives subslot 0 for page 1, as BASIC left it, so page 2 showed the
+# empty 0-0 and the game ran FFh bytes there. The patch loads 84h, slot 0-1,
+# the RAM that holds the ROM image, in place of that search.
+patch side1:5DE CD 38 01 0F 0F E6 03 4F 06 00 > 3E 84 00 00 00 00 00 00 00 00
+patch side1:5E8 21 C1 FC 09 B6 4F 23 23 23 23 > 00 00 00 00 00 00 00 00 00 00
+patch side1:5F2 7E E6 0C B1 > 00 00 00 00

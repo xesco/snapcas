@@ -1,0 +1,16 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image's call of SX2RES from H.KEYI
+# never runs. A routine at FCD9h, in SLTATR's bytes of the empty slots 1 and 2,
+# keeps IX, IY and the alternate registers, calls the image's routine at FD29h,
+# enables the interrupts again, which that routine's RDSLT disables, and jumps
+# to the BIOS's LDIRVM.
+patch page3:3CD9 00 00 00 00 00 00 00 00 00 00 > DD E5 FD E5 D9 C5 D5 E5 08 F5
+patch page3:3CE3 00 00 00 00 00 00 00 00 00 00 > 08 D9 CD 29 FD D9 08 F1 08 E1
+patch page3:3CED 00 00 00 00 00 00 00 00 00 00 > D1 C1 D9 FD E1 DD E1 FB C3 5C
+
+# The routine at 510Eh copies the name table's buffer at E000h to the
+# VRAM with LDIRVM once in each pass of the game's loop, in the title and in
+# play. It calls the routine above in place of LDIRVM.
+patch page1:1117 CD 5C 00 > CD D9 FC

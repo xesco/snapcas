@@ -2,3 +2,10 @@
 cas KE-RULEN.CAS
 sha1 dd3975b1c921898665db07157d6883ef54287ecc
 url https://download.file-hunter.com/Games/MSX1/CAS/Ke%20Rulen%20los%20Petas%20(1989)(Iber%20Soft)(es)%5BRUN%27CAS-%27%5D.zip
+
+# The game's load reads the tape's last block, which starts at AA08h in the file,
+# and stops 12 bytes before the file's end, in that block. No block follows, so
+# the game reads nothing more and needs no tape service. Without the service the
+# image needs no room in page 3, which the game fills, nor T0, whose page 0 the game
+# keeps for its own RAM.
+service no

@@ -1,0 +1,35 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image's call of SX2RES from H.KEYI
+# never runs. A routine at FCD9h, in the zeros of SLTATR and SLTWRK, reads the
+# VDP's status register 0, which the game never reads there. When its bit 7
+# shows a new frame, it keeps IX, IY and the alternate registers and calls the
+# image's routine at FD29h, so at most once a frame, and enables the interrupts
+# again, which that routine's RDSLT disables. Two entries call it: the one at
+# FCFDh then jumps to the BIOS's GTTRIG, the one at FD03h to the BIOS's WRTVRM.
+patch page3:3CD9 00 00 00 00 00 00 00 00 00 00 > F5 DB 99 07 30 1C DD E5 FD E5
+patch page3:3CE3 00 00 00 00 00 00 00 00 00 00 > D9 C5 D5 E5 08 F5 08 D9 CD 29
+patch page3:3CED 00 00 00 00 00 00 00 00 00 00 > FD D9 08 F1 08 E1 D1 C1 D9 FD
+patch page3:3CF7 00 00 00 00 00 00 00 00 00 00 > E1 DD E1 FB F1 C9 CD D9 FC C3
+patch page3:3D01 00 00 00 00 00 00 00 > D8 00 CD D9 FC C3 4D
+
+# The title waits for a trigger in a loop that reads GTTRIG, thousands of times
+# a second. Its first GTTRIG calls the entry at FCFDh.
+patch page3:163D CD D8 00 > CD FD FC
+
+# In play the routine at D1EAh writes the sprites' attributes with WRTVRM, about
+# 50 times a second. Its first WRTVRM calls the entry at FD03h.
+patch page3:11EF CD 4D 00 > CD 03 FD
+
+# At C9B5h the game erases an object when the byte at C053h is not zero: it
+# writes that byte less 1 at the address in C055h. The game writes neither
+# before its first use, so they hold the RAM's bytes at power-on, FFh and
+# FFFFh here. In play the write went to FFFFh, slot 0's subslot register, and
+# deselected the RAM. The patch clears the flag, so nothing waits for erasing.
+patch page3:53 FF > 00
+
+# Between games the loop at DC67h reads the joystick and the triggers with
+# GTSTCK and GTTRIG, without the routines above, so nothing called SX2RES
+# there. Its third GTTRIG calls the entry at FCFDh.
+patch page3:1C91 CD D8 00 > CD FD FC

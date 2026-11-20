@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# After the snapshot the game copies JP 8C29h from 8C26h into H.KEYI, over the
+# image's call of SX2RES, which then stops. The image's wrapper calls SX2RES and
+# jumps to 8C29h.
+rescall 8C29
+
+# The game copies the wrapper's address, FD60h after resb at FD29h, into H.KEYI.
+patch page2:C27 29 8C > 60 FD

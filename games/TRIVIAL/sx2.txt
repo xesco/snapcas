@@ -1,0 +1,6 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game copies BIOS to page 0 RAM and hooks H.KEYI/H.TIMI to 2701h/2702h. On
+# MSX2, interrupts during sub-ROM calls hit main ROM instead, crashing at 2702h.
+# Make H.KEYI RET and guard H.TIMI with IN A,(0A8h) / RRCA / RET NC / JP 2702h.
+patch side1:4687 C3 01 27 00 00 C3 02 27 00 00 > C9 D0 C3 02 27 DB A8 0F 18 F7

@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# SUBMA, FIN1, and c/m switch pages 0-1 to RAM via OUT (0A8h),A, which fails where
+# BIOS and RAM share slot 0 (corrupting T0 on VRAM copy at 24 s). Patch them to
+# write slot 0's subslot register instead (55h RAM, 50h BIOS; POKE byte after RET).
+patch side1:4DCB 0E A8 ED 78 32 1A > 3E 55 32 FF FF C9
+patch side1:4DD9 3A 1A B5 D3 A8 C9 > 3E 50 32 FF FF C9
+patch side1:8A3B 0E A8 ED 78 32 1A > 3E 55 32 FF FF C9
+patch side1:8A49 3A 1A C1 D3 A8 C9 > 3E 50 32 FF FF C9
+patch side1:8B37 0E A8 ED 78 32 CE > 3E 55 32 FF FF C9
+patch side1:8B45 3A CE EA D3 A8 C9 > 3E 50 32 FF FF C9
+
+# The load stops before the tape's last block, which holds only the 1Ah bytes
+# that end the game's ASCII data file, so the game reads nothing more, and the
+# image goes without the tape service. Its T0 would take the place of the
+# game's RAM in page 0, which the routines above select in slot 0-1 too, and
+# the restore of the BIOS by 50h needs the ROM in page 0.
+service no

@@ -1,0 +1,35 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The title takes the interrupt in the game's routine at 8400h, through JP at
+# 0038h in its RAM page 0. From the menu on, the game runs with the interrupts
+# off, so the wrapper of 8400h no longer runs. Three routines run at a steady
+# rate instead: 9EA6h prints the menu's last lines once in each pass of the
+# menu's loop, about 40 times a second; 9FD3h scans the keyboard in the loop
+# that shows the credits, about 10 times a second; and B480h runs about 9
+# times in each frame of the play, about 47 times a second. So the image gets
+# a wrapper for each, at F9CDh, F9D3h, F9D9h and F9DFh after the call routine.
+rescall 8400 9EA6 9FD3 B480
+
+# The call routine and the four wrappers take 69 bytes, and the zeros of
+# SLTATR and SLTWRK are the game's stack at FDE2h. F9A0h is in the BIOS's PLAY
+# queues, zeros that the game leaves alone.
+rescode F9A0
+
+# The call routine's stack, 64 bytes, in the same zeros.
+resstack FA00
+
+# The snapshot's JP 8400h at 0038h goes to the first wrapper. With the rescall
+# line's addresses, the build leaves that jump as it is.
+patch page0:0039 00 84 > CD F9
+
+# The menu's loop at 9E74h calls the wrapper of 9EA6h.
+patch page2:1E74 CD A6 9E > CD D3 F9
+
+# The credits' loop at 9E60h calls the wrapper of 9FD3h. The other calls of
+# 9FD3h wait for a key in a tight loop and stay as they are.
+patch page2:1E60 CD D3 9F > CD D9 F9
+
+# The two calls of B480h in the play call its wrapper.
+patch page2:31B2 CD 80 B4 > CD DF F9
+patch page2:3450 CD 80 B4 > CD DF F9

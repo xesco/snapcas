@@ -1,0 +1,11 @@
+# SX-2 with its Extra-Mapper on and without the 2048 KB mapper in slot 3-0: the
+# capture variant of sx2-extramapper-mcp for a game whose loader finds RAM in
+# slot 3 before it, or writes slot 3's registers, and then keeps a RAM page in
+# 3-0, which SX2RES holds and an image cannot restore. Slot 3 holds no RAM here,
+# so the capture patches such a loader's writes to the slot of the Extra-Mapper.
+# The capture uses no disk, but a machine file needs this line.
+openmsx -machine OCM_SX-2_extramapper_noram30
+disk hda
+firmware machines/OCM_SX-2_extramapper_noram30.xml
+# As in sx2-extramapper-mcp: the capture sets the width that the image restores.
+width 37

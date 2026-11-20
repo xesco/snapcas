@@ -1,0 +1,9 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# When a key starts the game, it writes JP 69DEh into H.KEYI over the image's
+# CALL resb, so SX2RES got no more calls. Its routine at 69DEh returns to the
+# BIOS's interrupt routine.
+# The BIOS's interrupt routine still calls H.TIMI after it, so H.TIMI calls
+# resb at FD29h too: CALL 0FD29h / RET.
+patch page3:3D9F C9 C9 C9 C9 C9 > CD 29 FD C9 C9

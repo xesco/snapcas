@@ -192,7 +192,7 @@ class Snapshot:
         """Writes patches.txt, the capture's patches of the tape, from the
         patches that new_patches gave."""
         with open(self.path("patches.txt"), "w") as f:
-            f.write("# The capture's patches of the tape (docs/INTERNALS.md, Slot patches, The RAM search patch).\n")
+            f.write("# The capture's patches of the tape (docs/internals/patches.md, Slot patches, The RAM search patch).\n")
             f.writelines(patch.line + "\n" for patch in found)
 
     def capture_patches(self):

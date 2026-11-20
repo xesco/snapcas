@@ -1,0 +1,23 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The block ALIAN1 looks for RAM in page 0, and then in page 1, by adding 1 or
+# 4 to the slot register's value until a write reads back, and keeps the value
+# at FFFDh. Here, where BASIC's slot register value is 00h, that passes slot
+# 3-0, the resident program's RAM, and then changes page 3 under its own code.
+# The patches select the RAM of 0-1 in pages 0 and 1 with 55h in slot 0's
+# subslot register instead, skip the search, and give BASIC back 50h after the
+# block's copy to page 0.
+patch side1:4382 26 00 C6 01 D3 A8 4F > 3E 55 32 FF FF 18 1D
+patch side1:4389 7E 2F 77 BE 79 20 F4 26 40 > F1 3E 50 32 FF FF C3 36 D0
+patch side1:43B1 F1 D3 A8 > C3 0B D0
+
+# The block ALIAN2 does the same for page 1. The patches write 54h, RAM in
+# pages 1 to 3, before its copy to page 1, and 50h after it.
+patch side1:63F2 26 40 C6 04 D3 A8 4F > 3E 54 32 FF FF 18 0A
+patch side1:63F9 7E 2F 77 BE 79 20 F4 32 FE > F1 3E 50 32 FF FF C3 23 D0
+patch side1:640E F1 D3 A8 > C3 0B D0
+
+# The block ALIAN3's last routine, which runs at F880h, selects the RAM of
+# FFFDh by the slot register before it starts the game. The patch writes 55h,
+# RAM in every page, to FFFFh instead.
+patch side1:B574 3A FD FF D3 A8 > 3E 55 32 FF FF

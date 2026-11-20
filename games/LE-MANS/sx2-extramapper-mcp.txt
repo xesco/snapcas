@@ -1,0 +1,17 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader, at 8051h, looks for RAM in page 1 in slots 3, 2 and 1 by the slot
+# register alone, through WSLREG, and halts with "Insufficient RAM present"
+# when none holds RAM. Here the RAM is in slot 0-1, beside the BIOS in 0-0. The
+# patch writes 54h to slot 0's subslot register in place of the search: the
+# BIOS in page 0 and RAM in pages 1 to 3.
+patch side1:77 CD 38 01 E6 F3 57 > 3E 54 32 FF FF C9
+
+# The game takes the interrupt in its routine at 4E6Ch through H.TIMI. When a
+# key starts the game, it writes RET into H.KEYI over the image's CALL resb,
+# so SX2RES got no more calls, and copies JP 4E6Ch into H.TIMI again from
+# 52C6h. The image gets a wrapper that calls SX2RES and jumps to 4E6Ch, at
+# FD60h, and both the snapshot's H.TIMI and the template take its address.
+rescall 4E6C
+patch page3:3DA0 6C 4E > 60 FD
+patch page1:12C7 6C 4E > 60 FD

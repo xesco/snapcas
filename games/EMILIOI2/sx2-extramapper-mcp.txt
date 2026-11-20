@@ -1,0 +1,31 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image has no call of SX2RES, and in
+# play it writes a table over FD29h, the image's place by default. The rescode
+# line puts the image's call routine at CC00h, in zeros of page 3 after the
+# loader's messages that the game leaves alone. The rescall line gives it a
+# wrapper at CC2Dh that calls SX2RES and jumps to CC40h, which does LD HL,8010h,
+# the first instruction of the game's keyboard routine at 3317h, and jumps to
+# the rest of the routine at 331Ah.
+rescode CC00
+rescall CC40
+patch page3:C40 00 00 00 00 00 00 > 21 10 80 C3 1A 33
+
+# In play the game reads the keyboard with the routine at 3317h, about 24 times
+# a second. The routine jumps to the wrapper in place of its first instruction.
+patch page0:3317 21 10 80 > C3 2D CC
+
+# In play the game's stack is near FD67h, inside FD49h to FD88h, where the build
+# puts the call's stack and its end. The stack goes to E800h, in zeros of page
+# 3 that the game leaves alone in a minute of play with keys.
+resstack E800
+
+# The title calls no keyboard routine at 3317h: it loops at 314Ch, CALL 3154h /
+# INC A / JR Z, which scans the keyboard thousands of times a second, so
+# nothing called SX2RES there. A routine at CC50h, in zeros of page 3 that the
+# game leaves alone, reads the VDP's status register 0, and when its bit 7
+# shows a new frame it calls res3 at CC00h, so at most once a frame. It then
+# jumps to 3154h. The loop's CALL calls it.
+patch page3:C50 00 00 00 00 00 00 00 00 00 > DB 99 07 DC 00 CC C3 54 31
+patch page0:314C CD 54 31 > CD 50 CC

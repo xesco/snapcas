@@ -1,0 +1,10 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game writes over the tape service's part of page 3 at its default place, and
+# it keeps RAM of its own in page 0, so the mode without a part in page 3, whose T0
+# needs page 0 of DOS's mapper, cannot take it. The SX-2 has no other RAM for a
+# capture variant. At EDE1h the game wrote the part once a key started it, which
+# the check, without keys, does not see. The part goes to EEE1h to EF7Eh, which
+# hold zeros at the snapshot and in a minute of play with keys on
+# sx2-extramapper-mcp.
+service at EEE1

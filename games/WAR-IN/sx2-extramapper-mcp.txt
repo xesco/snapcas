@@ -1,0 +1,25 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game takes its interrupts in its own routine at 0400h, with its stack in
+# page 1, where SX2RES's entry is, so nothing called SX2RES: the image's call
+# routine leaves the call out while the stack is in page 1. The game also uses
+# the zeros at FD29h and FCC9h. The call's code goes to C700h, in zeros of page
+# 3 that the game leaves alone in a minute of play with keys: res3, then the
+# wrapper at C72Dh, which calls res3 and jumps to C73Dh.
+rescode C700
+rescall C73D
+
+# At C733h, LD (C744h),SP / LD SP,C7C6h / JP C72Dh: the call runs on a stack of
+# 128 bytes in the zeros up to C7C6h. At C73Dh, LD SP,(C744h) / JP 0400h gives
+# the game its stack back and runs its routine.
+patch page3:733 00 00 00 00 00 00 00 00 00 00 > ED 73 44 C7 31 C6 C7 C3 2D C7
+patch page3:73D 00 00 00 00 00 00 00 > ED 7B 44 C7 C3 00 04
+
+# The jump at 0038h goes to C733h.
+patch page0:39 00 04 > 33 C7
+
+# The game's stack is in page 1, the page of SX2RES's entry, and the zeros at
+# FCC9h to FD88h have no room for the call's own stack. C780h holds zeros that
+# the game leaves alone, so the stack goes there.
+resstack C780

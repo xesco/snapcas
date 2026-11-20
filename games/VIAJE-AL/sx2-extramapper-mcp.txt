@@ -1,0 +1,15 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game takes the interrupt in its routine at 1792h, through JP at 0038h in
+# its RAM page 0, and its code at 1780h writes that jump again when the play
+# starts, over the jump to the image's wrapper. So the rescall line names the
+# routine, and the patches make both jumps go to the wrapper at FCC9h.
+rescall 1792
+
+# The snapshot's JP 1792h at 0038h. With the rescall line's address, the build
+# leaves that jump as it is.
+patch page0:0039 92 17 > C9 FC
+
+# LD HL,1792h before LD (0039h),HL, at the start of the play.
+patch page0:1782 21 92 17 > 21 C9 FC

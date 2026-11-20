@@ -1,5 +1,5 @@
 # Game files that load on a machine in plain openMSX but fail with snapcas:
-# failures of snapcas, to fix (docs/PLAN.md, step 9). make games prints them
+# failures of snapcas, to fix (docs/BUILD.md, step 9). make games prints them
 # as a group of their own, does not fail for them, and notes a game file here
 # that passes now. Each line: the machine, the game file's folder, and what
 # fails and why.

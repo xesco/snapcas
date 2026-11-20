@@ -1,6 +1,7 @@
-# Images
+# Built Images
 
-`snapcas.py snap` puts each game's image here once every step passes, as
-`images/<machine>/<game>/<GAME>.SNP`. Copy the image and `bin/SNAPCAS.COM` to your
-MSX's disk, or start it in `openMSX` with `snapcas.py try`. Git ignores everything
-here except this file.
+This directory holds finished `.SNP` images built by `./snapcas.py snap`. Git ignores everything here except this file.
+
+- **Layout:** `images/<machine>/<game>/<GAME>.SNP` (custom games go under `images/<machine>/custom/<GAME>/`).
+- **Sync to MSX:** Run `./snapcas.py sync <machine> <destination>` to copy `bin/SNAPCAS.COM` and all images for that machine.
+- **Test in `openMSX`:** Run `./snapcas.py try <game> <machine>`.

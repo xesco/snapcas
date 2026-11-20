@@ -1,0 +1,36 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at E000h first selects page 1's slot, BASIC's ROM in 0-0, in page
+# 2 with ENASLT. Here that writes slot 0's subslot register and leaves no RAM
+# in page 2, where the loader then copies its RAM search. Where slot 0 is not
+# expanded the call writes the slot register alone, which the loader writes
+# again next. The patch removes the call.
+patch side1:48 CD 24 00 > 00 00 00
+
+# The loader's two RAM searches, for page 1 and then for page 0, find the RAM
+# in 0-1, but their result at FFFEh is 00h here, where the BIOS and the RAM
+# share slot 0, so the loader's switches by the slot register alone do
+# nothing. The patches skip both searches and make the two switches writes of
+# slot 0's subslot register: 54h, RAM in pages 1 to 3, before the game's load,
+# and 55h, RAM in every page, before its start at 4000h.
+patch side1:D4 3A FE FF D3 A8 > 3E 54 32 FF FF
+patch side1:FD 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:27D 47 08 78 E6 > 4F 08 18 42
+patch side1:2CD 47 08 78 E6 > 4F 08 18 3F
+
+# 0038h is RET (leaving VDP IRQ active), so hook the main loop instead (~44 Hz):
+# place a direct-I/O SX2RES caller (slot 3-0 4040h) in unused page 2 zeros at
+# A3C0h, with wrapper A41Dh running IN A,(99h) / CALL A3C0h / EI / RET.
+patch page2:23C0 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:23CA 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page2:23D4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page2:23DE 00 00 00 00 00 00 00 00 00 00 > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page2:23E8 00 00 00 00 00 00 00 00 00 00 > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page2:23F2 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 C1
+patch page2:23FC 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:2406 00 00 00 00 00 00 00 00 00 00 > D3 A8 F1 E2 0D A4 FB 08 F1 08
+patch page2:2410 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:241A 00 00 00 00 00 00 00 00 00 00 > C1 F1 C9 DB 99 CD C0 A3 FB C9
+
+# The main loop's IN A,(99h) / EI at 4420h becomes CALL A41Dh.
+patch page1:420 DB 99 FB > CD 1D A4

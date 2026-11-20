@@ -1,0 +1,26 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at DD00h looks for RAM in pages 1 and 2 with ENASLT and the slot
+# IDs 80h to 8Fh, so it takes SX2RES's mapper in 3-0, ID 83h, before the
+# Extra-Mapper in 0-1, ID 84h, and then selects slot 3 in page 0 too. Its
+# tape calls, by the trampoline that the capture patches, then reach the RAM
+# in 3-0, not the BIOS, and the CPU halts at FC99h. The capture runs without
+# that mapper, where the search finds the Extra-Mapper.
+capture sx2-extramapper-noram30
+
+# After the search the loader gives page 0 the slot of page 1, by the slot
+# register alone, and loads the game from 0100h. Here that keeps page 0 on the
+# BIOS, in subslot 0 of slot 0, and the bytes for page 0 are lost. The patch
+# writes 55h to slot 0's subslot register instead, the Extra-Mapper in every
+# page, as the loader's own slot register value does where RAM has a slot of
+# its own.
+patch side1:372 CD 38 01 E6 FC 47 CB 3F CB 3F E6 03 B0 D3 A8 > 3E 55 32 FF FF 00 00 00 00 00 00 00 00 00 00
+
+# After the load the loader gives the slot register BASIC's value back, for its
+# calls of STMOTR and CHGCLR, and then the game's value, and jumps to 0100h.
+# Here the slot register alone changes nothing, so the calls run the RAM in
+# page 0. The patches write slot 0's subslot register instead: 50h, BASIC,
+# before the calls, and 55h, the Extra-Mapper in every page, before the jump,
+# in two bytes after it that the loader leaves alone.
+patch side1:4BA DB A8 47 F1 D3 A8 > F1 3E 50 32 FF FF
+patch side1:4E2 C1 78 D3 A8 C3 00 01 FF FF > C1 3E 55 32 FF FF C3 00 01

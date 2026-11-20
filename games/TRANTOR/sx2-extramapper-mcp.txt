@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# When a key starts the game, it saves H.KEYI and H.TIMI at C9D4h and copies
+# its own from CA14h, over the image's CALL resb: JP 0CA1Eh, a RET, into
+# H.KEYI and JP 0CA1Fh into H.TIMI, so SX2RES got no more calls. The image
+# gets a wrapper that calls SX2RES and jumps to CA1Fh, at FD60h, and the
+# template's JP 0CA1Fh becomes JP 0FD60h.
+rescall CA1F
+patch page3:0A1A 1F CA > 60 FD

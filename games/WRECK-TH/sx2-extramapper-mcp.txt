@@ -1,0 +1,8 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at 8000h looks for RAM in page 1 with WSLREG in primary slots 3, 2
+# and 1, and jumps to 0 when it finds none. Here the RAM is the Extra-Mapper in
+# 0-1, which shares slot 0 with the BIOS, so the loader resets the machine. The
+# patch at 804Eh writes 54h to slot 0's subslot register, the BIOS in page 0
+# and the Extra-Mapper in pages 1 to 3, and jumps to the RAM test at 8061h.
+patch side1:74 CD 38 01 E6 F3 57 3E > 3E 54 32 FF FF 18 0C

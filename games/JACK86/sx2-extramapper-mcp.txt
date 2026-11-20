@@ -1,0 +1,40 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader looks for RAM in page 0 and then in page 1 by the slot register
+# alone. Here the RAM is in slot 0-1, beside the BIOS in 0-0, so the search
+# passes it by, and its last try selects slot 1 in page 3, under its own code.
+# IN A,(0A8h) / AND 0F0h / DEC A / INC A / OUT (0A8h),A becomes LD A,55h /
+# LD (0FFFFh),A / XOR A / OUT (0A8h),A: slot 0's RAM in every page, and slot 0
+# by the slot register, which both tests then find.
+patch side1:2F DB A8 E6 F0 3D 3C D3 A8 > 3E 55 32 FF FF AF D3 A8
+
+# The loader reads the game's block of FC00h bytes to 0400h to FFFFh. On a
+# machine whose RAM is in an expanded slot, FFFFh is the slot's subslot
+# register, and the block's last byte, F0h, deselects the RAM. The first patch
+# makes the load FBFFh bytes. The loader compares the exclusive OR of the
+# block's bytes with the byte after the block, so the second patch puts that
+# value for the shorter block, ABh XOR F0h, in the place of the last byte.
+patch side1:67 11 00 FC > 11 FF FB
+patch side1:FE30 F0 > 5B
+
+# Interrupts are off, page 3 is full, and SP is in page 1. Place a direct-I/O
+# SX2RES caller (slot 3-0 4040h) at 0320h in unused 01C4h-03DEh bytes, with entry
+# 0300h switching SP below 0300h (saved at 0311h) before jumping to 4251h.
+patch page0:300 FF FF FF FF FF FF FF FF FF FF > ED 73 11 03 31 00 03 CD 20 03
+patch page0:30A FF FF FF FF FF FF FF FF FF > ED 7B 11 03 C3 51 42 00 00
+patch page0:320 FF FF FF FF FF FF FF FF FF FF > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page0:32A FF FF FF FF FF FF FF FF FF FF > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page0:334 FF FF FF FF FF FF FF FF FF FF > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page0:33E FF FF FF FF FF FF FF FF FF FF > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page0:348 FF FF FF FF FF FF FF FF FF FF > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page0:352 FF FF FF FF FF FF FF FF FF FF > 08 3A 41 40 FE DB CC 40 40 C1
+patch page0:35C FF FF FF FF FF FF FF FF FF FF > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page0:366 FF FF FF FF FF FF FF FF FF FF > D3 A8 F1 E2 6D 03 FB 08 F1 08
+patch page0:370 FF FF FF FF FF FF FF FF FF FF > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page0:37A FF FF FF > C1 F1 C9
+
+# The game reads the joystick with the routine at 4251h: at 146Eh in the title,
+# about 26 times a second, and at 4209h in play, about 14 times a second. Both
+# call the entry at 0300h in place of that routine.
+patch page0:146E CD 51 42 > CD 00 03
+patch page1:209 CD 51 42 > CD 00 03

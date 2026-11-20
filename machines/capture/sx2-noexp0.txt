@@ -1,0 +1,11 @@
+# SX-2 with its slot 0 not expanded: the capture variant of sx2 for a game whose
+# loader fails because slot 0 is expanded. Such a loader writes slot 0's
+# subslot register in its search for RAM and leaves the main ROM deselected, or
+# selects slot 0 in page 3, where its own code runs. It is the machine
+# sx2-noexp0, whose file says more.
+# The capture uses no disk, but a machine file needs this line.
+openmsx -machine OCM_SX-2_noexp0
+disk hda
+firmware machines/OCM_SX-2_noexp0.xml
+# The capture sets the width of the machine sx2.
+width 37

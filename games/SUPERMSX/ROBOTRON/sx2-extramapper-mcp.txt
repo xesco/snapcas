@@ -1,0 +1,31 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the 26 bytes below SP 0000h cross a page boundary or include
+# FFFFh. `make games` wrote this line.
+capture sx2-extramapper-noram30
+
+# The game runs without interrupts, so the image's call of SX2RES from H.KEYI
+# never runs, and its stack is in page 1, where the call puts SX2RES. A routine
+# at FCD9h, in the zeros of SLTATR and SLTWRK, reads the VDP's status register
+# 0, which the game never reads. When its bit 7 shows a new frame, it keeps SP
+# at FD0Ah, takes a stack below FC9Ah, in BASIC's TRPTBL, which only BASIC's
+# interrupt routine reads, keeps IX, IY and the alternate registers, calls the
+# image's routine at FD29h, and takes the game's stack back, so at most once a
+# frame. Then it does LD C,A / IN A,(0AAh) and returns.
+patch page3:3CD9 00 00 00 00 00 00 00 00 00 00 > F5 DB 99 07 30 26 ED 73 0A FD
+patch page3:3CE3 00 00 00 00 00 00 00 00 00 00 > 31 9A FC DD E5 FD E5 D9 C5 D5
+patch page3:3CED 00 00 00 00 00 00 00 00 00 00 > E5 08 F5 08 D9 CD 29 FD D9 08
+patch page3:3CF7 00 00 00 00 00 00 00 00 00 00 > F1 08 E1 D1 C1 D9 FD E1 DD E1
+patch page3:3D01 00 00 00 00 00 00 00 00 00 > ED 7B 0A FD F1 4F DB AA C9
+
+# The game reads each row of the keyboard through the routine at AC2Bh, in the
+# title and in play. Its first instructions call the routine above.
+patch page2:2C2B 4F DB AA > CD D9 FC
+
+# The game's stack is in page 1, the page of SX2RES's entry, and the zeros at
+# FCC9h to FD88h have no room for the call's own stack. Put the stack at FE18h
+# in the unused C9h BIOS hook area.
+resstack FE18

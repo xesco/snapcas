@@ -1,4 +1,4 @@
-"""The search slot patch (docs/INTERNALS.md, The search slot patch): a loader's
+"""The search slot patch (docs/internals/patches.md, The search slot patch): a loader's
 RAM search that finds the slot of page 1's RAM, and then stores for page 1 the
 slot of BASIC's page 2. patches/searchslot.tcl patches each search's end at step
 3, on every machine. The kind works only in the capture, so its find() finds

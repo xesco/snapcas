@@ -1,0 +1,26 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so nothing calls SX2RES. The image's wrapper
+# at FCC9h, before the tape service's entries, calls SX2RES and jumps to a RET
+# at FC68h.
+rescall FC68
+
+# Two entries at FC4Ch, in BASIC's zeros of TRPTBL, which the game leaves alone.
+# The first counts its calls in the bytes at FC70h and FC71h and calls the
+# wrapper at every 1024th; the second calls it each time. Each then does the
+# instructions that its call replaces and returns.
+patch page3:3C4C 00 00 00 00 00 00 00 00 00 00 > F5 3A 70 FC C6 01 32 70 FC 30
+patch page3:3C56 00 00 00 00 00 00 00 00 00 00 > 0D 3A 71 FC C6 40 32 71 FC 30
+patch page3:3C60 00 00 00 00 00 00 00 00 00 00 > 03 CD C9 FC F1 AF D3 AA C9 CD
+patch page3:3C6A 00 00 00 00 00 00 > C9 FC CD B8 2C C9
+
+# The title waits for 1 or 2 in a loop at 27F7h that reads the keyboard's row 0,
+# about 50000 times a second. It calls the first entry in place of XOR A / OUT
+# (0AAh),A, about 30 times a second.
+patch page0:27F7 AF D3 AA > CD 4C FC
+
+# The game's loop at 2ED5h calls the routine at 2CB8h, which copies the screen
+# to the VRAM, about 15 times a second. It calls the second entry instead, which
+# calls that routine after the wrapper.
+patch page0:2ED5 CD B8 2C > CD 69 FC

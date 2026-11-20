@@ -1,56 +1,7 @@
-# Procedures of the capture (docs/INTERNALS.md, Capture). tools/capture.py puts
-# the game file's settings and memory.tcl before them, the settings and the Tcl
-# file of each patch kind that works in the capture after them
-# (tools/patches/), and then the start, safe step1.
-#
-# capture.py sets these before the procedures:
-#   ::S(snap)     the snapshot folder
-#   ::S(boot)     the boot steps, for boot (prelude.tcl)
-#   ::S(afterboot) what follows them: wait_ok, after BASIC typed at DOS's prompt
-#                 on a machine that boots DOS from its own disk
-#   ::S(tape)     the tape file of side 1, CAS or TSX
-#   ::S(cmd)      the load command; ::S(cload) is 1 for CLOAD, then RUN
-#   ::S(headers)  the offsets of side 1's headers
-#   ::S(needed)   the end of the last block that the load must read
-#   ::S(side2tape) side 2's tape file, or "" without a side 2
-#   ::S(s1len)    side 1's length, padded to a multiple of 8: side 2's start
-#   ::S(headers2) the positions of side 2's headers, from side 1's start
-#   ::S(nosvc)    1 when the game file has service no
-#   ::S(subkeep)  1 when the game file has subslots keep
-#   ::S(keys)     [list time tcl] pairs, times from the load command
-#   ::S(lastkey)  the last keys time
-#   ::S(tries)    [list name tcl] pairs: the keys that may continue a load
-#   ::S(snapat)   the snapshot at time, or ""
-#   ::S(state)    the start of the names of the capture's savestates, its own
-#                 so that captures can run side by side. capture.py deletes
-#                 them
-#   ::S(home)     openMSX's home folder, whose savestates/ folder holds them
-#
-# ::st holds the state that follows the machine: what the capture logs and
-# tracks. A rewind puts back its copy from the saved moment, because openMSX's
-# loadstate restores the machine but neither Tcl variables nor timers.
-#
-# ::run holds the rest of the run's state, which a rewind leaves alone:
-#   phase       boot until BASIC's Ok (step 1); load while the capture prepares
-#               and follows the load (steps 2 to 5); try during a key try of
-#               step 5; wait in step 6, until the snapshot's moment; snap while
-#               take_snapshot reads the machine; stopping once the capture has
-#               ended (prelude.tcl)
-#   msx2, exbrsa  1 on an MSX2, and the sub-ROM's slot ID, read in step 2
-#   t0          the moment of the load command
-#   elapsed     the emulated seconds since then, counted across rewinds
-#   restarts    the restarts of step 5 so far
-#   since       when the motor last stopped, or "" while it runs (step 5)
-#   saved       whether the wait has a saved moment
-#   moment,<name>  ::st at the moment saved under that name
-#   trying, tried_at  the keys left to try, and when the last one went
-#   decisions   what the capture decided, kept across rewinds
-#   accepted, irq_probe, irq_bp, fallback_pc  the snapshot's wait for an
-#               interrupt (step 6)
-#   psg         the watchpoints on the PSG's ports
-#   slotwp, slots_watched  the watchpoints on the slot register and on FFFFh,
-#               and whether step 4 has set them
-#   stack_logged  whether the log names a push that writes FFFFh
+# Capture driver (docs/internals/capture.md). tools/capture.py injects ::S(*)
+# settings, memory.tcl, and active patcher Tcl scripts around these procs.
+# ::st holds rewindable state restored on loadstate; ::run holds run-wide state
+# (phase: boot -> load -> try -> wait -> snap -> stopping).
 array set ::run {msx2 0 t0 0 elapsed 0 restarts 0 since "" saved 0 decisions {} psg {} slotwp {} slots_watched 0 stack_logged 0}
 set ::st(log) {}
 
@@ -116,7 +67,7 @@ proc screen_lines {} {
     join [lmap l [split [screen] \n] {expr {[string trim $l] eq "" ? [continue] : [string trim $l]}}] " | "
 }
 
-# ---- The patch kinds (INTERNALS.md, The tools' code) ----
+# ---- The patch kinds (docs/internals/patches.md, The tools' code) ----
 #
 # A patch kind that works in the capture adds a procedure to a hook's list:
 #   start       runs in step 3, before the load command
@@ -135,7 +86,7 @@ proc patch_line {side offset old new} {
 }
 # Stops the capture with a patch of the tape that a kind has found: its lines
 # go to newpatch.txt, and why to the log. capture.py adds the lines to the
-# tape's patches and runs the capture again on the patched tape (INTERNALS.md,
+# tape's patches and runs the capture again on the patched tape (docs/internals/patches.md,
 # Slot patches).
 proc stop_with_patch {lines why} {
     write_lines newpatch.txt $lines
@@ -151,7 +102,7 @@ proc stop_with_patch {lines why} {
 # the watchpoints, though it keeps the breakpoints. So moment_load puts ::st
 # back and sets the watchpoints again: the PSG's, and those on the slot
 # register and on FFFFh once step 4 has set them. Without them, a RAM page that
-# a game first selects after a rewind is not kept (INTERNALS.md, Capture, step
+# a game first selects after a rewind is not kept (docs/internals/capture.md, Capture, step
 # 5).
 proc moment_file {name} { file join $::S(home) savestates $::S(state)-$name.oms }
 proc moment_saved {name} { info exists ::run(moment,$name) }
@@ -172,7 +123,7 @@ proc moment_load {name} {
     if {$::run(slots_watched)} watch_slots
 }
 
-# ---- What the capture tracks (INTERNALS.md, Capture, steps 1 and 4) ----
+# ---- What the capture tracks (docs/internals/capture.md, Capture, steps 1 and 4) ----
 
 # The PSG register selected last, from port A0h, and the last value written to
 # register 15, from port A1h, which openMSX does not show.
@@ -274,17 +225,27 @@ proc insert_side2 {} {
 # in the BIOS's tape code, waits for side 2: the player turns the tape over, so
 # side 2 goes in, and the read goes on after side 2's first header, or at side
 # 2's start when it holds no standard block. A motor that a game only switches,
-# with no read, does not turn the tape over.
+# with no read, does not turn the tape over. The player is at the end in the
+# last 10 milliseconds of the tape, where TAPIN can still read side 1's last
+# byte, so the wait must last 0.05 seconds: Thunder Blade's loader got side 2's
+# signal for its last block's sum byte, and hung.
 proc turn_over {} {
-    if {$::S(side2tape) eq "" || $::st(side2in) || ![motor_on] || ![at_end]} { return }
-    if {![in_tape_code [reg PC]]} { return }
+    if {$::S(side2tape) eq "" || $::st(side2in) || ![motor_on] || ![at_end] || ![in_tape_code [reg PC]]} {
+        set ::st(end_wait) ""
+        return
+    }
+    if {![info exists ::st(end_wait)] || $::st(end_wait) eq ""} {
+        set ::st(end_wait) [now]
+        return
+    }
+    if {[now] - $::st(end_wait) < 0.05} { return }
     insert_side2
     next_header
 }
 
 # The BIOS's reset routine. The log keeps a reset across a rewind, so that it
 # holds the resets of the seconds after the snapshot's moment, which the check
-# looks for (INTERNALS.md, Check, point 3). A reset during a key try follows the
+# looks for (docs/internals/restorer-and-check.md, Check, point 3). A reset during a key try follows the
 # machine instead, and goes with the try's rewind, because the restored game
 # gets no such key.
 proc on_reset {} {
@@ -298,7 +259,7 @@ proc side1_read {} {
     expr {$::st(tapion) > 0 && $::st(tapin) > 0 && $::st(pos) >= $::S(needed) - 7}
 }
 
-# ---- The steps (INTERNALS.md, Capture) ----
+# ---- The steps (docs/internals/capture.md, Capture) ----
 
 # 1. Watch the PSG's ports, boot, pass the boot menu, wait for BASIC's Ok.
 proc step1 {} {
@@ -317,19 +278,12 @@ proc wait_ok {} {
         { fail "BASIC's Ok did not appear within 120 seconds" }
 }
 
-# On an MSX2 whose BASIC has its RAM in an expanded slot, the slot's subslot
-# register selects the RAM's subslot in pages 2 and 3 only, and a ROM of the
-# slot in pages 0 or 1. A loader that looks for RAM by primary slot then finds
-# none there. So every page of that slot gets the RAM's subslot, as POKE -1,170
-# gives it on a machine with its RAM in subslot 2. SLTTBL at FCC5h, the BIOS's
-# copy of the subslot registers, gets the same value. The BIOS's inter-slot
-# calls put the register back after each call, so the BIOS still reaches the
-# slot's ROMs. An MSX1 stays as it is: its loaders find its own RAM, which is
-# not in an expanded slot. A game file's subslots keep leaves the register
-# alone, for a game that puts its stack at FFFFh once it finds 64 KB.
+# On MSX2+, set BASIC's expanded RAM slot (and SLTTBL) to select RAM in all four
+# pages so primary-slot-only loaders find RAM in pages 0-1. Skipped for slot 0
+# (holds main ROM in subslot 0), MSX1, or when subslots keep is set.
 proc ram_in_every_page {} {
     set ps [expr {([debug read ioports 0xA8] >> 6) & 3}]
-    if {$::S(subkeep) || !$::run(msx2) || ![expanded $ps]} return
+    if {$::S(subkeep) || !$::run(msx2) || $ps == 0 || ![expanded $ps]} return
     set ss [expr {([subslot_reg $ps] >> 6) & 3}]
     set value [expr {$ss * 0x55}]
     set_subslot_reg $ps $value
@@ -340,8 +294,9 @@ proc ram_in_every_page {} {
 #    its slot, and set HIMEM as on a cassette machine.
 proc step2 {} {
     set v [debug read memory 0x002D]
-    if {$v > 1} { fail "the machine is not an MSX1 or an MSX2: 002Dh holds $v" }
-    set ::run(msx2) $v
+    if {$v > 2} { fail "the machine is not an MSX1, an MSX2 or an MSX2+: 002Dh holds $v" }
+    # An MSX2+ is an MSX2 here: its sub-ROM and its VDP's registers 0 to 23.
+    set ::run(msx2) [expr {$v >= 1}]
     read_exptbl
     # EXBRSA at FAF8h: the slot ID of the MSX2 sub-ROM.
     set ::run(exbrsa) [debug read memory 0xFAF8]
@@ -350,7 +305,10 @@ proc step2 {} {
     debug write memory 0xF37D 0
     for {set a 0xFCC9} {$a <= 0xFD88} {incr a} { debug write memory $a 0 }
     ram_in_every_page
-    type "CLEAR200,&HF380\r"
+    # A machine file's width sets BASIC's text width first, for a BIOS that
+    # starts BASIC with another width than the loaders expect.
+    set width [expr {$::S(width) ? "WIDTH$::S(width):" : ""}]
+    type "${width}CLEAR200,&HF380\r"
     later 3 step3
 }
 
@@ -360,6 +318,8 @@ proc step3 {} {
     foreach ps {0 1 2 3} {
         set ::st(sub$ps) [expr {[expanded $ps] ? [subslot_reg $ps] : -1}]
     }
+    # The subslot register of the sub-ROM's slot as BASIC leaves it, for step 6.
+    set ::run(subrom_sub) [expr {$::run(msx2) ? $::st(sub[lindex [slot_parts $::run(exbrsa)] 0]) : -1}]
     set ::st(sel) {}
     set ::st(log) {}
     set ::st(pos) 0
@@ -519,8 +479,18 @@ proc watch_motor {name} {
     later 0.1 [list watch_motor $name]
 }
 
-# 6. The snapshot, at the entry of the next interrupt that the CPU accepts
-#    while no VDP command runs and both VDP latches are empty.
+# Step 6: defer snapshot while a sub-ROM call is active (page 0 selects the
+# sub-ROM, or the sub-ROM's slot matches page 3 with sub-ROM selected in page 0)
+# so we never snapshot mid-call or conflict with T0's subslot setup.
+proc in_subrom_call {} {
+    if {!$::run(msx2)} { return 0 }
+    lassign [slot_parts $::run(exbrsa)] ps ss
+    if {$ss eq "x"} { return 0 }
+    set a8 [debug read ioports 0xA8]
+    if {($a8 & 3) == $ps && ([tracked_sub $ps] & 3) == $ss} { return 1 }
+    if {!$::st(service) || (($a8 >> 6) & 3) != $ps} { return 0 }
+    expr {($::run(subrom_sub) & 3) != $ss && ([tracked_sub $ps] & 3) == $ss}
+}
 proc vdp_quiet {} {
     if {[debug read "VDP register latch status" 0] != 0} { return 0 }
     if {[v9938]} {
@@ -546,7 +516,7 @@ proc step6 {} {
 }
 proc at_handler {} {
     set ::run(accepted) 0
-    if {$::run(phase) ne "wait" || ![vdp_quiet]} { return }
+    if {$::run(phase) ne "wait" || ![vdp_quiet] || [in_subrom_call]} { return }
     decide "snapshot at an interrupt's entry"
     take_snapshot
 }
@@ -588,14 +558,14 @@ proc fallback2 {tries} {
         return
     }
     set waited [format %.3f [expr {$tries * $::QUIET_STEP}]]
-    if {![vdp_quiet]} {
+    if {![vdp_quiet] || [in_subrom_call]} {
         if {$tries < $::QUIET_TRIES} {
             later $::QUIET_STEP [list fallback2 [expr {$tries + 1}]]
             return
         }
-        decide "the VDP is not quiet after $waited seconds more"
+        decide "the VDP is not quiet, or a call of the sub-ROM is under way, after $waited seconds more"
     } elseif {$tries > 0} {
-        decide "the snapshot waited $waited seconds for a quiet VDP"
+        decide "the snapshot waited $waited seconds for a quiet VDP and no call of the sub-ROM"
     }
     decide "snapshot without an interrupt"
     take_snapshot
@@ -631,7 +601,7 @@ proc take_snapshot {{pc {}}} {
     dict set state tapepos [hex 6 $::st(pos)]
     dict set state service $::st(service)
     # The player's position and side, for the non-standard blocks that the
-    # game has read by its own loader (INTERNALS.md, Tape files).
+    # game has read by its own loader (docs/internals/capture.md, Tape files).
     dict set state tapetime [format %.2f [cassetteplayer getpos]]
     dict set state tapeside [expr {$::st(side2in) ? 2 : 1}]
 

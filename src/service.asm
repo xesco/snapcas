@@ -7,20 +7,23 @@
 
         include "service.inc"
 
-VERSION equ 15
+VERSION equ 20
 
         org 0
 
         db VERSION
-        db 7                    ; number of parts
+        db 9                    ; number of parts
         dw tail, tail_end-tail          ; part 0: the tail
         dw t0_start, t0_end-t0_start    ; part 1: T0's stubs, for T0_CODE
         dw p3_start, p3_end-p3_start    ; part 2: page 3, for E_ENTRY
         dw code_start, code_end-code_start  ; part 3: the code segment
         dw t0m_start, t0m_end-t0m_start ; part 4: T0 without a part in page 3
-        dw file_end, 0                  ; part 5: the symbols that this file exports
-        dw file_end, 0                  ; part 6: the bytes that move with page 3.
-                                        ; tools/relocs.py appends parts 5 and 6
+        dw call_start, call_end-call_start ; part 5: the call of a resident program, and sub0
+        dw file_end, 0                  ; part 6: the symbols that this file exports
+        dw file_end, 0                  ; part 7: the bytes that move with page 3
+        dw file_end, 0                  ; part 8: the addresses that move with the
+                                        ; code block. tools/relocs.py appends
+                                        ; parts 6 to 8
 
 ; Fills with zeros up to an address, which the code before it must not pass.
         macro fill_to address
@@ -64,7 +67,9 @@ tail_end:
 ; jumps to (MSX Red Book, chapter 4), and each returns as the BIOS's routine
 ; does. TAPION and TAPIN run in the code segment, through tramp in page 3,
 ; because page 0 changes under it. TAPIOF and STMOTR run in page 3 too, where
-; the entries share them. The rest of the range is free.
+; the entries share them. After TAPIN's stub comes T0's own call of a routine
+; in its slot (docs/internals/service-and-resident.md, T0 and the sub-ROM in one slot). The rest of the
+; range is free.
 
 t0_start:
         disp T0_CODE
@@ -86,7 +91,12 @@ t_tapoon:                       ; 19F1h, TAPOON: the tape cannot be written, so
 t_tapout:                       ; 1A19h, TAPOUT: the same. The BIOS's leaves
         scf                     ; the interrupts as they are
         ret
+; t_res's stack, below t_tapion, in bytes of the BIOS's TAPOUT that nothing
+; runs: AF and HL, then the program's call.
+t_stack_end:
         fill_to 1A63h
+T_STACK:
+        assert T_STACK-t_stack_end >= 4+RES_STACK+RES_SPARE
 t_tapion:                       ; 1A63h, TAPION
         di
         ld hl,tapion
@@ -96,11 +106,113 @@ t_tapin:                        ; 1ABCh, TAPIN
         di
         ld hl,tapin
         jp tramp
+
+; CALSLT subslot hook when T0 and sub-ROM share one slot (docs/internals/service-and-resident.md).
+; For a page-0 call into our slot, defers the subslot write in t_pend for t_c/sub
+; and returns the BIOS helper's register contract (A, B, C, D, H, L); otherwise chains.
+t_s:
+        push af
+        ld a,h
+        and 0C0h
+        jr nz,.bios             ; a routine in another page
+        in a,(0A8h)
+        ld b,a
+        rlca
+        rlca
+        xor b
+        and 3
+        jr nz,.bios             ; page 3 is in another slot than T0
+        pop af
+        push af
+        xor b
+        and 3
+        jr nz,.bios             ; the routine is in another slot than T0
+        pop af
+        rrca
+        rrca
+        and 3
+        ld d,a
+        ld (t_pend),a
+        ld h,0FCh
+        ld a,(0FFFFh)
+        cpl
+        ld l,a
+        ld a,b
+        and 0C0h
+        ld c,a
+        ld a,b
+        and 3
+        ret
+.bios:
+        pop af
+.jump:  jp 0                    ; build.py: the BIOS's routine
+
+; t_c takes the place of CALSLT's jump to CLPRIM at F38Ch, with the slot
+; register's value for the call in A and the one before it on the stack.
+; Without a subslot at t_pend it goes to CLPRIM. With one, the slot register
+; stays, and sub in page 3 makes the call with that subslot in page 0. It gets
+; the subslot register's value for the call in A, and the value now on the
+; stack, in the high byte.
+t_c:
+        push hl
+        ld hl,t_pend
+        bit 7,(hl)
+        jr z,.sub
+        pop hl
+        jp 0F38Ch
+.sub:
+        ld a,(hl)
+        ld (hl),0FFh
+        ld l,a
+        ld a,(0FFFFh)
+        cpl
+        ld h,a
+        and 0FCh
+        or l
+        ld l,a
+        ex (sp),hl
+        jp sub
+t_pend: db 0FFh                 ; the subslot that waits for t_c, or FFh
+
+; Resident program hook installed at 0038h in T0 (docs/internals/service-and-resident.md).
+; Switches to T_STACK, maps the resident slot, verifies its 2-byte signature,
+; calls the entry (which preserves all registers), and chains to the BIOS IRQ.
+t_res:
+        di
+        ld (.back+1),sp
+        ld sp,T_STACK
+        push af
+        push hl
+        in a,(0A8h)
+        ld h,a                  ; the game's slot register
+.mask:  and 0                   ; build.py: without the page's bits
+.slot:  or 0                    ; build.py: the program's primary slot there
+        out (0A8h),a
+.at1:   ld a,(0)                ; build.py: the entry
+.is1:   cp 0                    ; build.py: its first byte
+        jr nz,.out
+.at2:   ld a,(0)                ; build.py: the entry plus 1
+.is2:   cp 0                    ; build.py: its second byte
+        jr nz,.out
+.call:  call 0                  ; build.py: the entry
+.out:
+        ld a,h
+        out (0A8h),a
+        pop hl
+        pop af
+.back:  ld sp,0                 ; the game's stack pointer
+.jump:  jp 0                    ; build.py: the BIOS's interrupt routine
         fill_to T0_END
         ent
 t0_end:
 
-; ---- Page 3, from E_ENTRY to E_STACK, by default FCE1h to FD6Fh ----
+; ---- Page 3, from E_ENTRY to E_STACK, by default FCE1h to FD7Eh ----
+;
+; Two blocks: the entries and their data, from E_ENTRY to E_STOP, and the code
+; block, from P3_CODE to E_STACK. By default the code block follows the
+; entries. A game file's service at can put it at another address in page 3,
+; and build.py moves its addresses with the list that tools/relocs.py makes
+; (docs/internals/service-and-resident.md, Build).
 
 p3_start:
         disp E_ENTRY
@@ -126,9 +238,12 @@ p3_start:
         db 0,0,0,0              ; E_SLOT, E_T0, E_CODE, E_FC
         assert $ = E_STOP
         db 0
+        ent
+p3_code:
+        disp P3_CODE
 
 ; STMOTR and TAPIOF stop the manual tape, which waits for the player's key at
-; the next read (INTERNALS.md, The manual tape). STMOTR with A = 1 starts the
+; the next read (docs/internals/service-and-resident.md, The manual tape). STMOTR with A = 1 starts the
 ; motor and leaves the tape as it is. The automatic tape ignores E_STOP. They
 ; run here for the entries and for T0's stubs, with the caller's registers,
 ; stack and interrupts, as the BIOS's do: STMOTR changes only AF, and TAPIOF
@@ -171,7 +286,7 @@ e_run:
         and 3
         or b
         out (0A8h),a
-        call tramp              ; A is also in D
+.call:  call tramp              ; A is also in D. build.py: sub0 for FLAG_P0
         ld a,(E_FC)
         out (0FCh),a
         ld a,(e_a8)
@@ -203,9 +318,26 @@ reader:
         ld e,(hl)
         out (c),b
         ret
+; From T0's t_c, with interrupts off, the subslot register's value for the call
+; in A, its value now in the high byte on the stack, and under it what CLPRIM
+; finds: the slot register's value before the call. Selects the routine's
+; subslot in page 0, where T0 was, calls the routine at IX through the BIOS's
+; JP (IX) at F398h, as CLPRIM does, and selects T0 again. It returns to T0's
+; CALSLT what the routine returns. The slot register did not change.
+sub:
+        ld (0FFFFh),a
+        ex af,af'
+        call 0F398h
+        ex af,af'
+        pop af
+        ld (0FFFFh),a
+        pop af
+        ex af,af'
+        ret
 
 ; e_run's scratch bytes and stack. Its deepest path takes 20 bytes of the
-; stack: 4 for the calls of tramp and of the routine, and 16 in the code
+; stack, or 22 with sub0 between e_run and tramp: 4 for the calls of tramp
+; and of the routine, 2 for the call of sub0, and 16 in the code
 ; segment, where a read under the header's compare of TAPION or TAPIN, which
 ; keeps BC and HL, 4, calls next_byte, 2, which keeps DE, 2, and calls wrap,
 ; 2, whose flash keeps two values, 4, and calls vdp, 2. The manual tape's
@@ -217,8 +349,9 @@ E_STACK:
         ent
 p3_end:
 ; At FCE1h, the part is inside the area that build.py wants at zero.
-        assert E_STACK-E_ENTRY = p3_end-p3_start
-        assert E_PAGE != 0FCh || (E_ENTRY >= P3_FREE && E_STACK-1 <= P3_FREE_END)
+        assert P3_CODE-E_ENTRY != E_STOP+1-E_ENTRY || E_STACK-E_ENTRY = p3_end-p3_start
+        assert p3_code-p3_start = E_STOP+1-E_ENTRY && p3_end-p3_code = E_STACK-P3_CODE
+        assert E_PAGE != 0FCh || P3_CODE != E_STOP+1 || (E_ENTRY >= P3_FREE && E_STACK-1 <= P3_FREE_END)
 
 ; ---- The code segment, which runs in page 0 with interrupts off ----
 ;
@@ -230,6 +363,33 @@ code_start:
         disp 0
 T0MODE  equ 0
         include "tape.inc"
+
+; Resident call from the code segment for wrapped game IRQs (called via e_run
+; with interrupts off). Uses resc_stack, checks the 2-byte signature, and calls
+; the resident entry (preserving all registers).
+resc:
+        ld (resc_sp),sp
+        ld sp,resc_stack
+        in a,(0A8h)
+        ld h,a                  ; the slot register, with DOS's mapper in page 0
+.mask:  and 0                   ; build.py: without the page's bits
+.slot:  or 0                    ; build.py: the program's primary slot there
+        out (0A8h),a
+.at1:   ld a,(0)                ; build.py: the entry
+.is1:   cp 0                    ; build.py: its first byte
+        jr nz,.back
+.at2:   ld a,(0)                ; build.py: the entry plus 1
+.is2:   cp 0                    ; build.py: its second byte
+        jr nz,.back
+.call:  call 0                  ; build.py: the entry
+.back:
+        ld a,h
+        out (0A8h),a
+        ld sp,(resc_sp)
+        ret
+resc_sp: dw 0                   ; e_run's stack pointer during the call
+        ds RES_STACK+RES_SPARE,0
+resc_stack:
         align 8,0               ; the tape starts at a multiple of 8
         ent
 code_end:
@@ -239,7 +399,7 @@ code_end:
 ; ---- T0 without a part in page 3, from 19DDh to 1B44h ----
 ;
 ; T0's data and routines, for a game whose page 3 has no room for the service
-; (INTERNALS.md, Without a part in page 3). The game reaches T0 through DOS's
+; (docs/internals/service-and-resident.md, Without a part in page 3). The game reaches T0 through DOS's
 ; mapper in page 0, where mapper register FCh holds T0, and build.py points the
 ; jump table's entries from 00E1h to 00F3h at the routines here.
 
@@ -249,7 +409,7 @@ t0m_start:
 T0MODE  equ 1
         include "tape.inc"
 ; T0 has no room for the manual tape, so the tape is automatic in this mode
-; (INTERNALS.md, The manual tape), and TAPIOF and STMOTR have nothing to stop.
+; (docs/internals/service-and-resident.md, The manual tape), and TAPIOF and STMOTR have nothing to stop.
 ; Each returns as the BIOS's routine does, as T0's stubs above.
 tapiof:                         ; TAPIOF and TAPOOF
 tapoof:
@@ -267,6 +427,171 @@ tapout:                         ; TAPOUT
 t0m_end:
 ; The restorer writes these by service.inc's places.
         assert t0m.D_SEGS = T_SEGS && t0m.D_PAGE = T_PAGE && t0m.D_PAGE_SLOT = T_PAGE+2
+
+; ---- Resident call routines (no T0) and sub0 ----
+; res3: direct A8h resident call placed in page 3 with a private stack + res3e.
+; Double LD A,I captures IFF2 reliably even if an IRQ fires on the first LD A,I;
+; preserves all registers and restores interrupt state on exit.
+call_start:
+        disp 0
+res3:
+        push af
+        ld a,i                  ; P/V: IFF2
+.pe:    jp pe,0                 ; build.py: .on
+        ld a,i
+.on:    di
+.save:  ld (0),sp               ; build.py: res3e.back+1
+.stack: ld sp,0                 ; build.py: the stack's end, res3e
+        in a,(0A8h)             ; the game's slot register; IN keeps the flags
+        push af
+.mask:  and 0                   ; build.py: without the page's bits
+.slot:  or 0                    ; build.py: the program's primary slot there
+        out (0A8h),a
+.at1:   ld a,(0)                ; build.py: the entry
+.is1:   cp 0                    ; build.py: its first byte
+.fail:  jp nz,0                 ; build.py: res3e
+.at2:   ld a,(0)                ; build.py: the entry plus 1
+.is2:   cp 0                    ; build.py: its second byte
+.call:  call z,0                ; build.py: the entry
+.tail:  jp 0                    ; build.py: res3e
+        fill_to res3+45
+; resb: H.KEYI resident call via BIOS RDSLT/CALSLT with private stack + resbe.
+; Preserves AF/BC/DE/HL on the game's stack and restores interrupt state (the
+; BIOS IRQ handler already saves IX/IY/alt regs around H.KEYI).
+resb:
+        push af
+        push hl
+        push bc
+        push de
+        ld a,i
+.pe:    jp pe,0                 ; build.py: .on
+        ld a,i
+.on:    di
+.save:  ld (0),sp               ; build.py: resbe.back+1
+.stack: ld sp,0                 ; build.py: the stack's end, resbe
+        push af                 ; IFF2 in P/V
+.id1:   ld a,0                  ; build.py: the program's slot ID
+.at1:   ld hl,0                 ; build.py: the entry
+        call 000Ch              ; RDSLT
+.is1:   cp 0                    ; build.py: its first byte
+        jr nz,.out
+.id2:   ld a,0                  ; build.py: the program's slot ID
+        inc hl
+        call 000Ch
+.is2:   cp 0                    ; build.py: its second byte
+.iy:    ld iy,0                 ; build.py: the slot ID in IYH
+.call:  ld ix,0                 ; build.py: the entry
+        call z,001Ch            ; CALSLT
+.out:   pop af
+.tail:  jp 0                    ; build.py: resbe
+        assert $ = resb+55
+; res3g and resbg are res3 and resb on the game's stack, for an image whose page
+; 3 has no zeros for the stack. Each has its routine's length, so that the
+; wrappers after it keep their places. They use no address of their own. They
+; leave the call out when the game's stack is in the entry's page, which the
+; call takes from the game, and keep the interrupts as they are until RDSLT.
+res3g:
+        push af
+        push hl
+        ld hl,0
+        add hl,sp
+        ld a,h
+        and 0C0h
+.page:  cp 0                    ; build.py: the entry's page, in bits 7 and 6
+        jr z,.skip
+        in a,(0A8h)
+        ld h,a                  ; the game's slot register
+.mask:  and 0                   ; build.py: without the page's bits
+.slot:  or 0                    ; build.py: the program's primary slot there
+        out (0A8h),a
+.at1:   ld a,(0)                ; build.py: the entry
+.is1:   cp 0                    ; build.py: its first byte
+        jr nz,.back
+.at2:   ld a,(0)                ; build.py: the entry plus 1
+.is2:   cp 0                    ; build.py: its second byte
+        jr nz,.back
+.call:  call 0                  ; build.py: the entry
+.back:
+        ld a,h
+        out (0A8h),a
+.skip:
+        pop hl
+        pop af
+        ret
+resbg:
+        push af
+        push hl
+        ld hl,0
+        add hl,sp
+        ld a,h
+        and 0C0h
+.page:  cp 0                    ; build.py: the entry's page, in bits 7 and 6
+        jr z,.skip
+        push bc
+        push de
+.id1:   ld a,0                  ; build.py: the program's slot ID
+.at1:   ld hl,0                 ; build.py: the entry
+        call 000Ch              ; RDSLT
+.is1:   cp 0                    ; build.py: its first byte
+        jr nz,.back
+.id2:   ld a,0                  ; build.py: the program's slot ID
+.at2:   ld hl,0                 ; build.py: the entry plus 1
+        call 000Ch
+.is2:   cp 0                    ; build.py: its second byte
+        jr nz,.back
+.iy:    ld iy,0                 ; build.py: the slot ID in IYH
+.call:  ld ix,0                 ; build.py: the entry
+        call 001Ch              ; CALSLT
+.back:
+        pop de
+        pop bc
+.skip:
+        pop hl
+        pop af
+        ret
+; res3e and resbe end res3 and resb: build.py writes each just after the
+; routine's stack, where its stack begins. Each gives the game its slot register
+; and its stack back, and turns the interrupts on when they were on at the call,
+; by P/V.
+res3e:
+        pop af                  ; the slot register, and IFF2 in P/V
+        out (0A8h),a
+.back:  ld sp,0                 ; the game's stack pointer
+.po:    jp po,0                 ; build.py: .off
+        ei
+.off:   pop af
+        ret
+resbe:
+.back:  ld sp,0                 ; the game's stack pointer
+        pop de
+        pop bc
+        pop hl
+.po:    jp po,0                 ; build.py: .off
+        ei
+.off:   pop af
+        ret
+; Game files call resb at FD29h and jump to the wrapper after res3 at FD56h, so
+; each routine keeps the length that it had before it took a stack.
+        assert resb-res3 = 45 && res3g-resb = 55
+        assert resbg-res3g = resb-res3 && res3e-resbg = res3g-resb
+        assert resbe-res3e = sub0-resbe
+
+; sub0: wrapper around tramp when page 0 may hold another subslot of DOS's
+; expanded mapper slot (FLAG_P0). Temporarily switches page 0's subslot bits
+; at FFFFh to page 3's mapper subslot, calls tramp, and restores FFFFh.
+sub0:
+        ld a,(0FFFFh)
+        cpl
+.save:  ld (0),a                ; build.py: .back+1
+        and 0FCh
+.ss:    or 0                    ; build.py: page 3's subslot
+        ld (0FFFFh),a
+.tramp: call 0                  ; build.py: tramp
+.back:  ld a,0                  ; the subslot register before the call
+        ld (0FFFFh),a
+        ret
+        ent
+call_end:
 
 ; tools/relocs.py appends the symbols and the offsets of the bytes that differ
 ; when P3_PAGE is FBh: the high bytes of the addresses in the page 3 part.
@@ -311,6 +636,7 @@ file_end:
         export PLACE_SIZE
         export FLAG_ROM_KEEP
         export FLAG_T0
+        export FLAG_P0
         export REC_MAPPER
         export REC_RAM
         export REC_SERVICE
@@ -325,7 +651,20 @@ file_end:
         export E_CODE
         export E_FC
         export E_STOP
+        export P3_CODE
         export e_sp
+        export e_run
+        export e_run.call
+        export tramp
+        export resc
+        export resc_stack
+        export resc.mask
+        export resc.slot
+        export resc.at1
+        export resc.is1
+        export resc.at2
+        export resc.is2
+        export resc.call
 ; T0: the BIOS's tape code and the stubs at its routines' addresses.
         export T0_CODE
         export T0_END
@@ -336,6 +675,84 @@ file_end:
         export t_tapout
         export t_tapoof
         export t_stmotr
+; T0's call of a routine in its own slot: the two routines that build.py sends
+; CALSLT to, and the jump to the BIOS's routine, whose address it fills in.
+        export t_s
+        export t_s.jump
+        export t_c
+        export t_res
+        export T_STACK
+        export RES_STACK
+        export RESB_STACK
+        export res3
+        export res3.pe
+        export res3.on
+        export res3.save
+        export res3.stack
+        export res3.mask
+        export res3.slot
+        export res3.at1
+        export res3.is1
+        export res3.fail
+        export res3.at2
+        export res3.is2
+        export res3.call
+        export res3.tail
+        export resb
+        export resb.pe
+        export resb.on
+        export resb.save
+        export resb.stack
+        export resb.id1
+        export resb.at1
+        export resb.is1
+        export resb.id2
+        export resb.is2
+        export resb.iy
+        export resb.call
+        export resb.tail
+        export res3g
+        export res3g.page
+        export res3g.mask
+        export res3g.slot
+        export res3g.at1
+        export res3g.is1
+        export res3g.at2
+        export res3g.is2
+        export res3g.call
+        export resbg
+        export resbg.page
+        export resbg.id1
+        export resbg.at1
+        export resbg.is1
+        export resbg.id2
+        export resbg.at2
+        export resbg.is2
+        export resbg.iy
+        export resbg.call
+        export res3e
+        export res3e.back
+        export res3e.po
+        export res3e.off
+        export resbe
+        export resbe.back
+        export resbe.po
+        export resbe.off
+        export RES3_STACK
+        export sub0
+        export sub0.save
+        export sub0.ss
+        export sub0.tramp
+        export sub0.back
+        export t_res.back
+        export t_res.mask
+        export t_res.slot
+        export t_res.at1
+        export t_res.is1
+        export t_res.at2
+        export t_res.is2
+        export t_res.call
+        export t_res.jump
 ; The code segment's data.
         export SEGS_MAX
         export D_POS

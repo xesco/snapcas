@@ -1,4 +1,4 @@
-"""The tape code patch (docs/INTERNALS.md, Scan): the game's code that reaches
+"""The tape code patch (docs/internals/patches.md, Scan): the game's code that reaches
 the tape without going through T0.
 
 A finding that can be patched sends its call or stub to the entries in page 3,

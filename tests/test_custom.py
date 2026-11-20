@@ -1,5 +1,5 @@
 """Custom games, the user's own game files in custom/, each with its tape
-files beside it (custom/README.md, and docs/PLAN.md, step 25). The tests give
+files beside it (custom/README.md, and docs/BUILD.md, step 25). The tests give
 gamefile.CUSTOM a folder of their own for the time of a test, so that they
 leave custom/ alone. Pure tier."""
 import os

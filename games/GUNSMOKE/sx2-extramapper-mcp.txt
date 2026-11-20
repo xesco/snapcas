@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The capture reads the tape to its end, 150.1 of 150.1 seconds, so the game
+# reads nothing from it later. Without the tape service, and so without its
+# mode without a part in page 3, whose T0 has no room for the call of SX2RES
+# (rescall t0mode), the image puts the call in H.KEYI. The game's stack is in
+# page 1, the page of SX2RES's entry, where the call routine leaves the call
+# out, so the calls start only with a call routine that takes a stack of its
+# own.
+service no

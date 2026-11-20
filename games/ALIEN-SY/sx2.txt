@@ -1,0 +1,8 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The 256-word double-width text table at FE00h-FFFFh (built at 9F16h, read at
+# B739h) writes FFFFh, deselecting expanded RAM. Shift the table two bytes down
+# to FDFEh-FFFDh (FDFEh-FDFFh are zero in every block) and update the block XOR.
+patch side1:81D7 21 00 FE > 21 FE FD
+patch side1:99FA 87 6F CE FE 95 67 > 6F 26 7F 2B 29 00
+patch side1:E0D9 18 > FB

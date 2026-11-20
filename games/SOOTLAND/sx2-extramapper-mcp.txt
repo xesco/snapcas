@@ -1,0 +1,9 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The block zydro at C738h selects RAM in pages 1 to 3 with LD A,0FCh / OUT
+# (0A8h),A, which assumes the RAM in slot 3. Here the BIOS and the Extra-Mapper
+# share slot 0, and slot 3 holds SX2RES's mapper and the MegaSD. The patch
+# writes 54h, the BIOS in page 0 and the Extra-Mapper in pages 1 to 3, to slot
+# 0's subslot register, and moves the next two loads by a byte, over the NOP
+# after them.
+patch side1:24E 3E FC D3 A8 DD 21 00 88 11 00 24 00 > 3E 54 32 FF FF DD 21 00 88 11 00 24

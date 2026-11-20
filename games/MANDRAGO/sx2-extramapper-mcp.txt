@@ -1,0 +1,58 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader at D000h tests each slot and each subslot of an expanded slot for
+# RAM in pages 0 and 1. To write an expanded slot's subslot register it selects
+# that slot in page 3, where its own code runs, so its code is gone when it
+# tests slot 3, as page 3 is in slot 0 here. The patch gives slots 1 to 3 the
+# loader's template of five zeros at D1CCh, which leaves them out, and slot 0
+# its template for an expanded slot, so the loader finds the Extra-Mapper in
+# slot 0-1, in pages 0 and 1.
+patch side1:86 3E C5 90 4F 06 FC 0A B7 > 3E 04 B8 21 CC D1 20 03
+patch side1:8E 21 CB D1 28 03 21 D0 D1 > 21 D0 D1 00 00 00 00 00
+
+# The loader then keeps the slot register's value at E270h for RAM in every
+# page, and at E271h with slot 0 in page 0, for the BIOS, and gives page 0 back
+# by the slot register alone. Here the BIOS and the RAM are both in slot 0, in
+# subslots 0 and 1, so page 0 keeps the RAM. The patch keeps 00h in E270h to
+# E272h and writes 54h to slot 0's subslot register instead: the BIOS in page 0
+# and RAM in pages 1 to 3.
+patch side1:5B DB A8 32 70 E2 E6 FC 32 71 E2 > AF 32 70 E2 32 71 E2 32 72 E2
+patch side1:65 D3 A8 E6 F0 32 72 E2 > 3E 54 32 FF FF 00 00
+
+# The block at 8AA0h selects the RAM in every page with the value at E270h, and
+# then the BIOS in page 0 with the value at E271h. The patches write 55h and 54h
+# to the subslot register instead, and keep the block's sum.
+patch side1:2D59 3A 70 E2 D3 A8 > 3E 55 32 FF FF
+patch side1:2D80 3A 71 E2 D3 A8 > 3E 54 32 FF FF
+patch side1:84B8 96 > 0C
+
+# The block at 8500h keeps those values at E23Dh and E23Ch, and selects the RAM
+# in every page with them for its copies to page 0 and for the routines at
+# AF00h and AF3Dh. The patches write 55h and then 54h to the subslot register
+# instead, and keep the block's sum.
+patch side1:872B DB A8 F5 3A 3D E2 D3 > 3E 55 32 FF FF ED B0
+patch side1:8732 A8 ED B0 F1 D3 A8 > 3E 54 32 FF FF 00
+patch side1:88D5 DB A8 F5 3A 3D E2 D3 > 3E 55 32 FF FF ED B0
+patch side1:88DC A8 ED B0 F1 D3 A8 > 3E 54 32 FF FF 00
+patch side1:AED5 3A 3D E2 D3 A8 > 3E 55 32 FF FF
+patch side1:AEFD 3A 3C E2 D3 A8 > 3E 54 32 FF FF
+patch side1:AF12 3A 3D E2 D3 A8 > 3E 55 32 FF FF
+patch side1:AF25 3A 3C E2 D3 A8 > 3E 54 32 FF FF
+patch side1:DDD8 B0 > 06
+
+# The game runs on the BIOS's interrupt routine, with the BIOS in page 0, but
+# the snapshot keeps its RAM page 0, so the image's T0 makes no call of SX2RES,
+# and H.KEYI holds RET. The image's wrapper calls SX2RES through the tape
+# service's entry code and jumps to the RET at FD9Dh, in H.KEYI after the patch
+# below. sub0 takes FCC9h, so the wrapper goes to FB03h, in the work area of an
+# RS-232C interface, which stays at zeros on the SX-2, which has none.
+rescall FD9D
+rescode FB03
+
+# H.KEYI calls the wrapper: CALL 0FB03h / RET.
+patch page3:3D9A C9 C9 C9 > CD 03 FB
+
+# The build writes the wrapper's 17 bytes but, with the tape service, does not
+# list them for the check, which then finds them changed. This patch changes
+# nothing and lists them.
+patch page3:3B03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00

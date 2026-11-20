@@ -1,4 +1,4 @@
-"""The reader of TSX files (docs/FORMATS.md, TSX data, and docs/INTERNALS.md,
+"""The reader of TSX files (docs/FORMATS.md, TSX data, and docs/internals/capture.md,
 Tape files).
 
 A TSX file is a TZX file with block 4Bh for MSX. The reader knows the blocks

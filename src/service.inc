@@ -1,5 +1,5 @@
 ; The places that service.asm, the restorer and build.py share: the tape
-; service's fixed places (docs/INTERNALS.md, Tape service), the tail's fields and
+; service's fixed places (docs/internals/service-and-resident.md, Tape service), the tail's fields and
 ; the image's layout (docs/FORMATS.md, Image). This file is their one source.
 ; service.asm exports them, and build.py reads them by name from SERVICE.BIN
 ; (docs/FORMATS.md, SERVICE.BIN), as it reads the service's other places, which
@@ -22,6 +22,14 @@ E_FC      equ E_SLOT+3          ; build.py: the game's mapper register FCh;
                                 ; restorer: T0's segment when T0 replaces the ROM
 E_STOP    equ E_SLOT+4          ; 1 while the manual tape is stopped; build.py:
                                 ; 1 when the motor is off at the snapshot
+; The code block of the part, which follows the entries unless the Makefile's
+; third assembly gives it another address, for the list of the addresses that
+; move with it.
+        ifdef CODE_MOVED
+P3_CODE   equ CODE_MOVED
+        else
+P3_CODE   equ E_STOP+1
+        endif
 ; The restorer writes E_SLOT, E_T0, E_CODE and E_FC one after the other.
         assert E_T0 = E_SLOT+1 && E_CODE = E_T0+1 && E_FC = E_CODE+1
 
@@ -30,6 +38,13 @@ E_STOP    equ E_SLOT+4          ; 1 while the manual tape is stopped; build.py:
 P3_FREE     equ 0FCC9h          ; its first byte
 P3_FREE_END equ 0FD88h          ; its last byte
 
+; Resident call private stack sizes (bytes; SX2RES 2.8+ uses 6 B before switching):
+; RES_STACK = ret(2)+entry(8), RES3_STACK = +A8h/flags(2), RESB_STACK = +CALSLT(14)+spare(4).
+RES_STACK  equ 2+8
+RES3_STACK equ 2+RES_STACK
+RESB_STACK equ 2+14+8+4
+RES_SPARE  equ 8
+
 ; T0: the BIOS's tape code, which the service replaces (MSX Red Book, chapter
 ; 4). OUTDO's code follows it.
 T0_CODE   equ 19DDh             ; its first byte, TAPOOF
@@ -37,13 +52,13 @@ T0_END    equ 1B45h             ; the first byte after it
 
 ; The service's data, which tape.inc declares, starts each copy of the
 ; service: at 0000h of the code segment, and at T0_CODE in the mode without a
-; part in page 3 (INTERNALS.md, Without a part in page 3). The restorer writes
+; part in page 3 (docs/internals/service-and-resident.md, Without a part in page 3). The restorer writes
 ; these fields, and service.asm checks their places against tape.inc's.
 SEGS_AT   equ 14h               ; the table of segments in the data
 C_SEGS    equ SEGS_AT           ; restorer: the code segment, then the next tape segments
 SEGS_MAX  equ 64                ; so the tape service holds up to 1 MB
 C_MODE    equ C_SEGS+SEGS_MAX   ; restorer: 1 for the manual tape of /M, 0 for the
-                                ; automatic tape (INTERNALS.md, The manual tape)
+                                ; automatic tape (docs/internals/service-and-resident.md, The manual tape)
 T_SEGS    equ T0_CODE+SEGS_AT   ; restorer: the tape's segments
 T_SEGS_MAX equ 16               ; so the tape holds up to 256 KB
 T_PAGE    equ T_SEGS+T_SEGS_MAX ; the borrowed page's data, 6 bytes. Restorer:
@@ -105,6 +120,10 @@ PLACE_SIZE equ 3                ; a place: its record's number, its offset in th
 FLAG_ROM_KEEP equ 1             ; bit 0: the game file's rom keep, so T0 does not
                                 ; replace the ROM
 FLAG_T0   equ 2                 ; bit 1: the tape service without a part in page 3
+FLAG_P0   equ 4                 ; bit 2: sub0 sets page 0's bits of page 3's
+                                ; subslot register around each call of the
+                                ; code segment (docs/internals/service-and-resident.md, Page 0 in another
+                                ; subslot of DOS's mapper's slot)
 ; A record's type.
 REC_MAPPER  equ 1               ; a RAM page in a mapper: slot ID, page, segment
 REC_RAM     equ 2               ; a RAM page outside a mapper: slot ID, page, 0

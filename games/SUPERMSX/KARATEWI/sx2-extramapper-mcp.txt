@@ -1,0 +1,20 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The title runs without interrupts, so the image's call of SX2RES from T0 runs
+# only in play, where the game takes the VDP's frame interrupt. The image's
+# wrapper at FCC9h, before the tape service's entries, calls SX2RES and jumps to
+# a RET at FC66h.
+rescall FC66
+
+# An entry at FC4Ch, in BASIC's zeros of TRPTBL, which the game leaves alone,
+# counts its calls in the byte at FC67h and calls the wrapper at every 64th. The
+# wrapper disables the interrupts, so the entry enables them again when they
+# were on, from LD A,I. Then it calls the BIOS's SNSMAT and returns.
+patch page3:3C4C 00 00 00 00 00 00 00 00 00 00 > F5 ED 57 F5 3A 67 FC C6 04 32
+patch page3:3C56 00 00 00 00 00 00 00 00 00 00 > 67 FC 30 03 CD C9 FC F1 E2 62
+patch page3:3C60 00 00 00 00 00 00 00 > FC FB F1 CD 41 01 C9
+
+# The routine at A2AEh reads a row of the keyboard with SNSMAT, about 2000 times
+# a second in the title. It calls the entry in place of SNSMAT.
+patch page2:22B0 CD 41 01 > CD 4C FC

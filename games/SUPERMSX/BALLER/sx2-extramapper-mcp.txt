@@ -1,0 +1,20 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The code at B608h of the block BALLE2 looks for RAM in page 1 with the slot
+# register alone, stores the slot register's value at FFFEh and copies 2000h
+# bytes from A000h to 4000h. Here the BIOS and the RAM are both in slot 0, in
+# subslots 0 and 1, so the search found no RAM. The patch keeps slot 0's
+# subslot register, writes 54h to it, the BIOS in page 0 and RAM in pages 1 to
+# 3, copies the bytes, and writes the old value back.
+patch side1:BB7E 26 40 C6 04 D3 A8 4F 7E 2F 77 > 3A FF FF 2F F5 3E 54 32 FF FF
+patch side1:BB88 BE 79 20 F4 32 FE FF 01 00 20 > 01 00 20 21 00 A0 11 00 40 ED
+patch side1:BB92 21 00 A0 11 00 40 ED B0 > B0 F1 32 FF FF 00 00 00
+
+# The block BALLE3's start at D000h selects the copy in page 1 with the value at
+# FFFEh, by the slot register: LD A,54h / LD (0FFFFh),A in its place.
+patch side1:F802 3A FE FF D3 A8 > 3E 54 32 FF FF
+
+# Its end gives page 1 back to the BIOS by the slot register: LD A,50h /
+# LD (0FFFFh),A, the BIOS in pages 0 and 1, in its place.
+patch side1:F812 DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00

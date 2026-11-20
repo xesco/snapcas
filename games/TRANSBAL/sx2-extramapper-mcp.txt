@@ -1,0 +1,19 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Each of the two binaries finds the RAM by slot and subslot, and starts a ROM
+# image with the RAM in pages 1 to 3, 54h in slot 0's subslot register here.
+# The routine at C911h writes that value, and the routine at C904h writes back
+# the register's old value, both also with the slot register's value. The ROM
+# image looks up its slot's subslots in SLTTBL, whose byte for slot 0, at
+# FCC5h, still holds 50h, BASIC's subslots, so it takes the ROM for itself.
+# The patches make both routines write their value to FCC5h in place of the
+# slot register, which is 00h throughout here, and keep the code that stores
+# the slot register's values from writing into them.
+patch side1:415A 32 0C C9 > 00 00 00
+patch side1:41A0 32 19 C9 > 00 00 00
+patch side1:4254 3E A0 D3 A8 > 32 C5 FC 00
+patch side1:4261 3E A8 D3 A8 > 32 C5 FC 00
+patch side1:82DF 32 0C C9 > 00 00 00
+patch side1:8325 32 19 C9 > 00 00 00
+patch side1:83D9 3E A0 D3 A8 > 32 C5 FC 00
+patch side1:83E6 3E A8 D3 A8 > 32 C5 FC 00

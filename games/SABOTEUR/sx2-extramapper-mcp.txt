@@ -1,0 +1,24 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game hooks 0038h in page 0 RAM and uses page 3 zeros where SX2RES goes.
+# Place a 3-part direct-I/O SX2RES caller in unused page 2 zeros (save/restore
+# A700h, slot 3-0 switchers A780h/A799h) and wrapper A73Fh calling A700h.
+patch page2:2700 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:270A 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 CD
+patch page2:2714 00 00 00 00 00 00 00 00 00 00 > 80 A7 C5 3A 40 40 FE F5 20 08
+patch page2:271E 00 00 00 00 00 00 00 00 00 00 > 3A 41 40 FE DB CC 40 40 C1 CD
+patch page2:2728 00 00 00 00 00 00 00 00 00 00 > 99 A7 F1 E2 2F A7 FB 08 F1 08
+patch page2:2732 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:273C 00 00 00 00 00 00 00 00 00 00 > C1 F1 C9 CD 00 A7 DB 99 21 04
+patch page2:2746 00 00 > A6 C9
+patch page2:2780 00 00 00 00 00 00 00 00 00 00 > DB A8 47 F6 C0 D3 A8 3A FF FF
+patch page2:278A 00 00 00 00 00 00 00 00 00 00 > 2F 4F E6 F3 32 FF FF 78 E6 F3
+patch page2:2794 00 00 00 00 00 > F6 0C D3 A8 C9
+patch page2:2799 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:27A3 00 00 00 > D3 A8 C9
+
+# The routine at 0038h reads the VDP's status with IN A,(99h) and then does LD
+# HL,0A604h, on its own stack. Those instructions become CALL A73Fh and two
+# NOPs.
+patch page0:45 DB 99 21 04 A6 > CD 3F A7 00 00

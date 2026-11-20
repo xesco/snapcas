@@ -1,0 +1,25 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's routine at D657h looks for RAM in page 0 or 1 by the slot
+# register alone, from the register's value up. Here the BIOS and the RAM are
+# both in slot 0, in subslots 0 and 1, so the search runs past every slot and
+# selects slot 3 in page 3, under its own code. The patches select the RAM by
+# slot 0's subslot register in place of each search: 55h, RAM in pages 0 to
+# 3, for the copy to page 0 at D600h, and 54h, the BIOS in page 0 and RAM in
+# pages 1 to 3, for the copy to page 1 at D61Fh.
+patch side1:33C5 06 01 CD 57 D6 79 32 70 D6 > 3E 55 32 FF FF 00 00 00 00
+
+patch side1:33E4 06 04 CD 57 D6 79 32 71 D6 > 3E 54 32 FF FF 00 00 00 00
+
+# After each copy the loader writes back the slot register's old value for
+# BASIC. The patches write 50h to the subslot register in its place, BASIC's
+# ROM in pages 0 and 1.
+patch side1:33D9 3A 6F D6 D3 A8 > 3E 50 32 FF FF
+
+patch side1:33F8 3A 6F D6 D3 A8 > 3E 50 32 FF FF
+
+# At D63Eh the loader selects the RAM in pages 0 and 1, by the two values that
+# the searches found, and starts the game at 0100h. The patch writes 55h to the
+# subslot register and to SLTTBL's entry for slot 0 at FCC5h, from which the
+# BIOS writes the register again.
+patch side1:3400 3A 70 D6 4F 3A 71 D6 B1 D3 A8 > 3E 55 32 FF FF 32 C5 FC 00 00

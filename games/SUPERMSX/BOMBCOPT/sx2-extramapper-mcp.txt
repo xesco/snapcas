@@ -1,0 +1,51 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader of BOMBC1 at CB00h looks for RAM in page 0 by RDSLT and WRSLT on
+# the slot IDs 80h up, and finds the 2048 KB mapper in slot 3-0 at 83h, which
+# SX2RES holds. Here the game's RAM is the Extra-Mapper in slot 0-1. The patch
+# writes 55h to slot 0's subslot register, RAM in pages 0 to 3, and jumps to
+# the loader's copy to page 0 at CB49h.
+patch side1:C55A 21 00 00 3E 00 F6 80 F5 > 3E 55 32 FF FF C3 49 CB
+
+# After the copy the loader writes back only the slot register, and page 0
+# keeps the RAM. The patches make its end jump to CB0Ch, in the search that the
+# patch above skips, and put POP AF / LD A,50h / LD (0FFFFh),A / RET there:
+# BASIC's ROM in pages 0 and 1 again.
+patch side1:C5AA F1 D3 A8 C9 > C3 0C CB 00
+
+patch side1:C562 00 CD 0C 00 EE FF 5F > F1 3E 50 32 FF FF C9
+
+# The loader of BOMBC2 at D000h looks for RAM in page 1 the same way, by
+# ENASLT, and keeps the slot ID that it finds in F341h, where the game reads
+# its RAM's slot. The patch writes 54h to the subslot register, the BIOS in
+# page 0 and RAM in pages 1 to 3, and goes on at D026h with 84h, the slot ID
+# of slot 0-1, on the stack. At D00Eh it puts the same end as BOMBC1's.
+patch side1:105D9 21 00 40 3E 00 F6 80 F5 > 3E 54 32 FF FF 3E 84 F5
+
+patch side1:105E1 E5 CD 24 00 E1 36 55 CB 06 7E > C3 26 D0 F1 3E 50 32 FF FF C9
+
+patch side1:10610 F1 D3 A8 C9 > C3 0E D0 00
+
+# BOMBC4 at 8380h gives page 1 the RAM by the slot register value that BOMBC2
+# kept at FFDAh, and starts the ROM image at 4000h. Here that value leaves
+# page 1 on BASIC's ROM. The patches write 54h to the subslot register and to
+# SLTTBL's entry for slot 0 at FCC5h, where the ROM image looks for its slot,
+# in the NOPs before, and remove the slot register's write.
+patch side1:15D67 00 00 00 00 00 00 00 00 > 3E 54 32 FF FF 32 C5 FC
+
+patch side1:15D71 3A DA FF D3 A8 > 00 00 00 00 00
+
+# The ROM image never reads the tape again: the rest of the tape is the next
+# game's. The game keeps data in page 0's RAM, at 0500h, and runs with the BIOS
+# in page 0, in another subslot of DOS's mapper's slot, which the tape service's
+# T0 cannot hold. Without the tape service the restorer keeps the BIOS there.
+service no
+
+# After the snapshot the game copies JP 41A5h from 4192h into H.KEYI, over the
+# image's call of SX2RES, which then stops. The image's wrapper calls SX2RES and
+# jumps to 41A5h.
+rescall 41A5
+
+# The game copies the wrapper's address, FD00h after resb at FCC9h, into
+# H.KEYI.
+patch page1:193 A5 41 > 00 FD

@@ -1,0 +1,43 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:14D 3A A1 90 D3 A8 > 3E 55 32 FF FF
+patch side1:15D 3A A2 90 D3 A8 > 3E 50 32 FF FF
+patch side1:168 3A A1 90 D3 A8 > 3E 55 32 FF FF
+patch side1:891 47 08 78 E6 > 4F 08 18 78
+patch side1:917 3A FF FF 2F > 3E 54 00 00
+
+# The game runs without interrupts, so the image has no call of SX2RES. The
+# rescode line puts the image's call routine at EF70h, in zeros of page 3 that
+# the game leaves alone, below its variable at EFF5h. The rescall line gives it
+# three wrappers that call SX2RES: at EF9Dh, which jumps to EFB0h, at EFA3h,
+# which jumps to the game's routine at 3EE3h, and at EFA9h, which jumps to the
+# game's routine at 2506h. EFB0h does PUSH DE / LD DE,1F40h, the first
+# instructions of the game's delay routine at 101Ch, and jumps to the rest of
+# the routine at 1020h.
+rescode EF70
+rescall EFB0 3EE3 2506
+
+# When play starts, the game writes over res3's default stack in SLTWRK
+# (FD71h..FD88h), crashing the next call. Use res3g on the game's stack.
+resstack no
+patch page3:2FB0 00 00 00 00 00 00 00 > D5 11 40 1F C3 20 10
+
+# The game waits with the delay routine at 101Ch, from 10 places. The routine
+# jumps to the first wrapper in place of its first instructions.
+patch page0:101C D5 11 40 > C3 9D EF
+
+# The title's loop at 0BD7h reads the keys with the routine at 3EE3h and waits,
+# about 10 times a second. It calls the second wrapper in place of that routine.
+patch page0:BD7 CD E3 3E > CD A3 EF
+
+# In play the routine at 2F1Eh sets the VRAM address with the routine at 2506h
+# for each of the 14 rows that it draws, in bursts that come about 3 times a
+# second, 47 calls a second in all. It calls the third wrapper in place of that
+# routine.
+patch page0:2F2A CD 06 25 > CD A9 EF

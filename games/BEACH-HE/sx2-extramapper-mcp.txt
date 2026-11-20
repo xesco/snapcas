@@ -1,0 +1,19 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# beach1's routine at 87D8h selects page 3's slot in pages 1 to 3 to copy the
+# first half of a ROM image to 4000h, and for page 3 in slot 0 it takes 54h,
+# slot 1 in pages 1 to 3, which holds nothing. Here the RAM is in slot 0-1,
+# beside the BIOS in 0-0. The patch writes 54h to slot 0's subslot register
+# instead, RAM in pages 1 to 3.
+patch side1:14A E6 C0 0E FC FE C0 28 08 0E A8 > 3E 54 32 FF FF 00 00 00 00 00
+patch side1:154 FE 80 28 02 0E 54 79 D3 A8 > 00 00 00 00 00 00 00 00 00
+
+# After the copy the routine gives back the slot register alone, which leaves
+# the RAM in page 1. The patch also writes 50h, BASIC's subslots, for the next
+# BLOAD.
+patch side1:168 32 20 C8 F1 D3 A8 C9 > F1 3E 50 32 FF FF C9
+
+# beach2 gives page 1 the slot of page 2 by the slot register alone, and starts
+# the ROM image, which looks up its slot's subslot in SLTTBL. The patch writes
+# 54h to the subslot register and to slot 0's byte of SLTTBL at FCC5h.
+patch side1:81A6 DB A8 E6 F0 47 0F 0F B0 D3 A8 > 3E 54 32 FF FF 32 C5 FC 00 00

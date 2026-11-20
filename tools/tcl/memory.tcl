@@ -1,8 +1,8 @@
-# Procedures that the capture and the check share (docs/INTERNALS.md, The tools'
+# Procedures that the capture and the check share (docs/internals/restorer-and-check.md, The tools'
 # code): the CPU's view of memory with a slot selected, the read of VRAM, and
 # the machine's state as state.txt holds it.
 
-# The CPU's view of memory, after selecting a slot in a page (INTERNALS.md, RAM).
+# The CPU's view of memory, after selecting a slot in a page (docs/internals/capture.md, RAM).
 
 # EXPTBL at FCC1h: bit 7 of each slot's byte is set when it is expanded. The
 # capture reads it once, in step 2, because a game can overwrite page 3.
@@ -148,6 +148,10 @@ proc read_with {a8 address n} {
 
 proc v9938 {} { expr {[debug size "physical VRAM"] > 0x4000} }
 
+# The MSX2+'s V9958, whose ID in bits 1 to 5 of status register 1 is 2, where
+# the V9938's is 0. It adds registers 25 to 27.
+proc v9958 {} { expr {[v9938] && (([debug read {VDP status regs} 1] >> 1) & 0x1F) == 2} }
+
 # VRAM's cells. openMSX shows a V9938's VRAM through the addressing of
 # register 8's bit 3, VR, which a game can clear (FORMATS.md, Snapshot files),
 # and the restorer writes the cells with VR set, so VR is set for the read.
@@ -185,6 +189,7 @@ proc machine_state {} {
     if {$v9938} {
         lappend regs 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 32 33 34 35 36 37 38 39 40 41 42 43 44 45
     }
+    if {[v9958]} { lappend regs 25 26 27 }
     foreach r $regs { lappend state vdp$r [hex 2 [debug read {VDP regs} $r]] }
     if {$v9938} {
         for {set c 0} {$c < 16} {incr c} {

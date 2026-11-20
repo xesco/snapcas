@@ -1,0 +1,21 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The first binary looks for RAM in page 1 by the slot register alone, through
+# RSLREG and WSLREG, and steps on into pages 2 and 3, where it cuts off its own
+# code. Here the RAM is in slot 0-1, beside the BIOS in 0-0. The patch keeps
+# 50h, BASIC's subslots, for the end, and writes 54h to slot 0's subslot
+# register, RAM in pages 1 to 3, so the search finds RAM at once.
+patch side1:978F CD 38 01 F5 E6 F3 4F CD 3B 01 > 3E 50 F5 3E 54 32 FF FF 00 00
+
+# After the copy to page 1, the search gives back BASIC's slots by WSLREG. The
+# patch writes the 50h to the subslot register instead, the ROM in page 1.
+patch side1:97B2 CD 3B 01 > 32 FF FF
+
+# The search keeps its slot register value at FD9Ch, in H.KEYI. The patch
+# leaves the hook alone.
+patch side1:97B8 32 9C FD > 00 00 00
+
+# The second binary selects that value's RAM in page 1 by WSLREG, or stops
+# when it is 00h, which is BASIC's own value here. The patch writes 54h to the
+# subslot register instead, RAM in page 1.
+patch side1:CD90 3A 9C FD B7 CA 58 87 CD 3B 01 > 3E 54 32 FF FF 00 00 00 00 00

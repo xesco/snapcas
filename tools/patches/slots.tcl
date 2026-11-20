@@ -1,4 +1,4 @@
-# The capture's watch on the slot register (docs/INTERNALS.md, Slot patches).
+# The capture's watch on the slot register (docs/internals/patches.md, Slot patches).
 # tools/patches/slots.py puts its settings before this file:
 #   ::slotcode(load)     the bytes of LD A,n before n
 #   ::slotcode(out)      the bytes after n of the form that writes the register
@@ -53,7 +53,7 @@ proc slot_map {} {
     }
     set lines [list \
         "# For each page: the primary slots that hold nothing there, and the slot" \
-        "# that replaces them in a slot register value, or -1 (INTERNALS.md, Slot patches)."]
+        "# that replaces them in a slot register value, or -1 (docs/internals/patches.md, Slot patches)."]
     foreach page {0 1 2 3} {
         lassign $::slots($page) empty with
         lappend lines "page $page empty [expr {[llength $empty] ? [join $empty ,] : "-"}] with $with"

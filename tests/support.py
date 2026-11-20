@@ -1,4 +1,4 @@
-"""What the tests share (docs/PLAN.md, Test setup): the folders, the tools as
+"""What the tests share (docs/BUILD.md, Test setup): the folders, the tools as
 programs, the files that a test writes in place of a capture's, an image's
 header, and the runs in openMSX.
 
@@ -117,7 +117,7 @@ def temp(case):
 def symbols(name):
     """The symbols of an assembly, {label: address}, from out/<name>.sym,
     which make all and make test write: snapcas, service, and the test games
-    borrow, contract and guard."""
+    borrow, contract, guard and subrom."""
     path = os.path.join(ROOT, "out", name + ".sym")
     if not os.path.isfile(path):
         raise SetupError(f"out/{name}.sym is missing: make all and make test write it")
@@ -197,7 +197,7 @@ BASIC_TAPE = cas_file(b"\xD3" * 10 + b"GAME  ", bytes.fromhex("07 80 0A 00 81 00
 
 # ---- A snapshot that a test writes ----
 
-def snapshot(folder, ram=None, mapper=True, service=False, shared=False, v9938=False, **state):
+def snapshot(folder, ram=None, mapper=True, service=False, shared=False, v9938=False, v9958=False, **state):
     """Writes a small snapshot in folder (FORMATS.md, Snapshot files), and
     returns the folder. It has what the build and check.py read: state.txt,
     ram/, vram.bin at zero, rom.bin, slots.txt and log.txt.
@@ -207,7 +207,8 @@ def snapshot(folder, ram=None, mapper=True, service=False, shared=False, v9938=F
     of a mapper of 32 segments, or else outside a mapper. With shared, pages
     2 and 3 select one segment, 5, which the capture writes once for each
     page. With service, the snapshot has the tape service. With v9938, the
-    state and VRAM are an MSX2's. ram gives the RAM pages in place of these,
+    state and VRAM are an MSX2's, and with v9958 also, an MSX2+'s, the state
+    has VDP registers 25 to 27. ram gives the RAM pages in place of these,
     as {name of the ram/ file without .bin: bytes}, and state the values of
     state.txt that differ: the stack pointer is F000h, in page 3."""
     os.makedirs(os.path.join(folder, "ram"), exist_ok=True)
@@ -216,6 +217,8 @@ def snapshot(folder, ram=None, mapper=True, service=False, shared=False, v9938=F
     values.update({f"vdp{r}": "00" for r in (list(range(24)) + list(range(32, 46)) if v9938 else range(8))})
     if v9938:
         values.update({f"pal{c}": "0000" for c in range(16)})
+    if v9958:
+        values.update({f"vdp{r}": "00" for r in (25, 26, 27)})
     values.update({f"sub{ps}": "-" for ps in range(4)})
     values.update(i="00", im="01", iff="1", a8="FC", ppic="50", psgsel="00", vramptr="00000", vramwrite="1",
                   service="1" if service else "0", tapepos="000000", tapetime="0.00", tapeside="1", sp="F000",

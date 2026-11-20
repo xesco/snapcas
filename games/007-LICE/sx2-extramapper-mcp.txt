@@ -1,0 +1,25 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The image has no call of SX2RES: the game uses the zeros in page 3 where the
+# image's code for the call goes, or has no room there that the check allows. A
+# routine at 8008h, as in Knight Lore's file for this machine, in zeros of page
+# 2 that the game leaves alone in a minute of play with keys, uses no BIOS
+# routine. It keeps all the registers and the interrupts, selects slot 3's
+# subslot 0 in page 1 with slot 3's subslot register, selects slot 3 in page 1
+# with the slot register, and calls SX2RES's entry at 4040h when it starts F5h
+# DBh. Then it gives both registers back. At 8065h, CALL 8008h / JP 0AFFh.
+patch page2:8 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:12 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page2:1C 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page2:26 00 00 00 00 00 00 00 00 00 00 > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page2:30 00 00 00 00 00 00 00 00 00 00 > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page2:3A 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 C1
+patch page2:44 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:4E 00 00 00 00 00 00 00 00 00 00 > D3 A8 F1 E2 55 80 FB 08 F1 08
+patch page2:58 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:62 00 00 00 00 00 00 00 00 00 > C1 F1 C9 CD 08 80 C3 FF 0A
+
+# The game takes its interrupts at 0038h in its RAM in page 0, with JP 0AFFh.
+# The jump goes to 8065h.
+patch page0:39 FF 0A > 65 80

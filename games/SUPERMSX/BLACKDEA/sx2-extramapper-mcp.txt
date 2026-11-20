@@ -1,0 +1,25 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image's call of SX2RES from T0 never
+# runs. The image's wrapper at FCC9h, before the tape service's entries, calls
+# SX2RES and jumps to a RET at FC5Fh.
+rescall FC5F
+
+# Two entries at FC4Ch, in BASIC's zeros of TRPTBL, which the game leaves alone.
+# The first counts its calls in the byte at FC67h and calls the wrapper at every
+# 256th; the second calls it each time. Each then does the instructions that its
+# call replaces and returns.
+patch page3:3C4C 00 00 00 00 00 00 00 00 00 00 > F5 3A 67 FC C6 01 32 67 FC 30
+patch page3:3C56 00 00 00 00 00 00 00 00 00 00 > 03 CD C9 FC F1 FD 21 70 D0 C9
+patch page3:3C60 00 00 00 00 00 00 00 > CD C9 FC CD C9 4C C9
+
+# The title plays its music in a loop at 5AEDh, about 7000 times a second, until
+# a key. It calls the first entry in place of LD IY,0D070h, about 25 times a
+# second.
+patch page1:1AED FD 21 70 D0 > CD 4C FC 00
+
+# The game's loop at 4BB6h calls the routine at 4CC9h first in each pass, about
+# 30 times a second. It calls the second entry instead, which calls that routine
+# after the wrapper.
+patch page1:BB6 CD C9 4C > CD 60 FC

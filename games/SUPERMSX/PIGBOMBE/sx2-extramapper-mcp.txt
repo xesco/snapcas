@@ -1,0 +1,41 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loader `slots` finds RAM by a search that leaves slot 0's subslot
+# register at 55h, RAM in page 0, when it returns with EI, so the load stopped
+# right after it. It keeps BASIC's slot register value at FFFDh and the RAM's
+# at FFFEh, and selects them later by the slot register again. Here the BIOS
+# and the RAM share slot 0, so both values are 00h and each switch does
+# nothing. The patches skip the search and make each use of the two values a
+# write of slot 0's subslot register instead: 50h for BASIC and 55h for RAM in
+# every page.
+patch side1:71D 47 08 78 E6 > 4F 08 18 78
+patch side1:799 20 DA > 18 0B
+patch side1:87D 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:892 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:8CE 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:8FF 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+
+# The two copies of the game's pages 0 and 1, at D000h and B500h, select the
+# RAM and then BASIC with LD A,(0FFFEh) or (0FFFDh) / OUT (0A8h),A. They write
+# slot 0's subslot register instead. The loader checks each block by the
+# exclusive OR of its bytes, so a NOP after each RET takes the change too.
+patch side1:4945 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:4955 3A FD FF D3 A8 > 3E 50 32 FF FF
+patch side1:495B 00 > 06
+patch side1:6E8F 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:6E9F 3A FD FF D3 A8 > 3E 50 32 FF FF
+patch side1:6EA5 00 > 06
+
+# The game's start at 9850h selects BASIC the same way, and then runs Psycho
+# Pigs U.X.B.'s RAM search at D391h, which looks for RAM in pages 0 and 1 by
+# the slot register alone and waits forever when it finds none. As in
+# PSYCHO's file, the search returns at once, and its bytes hold two selectors,
+# for BASIC with EI and for the RAM with DI, that the game's selectors at
+# D3EAh and D3E4h jump to. A byte of the dead search, at D3A0h, keeps the
+# block's exclusive OR.
+patch side1:6ED9 3A FD FF D3 A8 > 3E 50 32 FF FF
+patch side1:AA19 F3 DB A8 32 EB D3 E6 F0 4F F6 > C9 3E 50 32 FF FF FB C9 F3 3E
+patch side1:AA23 0F CD B6 D3 79 > 55 32 FF FF C9
+patch side1:AA28 F6 > 86
+patch side1:AA6C F3 3E 00 D3 > C3 99 D3 00
+patch side1:AA72 3E 00 D3 A8 > C3 92 D3 00

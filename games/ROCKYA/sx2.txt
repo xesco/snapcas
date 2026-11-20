@@ -1,0 +1,9 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game selects slot 3 in every page and then writes AAh to FFFFh, the
+# subslot register, which selects subslot 2 in every page, where the Philips
+# and Sony MSX2s have their RAM, in two copies of its code. The SX-2's RAM is
+# in subslot 0, so the write takes the RAM away. The patches make the value
+# 00h, subslot 0 in every page.
+patch side1:6586 AA > 00
+patch side1:AC4E AA > 00

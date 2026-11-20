@@ -1,0 +1,48 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1, but its results, F4FBh
+# for the found RAM and F4FCh for BASIC, are both 00h here, where the BIOS and
+# the RAM share slot 0. The patches skip the search and give F4FDh, the subslot
+# register's value that the routine at F4AFh writes to FFFFh after it selects
+# the found RAM, 55h: RAM in every page.
+patch side1:4421 47 08 78 E6 > 4F 08 18 78
+patch side1:44A7 3A FF FF 2F > 3E 55 00 00
+
+# The routines at F4AFh and F4BCh select the found RAM with F4FBh and give the
+# slots back to BASIC with F4FCh, by the slot register alone. The patches write
+# slot 0's subslot register instead: 55h for RAM in every page, 50h for BASIC.
+patch side1:43A5 3A FB F4 D3 A8 > 3E 55 32 FF FF
+patch side1:43B1 3A FC F4 D3 A8 > 3E 50 32 FF FF
+
+# The game runs without interrupts, so nothing calls SX2RES. Its RAM in page 0
+# keeps the BIOS away, so the BIOS's hooks are unused, and the game never writes
+# them. The patches below clear 51 bytes of them from FF10h for the image's code
+# of the call: its call routine res3 and its wrapper at FF3Dh, which calls res3
+# and jumps to a RET at FF62h.
+patch page3:3F10 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F1A C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F24 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F2E C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F38 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F42 C9 > 00
+rescode FF10
+rescall FF62
+
+# Two entries at FF50h, in more of the hooks, count their calls in the bytes
+# from FF81h and call the wrapper at every 16th of the first and every 1024th of
+# the second, then do the instructions that their calls replace and return.
+patch page3:3F50 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > F5 3A 81 FF C6 10 32 81 FF 30
+patch page3:3F5A C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 03 CD 3D FF F1 CD 6F 52 C9 F5
+patch page3:3F64 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 3A 81 FF C6 01 32 81 FF 30 0D
+patch page3:3F6E C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 3A 82 FF C6 40 32 82 FF 30 03
+patch page3:3F78 C9 C9 C9 C9 C9 C9 C9 C9 C9 > CD 3D FF F1 3E F0 D3 AA C9
+
+# The title calls the game's delay at 526Fh from 5175h, about 470 times a
+# second. It calls the first entry instead, which calls the delay after the
+# wrapper.
+patch page1:1175 CD 6F 52 > CD 50 FF
+
+# The menu waits for 1, 2 or 3 in a loop at E81Eh that reads the keyboard's row
+# 0, about 27000 times a second. It calls the second entry in place of LD A,0F0h
+# / OUT (0AAh),A.
+patch page3:281E 3E F0 D3 AA > CD 63 FF 00

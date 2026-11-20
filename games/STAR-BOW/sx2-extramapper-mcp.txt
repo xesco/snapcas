@@ -1,0 +1,75 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader strld0, at F980h, looks for RAM in pages 0 and 1 by the slot
+# register alone, keeps the value at FA06h, and selects it for each copy of the
+# game to pages 0 and 1. Here the BIOS and the RAM are both in slot 0, in
+# subslots 0 and 1, so the search finds SX2RES's mapper in 3-0. The patches
+# write 55h, the Extra-Mapper in every page, to slot 0's subslot register for
+# each copy, 00h to FA06h, and 50h, BASIC's value, after the first two copies.
+patch side1:379E F3 DB A8 F5 E6 F0 CD 8E F9 28 > F3 3E 55 32 FF FF AF 32 06 FA
+patch side1:37A8 1F 3C 18 F8 47 D3 A8 21 00 00 > 21 00 88 11 00 04 01 00 16 ED
+patch side1:37B2 CD A1 F9 78 C0 21 00 40 > B0 3E 50 32 FF FF FB C9
+patch side1:37DB DB A8 F5 F3 3A 06 FA D3 A8 21 > F3 3E 55 32 FF FF 21 00 88 11
+patch side1:37E5 00 88 11 00 40 01 00 40 ED B0 > 00 40 01 00 40 ED B0 3E 50 32
+patch side1:37EF F1 D3 A8 FB C9 > FF FF FB C9 00
+patch side1:37F5 3A 06 FA D3 A8 > 3E 55 32 FF FF
+
+# The load ends in BASIC, which waits and then runs the last copy. That copy
+# writes page 3 up to FDFFh, over the call of SX2RES at FD29h. The snapshot
+# comes after it, where the game runs. The game keeps its interrupts off, with
+# no BIOS in page 0, so the image has no call of SX2RES.
+snapshot at 195
+
+# The BASIC loader copies page 3's subslot into every page of slot 0's subslot
+# register by a computed POKE -1, which gives 55h here, where the BIOS and the
+# RAM share slot 0, and takes BASIC's ROM away from pages 0 and 1. The patch
+# makes the computation keep pages 0 and 1 on the ROM: 50h.
+patch side1:D3 58 2A 34 2B 58 > 30 2A 34 2B 30
+
+# The game runs without interrupts, so nothing calls SX2RES. The game writes
+# page 3 up to FDFFh, and its RAM in page 0 keeps the BIOS away, so the BIOS's
+# hooks above are unused, and the game never writes them. The patches below
+# clear 51 bytes of them from FF40h for the image's code of the call: its call
+# routine res3 and its wrapper at FF6Dh, which calls res3 and jumps to a RET at
+# FF84h.
+patch page3:3F40 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F4A C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F54 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F5E C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F68 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F72 C9 > 00
+rescode FF40
+rescall FF84
+
+# The game's stack is in page 1, where SX2RES is, so res3 would leave the call
+# out. Three entries at FF73h, in more of the hooks, keep the game's stack
+# pointer at FFBFh, take a stack below FF40h, in the hooks, for the wrapper, and
+# take the game's stack back. The third counts its calls in the bytes from FFC1h
+# and calls the wrapper at every 1024th. Each then does the instruction that its
+# call replaces and returns.
+patch page3:3F73 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > ED 73 BF FF 31 40 FF CD 6D FF
+patch page3:3F7D C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > ED 7B BF FF CD 8A 0B C9 ED 73
+patch page3:3F87 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > BF FF 31 40 FF CD 6D FF ED 7B
+patch page3:3F91 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > BF FF CD 18 A0 C9 F5 3A C1 FF
+patch page3:3F9B C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > C6 01 32 C1 FF 30 18 3A C2 FF
+patch page3:3FA5 C9 C9 C9 8B A4 4D C9 C9 8B 15 > C6 40 32 C2 FF 30 0E ED 73 BF
+patch page3:3FAF 57 C9 C9 C9 C9 C9 C9 C9 C9 C9 > FF 31 40 FF CD 6D FF ED 7B BF
+patch page3:3FB9 C9 C9 C9 C9 C9 C9 > FF F1 CD E6 05 C9
+
+# The title plays a note of its music and tests the keys at 14FAh, about 7 times
+# a second. It calls the first entry in place of the key test, CALL 0B8Ah.
+patch page0:14FD CD 8A 0B > CD 73 FF
+
+# The game's loop from B5A0h calls the routine at A018h in each pass, about 15
+# times a second. It calls the second entry instead.
+patch page2:35A3 CD 18 A0 > CD 85 FF
+
+# The routine at 0585h waits for any key between the game's screens, in a loop
+# that reads the keyboard, about 30000 times a second. It calls the third entry
+# in place of CALL 05E6h.
+patch page0:588 CD E6 05 > CD 97 FF
+
+# The game's stack is in page 1, the page of SX2RES's entry, and the zeros at
+# FCC9h to FD88h have no room for the call's own stack. Put the stack at FF01h
+# in the unused C9h BIOS hook area, below the trampoline's stack at FF40h.
+resstack FF01

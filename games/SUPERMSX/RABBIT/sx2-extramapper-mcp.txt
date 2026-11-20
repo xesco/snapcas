@@ -1,0 +1,30 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, but for one screen, so the image's call of
+# SX2RES from T0 runs only there. The image's wrapper at FCC9h, before the tape
+# service's entries, calls SX2RES and jumps to a RET at FC7Bh.
+rescall FC7B
+
+# An entry at FC4Ch, in BASIC's zeros of TRPTBL, which the game leaves alone,
+# counts its calls in the bytes from FC7Ch and calls the wrapper at every
+# 1024th, only when the stack is at EF00h or above, as in the title. The game's
+# loop runs with its stack at E10Ah, among its variables, where SX2RES's stack
+# would overwrite them. The wrapper disables the interrupts, so the entry
+# enables them again when they were on, from LD A,I. Then it calls the game's
+# key test at 886Eh and returns.
+patch page3:3C4C 00 00 00 00 00 00 00 00 00 00 > F5 ED 57 F5 E5 21 00 00 39 7C
+patch page3:3C56 00 00 00 00 00 00 00 00 00 00 > E1 FE EF 38 17 3A 7C FC C6 01
+patch page3:3C60 00 00 00 00 00 00 00 00 00 00 > 32 7C FC 30 0D 3A 7D FC C6 40
+patch page3:3C6A 00 00 00 00 00 00 00 00 00 00 > 32 7D FC 30 03 CD C9 FC F1 E2
+patch page3:3C74 00 00 00 00 00 00 00 00 > 77 FC FB F1 CD 6E 88 C9
+
+# The title waits for a key in a loop at 8559h that calls the key test, about
+# 29000 times a second. It calls the entry instead.
+patch page2:55B CD 6E 88 > CD 4C FC
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: point 2: fail: the game writes FD65h, in the tape service's part of page 3,
+# from 0038h. `make games` wrote this line.
+capture sx2-extramapper-noram30

@@ -1,0 +1,23 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Each of the three binaries WEC1 looks for RAM in page 0 and then in page 1 by
+# the slot register alone. Here the RAM is in slot 0-1, beside the BIOS in 0-0.
+# The search for page 0 finds SX2RES's mapper in slot 3-0, and the search for
+# page 1 steps on into pages 2 and 3. The patches jump over the searches to the
+# call of the routine at 9256h, which selects the RAM, and make that routine
+# write 55h, RAM in every page, to slot 0's subslot register. The routine at
+# 924Fh gives back BASIC's slots, and writes 50h there instead.
+patch side1:147 DB A8 > 18 2B
+patch side1:195 F5 3E 00 D3 A8 F1 C9 > 3E 50 32 FF FF C9 00
+patch side1:19C F5 3E 00 D3 A8 F1 C9 > 3E 55 32 FF FF C9 00
+patch side1:426F DB A8 > 18 2B
+patch side1:42BD F5 3E 00 D3 A8 F1 C9 > 3E 50 32 FF FF C9 00
+patch side1:42C4 F5 3E 00 D3 A8 F1 C9 > 3E 55 32 FF FF C9 00
+patch side1:8397 DB A8 > 18 2B
+patch side1:83E5 F5 3E 00 D3 A8 F1 C9 > 3E 50 32 FF FF C9 00
+patch side1:83EC F5 3E 00 D3 A8 F1 C9 > 3E 55 32 FF FF C9 00
+
+# When play starts, the game writes FD41h in SLTWRK over the call of SX2RES.
+# Put the call routine and its stack in unused zeros at C298h.
+rescode C298
+resstack C2D0

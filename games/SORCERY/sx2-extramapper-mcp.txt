@@ -1,0 +1,15 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game takes the interrupt in routines of its own through H.KEYI: JP 84D3h
+# at the snapshot, which the image chains after its CALL resb, and from play
+# on JP 0ADD4h, which its code at 8B15h writes a byte at a time, and JP 84D3h
+# again from 8F89h, both over the image's call. So SX2RES got no more calls.
+# The image gets a wrapper for each that calls SX2RES and jumps to the
+# routine, at FD00h for ADD4h and FD06h for 84D3h, and each LD A,n of the
+# address takes the wrapper's bytes.
+rescall ADD4 84D3
+patch page2:0B1C D4 > 00
+patch page2:0B21 AD > FD
+patch page2:0F8F D3 > 06
+patch page2:0F94 84 > FD

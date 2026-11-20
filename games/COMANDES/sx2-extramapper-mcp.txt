@@ -1,0 +1,7 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Dinamic's RAM search starts at slot 3 and finds SX2RES's mapper in 3-0, or,
+# run from page 3, cuts off its own code there. The patch starts it at slot 0,
+# where it finds the Extra-Mapper in 0-1.
+patch side1:5DBD 3E 03 > 3E 00
+patch side1:CC4D 3E 03 > 3E 00

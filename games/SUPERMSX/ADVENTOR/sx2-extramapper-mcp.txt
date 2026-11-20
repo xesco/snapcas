@@ -1,0 +1,32 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# ADVEN1 searches RAM for pages 0 and 1 at 8EC4h. Here the search finds the RAM
+# in slot 0-1 by slot 0's subslot register, which it leaves at 55h, RAM in
+# every page. After its copy to 5D00h it selects BASIC again by the slot
+# register alone, from F975h, so pages 0 and 1 keep the RAM and BASIC crashes.
+# ADVEN2 selects the search's result from F976h by the slot register before it
+# starts the game. The patches write slot 0's subslot register instead: 50h
+# for BASIC, and 55h for the game.
+patch side1:2F94E 3A 75 F9 D3 A8 > 3E 50 32 FF FF
+patch side1:377F6 3A 76 F9 D3 A8 > 3E 55 32 FF FF
+
+# The game runs without interrupts, so nothing calls SX2RES. The image's wrapper
+# at FCC9h, before the tape service's entries, calls SX2RES and jumps to a RET
+# at FC6Ah.
+rescall FC6A
+
+# The game's stack is in page 1, where SX2RES is, so the wrapper would leave the
+# call out. An entry at FC4Ch, in BASIC's zeros of TRPTBL, which the game leaves
+# alone, counts its calls in the byte at FC6Dh and at every 3rd keeps the game's
+# stack pointer, takes a stack below FF00h, in the BIOS's hooks, which the
+# game's RAM in page 0 leaves unused, calls the wrapper and takes the game's
+# stack back. Then it does IN A,(0AAh) / AND 0F0h and returns.
+patch page3:3C4C 00 00 00 00 00 00 00 00 00 00 > F5 3A 6D FC C6 56 32 6D FC 30
+patch page3:3C56 00 00 00 00 00 00 00 00 00 00 > 0E ED 73 6B FC 31 00 FF CD C9
+patch page3:3C60 00 00 00 00 00 00 00 00 00 00 > FC ED 7B 6B FC F1 DB AA E6 F0
+patch page3:3C6A 00 > C9
+
+# The routine at C0D8h reads a row of the keyboard, about 100 times a second in
+# the title and in play. It calls the entry in place of IN A,(0AAh) / AND 0F0h,
+# about 33 times a second.
+patch page3:D9 DB AA E6 F0 > CD 4C FC 00

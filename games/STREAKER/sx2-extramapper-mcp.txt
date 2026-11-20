@@ -1,0 +1,29 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper
+# on and SX2RES running.
+
+# After the snapshot the game puts its own routines into H.KEYI, over the
+# image's call of SX2RES, which then stops: JP C800h written with LD HL,0C800h
+# at ten places and JP C866h at the title, written with LD HL,0C866h at eight
+# places. The image's wrappers call SX2RES and jump to each routine.
+rescall C800 C866
+
+# The game installs the wrappers' addresses instead, FD00h and FD06h after resb
+# at FCC9h, as build.txt's resvector gives them, one patch for each writer.
+patch page2:A4C 00 C8 > 00 FD
+patch page2:A68 00 C8 > 00 FD
+patch page2:F24 00 C8 > 00 FD
+patch page2:3F86 00 C8 > 00 FD
+patch page3:234 00 C8 > 00 FD
+patch page3:604 00 C8 > 00 FD
+patch page3:84B 00 C8 > 00 FD
+patch page3:2100 00 C8 > 00 FD
+patch page3:211C 00 C8 > 00 FD
+patch page3:221A 00 C8 > 00 FD
+patch page2:A3C 66 C8 > 06 FD
+patch page2:A54 66 C8 > 06 FD
+patch page2:F0C 66 C8 > 06 FD
+patch page2:3F7D 66 C8 > 06 FD
+patch page3:6A8 66 C8 > 06 FD
+patch page3:80F 66 C8 > 06 FD
+patch page3:20E2 66 C8 > 06 FD
+patch page3:2211 66 C8 > 06 FD

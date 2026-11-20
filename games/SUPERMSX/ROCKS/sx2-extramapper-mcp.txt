@@ -1,0 +1,52 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: page 3 is not a RAM page that the snapshot keeps. `make games`
+# wrote this line.
+capture sx2-extramapper-noram30
+
+# The capture variant alone is not enough: the loaders of ROCKS1, at CF04h, and
+# ROCKS2, at D004h, look for RAM in pages 0 and 1 by the slot register alone,
+# and here the search cut off its own code in page 3, so the load stopped
+# there. Each search becomes a write of slot 0's subslot register, 55h for RAM
+# in every page or 54h for RAM in pages 1 to 3, around the copy that follows
+# it, and the old value goes back after the copy. The values that the searches
+# kept at FFFDh and FFFEh are gone, so ROCKS3's last select at DC0Bh writes 54h
+# to the subslot register and to SLTTBL's entry of slot 0, and the page 0 RAM's
+# slot ID that it takes from FFFDh becomes 84h, slot 0-1.
+patch side1:DF0A 26 00 C6 01 D3 A8 4F 7E 2F 77 > 3A FF FF 2F F5 3E 55 32 FF FF
+patch side1:DF14 BE 79 20 F4 26 40 C6 04 D3 A8 > 21 00 90 11 00 00 01 00 40 ED
+patch side1:DF1E 4F 7E 2F 77 BE 79 20 F4 32 FD > B0 F1 32 FF FF 00 00 00 00 00
+patch side1:DF28 FF E6 FC 32 FE FF 21 00 90 11 > 00 00 00 00 00 00 00 00 00 00
+patch side1:DF32 00 00 01 00 40 ED B0 > 00 00 00 00 00 00 00
+patch side1:11F72 26 40 C6 04 D3 A8 4F 7E 2F 77 > 3A FF FF 2F F5 3E 54 32 FF FF
+patch side1:11F7C BE 79 20 F4 32 FE FF 01 00 40 > 01 00 40 21 00 90 11 00 40 ED
+patch side1:11F86 21 00 90 11 00 40 ED B0 > B0 F1 32 FF FF 00 00 00
+patch side1:17AD1 06 FF C5 CD 9F FD C1 10 F9 F3 > F3 3E 54 32 FF FF 32 C5 FC 00
+patch side1:17ADB 3A FE FF D3 A8 3A FD FF E6 03 > 00 00 00 00 00 3E 84 00 00 00
+
+# The load stops at the end of ROCKS3, at tape position 55615, and the next
+# block is the BASIC loader of the next program, ANDR_I. With the tape service
+# the image's wrapper for the call of SX2RES and sub0, which the restore needs
+# for the BIOS that the game keeps in page 0, both need FCC9h. So the image goes
+# without the tape service, and calls SX2RES from H.KEYI.
+service no
+
+# After the snapshot the game puts its own routine into H.KEYI, over the image's
+# call of SX2RES, which then stops: JP 43A5h copied from 4392h. The image's
+# wrapper calls SX2RES and jumps to it.
+rescall 43A5
+
+# The game installs the wrapper's address instead, FD60h after resb at FD29h, as
+# build.txt's resvector gives it.
+patch page1:393 A5 43 > 60 FD
+
+# To turn its routine off the game fills H.KEYI with RET, from 4395h, and the
+# calls stop. The game's routine replaces the BIOS's interrupt routine, so with
+# it off the BIOS's routine runs alone. The patch writes JP FD29h there instead,
+# a jump to the image's resb, which calls SX2RES and returns, as the image's
+# H.KEYI does at the restore.
+patch page1:395 21 9A FD 11 9B FD 36 > F3 21 29 FD 22 9B FD
+patch page1:39C C9 01 02 00 F3 ED B0 > 3E C3 32 9A FD 00 00

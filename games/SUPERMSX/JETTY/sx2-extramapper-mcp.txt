@@ -1,0 +1,26 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the snapshot keeps the RAM page 3-0-2-1.bin in slot 3-0, which
+# the machine's resident program holds: the game needs RAM in another slot. `make
+# games` wrote this line.
+capture sx2-extramapper-noram30
+
+# The menu runs with the interrupts off, so the image's call of SX2RES from T0
+# stops there. Its loop at 82A2h waits for a key and calls 851Ah about 9,500
+# times a second, too often for a call of SX2RES in each. The image's wrapper
+# at FCC9h calls SX2RES and jumps to 851Ah. The play takes the interrupt and
+# needs no more.
+rescall 851A
+
+# A counter at FA00h, which sends one in 256 of the menu loop's calls of 851Ah
+# to the wrapper, about 37 times a second, and the others straight to 851Ah.
+# FA00h is in the BIOS's PLAY queues, zeros that the game leaves alone, and
+# FA12h holds the count.
+patch page3:3A00 00 00 00 00 00 00 00 00 00 > F5 3A 12 FA 3C 32 12 FA 20
+patch page3:3A09 00 00 00 00 00 00 00 00 00 > 04 F1 C3 C9 FC F1 C3 1A 85
+
+# The menu's loop calls the counter.
+patch page2:02A4 CD 1A 85 > CD 00 FA

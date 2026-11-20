@@ -1,0 +1,28 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game never reads the tape again: the rest of the tape is the next game's.
+# It keeps data in page 0's RAM and runs with the BIOS in page 0, in another
+# subslot of DOS's mapper's slot, which the tape service's T0 cannot hold.
+# Without the tape service the restorer keeps the BIOS there.
+service no
+
+# Super MSX's loaders find RAM for pages 0 and 1 by the slot register alone, keep
+# the values at FFFDh and FFFEh, and select them later by the slot register
+# again. Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1, so
+# the patches write slot 0's subslot register instead: 54h for RAM in pages 1
+# to 3, 55h for RAM in every page, 50h for BASIC, with SLTTBL's entry for slot 0
+# at FCC5h where a ROM image looks up its slot, and 84h as RAM's slot ID.
+patch side1:4A02 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 90 11 00 00 01 00 40 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 90 11 00 00 01 00 40 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:8A6F DB A8 F5 3A FE FF D3 A8 01 00 40 21 00 90 11 00 40 ED B0 F1 D3 A8 > 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 3A C5 FC 32 FF FF
+patch side1:BD76 06 FF C5 CD 9F FD C1 10 F9 F3 3A FD FF D3 A8 > F3 3E 55 32 FF FF 32 C5 FC 00 00 00 00 00 00
+patch side1:BDA3 3A FE FF D3 A8 3A FD FF E6 03 > 3E 54 32 FF FF 3E 84 00 00 00
+patch side1:1253A 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF 01 00 40 21 00 90 11 00 40 ED B0 > 3A FF FF 2F F5 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 F1 32 FF FF 00 00 00
+patch side1:165A1 06 FF C5 CD 9F FD C1 10 F9 F3 3A FE FF D3 A8 > F3 3E 54 32 FF FF 32 C5 FC 00 00 00 00 00 00
+
+# After the snapshot the game copies JP 4254h from 4462h into H.KEYI, over the
+# image's call of SX2RES, which then stops. The image's wrapper calls SX2RES and
+# jumps to 4254h.
+rescall 4254
+
+# The game copies the wrapper's address, FD60h after resb at FD29h, into H.KEYI.
+patch page1:463 54 42 > 60 FD

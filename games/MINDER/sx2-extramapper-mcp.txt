@@ -1,0 +1,62 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader selects RAM in pages 0 and 1 by the slot register alone, with
+# values that it computes from the register: page 1 takes the slot of page 2,
+# page 0 that of page 3. Here the BIOS and the RAM share slot 0 and differ in
+# slot 0's subslot register, so its copies to pages 0 and 1 went to the ROM,
+# and at the game's start its CALL 403Dh ran BASIC, which stopped at "Syntax
+# error in 80". The patches write the subslot register instead: 55h for RAM in
+# every page, 54h for the BIOS in page 0 and RAM in pages 1 to 3, 50h for
+# BASIC.
+
+# Line 20 of the BASIC loader gives A% and B% the values that line 50 pokes
+# into the USR routine at 8AACh. A%=&H50 in place of A%=INP(&HA8) makes them
+# 54h and 50h.
+patch side1:51 49 4E 50 28 26 48 41 38 29 > 26 48 35 30 20 20 20 20 20
+
+# The USR routine at 8AACh selects page 1 with A%, copies 8CA0h to 4000h and
+# selects BASIC with B%, each by CALL 013Bh, the BIOS's WSLREG. LD (0FFFFh),A
+# takes the place of each CALL.
+patch side1:3930 CD 3B 01 > 32 FF FF
+patch side1:3940 CD 3B 01 > 32 FF FF
+
+# The routine at C808h gives page 0 the slot of page 3, copies 8800h to 0000h
+# and gives page 0 its slot back. It becomes LD A,55h / LD (0FFFFh),A, the
+# same copy, LD A,50h / LD (0FFFFh),A, EI and RET.
+patch side1:BF6F DB A8 F5 47 0F 0F 0F 0F B0 D3 > 3E 55 32 FF FF 21 00 88 11 00
+patch side1:BF79 A8 21 00 88 11 00 00 01 00 40 > 00 01 00 40 ED B0 3E 50 32 FF
+patch side1:BF83 ED B0 F1 D3 A8 FB C9 > FF FB C9 00 00 00 00
+
+# When space starts the game, the routine at A7D1h, which runs at F975h, gives
+# pages 0 and 1 the slot of pages 2 and 3, makes two copies, stores the slot
+# register's value for page 0 in the BIOS's slot and pages 1 to 3 in RAM at
+# 8B3Eh, and selects the BIOS and BASIC. It becomes LD A,55h / LD (0FFFFh),A,
+# the two copies, LD A,54h / LD (8B3Eh),A, LD A,50h / LD (0FFFFh),A, EI and
+# JP 8AACh.
+patch side1:E0DF DB A8 47 0F 0F 0F 0F B0 D3 A8 > 3E 55 32 FF FF 21 00 88 11 A6
+patch side1:E0E9 21 00 88 11 A6 CA 01 BB 1F ED > CA 01 BB 1F ED B0 21 06 00 11
+patch side1:E0F3 B0 21 06 00 11 AC 8A 01 FA 3F > AC 8A 01 FA 3F ED B0 3E 54 32
+patch side1:E0FD ED B0 E6 FC 32 3E 8B E6 F0 D3 > 3E 8B 3E 50 32 FF FF FB C3 AC
+patch side1:E107 A8 FB C3 AC 8A > 8A 00 00 00 00
+
+# The game's routine at 8B3Dh selects pages 1 to 3 with the value at 8B3Eh by
+# CALL 013Bh, and then calls its code in page 1. LD (0FFFFh),A takes the place
+# of the CALL.
+patch side1:7DE7 CD 3B 01 > 32 FF FF
+
+# The game loads nothing more: the snapshot comes after the tape's last block.
+# The snapshot keeps a RAM page for page 0, the game's copy of 8800h to C7FFh,
+# so with the tape service the image had no call of SX2RES. So the image has
+# no tape service.
+service no
+
+# The image calls SX2RES from H.KEYI, but in play the game puts its own
+# routine there. It never writes H.TIMI, which the BIOS's interrupt routine
+# calls after H.KEYI. The rescode line puts the call's routine, resb, at F460h
+# and its stack at F4A0h, in zeros of KBUF, BASIC's buffer for a line that it
+# tokenizes, which the game leaves alone in a minute of play with keys. H.TIMI
+# calls resb too, and then runs 40h, LD B,B, and its RET. Until play, each
+# interrupt calls SX2RES twice.
+rescode F460
+resstack F4A0
+patch page3:3D9F C9 8B E4 > CD 60 F4

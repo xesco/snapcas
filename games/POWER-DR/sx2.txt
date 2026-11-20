@@ -1,0 +1,10 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# Page 0 is in DOS's mapper (blocking service t0) and the race buffer EA00h-FEFFh
+# overwrites every xxE1h below FFE1h. Split the tape service: entries at FFE1h
+# (over unused BIOS VDP copies; game never calls BIOS) and code at FF01h-FF84h.
+service at FFE1 FF01
+
+# FFE4h, in the BIOS's reserved bytes below those copies, holds FFh here, and a
+# block of service at takes zeros there. The game never reads or writes it.
+patch page3:3FE4 FF > 00

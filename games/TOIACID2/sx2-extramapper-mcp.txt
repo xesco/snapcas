@@ -1,0 +1,29 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so nothing calls SX2RES. Its RAM in page 0
+# keeps the BIOS away, so the BIOS's hooks are unused, and the game never writes
+# them. The patches below clear 51 bytes of them from FF40h for the image's code
+# of the call: its call routine res3 and its wrapper at FF6Dh, which calls res3
+# and jumps to a RET at FF91h.
+patch page3:3F40 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F4A C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F54 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F5E C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F68 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 00 00 00 00 00 00 00 00 00 00
+patch page3:3F72 C9 > 00
+rescode FF40
+rescall FF91
+
+# The game's stack is in page 1, where SX2RES is, so res3 would leave the call
+# out. An entry at FF73h, in more of the hooks, counts its calls in the byte at
+# FF94h and at every 2nd keeps the game's stack pointer, takes a stack below
+# FF40h, in the hooks, calls the wrapper and takes the game's stack back. Then
+# it does OUT (0AAh),A / IN A,(0A9h) and returns at FF91h, a RET of the hooks.
+patch page3:3F73 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > F5 3A 94 FF C6 80 32 94 FF 30
+patch page3:3F7D C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > 0E ED 73 92 FF 31 40 FF CD 6D
+patch page3:3F87 C9 C9 C9 C9 C9 C9 C9 C9 C9 C9 > FF ED 7B 92 FF F1 D3 AA DB A9
+
+# The routine at BDE0h reads the game's keys, about 85 times a second. It calls
+# the entry in place of OUT (0AAh),A / IN A,(0A9h).
+patch page2:3DE7 D3 AA DB A9 > CD 73 FF 00

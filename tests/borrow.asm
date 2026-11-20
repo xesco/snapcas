@@ -1,15 +1,6 @@
-; A test game for the tape service without a part in page 3 (INTERNALS.md,
-; Without a part in page 3), on the Sanyo PHC-28S with its RAM cartridge in
-; slot 1: page 2 holds that cartridge's RAM, which is not in a mapper, and
-; the stack, so TAPIN must borrow page 2 through the slot register, without
-; the stack. tests/test_service.py writes this binary to a CAS file, followed
-; by a block of the bytes 0 to 255.
-;
-; The game waits about 60 seconds, so that the capture takes its snapshot
-; first, then reads the block into page 2 and checks it. It ends at passed
-; or at failed, which the test counts. Before it reads, it selects the main
-; ROM in page 0, as a loader can, and the test's game file patches the slot
-; at rom to DOS's mapper, where T0 is.
+; Test game for T0-mode tape service borrowing non-mapper page 2 without using
+; the stack (tests/test_service.py). Waits ~60 s for capture, then reads and
+; verifies a 256-byte block into page 2 and halts at passed or failed.
 
 TAPION  equ 00E1h       ; MSX Red Book, chapter 4: the BIOS's tape entries
 TAPIN   equ 00E4h

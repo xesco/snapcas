@@ -2,3 +2,10 @@
 cas MOCKY.CAS
 sha1 1d3b29532f5b0ddbd95379672da502b5ee89254a
 url https://download.file-hunter.com/Games/MSX1/CAS/Mocky%20(1985)(Login%20Soft)%5BCLOAD%2BBLOAD%27CAS-%27%2BRUN%5D.zip
+
+# The BASIC program reads machine code and graphics from 9000h..C59Fh, which
+# sits in the tape's second file and must be loaded with BLOAD"CAS:" after
+# CLOAD and before RUN.
+load 'CLEAR 350,&H8FFF:CLOAD'
+keys 18 'BLOAD"CAS:":RUN'
+keys 19 return

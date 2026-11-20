@@ -1,0 +1,33 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's RAM search, for pages 1 and 0, skips the primary slot that BASIC
+# has in the page, and here that is slot 0, where the RAM is, in 0-1: it
+# printed Cannot find 64K of RAM. The patches make both searches return 84h,
+# the slot ID of 0-1, which ENASLT selects in page 1 by itself, and remove the
+# WRSLT of a JP (HL) at 003Dh of that RAM.
+patch side1:6E2 26 40 CD 39 8E > 3E 84 00 00 00
+patch side1:6F2 26 00 CD 39 8E > 3E 84 00 00 00
+patch side1:6FA 21 3D 00 1E E9 CD 14 > 00 00 00 00 00 00 00
+
+# The loader and the game reach routines that need the RAM in page 0 through
+# CALSLT to that JP (HL). Where the RAM shares slot 0 with the BIOS, CALSLT
+# switches page 0 under its own code. The loader's routine at 8DABh becomes
+# POP HL, DI, 55h, the RAM in every page, to slot 0's subslot register, a call
+# of a JP (HL) at its end, and 50h, BASIC.
+patch side1:5F5 21 00 40 3A 7E F3 CD 24 00 E1 > E1 F3 3E 55 32 FF FF CD BF 8D
+patch side1:5FF DD 21 3D 00 FD 2A 7C > 3E 50 32 FF FF C9 E9
+
+# The game's two calls call a routine in 17 zeros between two of its routines
+# at AC2Fh: a JP (HL), then DI, 55h, the call of that JP (HL), 54h, the BIOS in
+# page 0 and the RAM in pages 1 to 3, EI and RET.
+patch side1:8488 FD 2A 7C F3 DD 21 3D 00 21 65 > 21 65 90 76 CD 30 AC 00 00 00
+patch side1:8492 90 76 CD 1C 00 FB > 00 00 00 00 00 00
+patch side1:90E7 DD 21 3D 00 FD 2A 7C F3 21 04 > 21 04 9A CD 30 AC 00 00 00 00
+patch side1:90F1 9A CD 1C > 00 00 00
+patch side1:A397 00 00 00 00 00 00 00 00 00 00 > E9 F3 3E 55 32 FF FF CD 2F AC
+patch side1:A3A1 00 00 00 00 00 00 00 > 3E 54 32 FF FF FB C9
+
+# The loader checks its own sum and the game's block's sum. The patches keep
+# both.
+patch side1:704 A4 E8 > 92 E6
+patch side1:C8E3 DA 30 > 8A AC

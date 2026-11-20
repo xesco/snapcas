@@ -1,0 +1,7 @@
+# Lines for vg8020-carnivore2, the Philips VG-8020 (MSX1, 64 KB) with a Carnivore2.
+
+# The capture runs on vg8020, the Philips VG-8020 without cartridges, so without a
+# disk system. On vg8020-carnivore2 itself the game fails: point 2: fail: the game
+# writes FD49h, in the tape service's part of page 3, from 1BDEh. `make games` wrote
+# this line.
+capture vg8020

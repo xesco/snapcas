@@ -1,0 +1,9 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game writes over the tape service's part of page 3 at its default place, and
+# it keeps RAM of its own in page 0, so the mode without a part in page 3, whose T0
+# needs page 0 of DOS's mapper, cannot take it. The SX-2 has no other RAM for a
+# capture variant. The part goes to F8E1h to F97Eh, in the BIOS's work area. Those
+# bytes hold zeros at the snapshot, and neither the game nor the BIOS writes them in
+# the check's minute of play. A later load of the game could.
+service at F8E1

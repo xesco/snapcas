@@ -1,4 +1,4 @@
-"""The interrupt slot patch (docs/INTERNALS.md, The interrupt slot patch): an
+"""The interrupt slot patch (docs/internals/patches.md, The interrupt slot patch): an
 interrupt handler that writes the slot register back from the game's own copy
 of its value, and not from the register. patches/irqslot.tcl decides at step
 3 whether the machine needs the patch. The kind works only in the capture, so

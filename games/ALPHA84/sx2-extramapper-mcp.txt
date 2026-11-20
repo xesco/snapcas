@@ -1,0 +1,36 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Aackosoft's loader at C000h looks for RAM in page 1 and then in page 0 by the
+# slot register alone, and finds none here, where the BIOS and the RAM share
+# slot 0: it prints that the computer lacks the RAM. The first patch skips the
+# search to the loader's last selection, which the second patch makes a write
+# of slot 0's subslot register: 55h, RAM in every page.
+patch side1:25CA AF 32 F6 > C3 CF C0
+patch side1:266D D3 A8 00 00 00 00 00 > 3E 55 32 FF FF 00 00
+
+# Each later selection by the stored values, BASIC's at C301h and the RAM's at
+# C302h, becomes a write of slot 0's subslot register: 50h for BASIC, 55h for
+# RAM. The selection at C173h ends with OUT (C),D, which becomes JR $+2: the
+# loader checks the sum of its signature against the byte at C178h, LD D,A.
+patch side1:2711 3A 02 C3 0E A8 > 3E 55 32 FF FF
+patch side1:2717 ED 51 > 18 00
+patch side1:287A 3A 01 C3 D3 A8 > 3E 50 32 FF FF
+patch side1:2882 3A 01 C3 D3 A8 > 3E 50 32 FF FF
+patch side1:2890 3A 02 C3 D3 A8 > 3E 55 32 FF FF
+
+# The game runs on the BIOS's interrupt routine, with the BIOS in page 0, but
+# the snapshot keeps its RAM page 0, so the image's T0 makes no call of SX2RES,
+# and H.KEYI holds RET. The image's wrapper calls SX2RES through the tape
+# service's entry code and jumps to the RET at FD9Dh, in H.KEYI after the patch
+# below. sub0 takes FCC9h, so the wrapper goes to FB03h, in the work area of an
+# RS-232C interface, which stays at zeros on the SX-2, which has none.
+rescall FD9D
+rescode FB03
+
+# H.KEYI calls the wrapper: CALL 0FB03h / RET.
+patch page3:3D9A C9 C9 C9 > CD 03 FB
+
+# The build writes the wrapper's 17 bytes but, with the tape service, does not
+# list them for the check, which then finds them changed. This patch changes
+# nothing and lists them.
+patch page3:3B03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00

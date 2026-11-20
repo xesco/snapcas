@@ -1,0 +1,58 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Gremlin's loader at D800h runs a RAM search, which finds the RAM in 0-1 but
+# leaves slot 0's subslot register at 55h, RAM in page 0, and enables the
+# interrupts, which then run the RAM at 0038h: the load stopped after the
+# search. Its result at FFFEh, the slot register's value for the RAM, is 00h
+# here, where the BIOS and the RAM share slot 0. The patch skips the search,
+# so the register stays 50h, BASIC.
+patch side1:1C4 47 08 78 E6 > 4F 08 18 78
+
+# Each later block selects the RAM by that value and gives BASIC back by the
+# slot register alone. The patches write slot 0's subslot register instead: 55h
+# for RAM in every page, as the value at FFFEh selects elsewhere, then 50h.
+patch side1:272 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:29A DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+patch side1:C6F2 3A FE FF D3 A8 > 3E 55 32 FF FF
+
+# Where a block gives BASIC back with AND 0F0h on that value and OUT (0A8h),A,
+# the patches drop the block's first DI, which the loader has already done,
+# move the code up a byte, and end it with LD (0FFFFh),A: 55h AND 0F0h, 50h.
+patch side1:1E91 F3 3A FE FF D3 A8 01 00 40 11 > 3E 55 32 FF FF 01 00 40 11 80
+patch side1:1E9B 80 03 21 80 87 ED B0 E6 F0 D3 > 03 21 80 87 ED B0 E6 F0 32 FF
+patch side1:1EA5 A8 > FF
+patch side1:44B1 F3 3A FE FF D3 A8 01 00 40 11 > 3E 55 32 FF FF 01 00 40 11 00
+patch side1:44BB 00 40 21 00 88 ED B0 E6 F0 D3 > 40 21 00 88 ED B0 E6 F0 32 FF
+patch side1:44C5 A8 > FF
+
+# The loader checks each block by the XOR of its bytes, which must be 0. The
+# patches change each changed block's last byte, its sum, to keep that.
+patch side1:253 0C > FA
+patch side1:1E72 2A > 71
+patch side1:4491 EC > 4F
+patch side1:85B2 26 > 85
+patch side1:107F2 9E > 87
+
+# The game takes its interrupts with RET at 0038h, in its RAM in page 0, so
+# nothing called SX2RES. After its title it clears FB00h to FDFFh, where the
+# image's code for the call goes. The code goes to DA30h, in zeros of page 3
+# that the game leaves alone in a minute of play with keys: res3, then the
+# wrapper at DA5Dh, which calls SX2RES and jumps to a RET at 0037h.
+rescode DA30
+rescall 0037
+
+# The RET at 0037h, in FFh bytes that the game leaves alone, and at 0038h a jump
+# to the wrapper.
+patch page0:37 FF C9 FF FF > C9 C3 5D DA
+
+# In play the game runs with its interrupts off, so the wrapper calls SX2RES
+# only in the title. The game reads the joysticks through its routine at B73Eh
+# about 36 times a second. Its LD A,0Eh / OUT (0A0h),A at B74Ah becomes CALL
+# DA63h and a NOP, and DA63h, after the wrapper, does CALL DA30h, res3, then LD
+# A,0Eh / OUT (0A0h),A / RET.
+patch page3:1A63 00 00 00 00 00 00 00 00 > CD 30 DA 3E 0E D3 A0 C9
+patch page2:374A 3E 0E D3 A0 > CD 63 DA 00
+
+# When play starts, the game writes FD71h in SLTWRK over res3's default stack.
+# Put the stack in the unused C9h BIOS hook area.
+resstack FE18

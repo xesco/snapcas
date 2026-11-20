@@ -1,4 +1,4 @@
-"""tools/msx.py without openMSX (docs/INTERNALS.md, The tools' code): machine
+"""tools/msx.py without openMSX (docs/internals/capture.md, The tools' code): machine
 files, the DOS files' folders, the Tcl that it writes, a run's savestates, and
 what it makes of openMSX's end, which the test gives. Runs in openMSX are in
 tests/test_harness.py. Pure tier."""
@@ -28,6 +28,49 @@ class Msx(unittest.TestCase):
         self.assertEqual(msx.read_machine(msx.machine_path("test/nms8250-dos1")).dos_files, "msxdos1")
         self.assertEqual(msx.read_machine(msx.machine_path("hbf700p-ram512k-msxdos2")).dos_files, "msxdos2")
         self.assertEqual(msx.read_machine(msx.machine_path("vg8020-carnivore2")).dos_files, "nextor")
+
+    def test_a_width_line_gives_the_width_that_the_capture_sets(self):
+        self.assertEqual(msx.read_machine(msx.machine_path("sx2")).width, 37)
+        self.assertEqual(msx.read_machine(msx.variant_path("sx2-noexp0")).width, 37)
+        self.assertIsNone(msx.read_machine(msx.machine_path("vg8020-carnivore2")).width)
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "m.txt")
+            for line in ("width 0", "width 81", "width 37\nwidth 40", "width wide"):
+                with open(path, "w") as f:
+                    f.write(f"openmsx -machine C-BIOS_MSX2\ndisk hda\n{line}\n")
+                with self.subTest(line=line), self.assertRaises(msx.MachineError):
+                    msx.read_machine(path)
+
+    def test_a_resident_line_gives_the_slot_the_entry_and_its_code(self):
+        resident = msx.read_machine(msx.machine_path("sx2-extramapper-mcp")).resident
+        self.assertEqual((resident.slot_id, resident.address, resident.signature),
+                         (0x83, 0x4040, bytes.fromhex("F5 DB FD F5 3E")))
+        self.assertEqual(resident.code[-1], 0xC9)
+        self.assertIsNone(msx.read_machine(msx.machine_path("sx2")).resident)
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "m.txt")
+            # Too few bytes for the signature, a slot of 4, an address of three
+            # digits, and two lines.
+            for line in ("resident 3-0 4040 F5 DB FD F5", "resident 4 4040 F5 DB FD F5 3E",
+                         "resident 3-0 404 F5 DB FD F5 3E", "resident 2 4040 F5 DB FD F5 3E\nresident 2 4040 F5 DB FD F5 3E"):
+                with open(path, "w") as f:
+                    f.write(f"openmsx -machine C-BIOS_MSX2\ndisk hda\n{line}\n")
+                with self.subTest(line=line), self.assertRaises(msx.MachineError):
+                    msx.read_machine(path)
+            with open(path, "w") as f:
+                f.write("openmsx -machine C-BIOS_MSX2\ndisk hda\nresident 2 8000 01 02 03 04 05\n")
+            self.assertEqual(msx.read_machine(path).resident.slot_id, 0x02)
+
+    def test_a_parent_line_inherits_game_files_from_its_parent(self):
+        self.assertEqual(msx.machine_chain("sx2-noexp0"), ["sx2", "sx2-noexp0"])
+        self.assertEqual(msx.machine_chain("sx2"), ["sx2"])
+        self.assertEqual(msx.machine_chain("no-such-machine"), ["no-such-machine"])
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "m.txt")
+            with open(path, "w") as f:
+                f.write("openmsx -machine C-BIOS_MSX2\ndisk hda\nparent no-such-machine\n")
+            with self.assertRaises(msx.MachineError):
+                msx.read_machine(path)
 
     def test_a_press_line_presses_its_key_at_its_time_after_power_on(self):
         machine = msx.read_machine(msx.variant_path("hb75p"))

@@ -1,0 +1,39 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# REUBICA's routine at 93FFh gives pages 0 and 1 the slots of pages 2 and 3 by
+# the slot register alone, for its copies to page 0 and 1, and the routine at
+# 9405h gives back the old value. Here BASIC and the RAM are both in slot 0, in
+# subslots 0 and 1, so the copies go to the ROM. The patches write 55h, RAM in
+# every page, and 50h, BASIC's subslots, to slot 0's subslot register instead.
+patch side1:3BE5 3A 0C 94 D3 A8 C9 > 3E 55 32 FF FF C9
+patch side1:3BEB 3A 0B 94 D3 A8 C9 > 3E 50 32 FF FF C9
+
+# The game copies its character set to EA60h to FFFFh, by an LDIR of 15A0h
+# bytes. FFFFh is slot 0's subslot register here, and the copy's last byte
+# deselects the RAM. The patch makes the copy 159Fh bytes. The byte left out is
+# the last row of the last character, a row of 00h, and the game then reads the
+# subslot register there.
+patch side1:3BDD 01 A0 15 > 01 9F 15
+
+# The game's image has no call of SX2RES, and the game writes over the BIOS's
+# slot routines and tables in page 3. A routine at 81A0h, in FFh bytes of page 2
+# that the game leaves alone, uses no BIOS routine. It keeps all the registers
+# and the interrupts, selects slot 3's subslot 0 in page 1 with slot 3's subslot
+# register, selects slot 3 in page 1 with the slot register, and calls SX2RES's
+# entry at 4040h when it starts F5h DBh. Then it gives both registers back. The
+# routine runs in page 2, because it moves pages 1 and 3. An entry at 81FDh
+# calls the routine, then does LD A,D / OUT (0AAh),A and returns.
+patch page2:1A0 FF FF FF FF FF FF FF FF FF FF > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:1AA FF FF FF FF FF FF FF FF FF FF > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page2:1B4 FF FF FF FF FF FF FF FF FF FF > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page2:1BE FF FF FF FF FF FF FF FF FF FF > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page2:1C8 FF FF FF FF FF FF FF FF FF FF > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page2:1D2 FF FF FF FF FF FF FF FF FF FF > 08 3A 41 40 FE DB CC 40 40 C1
+patch page2:1DC FF FF FF FF FF FF FF FF FF FF > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:1E6 FF FF FF FF FF FF FF FF FF FF > D3 A8 F1 E2 ED 81 FB 08 F1 08
+patch page2:1F0 FF FF FF FF FF FF FF FF FF FF > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:1FA FF FF FF FF FF FF FF FF FF FF > C1 F1 C9 CD A0 81 7A D3 AA C9
+
+# The game selects a row of the keyboard at 135Ah, LD A,D / OUT (0AAh),A, before
+# it reads the row. It calls the entry at 81FDh in place of those instructions.
+patch page0:135A 7A D3 AA > CD FD 81

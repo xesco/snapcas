@@ -1,0 +1,16 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# GOOD&1's search at 9000h finds RAM for pages 0 and 1 and keeps its slot
+# register value at FFFEh. GOOD&2 and GOOD&3 select it by the slot register
+# alone, copy the game to pages 0 and 1, and select BASIC with AND 0F0h / OUT
+# (0A8h),A. GOOD&5 selects it again and starts the game at 0380h. Here the BIOS
+# and the RAM are both in slot 0, in subslots 0 and 1, so the first patch skips
+# the search to its end, and the others write slot 0's subslot register
+# instead: 55h for RAM in every page, and 50h for BASIC, which SUB 5 makes from
+# 55h. Each copy routine's RET moves into the unused byte after it.
+patch side1:17655 47 08 78 E6 > 4F 08 18 78
+patch side1:1770C 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:1771C E6 F0 D3 A8 FB C9 38 > D6 05 32 FF FF FB C9
+patch side1:1B835 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:1B845 E6 F0 D3 A8 FB C9 5B > D6 05 32 FF FF FB C9
+patch side1:23A87 3A FE FF D3 A8 > 3E 55 32 FF FF

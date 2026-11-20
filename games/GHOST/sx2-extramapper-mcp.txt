@@ -1,0 +1,33 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the 26 bytes below SP 000Bh cross a page boundary or include
+# FFFFh. `make games` wrote this line.
+capture sx2-extramapper-noram30
+
+# The BASIC loader's POKE -1,((PEEK(-1)XOR255)AND240)*1.0625 gives pages 0 and
+# 1 the subslots of pages 2 and 3 in the slot of page 3. Where the RAM has a
+# primary slot of its own that slot is not in pages 0 and 1, but here it is
+# slot 0, and the POKE put the RAM of 0-1 under BASIC, which then ran RAM. The
+# patch makes the factor 1, so the POKE writes the register's own value.
+patch side1:8E 31 2E 30 36 32 35 > 31 20 20 20 20 20
+
+# The blocks grafic and mapa give page 1, or pages 0 and 1, the slots of pages
+# 2 and 3 by the slot register alone for a copy, and give them back. The
+# patches write slot 0's subslot register instead, in the NOPs beside each
+# OUT: 54h, the RAM in pages 1 to 3, or 55h, the RAM in every page, then 50h.
+patch side1:1050 D3 A8 00 00 00 > 3E 54 32 FF FF
+patch side1:1060 00 00 00 F1 D3 A8 > F1 3E 50 32 FF FF
+patch side1:34CC D3 A8 00 00 00 > 3E 55 32 FF FF
+patch side1:34DC 00 00 00 F1 D3 A8 > F1 3E 50 32 FF FF
+
+# The block prog has the same selections in its routines at 8BA3h and 9CB2h,
+# page 1, 9CC7h, pages 0 and 1, and 8BB2h and 9CC0h, which give the slots
+# back from FA00h. The patches make them write 54h, 55h and 50h to FFFFh.
+patch side1:7A7A DB A8 32 00 FA 47 > 3E 54 32 FF FF C9
+patch side1:7A88 3A 00 FA D3 A8 > 3E 50 32 FF FF
+patch side1:8B88 DB A8 32 00 FA 47 > 3E 54 32 FF FF C9
+patch side1:8B96 3A 00 FA D3 A8 > 3E 50 32 FF FF
+patch side1:8B9E DB A8 32 00 FA 47 > 3E 55 32 FF FF C9

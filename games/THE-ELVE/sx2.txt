@@ -1,0 +1,19 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The interpreter's interrupt handler at CF05h selects the game's RAM with the slot
+# register alone and calls B010h, a JP to its routine at 013Ch in page 0. On the
+# SX-2 the sub-ROM is in slot 3-1, beside the RAM in 3-0, so an interrupt during a
+# call of the sub-ROM finds the sub-ROM in page 0, and the handler runs the
+# sub-ROM's bytes until the machine resets. The first patch puts a routine in the
+# 13 unused FFh bytes at CFA6h, after a JP. It pushes the subslot register's
+# value as it reads, the complement, selects subslot 0, the RAM, in every page of
+# slot 3, calls B010h, and returns with the value in A. The second makes the
+# handler call that routine.
+patch side1:D4B7 FF FF FF FF FF FF FF FF FF FF FF FF FF > 3A FF FF F5 AF 32 FF FF CD 10 B0 F1 C9
+patch side1:D42E CD 10 B0 > CD A6 CF
+
+# The third writes the value back to the subslot register, with a CPL, before the
+# handler selects the ROM. It takes the place of the handler's LD (0CFBEh),A
+# after the ROM's selection, whose value only the BIOS's interrupt routine sees
+# before the handler's last write of the copy, and of one of the two NOPs.
+patch side1:D431 3A 08 B0 D3 A8 32 BE CF 00 00 > 2F 32 FF FF 3A 08 B0 D3 A8 00

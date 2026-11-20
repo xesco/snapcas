@@ -1,0 +1,12 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game takes the interrupt in its routine at 7443h through H.TIMI, and
+# copies JP 7443h there again from 735Fh 5 seconds after the restore. When a
+# key starts the game, it writes RET into H.KEYI over the image's CALL resb,
+# so SX2RES got no more calls. The image gets a wrapper that calls SX2RES and
+# jumps to 7443h, at FD00h, and both the snapshot's H.TIMI and the template
+# take its address.
+rescall 7443
+patch page3:3DA0 43 74 > 00 FD
+patch page1:3360 43 74 > 00 FD

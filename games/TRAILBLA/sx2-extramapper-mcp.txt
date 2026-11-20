@@ -1,0 +1,32 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The block trail1 searches for RAM in page 1 and returns to BASIC with slot
+# 0's subslot register at 54h, the RAM of 0-1 in page 1, where BASIC's ROM must
+# be. Its result at FFFEh is 00h here, where the BIOS and the RAM share slot 0.
+# The patch skips the search, so the register stays 50h.
+patch side1:149 47 08 78 E6 > 4F 08 18 42
+
+# The blocks trail2 and trail4 select RAM in page 1 by FFFEh, and trail2 gives
+# page 1 back to BASIC, with the slot register alone. The patches write 54h,
+# RAM in pages 1 to 3, and 50h, BASIC, to slot 0's subslot register instead.
+patch side1:26F 3A FE FF D3 A8 > 3E 54 32 FF FF
+patch side1:297 DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+patch side1:46E6 3A FE FF D3 A8 > 3E 54 32 FF FF
+
+# The block trail3 does the same, and gives page 1 back with AND 0F0h on that
+# value, which here would select slot 1 in pages 2 and 3. The patches rewrite
+# its 21 bytes to write 54h and then 50h to FFFFh through HL.
+patch side1:1E96 3A FE FF D3 A8 01 00 > 21 FF FF 36 54 E5 01
+patch side1:1E9D 20 11 00 60 21 00 90 > 00 20 11 00 60 21 00
+patch side1:1EA4 ED B0 E6 F0 D3 A8 C9 > 90 ED B0 E1 36 50 C9
+
+# 4.7 seconds after the end of the load the game fills FB00h to FDFFh with
+# its table for interrupt mode 2, over the image's call of SX2RES. The
+# snapshot comes after that, at 149 seconds, where the game runs.
+snapshot at 149
+
+# The game's table for interrupt mode 2 covers FD29h and FCC9h, where the
+# image's code for the call of SX2RES goes, so nothing called SX2RES. The code
+# goes to F9A0h, in zeros of page 3 that the game leaves alone in a minute of
+# play with keys: res3, then the wrapper of the game's interrupt routine.
+rescode F9A0

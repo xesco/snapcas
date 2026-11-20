@@ -1,0 +1,10 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# Before the game's copy to 0100h, the loader's routine at 9014h gives pages 0 and
+# 1 the slot of page 3. When that slot is expanded, it sets only the subslot
+# register and leaves the slot register with the ROM in pages 0 and 1, so the
+# copy is lost and the game's tables read FFh. The other machines take a capture
+# variant whose RAM is in a slot that is not expanded, which the SX-2 has not. Its
+# subslot register already selects the RAM in every page, so the patch makes the
+# JR NZ that skips the slot register two NOPs.
+patch side1:26A0 20 10 > 00 00

@@ -1,4 +1,4 @@
-"""The tape service in restored games (docs/INTERNALS.md, Tape service, The
+"""The tape service in restored games (docs/internals/service-and-resident.md, Tape service, The
 manual tape and Without a part in page 3): games that load during play, each
 captured, built and checked on the PHC-28S and then played to its next load,
 the contracts of the service's entries, the manual tape of /M, the place of
@@ -176,7 +176,7 @@ PLAYS = {
 
 
 class Loads(unittest.TestCase):
-    """Computad and Gauntlet, which load during play (PLAN.md, step 5)."""
+    """Computad and Gauntlet, which load during play (docs/BUILD.md, step 5)."""
 
     @classmethod
     def setUpClass(cls):
@@ -260,7 +260,7 @@ class Stubs(unittest.TestCase):
                 self.assertGreater(values["pos"], values["pos0"], values)
 
 
-# Moonwalker, with the tape service in T0 (INTERNALS.md, Without a part in page
+# Moonwalker, with the tape service in T0 (docs/internals/service-and-resident.md, Without a part in page
 # 3): its game file, and the inputs from the intro to the main game's load. Its
 # loader's stub selects the ROM in page 0, so the scan patches it, and the
 # restorer writes the value that selects DOS's mapper there.
@@ -343,7 +343,7 @@ class BorrowedBySlot(unittest.TestCase):
         self.assertEqual(self.values["failed"], 0, self.values)
 
 
-# The contracts of the tape service's entries (INTERNALS.md, Tape service), from
+# The contracts of the tape service's entries (docs/internals/service-and-resident.md, Tape service), from
 # the BIOS's code: what each routine returns, and what it keeps. Each case is
 # the routine, the opcode that sets the interrupts at the call, AF at the call,
 # and what must hold after it: the carry flag, the interrupts, on, off or as
@@ -380,7 +380,7 @@ CONTRACT = [
 ]
 CONTRACT_BLOCKS = [bytes((32 * block + n) & 0xFF for n in range(32)) for block in range(4)]
 
-# The manual tape (INTERNALS.md, The manual tape): the cases, and the key that
+# The manual tape (docs/internals/service-and-resident.md, The manual tape): the cases, and the key that
 # the test gives each read that waits, by its case: RETURN plays on, and
 # CTRL+STOP ends the read with carry and leaves the tape stopped, where it was.
 # The tape is stopped at the snapshot, and TAPIOF stops it again: after 3 bytes
@@ -637,14 +637,16 @@ class Contracts(unittest.TestCase):
         self.assertEqual(used, STACK_USED)
 
 
-def guard_tape(loads, reads, writes):
+def guard_tape(loads, reads, writes, target=None):
     """tests/guard.asm as a binary file on tape, for a game that reads so many
     bytes of the tape before its wait and after it, and then writes the
-    service's part of page 3 or not."""
+    service's part of page 3, at target or at its first byte, or not."""
     code, symbols = test_game("guard")
     start = symbols["start"]
     for name, value in (("loads", loads), ("reads", reads), ("writes", int(writes))):
         code[symbols[name] - start] = value
+    if target is not None:
+        struct.pack_into("<H", code, symbols["target"] - start, target)
     return support.binary_tape("GUARD ", bytes(code), start)
 
 
@@ -668,8 +670,8 @@ GUARDS = {
 
 
 class Guard(unittest.TestCase):
-    """The check's guard of the tape service's part of page 3 (INTERNALS.md,
-    Check, point 2, and PLAN.md, step 13), on a game that reads the tape and
+    """The check's guard of the tape service's part of page 3 (docs/internals/service-and-resident.md,
+    Check, point 2, and docs/BUILD.md, step 13), on a game that reads the tape and
     writes the part within the check's 60 seconds."""
 
     @classmethod
@@ -743,7 +745,7 @@ class Guard(unittest.TestCase):
 
 
 class TapeEnd(unittest.TestCase):
-    """7 Card Stud, as shipped (PLAN.md, step 13). Its snapshot is in the
+    """7 Card Stud, as shipped (docs/BUILD.md, step 13). Its snapshot is in the
     middle of its load. The restored game loads the rest of its tape through
     the tape service, and then keeps its own values in the service's part of
     page 3. Those writes do not count for point 2, because the service has
@@ -836,7 +838,7 @@ def build_part(name):
 
 class Parts(unittest.TestCase):
     """The place of the service's part of page 3 by the game file's lines
-    (PLAN.md, step 17)."""
+    (docs/BUILD.md, step 17)."""
 
     @classmethod
     def setUpClass(cls):
@@ -859,3 +861,109 @@ class Parts(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# The machine of SubRom: an NMS 8250 with only its own mapper, in slot 3-2,
+# under Nextor. Its sub-ROM is in slot 3-0.
+ONE_SLOT = "test/nms8250-512k-sunriseide"
+
+
+def memory_at_the_checks_end(restored, address):
+    """The byte at an address of a restored game, 60 seconds after the
+    restore, from the check's last savestate."""
+    out = os.path.join(restored.out, "byte.txt")
+    if os.path.exists(out):
+        os.remove(out)
+    machine = msx.read_machine(msx.machine_path(restored.machine))
+    script = f"""
+loadstate {msx.tcl_word(os.path.join(restored.out, "check", "60s"))}
+later 0.1 {{
+    set f [open {msx.tcl_word(out)} w]
+    puts $f [debug read memory {address}]
+    close $f
+    stop
+}}
+"""
+    stderr = msx.run([*machine.args, f"-{machine.disk}", os.path.join(restored.out, "check", "disk.dsk")], script,
+                     timeout=120)
+    if not os.path.exists(out):
+        raise AssertionError(f"openMSX stopped before it read the byte{msx.last_output(stderr)}")
+    with open(out) as f:
+        return int(f.read())
+
+
+class SubRom(unittest.TestCase):
+    """T0's calls of the sub-ROM on a machine that has the sub-ROM in the slot
+    of DOS's mapper (docs/internals/service-and-resident.md, T0 and the sub-ROM in one slot), on a game
+    that calls the sub-ROM through the BIOS and then reads the tape, within
+    the check's 60 seconds."""
+
+    NAME, LINES = "subrom", ""
+
+    @classmethod
+    def setUpClass(cls):
+        # tests/subrom.asm as a binary file on tape, then a block of the bytes
+        # 1 to 32 (FORMATS.md, CAS data).
+        code, cls.symbols = test_game("subrom")
+        data = support.binary_tape("SUBROM", bytes(code), cls.symbols["start"])
+        data += bytes(-len(data) % 8) + support.cas_file(GUARD_BLOCK)
+        tapes = write_tape("SUBROM.CAS", data)
+        cls.restored = support.restore(game(cls.NAME, "cas SUBROM.CAS\n" + cls.LINES), ONE_SLOT, tapes)
+
+    def test_t0_replaces_the_rom_in_the_sub_roms_slot(self):
+        support.assert_passes(self, self.restored)
+        header = self.restored.header
+        self.assertEqual(header["H_FLAGS"], 0)
+        state = self.restored.snapshot.state
+        self.assertEqual(state["service"], "1")
+        # Page 0 selects the main ROM in slot 0, so T0 replaces it, and page 3
+        # the RAM in slot 3, where the sub-ROM is.
+        self.assertEqual(int(state["a8"], 16) & 0xC3, 0xC0)
+
+    def test_the_tape_serves_after_the_bios_has_called_the_sub_rom(self):
+        # Before, CALSLT's write of slot 3's subslot register took T0 from
+        # under its own code, and the tape's entries were the ROM's.
+        self.assertIsNone(self.restored.step, self.restored)
+        self.assertEqual(memory_at_the_checks_end(self.restored, self.symbols["result"]), 1)
+
+
+class SplitGuard(unittest.TestCase):
+    """The check's guard of a part whose code block a game file's service at
+    puts apart (docs/internals/service-and-resident.md, Build), on the guard game: a write into the code
+    block fails point 2, and the service's own code there, which reads the
+    tape and writes its scratch bytes, does not."""
+
+    CODE = 0xC100
+
+    @classmethod
+    def setUpClass(cls):
+        games = {}
+        for name, (reads, target) in {"split-writes": (8, cls.CODE), "split-reads": (8, None)}.items():
+            cas = name.upper().replace("-", "")[:8]
+            side1 = guard_tape(0, reads, target is not None, target)
+            side1 += bytes(-len(side1) % 8) + support.cas_file(GUARD_BLOCK)
+            tapes = write_tape(cas + ".CAS", side1)
+            games[name] = f"cas {cas}.CAS\nservice at FCE1 {cls.CODE:04X}\n"
+        with concurrent.futures.ThreadPoolExecutor(len(games)) as pool:
+            cls.restored = dict(zip(games, pool.map(
+                lambda name: support.restore(game(name, games[name]), MACHINE, tapes), games)))
+
+    def test_a_game_that_writes_the_code_block_fails_point_2(self):
+        restored = self.restored["split-writes"]
+        self.assertIn(f"partcode {self.CODE}", restored.read("build.txt"))
+        support.assert_fails(self, restored, 2, f"the game writes {self.CODE:04X}h, in the tape service's part")
+
+    def test_the_service_runs_from_its_code_block_and_its_own_writes_do_not_count(self):
+        support.assert_passes(self, self.restored["split-reads"])
+
+
+class SubRomSplit(SubRom):
+    """The same on a part whose code block a game file's service at puts
+    apart, so that T0's stubs and its call of the sub-ROM run the code block's
+    moved addresses (docs/internals/service-and-resident.md, Build)."""
+
+    NAME, LINES = "subrom-split", "service at FCE1 C480\n"
+
+    def test_the_part_is_split(self):
+        self.assertIn(f"partcode {0xC480}", self.restored.read("build.txt"))
+

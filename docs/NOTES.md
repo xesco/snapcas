@@ -1,488 +1,60 @@
-# Notes
-
-This page keeps the evidence behind the design. The evidence is the games, the
-counts and the findings that taught each rule. Each one is under the name of the
-section that holds the rule. That section is in [INTERNALS.md](INTERNALS.md) or, for
-the decisions and the limits, in [DESIGN.md](DESIGN.md). A rule stays on its page,
-and its examples come here, so the pages read short and the evidence is not lost.
-The last two sections hold the rules that changed, and the questions that are still
-open.
-
-## Tape files
-
-In a collection of 2354 TSX files, 327 hold blocks that a CAS file cannot hold. Of
-the first 125 of them, 123 played to their end in `openMSX` on the Sanyo PHC-28S, 3
-of them with a reset.
-
-## Capture
-
-This note is about step 1's 10 seconds after `Ok`. On the Sanyo PHC-28S with a
-Carnivore2, Moonrider loads when the load starts 9 seconds after the boot menu, and
-stops when the load starts after 5 seconds.
-
-These notes are about the resets in the capture's step 4. Alien 8's loader jumps to
-the reset routine itself. The capture takes The Goonies's snapshot during the start
-that the game's loader's reset begins, and the restored machine finishes that start.
-A loader that crashes into a reset writes the tape service's part of page 3. On the
-PHC-28S, 30 collection tapes did, most of them through the loader that the RAM
-search patch now fixes.
-
-Moonrider pauses its own load for 16 seconds, so step 5's wait lasts 30 seconds.
-
-Saint Dragon reads its tape with interrupts off, and Thunder Blade waits in `TAPION`
-for side 2, so their snapshots go back to the last `TAPION` call's entry (step 6).
-
-This note is about step 5's watchpoints. A-TEAM waits for a key after its title
-screen, and the capture's key try there rewinds the machine. Until the capture set
-its watchpoints again after a rewind, it did not see the loader select the RAM of
-pages 0 and 1, at ATEAM1's FA00h and FA17h, and did not keep those pages. On the
-HB-F700P the restored game then reset the machine, which the check's point 2 and
-point 3 saw. On the VG-8020, the PHC-28S and the HB-75P the image passed the check
-without the two pages.
-
-## Slot patches
-
-Sootland's FCh names slot 0 for page 0, which holds the ROM, and slot 3 for pages 1
-to 3. On the PHC-28S without Nextor, BASIC selects slot 1 in page 2 and slot 0 in
-page 3, and slot 1 also holds RAM in page 1, so the patch writes 14h.
-
-Knight Orc reads its slot values from RAM with `LD A,(EF3Eh) / OUT (0A8h),A`,
-`3A 3E EF D3 A8`, whose last four bytes are the first form with n = EFh. A patch of
-that n changed the address, so the game read a wrong value and hung. Because of that
-hang, the watch skips a `3E` after a `3A`, and the scan skips a `3E` that can be any
-operand. When the watch used the wide rule too, it skipped Rocky's `01 F3 3E FF`,
-which is a `DI` after data, Time Out's `LD SP,EAA8h` before its `LD A,0FCh`, and
-Uchi Mata's `LD (DE0Bh),A` before its `LD A,0F0h`. Finders Keepers selects RAM in
-slot 2 through `WSLREG`, the second form.
-
-## The RAM search patch
-
-In the test collection, 70 tapes have this search, many of them from Opera Soft. The
-second copy on Made in Spain's tape runs after the snapshot.
-
-## Page 3's slot for the other pages
-
-The Sanyo PHC-28S keeps its own 16 KB in slot 0, in page 3 only, beside the ROM in
-pages 0 and 1, and its RAM cartridge in slot 1. With the Carnivore2, BASIC takes
-pages 2 and 3 from the Carnivore2's mapper in slot 2-2 instead. The loaders seen so
-far take these forms:
-
-| Form | Games | Fix in the PHC-28S's game file |
-|---|---|---|
-| Page 1's bits of the slot register from page 3's: `BIT 7,A` / `SET 3,A` / `BIT 6,A` / `SET 2,A` | Circus Charlie and Hyper Sports 3 from Engesoft, and M-Droid's `core` | The page copy patch, which makes the routine select slot 1, the RAM cartridge, in page 1 |
-| The same routine as text, in a BASIC loader's `DATA` lines | M-Droid | A patch of the text |
-| A fixed value for pages 1 to 3, chosen by page 3's slot | Beach-Head. Its value is 54h for page 3 in slot 0 or 1. The value comes from code in page 2, so the capture's patch that keeps page 3 does not see it | A patch to 14h, and the capture without the Carnivore2 |
-| Page 2's slot copied into page 1's bits | Budokan, Michel Futbol Master's side B, Professional Tennis Simulator and Arquimedes XXI, whose program is `slots`, with two dumps each of Michel Futbol Master and Professional Tennis Simulator. Night Shade from Engesoft, whose NIGHT and SHADE end with the copy. Konami's Soccer, whose MUNDIA parts OR the slot register with itself shifted right by two bits | The capture without the Carnivore2, where pages 1 to 3 are the RAM cartridge |
-| A search for RAM in page 1 only, and a ROM image read into page 1 there and into BASIC's page 2, after which the game selects page 1's slot in page 2 | From Super MSX: Aliens, Star and Worm, whose loader is LOADER, and American Football, Japan, Xerider, The Karate Kid, Alexis, Guardic and Mad Driver, whose loader is two parts. Also Dam Busters, and the second half of Hyper Sports 3 | The capture without the Carnivore2, where pages 1 and 2 are the RAM cartridge |
-| A shorter variant of `slots` that keeps the slots it finds | Underground | The capture without the Carnivore2. Which value leads the game to its reset is not known |
-| Pages 2 and 3's slots copied into pages 0 and 1: `AND F0h`, then four `RLCA`s, `RRCA`s or `SRA A`s of the slot register's value, then `OR` with the first, with `AND 0Fh` before it after `RRCA`s or `SRA A`s | The Wall from Super MSX 7, whose LOADER is at DD00h. Each part of a tape made by CasLink3: Hang-On, Lunar Ball and Quartet. Level 9's adventures, which read their A-code in pages 0 and 1: Emerald Isle, Red Moon, Time and Magik II, Return to Eden, Silicon Dreams II, The Worm in Paradise, and the four parts of The Secret Diary of Adrian Mole | The page copy patch, to `LD A,15h`, and the capture without the Carnivore2 |
-
-The `slots` program of Budokan, Michel Futbol Master and Professional Tennis
-Simulator searches for RAM in pages 0 and 1, and its end copies page 2's slot into
-page 1's bits beside the value that the search found. After the War writes its font
-by the copy and reads it by the search's value, so on the PHC-28S with the
-Carnivore2 its menu showed bars for letters, and Mega Phoenix reset during its load,
-so that its image was BASIC's start screen. The check passed for both. The search slot patch now makes the copy the search's
-value in the 31 tapes that hold this search
-([INTERNALS.md, The search slot patch](INTERNALS.md#the-search-slot-patch)). The
-games with a `capture` line for this form keep it.
-
-The forms with fixed code are the bit tests and the copies of pages 2 and 3. Those
-forms are the page copy patch's
-([INTERNALS.md, The page copy patch](INTERNALS.md#the-page-copy-patch)), and the
-others are lines in the game files. CasLink3's form is in 60 tapes, but its parts
-also copy the subslot register's fields of pages 2 and 3 to pages 0 and 1. With the
-Carnivore2, pages 2 and 3 are its mapper, so pages 0 and 1 get the mapper too, and
-the patch leaves the form alone. Only the games that need the capture without the
-Carnivore2 for another reason get the patch. Level 9's code copies the slot register
-only, so its games need the capture without the Carnivore2, and the patch on the
-PHC-28S. Erik the Viking has the same code, but it works with the Carnivore2. The
-blocks that Level 9's loader checks end with an 8-bit sum, which the patch keeps.
-M-Droid's BASIC loader holds the routine as text, and that form stays a line in its
-game file.
-
-## The capture with slot 0 not expanded
-
-On `hbf700p-ram512k-msxdos2`, 251 of the 1,545 game files failed before these
-variants. Three messages covered 237 of them:
-
-| Message | Game files | What the snapshots show |
-|---|---|---|
-| `service t0 needs page 0 outside DOS's mapper`, from the restorer | 121 | In all 121, the program counter is at 0038h, page 0 selects slot 0, and slot 0's subslot register selects another subslot than 0 there. Each interrupt's `RST 38h` runs again at 0038h, and its return address, 0039h, fills the stack downwards. The stack went through FCC9h to FD88h, so the build took the mode without a part in page 3 |
-| `the 26 bytes below SP ... are not in a RAM page that the snapshot keeps`, from the build | 68 | The same in 67, with a stack that had reached the ROM |
-| `page 3 is not a RAM page that the snapshot keeps`, from the build | 48 | A slot register write from code in page 3 that selects slot 0 or slot 3 there. The capture's log names the write, with `cuts off its code` |
-
-After the War's `slots` is a loader of the first kind. At 9024h and 905Eh it writes
-10h to the slot register, which selects slot 0 in page 3. At FFFFh it then writes
-F0h to F3h for page 0, and F3h, F7h, FBh and FFh for page 1. Altered Beast's loader
-does the same at B01Ah, with 14h and then FCh to FFh. Mot's loader is of the second
-kind. Its copy of `ENASLT` at D08Eh gets the main ROM's slot ID, 80h, and writes 15h
-to the slot register at D13Ch.
-
-These loaders fail in `openMSX` itself. A plain load on the same machine, which
-types the load command after BASIC's `Ok`, ends in these states 60 seconds after the
-tape's end:
-
-| Games | The plain load's end |
-|---|---|
-| After the War, Altered Beast, Lorna, Casanova | The program counter at 0038h, with FFh in slot 0's subslot register |
-| Kong's Revenge, Fernando Martin, Robot Wars | Slot 0 in page 3 |
-| Satan, Bestial Warrior | Slot 3 in page 3, where BASIC had slot 1, the RAM cartridge |
-| Mot, Mandragore | BASIC's screen with `Found:` and the file's name, and no game |
-| Uchusen Gamma | BASIC's banner alone, after a reboot |
-
-Bestial Warrior and Mandragore also find the HB-F700P's own RAM in slot 3-3 and
-select slot 3 in page 3, where the RAM cartridge in slot 1 holds their code. They
-load on `hbf700p-noexp0-msxdos2`, without that cartridge.
-
-With the variants, the games run wrote 235 `capture` lines. Continental Circus and
-Il Giustiziere got their lines by hand, Thunder Blade got `service t0` beside the
-run's line, as on the other machines, and Operation Wolf, Rambo III and Puzzle pass
-with the check's limit for a large image. That left 11 game files. Ten of them
-failed for a reason of their own, and none of those reasons is the HB-F700P's:
-
-| Game files | What failed | The fix |
-|---|---|---|
-| Break Out!, Breakout | Line 30 stops at `Out of memory`. An MSX2's `SCREEN` runs in the sub-ROM, with the stack pointer at 81B7h where the PHC-28S has 81DAh, and `CLEAR1,&H83FF` leaves 10 bytes too few. The loader also selects slot 2 for RAM by fixed values, and this machine has the MSX-DOS 2 cartridge's ROM in page 1 of slot 2, so the slot patch left that field | `MAXFILES=0` at the start of line 5, in `game.txt`, which frees a file's 267 bytes. In the machine's game file, patches of the 12 slot values to slot 1 |
-| Master of the Lamps | `CLEAR0,&H82E6` needs 160 bytes above the program, and the program has 161 on an MSX1. The MSX2 BASIC has one `DEC HL` more, at 7A22h, and keeps one byte more below the file buffers | `MAXFILES=0` at the start of line 1, in `game.txt` |
-| The Queens Footsteps Part 2 | The game calls 0115h, the second byte of the jump table's entry at 0114h. An MSX1's bytes there run on into `TAPIN` and return 7 seconds later. An MSX2's jump to C316h | The call made three NOPs, in `game.txt`. The game file's `snapshot at` and `service no` lines were for that call of the tape, and are gone |
-| Booga-Boo, Frog | `LD SP,0FFFFh`, on an MSX2's copies of VDP registers 8 to 23 and the main ROM's slot at FFF7h | The stack at F380h, in `game.txt` |
-| A-TEAM | The capture did not keep the RAM of pages 0 and 1 ([Capture](#capture)) | The capture's watchpoints after a rewind. The game file needs no line |
-| La Aventura Espacial, both sides | The interrupt handler writes the slot register from the game's copy of it, and the machine resets at the end of the load | [The interrupt slot patch](#the-interrupt-slot-patch), with the capture on `hbf700p-noexp0-ram512k-msxdos2` |
-| Echec, side B | The block CODEFEN1 loads FD9Ah to FFFFh, with an empty MSX1's bytes from FFCAh on, over an MSX2's variables there. FFF7h, the main ROM's slot, gets FFh | The block's end address made FFC9h, in `game.txt` |
-
-The fixes in `game.txt` pass on the VG-8020, the PHC-28S, the HB-75P, the HB-F700P
-and the NMS 8250 with a Carnivore2, except Echec's side B on the NMS 8250. Its
-loader looks for RAM in pages 0 and 1 by primary slot only, at BB00h. The NMS 8250's
-RAM is in slot 3-2, with ROMs in pages 0 and 1 of slot 3, and with the Carnivore2
-the loader writes into the cartridge, so it finds no RAM either way.
-
-The NMS 8250's BASIC needs 160 free bytes at each check of the stack, where the
-HB-F700P's and an MSX1's need 120. Its `LD A,60h` at 6268h is `LD A,88h` in those.
-So `&H82E7`, which gives Master of the Lamps its one byte on the HB-F700P, was not
-enough there, and both games got `MAXFILES=0`.
-
-Relics still fails on the HB-F700P. The restorer needs 32 or 33 free mapper segments
-for its tape, and MSX-DOS 2 has 26 in the 512 KB cartridge. So 1,544 of the 1,545
-game files pass.
-
-The HB-F700P's own mapper, in slot 3-3, has 16 more free segments, and the restorer
-does not use them. It takes every segment from MSX-DOS 2's primary mapper, which is
-the cartridge and also holds the game's RAM, because the tape service selects a
-segment to read the tape and does not select a slot. The game needs both sides of
-its tape, so a shorter tape is not a fix.
-
-A tape service that reads from a second mapper is possible, and is not built. In a
-test in `openMSX`, a routine in the code segment selected slot 3-3 in page 2, read
-a byte of a segment there and selected the old slot again. The part in page 3 does
-not grow. The restorer would find the second mapper in MSX-DOS 2's mapper table
-(`EXTBIO` with D=4 and E=1) and get its segments with `ALL_SEG`. The restorer must
-then leave out the segments of that mapper that the game holds. MSX-DOS 1 has no
-mapper table. The change is about 500 lines with its tests, and it changes the
-image format. Relics is the only game file that fails for free segments in the
-results of the five machines, and none of `openMSX`'s 251 machine files has two
-mappers.
-
-## The interrupt slot patch
-
-La Aventura Espacial resets the HB-F700P at the end of its load. The stack at the
-reset holds the frame of a BIOS call into the sub-ROM, and the handler at CF9Ah had
-written 50h, the copy's value at D053h, to the slot register. The same handler is on
-14 tapes, with the copy at D053h or CFBEh, and 13 game files load them: both sides
-of La Aventura Espacial, Ci-U-Than Trilogy II and III in two game files each, Los
-Elfos de Maroland in two, The Elves of Maroland, Las Aventuras de Rudolphine Rur 1
-and 2, and Torreoscura in two. The 14th tape is a second dump of The Elves that no
-game file names. On the HB-F700P, the 11 game files other than La Aventura
-Espacial's loaded only on `hbf700p-noexp0-msxdos2` before the patch. With the patch,
-R.U.R. 1, Los Templos Sagrados, Chichen Itza, Los Elfos and Torreoscura also load on
-`hbf700p-noexp0-ram512k-msxdos2`. The Elves still loads only without the RAM
-cartridge, and the cause is not known.
-
-## The RAM's subslot in every page
-
-On `nms8250-carnivore2`, 85 of the 1,545 game files failed before this step, and the
-capture without the Carnivore2 fixed 19 of them. Of the 66 others, 32 pass with the
-step alone, on the machine itself. Arkanoid, Bruce Lee and Punch and Judy stopped at
-`Syntax error in 10`, after `BLOAD"cas:",R` came back from a loader that had found
-no RAM. Engesoft's loaders stopped at an error in line 23 or 25. Head over Heels,
-Match Day II, Rambo III and Operation Wolf tried each slot register value from code
-in page 3, and ended with slot 2, which holds nothing, in page 3. The game files
-that reset the machine and booted DOS again, such as Beach-Head and Hyper Sports 3,
-had loaded their game into a ROM.
-
-The step made two games fail that passed before it. Macadam Bumper and Las Tres
-Luces de Glaurung put their stack at the top of memory once their loader finds 64
-KB, and the capture's log names their push at FFFFh. They got `subslots keep`. Four
-game files of Satan, whose stack is at 000Ch then, failed on the machine, and the
-games run gave them the capture without the Carnivore2. On the HB-F700P, Goody and
-El Poder Oscuro are captured without the RAM cartridge, in slot 3-3. With the step
-their loaders select another slot in page 3, where their code runs, and they got
-`subslots keep` too.
-
-These games use FFFFh as memory, which is the subslot register of both RAMs of this
-machine:
-
-| Game | What writes FFFFh | Result |
-|---|---|---|
-| Jumping Jack | BASIC's `POKE &HFFFF` in seven places, and `LD A,(0FFFFh)` in the machine code | Patches keep the value at FFFEh, in `game.txt` |
-| Space Beater | A push with the stack at 0000h, from `LD SP,0000h` in three places | Patches set the stack at FFFEh, in `game.txt` |
-| Enchanted | An LDIR of the character set to EA60h to FFFFh | A patch copies one byte less, on this machine only. The byte is the last row of the last character |
-| RoboCop | Two fills of F000h to FFFFh, at 56C8h and 5A4Ah, and a copy of 2000h to 2FFFh there at 84C0h, before each load from the tape | Patches end the fills and the copy at FFFEh, on this machine only. The game keeps a copy of the system area in 2000h to 2FFFh |
-| Ocean Conqueror | The loader's LDDR of 4000h bytes to C000h to FFFFh | A patch moves one byte less, on this machine only. The byte is the last row of the last character, as in Enchanted |
-| The Wall | An LDDR of 8001h bytes from C000h to 0000h, at 0360h | A patch moves 7FFFh bytes, from BFFEh to FFFEh, on this machine only. The byte left out follows a filler at the block's end, and no code of the game names FFFFh |
-| Casanova | `LD A,18h / LD (0FFFFh),A` at 05ECh, a rest of the ZX Spectrum version. The game runs in interrupt mode 1 | A patch replaces the write with `NOP` and `LD A,0Ch`, on this machine only |
-| Jack the Nipper | The last byte of the block of FC00h bytes that its loader reads to 0400h | Patches make the load FBFFh bytes, on this machine only |
-| Barbarian | An LDIR of 1B2h bytes to FF01h and on through FFFFh to 00B2h | A patch makes the byte for FFFFh AAh, the value that the register has, on this machine only. The game then reads 55h there, where the tape has 00h |
-| Chuckie Egg, in two dumps | `LD (0FFFFh),A` with B0h at AC97h, before each `LDIR` that clears a part of memory. With EDh at FFFEh the two bytes are an `LDIR`, which the game never runs | A patch replaces the write with `OR A` and `CP 7Bh`, on this machine only |
-| Knight Lore | 14 tables of 256 bytes that the game builds in F200h to FFFFh, for the 7 shifts of a sprite's byte, and reads with the byte as the low address | Patches move the tables down one page, to F100h to FEFFh, and the stack from below F200h to below F100h, on this machine only. The stack has 256 bytes there, above the game's tables in E000h to EFFFh |
-| Alien Syndrome | A table of 256 words in FE00h to FFFFh, built at 9F16h for the double-width text and read at B739h only. The game's other two tables there, built at 9EF3h and 9F03h, end at FEFFh and FFBFh | Patches put the word table two bytes lower, in FDFEh to FFFDh, on this machine only. FDFEh and FDFFh hold 00h in every block that loads them, and the table's first word is 0000h |
-
-The Wall, Jack the Nipper and Barbarian load with a loader that compares the
-exclusive OR of a block's bytes with the byte after the block. Their patches change
-that byte too. The Wall flashes the Caps lamp 16 times after a block that fails, and
-starts the game 5 seconds later. Casanova's three new bytes have the exclusive OR of
-the old ones. Chuckie Egg's tape holds each byte XOR the two bytes of its address,
-and its loader checks the sum of the bytes, which the new bytes keep.
-
-No patch of the capture replaces these patches. Both RAMs of the machine are in an
-expanded slot, slot 2 is empty, and slot 0 holds the ROM, so an image for this
-machine always has the register at FFFFh.
-
-These game files failed for another cause:
-
-| Game | Cause | Result |
-|---|---|---|
-| Choplift, Tetratlon, Toruk, Digy Dung, Container, of the Super MSX tapes | The game's loader fills FD9Ah to FFF6h with C9h, to clear the hooks. On an MSX2, FFE7h to FFF6h hold the BIOS's copies of VDP registers 8 to 23. The game then sets the screen mode, the sub-ROM writes the registers from the copies, and register 15 gets 09h. The interrupt handler then reads status register 9, the interrupt stays active, and the handler's stack runs through the memory | A patch ends the fill at FFE6h, on this machine only |
-| Trivial Pursuit | The game copies the BIOS to the RAM of page 0, puts its own code there from 268Ch, and sets H.KEYI and H.TIMI to jump to 2701h and 2702h in that RAM. An interrupt in the sub-ROM goes to the main ROM's handler, whose hooks then jump to 2701h and 2702h in the ROM, where an LDIR of 65,536 bytes can run | A patch makes H.KEYI a `RET`, and H.TIMI a test of the slot register that runs the routine only when page 0 is in slot 1 or 3, on this machine only |
-| Mortadelo y Filemon | `OUT (0FEh),A`, the ZX Spectrum's border port, at 5B13h and FF5Dh. Port FEh is a memory mapper's register of page 2, and both RAMs of this machine are mappers | Patches replace each with `LD A,A` and `LD D,D`, on this machine only |
-
-Trivial Pursuit selects its RAM in page 0 by its primary slot only. Without the
-Carnivore2, its RAM is in slot 3, where the sub-ROM is too, and a call of the
-sub-ROM leaves the sub-ROM in page 0. So the game needs a RAM in another slot than
-3, as the Carnivore2's is.
-
-The NMS 8250's BASIC needs 160 free bytes at each check of the stack, where an
-MSX1's and the HB-F700P's need 120. Its `LD A,60h` at 6268h is `LD A,88h` in those.
-Nine BASIC loaders set `CLEAR` for an MSX1's stack and stop at `Out of memory` here.
-Happy Fret in two dumps, Reflex and Wing Man got `MAXFILES=0`, which frees a file's
-267 bytes. Polar Star got it in the place of five characters of its message, on this
-machine only, because its program is stored in BASIC's tokens. A View to a Kill
-opens a file, and lost its 63 needless spaces. Robotix already has `MAXFILES=0`, and
-got its five lines as one, with `CLEAR0`. Survivor loads with the step above.
-Spartan X runs its BASIC program during the game, and its code at 8580h is in the
-file's area, so `MAXFILES=0` breaks it. Its line 100 lost `LOCATE 10,11` and the
-`PRINT` of its message, and has `CLEAR 1` for `CLEAR 10`, which frees 39 bytes, on
-this machine only.
-
-Crazy Golf, Cubit and Humphrey load their loader at FFCAh to FFFEh, over an MSX2's
-copies of VDP registers 8 to 23 and the main ROM's slot at FFF7h. Their patches load
-it at FB03h. The Queens Footsteps Part 1 calls 0115h, as Part 2 does, and has the
-same patch.
-
-## Build
-
-Double Dragon selects one segment in two pages, so the build finds a page's RAM by
-its segment as well as its slot.
-
-Moonwalker keeps its code in FCC9h to FD88h, the area where the service's part of
-page 3 goes by default.
-
-## Tape service
-
-Saint Dragon's loader expects the FFh that `TAPIN` returns in side 1's padding, as
-`openMSX` returns it while the player turns the tape over.
-
-Gauntlet stops the motor through the BIOS in ROM. It calls `STMOTR` there, with
-`rom keep`, so the manual tape's `TAPION` finds the motor off.
-
-4x4 Off-Road Racing asks the player to stop the tape and press space. On the manual
-tape, the tape has stopped by itself, because the game stops the motor, as openMSX
-shows. At the game's next load on the manual tape, the player presses RETURN to play
-on, or GRAPH or CODE to rewind.
-
-Tokyo Nampa Street loads each scene with BASIC's own `BLOAD`, and its page 2 holds
-the game's stack. So the mode without a part in page 3 serves `BLOAD` and its
-`TAPIN` uses no stack. Bronx's RAM is in a slot without a mapper on the Sanyo
-PHC-28S, and it lends its page too.
-
-Bronx's page 3 has one area of zeros at the snapshot that the service's part fits,
-F1E1h to F26Fh. Bronx's code names two addresses in that area, F1F3h and F207h, so
-Bronx's game file has `service t0`. `build.py` took that mode by itself while the
-part was 168 bytes, because the part did not fit in the area then.
-
-Gauntlet's level loader reads a byte with `TAPIN`, puts the byte in C, and adds BC
-to a sum. The loader relies on the B = 0 that the BIOS's `TAPIN` leaves. So the
-service's `TAPIN` leaves B = 0 too, through the entries in page 3 and through T0.
-
-Moonwalker's loader computes the value that its stub writes to the slot register as
-`AND H / LD L,A`, the slot register with page 0's bits cleared, for slot 0. On the
-Sanyo PHC-28S the game keeps the slot register at A5h, so the scan puts `LD L,0A6h`
-in place of those instructions. The new value selects slot 2, DOS's mapper. Altered
-Beast and Bronx have the same stub. On an NMS 8250 its own page 0 RAM is in DOS's
-mapper, so it cannot use the mode there.
-
-Desperado's phase loader writes 0 to FD68h before it looks for a phase, and that
-byte is in the tape service's reader in page 3. The write turns the reader's
-`OUT (C),D` into a 2-byte NOP. So every read comes from the code segment, where side
-1 starts, and the loader never finds a phase on side 2. The check does not start a
-phase, so it passes. The write happens on every machine, so the game's `game.txt`
-has `service t0`, and the scan patches its two stubs of `TAPION`. Gunsmoke, Go!'s
-release of the same game, has the same loader and the same line. Far West, Super
-MSX's copy, holds only the first phase and reads no more of the tape.
-
-The three versions' joystick routine writes PSG register 7 as the sound's value OR
-C0h before it reads register 14. Bit 6 makes I/O port A an output, and a discrete
-PSG, as the PHC-28S, VG-8020 and HB-75P have, then returns register 14's own latch
-and not the joystick. Their `game.txt` patches OR C0h to OR 80h. The game never
-writes register 15, so it reads the port that the BIOS selected last, port 2. Its
-sound driver writes register 7 with bit 7 clear, so I/O port B is an input at the
-snapshot, and register 15 then reads FFh, its pins. The restore wrote that FFh with
-port B an output. That write drives pin 8 of both joystick ports high, and a
-joystick whose switches share pin 8 then reads nothing. The capture now keeps the
-last value written to register 15, the BIOS's CFh.
-
-## Check
-
-7 Card Stud reads its last block through the service and then keeps its variables at
-FD00h, so point 2 ignores writes after the tape is read to its end.
-
-After Altered Beast loads its side B, it writes its variables over the service's
-entries at FCE1h, and its next call of the tape hangs. So Altered Beast needs the
-mode without a part in page 3. Point 2 does not see those writes, because they come
-after its 60 seconds.
-
-Points 1 and 2 do not see a reboot. Seven Super MSX images on the PHC-28S, and
-American Football on the VG-8020, passed those points. These images showed the boot
-screen or Nextor's 60 seconds after the restore, as their loads do in plain
-`openMSX`.
-
-Raider, from Super MSX n.18, resets the VG-8020 6.2 seconds after the restore and
-shows its game at 60 seconds, so point 3 needs the boot screen at two savestates.
-
-Konami's Soccer and Budokan on the PHC-28S, captured with the Carnivore2, stay on a
-title or an empty screen for the 60 seconds. But their captures reset 8.7 and 7.8
-seconds after the snapshot, and on a real PHC-28S Konami's Soccer's restored game
-does reset, into DOS.
-
-Point 3 judges where the machine ends, not the reset, because a loader can reset the
-machine on purpose after the restore. Japan, from Super MSX n.20, resets the VG-8020
-0.8 seconds after the restore, and the BIOS's search for cartridges finds the ROM
-copy in RAM and starts that copy. A breakpoint is at the start of the BIOS's reset
-routine, where 0000h's `DI / JP` jumps, while page 0 selects the main ROM, as in the
-capture's log ([Capture](#capture)). The breakpoint notes each reset in the report
-with its time, but a reset alone does not fail the point. The check reads EXPTBL,
-for the main ROM's slot, when `SNAPCAS.COM` starts. At first, the check read EXPTBL
-when the boot steps ended. On the PHC-28S the BIOS has not set EXPTBL then, so the
-breakpoint took the main ROM for slot 3-3 and missed every reset there, Aliens's
-among them. The report adds `point 3: fail` and the sign, or else `point 3: pass`,
-and a failed point 3 fails the check. A hang is not a reboot, and point 3 does not
-see a hang. American Football, captured with the Carnivore2, stops in the BIOS on
-the VG-8020 with its interrupts off. Its game file now captures it without the
-Carnivore2 ([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)).
-
-During the same 60 seconds the game must not stop at a BASIC error, and point 4
-checks that. A BASIC program, or a loader written in BASIC, that meets an error
-prints one of BASIC's error messages, such as `Syntax error in 100`. It then waits
-at `Ok`, in a text mode, where `openMSX`'s `screen` reads the message. Point 4 fails
-when the screen's text holds one of those messages at one of the savestates. Points
-1 to 3 do not see such a stop. A scan of the 60-second savestates of the
-collection's passing game files found 17 runs on the PHC-28S and the VG-8020 that
-end at an error. Among them are Field Master's `Overflow in 130` and three tapes of
-the CasLink3 loader, whose `BLOAD` of the next part ends in `Syntax error`. A loader
-that stops at `Ok` on purpose, and tells the player to press F5 or type `RUN`, as 12
-tapes do, shows no error message, so it passes. The report adds `point 4: fail` and
-the message, or else `point 4: pass`, and a failed point 4 fails the check.
-
-## Decisions
-
-Of 112 programs on the Engesoft and Super MSX tapes that File-Hunter also has as
-dumps of their own, none had game blocks that equal the dump's.
-
-On the Sanyo PHC-28S, La Abadia del Crimen's loader took the RAM cartridge in slot 1
-for an expanded slot and crashed, but loaded without the cartridge, until the RAM
-search patch fixed its load. Its image ran with the cartridge in place, because the
-game never selects slot 1 again.
-
-Of the 59 multi-load files tested on an NMS 8250, two games use page 0 RAM and leave
-the ROM there at the snapshot: Moonwalker and Time Out.
-
-A search of the 1,653 files of File-Hunter's MSX CAS collection found 62 files of 51
-games. The search looked for files that leave over 10% and 2 KB unread in a test
-load and hold a rewind or play prompt. Of those games, 20 build stubs that T0 alone
-does not intercept, and in 41 the unread blocks have no names.
-
-## Limits
-
-Moonwalker's 236 KB tape does not fit in an NMS 8250's 128 KB.
-
-Doki Doki Penguinland selects the RAM cartridge, slot 1, in page 3, where the Sanyo
-PHC-28S without Nextor keeps its internal RAM. So the game's slot patch is a line by
-hand. On the NMS 8250, BASIC's subslot register of slot 3 does not select RAM in
-pages 0 and 1 at step 3, so the slot map has no slot for those pages. So Checkmate!
-and Finders Keepers keep their lines there.
-
-Breakout's stack pointer is 0004h at the snapshot on the MFRSD machine, too low for
-the tail.
-
-Super MSX n.17's side B sets its stack pointer to 0000h. So its game file captures
-without the Carnivore2, where FFFFh is RAM, and takes its snapshot at 125 seconds,
-when the stack pointer leaves room for the tail.
-
-Tokyo Nampa Street waits for its `PLAY` music to end, and on a real PHC-28S the
-music never ends. Its game file's `snapshot at` comes after the music, and with that
-`snapshot at` the game runs on the real machine.
-
-Konami's Soccer, in its hacked dump `KONAMI.CAS`, resets the machine 8.7 seconds
-after the snapshot in its capture on the Sanyo PHC-28S, with no key pressed. On a
-real PHC-28S with the RAM cartridge in slot 1 and the Carnivore2 in slot 2, the
-restored game resets too, and the BIOS boots Nextor into DOS. The same happens in
-`openMSX` on the VG-8020, and in the plain load in `openMSX` on the PHC-28S. In
-`openMSX`'s check on the PHC-28S, the restored game stays on its title screen for
-the 60 seconds and never resets. Point 3's third sign fails the check for that
-([Check](#check)), and Budokan does the same. Why the restored machine does not
-reset there is not known. Both captures reset because the loaders crash. The loaders
-copy page 2's slot into page 1's bits, and with the Carnivore2 page 2 is its
-mapper's subslot
-([Page 3's slot for the other pages](#page-3s-slot-for-the-other-pages)). Their game
-files now capture them without the Carnivore2, where neither resets, and both games
-run.
-
-## History
-
-For a time, the capture stopped at every reset. Those stops failed 37 game files on
-the PHC-28S, among them The Goonies, KONAMI and KNIGHTMA, whose images pass the
-check and show the game. The capture now only logs a reset.
-
-The first signs were the tail's jump running a second time and
-`Copyright 1983 by Microsoft` on the screen ([Decisions](#decisions)). The first
-sign also fired when a game's own code passed the tail's jump address, within 0.4
-seconds of the restore. The code of Ci-U-Than Trilogy III and of Enchanted does so
-on the PHC-28S. The second sign also fired for games whose restored screen still
-holds BASIC's banner with that line, such as Roberto Mate from Philips's Turbo Pack
-A and Trick Boy.
-
-The first machine names, such as `advanced/phc28s`, named only the model, and
-folders split the machines by how hard they are to set up.
-
-The first capture variants were named after their machine and the cartridge that
-they leave out, such as `advanced/phc28s-nodisk`, and the tools found them by that
-prefix. With the new machine names, that rule gives names such as
-`phc28s-ram64k-carnivore2-nocarnivore2`.
-
-A compilation's program that File-Hunter also has as a dump of its own first got no
-game file. It now gets one in the collection's folder.
-
-Eight Super MSX images crashed into a reboot after the restore and passed points 1
-and 2. A first rule then failed every reset after the restore, on the assumption
-that a loader resets on purpose only before the snapshot, as The Goonies's does.
-Japan, from Super MSX n.20, resets the VG-8020 after the restore and then starts, so
-point 3 now judges where the machine ends. Point 3's first signs were the tail's
-jump running again and `Copyright 1983 by Microsoft` on the screen. Those signs
-failed games that do not reboot: three whose code passes the tail's jump address,
-and games whose restored screen holds BASIC's banner.
-
-## Open questions
-
-One open question is the RAM search patch on a machine where the RAM that the loader
-finds is in an expanded slot other than the slot of page 3. The patched loader then
-selects the subslot that the slot's register already selects.
+# Hardware & Game Notes
+
+This reference preserves the MSX hardware quirks and game case studies behind the rules and automatic patchers in `snapcas`. Use it when debugging a new failure or designing a patch. For the patcher implementations themselves, see [docs/internals/patches.md](internals/patches.md).
+
+## Loaders and slots
+
+### Primary-slot-only loaders
+Many 1980s loaders compute `OUT (0A8h),A` or `CALL WSLREG` values assuming RAM sits in one unexpanded primary slot:
+- **Fixed slot assumptions:** *Sootland* writes `FCh` (slot 3 RAM); on a PHC-28S without Nextor (internal RAM in slot 0 page 3, RAM cart in slot 1 pages 1–2), the matching value is `14h`. *Doki Doki Penguinland* explicitly selects slot 1 in page 3 and keeps a hand patch.
+- **False-positive `3E` operands:** *Knight Orc* executes `LD A,(EF3Eh) / OUT (0A8h),A` (`3A 3E EF D3 A8`) whose tail resembles `LD A,EFh / OUT (0A8h),A`. Capture skips `3E` after `3A`, while the build scan skips any `3E` that could be an operand.
+- **Page-copy loaders:** Level 9 adventures (*Emerald Isle*, *Red Moon*, *Adrian Mole*, etc.), CasLink3 tapes (*Hang-On*, *Lunar Ball*, *Quartet*), Engesoft's *Circus Charlie* / *Hyper Sports 3*, and Super MSX's *The Wall* copy page 2/3's slot bits into pages 0–1. Fixed machine-code forms are handled by the page-copy patcher (preserving Level 9's 8-bit block sum); BASIC `DATA` forms (*M-Droid*) use game-file patches.
+- **Dinamic's `slots` program (31 tapes):** Searches for RAM in pages 0–1, then copies page 2's slot into page 1 beside the found value. On a PHC-28S with Carnivore2, *After the War* rendered bars for fonts and *Mega Phoenix* reset to BASIC before the search-slot patcher aligned both values.
+- **Buggy `ENASLT` copies (14 tapes):** *Arkos I–III*, *Satan*, *Made in Spain*, and *Paris-Dakar* copy `ENASLT` with `AND B` instead of `AND H` (clearing the subslot register when `B = 00h` on `sx2-extramapper-mcp`) and restore BASIC using `EXPTBL[1]` (`00h`). Fixed globally by the `ENASLT`-copy patcher.
+- **Aventuras AD interrupt handler (13 games):** *La Aventura Espacial*, *Ci-U-Than Trilogy II/III*, *Elfos de Maroland*, *R.U.R. 1/2*, and *Torreoscura* write a saved `A8h` value during interrupts, colliding with MSX2 sub-ROM calls (fixed by the interrupt-slot patcher). On `sx2`, where RAM (`3-0`) shares slot 3 with the sub-ROM (`3-1`), a 13-byte patch also saves/restores the subslot register around the handler's `013Ch` call.
+
+### Expanded slot 0 & `noexp0` capture
+On machines with expanded slot 0 (Sony HB-F700P, SX-2), loaders that probe RAM via `OUT (0A8h),A` and `LD (0FFFFh),A` frequently crash even in plain `openMSX`:
+- *After the War*, *Altered Beast*, *Lorna*, and *Casanova* write `FFh` to slot 0's subslot register, leaving page 0 unmapped so every interrupt loops on `RST 38h`.
+- *Mot* and *Mandragore* pass `EXPTBL[0]` (`80h`) to a broken `ENASLT` copy.
+- Capturing on a `noexp0` variant (unexpanded slot 0 with main ROM in subslot 0) fixes 235+ games on `hbf700p-ram512k-msxdos2` without per-game patches.
+
+### `FFFFh` as RAM in expanded slots
+When page 3 sits in an expanded slot (all RAM on NMS 8250 and SX-2; Carnivore2 on MSX1), any write to `FFFFh` hits the subslot register and maps RAM out:
+- **Stack at `0000h` / `FFFFh`:** *Space Beater* (`LD SP,0000h`), *Booga-Boo*, *Frog*, and *Johny Comomolo* (`LD SP,0FFFFh`, which also clobbers MSX2 `MAINROM` at `FFF7h` during `EXTROM`) patch `SP` to `FFFEh` or `F380h`. *Macadam Bumper* and *Las Tres Luces de Glaurung* use `subslots keep`.
+- **Block copies / tables ending at `FFFFh`:** *Enchanted*, *Ocean Conqueror*, *The Wall*, *Jack the Nipper*, *RoboCop*, *Barbarian*, *Chuckie Egg*, *Knight Lore*, and *Alien Syndrome* all write `FFFFh` and keep targeted patches (updating block XOR/sum bytes where checked).
+- **Hook fills past `FFC9h`:** 32 games (e.g. Super MSX's *Choplift*, *Tetratlon*, *Toruk*, *Digy Dung*, *Container*) fill `FD9Ah`–`FFF6h` with `C9h`, clobbering MSX2 VDP register copies `RG8SAV`–`RG23SAV` (`FFE7h`–`FFF6h`); the next screen-mode change writes `09h` to VDP R#15 and causes an infinite interrupt storm. The hook-fill patcher caps these fills at `FFC9h` on MSX2+.
+
+### ZX Spectrum ports & MSX1 BIOS internals
+- **`OUT (0FEh),A`:** Spectrum ports (*Mortadelo y Filemon*, *Double Dragon 88*, *Scramble*) write to Spectrum border/beeper port `FEh`. On MSX mappers, port `FEh` remaps page 2 and crashes the game into `RST 38h`. Patched to `7F 52` (`LD A,A / LD D,D`), which is a 2-byte no-op that preserves both 8-bit sum and XOR checksums (`D3 + FE = D1`, `7F + 52 = D1`; `D3 ^ FE = 2D`, `7F ^ 52 = 2D`).
+- **Hardcoded MSX1 BIOS internals:** *The Queen's Footsteps Parts 1 & 2* call `0115h` (middle of a jump entry); *Khazzad-Dum* calls `046Fh` (MSX1 internal `BREAKX`, which is inside `CHKRAM` reset on MSX2/MSX2+—patched to `CALL 00B7h`).
+
+## Tape service and memory
+
+- **Register contracts:** *Gauntlet*'s level loader relies on `TAPIN` returning with `B = 0` (matching the BIOS), so `SERVICE.BIN` preserves `B = 0` in both page 3 and `T0` modes.
+- **Side 1 padding:** *Saint Dragon* expects `TAPIN` to return `FFh` bytes during Side 1 trailing padding while flipping sides.
+- **Post-end writes:** *7 Card Stud* writes variables into `FD00h` after reading its last tape block; check point 2 ignores writes to the tape service once the tape reaches its end.
+- **Late overwrites:** *Altered Beast* overwrites `FCE1h` after loading Side 2 (past the 60 s check) and *Desperado* / *Gunsmoke* zero `FD68h` inside the reader when starting a phase; both use `service t0`.
+- **Split placement:** *Power Drift*, *The Running Man*, and *SPQR* keep page 0 RAM in DOS's mapper (blocking `service t0`) and lack 158 contiguous free bytes at any `xxE1h`, motivating split `service at <xxE1> <code>` (and `FFE1h` entries for BIOS-free games like *Power Drift*). *Chase H.Q.* places its service inside an unused 255-byte `IM 2` vector table.
+- **Same segment in two pages:** *Double Dragon* maps one mapper segment into two pages simultaneously, so the build tracks RAM by `(slot, segment)` and stores explicit tail/page-3 record indices in the image header.
+- **Mapper capacity:** *Relics* requires 32–33 free mapper segments, exceeding 512 KB cartridges (26 free under MSX-DOS 2); supporting a second mapper would require a format change and ~500 lines for a single title.
+
+## VDP and hardware
+
+- **VDP R#8 `VR` bit:** *Boulder Dash* clears bit 3 (`VR`) of VDP R#8 on a V9938; capture forces `VR = 1` while dumping `physical VRAM` so linear restore matches.
+- **PSG R#7 and R#15 (joystick ports):** *Desperado* / *Gunsmoke* / *Far West* set bit 6 of PSG R#7 (making port A an output, breaking discrete PSGs on PHC-28S/VG-8020/HB-75P) and leave R#7 bit 7 clear at snapshot time (making R#15 read `FFh`, which would drive joystick pin 8 high on restore). Capture tracks the last byte written to R#15 via port `A1h` watchpoint.
+- **BASIC stack margin differences:** MSX2 BASIC (`SCREEN` via sub-ROM) uses more stack than MSX1, and NMS 8250 BASIC enforces a 160-byte free-stack check vs. 120 bytes on MSX1/HB-F700P. Loaders with tight `CLEAR` values (*Break Out!*, *Master of the Lamps*, *Happy Fret*, *Reflex*, *Wing Man*, *A View to a Kill*, *Spartan X*) fix this with `MAXFILES=0` or smaller `CLEAR` reserves.
+- **Timing & resets during capture:** *Moonrider* requires 10 s after `Ok` on PHC-28S+Carnivore2 and pauses 16 s mid-load (hence the 30 s motor-off wait). *A-TEAM* showed that `loadstate` rewinds must re-arm memory watchpoints. *The Goonies*, *Alien 8*, *Raider*, and *Japan* reset intentionally during boot/start, so point 3 flags where the machine ends up rather than every reset.
+- **Real PHC-28S quirks:** BASIC `PLAY` music active at snapshot time never finishes on real hardware (*Tokyo Nampa Street* snapshots after the music). *Konami's Soccer* and *Budokan* reset on real PHC-28S+Carnivore2 even when `openMSX` stayed on the title screen—capturing without Carnivore2 fixed both.
+
+## MSX2+ and SX-2
+
+- **80-column boot:** KdL's SX-2 sub-ROM resets width to 80 at every boot, breaking 37/40-column BASIC `LOCATE`/`PRINT` loaders; `width 37` in `sx2*.txt` fixes this.
+- **`POKE &HFFFF,&HAA` (83 games):** Hardcodes MSX2 subslot 2 in every page; on SX-2 (RAM in `3-0` or `0-1`), the subslot-POKE patcher substitutes the machine's actual RAM subslot (`50h` when RAM shares slot 0 with main ROM so BASIC stays mapped).
+- **`T0` sharing slot 3 with sub-ROM:** On `sx2`, DOS's mapper (`3-0`) and sub-ROM (`3-1`) share slot 3, so `T0` patches `CALSLT` (`t_s`/`t_c`) to switch subslots via page 3 without unmapping `T0` underneath itself.
+- **Extra-Mapper (`sx2-extramapper-mcp`):** DOS and BASIC RAM sit in slot `0-1` beside main ROM (`0-0`), while SX2RES occupies slot `3-0`:
+  - Capture skips setting RAM in all pages of slot 0 (which would map out main ROM).
+  - 220 Spanish games (Opera Soft, Topo Soft, Dro Soft) share an `FC9Ah` tape trampoline that selects BIOS via `A8h` alone; the trampoline patcher converts it to slot 0's subslot register while preserving block XOR checksums and restoring the caller's original subslot (needed by *Budokan*, which enters with `54h` rather than `55h`).
+  - *Gauntlet* overwrites `H.KEYI` (`FD9Ah`) 0.4 s after restore, motivating SX2RES calls from `T0` (`t_res`) and `rescall` wrappers (`rescall B45B`) for games that replace `0038h` in page 0 RAM.
+  - *Thor*, *Knight Tyme*, *Map Game*, *Checkmate!*, *Finders Keepers*, and *Super MSX*/*Engesoft* loaders that probe primary slots for page 1 RAM patch their switches to slot 0's subslot register (`54h`/`55h`/`50h`) and update `SLTTBL` (`FCC5h`) when the game later calls `ENASLT`.
+- **Open question:** On a machine where found RAM lives in an expanded slot other than page 3, the RAM-search patcher selects whichever subslot is already active in that slot's subslot register.

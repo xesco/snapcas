@@ -1,0 +1,32 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's RAM search at 8000h puts RAM in pages 0 and 1 through slot 0's
+# subslot register, 55h here, and keeps the slot register's value at FFFEh.
+# After the load it gives pages 0 and 1 back to the BIOS and BASIC with
+# `LD A,(0FFFEh) / AND 0F0h / OUT (0A8h),A`, the slot register alone, which
+# leaves them on the Extra-Mapper, because the ROM and the RAM are both in slot
+# 0. The game at CC00h then calls the BIOS and crashes. The patch writes 50h,
+# BASIC's value, to FFFFh. The slot register holds 00h already.
+patch side1:5B 3A FE FF E6 F0 D3 A8 > 3E 50 32 FF FF 00 00
+
+# The game's sound routine at DDABh selects its samples in pages 0 and 1 with
+# the value at FFFEh and the slot register alone, and writes the register back
+# at DDDCh. The patches write 55h to FFFFh, RAM in every page, in place of the
+# first write, without the PUSH AF / PUSH BC of the register's old value, and
+# 50h in place of the second, without the POPs, and jump to D0C0h, which the
+# routine called last. The block's last byte, its parity, keeps the XOR at 0.
+patch side1:B0F2 F5 C5 3A FE FF ED 79 > 00 00 3E 55 32 FF FF
+patch side1:B11D C1 F1 ED 79 CD C0 D0 C9 > 3E 50 32 FF FF C3 C0 D0
+patch side1:B341 96 > 6F
+
+# The game keeps the VDP's interrupt off and waits for each frame by reading
+# the VDP's status with the BIOS's RDVDP, so H.KEYI, where the image calls
+# SX2RES, never runs. The game's four wait loops call a routine at FD60h
+# instead, after resb at FD29h: CALL 013Eh / BIT 7,A / CALL NZ,0FD29h / RET.
+# It calls SX2RES once a frame, when the status shows the frame's end, and
+# resb keeps the flags that the loop tests.
+patch page3:3D60 00 00 00 00 00 00 00 00 00 > CD 3E 01 CB 7F C4 29 FD C9
+patch page2:33E4 CD 3E 01 CB 7F > CD 60 FD CB 7F
+patch page3:D6A CD 3E 01 CB 7F > CD 60 FD CB 7F
+patch page3:1000 CD 3E 01 CB 7F > CD 60 FD CB 7F
+patch page3:1400 CD 3E 01 CB 7F > CD 60 FD CB 7F

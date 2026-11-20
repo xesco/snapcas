@@ -1,5 +1,5 @@
 """tools/pipeline.py: the steps of one game's image on one machine, the trials
-of the capture variants, and their result (docs/INTERNALS.md, The tools'
+of the capture variants, and their result (docs/internals/capture.md, The tools'
 code). The tests give the steps' ends, or openMSX's, and start no openMSX.
 Pure tier."""
 import json
@@ -22,7 +22,7 @@ PASSES = "point 1: pass\npoint 2: pass\npoint 3: pass\npoint 4: pass\n"
 
 class Pipeline(unittest.TestCase):
     """pipeline.py's result, from steps that the test gives, without a run
-    (INTERNALS.md, The tools' code)."""
+    (docs/internals/capture.md, The tools' code)."""
 
     def result(self, name, status, error="", broke=False, output=""):
         return pipeline.result(pipeline.Step(name, status, error, broke, output))
@@ -154,6 +154,18 @@ class Pipeline(unittest.TestCase):
         self.assertEqual(shown, [pipeline.Step("capture", 0, "", False, ""), step])
         write_image.assert_called_once_with("GAME", "machine", gamefile.DOWNLOADS, variant="variant")
         check.assert_not_called()
+
+    def test_skip_capture_runs_build_and_check_without_capture(self):
+        shown = []
+        with mock.patch.object(pipeline.capture, "capture") as cap, \
+                mock.patch.object(pipeline.build, "write_image", return_value=("G", "G.SNP", "3 records")) as wb, \
+                mock.patch.object(pipeline.check, "check", return_value=(0, PASSES)) as chk:
+            step = pipeline.steps("GAME", "machine", "dos", show=shown.append, skip_capture=True)
+        self.assertEqual(step.status, 0)
+        cap.assert_not_called()
+        wb.assert_called_once()
+        chk.assert_called_once()
+        self.assertEqual([s.name for s in shown], ["build", "check"])
 
 
 if __name__ == "__main__":

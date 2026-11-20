@@ -1,0 +1,48 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:149 47 08 78 E6 > 4F 08 18 78
+patch side1:1CF 3A FF FF 2F > 3E 54 00 00
+patch side1:420F 3A 78 FA D3 A8 > 3E 54 32 FF FF
+patch side1:4225 3A 75 FA D3 A8 > 3E 50 32 FF FF
+patch side1:4A2E 3A 77 FA D3 A8 > 3E 55 32 FF FF
+patch side1:4A3E 3A 75 FA D3 A8 > 3E 50 32 FF FF
+patch side1:9DBC 3A 77 FA D3 A8 > 3E 55 32 FF FF
+patch side1:9DCC 3A 75 FA D3 A8 > 3E 50 32 FF FF
+
+# The game takes the interrupt in interrupt mode 2, with its table at FE00h
+# full of FDh, so that every vector is FDFDh, and JP BC3Ch at FDFDh. When the
+# play starts, its code at BB71h writes the table and the jump again, over the
+# image's wrapper of the vector. So the rescall line names the routine, and
+# the jump at FDFDh goes to the wrapper at FD56h, which calls SX2RES and jumps
+# to BC3Ch, in the snapshot and in the code that writes it again.
+rescall BC3C
+
+# The snapshot's JP BC3Ch at FDFDh. With the rescall line's address, the build
+# leaves the table and the jump as they are.
+patch page3:3DFE 3C BC > 56 FD
+
+# LD HL,BC3Ch before LD (0FDFEh),HL.
+patch page2:3B81 21 3C BC > 21 56 FD
+
+# The menu runs with the interrupts off. Its loop at 4033h scans the keyboard
+# with the routine at BD07h in each pass, about 1,600 times a second, too often
+# for a call of SX2RES in each. So the loop calls a counter at F9A0h in place
+# of BD07h, which calls the image's routine at FD29h in one pass of 64, about
+# 25 times a second, and then jumps to BD07h. F9A0h is in the BIOS's PLAY
+# queues, zeros that the game leaves alone, and F9B3h holds the count.
+patch page3:39A0 00 00 00 00 00 00 00 00 00 00 > F5 3A B3 F9 3C 32 B3 F9 E6 3F
+patch page3:39AA 00 00 00 00 00 00 00 00 00 > 20 03 CD 29 FD F1 C3 07 BD
+
+# The menu's loop calls the counter.
+patch page1:003F CD 07 BD > CD A0 F9
+
+# The call routine's stack, 64 bytes, in the same zeros of the PLAY queues, so
+# that the counter's calls from the menu's loop run SX2RES on a stack of its
+# own and keep the interrupts off.
+resstack FA00

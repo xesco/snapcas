@@ -1,7 +1,7 @@
 """snapcas.py snap on games: the command makes and checks an image, and the
 automatic fixes work on games that needed a game file's line by hand, without
-that line (docs/INTERNALS.md, Slot patches, The page copy patch and Without a
-part in page 3, and docs/PLAN.md, steps 9, 10 and 19). The patterns of the
+that line (docs/internals/patches.md, Slot patches, The page copy patch and Without a
+part in page 3, and docs/BUILD.md, steps 9, 10 and 19). The patterns of the
 patches are in tests/test_patches.py. Emulator tier."""
 import concurrent.futures
 import os
@@ -21,7 +21,7 @@ RUNS = {
     "sootland": ("SOOTLAND", PHC28S, ["capture phc28s-ram64k"]),
     "finderin": ("FINDERIN", VG8020, ["capture vg8020"]),
     "chase-h": ("CHASE-H", PHC28S, []),
-    "digydung-variant": ("SUPERMSX/DIGYDUNG", "hbf700p-ram512k-msxdos2", []),
+    "enchante-variant": ("ENCHANTE", VG8020, []),
     "rockya": ("ROCKYA", PHC28S, []),
     "uchi87": ("UCHI87", PHC28S, []),
     "doki-dok": ("DOKI-DOK", PHC28S, ["capture phc28s-ram64k"]),
@@ -152,13 +152,14 @@ class WithoutPage3(Snap):
 
 class Variants(Snap):
     # La Abadia del Crimen needed the variant until the RAM search patch, and
-    # Sootland until the patch that keeps page 3.
-    def test_snapcas_py_finds_digger_dungeons_capture_variant(self):
-        self.passed("digydung-variant")
-        result, _ = RESULTS["digydung-variant"]
-        self.assertIn("snapcas.py: trying the capture variant hbf700p-msxdos2\n", result.stderr)
-        self.assertIn("snapcas.py: it passes, so the machine's game file needs: capture hbf700p-msxdos2\n",
-                      result.stdout)
+    # Sootland until the patch that keeps page 3. Digy Dung's variant gave a
+    # snapshot of BASIC, after its POKE &HFFFF,&HAA had reset the HB-F700P,
+    # until the subslot POKE patch.
+    def test_snapcas_py_finds_enchanteds_capture_variant(self):
+        self.passed("enchante-variant")
+        result, _ = RESULTS["enchante-variant"]
+        self.assertIn("snapcas.py: trying the capture variant vg8020\n", result.stderr)
+        self.assertIn("snapcas.py: it passes, so the machine's game file needs: capture vg8020\n", result.stdout)
 
 
 if __name__ == "__main__":

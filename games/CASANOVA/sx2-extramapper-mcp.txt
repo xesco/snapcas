@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game writes 18h to FFFFh once, at 05EEh. It runs in interrupt mode 1 and
+# never executes FFFFh, so the write is a rest of the ZX Spectrum version. On a
+# machine whose RAM is in an expanded slot, FFFFh is the slot's subslot
+# register, and the write deselects the RAM. Here all RAM is in slot 0-1. The
+# patch replaces the write with NOP and LD A,0Ch. The game loads A again in the
+# next instruction, and the three bytes have the exclusive OR of the old ones,
+# which the loader's check of the block needs.
+patch side1:2101 32 FF FF > 00 3E 0C

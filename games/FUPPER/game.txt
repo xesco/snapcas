@@ -2,3 +2,10 @@
 cas FUPPER.CAS
 sha1 477ec911d570f64549f44cebb2a9b489928f2a48
 url https://download.file-hunter.com/Games/MSX1/CAS/Fupper%20(1985)(Login%20Soft)%5BCLOAD%2BBLOAD%27CAS-%27%2BRUN%5D.zip
+
+# The BASIC program calls machine code in B000h..DC1Fh, which sits in the
+# tape's second file and must be loaded with BLOAD"CAS:" after CLOAD and
+# before RUN.
+load 'CLEAR 200,&HAFFF:CLOAD'
+keys 32 'BLOAD"CAS:":RUN'
+keys 33 return

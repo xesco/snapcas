@@ -1,5 +1,5 @@
 """The download of a game's tape files from its url line (docs/CLI.md,
-Download, and docs/PLAN.md, step 23). The tests replace the network with zips
+Download, and docs/BUILD.md, step 23). The tests replace the network with zips
 that they make, so they run offline. Pure tier."""
 import hashlib
 import http.client

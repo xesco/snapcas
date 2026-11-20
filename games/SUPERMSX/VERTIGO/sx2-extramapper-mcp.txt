@@ -1,0 +1,27 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the 26 bytes below SP E156h are not in a RAM page that the
+# snapshot keeps. `make games` wrote this line.
+capture sx2-extramapper-noram30
+
+# The game waits by copying C000h to FFFBh onto itself 50 times, with LD
+# BC,3FFCh / LD HL,0C000h / LD DE,0C000h / LDIR at EA80h. The copy writes the
+# same bytes, but it writes over the call of SX2RES at FD29h, so the check
+# fails point 2. The patch copies C000h to FCC8h 53 times, which waits within
+# 1% as long and leaves FCC9h on alone.
+patch side1:6951 06 32 C5 01 FC 3F > 06 35 C5 01 C9 3C
+
+# Super MSX's loaders find RAM for pages 0 and 1 by the slot register alone, keep
+# the values at FFFDh and FFFEh, and select them later by the slot register
+# again. Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1, so
+# the patches write slot 0's subslot register instead: 54h for RAM in pages 1
+# to 3, 55h for RAM in every page, 50h for BASIC, with SLTTBL's entry for slot 0
+# at FCC5h where a ROM image looks up its slot, and 84h as RAM's slot ID.
+patch side1:7B1A 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 88 11 00 34 01 00 4C ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 88 11 00 34 01 00 4C ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:E4D3 3A FD FF D3 A8 > 3E 55 32 FF FF
+patch side1:122DA 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FD FF E6 FC 32 FE FF 21 00 90 11 00 00 01 00 40 ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 90 11 00 00 01 00 40 ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:16337 DB A8 F5 3A FE FF D3 A8 01 00 40 21 00 90 11 00 40 ED B0 F1 D3 A8 > 3E 54 32 FF FF 01 00 40 21 00 90 11 00 40 ED B0 3A C5 FC 32 FF FF
+patch side1:17B4F 3A FE FF D3 A8 3A FD FF E6 03 > 3E 54 32 FF FF 3E 84 00 00 00

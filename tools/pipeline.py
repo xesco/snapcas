@@ -96,12 +96,14 @@ def build_step(game, machine, variant):
     return 0, holds
 
 
-def steps(game, machine, dos=None, variant=None, show=None):
+def steps(game, machine, dos=None, variant=None, show=None, skip_capture=False):
     """Captures and builds the image of the game in a folder on a machine,
     and checks it when dos names the folder of the DOS system files. variant
-    names a capture variant, in place of the game file's. Returns the Step
+    names a capture variant, in place of the game file's. With skip_capture,
+    keeps the snapshot on disk and starts at build. Returns the Step
     that failed, or else the last one. show gets each Step when it ends."""
-    todo = [("capture", capture_step, game, machine, variant), ("build", build_step, game, machine, variant)]
+    todo = ([] if skip_capture else [("capture", capture_step, game, machine, variant)]) + [
+        ("build", build_step, game, machine, variant)]
     if dos:
         todo.append(("check", check.check, game, machine, dos))
     for call in todo:
@@ -130,7 +132,7 @@ def result(step, variant=None, image=None):
     return Result(step.name if step.status else None, step.status, message(step), step.broke, variant, image)
 
 
-def run(game, machine, dos=None, try_variants=False, show=None, trying=None):
+def run(game, machine, dos=None, try_variants=False, show=None, trying=None, skip_capture=False):
     """Makes the image of the game in a folder on a machine, and returns the
     Result. The steps are those of steps(), and a pass moves the image to
     images/. With try_variants, when a step fails and the game file names no
@@ -141,7 +143,7 @@ def run(game, machine, dos=None, try_variants=False, show=None, trying=None):
     failure. show gets each Step when it ends, and trying each variant's name
     before its trial. An error in the game's or the machine's file between the
     trials is raised as gamefile and msx raise it."""
-    first = steps(game, machine, dos, show=show)
+    first = steps(game, machine, dos, show=show, **({"skip_capture": True} if skip_capture else {}))
     if first.status == 0:
         return result(first, image=gamefile.publish(machine, game))
     # The capture's status 1 is an error in the input files, which every
@@ -205,12 +207,14 @@ def main():
     parser.add_argument("--variants", action="store_true",
                         help="run only the trials of the machine's capture variants, for a game whose own "
                              "lines have failed")
+    parser.add_argument("--skip-capture", action="store_true",
+                        help="reuse the existing snapshot in the work folder and run build and check only")
     args = parser.parse_args()
     folder = gamefile.game_folder(args.game)
     if args.variants:
         found = variant_trials(folder, args.machine, args.dos) or Result("check", 3, NO_VARIANT, False, None, None)
     else:
-        found = run(folder, args.machine, args.dos)
+        found = run(folder, args.machine, args.dos, skip_capture=args.skip_capture)
     print(json.dumps(found._asdict()))
     return 0
 

@@ -1,4 +1,4 @@
-# The capture's interrupt slot patch (docs/INTERNALS.md, The interrupt slot
+# The capture's interrupt slot patch (docs/internals/patches.md, The interrupt slot
 # patch). tools/patches/irqslot.py puts its settings before this file:
 #   ::irqslot      each handler in the tape files, as {side offset bytes}, where
 #                  bytes is its LD A,(copy) as hex

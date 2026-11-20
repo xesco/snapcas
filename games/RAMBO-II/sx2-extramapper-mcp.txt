@@ -1,0 +1,49 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader looks for RAM in page 1 by the slot register alone, and steps on
+# into pages 2 and 3, where it cuts off its own code. Here the RAM is in slot
+# 0-1, beside the BIOS in 0-0. The patch writes 54h to slot 0's subslot
+# register instead, RAM in pages 1 to 3.
+patch side1:53 DB A8 E6 F3 21 00 45 D3 A8 > 3E 54 32 FF FF AF 00 00 00
+patch side1:5C 77 BE 28 04 C6 04 18 F6 > 00 00 00 00 00 00 00 00
+
+# The loader's tape routine gives page 0 to slot 0 by the slot register alone.
+# The patch writes 54h, the BIOS in page 0.
+patch side1:80 DB A8 E6 FC D3 A8 > 3E 54 32 FF FF 00
+
+# The game keeps the slot register's value at 6107h, and looks for RAM in page
+# 0 in the same way, for the value at 6108h. The patch writes 55h, RAM in every
+# page, instead of the search.
+patch side1:40FC E6 FC D3 A8 77 BE > 3E 55 32 FF FF 00
+patch side1:4102 28 03 3C 18 F7 > 00 00 00 00 00
+
+# The game selects the RAM in every page with the value at 6108h, and the BIOS
+# in page 0 for its tape routine with the value at 6107h. The patches write 55h
+# and 54h to the subslot register instead.
+patch side1:41A5 3A 08 61 D3 A8 > 3E 55 32 FF FF
+patch side1:4298 3A 08 61 D3 A8 > 3E 55 32 FF FF
+patch side1:4345 3A 07 61 D3 A8 > 3E 54 32 FF FF
+patch side1:4385 3A 08 61 D3 A8 > 3E 55 32 FF FF
+
+# The game has two interrupt routines in its RAM, 604Eh, at 0039h in the
+# snapshot, and 9000h, which it installs at 0039h with the first when play
+# starts. The image's wrappers call SX2RES through the tape service's entry
+# code and jump to each: FC4Ch to 604Eh and FC5Dh to 9000h, in TRPTBL, BASIC's
+# trap table, which the game leaves at zeros. The game's stack is in page 1,
+# the page of SX2RES's entry, where the call leaves itself out, so the calls
+# start only with a call that takes a stack of its own.
+rescall 604E 9000
+rescode FC4C
+
+# The wrappers' addresses in the vector at 0039h, and in the game's
+# LD HL,604Eh / LD (0039h),HL at 91CAh and LD HL,9000h / LD (0039h),HL at
+# 9027h.
+patch page0:39 4E 60 > 4C FC
+patch page2:11CB 4E 60 > 4C FC
+patch page2:1028 00 90 > 5D FC
+
+# The build writes the wrappers' 34 bytes but, with the tape service, does not
+# list them for the check, which then finds them changed. These patches change
+# nothing and list them.
+patch page3:3C4C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch page3:3C5D 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 > 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00

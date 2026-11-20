@@ -1,0 +1,7 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The BASIC loader copies page 3's subslot into every page of slot 0's subslot
+# register by a computed POKE -1, which gives 55h here, where the BIOS and the
+# RAM share slot 0, and takes BASIC's ROM away from pages 0 and 1. The patch
+# makes the computation keep pages 0 and 1 on the ROM: 50h.
+patch side1:41 1D 41 10 62 50 > 1D 41 10 00 00

@@ -1,0 +1,14 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The main game takes the interrupt for a routine of its own, at B45Bh, with
+# JP 0B45Bh at 0038h in its RAM in page 0, so nothing calls SX2RES then. The
+# image's wrapper at FCC9h calls SX2RES and jumps to that routine.
+rescall B45B
+
+# The main game puts the wrapper's address at 0039h: LD HL,0B45Bh becomes
+# LD HL,0FCC9h. The block is unread at the snapshot.
+patch side1:D2A0 5B B4 > C9 FC
+
+# The block's 16-bit sum, after game.txt's line for it, with the B6h that the
+# patch above adds.
+patch side1:E2F3 39 F3 > EF F3

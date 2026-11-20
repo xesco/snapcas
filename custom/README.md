@@ -1,31 +1,26 @@
-# Your own games
+# Custom Games
 
-This folder holds your own games. They are games that `snapcas` does not ship, or
-your own dumps of a tape. Git ignores everything here except this file.
+Store your own `.CAS` games here—titles not shipped in `games/` or personal dumps. Git ignores everything in this folder except this file.
 
-Each game has a folder of its own, with its game file and its CAS files:
+Create one uppercase folder per game (up to 8 letters or digits) containing `game.txt` and your tape file(s):
 
-```
+```text
 custom/MYGAME/game.txt
 custom/MYGAME/MYGAME.CAS
 ```
 
-The game file needs one line, which names side 1's tape. The other lines are those
-of a shipped game's file ([FILES.md, Game file](../docs/FILES.md#game-file)):
+A minimal `game.txt` names Side 1 (plus `side2` for two-sided tapes; see [FILES.md](../docs/FILES.md#game-file)):
 
-```
+```text
 cas MYGAME.CAS
 ```
 
-A custom game's name is `custom/` and its folder's name. The commands take it as
-they take a shipped game's name:
+Pass `custom/<GAME>` to `snapcas.py`:
 
-```
+```sh
 ./snapcas.py list custom
-./snapcas.py snap custom/MYGAME phc28s-ram64k-carnivore2
+./snapcas.py snap custom/MYGAME phc28s-ram64k-carnivore2 --check
 ./snapcas.py try custom/MYGAME phc28s-ram64k-carnivore2
 ```
 
-`snap` reads the tapes from the game's folder and never downloads them. The image
-goes to `images/<machine>/custom/MYGAME/`. To share a game, move its folder into
-`games/`, add its `sha1` and `url` lines, and move its tapes into `downloads/`.
+`snap` reads local tapes directly without downloading and writes images to `images/<machine>/custom/MYGAME/`. `sync` copies them to `SNAPCAS/CUSTOM/` on your card.

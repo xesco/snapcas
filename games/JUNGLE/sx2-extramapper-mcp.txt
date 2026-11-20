@@ -1,0 +1,28 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so the image has no call of SX2RES, its page
+# 3 has no zeros that it leaves alone for the image's call routine, and its
+# stack is in page 1, where SX2RES's entry is. The game leaves alone the zeros
+# from 0E13h to 0F50h in page 0. A routine at 0EC0h keeps all the registers and
+# the interrupts, selects slot 3's subslot 0 in page 1 with slot 3's subslot
+# register, selects slot 3 in page 1 with the slot register, and calls SX2RES's
+# entry at 4040h when it starts F5h DBh. Then it gives both registers back. An
+# entry at 0EA0h keeps SP at 0EB1h, calls the routine with its stack below
+# 0EA0h, takes SP back and jumps to the game's routine at 41BAh.
+patch page0:EA0 00 00 00 00 00 00 00 00 00 00 > ED 73 B1 0E 31 A0 0E CD C0 0E
+patch page0:EAA 00 00 00 00 00 00 00 > ED 7B B1 0E C3 BA 41
+patch page0:EC0 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page0:ECA 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page0:ED4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page0:EDE 00 00 00 00 00 00 00 00 00 00 > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page0:EE8 00 00 00 00 00 00 00 00 00 00 > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page0:EF2 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 C1
+patch page0:EFC 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page0:F06 00 00 00 00 00 00 00 00 00 00 > D3 A8 F1 E2 0D 0F FB 08 F1 08
+patch page0:F10 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page0:F1A 00 00 00 > C1 F1 C9
+
+# The game's jump table entry at 4009h, which the game calls about 15 times a
+# second in play, jumps to the entry at 0EA0h in place of the routine at 41BAh.
+patch page1:9 C3 BA 41 > C3 A0 0E

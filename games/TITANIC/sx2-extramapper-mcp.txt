@@ -1,0 +1,21 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+# The game waits with a delay at E9D6h: 50 times LDIR from C000h to C000h,
+# 3FFCh bytes, which writes each byte of page 3 with its own value, over any
+# code of the image there, and the check fails point 2. The patch counts BC
+# down from 3400h in place of each LDIR, a delay of the same length that
+# writes nothing, and keeps A.
+patch page3:29DC 01 FC 3F 21 00 C0 > F5 01 00 34 0B 78
+patch page3:29E2 11 00 C0 ED B0 > B1 20 FB F1 00
+
+# The game takes its interrupts at 0038h in its RAM of page 0, with JP 0F065h,
+# and the image wraps that routine with res3 at FD29h. The game's stack is in
+# page 1, which res3 selects for SX2RES, so res3 skipped every call. A routine
+# at F9A0h, in zeros of page 3 that the game leaves alone in a minute of play
+# with keys, calls res3 on a stack of its own below D0A0h, in zeros the game
+# leaves alone too, and jumps to F065h.
+patch page3:39A0 00 00 00 00 00 00 00 00 00 00 > ED 73 FE F9 31 A0 D0 CD 29 FD
+patch page3:39AA 00 00 00 00 00 00 00 > ED 7B FE F9 C3 65 F0
+
+# The jump at 0038h goes to the routine at F9A0h, and the image's wrapper then
+# goes to it in turn.
+patch page0:39 65 F0 > A0 F9

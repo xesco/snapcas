@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader looks for RAM in page 1 by the slot register alone, for the ROM
+# image that it loads to 4000h to BFFFh. Here the RAM is in slot 0-1, beside the
+# BIOS in 0-0, so the search finds none and the image goes to the ROM. The patch
+# writes 54h, RAM in pages 1 to 3, to slot 0's subslot register and to its copy
+# in SLTTBL at FCC5h, where the ROM image looks up its slot, and leaves 00h in A
+# for the search of page 2, which finds the RAM in 0-1.
+patch side1:27 DB A8 E6 F3 21 00 > 3E 54 32 FF FF 32
+patch side1:2D 40 0E 04 CD 4B C0 > C5 FC AF 00 00 00

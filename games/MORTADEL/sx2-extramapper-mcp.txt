@@ -1,0 +1,28 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game writes port FEh, the ZX Spectrum's border and sound port, at 5B13h
+# when it starts and at FF5Dh in a delay loop. On a machine with a memory
+# mapper, port FEh is the mapper's register of page 2, so the write selects
+# another segment there and the game's code is gone; here the stack then runs
+# into FFFFh. The patches replace each OUT (0FEh),A with LD A,A and LD D,D,
+# which do nothing and have the exclusive OR of the old bytes, which the
+# loader's check of each block needs, as on the NMS 8250.
+patch side1:3421 D3 FE > 7F 52
+patch side1:D87D D3 FE > 7F 52
+
+# The game runs without interrupts, so the image has no call of SX2RES, and its
+# stack is in page 1, where SX2RES's entry is, so the image's call routine would
+# leave the call out. The rescode line puts that routine at CF00h, in zeros of
+# page 3 that the game leaves alone, and the rescall line gives it a wrapper at
+# CF2Dh that calls SX2RES and jumps to the RET at CF51h.
+rescode CF00
+rescall CF51
+
+# An entry at CF40h keeps SP at CF52h, calls the wrapper with its stack in the
+# zeros below CF00h, takes SP back and jumps to the game's routine at E83Dh.
+patch page3:F40 00 00 00 00 00 00 00 00 00 00 > ED 73 52 CF 31 00 CF CD 2D CF
+patch page3:F4A 00 00 00 00 00 00 00 00 > ED 7B 52 CF C3 3D E8 C9
+
+# In play the routine at E7EDh calls the routine at E83Dh about 50 times a
+# second. It calls the entry at CF40h in place of that routine.
+patch page3:27F2 CD 3D E8 > CD 40 CF

@@ -1,0 +1,27 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game turns the VDP's interrupt off, so the image's call of SX2RES from
+# T0 runs once. The title waits for a key in a loop at 4080h that calls 4D28h
+# about 2,750 times a second, and the play calls 45CFh from 435Ch about 50
+# times a second. So the image gets a wrapper for each, at FC4Ch for 4D28h and
+# at FC5Dh for 45CFh, which calls SX2RES and jumps to the routine. The
+# wrappers disable the interrupts, which the game does not take.
+rescall 4D28 45CF
+
+# The two wrappers take 34 bytes, and the 24 bytes at FCC9h, before the tape
+# service's part, hold one. FC4Ch is in BASIC's TRPTBL, zeros that the game
+# leaves alone.
+rescode FC4C
+
+# A counter at FC6Eh, which sends one in 128 of the title loop's calls of
+# 4D28h to the first wrapper, about 21 times a second, and the others straight
+# to 4D28h. FC82h holds the count.
+patch page3:3C6E 00 00 00 00 00 00 00 00 00 00 > F5 3A 82 FC 3C 32 82 FC E6 7F
+patch page3:3C78 00 00 00 00 00 00 00 00 00 00 > 20 04 F1 C3 4C FC F1 C3 28 4D
+
+# The title's loop calls the counter.
+patch page1:0086 CD 28 4D > CD 6E FC
+
+# The play's loop calls the wrapper of 45CFh.
+patch page1:035C CD CF 45 > CD 5D FC

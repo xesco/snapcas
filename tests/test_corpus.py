@@ -1,4 +1,4 @@
-"""The scan over the corpus (docs/INTERNALS.md, Scan, and docs/PLAN.md, Test
+"""The scan over the corpus (docs/internals/service-and-resident.md, Scan, and docs/BUILD.md, Test
 setup and step 6): each tape of the corpus is captured and built on the
 PHC-28S, and the findings that were confirmed by hand must be in its scan.txt.
 Emulator tier."""

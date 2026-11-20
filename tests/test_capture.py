@@ -1,4 +1,4 @@
-"""The capture (docs/INTERNALS.md, Capture, Slot patches and The RAM search
+"""The capture (docs/internals/patches.md, Capture, Slot patches and The RAM search
 patch): the snapshots of single-load games, the capture's Tcl procedures in
 openMSX's C-BIOS machine, the images that build.py makes of captured
 snapshots, and a capture of a patched tape with two sides. Emulator tier."""
@@ -141,7 +141,7 @@ class SingleLoads(unittest.TestCase):
         self.assertEqual(ram.diff_files + ram.left_only + ram.right_only, [])
 
     def test_a_machine_whose_ram_the_loader_finds_gets_no_ram_search_patch(self):
-        # La Abadia del Crimen's loader has the RAM search (PLAN.md, step 14).
+        # La Abadia del Crimen's loader has the RAM search (docs/BUILD.md, step 14).
         # On the NMS 8250 the slot that it finds holds page 3's RAM, so no
         # write cuts off its code, and the tape stays as it is.
         self.assertEqual(support.read_tape("ABADIA.CAS").count(patches.ramsearch.SEARCH), 1)
@@ -267,6 +267,58 @@ set ::run(msx2) 0
 irqslot_start
 result irqslot_msx1 [file exists [file join $::S(snap) newpatch.txt]]
 set ::irqslot {}
+# The C-BIOS machine's RAM is in a slot that is not expanded, where a POKE to
+# FFFFh writes RAM, so the tape keeps its POKE.
+set ::subpoke {{1 21 H 170}}
+subpoke_start
+result subpoke_plain [file exists [file join $::S(snap) newpatch.txt]]
+set ::subpoke {}
+# An MSX1 keeps RET in FFE7h to FFF6h harmless, so the tape keeps its fill.
+set ::hookfill {{1 21 5c02}}
+hookfill_start
+result hookfill_msx1 [file exists [file join $::S(snap) newpatch.txt]]
+set ::hookfill {}
+# A call of the sub-ROM in the slot of page 3, which the restorer would break,
+# shows as the sub-ROM's subslot in page 0 of that slot's register, where
+# BASIC leaves another. The sub-ROM is in subslot 1 of page 3's slot here.
+set ps3 [expr {([debug read ioports 0xA8] >> 6) & 3}]
+set ::st(service) 1; set ::run(msx2) 1; set ::run(exbrsa) [expr {0x80 | (1 << 2) | $ps3}]; set ::run(subrom_sub) 0
+rename tracked_sub tracked_sub_real
+set calls {}
+foreach sub {0x01 0x00 0x55} { proc tracked_sub {ps} [list return $sub]; lappend calls [in_subrom_call] }
+# BASIC leaving the sub-ROM's subslot in page 0 is no sign of a call, and
+# without the tape service the snapshot needs no wait.
+set ::run(subrom_sub) 1; proc tracked_sub {ps} { return 0x01 }; lappend calls [in_subrom_call]
+set ::run(subrom_sub) 0; set ::st(service) 0; lappend calls [in_subrom_call]
+# With the sub-ROM in page 0's slot, page 0 showing it is a call on any MSX2,
+# with or without the tape service; page 0 on another subslot is none.
+set ::run(exbrsa) [expr {0x80 | (1 << 2) | ([debug read ioports 0xA8] & 3)}]
+foreach sub {0x01 0x00} { proc tracked_sub {ps} [list return $sub]; lappend calls [in_subrom_call] }
+rename tracked_sub {}; rename tracked_sub_real tracked_sub
+result subrom_call $calls
+unset ::st(service) ::run(subrom_sub)
+# BASIC's RAM in an expanded slot 3 gets its subslot in every page, and in an
+# expanded slot 0, beside the main ROM, keeps the register.
+set ::run(msx2) 1
+rename expanded expanded_real; proc expanded {ps} { return 1 }
+rename subslot_reg subslot_reg_real; proc subslot_reg {ps} { return 0x50 }
+rename set_subslot_reg set_subslot_reg_real; proc set_subslot_reg {ps value} { lappend ::subwrites $ps $value }
+set ::subwrites {}
+set a8 [debug read ioports 0xA8]
+set sltslt0 [debug read memory 0xFCC5]
+set sltslt3 [debug read memory 0xFCC8]
+foreach slot {3 0} {
+    debug write ioports 0xA8 [expr {($a8 & 0x3F) | ($slot << 6)}]
+    ram_in_every_page
+}
+debug write ioports 0xA8 $a8
+debug write memory 0xFCC5 $sltslt0
+debug write memory 0xFCC8 $sltslt3
+rename expanded {}; rename expanded_real expanded
+rename subslot_reg {}; rename subslot_reg_real subslot_reg
+rename set_subslot_reg {}; rename set_subslot_reg_real set_subslot_reg
+result ram_every_page $::subwrites
+set ::run(msx2) 0
 reg pc $pc
 close $f
 
@@ -279,7 +331,7 @@ later 0.1 {
 }
 """
 
-# Tcl for the watch of the RAM search (INTERNALS.md, The RAM search patch): a
+# Tcl for the watch of the RAM search (docs/internals/patches.md, The RAM search patch): a
 # write to the slot register, from code in page 3, that selects another slot
 # there, where the bytes after the code differ. The search occurs twice on side
 # 1 and once on side 2.
@@ -304,13 +356,76 @@ later 1 {
 """ % patches.ramsearch.SEARCH.hex()
 
 
-# Tcl for the interrupt slot patch (INTERNALS.md, The interrupt slot patch), on
+# Tcl for the interrupt slot patch (docs/internals/patches.md, The interrupt slot patch), on
 # an MSX2: a handler on each side of the tape.
 IRQSLOT = r"""
 set ::irqslot {{1 21 3a53d0} {2 5 3abecf}}
 set ::run(msx2) 1
 later 1 {
     irqslot_start
+    # stop_with_patch has stopped the capture, and nothing runs after it.
+    write_lines went_on.txt 1
+    stop
+}
+"""
+
+
+# Tcl for the subslot POKE patch (docs/internals/patches.md, The subslot POKE patch): a POKE
+# of each kind on the tape. The C-BIOS machine's RAM is in a slot that is not
+# expanded, so the two procedures that read the slot give an expanded one:
+# first with BASIC's RAM in subslot 2, which the POKE expects, and then in
+# subslot 1.
+SUBPOKE = r"""
+set ::subpoke {{1 21 H 170} {1 40 D 170} {2 5 T 170} {2 9 D 168}}
+later 1 {
+    proc expanded {ps} { return 1 }
+    proc subslot_reg {ps} { return 0xA0 }
+    subpoke_start
+    write_lines subslot2.txt [file exists [file join $::S(snap) newpatch.txt]]
+    proc subslot_reg {ps} { return 0x50 }
+    subpoke_start
+    # stop_with_patch has stopped the capture, and nothing runs after it.
+    write_lines went_on.txt 1
+    stop
+}
+"""
+
+
+# The same, with page 3 in the main ROM's slot, as on the SX-2 with its
+# Extra-Mapper on: the POKE keeps BASIC's subslot 0 in pages 0 and 1.
+SUBPOKE0 = r"""
+set ::subpoke {{1 21 H 170} {1 40 D 170} {2 5 T 170} {2 9 D 168}}
+later 1 {
+    proc expanded {ps} { return 1 }
+    proc subslot_reg {ps} { return 0x50 }
+    set ::exptbl {0x80 0 0 0}
+    debug write ioports 0xA8 [expr {[debug read ioports 0xA8] & 0x3F}]
+    subpoke_start
+    stop
+}
+"""
+
+
+# Tcl for the trampoline patch (docs/internals/patches.md, The trampoline patch): a builder
+# on each side of the tape. The C-BIOS machine's main ROM is in slot 0, which is
+# not expanded, and the tape keeps its builders. With an expanded slot 0 and
+# BASIC's page 3 in slot 3 the tape keeps them too. With BASIC's RAM in slot
+# 0-1 beside the main ROM in 0-0, as on the SX-2 with its Extra-Mapper on, the
+# builders get the patch. with_slot stands for the RAM test of 0-1 in page 0.
+TRAMP = r"""
+set ::tramp {{1 5} {2 9}}
+later 1 {
+    tramp_start
+    set plain [file exists [file join $::S(snap) newpatch.txt]]
+    set ::exptbl {0x80 0 0 0}
+    set a8 [debug read ioports 0xA8]
+    debug write ioports 0xA8 [expr {$a8 | 0xC0}]
+    tramp_start
+    write_lines kept.txt [list $plain [file exists [file join $::S(snap) newpatch.txt]]]
+    proc subslot_reg {ps} { return 0x50 }
+    proc with_slot {ps ss page body} { write_lines tested.txt [list "$ps $ss $page"]; return 1 }
+    debug write ioports 0xA8 [expr {$a8 & 0x3F}]
+    tramp_start
     # stop_with_patch has stopped the capture, and nothing runs after it.
     write_lines went_on.txt 1
     stop
@@ -326,14 +441,15 @@ class Procedures(unittest.TestCase):
     def setUpClass(cls):
         cls.snaps = {}
         for name, start in (("procedures", PROCEDURES), ("boot", "safe step1\n"), ("ramsearch", RAMSEARCH),
-                            ("irqslot", IRQSLOT)):
+                            ("irqslot", IRQSLOT), ("subpoke", SUBPOKE), ("subpoke0", SUBPOKE0),
+                            ("tramp", TRAMP)):
             snap = cls.snaps[name] = os.path.join(WORK, name)
             shutil.rmtree(snap, ignore_errors=True)
             os.makedirs(snap)
             settings = {"snap": msx.tcl_word(snap), "home": msx.tcl_word(msx.home()), "state": "snapcas-test",
                         "boot": "{}", "afterboot": "wait_ok", "tape": "{}", "cmd": "{}", "cload": "0",
                         "headers": "{}", "needed": "0", "side2tape": "{}", "s1len": "0", "headers2": "{}",
-                        "nosvc": "0", "subkeep": "0", "keys": "{}", "lastkey": "0", "tries": "{}", "snapat": "{}"}
+                        "nosvc": "0", "subkeep": "0", "width": "0", "keys": "{}", "lastkey": "0", "tries": "{}", "snapat": "{}"}
             script = ("".join(f"set ::S({k}) {v}\n" for k, v in settings.items())
                       + msx.tcl("tcl/memory.tcl") + msx.tcl("tcl/capture.tcl") + patches.tcl(b"", b"") + start)
             support.cbios(script)
@@ -395,7 +511,7 @@ class Procedures(unittest.TestCase):
 
     def test_the_ram_search_is_patched_at_each_copy_on_the_tape(self):
         # Made in Spain's tape holds the search in each of its loaders
-        # (PLAN.md, step 14): the capture stops with a patch of every copy.
+        # (docs/BUILD.md, step 14): the capture stops with a patch of every copy.
         at = patches.ramsearch.AT
         self.assertEqual(self.read("ramsearch", "newpatch.txt").splitlines(),
                          [f"patch side1:{16 + at:X} CB FF > 00 00", f"patch side1:{16 + 8 + 100 + at:X} CB FF > 00 00",
@@ -422,6 +538,56 @@ class Procedures(unittest.TestCase):
 
     def test_an_msx1_keeps_the_handlers_bytes(self):
         self.assertEqual(self.results["irqslot_msx1"], "0")
+
+    def test_a_poke_of_subslot_2_gets_the_rams_subslot_at_each_place(self):
+        # In subslot 1, 55h selects the RAM in every page: as 55, 085 and 55h.
+        # A POKE of 168 gets 54h, 084, which selects it in pages 1 to 3.
+        self.assertEqual(self.read("subpoke", "newpatch.txt").splitlines(),
+                         ["patch side1:15 41 41 > 35 35", "patch side1:28 31 37 30 > 30 38 35",
+                          "patch side2:5 AA > 55", "patch side2:9 31 36 38 > 30 38 34"])
+        self.assertIn("the tape's BASIC program selects subslot 2 with a POKE to FFFFh", self.read("subpoke", "log.txt"))
+        self.assertFalse(os.path.exists(os.path.join(self.snaps["subpoke"], "went_on.txt")))
+
+    def test_a_snapshot_waits_out_a_call_of_the_sub_rom_in_page_3s_slot(self):
+        # The sub-ROM's subslot in page 0: a call; the RAM's: none; 55h, the
+        # sub-ROM's in every page: a call. Then BASIC's own subslot there, and
+        # an image without the tape service: no wait. Then, with the sub-ROM in
+        # page 0's slot and no tape service, page 0 showing it: a call; another
+        # subslot there: none.
+        self.assertEqual(self.results["subrom_call"], "1 0 1 0 0 1 0")
+
+    def test_basics_ram_gets_its_subslot_in_every_page_except_beside_the_main_rom(self):
+        # Slot 3's subslot 1 in every page; slot 0 untouched.
+        self.assertEqual(self.results["ram_every_page"], "3 85")
+
+    def test_an_msx1_keeps_the_hook_fill(self):
+        self.assertEqual(self.results["hookfill_msx1"], "0")
+
+    def test_a_poke_in_the_main_roms_slot_keeps_basic_in_pages_0_and_1(self):
+        # Subslot 1 in pages 2 and 3, and 0 in pages 0 and 1: 50h, as 50, 080
+        # and 50h, for 170 and for 168 alike.
+        self.assertEqual(self.read("subpoke0", "newpatch.txt").splitlines(),
+                         ["patch side1:15 41 41 > 35 30", "patch side1:28 31 37 30 > 30 38 30",
+                          "patch side2:5 AA > 50", "patch side2:9 31 36 38 > 30 38 30"])
+
+    def test_the_trampoline_patch_needs_the_ram_beside_the_main_rom(self):
+        # Slot 0 not expanded, and page 3 in another slot: the tape keeps its
+        # builders.
+        self.assertEqual(self.read("tramp", "kept.txt").split(), ["0", "0"])
+        # The RAM in 0-1 beside the ROM in 0-0: the RAM test of 0-1 in page 0,
+        # and the form for the ROM's subslot 0 and the RAM's 1 at each place.
+        self.assertEqual(self.read("tramp", "tested.txt").strip(), "0 1 0")
+        new = " ".join(f"{b:02X}" for b in patches.tramp.patched(0, 1))
+        old = " ".join(f"{b:02X}" for b in patches.tramp.BUILDER)
+        self.assertEqual(self.read("tramp", "newpatch.txt").splitlines(),
+                         [f"patch side1:5 {old} > {new}", f"patch side2:9 {old} > {new}"])
+        self.assertIn("the tape's TAPION trampoline selects the ROM in page 0 by the slot register alone",
+                      self.read("tramp", "log.txt"))
+        self.assertFalse(os.path.exists(os.path.join(self.snaps["tramp"], "went_on.txt")))
+
+    def test_a_ram_in_subslot_2_or_in_a_slot_that_is_not_expanded_keeps_the_poke(self):
+        self.assertEqual(self.read("subpoke", "subslot2.txt").strip(), "0")
+        self.assertEqual(self.results["subpoke_plain"], "0")
 
     def test_a_write_that_keeps_page_3s_slot_is_left_alone(self):
         self.assertEqual(self.results["ramsearch_same_page_3"], "0 0")
@@ -562,7 +728,7 @@ class PatchedTape(unittest.TestCase):
 
     def test_the_capture_turns_the_tape_over(self):
         # The game reads on past side 1's end, so side 2 goes in, and the
-        # tape position goes on in side 2 (INTERNALS.md, Capture, step 4).
+        # tape position goes on in side 2 (docs/internals/capture.md, Capture, step 4).
         support.assert_passes(self, self.restored)
         self.assertIn("side 2 inserted", self.restored.read("snap/log.txt"))
         side2_start = tape.side2_start(len(support.read_tape("SOOTLAND.CAS")))

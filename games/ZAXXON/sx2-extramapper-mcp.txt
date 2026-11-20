@@ -1,0 +1,31 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game writes its own code over the BIOS's routines at F380h in page 3,
+# which RDSLT and CALSLT use, so the image's call of SX2RES at FD29h never
+# reaches it. A routine at FCC9h, in the zeros of SLTATR and SLTWRK, keeps all
+# the registers, selects slot 3 in page 1 with the slot register alone, where
+# the image's header gives slot 3 the subslot of SX2RES, and calls SX2RES's
+# entry at 4040h when it starts F5h DBh. Then it gives the slot register back.
+patch page3:3CC9 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page3:3CD3 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 DB A8 F5 E6 F3
+patch page3:3CDD 00 00 00 00 00 00 00 00 00 00 > F6 0C D3 A8 3A 40 40 FE F5 20
+patch page3:3CE7 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 F1
+patch page3:3CF1 00 00 00 00 00 00 00 00 00 00 > D3 A8 08 F1 08 E1 D1 C1 D9 FD
+patch page3:3CFB 00 00 00 00 00 00 00 00 > E1 DD E1 E1 D1 C1 F1 C9
+
+# The title runs without interrupts. An entry at FD03h counts its calls in the
+# byte at FD1Ah, calls the routine above at every 128th, about 60 times a
+# second, and jumps to the BIOS's SNSMAT. In play the game's routine at EC5Ah
+# runs from H.KEYI. An entry at FD14h calls the routine above and jumps to it.
+patch page3:3D03 00 00 00 00 00 00 00 00 00 00 > F5 3A 1A FD 3C 32 1A FD E6 7F
+patch page3:3D0D 00 00 00 00 00 00 00 00 00 00 > CC C9 FC F1 C3 41 01 CD C9 FC
+patch page3:3D17 00 00 00 > C3 5A EC
+
+# The title waits for F1 to F4 in a loop that reads the keyboard with SNSMAT,
+# about 7000 times a second. It calls the entry at FD03h in place of SNSMAT.
+patch page3:285D CD 41 01 > CD 03 FD
+
+# H.KEYI jumps to the entry at FD14h in place of the game's routine. The image's
+# own call from H.KEYI keeps this hook after it.
+patch page3:3D9A C3 5A EC > C3 14 FD

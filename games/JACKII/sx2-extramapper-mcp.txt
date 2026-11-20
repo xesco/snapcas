@@ -1,0 +1,61 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Gremlin's loader at D800h runs a RAM search, which finds the RAM in 0-1 but
+# leaves slot 0's subslot register at 55h, RAM in page 0, and enables the
+# interrupts, which then run the RAM at 0038h: the load stopped after the
+# search. Its result at FFFEh, the slot register's value for the RAM, is 00h
+# here, where the BIOS and the RAM share slot 0. The patch skips the search,
+# so the register stays 50h, BASIC.
+patch side1:1C4 47 08 78 E6 > 4F 08 18 78
+
+# Each later block selects the RAM by that value and gives BASIC back by the
+# slot register alone. The patches write slot 0's subslot register instead: 55h
+# for RAM in every page, as the value at FFFEh selects elsewhere, then 50h.
+patch side1:272 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:29A DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+patch side1:E1F2 3A FE FF D3 A8 > 3E 55 32 FF FF
+
+# Where a block gives BASIC back with AND 0F0h on that value and OUT (0A8h),A,
+# the patches drop the block's first DI, which the loader has already done,
+# move the code up a byte, and end it with LD (0FFFFh),A: 55h AND 0F0h, 50h.
+patch side1:1E91 F3 3A FE FF D3 A8 01 00 40 11 > 3E 55 32 FF FF 01 00 40 11 80
+patch side1:1E9B 80 03 21 80 87 ED B0 E6 F0 D3 > 03 21 80 87 ED B0 E6 F0 32 FF
+patch side1:1EA5 A8 > FF
+patch side1:5FB1 F3 3A FE FF D3 A8 01 00 40 11 > 3E 55 32 FF FF 01 00 40 11 00
+patch side1:5FBB 00 40 21 00 88 ED B0 E6 F0 D3 > 40 21 00 88 ED B0 E6 F0 32 FF
+patch side1:5FC5 A8 > FF
+
+# The loader checks each block by the XOR of its bytes, which must be 0. The
+# patches change each changed block's last byte, its sum, to keep that.
+patch side1:253 0C > FA
+patch side1:1E72 DA > 81
+patch side1:5F91 10 > B3
+patch side1:A0B1 5F > FC
+patch side1:122F1 25 > 3C
+
+# The game runs without interrupts, so the image has no call of SX2RES, and in
+# play it uses the zeros of its page 3, so the image's call routine has no place
+# there. The game leaves alone the FFh bytes from 00C8h to 037Fh, below the
+# 0400h where it loads. A routine at 0320h keeps all the registers and the
+# interrupts, selects slot 3's subslot 0 in page 1 with slot 3's subslot
+# register, selects slot 3 in page 1 with the slot register, and calls SX2RES's
+# entry at 4040h when it starts F5h DBh. Then it gives both registers back. An
+# entry at 0300h keeps SP at 0311h, calls the routine with its stack below
+# 0300h, takes SP back and jumps to the game's joystick routine at C55Fh.
+patch page0:300 FF FF FF FF FF FF FF FF FF FF > ED 73 11 03 31 00 03 CD 20 03
+patch page0:30A FF FF FF FF FF FF FF FF FF > ED 7B 11 03 C3 5F C5 00 00
+patch page0:320 FF FF FF FF FF FF FF FF FF FF > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page0:32A FF FF FF FF FF FF FF FF FF FF > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page0:334 FF FF FF FF FF FF FF FF FF FF > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page0:33E FF FF FF FF FF FF FF FF FF FF > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page0:348 FF FF FF FF FF FF FF FF FF FF > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page0:352 FF FF FF FF FF FF FF FF FF FF > 08 3A 41 40 FE DB CC 40 40 C1
+patch page0:35C FF FF FF FF FF FF FF FF FF FF > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page0:366 FF FF FF FF FF FF FF FF FF FF > D3 A8 F1 E2 6D 03 FB 08 F1 08
+patch page0:370 FF FF FF FF FF FF FF FF FF FF > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page0:37A FF FF FF > C1 F1 C9
+
+# The routine at C529h reads the joystick with the routine at C55Fh and then the
+# keys, about 10 times a second, in the title and in play. It calls the entry at
+# 0300h in place of that routine.
+patch page3:529 CD 5F C5 > CD 00 03

@@ -1,0 +1,14 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader keeps the slot ID of its RAM in page 2 at FD9Ch, in H.KEYI's bytes
+# after the hook's RET, and at 867Eh, after the restore, it selects that RAM in
+# page 1 with ENASLT and (FD9Ch). The image calls SX2RES from H.KEYI, which it
+# writes over those bytes, so ENASLT selected slot 1, where nothing is, and the
+# game rebooted. The patch gives ENASLT 84h, the ID of slot 0-1, where the RAM
+# is here, in place of LD A,(0FD9Ch).
+patch side1:5D54 3A 9C FD > 3E 84 00
+
+# In play the game puts JP 8622h, its own routine, into H.KEYI, at 8742h, so the
+# calls stopped there. The wrapper calls SX2RES and jumps to 8622h.
+rescall 8622
+patch side1:5E19 22 86 > 00 FD

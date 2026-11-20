@@ -1,0 +1,11 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader looks for RAM in page 1 with ENASLT, by the slots 3, 2 and 1, and
+# keeps the slot that it found for the game's own ENASLT calls. The SX-2's RAM
+# in page 1 is slot 0-1: the first try and the slot that it keeps are 84h.
+patch side1:71B7 03 > 84
+patch side1:71D7 03 > 84
+
+# The game selects the BIOS in page 1 again with ENASLT and slot 0, which keeps
+# the RAM's subslot in an expanded slot 0. Slot 0-0 is 80h.
+patch side1:576D 00 > 80

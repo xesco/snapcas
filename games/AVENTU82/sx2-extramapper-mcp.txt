@@ -1,0 +1,33 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader's `slots` RAM search finds the RAM in 0-1 and leaves slot 0's
+# subslot register at 55h, but its result and BASIC's slot register value are
+# both 00h here, where the BIOS and the RAM share slot 0, so each later switch
+# by the slot register alone does nothing. The patches skip the search and make
+# each use of its stored values a write of slot 0's subslot register instead:
+# 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h for BASIC.
+patch side1:1EF9 47 08 78 E6 > 4F 08 18 78
+patch side1:1F7F 3A FF FF 2F > 3E 54 00 00
+patch side1:6E43 3A 77 FA D3 A8 > 3E 55 32 FF FF
+patch side1:6E59 3A 75 FA D3 A8 > 3E 50 32 FF FF
+patch side1:B1AD 3A 77 FA D3 A8 > 3E 55 32 FF FF
+patch side1:B1C3 3A 75 FA D3 A8 > 3E 50 32 FF FF
+patch side1:C9EA 3A 08 B0 D3 A8 > 3E 50 32 FF FF
+patch side1:C9F2 3A 09 B0 D3 A8 > 3E 55 32 FF FF
+
+# After it selects the found RAM, the loader writes FA76h, the subslot value
+# that its search kept, to FFFFh, and then copies into page 0. The
+# patch above makes FA76h 54h, which leaves BASIC's ROM in page 0. These
+# patches write 55h instead, RAM in every page, as the found slot gives where
+# the RAM has a slot of its own.
+patch side1:6E48 3A 76 FA 32 FF FF > 3E 55 00 32 FF FF
+patch side1:B1B2 3A 76 FA 32 FF FF > 3E 55 00 32 FF FF
+
+# The game runs on the BIOS's interrupt routine, with the BIOS in page 0, but
+# the snapshot keeps its RAM page 0, so the build put no call of SX2RES in
+# H.KEYI. The image's wrapper calls SX2RES and jumps to the RET at FD9Dh, in
+# H.KEYI after the patch below.
+rescall FD9D
+
+# H.KEYI calls the wrapper, FD56h after res3 at FD29h: CALL 0FD56h / RET.
+patch page3:3D9A C9 C9 C9 > CD 56 FD

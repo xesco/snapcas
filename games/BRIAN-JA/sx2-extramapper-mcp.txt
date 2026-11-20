@@ -1,0 +1,13 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game takes the interrupt in routines of its own: its routine at 89F2h
+# writes JP HL into H.KEYI, over the image's CALL resb, so SX2RES got no more
+# calls once play started. It installs 972Ah from C6B7h and CA37h, and 9E9Bh
+# from 9E93h. The image gets a wrapper for each that calls SX2RES and jumps to
+# the routine, at FD00h for 972Ah and FD06h for 9E9Bh, and each LD HL takes
+# the wrapper's address.
+rescall 972A 9E9B
+patch page3:06B8 2A 97 > 00 FD
+patch page3:0A38 2A 97 > 00 FD
+patch page2:1E94 9B 9E > 06 FD

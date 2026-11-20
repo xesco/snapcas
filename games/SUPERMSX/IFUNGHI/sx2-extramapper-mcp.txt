@@ -1,0 +1,20 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper
+# on and SX2RES running.
+
+# The capture reads the tape up to MOLLA, the next program's BASIC loader, at
+# tape position 24518, so the game reads no more of it. With the tape service
+# the image calls SX2RES from T0, but 3 seconds after the restore the game puts
+# the BIOS of slot 0-0 back in page 0, where the tape service's wrapper cannot
+# reach its code segment. So the image goes without the tape service, and calls
+# SX2RES from H.KEYI.
+service no
+
+# After the snapshot the game writes JP 84C0h with LD HL,84C0h at 849Ah into
+# H.KEYI, over the image's call of SX2RES, which then stops. The image's wrapper
+# calls SX2RES and jumps to 84C0h.
+rescall 84C0
+
+# The game writes the wrapper's address, FD60h after resb at FD29h, into H.KEYI.
+# The copy of the code at 949Ah gets the same patch.
+patch page2:49B C0 84 > 60 FD
+patch page2:149B C0 84 > 60 FD

@@ -1,0 +1,13 @@
+# Lines for sx2, the SX-2 (MSX2+, 2048 KB) as it starts, with its slot 0 expanded.
+
+# The game puts its stack at the top of memory, with LD SP,0FFFDh, and calls the
+# BIOS to set the screen with two return addresses there, in FFF9h to FFFCh. An
+# MSX2+'s BIOS keeps its copies of VDP registers 25 to 27 in FFFAh to FFFCh, and
+# writes them in that call, over the return addresses, so the game returns to
+# 0000h and the machine resets. The BIOS also writes its copy of register 23 at
+# FFF6h and reads the main ROM's slot at FFF7h. The patches put the stack
+# below all of them, at FFE7h. The game keeps its stack in range there: in 45
+# seconds of play the stack pointer stays between the BIOS's stack use and
+# FFE7h.
+patch side1:F96 31 FD FF > 31 E7 FF
+patch side1:165C 31 FD FF > 31 E7 FF

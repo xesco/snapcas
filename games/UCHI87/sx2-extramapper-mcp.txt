@@ -1,0 +1,23 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The second binary gives page 1 the RAM of page 3 with ENASLT and copies a
+# routine to DE00h. The routine returns to BASIC with the slot register at
+# F0h, BASIC's slots on an MSX with its RAM in slot 3, and its second entry,
+# DE0Ah, which the last binary jumps to, gives the game the register that it
+# had kept. Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1,
+# so BASIC got slot 3 and then RAM in place of its ROM. The patch rewrites the
+# routine: the first entry writes 50h, BASIC's value, to slot 0's subslot
+# register, and DE0Ah writes 54h, RAM in pages 1 to 3, and jumps to the game.
+patch side1:200D DB A8 32 0B DE 3E F0 D3 A8 C9 > 3E 50 32 FF FF C9 C3 30 42 00
+patch side1:2017 3E FC D3 A8 31 D3 DD 06 00 50 > 3E 54 32 FF FF 31 D3 DD 06 00
+patch side1:2021 C3 30 42 > 50 18 EF
+
+# After the snapshot the game writes JP 82BBh, with LD HL,82BBh at 82A9h and at
+# 82C8h, the end of the routine, which puts its guard 82CFh there while it runs,
+# into H.KEYI, over the image's call of SX2RES, which then stops. The image's
+# wrapper calls SX2RES and jumps to 82BBh.
+rescall 82BB
+
+# The game writes the wrapper's address, FD00h after resb at FCC9h, into H.KEYI.
+patch page2:2AA BB 82 > 00 FD
+patch page2:2C9 BB 82 > 00 FD

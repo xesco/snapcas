@@ -1,0 +1,17 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Level 9's loader, at EF34h, gives pages 0 and 1 the slots of pages 2 and 3 by
+# the slot register alone to copy the interpreter to 0000h, and the interpreter
+# keeps that value and BASIC's at 8073h and 8072h and swaps them at 807Bh and
+# 8074h. Here BASIC and the RAM are both in slot 0, so each swap writes slot 0's
+# subslot register instead: 50h for BASIC, 55h for RAM in every page. The last
+# patch gives the second block the sum that the loader checks.
+patch side1:59A DB A8 F5 F3 E6 F0 4F DB A8 CB > F3 3E 55 32 FF FF 21 00 80 11
+patch side1:5A4 2F CB 2F CB 2F CB 2F E6 0F B1 > 00 00 01 B8 34 ED B0 3E 50 32
+patch side1:5AE D3 A8 21 00 > FF FF FB C9
+patch side1:42B2 DB A8 32 72 80 E6 F0 4F DB A8 > 3E 50 32 72 80 3E 55 32 73 80
+patch side1:42BC CB 2F CB 2F CB 2F CB 2F E6 0F > 00 00 00 00 00 00 00 00 00 00
+patch side1:42C6 B1 32 73 > 00 00 00
+patch side1:3C0C 3A 72 80 D3 A8 > 3E 50 32 FF FF
+patch side1:3C14 3A 73 80 D3 A8 > 3E 55 32 FF FF
+patch side1:77E8 1C > 36

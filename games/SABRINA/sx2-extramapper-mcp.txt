@@ -1,0 +1,12 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The blocks sabr1, and milikk at 8800h, run a loader at C800h that selects RAM
+# in pages 1 and 2 with ENASLT, the Extra-Mapper in 0-1 here, copies the game
+# to page 1 and returns to BASIC with LD A,(0D668h) / CALL WSLREG, the slot
+# register alone. Slot 0's subslot register keeps the Extra-Mapper in page 1
+# without BASIC's ROM, which resets the machine. The patch gives page 1 back
+# with LD A,80h / LD H,40h / JP ENASLT, the main ROM in 0-0 there. ENASLT
+# leaves page 0's subslot, which the tape service needs after the restore,
+# where the second milikk block loads.
+patch side1:5CBA 3A 68 D6 CD 3B 01 C9 > 3E 80 26 40 C3 24 00
+patch side1:E8AA 3A 68 D6 CD 3B 01 C9 > 3E 80 26 40 C3 24 00

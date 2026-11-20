@@ -1,0 +1,5 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+# 3.1 seconds after the end of the load the game copies its code over page 3,
+# from C418h to FFF9h, over the image's call of SX2RES. The snapshot comes
+# after that copy, at 208 seconds, where the game runs.
+snapshot at 208

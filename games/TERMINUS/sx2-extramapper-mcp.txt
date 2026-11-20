@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The blocks FIRST and SECND each run a loader at 8598h that keeps slot 0's
+# subslot register from SLTTBL at FCC5h, selects the Extra-Mapper in page 1
+# with ENASLT, copies 8 KB there and writes the kept value back to FFFFh.
+# ENASLT also writes SLTTBL, so SECND keeps 54h, RAM in page 1, and returns to
+# BASIC without its ROM, which resets the machine. In both loaders, LD A,
+# (0FD9Bh) at 85ADh becomes LD A,50h, BASIC's value.
+patch side1:15B 3A 9B FD 32 FF FF > 3E 50 32 FF FF 00
+patch side1:21DB 3A 9B FD 32 FF FF > 3E 50 32 FF FF 00

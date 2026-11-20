@@ -1,0 +1,19 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loaders find RAM for pages 0 and 1 by the slot register alone, keep
+# the values at FFFDh and FFFEh, and select them later by the slot register
+# again. Here the BIOS and the RAM are both in slot 0, in subslots 0 and 1, so
+# the patches write slot 0's subslot register instead: 54h for RAM in pages 1
+# to 3, 55h for RAM in every page, 50h for BASIC, with SLTTBL's entry for slot 0
+# at FCC5h where a ROM image looks up its slot, and 84h as RAM's slot ID.
+patch side1:579A 26 00 C6 01 D3 A8 4F 7E 2F 77 BE 79 20 F4 26 40 C6 04 D3 A8 4F 7E 2F 77 BE 79 20 F4 32 FE FF E6 FC 32 FD FF 21 00 88 11 00 01 01 00 4F ED B0 > 3A FF FF 2F F5 3E 55 32 FF FF 21 00 88 11 00 01 01 00 4F ED B0 F1 32 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:A6FE 06 FF C5 CD 9F FD C1 10 F9 F3 3A FE FF D3 A8 > F3 3E 55 32 FF FF 32 C5 FC 00 00 00 00 00 00
+
+# As on sx2-noexp0, the game's page 3 has no 158 free bytes from xxE1h, and in
+# play it writes DAF6h and F63Bh. Split the tape service into the unused C9h
+# BIOS hook area: entries at FEE1h..FEFAh and code block at FF01h..FF84h.
+service at FEE1 FF01
+
+# The game uses FCC9h and FD20h in play. Put the wrapper in the unused C9h BIOS
+# hook area at FF90h (above the split tape service code block at FF01h..FF84h).
+rescode FF90

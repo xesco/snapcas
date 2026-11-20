@@ -1,25 +1,6 @@
-# The check (docs/INTERNALS.md, Check), after memory.tcl's procedures, which it
-# uses to read memory through the CPU's view. tools/check.py sets these:
-#   ::C(report)   the report's file
-#   ::C(restore)  the seconds that the restore may take, by the image's size
-#   ::C(snap)     the snapshot folder
-#   ::C(pages)    the number of RAM pages in it
-#   ::C(kv)       the names and values of its state.txt
-#   ::C(capreset) the seconds from the snapshot to the capture's first reset
-#                 after it, or ""
-#   ::C(state)    the start of the names of the check's savestates
-#   ::C(name)     the image's name, which starts the restorer's messages
-#   ::C(com)      the first 3 bytes of SNAPCAS.COM
-#   ::C(stop)     the address of the restorer's stop_message and the 3 bytes
-#                 there, or nothing without out/snapcas.sym
-#   ::C(service), ::C(tail), ::C(free), ::C(patched), ::C(part), ::C(moved),
-#   ::C(cpos), ::C(ended)
-#                 build.txt's facts, under their names (tools/build.py,
-#                 Image.facts)
-#
-# ::run(phase) is boot until SNAPCAS.COM's command is typed, restore until the
-# tail's jump, refused when the restorer has stopped with a message, and play
-# in the 60 seconds after the restore.
+# 4-point check driver (docs/internals/restorer-and-check.md). tools/check.py
+# injects memory.tcl and ::C(*) (paths, snapshot state, and build.txt facts).
+# ::run(phase): boot -> restore -> refused | play (60 s post-restore check).
 
 array set ::K $::C(kv)
 # The tail (FORMATS.md, Tail): its address, and the offsets in it of its last
@@ -126,7 +107,7 @@ proc start_check {} {
     }
     # With the tape service, page 0's bits of the slot register, of DOS's
     # mapper's subslot register, and of SLTTBL, and mapper register FCh, can
-    # select T0 (INTERNALS.md, Restorer, step 1).
+    # select T0 (docs/internals/service-and-resident.md, Restorer, step 1).
     set ::p0mask [expr {$::C(service) ? 0xFC : 0xFF}]
     set jp [expr {$::tail(at) + $::tail(jp)}]
     # The slot register alone can match DOS's own, so the breakpoint also
@@ -148,6 +129,20 @@ proc at_start {} {
     } else {
         read_exptbl
         set ::dosslot [debug read memory 0xF344]
+        seed_resident
+    }
+}
+# The machine's resident program (FILES.md, Machine file, resident), which
+# openMSX lacks: its code at its entry in every segment of the RAM in its slot,
+# where the program keeps it, so that the image calls it.
+proc seed_resident {} {
+    if {![llength $::C(resident)]} return
+    lassign $::C(resident) slot address
+    set device [lindex [machine_info slot [expr {$slot & 3}] [expr {($slot >> 2) & 3}] [expr {$address >> 14}]] 0]
+    set size [debug size $device]
+    for {set at [expr {$address & 0x3FFF}]} {$at < $size} {incr at 0x4000} {
+        set a $at
+        foreach b [lrange $::C(resident) 2 end] { debug write $device $a $b; incr a }
     }
 }
 # The restorer's message is on the screen a moment after stop_message starts:
@@ -174,8 +169,24 @@ proc at_tail {} {
     set ::n 0
     watch_part
     set ::restored [machine_info time]
+    watch_rescall
+    watch_rescode
     for_point 3 watch_reset
+    watch_rst38
+    press_keys
     later 10 point2
+}
+
+# With the check's keys (check.py, SNAPCAS_KEYS), space (15s, 45s), 0 (25s) and
+# 1 (35s) are pressed for 0.3 seconds after the restore, which starts most
+# games from their title (including menus that start on 0 or 1), so that the
+# points and the resident program's calls cover some play too.
+proc press_keys {} {
+    if {!$::C(keys)} return
+    foreach {s row mask} {15 8 1  25 0 1  35 0 2  45 8 1} {
+        later $s [list keymatrixdown $row $mask]
+        later [expr {$s + 0.3}] [list keymatrixup $row $mask]
+    }
 }
 
 # Point 2: the game runs for 60 seconds, saved every 10 seconds, and must not
@@ -189,20 +200,91 @@ proc point2 {} {
     write_point2
     for_point 3 write_point3
     for_point 4 { write_point 4 $::basic_errors }
+    write_rescall
     stop
 }
 
-# Point 3: in the same 60 seconds the restored machine must not reboot
-# (INTERNALS.md, Check, point 3). A reboot shows itself as SNAPCAS.COM starting
-# again, when a reset has booted DOS and AUTOEXEC.BAT runs it, or as the MSX1
-# BIOS's boot screen, whose first line is "MSX  system", at a savestate. BASIC's
-# banner, which a game's restored screen can still hold, does not count. A reset
-# alone does not fail the point, because a loader can reset on purpose to start a
-# ROM copy, but the report notes each one. The reset breakpoint is the capture's:
-# the BIOS's reset routine, where 0000h's DI / JP jumps, while page 0 selects
-# the main ROM. It is set after point 1, because the check's own boot passes
-# there, and the routine's address is read in the main ROM's slot, whose ID
-# EXPTBL holds, because page 0 is DOS's RAM now.
+# Whether the image calls the machine's resident program (build.py,
+# call_resident): from T0 or H.KEYI, from a wrapper, or from the game's code,
+# which a game file's patches make call the routine that rescode places alone.
+proc rescalls {} { expr {$::C(rescall) in {t0 hook} || $::C(resvector) ne "" || $::C(rescode) ne ""} }
+# The calls of the machine's resident program (FILES.md, Machine file,
+# resident), by every image on a machine with one, as a game file's own routine
+# can make them too: their number in the 60 seconds and the last one's time. write_rescall puts them in
+# rescall.txt beside the report, apart from the points: a game that takes the
+# interrupt for a routine of its own only ends the calls.
+proc watch_rescall {} {
+    if {[llength $::C(resident)] == 0} return
+    lassign $::C(resident) slot address
+    set ::rescall(calls) 0
+    set ::rescall(last) 0
+    set ::rescall(tens) {0 0 0 0 0 0}
+    set where [expr {$slot & 0x80 ? "[expr {$slot & 3}] [expr {($slot >> 2) & 3}]" : $slot & 3}]
+    debug set_bp $address "\[pc_in_slot $where\]" { count_rescall }
+}
+# The call's code in zeros of the game's page 3, ::C(rescode) = {first last
+# segment}, which a game must leave alone as it does the tape service's part:
+# a write from outside it, to the snapshot's page 3, fails point 2, because the
+# next interrupt would run the game's bytes. Its stack and its end after the
+# stack, ::C(resstack) = {first last}, are zeros of page 3 too: a write there
+# from outside the code while the stack pointer is outside them is the game's,
+# and the next call would write over the game's bytes or run them. The routine
+# writes the game's stack pointer into its end.
+set ::res_writes {}
+set ::stack_writes {}
+proc watch_rescode {} {
+    if {[llength $::C(rescode)] == 0} return
+    lassign $::C(rescode) first last
+    debug set_watchpoint write_mem [list $first $last] {} {safe rescode_write}
+    if {[llength $::C(resstack)]} {
+        debug set_watchpoint write_mem $::C(resstack) {} {safe resstack_write}
+    }
+}
+proc in_page3 {} {
+    lassign $::C(rescode) first last segment
+    if {([debug read ioports 0xA8] >> 6) != ([want a8] >> 6)} { return 0 }
+    expr {$segment < 0 || [debug read {MSX Memory Mapper I/O} 3] == $segment}
+}
+proc rescode_write {} {
+    lassign $::C(rescode) first last
+    set pc [reg pc]
+    if {$pc >= $first && $pc <= $last} return
+    if {![in_page3]} return
+    set address [format %04X $::wp_last_address]
+    if {![dict exists $::res_writes $address] && [dict size $::res_writes] < 40} {
+        dict set ::res_writes $address [format %04X $pc]
+    }
+}
+proc resstack_write {} {
+    lassign $::C(resstack) first last
+    lassign $::C(rescode) cfirst clast
+    set sp [reg sp]
+    set pc [reg pc]
+    if {$sp >= $first && $sp <= $last + 1} return
+    if {$pc >= $cfirst && $pc <= $clast} return
+    if {![in_page3]} return
+    set address [format %04X $::wp_last_address]
+    if {![dict exists $::stack_writes $address] && [dict size $::stack_writes] < 40} {
+        dict set ::stack_writes $address [format %04X $pc]
+    }
+}
+proc count_rescall {} {
+    incr ::rescall(calls)
+    set ::rescall(last) [after_restore]
+    set ten [expr {min(5, int($::rescall(last) / 10))}]
+    lset ::rescall(tens) $ten [expr {[lindex $::rescall(tens) $ten] + 1}]
+}
+proc write_rescall {} {
+    if {[llength $::C(resident)] == 0} return
+    set f [open [file join [file dirname $::C(report)] rescall.txt] w]
+    puts $f "calls $::rescall(calls) last $::rescall(last)"
+    puts $f "tens $::rescall(tens)"
+    close $f
+}
+
+# Point 3: fail on reboot (SNAPCAS.COM restarting or BIOS boot screen at 2+
+# savestates). Intentional resets are logged via a BP at main ROM's reset target
+# (resolved through EXPTBL) but do not fail by themselves.
 set ::resets {}
 set ::reboots {}
 proc after_restore {} { format %.1f [expr {[machine_info time] - $::restored}] }
@@ -225,8 +307,21 @@ proc watch_reset {} {
 proc noted_reset {} {
     if {[llength $::resets] < 10} { lappend ::resets "the machine resets [after_restore] seconds after the restore" }
 }
+# Crash detection: fail if >RST38_MAX entries to 0038h come from FFh (RST 38h)
+# bytes (ignoring normal VDP interrupts) or >LOW_SP_MAX distinct SP values below
+# 0100h occur (stack wraparound from a crash).
+set ::RST38_MAX 100000
+set ::rst38 0
+set ::LOW_SP_MAX 32
+array set ::low_sp {}
+proc watch_rst38 {} {
+    debug set_bp 0x0038 {} {
+        if {[peek [expr {([peek16 [reg sp]] - 1) & 0xFFFF}]] == 0xFF} { incr ::rst38 }
+        if {[reg sp] < 0x100} { set ::low_sp([reg sp]) 1 }
+    }
+}
 # Point 4: in the same 60 seconds the game must not stop at a BASIC error
-# (INTERNALS.md, Check, point 4). BASIC prints the message, with "in" and the line
+# (docs/internals/restorer-and-check.md, Check, point 4). BASIC prints the message, with "in" and the line
 # number in a program, and then Ok, in a text mode. The message counts only with
 # the Ok after it, so that a game's own words do not.
 set ::basic_errors {}
@@ -258,6 +353,12 @@ proc write_point3 {} {
     if {$::C(capreset) ne "" && [llength $::resets] == 0} {
         lappend ::reboots "the capture resets the machine $::C(capreset) seconds after the snapshot, and the restored game does not"
     }
+    if {[array size ::low_sp] > $::LOW_SP_MAX} {
+        lappend ::reboots "the CPU enters 0038h with [array size ::low_sp] values of SP below 0100h, as when a crash wraps the stack around"
+    }
+    if {$::rst38 > $::RST38_MAX} {
+        lappend ::reboots "the CPU runs FFh bytes, RST 38h, $::rst38 times in [after_restore] seconds, as after a crash"
+    }
     set failed [expr {[llength $::reboots] || [llength $::boots] >= 2}]
     set f [open $::C(report) a]
     puts $f [expr {$failed ? "point 3: fail" : "point 3: pass"}]
@@ -265,17 +366,9 @@ proc write_point3 {} {
     close $f
 }
 
-# The watch on the service's part of page 3 without its scratch bytes,
-# ::C(part) = {first last E_CODE segment}. A write counts when it comes from
-# code outside the part and goes to the snapshot's page 3: its slot in the slot
-# register and, in a mapper, its segment in register FFh. The service's own
-# writes come from the part's code, which sets E_STOP for TAPIOF and STMOTR, and
-# from the code segment, in page 0, which sets it for the manual tape. So a
-# write from page 0 does not count while page 0 selects DOS's mapper with the
-# code segment, whose number E_CODE holds, or with another segment than the
-# snapshot's. A write after the service has read the tape to its end does not
-# count: the tape is at its end at the write, as tape_read finds it, or the
-# service has read its last byte since the restore, as at_tape_end notes.
+# Point 2: guard the page 3 tape-service block(s) and sub0 against game writes
+# to the snapshot's page 3, ignoring self-writes from the service/code segment
+# (e.g. E_STOP) and writes occurring after the tape has reached its end.
 set ::part_writes {}
 proc in_service_segment {} {
     if {![page0_selects $::dosslot subslot_reg]} { return 0 }
@@ -318,6 +411,12 @@ proc watch_part {} {
     if {[llength $::C(part)] == 0} return
     lassign $::C(part) first last
     debug set_watchpoint write_mem [list $first $last] {} {safe part_write}
+    if {[llength $::C(partcode)]} {
+        debug set_watchpoint write_mem $::C(partcode) {} {safe part_write}
+    }
+    if {[llength $::C(sub0)]} {
+        debug set_watchpoint write_mem $::C(sub0) {} {safe part_write}
+    }
     if {[llength $::C(ended)] == 0} return
     lassign $::C(ended) one two
     debug set_bp $one {[in_code_segment] && ([reg AF] & 0x40)} {safe at_tape_end}
@@ -327,6 +426,14 @@ proc part_write {} {
     lassign $::C(part) first last code segment
     set pc [reg pc]
     if {$pc >= $first && $pc <= $last} return
+    if {[llength $::C(partcode)]} {
+        lassign $::C(partcode) cfirst clast
+        if {$pc >= $cfirst && $pc <= $clast} return
+    }
+    if {[llength $::C(sub0)]} {
+        lassign $::C(sub0) sfirst slast
+        if {$pc >= $sfirst && $pc <= $slast} return
+    }
     if {([debug read ioports 0xA8] >> 6) != ([want a8] >> 6)} return
     if {$segment >= 0 && [debug read {MSX Memory Mapper I/O} 3] != $segment} return
     if {$pc < 0x4000 && [in_service_segment]} return
@@ -340,6 +447,12 @@ proc write_point2 {} {
     set lines {}
     dict for {address pc} $::part_writes {
         lappend lines "the game writes ${address}h, in the tape service's part of page 3, from ${pc}h"
+    }
+    dict for {address pc} $::res_writes {
+        lappend lines "the game writes ${address}h, in the call of the machine's resident program in page 3, from ${pc}h"
+    }
+    dict for {address pc} $::stack_writes {
+        lappend lines "the game writes ${address}h, in the stack of the call of the machine's resident program in page 3, from ${pc}h"
     }
     write_point 2 $lines
 }
@@ -422,9 +535,15 @@ proc state_mask {name} {
         {^sub([0-3])$} {
             # When the worker's page does not select DOS's mapper's slot at
             # the snapshot, that page's bits of the slot's subslot register can
-            # differ (INTERNALS.md, Restorer, step 1).
+            # differ (docs/internals/restorer-and-check.md, Restorer, step 1).
             set ps [lindex $m 1]
-            if {$ps != ($::dosslot & 3)} { return 0xFF }
+            # The image selects the resident program's subslot in its entry's
+            # page of its slot (build.py, call_resident).
+            set res 0xFF
+            if {[rescalls] && ([lindex $::C(resident) 0] & 0x83) == (0x80 | $ps)} {
+                set res [expr {~(3 << (2 * ([lindex $::C(resident) 1] >> 14))) & 0xFF}]
+            }
+            if {$ps != ($::dosslot & 3)} { return $res }
             set wpage [expr {[debug read memory [expr {$::tail(at) + $::tail(port)}]] - 0xFC}]
             set mask $::p0mask
             if {(([want a8] >> (2 * $wpage)) & 3) != $ps} { set mask [expr {$mask & ~(3 << (2 * $wpage))}] }

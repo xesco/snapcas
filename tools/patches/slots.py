@@ -1,4 +1,4 @@
-"""The slot patches (docs/INTERNALS.md, Slot patches): fixed slot register values
+"""The slot patches (docs/internals/patches.md, Slot patches): fixed slot register values
 that name a slot that holds nothing, by the capture's slot map
 (snapshot.Snapshot.slots). patches/slots.tcl is the capture's watch."""
 import re
@@ -20,6 +20,11 @@ LD_A_NN = 0x3A
 # A 3Eh after one can be its operand.
 OPERAND_1 = bytes.fromhex("06 0E 16 1E 26 2E 36 3E C6 CE D6 DE E6 EE F6 FE D3 DB 10 18 20 28 30 38")
 OPERAND_2 = bytes.fromhex("01 11 21 31 22 2A 32 3A C2 C3 C4 CA CC CD D2 D4 DA DC E2 E4 EA EC F2 F4 FA FC")
+# The start of the BIOS's slot routines in page 3, RDPRIM at F380h, which
+# begins with OUT (0A8h),A. The two bytes before it are no code: X-Racing
+# halts with its stack at F380h, and the return address 603Eh that each
+# interrupt leaves at F37Eh reads as LD A,60h before RDPRIM's OUT.
+RDPRIM = bytes.fromhex("D3 A8 5E 18 03 D3 A8 73")
 
 
 def tcl(side1, side2):
@@ -57,7 +62,8 @@ def find(data, context):
     for match in SLOT_CODE.finditer(data) if context.slots else ():
         value = match.group(1)[0]
         fixed = slot_fix(value, context.slots)
-        if fixed != value and not in_operand(data, match.start()):
+        if fixed != value and not in_operand(data, match.start()) \
+                and data[match.start() + 2:match.start() + 2 + len(RDPRIM)] != RDPRIM:
             old = match.group()
             findings.append(Finding(SLOT_VALUE, match.start(), old, old[:1] + bytes([fixed]) + old[2:]))
     return findings

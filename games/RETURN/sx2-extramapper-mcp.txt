@@ -1,0 +1,18 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Level 9's loader, at EF34h, copies the interpreter to pages 0 and 1 with page
+# 3's slot there, by the slot register alone. Here BASIC and the RAM, the
+# Extra-Mapper in 0-1, are both in slot 0, so the copy goes to the ROM. The
+# patch writes slot 0's subslot register instead: 55h, RAM in every page, for
+# the copy, then 50h, BASIC's value, before EI and RET.
+patch side1:59A DB A8 F5 F3 E6 F0 4F DB > F3 3E 55 32 FF FF 21 00
+patch side1:5A2 A8 CB 2F CB 2F CB 2F CB > 80 11 00 00 01 00 60 ED
+patch side1:5AA 2F E6 0F B1 D3 A8 21 00 > B0 3E 50 32 FF FF FB C9
+
+# The interpreter swaps pages 0 and 1 between the BIOS and its RAM with LD A,
+# (8072h) or LD A,(8073h) / OUT (0A8h),A, in two routines at 8074h and 807Bh.
+# The patches write 50h or 55h to slot 0's subslot register instead. The block's
+# loader checks the sum of its bytes, which the last line keeps.
+patch side1:6754 3A 72 80 D3 A8 > 3E 50 32 FF FF
+patch side1:675C 3A 73 80 D3 A8 > 3E 55 32 FF FF
+patch side1:ABE0 D0 > 02

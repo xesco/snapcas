@@ -1,0 +1,27 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the snapshot keeps the RAM page 3-0-0-3.bin in slot 3-0, which
+# the machine's resident program holds: the game needs RAM in another slot. `make
+# games` wrote this line.
+capture sx2-extramapper-noram30
+
+# After the snapshot the game puts its own routine into H.KEYI, over the image's
+# call of SX2RES, which then stops: JP 4678h for its music, copied from 4944h.
+# The image's wrapper calls SX2RES and jumps to it. Its routine at 44A8h, copied
+# from 44A5h, needs no wrapper: it calls the hook that it saved at D031h, the
+# image's call or the music's wrapper, once the patch below keeps the image's
+# call in H.KEYI.
+rescall 4678
+
+# The game installs the wrapper's address instead, FD60h after resb at FD29h, as
+# build.txt's resvector gives it.
+patch page1:945 78 46 > 60 FD
+
+# At its start the game fills the BIOS's hooks with RET, from 4019h, H.KEYI too,
+# and the calls stop until it puts its routine there. The patch starts the fill
+# at FD9Fh, after H.KEYI, which keeps the image's call. Nothing else jumps to
+# the fill.
+patch page1:19 21 9A FD 11 9B FD 01 2F 02 > 21 9F FD 11 A0 FD 01 2A 02

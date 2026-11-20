@@ -1,0 +1,31 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Dinamic's RAM search starts at slot 3 and finds SX2RES's mapper in 3-0, or,
+# run from page 3, cuts off its own code there. The patch starts it at slot 0,
+# where it finds the Extra-Mapper in 0-1.
+patch side1:2608 3E 03 > 3E 00
+patch side1:AF0F 3E 03 > 3E 00
+
+# The game runs on the BIOS's interrupt routine at the snapshot, and the image
+# calls SX2RES from H.KEYI. Then the game puts its own routine at 0038h in its
+# RAM in page 0, which ends the calls. A routine at 86C0h, as in Knight Lore's
+# file for this machine, in zeros of page 2 that the game leaves alone in a
+# minute of play with keys, uses no BIOS routine. It keeps all the registers and
+# the interrupts, selects slot 3's subslot 0 in page 1 with slot 3's subslot
+# register, selects slot 3 in page 1 with the slot register, and calls SX2RES's
+# entry at 4040h when it starts F5h DBh. Then it gives both registers back. At
+# 871Dh, CALL 86C0h / JP 93CBh.
+patch page2:6C0 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:6CA 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page2:6D4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page2:6DE 00 00 00 00 00 00 00 00 00 00 > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page2:6E8 00 00 00 00 00 00 00 00 00 00 > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page2:6F2 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 C1
+patch page2:6FC 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:706 00 00 00 00 00 00 00 00 00 00 > D3 A8 F1 E2 0D 87 FB 08 F1 08
+patch page2:710 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:71A 00 00 00 00 00 00 00 00 00 > C1 F1 C9 CD C0 86 C3 CB 93
+
+# The game's LD HL,93CBh / LD (0039h),HL at 89E5h installs its routine. It
+# installs 871Dh instead.
+patch page2:9E6 CB 93 > 1D 87

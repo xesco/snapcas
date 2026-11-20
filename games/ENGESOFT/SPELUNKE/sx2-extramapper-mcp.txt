@@ -1,0 +1,28 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The capture runs without the 2048 KB mapper in 3-0, which the game's RAM would
+# otherwise take, and SX2RES holds it.
+capture sx2-extramapper-noram30
+
+# The ROM image never reads the tape again: the rest of the tape is the next
+# game's. Without the tape service the restorer keeps the BIOS in page 0, in
+# another subslot of DOS's mapper's slot.
+service no
+
+# Each binary of the loader selects RAM in pages 1 to 3 by a fixed slot
+# register value, FCh when the register reads F0h and A8h otherwise. Here the
+# BIOS and the RAM are both in slot 0, in subslots 0 and 1, and slot 2 is
+# empty. The patches write 54h to slot 0's subslot register in place of that
+# code: the BIOS in page 0 and RAM in pages 1 to 3.
+patch side1:417D CD 38 01 FE F0 28 04 3E A8 18 02 3E FC CD 3B 01 > 3E 54 32 FF FF 00 00 00 00 00 00 00 00 00 00 00
+patch side1:81F4 CD 38 01 FE F0 28 04 3E A8 18 02 3E FC CD 3B 01 > 3E 54 32 FF FF 00 00 00 00 00 00 00 00 00 00 00
+
+# The first binary then gives BASIC its slots back, F0h or A0h. The patch writes
+# 50h to the subslot register, the BIOS in pages 0 and 1, in place of that code.
+patch side1:4198 CD 38 01 FE FC 28 04 3E A0 18 02 3E F0 CD 3B 01 > 3E 50 32 FF FF 00 00 00 00 00 00 00 00 00 00 00
+
+# The ROM image resets the machine 122.87 seconds after the load command, 6
+# seconds after the end of its load, and the BIOS's boot then sets up page 3
+# again, over the image's call of SX2RES. At 126 seconds the boot is done and
+# the game runs, so the snapshot at that moment keeps the call.
+snapshot at 126

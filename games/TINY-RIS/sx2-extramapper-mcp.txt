@@ -1,0 +1,10 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper
+# on and SX2RES running.
+
+# After the snapshot the game writes JP AAC5h with LD HL,AAC5h at A96Fh into
+# H.KEYI, over the image's call of SX2RES, which then stops. The image's wrapper
+# calls SX2RES and jumps to AAC5h.
+rescall AAC5
+
+# The game writes the wrapper's address, FD60h after resb at FD29h, into H.KEYI.
+patch page2:2970 C5 AA > 60 FD

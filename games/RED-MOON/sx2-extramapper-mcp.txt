@@ -1,0 +1,31 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Level 9's interpreter swaps between BASIC's slots and its 64 KB of RAM by the
+# slot register alone, in its code and its interrupt routine. Here BASIC and
+# the RAM are both in slot 0, so each swap writes slot 0's subslot register
+# instead: 50h for BASIC, 55h for RAM in every page. The swaps that keep the old
+# value go through small routines in the interpreter's unused bytes. The later
+# versions' own RAM search, which finds no RAM by the slot register here, stores
+# the two values instead.
+patch side1:C46 3A 73 EF D3 A8 > 3E 50 32 FF FF
+patch side1:105E DB A8 32 73 EF E6 F0 4F DB A8 CB 2F CB 2F CB 2F CB 2F E6 0F B1 32 74 EF > 3E 50 32 73 EF 3E 55 32 74 EF 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+patch side1:1076 3A 74 EF D3 A8 > 3E 55 32 FF FF
+patch side1:10D1 3A 73 EF D3 A8 > 3E 50 32 FF FF
+patch side1:10F3 3A 74 EF D3 A8 > 3E 55 32 FF FF
+patch side1:167E DB A8 F5 > CD 80 EF
+patch side1:1695 F1 D3 A8 > CD 87 EF
+patch side1:16D1 DB A8 F5 3A 73 EF D3 A8 CD 38 00 F1 D3 A8 F1 C9 > 3A FF FF 2F F5 3E 50 32 FF FF CD 38 00 C3 8D EF
+patch side1:16EE FF FF 00 00 FF FF 00 00 FF FF 00 00 FF FF 00 04 FF FF 00 > E1 3A FF FF 2F F5 E9 E1 F1 32 FF FF E9 F1 32 FF FF F1 C9
+
+# Each run of the interpreter's init, as at a restart, fills the vector table
+# at F200h and puts JP 0EF5Bh, its interrupt routine, at F1F1h, in place of the
+# vector that the build sends to its wrapper. So the image's wrapper at FD56h
+# calls SX2RES and jumps to that routine, and the patches below send the
+# interrupt to the wrapper.
+rescall EF5B
+
+# The init's LD HL,0EF5Bh, at E920h, becomes LD HL,0FD56h, the wrapper.
+patch page3:2921 5B EF > 56 FD
+
+# The snapshot's JP 0EF5Bh at F1F1h jumps to the wrapper too.
+patch page3:31F2 5B EF > 56 FD

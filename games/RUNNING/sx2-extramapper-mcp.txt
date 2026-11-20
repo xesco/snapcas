@@ -1,0 +1,30 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The game's page 3 has no 158 free bytes from an address xxE1h for the tape
+# service's part, and it keeps RAM of its own in page 0, so the mode without a
+# part in page 3, whose T0 needs page 0 outside DOS's mapper, cannot take it.
+# Here the only RAM is that mapper. So the part goes apart, in its free bytes
+# from DA48h to DB41h, as on sx2-noexp0: its entries at DAE1h to DAFAh, and its
+# code block at DA48h to DACBh. These hold zeros at the snapshot, and the game
+# writes none of them in a minute of play.
+service at DAE1 DA48
+
+# VDP interrupts are off and SP is in page 1; 37D2h polls VDP status ~1400 Hz.
+# Place a direct-I/O SX2RES caller (slot 3-0 4040h) at 8D90h in unused page 2
+# zeros, with wrapper 8DEDh calling it every 32nd poll (counter 8E0Fh, SP 9090h).
+patch page2:D90 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:D9A 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
+patch page2:DA4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F
+patch page2:DAE 00 00 00 00 00 00 00 00 00 00 > 4F E6 F3 32 FF FF 78 E6 F3 F6
+patch page2:DB8 00 00 00 00 00 00 00 00 00 00 > 0C D3 A8 C5 3A 40 40 FE F5 20
+patch page2:DC2 00 00 00 00 00 00 00 00 00 00 > 08 3A 41 40 FE DB CC 40 40 C1
+patch page2:DCC 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:DD6 00 00 00 00 00 00 00 00 00 00 > D3 A8 F1 E2 DD 8D FB 08 F1 08
+patch page2:DE0 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:DEA 00 00 00 00 00 00 00 00 00 00 > C1 F1 C9 F3 F5 DB 99 3A 0F 8E
+patch page2:DF4 00 00 00 00 00 00 00 00 00 00 > 3C E6 1F 32 0F 8E 20 0E ED 73
+patch page2:DFE 00 00 00 00 00 00 00 00 00 00 > 0D 8E 31 90 90 CD 90 8D ED 7B
+patch page2:E08 00 00 00 00 00 > 0D 8E F1 FB C9
+
+# The routine at 37D2h jumps to 8DEDh.
+patch page0:37D2 F3 F5 DB > C3 ED 8D

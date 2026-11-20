@@ -1,0 +1,39 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The capture runs on sx2-extramapper-noram30, the SX-2 with its Extra-Mapper on and
+# without the 2048 KB mapper in slot 3-0. On sx2-extramapper-mcp itself the game
+# fails: build.py: the snapshot keeps the RAM page 3-0-0-3.bin in slot 3-0, which
+# the machine's resident program holds: the game needs RAM in another slot. `make
+# games` wrote this line.
+capture sx2-extramapper-noram30
+
+# The 9088h block's RAM search (9182h) uses A8h alone, failing where BIOS and RAM
+# share slot 0. Jump past the search to 9088h, rewrite selections to slot 0's
+# subslot register (55h RAM, 50h BASIC via DEC BC / LD (BC),A), and preserve the
+# block XOR checksum using dead search byte 9186h.
+patch side1:4571 F3 3E FF D3 A8 > 3E 55 32 FF FF
+patch side1:4582 3E FF F3 D3 A8 01 5E 38 11 88 > F3 3E 55 32 FF FF 01 5E 38 11
+patch side1:458C 45 C3 EF 90 > 88 45 18 48
+patch side1:4590 3E FF F3 D3 A8 31 FA 00 11 00 > F3 3E 55 32 FF FF 31 FA 00 21
+patch side1:459A 00 21 BD 90 01 C8 00 ED B0 > BD 90 01 C8 00 50 58 ED B0
+patch side1:45DD 3E F0 D3 A8 FB C9 > 3E 50 0B 02 FB C9
+patch side1:466C DB A8 32 > C3 88 90
+patch side1:466F F5 > 0A
+
+# When space starts the game, its routine at 49D4h, a copy of 90FCh, copies
+# the BIOS into RAM in page 0, 1 KB at a time through 4E20h, by the slot
+# register alone: FCh for the BIOS in page 0 and FFh for RAM there. Here both
+# select slot 3, and the game crashed. The loop writes slot 0's subslot
+# register instead: LD A,54h / LD (0FFFFh),A for the BIOS, then INC A for 55h,
+# RAM in every page, and LD B,4 for LD BC,400h, as C is 0 after the LDIR. The
+# byte at 9186h above takes the change of the block's exclusive OR too.
+patch side1:45E5 21 00 00 C5 11 20 4E 3E FC D3 > 21 00 00 C5 11 20 4E 3E 54 32
+patch side1:45EF A8 01 00 04 E5 D5 ED B0 E1 D1 > FF FF 01 00 04 E5 D5 ED B0 E1
+patch side1:45F9 3E FF D3 A8 01 00 04 ED B0 EB > D1 3C 32 FF FF 06 04 ED B0 EB
+
+# The unpacker that runs from 0000h when play starts rewrites all of C000h to
+# FFFDh with the game, over the image's call of SX2RES and its stack, wherever
+# they are, and then the game writes RET at 0038h and runs without interrupts.
+# So the image has no call.
+rescall no

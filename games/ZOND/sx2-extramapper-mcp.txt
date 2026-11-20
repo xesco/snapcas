@@ -1,0 +1,8 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# Line 30 of the BASIC program at the snapshot, FOR I=&HFD9A TO &HFF30:POKE
+# I,&HC9:NEXT, writes RET into every hook from H.KEYI up, over the image's
+# CALL resb, so SX2RES got no more calls. The patch starts the loop at &HFD9F,
+# H.TIMI, and leaves H.KEYI with the image's call.
+patch page2:008D 0C 9A FD > 0C 9F FD

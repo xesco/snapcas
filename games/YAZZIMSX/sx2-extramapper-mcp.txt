@@ -1,0 +1,28 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# CasLink3's loader leaves the game as a ROM image in RAM and resets the
+# machine, so that the BIOS starts it. That boot takes the 2048 KB mapper in
+# 3-0, which SX2RES holds, for its RAM. The capture runs without that mapper,
+# so the boot keeps the Extra-Mapper in 0-1.
+capture sx2-extramapper-noram30
+
+# CasLink3's loader copies FFFFh's fields of pages 2 and 3 to pages 0 and 1 to
+# load into RAM, 55h here. It then gives page 0 back to the BIOS by the slot
+# register alone and resets with RST 30h, which leaves page 0 on the RAM in
+# 0-1, because the BIOS and the RAM are both in slot 0. The patch writes 54h,
+# the BIOS in page 0 and RAM in pages 1 to 3, to FFFFh before the reset.
+patch side1:43E3 E6 FC D3 A8 F7 00 > 3E 54 32 FF FF F7
+
+# The game saves H.TIMI, puts its own routine there, and writes RET to H.KEYI
+# at FD9Ah, where the image calls SX2RES, so the calls end 7 seconds after the
+# restore. The patch writes the RET to FD9Eh, the hook's last byte, which holds
+# RET already, so the call stays. The loader sums the block from 9179h and
+# compares the sum with the byte at 9009h, so that byte grows by 4 as well.
+patch side1:579 3E C9 32 9A FD > 3E C9 32 9E FD
+patch side1:F7 8F > 93
+
+# After the restore, the game writes FD79h and FD7Ah (in SLTWRK, from 4951h),
+# where the build puts the stack of the call of SX2RES at FD60h to FD87h. The
+# stack takes 40 zeros of KBUF, BASIC's buffer for a line that it tokenizes,
+# which the boot and the game leave alone.
+resstack F4E0

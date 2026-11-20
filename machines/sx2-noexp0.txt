@@ -1,0 +1,14 @@
+# SX-2 (MSX2+, 2048 KB) with its slot 0 not expanded. Configured via SETSMART
+# -F9FD (disables MSX-MUSIC and Wi-Fi until power-off), 2048 KB RAM in 3-0,
+# MegaSD (Nextor) in 3-2, slots 1-2 empty. Built from OCM-BIOS.DAT via make
+# firmware (see docs/MACHINES.md).
+openmsx -machine OCM_SX-2_noexp0
+disk hda
+firmware machines/OCM_SX-2_noexp0.xml
+parent sx2
+# KdL's sub-ROM writes its defaults to the clock chip at every boot, among them
+# a text width of 80, and BASIC starts with it, where an MSX2 starts with 37.
+# Text games would show in 80 columns, and a program that sets WIDTH 32 on its
+# graphics screen, as English Words does, gets the text screen from an MSX2+'s
+# sub-ROM. The image restores the captured width.
+width 37

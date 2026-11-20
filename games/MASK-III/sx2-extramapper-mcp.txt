@@ -1,0 +1,55 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Gremlin's loader at D800h runs a RAM search, which finds the RAM in 0-1 but
+# leaves slot 0's subslot register at 55h, RAM in page 0, and enables the
+# interrupts, which then run the RAM at 0038h: the load stopped after the
+# search. Its result at FFFEh, the slot register's value for the RAM, is 00h
+# here, where the BIOS and the RAM share slot 0. The patch skips the search,
+# so the register stays 50h, BASIC.
+patch side1:1C4 47 08 78 E6 > 4F 08 18 78
+
+# Each later block selects the RAM by that value and gives BASIC back by the
+# slot register alone. The patches write slot 0's subslot register instead: 55h
+# for RAM in every page, as the value at FFFEh selects elsewhere, then 50h.
+patch side1:272 3A FE FF D3 A8 > 3E 55 32 FF FF
+patch side1:29A DB A8 E6 F0 D3 A8 > 3E 50 32 FF FF 00
+patch side1:CDF2 3A FE FF D3 A8 > 3E 55 32 FF FF
+
+# Where a block gives BASIC back with AND 0F0h on that value and OUT (0A8h),A,
+# the patches drop the block's first DI, which the loader has already done,
+# move the code up a byte, and end it with LD (0FFFFh),A: 55h AND 0F0h, 50h.
+patch side1:1E91 F3 3A FE FF D3 A8 01 00 40 11 > 3E 55 32 FF FF 01 00 40 11 80
+patch side1:1E9B 80 03 21 80 87 ED B0 E6 F0 D3 > 03 21 80 87 ED B0 E6 F0 32 FF
+patch side1:1EA5 A8 > FF
+patch side1:5BB1 F3 3A FE FF D3 A8 01 00 40 11 > 3E 55 32 FF FF 01 00 40 11 00
+patch side1:5BBB 00 40 21 00 88 ED B0 E6 F0 D3 > 40 21 00 88 ED B0 E6 F0 32 FF
+patch side1:5BC5 A8 > FF
+
+# The loader checks each block by the XOR of its bytes, which must be 0. The
+# patches change each changed block's last byte, its sum, to keep that.
+patch side1:253 0C > FA
+patch side1:1E72 5B > 00
+patch side1:5B92 9A > 39
+patch side1:9CB1 E0 > 43
+patch side1:10EF1 BF > A6
+
+# Page 3 has no room for the built-in SX2RES hook, so place a 3-part direct-I/O
+# caller in unused zeros: save/restore at 9568h, slot 3-0 switchers at 9468h/9481h
+# (page 2), and wrapper at C1E0h calling 9568h then jumping to 10CAh.
+patch page2:1568 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
+patch page2:1572 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 CD
+patch page2:157C 00 00 00 00 00 00 00 00 00 00 > 68 94 C5 3A 40 40 FE F5 20 08
+patch page2:1586 00 00 00 00 00 00 00 00 00 00 > 3A 41 40 FE DB CC 40 40 C1 CD
+patch page2:1590 00 00 00 00 00 00 00 00 00 00 > 81 94 F1 E2 97 95 FB 08 F1 08
+patch page2:159A 00 00 00 00 00 00 00 00 00 00 > E1 D1 C1 D9 FD E1 DD E1 E1 D1
+patch page2:15A4 00 00 00 > C1 F1 C9
+patch page2:1468 00 00 00 00 00 00 00 00 00 00 > DB A8 47 F6 C0 D3 A8 3A FF FF
+patch page2:1472 00 00 00 00 00 00 00 00 00 00 > 2F 4F E6 F3 32 FF FF 78 E6 F3
+patch page2:147C 00 00 00 00 00 > F6 0C D3 A8 C9
+patch page2:1481 00 00 00 00 00 00 00 00 00 00 > 78 F6 C0 D3 A8 79 32 FF FF 78
+patch page2:148B 00 00 00 > D3 A8 C9
+patch page3:1E0 00 00 00 00 00 00 > CD 68 95 C3 CA 10
+
+# The game takes its interrupts at 0038h in its RAM in page 0, with JP 10CAh.
+# The jump goes to C1E0h.
+patch page0:39 CA 10 > E0 C1

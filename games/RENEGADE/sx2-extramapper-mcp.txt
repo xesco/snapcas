@@ -1,0 +1,34 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The title and the play take the interrupt in the game's routine at 0A38h,
+# through JP at 0038h in its RAM page 0, which the code at 0A2Ah writes. The
+# menu runs with the interrupts off: its loop at 6540h gives the border a
+# random colour in each pass, about 3,000 times a second, too often for a call
+# of SX2RES in each. So the image gets a wrapper for 0A38h at FC4Ch, and a
+# second one at FC5Dh whose jump goes to the RET at FC84h, for a counter that
+# the menu's loop calls. The play starts with 1, 2 or 3 in the menu, after a
+# load from the tape.
+rescall 0A38 FC84
+
+# The two wrappers take 34 bytes, and the 24 bytes at FCC9h, before the tape
+# service's part, hold one. FC4Ch is in BASIC's TRPTBL, zeros that the game
+# leaves alone, also after the load of a level.
+rescode FC4C
+
+# The snapshot's JP 0A38h at 0038h, and LD HL,0A38h in the code that writes
+# it, go to the first wrapper. With the rescall line's addresses, the build
+# leaves that jump as it is.
+patch page0:0039 38 0A > 4C FC
+patch page0:0A2D 21 38 0A > 21 4C FC
+
+# The counter at FC6Eh: AND 7 / CALL 09CEh, the menu's border, as RST 0 does,
+# then one pass in 128 goes to the second wrapper, about 24 times a second,
+# and the others return. FC85h holds the count.
+patch page3:3C6E 00 00 00 00 00 00 00 00 00 00 > E6 07 CD CE 09 F5 3A 85 FC 3C
+patch page3:3C78 00 00 00 00 00 00 00 00 00 00 > 32 85 FC E6 7F 20 04 F1 C3 5D
+patch page3:3C82 00 00 00 > FC F1 C9
+
+# AND 7 / RST 0 / NOP in the menu's loop becomes CALL 0FC6Eh / NOP. Both of
+# the loop's ways reach it, after LD A,R or after LD A,0.
+patch page1:258D E6 07 C7 00 > CD 6E FC 00

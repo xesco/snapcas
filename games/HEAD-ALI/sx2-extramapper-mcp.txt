@@ -1,0 +1,11 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The first binary, at BBC2h, sets RAMAD0 to RAMAD3 at F341h to FFh, then looks
+# for RAM in pages 0 and 1 from slot ID 84h up with its own copy of ENASLT. It
+# finds the Extra-Mapper in slot 0-1 and leaves it selected in pages 0 and 1 of
+# slot 0's subslot register, so BASIC's ROM is gone when it returns. Here the
+# BIOS has already set RAMAD0 to RAMAD3 to 84h, the slot that the search finds.
+# The patches leave out the reset of RAMAD0 to RAMAD3 and the call of the
+# search.
+patch side1:17F 21 41 F3 06 04 36 FF 23 10 FB > 00 00 00 00 00 00 00 00 00 00
+patch side1:18C CD 50 BC > 00 00 00

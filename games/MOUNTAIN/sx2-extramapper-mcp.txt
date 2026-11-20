@@ -1,0 +1,26 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# The loader is Positive's, as African Trail Simulator's. Its `slots` RAM search
+# finds the RAM in 0-1 and leaves slot 0's subslot register at 55h, but its
+# result and BASIC's slot register value are both 00h here, where the BIOS and
+# the RAM share slot 0, so each later switch by the slot register alone does
+# nothing, and the load stopped after the second binary. The patches skip the
+# search and make each use of its stored values a write of slot 0's subslot
+# register instead: 55h for RAM in every page, 54h for RAM in pages 1 to 3, 50h
+# for BASIC.
+patch side1:14D 3A A1 90 D3 A8 > 3E 55 32 FF FF
+patch side1:15D 3A A2 90 D3 A8 > 3E 50 32 FF FF
+patch side1:168 3A A1 90 D3 A8 > 3E 55 32 FF FF
+patch side1:891 47 08 78 E6 > 4F 08 18 78
+patch side1:917 3A FF FF 2F > 3E 54 00 00
+
+# The game runs without interrupts, so nothing calls SX2RES. In play the game
+# writes from F570h to FF42h. Put the call routine and its stack in the unused
+# zeros at E630h..E687h (wrapper at E65Dh, jumping to the delay at 257Ah).
+rescode E630
+resstack E670
+rescall 257A
+
+# The game's loop at 0B12h calls the delay once a pass, about 13 times a second.
+# It calls the wrapper instead.
+patch page0:B15 CD 7A 25 > CD 5D E6

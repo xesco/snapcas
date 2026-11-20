@@ -3,3 +3,25 @@ cas DOUBLE88.CAS
 side2 DOUBLEB.CAS
 sha1 50b16328f7f9899d44a7bd797bb21ffa873280df 35ddbc4dbee26620eacf7864fb121502f384418d
 url https://download.file-hunter.com/Games/MSX1/CAS/Double%20Dragon%20(1988)(Dro%20Soft)(es)(Side%20A)%5BRUN%27CAS-%27%5D.zip https://download.file-hunter.com/Games/MSX1/CAS/Double%20Dragon%20(1988)(Dro%20Soft)(es)(Side%20B)%5BRUN%27CAS-%27%5D.zip
+
+# The game writes port FEh, the ZX Spectrum's border and sound port, with
+# OUT (0FEh),A: six times in its code, and once in each level's block, as
+# XOR A / OUT (0FEh),A / LD HL,4000h. On a machine with a memory mapper, port FEh
+# is the mapper's register of page 2, so page 2 shows page 3's segment 0. The
+# next level's code at 9000h is then not there, and JP 9056h at EAD7h runs data
+# until the CPU loops on RST 38h. The patches replace each OUT (0FEh),A with
+# LD A,A and LD D,D, which do nothing and keep both the sum and the exclusive OR
+# of each block, as in Mortadelo y Filemon's files.
+patch side1:4C41 D3 FE > 7F 52
+patch side1:5352 D3 FE > 7F 52
+patch side1:558B D3 FE > 7F 52
+patch side1:582B D3 FE > 7F 52
+patch side1:58E7 D3 FE > 7F 52
+patch side1:58EB D3 FE > 7F 52
+patch side1:813C D3 FE > 7F 52
+patch side1:108AB D3 FE > 7F 52
+patch side1:15A03 D3 FE > 7F 52
+patch side1:1AA87 D3 FE > 7F 52
+patch side1:1FDAA D3 FE > 7F 52
+patch side1:250BB D3 FE > 7F 52
+patch side2:263F D3 FE > 7F 52

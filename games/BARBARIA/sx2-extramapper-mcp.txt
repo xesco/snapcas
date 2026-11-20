@@ -1,0 +1,12 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# After the load, code at D966h copies 434 bytes from D974h to FF01h with LDIR,
+# up to FFFFh and on from 0000h. The byte that lands on FFFFh, slot 0's
+# subslot register here, is 00h: the main ROM's subslot in every page, so page
+# 3 loses its RAM and the next interrupt crashes. Where the RAM has a slot of
+# its own, as in subslot 0 of slot 3, 00h keeps it. The first patch makes the
+# byte 55h, the Extra-Mapper in every page. The second keeps the XOR of the
+# block, which the loader checks: its last byte, which the loader reads and
+# does not store.
+patch side1:94A3 00 > 55
+patch side1:9FD4 0A > 5F

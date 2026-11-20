@@ -1,0 +1,29 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
+
+# Super MSX's loaders keep BASIC's slot register value at FFFDh and the RAM's
+# at FFFEh, and select them by the slot register alone. Here the BIOS and the
+# RAM share slot 0, so both values are 00h and each switch does nothing. The
+# patches make each use of the two values a write of slot 0's subslot register
+# instead: 50h for BASIC and 55h for RAM in every page.
+patch side1:1644D 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:16462 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+patch side1:1649E 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
+patch side1:164CF 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
+
+# The lines above leave slot 0's subslot register at 55h when the loader calls
+# each block's routine. The routine of the last block, at B800h, copies the
+# game's code from 9000h to C800h and jumps to D800h, which calls the BIOS, so
+# the patch writes 50h, BASIC's value, in the routine's first NOPs.
+patch side1:1E3CA 00 00 00 00 00 > 3E 50 32 FF FF
+
+# At D919h the game copies the code that the first two blocks left from 2024h
+# up to 8000h, with RAM in pages 0 and 1 by the slot register alone, and starts
+# it at 8000h with BASIC's value, both 00h here. The patch jumps from D91Ch to
+# D930h, a copy of the game from the tape that nothing calls, which the next
+# lines replace with the same copy between writes of 55h and 50h to FFFFh.
+# The last line keeps the block's parity, the XOR of its bytes, at 0.
+patch side1:1CCE6 D3 A8 21 > C3 30 D9
+patch side1:1CCFA 21 00 80 01 FF 54 16 00 D9 CD > 3E 55 32 FF FF 21 24 20 11 00
+patch side1:1CD04 E4 00 D9 38 17 77 82 57 23 0B > 80 01 FF 54 ED B0 3E 50 32 FF
+patch side1:1CD0E 78 B1 20 F0 > FF C3 00 80
+patch side1:1E40A D8 > 79

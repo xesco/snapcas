@@ -1,0 +1,28 @@
+# Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
+# and SX2RES running.
+
+# The game runs without interrupts, so nothing calls SX2RES. The image's code
+# for the call, its call routine res3 and its wrapper at FD56h, which calls res3
+# and jumps to a RET at FCDCh, goes to FD29h, in SLTWRK's zeros of the empty
+# slots 1 and 2.
+rescode FD29
+rescall FCDC
+
+# Two entries at FCC9h, in SLTATR's zeros, count their calls in the byte after
+# them and call the wrapper at every 256th of the first and every 64th of the
+# second, then do the instructions that their calls replace and return.
+patch page3:3CC9 00 00 00 00 00 00 00 00 00 00 > F5 3A F1 FC C6 01 32 F1 FC 30
+patch page3:3CD3 00 00 00 00 00 00 00 00 00 00 > 03 CD 56 FD F1 DB AA E6 F0 C9
+patch page3:3CDD 00 00 00 00 00 00 00 00 00 00 > F5 3A F1 FC C6 04 32 F1 FC 30
+patch page3:3CE7 00 00 00 00 00 00 00 00 00 00 > 03 CD 56 FD F1 06 64 10 FE C9
+
+# The title waits for a key in a loop from 5F70h that reads the keyboard's
+# rows, about 5000 times a second. It calls the first entry in place of
+# IN A,(0AAh) / AND 0F0h, about 20 times a second.
+patch page1:1F7F DB AA E6 F0 > CD C9 FC 00
+
+# The menu waits for 1 to 4 in a loop from 5C3Dh that starts with a delay,
+# LD B,64h / DJNZ $, about 2300 times a second. It calls the second entry in
+# place of the delay, about 35 times a second. The fights load from the other
+# tapes.
+patch page1:1C3D 06 64 10 FE > CD DD FC 00
