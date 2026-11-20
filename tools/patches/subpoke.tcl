@@ -15,19 +15,9 @@ proc subpoke_bytes {kind value} {
     return $bytes
 }
 
-# Step 3's part, before the load command. The POKE writes AAh to the subslot
-# register of page 3's slot, which selects subslot 2 in every page, or A8h,
-# which selects it in pages 1 to 3 and subslot 0 in page 0. Where BASIC's RAM
-# is in another subslot, the POKE takes the RAM away from under the program.
-# So each POKE gets that subslot in the same pages as its value: in every
-# page, as step 2 sets the register, or in pages 1 to 3. In the main ROM's
-# slot, as on the SX-2 with its Extra-Mapper on, the RAM's subslot in pages 0
-# and 1 would take BASIC away, so the POKE gets it in pages 2 and 3 only, and
-# subslot 0 in pages 0 and 1, as BASIC has them. A slot that is not
-# expanded has RAM at FFFFh, and a RAM in subslot 2 is what the POKE expects,
-# so those tapes keep their bytes. The capture stops with the patches, and
-# capture.py runs it again on the patched tape, where no POKE has its old
-# value.
+# Step 3: rewrite BASIC POKE &HFFFF,&HAA / &HA8 to BASIC's actual RAM subslot
+# when page 3 is expanded and not in subslot 2 (preserving pages 0-1 in slot 0
+# so BASIC stays mapped). Stops capture so capture.py retries on the patched tape.
 proc subpoke_start {} {
     if {![llength $::subpoke]} return
     set ps [expr {([debug read ioports 0xA8] >> 6) & 3}]

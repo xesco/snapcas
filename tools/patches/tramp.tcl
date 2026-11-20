@@ -5,17 +5,9 @@
 #   ::tramp_new   by "<ROM's subslot>,<RAM's subslot>", the patched builder's
 #                 bytes
 
-# Step 3's part, before the load command. The trampoline selects slot 0 in page
-# 0 by the slot register alone, for TAPION in the main ROM. Where the main ROM's
-# slot is expanded and BASIC's RAM for page 3 is in another subslot of that
-# slot, which also holds RAM in page 0, the game's RAM there hides the ROM from
-# the slot register, and the trampoline calls the game's RAM: the SX-2 with its
-# Extra-Mapper on has the ROM in 0-0 and the RAM in 0-1. There the patched
-# trampoline selects the ROM's subslot in page 0 and the RAM's in the other
-# pages for the call, and then writes back the subslot register's value from
-# when the builder ran. Every other machine keeps the tape's bytes. The capture
-# stops with the patches, and capture.py runs it again on the patched tape,
-# where the builder no longer occurs.
+# Step 3: when main ROM and BASIC RAM share an expanded slot 0 (e.g. SX-2
+# Extra-Mapper), rewrite the FC9Ah tape trampoline to switch slot 0's subslot
+# register around TAPION and restore the caller's original subslot.
 proc tramp_start {} {
     if {![llength $::tramp]} return
     set rom [exptbl 0]

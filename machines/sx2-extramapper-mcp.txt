@@ -1,15 +1,7 @@
-# SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running. The SX-2
-# is an FPGA MSX on KdL's OCM-PLD firmware, here as the sx2-mcp project leaves
-# it: its resident program SX2RES, 2.8 or later, sends SETSMART's codes 57h,
-# the Extra-Mapper on, and FCh, the warm reset with the 2048 KB mapper, at
-# boot. Slot 0 is expanded: the main ROM in 0-0, the Extra-Mapper of 4096 KB in
-# 0-1, MSX-MUSIC in 0-2 and the Wi-Fi's BIOS in 0-3. The BIOS and DOS take the
-# Extra-Mapper: RAMAD0 to RAMAD3 at F341h are 84h. The 2048 KB mapper in 3-0 is
-# SX2RES's, and the MegaSD with Nextor is in 3-2. The cartridge slots 1 and 2
-# are empty. The machine sx2 is the SX-2 with the Extra-Mapper off. The
-# Makefile makes the model from openMSX's FS-A1WSX and the ROMs of the SX-2's
-# own OCM-BIOS.DAT, from its SD card, which goes in openMSX's system ROMs
-# (make firmware). openMSX has no ESP8266, so the Wi-Fi's BIOS finds none.
+# SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running. Slot 0 is
+# expanded (main ROM 0-0, 4096 KB Extra-Mapper 0-1 for BIOS/DOS, MSX-MUSIC 0-2,
+# Wi-Fi BIOS 0-3); SX2RES 2.8+ holds the 2048 KB mapper in 3-0, MegaSD in 3-2,
+# slots 1-2 empty. Built from OCM-BIOS.DAT via make firmware (docs/MACHINES.md).
 openmsx -machine OCM_SX-2_extramapper
 disk hda
 firmware machines/OCM_SX-2_extramapper.xml

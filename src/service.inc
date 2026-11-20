@@ -38,17 +38,8 @@ P3_CODE   equ E_STOP+1
 P3_FREE     equ 0FCC9h          ; its first byte
 P3_FREE_END equ 0FD88h          ; its last byte
 
-; The stacks of the calls of a machine's resident program (docs/internals/service-and-resident.md, The
-; resident program's call), in bytes. The program switches to a stack of its
-; own at entry (SX2RES 2.8+ uses 6 bytes below SP before switching), staying
-; within 8 bytes below SP at its entry, and the call's return address takes 2
-; more, RES_STACK. res3 keeps the slot register and the interrupts' state on its
-; stack too, 2 bytes, RES3_STACK (12 + 12 for res3e = 24 bytes). resb reaches
-; the entry through the BIOS's CALSLT, which takes 14 bytes on the SX-2 down to
-; the entry (RDSLT takes 12), plus 2 for the interrupts' state, 8 for the entry
-; and 4 to spare for another BIOS's CALSLT: RESB_STACK (28 + 12 for resbe = 40
-; bytes, which fits in SLTWRK after resb without touching SLTATR). resc and
-; t_res, whose stacks cost the game nothing, have RES_SPARE bytes to spare too.
+; Resident call private stack sizes (bytes; SX2RES 2.8+ uses 6 B before switching):
+; RES_STACK = ret(2)+entry(8), RES3_STACK = +A8h/flags(2), RESB_STACK = +CALSLT(14)+spare(4).
 RES_STACK  equ 2+8
 RES3_STACK equ 2+RES_STACK
 RESB_STACK equ 2+14+8+4

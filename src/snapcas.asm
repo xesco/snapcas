@@ -1,15 +1,6 @@
-; SNAPCAS.COM, the snapcas restorer (docs/internals/restorer-and-check.md, Restorer).
-;
-; SNAPCAS <GAME> restores <GAME>.SNP, the snapshot of a cassette game, and
-; starts the game.
-;
-; It runs under MSX-DOS 1, MSX-DOS 2 and Nextor. Its code and its data stay
-; below 4000h, in page 0, so that pages 1 and 2 are free for its buffers and its
-; worker. It keeps DOS's stack, in page 3, because MSX-DOS 2's mapper routines
-; page the DOS kernel into page 0, and switches to a stack in page 0 only while
-; it selects other slots in page 3. It reads the image with the FCB functions, which
-; MSX-DOS 1 has and MSX-DOS 2 and Nextor keep (MSX-DOS 2 Function Codes
-; Specification).
+; SNAPCAS.COM: MSX-DOS 1/2/Nextor snapshot restorer (docs/internals/restorer-and-check.md).
+; Code and data stay below 4000h so pages 1-2 remain free for buffers/worker;
+; uses DOS's FCB calls and stack (switching to a page-0 stack when paging slot 3).
 
 BDOS    equ 0005h       ; DOS function call
 _TERM0  equ 00h         ; end the program
@@ -556,18 +547,10 @@ data_offset:
 
 ; ---- Step 1: the worker's page at the end ----
 
-; The worker runs at the end in page 1 or 2, a page other than the tail's,
-; selecting DOS's mapper. When that mapper is in an expanded slot, the worker
-; must keep the mapper's subslot in its page while it writes the slot's
-; subslot register. It takes, in this order:
-; 1. a page whose bits in the snapshot's subslot register of that slot already
-;    select DOS's mapper's subslot;
-; 2. when the snapshot's page 3 selects DOS's mapper's slot, any page: the tail
-;    writes the slot's true subslot register at FFFFh;
-; 3. a page that does not select DOS's mapper's slot at the snapshot: only that
-;    page's bits of the slot's subslot register differ from the snapshot's, and
-;    the BIOS writes them again from SLTTBL when it next selects a subslot of
-;    the slot.
+; Choose worker page (1 or 2, distinct from tail's page) so the worker stays
+; mapped when writing DOS's expanded subslot register: prefer (1) a page whose
+; snapshot subslot already matches DOS's mapper, (2) any page if page 3 is DOS's
+; slot (tail writes FFFFh), or (3) a page not selecting DOS's slot at snapshot.
 find_worker_page:
         ld a,(HDR+H_TAIL+1)
         rlca

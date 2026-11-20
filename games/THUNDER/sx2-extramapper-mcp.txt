@@ -6,17 +6,9 @@
 # hold zeros at the snapshot and in a minute of play with keys.
 service at EEE1
 
-# The game runs with its interrupts off, so the image has no call of SX2RES, and
-# its stack is often in page 1, which the routine gives to SX2RES. Its routine
-# at 30CAh, DI / LD A,0F3h / OUT (0AAh),A, reads the keyboard about 8 times a
-# second. A routine at 8935h, as in Knight Lore's file for this machine, in
-# zeros of page 2 that the game leaves alone in a minute of play with keys, uses
-# no BIOS routine. It keeps all the registers and the interrupts, selects slot
-# 3's subslot 0 in page 1 with slot 3's subslot register, selects slot 3 in page
-# 1 with the slot register, and calls SX2RES's entry at 4040h when it starts F5h
-# DBh. Then it gives both registers back. At 8992h, DI, then LD (89A4h),SP / LD
-# SP,89EEh / CALL 8935h / LD SP,(89A4h), then LD A,0F3h / RET: the call runs on
-# a stack in zeros below 89EEh.
+# Interrupts are off and SP is often in page 1; 30CAh scans keys ~8 Hz. Place a
+# direct-I/O SX2RES caller (slot 3-0 4040h) at 8935h in unused page 2 zeros, with
+# wrapper 8992h switching SP to 89EEh (saved at 89A4h) around CALL 8935h.
 patch page2:935 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
 patch page2:93F 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
 patch page2:949 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F

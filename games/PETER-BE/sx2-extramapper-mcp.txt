@@ -1,16 +1,9 @@
 # Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on
 # and SX2RES running.
 
-# The image has no call of SX2RES: the game uses the zeros in page 3 where the
-# image's code for the call goes, or has no room there that the check allows. A
-# routine at 2E60h, as in Knight Lore's file for this machine, in zeros of page
-# 0 that the game leaves alone in a minute of play with keys, uses no BIOS
-# routine. It keeps all the registers and the interrupts, selects slot 3's
-# subslot 0 in page 1 with slot 3's subslot register, selects slot 3 in page 1
-# with the slot register, and calls SX2RES's entry at 4040h when it starts F5h
-# DBh. Then it gives both registers back. At 2EBDh, LD (2ECEh),SP / LD SP,1700h
-# / CALL 2E60h / LD SP,(2ECEh) / JP 1526h: the game's stack is in page 1, which
-# the routine gives to SX2RES, so the call runs on a stack in zeros below 1700h.
+# Page 3 has no room for the built-in SX2RES hook and SP is in page 1. Place a
+# direct-I/O SX2RES caller (slot 3-0 4040h) at 2E60h in unused page 0 zeros, with
+# wrapper 2EBDh switching SP to 1700h before jumping to 1526h.
 patch page0:2E60 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
 patch page0:2E6A 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
 patch page0:2E74 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F

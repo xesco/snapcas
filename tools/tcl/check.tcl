@@ -1,25 +1,6 @@
-# The check (docs/internals/restorer-and-check.md, Check), after memory.tcl's procedures, which it
-# uses to read memory through the CPU's view. tools/check.py sets these:
-#   ::C(report)   the report's file
-#   ::C(restore)  the seconds that the restore may take, by the image's size
-#   ::C(snap)     the snapshot folder
-#   ::C(pages)    the number of RAM pages in it
-#   ::C(kv)       the names and values of its state.txt
-#   ::C(capreset) the seconds from the snapshot to the capture's first reset
-#                 after it, or ""
-#   ::C(state)    the start of the names of the check's savestates
-#   ::C(name)     the image's name, which starts the restorer's messages
-#   ::C(com)      the first 3 bytes of SNAPCAS.COM
-#   ::C(stop)     the address of the restorer's stop_message and the 3 bytes
-#                 there, or nothing without out/snapcas.sym
-#   ::C(service), ::C(tail), ::C(free), ::C(patched), ::C(part), ::C(partcode),
-#   ::C(moved), ::C(cpos), ::C(ended), ::C(sub0)
-#                 build.txt's facts, under their names (tools/build.py,
-#                 Image.facts)
-#
-# ::run(phase) is boot until SNAPCAS.COM's command is typed, restore until the
-# tail's jump, refused when the restorer has stopped with a message, and play
-# in the 60 seconds after the restore.
+# 4-point check driver (docs/internals/restorer-and-check.md). tools/check.py
+# injects memory.tcl and ::C(*) (paths, snapshot state, and build.txt facts).
+# ::run(phase): boot -> restore -> refused | play (60 s post-restore check).
 
 array set ::K $::C(kv)
 # The tail (FORMATS.md, Tail): its address, and the offsets in it of its last
@@ -301,17 +282,9 @@ proc write_rescall {} {
     close $f
 }
 
-# Point 3: in the same 60 seconds the restored machine must not reboot
-# (docs/internals/restorer-and-check.md, Check, point 3). A reboot shows itself as SNAPCAS.COM starting
-# again, when a reset has booted DOS and AUTOEXEC.BAT runs it, or as the MSX1
-# BIOS's boot screen, whose first line is "MSX  system", at a savestate. BASIC's
-# banner, which a game's restored screen can still hold, does not count. A reset
-# alone does not fail the point, because a loader can reset on purpose to start a
-# ROM copy, but the report notes each one. The reset breakpoint is the capture's:
-# the BIOS's reset routine, where 0000h's DI / JP jumps, while page 0 selects
-# the main ROM. It is set after point 1, because the check's own boot passes
-# there, and the routine's address is read in the main ROM's slot, whose ID
-# EXPTBL holds, because page 0 is DOS's RAM now.
+# Point 3: fail on reboot (SNAPCAS.COM restarting or BIOS boot screen at 2+
+# savestates). Intentional resets are logged via a BP at main ROM's reset target
+# (resolved through EXPTBL) but do not fail by themselves.
 set ::resets {}
 set ::reboots {}
 proc after_restore {} { format %.1f [expr {[machine_info time] - $::restored}] }
@@ -334,20 +307,9 @@ proc watch_reset {} {
 proc noted_reset {} {
     if {[llength $::resets] < 10} { lappend ::resets "the machine resets [after_restore] seconds after the restore" }
 }
-# A crashed game counts as a reboot: a jump into an empty slot, or into RAM that
-# holds FFh, runs RST 38h at each byte, and each one enters 0038h with the
-# address after the FFh byte on the stack. An interrupt enters 0038h too, so an
-# entry counts only when the byte before its return address is FFh. Games that
-# run make up to about 1,700 such entries in the 60 seconds, and the crashes seen
-# 260,000 and more. Rocky enters 0038h a million times by interrupts, whose VDP
-# status it never reads, and makes none. So more than RST38_MAX entries fail the
-# point. A crash can also take the stack down among the restart addresses below
-# 0100h, where RST 38h pushes its return addresses over the code that it runs, so
-# the byte before them is seldom FFh. Such a crash wraps the stack around: Tales
-# of Popolon's crash on sx2-extramapper-mcp enters 0038h with 128 values of SP
-# below 0100h, from 00FEh down to 0000h. The Living Daylights and Saboteur keep
-# their stack there by design, and enter 0038h with 2 to 4 values, all above
-# 00EDh. So more than LOW_SP_MAX values of SP below 0100h fail the point too.
+# Crash detection: fail if >RST38_MAX entries to 0038h come from FFh (RST 38h)
+# bytes (ignoring normal VDP interrupts) or >LOW_SP_MAX distinct SP values below
+# 0100h occur (stack wraparound from a crash).
 set ::RST38_MAX 100000
 set ::rst38 0
 set ::LOW_SP_MAX 32
@@ -404,21 +366,9 @@ proc write_point3 {} {
     close $f
 }
 
-# The watch on the service's part of page 3 without its scratch bytes,
-# ::C(part) = {first last E_CODE segment}, and on its code block without them,
-# ::C(partcode) = {first last}, when a game file's service at puts that block
-# apart from the entries, and on sub0, ::C(sub0) = {first last}, when the
-# build put it into page 3. A write counts when it comes from code outside the
-# part's blocks and sub0, which keeps a value in its own code, and goes to the
-# snapshot's page 3: its slot in the slot
-# register and, in a mapper, its segment in register FFh. The service's own
-# writes come from the part's code, which sets E_STOP for TAPIOF and STMOTR, and
-# from the code segment, in page 0, which sets it for the manual tape. So a
-# write from page 0 does not count while page 0 selects DOS's mapper with the
-# code segment, whose number E_CODE holds, or with another segment than the
-# snapshot's. A write after the service has read the tape to its end does not
-# count: the tape is at its end at the write, as tape_read finds it, or the
-# service has read its last byte since the restore, as at_tape_end notes.
+# Point 2: guard the page 3 tape-service block(s) and sub0 against game writes
+# to the snapshot's page 3, ignoring self-writes from the service/code segment
+# (e.g. E_STOP) and writes occurring after the tape has reached its end.
 set ::part_writes {}
 proc in_service_segment {} {
     if {![page0_selects $::dosslot subslot_reg]} { return 0 }

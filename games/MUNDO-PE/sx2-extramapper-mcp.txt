@@ -8,17 +8,10 @@
 # games` wrote this line.
 capture sx2-extramapper-noram30
 
-# The block at 9088h has its own RAM search at 9182h, which tries pages 0 and
-# 1 in each slot by the slot register alone, finds none here, where the BIOS
-# and the RAM share slot 0, and writes the last value it tried, 00h, into the
-# block's selections, LD A,0FFh / OUT (0A8h),A: the copies to pages 0 and 1
-# then wrote the ROM, and the load ended at BASIC's Ok. The search becomes a
-# jump to 9088h, and each selection writes slot 0's subslot register instead:
-# 55h for RAM in every page, and 50h for BASIC after a copy, as
-# LD A,50h / DEC BC / LD (BC),A with BC 0 after the LDIR. The selections at
-# 9099h and 90A7h keep their DI by JR for JP, and by LD D,B / LD E,B, with B
-# 0, for LD DE,0. The loader checks the block by the exclusive OR of its
-# bytes, so a byte of the dead search, at 9186h, keeps it.
+# The 9088h block's RAM search (9182h) uses A8h alone, failing where BIOS and RAM
+# share slot 0. Jump past the search to 9088h, rewrite selections to slot 0's
+# subslot register (55h RAM, 50h BASIC via DEC BC / LD (BC),A), and preserve the
+# block XOR checksum using dead search byte 9186h.
 patch side1:4571 F3 3E FF D3 A8 > 3E 55 32 FF FF
 patch side1:4582 3E FF F3 D3 A8 01 5E 38 11 88 > F3 3E 55 32 FF FF 01 5E 38 11
 patch side1:458C 45 C3 EF 90 > 88 45 18 48

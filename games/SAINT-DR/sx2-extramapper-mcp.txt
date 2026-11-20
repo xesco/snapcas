@@ -1,16 +1,9 @@
 # Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
 
-# The game's page 3 has no 158 zero bytes from an xxE1h that it leaves alone:
-# the build's place, DBE1h, is in its table of objects from DA4Fh, 25 records of
-# 29 bytes, which it clears when play starts and then fills. Its RAM in page 0 is
-# in DOS's mapper, so the mode without a part in page 3 cannot take it. But
-# C000h to C3BFh hold 07h: the attribute map of the ZX Spectrum game that this
-# one comes from, 32 bytes for each row of 8 lines. Two routines still write an
-# object's colours there, from the object's address in the screen buffer at
-# 8000h, and nothing reads the map: no code forms an address in it but these
-# two, and no load of a level reaches it. The loads go to 01F4h, 5DC0h, 9C40h
-# and F398h. So the map is free once the two writes are off: LD (HL),A at 92C2h
-# becomes NOP, and LD (HL),04h at D7A9h becomes JR $+2.
+# Page 0 is in DOS's mapper and DBE1h lies in the active object table (DA4Fh).
+# C000h-C3BFh is a dead ZX Spectrum attribute map written only by 92C2h and D7A9h
+# and never read or overwritten by level loads. Disable both writes (NOP, JR $+2)
+# to free C000h-C3BFh for the tape service.
 patch page2:12C2 77 > 00
 patch page3:17A9 36 04 > 18 00
 

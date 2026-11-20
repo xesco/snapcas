@@ -1,57 +1,7 @@
-# Procedures of the capture (docs/internals/capture.md, Capture). tools/capture.py puts
-# the game file's settings and memory.tcl before them, the settings and the Tcl
-# file of each patch kind that works in the capture after them
-# (tools/patches/), and then the start, safe step1.
-#
-# capture.py sets these before the procedures:
-#   ::S(snap)     the snapshot folder
-#   ::S(boot)     the boot steps, for boot (prelude.tcl)
-#   ::S(afterboot) what follows them: wait_ok, after BASIC typed at DOS's prompt
-#                 on a machine that boots DOS from its own disk
-#   ::S(tape)     the tape file of side 1, CAS or TSX
-#   ::S(cmd)      the load command; ::S(cload) is 1 for CLOAD, then RUN
-#   ::S(headers)  the offsets of side 1's headers
-#   ::S(needed)   the end of the last block that the load must read
-#   ::S(side2tape) side 2's tape file, or "" without a side 2
-#   ::S(s1len)    side 1's length, padded to a multiple of 8: side 2's start
-#   ::S(headers2) the positions of side 2's headers, from side 1's start
-#   ::S(nosvc)    1 when the game file has service no
-#   ::S(subkeep)  1 when the game file has subslots keep
-#   ::S(width)    the machine file's width, or 0
-#   ::S(keys)     [list time tcl] pairs, times from the load command
-#   ::S(lastkey)  the last keys time
-#   ::S(tries)    [list name tcl] pairs: the keys that may continue a load
-#   ::S(snapat)   the snapshot at time, or ""
-#   ::S(state)    the start of the names of the capture's savestates, its own
-#                 so that captures can run side by side. capture.py deletes
-#                 them
-#   ::S(home)     openMSX's home folder, whose savestates/ folder holds them
-#
-# ::st holds the state that follows the machine: what the capture logs and
-# tracks. A rewind puts back its copy from the saved moment, because openMSX's
-# loadstate restores the machine but neither Tcl variables nor timers.
-#
-# ::run holds the rest of the run's state, which a rewind leaves alone:
-#   phase       boot until BASIC's Ok (step 1); load while the capture prepares
-#               and follows the load (steps 2 to 5); try during a key try of
-#               step 5; wait in step 6, until the snapshot's moment; snap while
-#               take_snapshot reads the machine; stopping once the capture has
-#               ended (prelude.tcl)
-#   msx2, exbrsa  1 on an MSX2 or an MSX2+, and the sub-ROM's slot ID, read in step 2
-#   t0          the moment of the load command
-#   elapsed     the emulated seconds since then, counted across rewinds
-#   restarts    the restarts of step 5 so far
-#   since       when the motor last stopped, or "" while it runs (step 5)
-#   saved       whether the wait has a saved moment
-#   moment,<name>  ::st at the moment saved under that name
-#   trying, tried_at  the keys left to try, and when the last one went
-#   decisions   what the capture decided, kept across rewinds
-#   accepted, irq_probe, irq_bp, fallback_pc  the snapshot's wait for an
-#               interrupt (step 6)
-#   psg         the watchpoints on the PSG's ports
-#   slotwp, slots_watched  the watchpoints on the slot register and on FFFFh,
-#               and whether step 4 has set them
-#   stack_logged  whether the log names a push that writes FFFFh
+# Capture driver (docs/internals/capture.md). tools/capture.py injects ::S(*)
+# settings, memory.tcl, and active patcher Tcl scripts around these procs.
+# ::st holds rewindable state restored on loadstate; ::run holds run-wide state
+# (phase: boot -> load -> try -> wait -> snap -> stopping).
 array set ::run {msx2 0 t0 0 elapsed 0 restarts 0 since "" saved 0 decisions {} psg {} slotwp {} slots_watched 0 stack_logged 0}
 set ::st(log) {}
 
@@ -328,19 +278,9 @@ proc wait_ok {} {
         { fail "BASIC's Ok did not appear within 120 seconds" }
 }
 
-# On an MSX2 whose BASIC has its RAM in an expanded slot, the slot's subslot
-# register selects the RAM's subslot in pages 2 and 3 only, and a ROM of the
-# slot in pages 0 or 1. A loader that looks for RAM by primary slot then finds
-# none there. So every page of that slot gets the RAM's subslot, as POKE -1,170
-# gives it on a machine with its RAM in subslot 2. SLTTBL at FCC5h, the BIOS's
-# copy of the subslot registers, gets the same value. The BIOS's inter-slot
-# calls put the register back after each call, so the BIOS still reaches the
-# slot's ROMs. An MSX1 stays as it is: its loaders find its own RAM, which is
-# not in an expanded slot. A game file's subslots keep leaves the register
-# alone, for a game that puts its stack at FFFFh once it finds 64 KB.
-# Slot 0 keeps its register: the main ROM is in its subslot 0, and RAM there in
-# every page would deselect the ROM in pages 0 and 1, as BASIC's RAM in 0-1 of
-# an SX-2 with its Extra-Mapper on.
+# On MSX2+, set BASIC's expanded RAM slot (and SLTTBL) to select RAM in all four
+# pages so primary-slot-only loaders find RAM in pages 0-1. Skipped for slot 0
+# (holds main ROM in subslot 0), MSX1, or when subslots keep is set.
 proc ram_in_every_page {} {
     set ps [expr {([debug read ioports 0xA8] >> 6) & 3}]
     if {$::S(subkeep) || !$::run(msx2) || $ps == 0 || ![expanded $ps]} return
@@ -539,25 +479,9 @@ proc watch_motor {name} {
     later 0.1 [list watch_motor $name]
 }
 
-# 6. The snapshot, at the entry of the next interrupt that the CPU accepts
-#    while no VDP command runs, both VDP latches are empty, and no call of the
-#    sub-ROM is under way in the slot of the game's RAM.
-#
-# With the tape service, the restorer gives page 0 of DOS's mapper's slot the
-# mapper's subslot, for T0 (docs/internals/service-and-resident.md, T0 and the sub-ROM in one slot). While
-# the BIOS calls the sub-ROM in that slot, the slot's subslot register has the
-# sub-ROM's subslot in page 0, and the call's return needs it there. That is so
-# in the sub-ROM's own code and in the main ROM's code that the sub-ROM calls.
-# So an interrupt passes while the sub-ROM's slot is also page 3's and its
-# register has the sub-ROM's subslot in page 0. A machine whose BASIC leaves
-# that subslot there, as step 3 found, has no such sign of a call.
-#
-# On any MSX2, with or without the tape service, a call is also under way while
-# page 0 shows the sub-ROM: page 0's slot is the sub-ROM's, and that slot's
-# register has the sub-ROM's subslot in page 0. A snapshot there restores the
-# sub-ROM's code half way through, with page 0's state that the restore does not
-# give back: on sx2-extramapper-mcp, where page 3 is in slot 0 and the sub-ROM in
-# 3-1, Reversi rebooted and eight games crashed after such a snapshot.
+# Step 6: defer snapshot while a sub-ROM call is active (page 0 selects the
+# sub-ROM, or the sub-ROM's slot matches page 3 with sub-ROM selected in page 0)
+# so we never snapshot mid-call or conflict with T0's subslot setup.
 proc in_subrom_call {} {
     if {!$::run(msx2)} { return 0 }
     lassign [slot_parts $::run(exbrsa)] ps ss

@@ -1,29 +1,14 @@
 # Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
 
-# The loader, and its copy in the game's block at 4000h, pushes a trampoline at
-# FC98h: LD C,0A8h / OUT (C),L / EXX / CALL 00E1h / EXX / OUT (C),H / RET, with
-# H the slot register and L the same with slot 0 in page 0, to reach the BIOS
-# from its RAM in page 0. Here the BIOS and the RAM are both in slot 0, in
-# subslots 0 and 1, so the slot register cannot swap them. The patches make the
-# trampoline LD (HL),54h / EXX / CALL 00E1h / EXX / LD (HL),55h / RET, with HL
-# = FFFFh, slot 0's subslot register: the BIOS in page 0, then RAM in every
-# page again. The restore is a constant because the loader keeps each byte in
-# C. The caller's IN A,(0A8h) / LD H,A / AND 0FCh / LD L,A becomes LD HL,0FFFFh
-# / LD A,n, where n keeps the XOR by which the loader checks the block.
+# The FC98h tape trampoline switches page 0 via A8h alone, failing where BIOS and
+# RAM share slot 0. Patch both copies to write FFFFh (54h BIOS, 55h RAM) with
+# HL=FFFFh; the caller's LD A,n keeps the block XOR checksum.
 patch side1:110 21 61 C9 E5 21 D9 ED E5 21 E1 00 E5 21 D9 CD E5 21 ED 69 E5 21 0E A8 E5 3B 3B D9 DB A8 67 E6 FC 6F > 21 55 C9 E5 21 D9 36 E5 21 E1 00 E5 21 D9 CD E5 21 36 54 E5 21 00 00 E5 3B 3B D9 21 FF FF 3E D1 00
 patch side1:84A3 21 61 C9 E5 21 D9 ED E5 21 E1 00 E5 21 D9 CD E5 21 ED 69 E5 21 0E A8 E5 3B 3B D9 DB A8 67 E6 FC 6F > 21 55 C9 E5 21 D9 36 E5 21 E1 00 E5 21 D9 CD E5 21 36 54 E5 21 00 00 E5 3B 3B D9 21 FF FF 3E D1 00
 
-# The image has no call of SX2RES: the game uses the zeros at FCC9h in page 3,
-# where the image's wrapper for the call goes with the tape service, and the
-# game's stack is in page 1, where the wrapper leaves the call out. A routine at
-# A000h, as in Knight Lore's file for this machine, in zeros of page 2 that the
-# game leaves alone in a minute of play with keys, uses no BIOS routine. It
-# keeps all the registers and the interrupts, selects slot 3's subslot 0 in page
-# 1 with slot 3's subslot register, selects slot 3 in page 1 with the slot
-# register, and calls SX2RES's entry at 4040h when it starts F5h DBh. Then it
-# gives both registers back. At A05Dh, LD (A06Eh),SP / LD SP,A400h / CALL A000h
-# / LD SP,(A06Eh) / JP 5BE2h: the game's stack is in page 1, which the routine
-# gives to SX2RES, so the call runs on a stack in zeros below A400h.
+# The game uses FCC9h and keeps SP in page 1, so no automatic SX2RES hook fits.
+# Place a direct-I/O SX2RES caller (slot 3-0 4040h) at A000h in unused page 2
+# zeros, with wrapper A05Dh switching SP to A400h before jumping to 5BE2h.
 patch page2:2000 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
 patch page2:200A 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
 patch page2:2014 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F

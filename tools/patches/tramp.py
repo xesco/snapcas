@@ -23,16 +23,9 @@ BUILDER = bytes.fromhex("11 61 C9 D5 11 D9 ED D5 11 E1 00 D5 11 D9 CD D5 11 ED 6
 CALL = bytes.fromhex("CD 9A FC")
 FORM = re.compile(re.escape(BUILDER + CALL))
 
-# The patched trampoline: LD (HL),n / EXX / CALL 00E1h / EXX / LD (HL),C /
-# RET, with HL = FFFFh, the subslot register. n has the main ROM's subslot in
-# page 0 and the RAM's in pages 1 to 3. C holds the register's value when the
-# builder ran, which the second write restores, as OUT (C),H restores the slot
-# register. The caller's LD C,0A8h / IN H,(C) / AND H / LD L,A becomes
-# LD HL,0FFFFh / LD A,(HL) / CPL / LD C,A, which reads that value. The RET
-# moves up a byte, so the last byte of the trampoline, at FCA3h, never runs.
-# That byte keeps the XOR of the builder's bytes: the loader checks its
-# headerless blocks by an XOR of their bytes, and some tapes hold the builder
-# in such a block.
+# Patched trampoline: LD (HL),n / EXX / CALL 00E1h / EXX / LD (HL),C / RET
+# (HL=FFFFh, C=saved subslot from NEW_CALLER). The unused trailing byte at
+# FCA3h preserves the builder block's XOR checksum.
 CALLER = 22        # LD C,0A8h / IN H,(C) / AND H / LD L,A
 NEW_CALLER = bytes.fromhex("21 FF FF 7E 2F 4F")
 

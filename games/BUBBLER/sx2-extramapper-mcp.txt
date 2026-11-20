@@ -18,16 +18,9 @@ patch side1:FD 3A FE FF D3 A8 > 3E 55 32 FF FF
 patch side1:27D 47 08 78 E6 > 4F 08 18 42
 patch side1:2CD 47 08 78 E6 > 4F 08 18 3F
 
-# The game takes its interrupts with RET at 0038h, which leaves the VDP's
-# interrupt set, so a call from 0038h would run thousands of times a second. Its
-# main loop waits with EI / HALT / IN A,(99h) / EI, about 44 times a second. A
-# routine at A3C0h, as in Knight Lore's file for this machine, in zeros of page
-# 2 that the game leaves alone in a minute of play with keys, uses no BIOS
-# routine. It keeps all the registers and the interrupts, selects slot 3's
-# subslot 0 in page 1 with slot 3's subslot register, selects slot 3 in page 1
-# with the slot register, and calls SX2RES's entry at 4040h when it starts F5h
-# DBh. Then it gives both registers back. At A41Dh, IN A,(99h) / CALL A3C0h / EI
-# / RET.
+# 0038h is RET (leaving VDP IRQ active), so hook the main loop instead (~44 Hz):
+# place a direct-I/O SX2RES caller (slot 3-0 4040h) in unused page 2 zeros at
+# A3C0h, with wrapper A41Dh running IN A,(99h) / CALL A3C0h / EI / RET.
 patch page2:23C0 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
 patch page2:23CA 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
 patch page2:23D4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F

@@ -1,14 +1,7 @@
-# SX-2 (MSX2+, 2048 KB) with its slot 0 not expanded. The SX-2 is an FPGA MSX on
-# KdL's OCM-PLD firmware. Its RAM is in slot 3-0 and its MegaSD with Nextor in
-# 3-2, and its cartridge slots 1 and 2 are empty. OCMINFO's F4 screen shows that
-# setting: CPU clock Standard, cartridge slots 1 and 2 External, RAM mapper
-# 2048KB, internal MegaSD ON. The extra mapper stays off, and SETSMART -F9FD
-# takes slot 0 out of expansion until the power goes off, which also
-# turns the internal MSX-MUSIC and the Wi-Fi off (docs/MACHINES.md). The
-# machine sx2 is the SX-2 as it starts, with slot 0 expanded. The
-# Makefile makes the model from openMSX's FS-A1WSX and the ROMs of the SX-2's
-# own OCM-BIOS.DAT, from its SD card, which goes in openMSX's system ROMs
-# (make firmware).
+# SX-2 (MSX2+, 2048 KB) with its slot 0 not expanded. Configured via SETSMART
+# -F9FD (disables MSX-MUSIC and Wi-Fi until power-off), 2048 KB RAM in 3-0,
+# MegaSD (Nextor) in 3-2, slots 1-2 empty. Built from OCM-BIOS.DAT via make
+# firmware (see docs/MACHINES.md).
 openmsx -machine OCM_SX-2_noexp0
 disk hda
 firmware machines/OCM_SX-2_noexp0.xml

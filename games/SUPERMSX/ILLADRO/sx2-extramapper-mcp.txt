@@ -17,16 +17,9 @@ patch side1:3AE5 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
 patch side1:3B21 3A FD FF 20 04 D3 A8 > 3E 50 32 FF FF 18 05
 patch side1:3B52 3A FE FF 20 04 D3 A8 > 3E 55 32 FF FF 18 05
 
-# The game's two slot routines at 4322h and 4331h select the BIOS in page 0
-# and RAM elsewhere, and RAM in every page, by OUT (0A8h),A with the values
-# that the stub at C010h writes into them, from the slot register. Here those
-# are 00h and switch nothing. The first two patches make each routine's OUT
-# (0A8h),A a LD (0FFFFh),A: slot 0's subslot register. The last 49h, LD C,C,
-# keeps the XOR of the block, which the loader checks. The third makes the
-# stub, which the loader enters at C010h with RAM in every page, put 55h and
-# 54h into the routines and select 54h, the BIOS in page 0, before it jumps to
-# the game. Its third byte, in the code before C010h that never runs, keeps
-# the block's XOR.
+# Slot routines 4322h/4331h use OUT (0A8h),A with values computed by stub C010h,
+# which switch nothing when BIOS and RAM share slot 0. Patch them to LD (0FFFFh),A
+# (49h keeps block XOR) and patch C010h to write 55h/54h (keeping block XOR).
 patch side1:7969 D3 A8 00 00 00 00 > 32 FF FF 00 00 49
 patch side1:7978 D3 A8 00 00 00 00 > 32 FF FF 00 00 49
 patch side1:F66B F3 3E AA D3 A8 21 00 90 11 00 80 01 00 40 ED B0 DB A8 32 35 43 E6 FC 32 26 43 D3 A8 C3 62 40 00 > F3 3E 8B D3 A8 21 00 90 11 00 80 01 00 40 ED B0 3E 55 32 35 43 3E 54 32 26 43 32 FF FF C3 62 40

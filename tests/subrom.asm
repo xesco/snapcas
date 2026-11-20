@@ -1,16 +1,6 @@
-; A test game for T0's calls of the sub-ROM (docs/internals/service-and-resident.md, T0 and the
-; sub-ROM in one slot). tests/test_service.py writes this binary to a CAS file,
-; with a block of 32 bytes after it on side 1.
-;
-; The game waits about 40 seconds, so that the capture takes its snapshot
-; first, and what the game does next comes within the check's 60 seconds. Then
-; it calls the sub-ROM twice through the BIOS in page 0, which is T0 after the
-; restore: once inside CHGMOD, which an MSX2's BIOS sends to the sub-ROM, and
-; once through EXTROM. Last it reads 8 bytes of the block through T0's jump
-; table, and compares them with the bytes 1 to 8. It reaches the tape's entries
-; through a computed address, so that the scan finds no call to patch
-; (docs/internals/service-and-resident.md, Scan). The byte at result is 1 when the bytes are right, 2
-; when a tape routine returns carry or a byte differs, and 0 until then.
+; Test game for T0 sub-ROM calls when T0 and sub-ROM share a slot
+; (tests/test_service.py). Waits ~40 s for capture, calls CHGMOD and EXTROM,
+; then reads and verifies 8 tape bytes via T0 (result: 1=ok, 2=fail).
 
 CHGMOD  equ 005Fh       ; MSX Red Book, chapter 4: sets the screen mode in A
 EXTROM  equ 015Fh       ; MSX2 Technical Handbook, chapter 5: calls IX in the sub-ROM

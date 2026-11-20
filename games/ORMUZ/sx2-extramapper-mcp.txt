@@ -1,16 +1,8 @@
 # Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
 
-# The blocks SUBMA, FIN1 and c/m each hold a routine that selects RAM in every
-# page, LD C,0A8h / IN A,(C) / LD (n),A / AND 0Fh / OR 0AAh / OUT (0A8h),A /
-# RET, whose OR value the BASIC loader POKEs, and after it LD A,(n) / OUT
-# (0A8h),A / RET, which selects the BIOS again. The game copies its pictures
-# to RAM in pages 0 and 1 with the first, and later copies them between that
-# RAM and VRAM. Here the BIOS and the RAM share slot 0, so the slot register
-# alone never selects the RAM in pages 0 and 1: the pictures went to the ROM,
-# and the game used T0, the image's copy of the BIOS, as its page 0, which its
-# copy from VRAM at 24 seconds wrote over, so it crashed. The patches make the
-# routines write slot 0's subslot register instead, 55h for RAM in every page
-# and 50h for the BIOS in pages 0 and 1. The POKEd byte is after the RET.
+# SUBMA, FIN1, and c/m switch pages 0-1 to RAM via OUT (0A8h),A, which fails where
+# BIOS and RAM share slot 0 (corrupting T0 on VRAM copy at 24 s). Patch them to
+# write slot 0's subslot register instead (55h RAM, 50h BIOS; POKE byte after RET).
 patch side1:4DCB 0E A8 ED 78 32 1A > 3E 55 32 FF FF C9
 patch side1:4DD9 3A 1A B5 D3 A8 C9 > 3E 50 32 FF FF C9
 patch side1:8A3B 0E A8 ED 78 32 1A > 3E 55 32 FF FF C9

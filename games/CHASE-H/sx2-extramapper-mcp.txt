@@ -1,15 +1,8 @@
 # Lines for sx2-extramapper-mcp, the SX-2 (MSX2+, 6144 KB) with its Extra-Mapper on and SX2RES running.
 
-# The game keeps RAM of its own in page 0, in the Extra-Mapper, DOS's mapper.
-# So the mode without a part in page 3, whose T0 needs page 0 of DOS's mapper,
-# cannot take it, and the SX-2's other RAM, in slot 3-0, is SX2RES's. Page 3
-# has no free run of 158 bytes, nor of the 132 of the part's code. The game's
-# interrupts run in mode 2 with I FDh, and it fills FD00h to FE00h with FEh. An
-# MSX's bus gives FFh in the interrupt's cycle, so the CPU reads only FDFFh and
-# FE00h, and the 255 bytes before them are free. Each level's code fills the
-# table again, after its load. These two patches make the fills of the later
-# levels, on each side, start at FDFFh with a count of 1, so that they write
-# only FDFFh and FE00h. The fill of the first load stays.
+# Page 0 is in DOS's mapper (blocking service t0) and page 3 has no 132 free bytes,
+# but IM 2 with I=FDh only reads FDFFh-FE00h on MSX (bus=FFh), leaving FD00h-FDFEh
+# unused. Limit later levels' table fills on both sides to FDFFh-FE00h (count 1).
 patch side1:15503 21 00 FD 7C 06 00 > 21 FF FD 7C 06 01
 patch side2:9F3B 21 00 FD 7C 06 00 > 21 FF FD 7C 06 01
 

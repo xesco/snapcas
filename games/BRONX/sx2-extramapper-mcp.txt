@@ -8,19 +8,9 @@
 # leaves alone in a minute of play with keys.
 service at F0E1 F180
 
-# The image has no call of SX2RES: the game uses the zeros at FCC9h in page 3,
-# where the image's wrapper for the call goes with the tape service, and the
-# game's stack is in page 1, where the wrapper leaves the call out. A routine,
-# from Knight Lore's file for this machine and in three parts, uses no BIOS
-# routine, in zeros that the game leaves alone in a minute of play with keys. At
-# EF68h it keeps all the registers and the interrupts and calls A69Dh, which
-# with the slot register's value in B selects slot 3's subslot 0 in page 1 with
-# slot 3's subslot register and slot 3 in page 1 with the slot register. It
-# calls SX2RES's entry at 4040h when it starts F5h DBh, then A6B1h, which gives
-# both registers back. The two parts that move page 3 are in page 2 or 2,
-# outside pages 1 and 3. At EFACh, LD (EFBDh),SP / LD SP,F030h / CALL EF68h / LD
-# SP,(EFBDh) / JP 9A67h: the game's stack is in page 1, which the routine gives
-# to SX2RES, so the call runs on a stack in zeros below F030h.
+# The game uses FCC9h and keeps SP in page 1, so place a 3-part direct-I/O SX2RES
+# caller in unused zeros: save/restore at EF68h, slot 3-0 switchers at A69Dh/A6B1h
+# (page 2), and wrapper at EFACh switching SP to F030h before jumping to 9A67h.
 patch page3:2F68 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
 patch page3:2F72 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
 patch page3:2F7C 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 CD 9D A6 C5 3A 40

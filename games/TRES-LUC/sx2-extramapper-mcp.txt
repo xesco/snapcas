@@ -19,17 +19,9 @@ patch side1:2566 3A 7D DE D3 A8 > 3E 54 32 FF FF
 # and leaves that byte out.
 patch side1:2599 11 FF FF 21 7F F3 01 E0 B1 > 11 FE FF 21 7E F3 01 DF B1
 
-# The game runs with its interrupts off, so the image has no call of SX2RES, and
-# its stack is in page 1, which the routine gives to SX2RES. The game reads a
-# row of the keyboard in its routine at A0D8h, about 28 times a second. A
-# routine at A2C0h, as in Knight Lore's file for this machine, in zeros of page
-# 2 that the game leaves alone in a minute of play with keys, uses no BIOS
-# routine. It keeps all the registers and the interrupts, selects slot 3's
-# subslot 0 in page 1 with slot 3's subslot register, selects slot 3 in page 1
-# with the slot register, and calls SX2RES's entry at 4040h when it starts F5h
-# DBh. Then it gives both registers back. At A31Dh, OUT (0AAh),A / IN A,(0A9h),
-# then LD (A330h),SP / LD SP,A3C0h / CALL A2C0h / LD SP,(A330h) / RET: the call
-# runs on a stack in zeros below A3C0h.
+# Interrupts are off and SP is in page 1; A0D8h scans keys ~28 Hz. Place a
+# direct-I/O SX2RES caller (slot 3-0 4040h) at A2C0h in unused page 2 zeros, with
+# wrapper A31Dh switching SP to A3C0h (saved at A330h) around CALL A2C0h.
 patch page2:22C0 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
 patch page2:22CA 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
 patch page2:22D4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F

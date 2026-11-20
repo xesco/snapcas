@@ -107,19 +107,9 @@ t_tapin:                        ; 1ABCh, TAPIN
         ld hl,tapin
         jp tramp
 
-; T0's call of a routine in page 0 of its own slot, which is the sub-ROM on a
-; machine that has it in the slot of DOS's mapper. The BIOS's CALSLT writes
-; the routine's subslot to the slot's subslot register while its own code
-; runs in page 0, and for that slot the write would take T0 from under it. So
-; build.py sends two places of CALSLT here.
-;
-; t_s takes the place of CALSLT's call of the BIOS's routine that writes the
-; subslot register, with the slot ID in A, the routine's address in HL and
-; interrupts off. For a routine in page 0 of the slot that pages 0 and 3 are
-; in, it leaves the register as it is, keeps the subslot at t_pend, and
-; returns what the BIOS's routine returns: the slot in A, the slot register in
-; B, the slot in page 3's bits in C, the subslot in D, the other pages' bits
-; in H and the register in L. Any other call goes to the BIOS's routine.
+; CALSLT subslot hook when T0 and sub-ROM share one slot (docs/internals/service-and-resident.md).
+; For a page-0 call into our slot, defers the subslot write in t_pend for t_c/sub
+; and returns the BIOS helper's register contract (A, B, C, D, H, L); otherwise chains.
 t_s:
         push af
         ld a,h
@@ -184,17 +174,9 @@ t_c:
         jp sub
 t_pend: db 0FFh                 ; the subslot that waits for t_c, or FFh
 
-; t_res takes the place of the BIOS's jump at 0038h on a machine with a
-; resident program (FILES.md, Machine file, resident): at each interrupt it
-; calls the program's entry, in a page of another slot, and goes on to the
-; BIOS's interrupt routine. It needs no BIOS routine, and the game cannot write
-; over it as over a hook. It runs on a stack of its own in T0, so that the
-; game's stack keeps only the interrupt's return address, and the call runs
-; when that stack is in the entry's page too, which the call takes from the
-; game. The interrupts stay off. It leaves the call out when the entry does
-; not start with the program's two bytes: the program is not there, or its
-; slot shows another subslot. build.py fills in the fields. The entry keeps
-; every register, H among them.
+; Resident program hook installed at 0038h in T0 (docs/internals/service-and-resident.md).
+; Switches to T_STACK, maps the resident slot, verifies its 2-byte signature,
+; calls the entry (which preserves all registers), and chains to the BIOS IRQ.
 t_res:
         di
         ld (.back+1),sp
@@ -382,16 +364,9 @@ code_start:
 T0MODE  equ 0
         include "tape.inc"
 
-; resc is the call of a machine's resident program (docs/internals/service-and-resident.md, The resident
-; program's call) for a game that takes the interrupt for a routine of its own.
-; The game's vector goes to a wrapper in page 3, which build.py writes: it
-; runs resc through e_run and jumps to the game's routine. resc runs on a
-; stack of its own in the code segment, resc_stack, because the program needs
-; more than e_run's, and the game's can be in the entry's page. As t_res, it
-; selects the program's primary slot in the entry's page for the call, and
-; leaves the call out when the entry does not start with the program's two
-; bytes. build.py fills in the fields. The entry keeps every register, H among
-; them. e_run has turned the interrupts off.
+; Resident call from the code segment for wrapped game IRQs (called via e_run
+; with interrupts off). Uses resc_stack, checks the 2-byte signature, and calls
+; the resident entry (preserving all registers).
 resc:
         ld (resc_sp),sp
         ld sp,resc_stack
@@ -453,22 +428,10 @@ t0m_end:
 ; The restorer writes these by service.inc's places.
         assert t0m.D_SEGS = T_SEGS && t0m.D_PAGE = T_PAGE && t0m.D_PAGE_SLOT = T_PAGE+2
 
-; ---- The call of a resident program, for an image without the tape service,
-; ---- and sub0, for the tape service's entry code ----
-;
-; res3 is t_res's call (above), for an image that has no T0 to hold it: build.py
-; writes it into zeros of the game's page 3, at FD29h, with the fields that it
-; fills in, and a call of it into H.KEYI or the game's interrupt vector. Its
-; stack is RES3_STACK other zeros of page 3, which build.py finds, and res3e,
-; its end, follows the stack there. So the game's stack keeps only AF and the
-; return address, and the call runs when the game's stack is in the entry's
-; page too. It keeps every register. It turns the interrupts off for the call
-; and on again at its end when they were on, for a call from a game's main
-; loop: LD A,I gives IFF2 in P/V, and a second LD A,I when the first gives 0,
-; because a Z80 that takes an interrupt at the end of LD A,I gives 0 there.
-; The flags stay with the slot register on res3's stack. An interrupt can come
-; before the DI, and its call of the routine runs to its end before this one
-; goes on, so the stack is never in use twice.
+; ---- Resident call routines (no T0) and sub0 ----
+; res3: direct A8h resident call placed in page 3 with a private stack + res3e.
+; Double LD A,I captures IFF2 reliably even if an IRQ fires on the first LD A,I;
+; preserves all registers and restores interrupt state on exit.
 call_start:
         disp 0
 res3:
@@ -492,17 +455,9 @@ res3:
 .call:  call z,0                ; build.py: the entry
 .tail:  jp 0                    ; build.py: res3e
         fill_to res3+45
-; From H.KEYI, where the BIOS's interrupt routine runs with the main ROM in
-; page 0: the same call through the BIOS's RDSLT and CALSLT, which select the
-; program's subslot in the entry's page and give the slot's subslot register
-; back, whatever another ROM of that slot left there. build.py writes only this
-; routine for the H.KEYI call, and only res3 for a wrapper. Its stack is
-; RESB_STACK zeros of page 3, for CALSLT's bytes too, and resbe follows it. It
-; keeps the main registers, on the game's stack, and the interrupts as res3
-; does, which RDSLT turns off. RDSLT keeps HL. CALSLT changes IX, IY and the
-; alternate registers, which the BIOS's interrupt routine keeps around H.KEYI,
-; and a game's hook after the call does not take them from the interrupt
-; routine.
+; resb: H.KEYI resident call via BIOS RDSLT/CALSLT with private stack + resbe.
+; Preserves AF/BC/DE/HL on the game's stack and restores interrupt state (the
+; BIOS IRQ handler already saves IX/IY/alt regs around H.KEYI).
 resb:
         push af
         push hl
@@ -621,17 +576,9 @@ resbe:
         assert resbg-res3g = resb-res3 && res3e-resbg = res3g-resb
         assert resbe-res3e = sub0-resbe
 
-; sub0 is e_run's call of tramp for an image whose page 0 can be in another
-; subslot of the slot of page 3, which is DOS's mapper's (docs/internals/service-and-resident.md, Page 0
-; in another subslot of DOS's mapper's slot). There the slot register alone
-; selects the game's subslot in page 0, the main ROM or other RAM, and not the
-; mapper. build.py writes sub0 into zeros of the game's page 3, points e_run's
-; call at it and sets FLAG_P0. It writes page 3's subslot into page 0's bits
-; of the subslot register at FFFFh, calls tramp, and writes the register's
-; value back. The value is the one when the entry ran, because the game
-; switches its page 0 at any time. Interrupts are off, and pages 1 to 3 keep
-; their bits. It takes 2 bytes of e_run's stack, so the deepest path takes all
-; 22. It returns tramp's flags, BC, DE and HL, and e_run takes A from D.
+; sub0: wrapper around tramp when page 0 may hold another subslot of DOS's
+; expanded mapper slot (FLAG_P0). Temporarily switches page 0's subslot bits
+; at FFFFh to page 3's mapper subslot, calls tramp, and restores FFFFh.
 sub0:
         ld a,(0FFFFh)
         cpl

@@ -9,18 +9,9 @@
 # writes none of them in a minute of play.
 service at DAE1 DA48
 
-# The game runs with the VDP's interrupt off, so the image has no call of
-# SX2RES, and its stack is in page 1, which the routine gives to SX2RES. It
-# calls its routine at 37D2h, DI / PUSH AF / IN A,(99h) / POP AF / EI / RET,
-# about 1400 times a second in play. A routine at 8D90h, as in Knight Lore's
-# file for this machine, in zeros of page 2 that the game leaves alone in a
-# minute of play with keys, uses no BIOS routine. It keeps all the registers and
-# the interrupts, selects slot 3's subslot 0 in page 1 with slot 3's subslot
-# register, selects slot 3 in page 1 with the slot register, and calls SX2RES's
-# entry at 4040h when it starts F5h DBh. Then it gives both registers back. At
-# 8DEDh, the same routine, which calls 8D90h on every 32nd call, counted at
-# 8E0Fh, with LD (8E0Dh),SP / LD SP,9090h before and LD SP,(8E0Dh) after: the
-# call runs on a stack in zeros below 9090h.
+# VDP interrupts are off and SP is in page 1; 37D2h polls VDP status ~1400 Hz.
+# Place a direct-I/O SX2RES caller (slot 3-0 4040h) at 8D90h in unused page 2
+# zeros, with wrapper 8DEDh calling it every 32nd poll (counter 8E0Fh, SP 9090h).
 patch page2:D90 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
 patch page2:D9A 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
 patch page2:DA4 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F

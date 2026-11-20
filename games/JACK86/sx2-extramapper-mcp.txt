@@ -17,16 +17,9 @@ patch side1:2F DB A8 E6 F0 3D 3C D3 A8 > 3E 55 32 FF FF AF D3 A8
 patch side1:67 11 00 FC > 11 FF FB
 patch side1:FE30 F0 > 5B
 
-# The game runs without interrupts, so the image has no call of SX2RES, and its
-# page 3 has no room for the image's call routine, and its stack is in page 1,
-# where SX2RES's entry is. The game leaves alone the FFh bytes from 01C4h to
-# 03DEh, below the 0400h where it loads. A routine at 0320h keeps all the
-# registers and the interrupts, selects slot 3's subslot 0 in page 1 with slot
-# 3's subslot register, selects slot 3 in page 1 with the slot register, and
-# calls SX2RES's entry at 4040h when it starts F5h DBh. Then it gives both
-# registers back. An entry at 0300h keeps SP at 0311h, calls the routine with
-# its stack below 0300h, takes SP back and jumps to the game's joystick routine
-# at 4251h.
+# Interrupts are off, page 3 is full, and SP is in page 1. Place a direct-I/O
+# SX2RES caller (slot 3-0 4040h) at 0320h in unused 01C4h-03DEh bytes, with entry
+# 0300h switching SP below 0300h (saved at 0311h) before jumping to 4251h.
 patch page0:300 FF FF FF FF FF FF FF FF FF FF > ED 73 11 03 31 00 03 CD 20 03
 patch page0:30A FF FF FF FF FF FF FF FF FF > ED 7B 11 03 C3 51 42 00 00
 patch page0:320 FF FF FF FF FF FF FF FF FF FF > F5 C5 D5 E5 DD E5 FD E5 D9 C5

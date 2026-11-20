@@ -27,17 +27,10 @@ patch side1:E63C DB A8 F5 E6 FC D3 A8 > F5 3E 54 32 FF FF 00
 patch side1:E649 F5 E1 F1 D3 A8 E5 F1 E1 C9 > 21 FF FF 36 55 E1 E1 C9 00
 patch side1:EC52 26 > 7B
 
-# The image has no call of SX2RES: the game uses the zeros at FCC9h in page 3,
-# where the image's wrapper for the call goes with the tape service, and the
-# game's stack is in page 1, where the wrapper leaves the call out. A routine at
-# 02E8h, as in Knight Lore's file for this machine, in zeros of page 0 that the
-# game leaves alone in a minute of play with keys, uses no BIOS routine. It
-# keeps all the registers and the interrupts, selects slot 3's subslot 0 in page
-# 1 with slot 3's subslot register, selects slot 3 in page 1 with the slot
-# register, and calls SX2RES's entry at 4040h when it starts F5h DBh. Then it
-# gives both registers back. At 0345h, LD (0356h),SP / LD SP,04F8h / CALL 02E8h
-# / LD SP,(0356h) / JP 1D4Fh: the game's stack is in page 1, which the routine
-# gives to SX2RES, so the call runs on a stack in zeros below 04F8h.
+# The game uses FCC9h and keeps SP in page 1, so no automatic SX2RES hook fits.
+# Place a direct-I/O SX2RES caller (slot 3-0 4040h, F5h DBh check) at 02E8h in
+# unused page 0 zeros, with a wrapper at 0345h switching SP to 04F8h and jumping
+# to 1D4Fh.
 patch page0:2E8 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
 patch page0:2F2 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 DB
 patch page0:2FC 00 00 00 00 00 00 00 00 00 00 > A8 47 F6 C0 D3 A8 3A FF FF 2F

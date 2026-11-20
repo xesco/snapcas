@@ -8,15 +8,8 @@
 # games` wrote this line.
 capture sx2-extramapper-noram30
 
-# After the snapshot the game puts its own routines into H.KEYI, JP 5C46h copied
-# from 5C2Eh and JP 61EEh written with LD HL,61EEh at 61CCh, over the image's
-# call of SX2RES. They need no wrapper: each saves the hook that it replaces, at
-# 5C31h and 61BCh, and calls it, so the call runs from them while the hook that
-# they save holds one. To turn its routine off the game copies the hook that it
-# saved at 5C31h into H.KEYI with RET first, from 5C36h, and the calls stop. The
-# patch makes it write JP FD29h there instead, a jump to the image's resb, which
-# calls SX2RES and returns, as the image's H.KEYI does at the restore. The saved
-# hook keeps its first byte: only the game's routine calls the hook, and the
-# game saves it again before it puts the routine back.
+# The game chains its H.KEYI handlers (5C46h, 61EEh) through the saved hook, but
+# restores H.KEYI with RET from 5C36h when disabling them, silencing SX2RES.
+# Patch 5C36h to write JP FD29h (resb) instead so SX2RES stays active.
 patch page1:1C36 21 31 5C 36 C9 11 9A > F3 21 29 FD 22 9B FD
 patch page1:1C3D FD 01 05 00 F3 ED B0 > 3E C3 32 9A FD FB C9

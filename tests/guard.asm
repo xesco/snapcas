@@ -1,16 +1,6 @@
-; A test game for the check's guard of the tape service's part of page 3
-; (docs/internals/restorer-and-check.md, Check, point 2). tests/test_service.py writes this binary to a
-; CAS file, after it has filled in what the game does, with a block of 32 bytes
-; after it on side 1, or as side 2.
-;
-; The game first reads the number of bytes at loads from the tape, unless that
-; number is 0: that is its own load, which the capture sees. Then it waits
-; about 40 seconds, so that the capture takes its snapshot first, and what the
-; game does next comes within the check's 60 seconds. It reads the number of
-; bytes at reads from the tape, through the tape service, unless that number
-; is 0. Then it writes the byte at target, by default the first byte of the
-; service's part of page 3, unless the byte at writes is 0. It ends at passed, or at failed when a tape routine
-; returns carry.
+; Test game for check point 2's page 3 write guard (tests/test_service.py).
+; Optionally reads `loads` bytes before capture, waits ~40 s, reads `reads`
+; bytes via tape service, writes to `target` if `writes != 0`, and halts.
 
 TAPION  equ 00E1h       ; MSX Red Book, chapter 4: the BIOS's tape entries
 TAPIN   equ 00E4h

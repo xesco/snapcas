@@ -33,16 +33,9 @@ patch side1:5B92 9A > 39
 patch side1:9CB1 E0 > 43
 patch side1:10EF1 BF > A6
 
-# The image has no call of SX2RES: the game uses the zeros in page 3 where the
-# image's code for the call goes, and has no room that the check allows. A
-# routine, from Knight Lore's file for this machine and in three parts, uses no
-# BIOS routine, in zeros that the game leaves alone in a minute of play with
-# keys. At 9568h it keeps all the registers and the interrupts and calls 9468h,
-# which selects slot 3's subslot 0 in page 1 with slot 3's subslot register and
-# slot 3 in page 1 with the slot register. It calls SX2RES's entry at 4040h when
-# it starts F5h DBh, then 9481h, which gives both registers back. The two parts
-# that move page 3 are in page 2 or 2, outside pages 1 and 3. At C1E0h, CALL
-# 9568h / JP 10CAh.
+# Page 3 has no room for the built-in SX2RES hook, so place a 3-part direct-I/O
+# caller in unused zeros: save/restore at 9568h, slot 3-0 switchers at 9468h/9481h
+# (page 2), and wrapper at C1E0h calling 9568h then jumping to 10CAh.
 patch page2:1568 00 00 00 00 00 00 00 00 00 00 > F5 C5 D5 E5 DD E5 FD E5 D9 C5
 patch page2:1572 00 00 00 00 00 00 00 00 00 00 > D5 E5 08 F5 08 ED 57 F5 F3 CD
 patch page2:157C 00 00 00 00 00 00 00 00 00 00 > 68 94 C5 3A 40 40 FE F5 20 08
