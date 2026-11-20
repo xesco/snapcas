@@ -1,4 +1,4 @@
-"""Single-load games restored on the test machines (docs/PLAN.md, Test setup
+"""Single-load games restored on the test machines (docs/BUILD.md, Test setup
 and steps 4, 9, 14 and 20): each game of the corpus is captured, built and
 checked on each machine where it loads, one game on every shipped machine,
 Mot and Made in Spain for the RAM search patch, and two games on the HB-F700P's
@@ -26,7 +26,7 @@ GAMES = {
     "caldero": "cas CALDERO.CAS\n",
     # La Abadia del Crimen leaves its last 16 KB unread during the load. Its
     # loader has the RAM search, which the capture patches on a machine where
-    # it cuts off the loader's code (INTERNALS.md, The RAM search patch).
+    # it cuts off the loader's code (docs/internals/patches.md, The RAM search patch).
     "abadia": "cas ABADIA.CAS\nservice no\n",
     # On the PHC-28S, La Abadia's loader took the RAM cartridge in slot 1 for an
     # expanded slot and crashed, so the game loaded without it. The RAM search
@@ -42,7 +42,7 @@ GAMES = {
     "bestial-noexp0": "cas BESTIAL.CAS\ncapture hbf700p-noexp0-msxdos2\n",
     # Exerion's loader looks for RAM in page 1 by primary slot. On the NMS 8250
     # the Carnivore2's slot shows a ROM there until the capture selects the
-    # RAM's subslot in every page (INTERNALS.md, Capture, step 2).
+    # RAM's subslot in every page (docs/internals/capture.md, Capture, step 2).
     "exerion": "cas ENGESO06.CAS\nstart EXER\n",
     # With subslots keep the capture leaves that out, and the loader finds no
     # RAM in page 1.
@@ -54,7 +54,7 @@ GAMES = {
 
 # machine: (games that pass, games that the restorer stops for too few free
 # segments). A game left out of both fails on that machine in openMSX itself
-# (docs/PLAN.md, step 4). Each machine boots the DOS that its file names.
+# (docs/BUILD.md, step 4). Each machine boots the DOS that its file names.
 MACHINES = {
     PHC28S: ({"freddy", "fernando", "moonrider", "caldero", "abadia", "abadia-phc"}, set()),
     VG8020: ({"freddy", "fernando", "moonrider", "caldero", "caldero[1]*"}, set()),
@@ -126,7 +126,7 @@ class Corpus(unittest.TestCase):
         self.assertRegex(changed.report, r"RAM \S+ differs at [0-9A-F]{2}34")
 
     def test_the_capture_patches_the_ram_search_and_the_check_passes(self):
-        # PLAN.md, step 14: without a capture line, on the two machines where
+        # docs/BUILD.md, step 14: without a capture line, on the two machines where
         # the search's slot register write cuts off the loader's code.
         for machine in (PHC28S, "hbf700p-ram512k-msxdos2"):
             with self.subTest(machine=machine):
@@ -141,7 +141,7 @@ class Corpus(unittest.TestCase):
     def test_a_capture_with_slot_0_not_expanded_restores_on_the_machine_that_expands_it(self):
         # The image's header marks slot 0 as not expanded in the capture, and
         # the restorer then writes 0 to its subslot register, which selects the
-        # main ROM in subslot 0 (INTERNALS.md, The capture with slot 0 not
+        # main ROM in subslot 0 (docs/internals/capture.md, The capture with slot 0 not
         # expanded).
         for game in ("fernando-noexp0", "bestial-noexp0"):
             with self.subTest(game=game):
@@ -164,7 +164,7 @@ class Corpus(unittest.TestCase):
                 self.assertEqual(restored.snapshot.capture_patches(), [])
 
 
-# The shipped games of PLAN.md's step 14, as name: the game's folder below
+# The shipped games of docs/BUILD.md's step 14, as name: the game's folder below
 # games/ and the machine. Their loaders have the RAM search.
 SEARCH_GAMES = {
     "mot-phc28s": ("MOT", PHC28S),
@@ -176,7 +176,7 @@ SEARCH_GAMES = {
 
 
 class RamSearch(unittest.TestCase):
-    """The RAM search patch on the games that it was made for (INTERNALS.md,
+    """The RAM search patch on the games that it was made for (docs/internals/patches.md,
     The RAM search patch): Mot and Made in Spain, as shipped."""
 
     @classmethod
@@ -219,7 +219,7 @@ class RamSearch(unittest.TestCase):
 
 
 class Enaslt(unittest.TestCase):
-    """The ENASLT copy patch on Made in Spain (INTERNALS.md, The ENASLT copy
+    """The ENASLT copy patch on Made in Spain (docs/internals/patches.md, The ENASLT copy
     patch): on the SX-2 with its Extra-Mapper on, where BASIC's slot register is
     00h, the copy's AND B clears the subslot register, and the loader finds no
     RAM in page 3."""
@@ -284,7 +284,7 @@ class Shipped(unittest.TestCase):
                 continue
             with self.subTest(machine=machine):
                 # The check's own boot, before the restore, is no reboot
-                # (PLAN.md, step 16): point 3 passes with the others.
+                # (docs/BUILD.md, step 16): point 3 passes with the others.
                 support.assert_passes(self, self.restored[machine])
         if missing:
             self.skipTest(f"{', '.join(missing)} without firmware that make firmware could not make")

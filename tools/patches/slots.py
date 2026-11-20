@@ -1,4 +1,4 @@
-"""The slot patches (docs/INTERNALS.md, Slot patches): fixed slot register values
+"""The slot patches (docs/internals/patches.md, Slot patches): fixed slot register values
 that name a slot that holds nothing, by the capture's slot map
 (snapshot.Snapshot.slots). patches/slots.tcl is the capture's watch."""
 import re

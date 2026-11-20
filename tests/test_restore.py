@@ -1,4 +1,4 @@
-"""The restorer, SNAPCAS.COM, on images that the tests write (docs/INTERNALS.md,
+"""The restorer, SNAPCAS.COM, on images that the tests write (docs/internals/restorer-and-check.md,
 Restorer and The restorer's stops): its usage and its messages, its stops for
 an image that the machine cannot restore, its plan: the segment that each
 record is read into, the holding segments and T0's segment, and what it fills
@@ -19,7 +19,7 @@ FCB_FILESIZE = 16  # the file's size in an FCB, 4 bytes (src/snapcas.asm)
 
 
 class Usage(unittest.TestCase):
-    """The first SNAPCAS.COM of PLAN.md's step 1: the assembler, the disk
+    """The first SNAPCAS.COM of docs/BUILD.md's step 1: the assembler, the disk
     image, the boot keys and the screen reading."""
 
     def screen(self, name, autoexec, end):
@@ -174,7 +174,7 @@ class RomKeepSub0(unittest.TestCase):
     """The same machine, with images whose entry code has sub0 (FLAG_P0): it
     selects DOS's mapper's subslot in page 0 itself while it runs, when page
     3 is in DOS's mapper, so page 0 can stay in another subslot of slot 0
-    (INTERNALS.md, Page 0 in another subslot of DOS's mapper's slot)."""
+    (docs/internals/service-and-resident.md, Page 0 in another subslot of DOS's mapper's slot)."""
 
     @classmethod
     def setUpClass(cls):
@@ -533,7 +533,7 @@ class Fill(unittest.TestCase):
 
 
 class Manual(unittest.TestCase):
-    """/M in the restorer's command line, for the manual tape (INTERNALS.md,
+    """/M in the restorer's command line, for the manual tape (docs/internals/service-and-resident.md,
     The manual tape), which needs the tape service with its part in page 3.
     The manual tape's reads are in tests/test_service.py."""
 

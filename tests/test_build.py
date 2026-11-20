@@ -1,4 +1,4 @@
-"""The image as tools/build.py makes it (docs/INTERNALS.md, Build, and
+"""The image as tools/build.py makes it (docs/internals/service-and-resident.md, Build, and
 docs/FORMATS.md, Image, Tail, Port writes and SERVICE.BIN): its helpers, the
 layout's one source, and images of the snapshot that support.snapshot writes,
 through the functions and through build.py as a program. Pure tier."""
@@ -334,7 +334,7 @@ class Synthetic(unittest.TestCase):
 
 class ResidentCall(unittest.TestCase):
     """The call of a machine's resident program from T0's jump at 0038h
-    (FILES.md, Machine file, resident; INTERNALS.md, The resident program's
+    (FILES.md, Machine file, resident; docs/internals/service-and-resident.md, The resident program's
     call)."""
 
     # In slot 2-0, with its entry in page 1.
@@ -1123,7 +1123,7 @@ class Service(unittest.TestCase):
         self.built(a_game("t0"), side1=long[:16 * build.PAGE])
 
     # CALSLT's two places and the routine that the first one calls, as every
-    # MSX2's BIOS has them, at their addresses there (INTERNALS.md, T0 and the
+    # MSX2's BIOS has them, at their addresses there (docs/internals/service-and-resident.md, T0 and the
     # sub-ROM in one slot).
     CALSLT_CALL = (0x02FA, "F1 CD 78 03 F5 FD E1 E5 C5 4F 06 00 7D A4 B2 21 C5 FC 09 77")
     CALSLT_JUMP = (0x02E6, "DB A8 F5 A1 B0 D9 C3 8C F3")

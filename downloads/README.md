@@ -1,6 +1,8 @@
-# Downloaded tapes
+# Downloaded Tapes
 
-`snapcas.py snap` downloads each game's tape files from File-Hunter into this
-folder, once, and checks each one against its game file's SHA-1. `make games` reads
-the tapes from here and never downloads any. Git ignores everything here except this
-file.
+This directory caches `.CAS` files downloaded on demand from [File-Hunter](https://download.file-hunter.com) by `./snapcas.py snap` ([CLI.md](../docs/CLI.md#snap)). Git ignores everything here except this file.
+
+- Each tape is downloaded once and verified against the SHA-1 in its `game.txt`.
+- Existing files with matching SHA-1 are reused automatically; a mismatch aborts without overwriting your file.
+- `make games` reads only from this cache and never accesses the network.
+- Override this path with `SNAPCAS_DOWNLOADS` ([CLI.md](../docs/CLI.md#environment-variables)).

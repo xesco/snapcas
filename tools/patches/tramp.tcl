@@ -1,4 +1,4 @@
-# The capture's trampoline patch (docs/INTERNALS.md, The trampoline patch).
+# The capture's trampoline patch (docs/internals/patches.md, The trampoline patch).
 # tools/patches/tramp.py puts its settings before this file:
 #   ::tramp       each builder in the tape files, as {side offset}
 #   ::tramp_old   the builder's bytes

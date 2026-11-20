@@ -16,7 +16,7 @@ firmware machines/OCM_SX-2_extramapper.xml
 # SX2RES keeps its game entry at 4040h of every segment of slot 3-0, where it
 # starts PUSH AF / IN A,(0FDh) / PUSH AF / LD A,n. A restore writes the game's
 # page 3 as captured, without SX2RES's hooks, so each image calls the entry
-# itself, from T0, H.KEYI or a wrapper (docs/INTERNALS.md, The resident program's
+# itself, from T0, H.KEYI or a wrapper (docs/internals/service-and-resident.md, The resident program's
 # call), and the build refuses an image with RAM in 3-0. The check puts PUSH
 # AF / IN A,(0FDh) / PUSH AF / LD A,0 / POP AF / POP AF / RET there in openMSX.
 # The capture variant without the 2048 KB mapper in 3-0 serves the games that

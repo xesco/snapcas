@@ -1,4 +1,4 @@
-"""The tape files as the tools read them (docs/INTERNALS.md, Tape files, and
+"""The tape files as the tools read them (docs/internals/capture.md, Tape files, and
 docs/FORMATS.md, CAS data and TSX data): the readers of CAS and TSX files, the
 tape model, the tape service's tape, and a load that starts at a later file.
 The tests write each tape's bytes. Pure tier."""

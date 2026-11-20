@@ -1,4 +1,4 @@
-; A test game for the contracts of the tape service's entries (INTERNALS.md,
+; A test game for the contracts of the tape service's entries (docs/internals/service-and-resident.md,
 ; Tape service): what each routine returns and keeps, as the BIOS's routine
 ; does. tests/test_service.py writes this binary to a CAS file, followed by
 ; blocks of known bytes, after it has filled in the cases and the entries that
@@ -10,7 +10,7 @@
 ; returns. It runs the cases with the entries from first on, T0's jump table at
 ; 00E1h, and then with those from second on, the entries in page 3 at FCE1h,
 ; unless second is 0. It reaches every entry through a computed address, so
-; that the scan finds no call to patch (INTERNALS.md, Scan).
+; that the scan finds no call to patch (docs/internals/patches.md, Scan).
 
 JIFFY   equ 0FC9Eh      ; MSX Red Book, chapter 6: counts the VDP's interrupts
 CASES   equ 32          ; the most cases

@@ -1,22 +1,14 @@
-# Machine and game files
+# Machine & Game Files
 
-`snapcas` makes an image from two kinds of text file. A machine file describes one
-MSX and its cartridges. A game file describes one game and its tape. This page
-defines both kinds for the user who writes a game file for a custom game or a
-machine file for a new machine. The page also lists the files that the repository
-ships. [DESIGN.md](DESIGN.md) describes how the tools use the two kinds of file.
+This reference defines the text file formats for machines (`machines/*.txt`) and games (`games/<GAME>/*.txt` and `custom/<GAME>/*.txt`), and summarizes the shipped configurations. For how the tools process these files, see [DESIGN.md](DESIGN.md).
 
 ## Machine file
 
-A machine file describes one MSX and the cartridges in its slots. It holds one
-`openmsx` line, one `disk` line, any number of `boot`, `hold`, and `press` lines, at
-most one `dos` line, at most one `dosfiles` line, and any number of `firmware` and
-`variant` lines. This example is for a Sanyo PHC-28S with a RAM cartridge and a
-Carnivore2:
+A machine file describes one MSX model and its cartridges in slot order. Lines starting with `#` are comments; the first sentence of the opening comment is displayed by `./snapcas.py machines`.
 
-```
-# Sanyo PHC-28S (MSX1, 16 KB) with a 64 KB RAM cartridge and a Carnivore2. The RAM
-# cartridge is in slot 1 and the Carnivore2 in slot 2, under Nextor.
+```text
+# Sanyo PHC-28S (MSX1, 16 KB) with a 64 KB RAM cartridge and a Carnivore2.
+# The RAM cartridge is in slot 1 and the Carnivore2 is in slot 2, under Nextor.
 openmsx -machine Sanyo_PHC-28S -ext ram64k -ext Carnivore2
 disk hda
 boot "DefConfig" space
@@ -24,237 +16,99 @@ variant phc28s-ram64k
 variant phc28s-empty-carnivore2
 ```
 
-| Line | Meaning |
-|---|---|
-| `openmsx` | The `openMSX` arguments that reproduce the machine |
-| `disk` | The `openMSX` command that inserts `check.py`'s disk image, such as `hda` for an IDE interface or an SD card, or `diska` for a floppy drive. The image's size in KB can follow the command. The size is 720, the default, or 360 for a single-sided drive. The Philips VG-8235 has a single-sided drive |
-| `boot` | A text on the screen during boot, and the key to press when the text appears. Each key has its own line, and the tools match the lines in order. A menu can show its text before the menu reads the keyboard. So the tools press the key again each second while the text stays, up to 10 times |
-| `hold` | A key held down from power-on, and the emulated seconds that the key is held, such as `hold del 6`. The line is for a machine whose firmware starts a program in a graphics mode in place of BASIC. `boot` cannot read the screen of that program. For example, the Panasonic FS-A1 starts its Desk Pac menu unless DEL is held |
-| `press` | A key pressed for 0.1 emulated seconds, and the emulated seconds after power-on when the key goes down, such as `press down 8`. The line is for a firmware menu in a graphics mode that no held key skips. For example, without a disk system, the Sony HB-75P starts its Personal Data Bank menu. The `hb75p` capture variant moves down to the menu's BASIC item and presses RETURN |
-| `dos` | DOS's prompt, such as `A:\>`, and the drive letter of `check.py`'s disk. The line is for a machine that boots MSX-DOS from a disk of its own. For example, the MegaFlashROM SCC+ SD boots from the ROM disk in its flash. When the prompt appears, the capture types `BASIC`, because the capture loads the game from BASIC. The check types that drive and `AUTOEXEC` when the prompt appears |
-| `dosfiles` | The folder below `dos/` that holds the DOS system files that the machine boots in `snapcas.py snap --check`, `try`, `make games`, and the tests. The folder is `msxdos1` or `msxdos2`. Without this line, the folder is `nextor` |
-| `width` | The text width, 1 to 80, that the capture sets in BASIC with `WIDTH` before the load. The line is for a machine whose BIOS starts BASIC with another width than the loaders expect. KdL's BIOS for the SX-2 starts it at 80 at every boot, where an MSX2 starts at 37, so `sx2` has `width 37`. The image restores the captured width |
-| `firmware` | A file below the `share` folder of the `openMSX` home that the machine needs and that `make firmware` makes, such as `systemroms/snapcas/SDMAPPER.ROM`. For `sx2`, `make firmware` needs the user's `OCM-BIOS.DAT` ([CLI.md](CLI.md)). Without the file, `snapcas.py snap` and `try` stop and name `make firmware`. They also stop without a file that one of the machine's capture variants needs |
-| `variant` | The name of one of the machine's capture variants. `snapcas.py snap` tries the capture variants in the order of these lines |
-| `resident` | A program that stays in RAM of the machine and must keep running under the game: its slot, as `3-0` or `2`, its entry's address in hex, in page 1 or 2, and the code that the check puts at the entry in every segment of that slot in `openMSX`, at least 5 bytes, whose first 2 the image compares with the entry before each call. The build stops at an image with a RAM page in that slot, and makes the image call the entry at each interrupt ([INTERNALS.md, The resident program's call](INTERNALS.md#the-resident-programs-call)). `build.txt`'s `rescall` line names how, or why not, and the check writes the calls of its 60 seconds to `check/rescall.txt`. At most one line |
-
-`openMSX` puts each `-ext` cartridge in the next free external slot, so the order of
-the `-ext` options sets the slots. That order must match the order of the real
-machine's cartridges. `boot` lines pass a cartridge's boot menu, such as the boot
-menu of the Carnivore2. The tools read the screen with `get_screen`, so such a menu
-must be in a text mode. A line that starts with `#` is a comment. The file's first
-comment says what the machine is.
-
-A machine file's name says what the file describes. The name gives the model, then
-each cartridge in slot order, with `empty` for an empty slot before a cartridge. A
-cartridge's name is `openMSX`'s name for the cartridge in lower case, such as
-`ram64k` or `carnivore2`. For a long `openMSX` name, the cartridge's name is a short
-form, such as `sunriseide` and `mfrsd`. So `phc28s-ram64k-carnivore2` is a
-Sanyo PHC-28S with a 64 KB RAM cartridge in slot 1 and a Carnivore2 in slot 2. Two
-setups of one model have two names.
-
-Machine files are of three kinds, each in its own place:
-
-| Kind | Where | What it is |
+| Directive | Required | Description |
 |---|---|---|
-| A user's machine | `machines/` | A real machine that the images are made for, given as the command's `<machine>` |
-| A capture variant | `machines/capture/` | The same machine with fewer cartridges, or with its slot 0 not expanded. It is for a game whose loader fails because of a cartridge, or because slot 0 is expanded. It is also for a game whose image needs fewer free mapper segments when the game runs in the machine's own RAM. A game's `capture` line names the capture variant |
-| A test machine | `machines/test/`, given as `test/<name>` | A machine that only the tests use |
+| `openmsx <args...>` | Yes (1) | Arguments passed to `openMSX`. Each `-ext` fills the next free external slot, so `-ext` order must match your real cartridge slots. |
+| `disk <cmd> [360\|720]` | Yes (1) | `openMSX` disk command (`hda`, `diska`, etc.) and optional floppy size in KB (default `720`; `360` for single-sided drives). |
+| `boot "<text>" <key>` | 0+ | Wait for `<text>` on the text screen during boot and press `<key>` (retried every second up to 10 times while text remains). Matched in order. |
+| `hold <key> <sec>` | 0+ | Hold `<key>` from power-on for `<sec>` emulated seconds to bypass graphics-mode firmware menus (e.g. `hold del 6` on FS-A1). |
+| `press <key> <sec>` | 0+ | Press `<key>` for 0.1 s at `<sec>` seconds after power-on for graphics menus that need navigation (e.g. `hb75p` Personal Data Bank). |
+| `dos "<prompt>" <drive>` | 0–1 | For cartridges that boot DOS from their own ROM disk (e.g. stock MegaFlashROM). Capture types `BASIC` at `<prompt>`; check switches to `<drive>:` and runs `AUTOEXEC`. |
+| `dosfiles <msxdos1\|msxdos2>` | 0–1 | Subfolder under `dos/` booted by `--check`, `try`, `make games`, and tests. Defaults to `nextor`. |
+| `width <1..80>` | 0–1 | Run `WIDTH <n>` in BASIC before loading (e.g. `width 37` on SX-2, whose sub-ROM boots into 80 columns). |
+| `firmware <path>` | 0+ | Relative path under `openMSX`'s `share/` required by this machine and created by `make firmware` (e.g. `systemroms/snapcas/SDMAPPER.ROM`). |
+| `variant <name>` | 0+ | Capture variant under `machines/capture/` tried in order when a capture/build/check fails. |
+| `resident <slot> <addr> <bytes...>` | 0–1 | Resident program that must keep running under games (e.g. SX2RES: `resident 3-0 4040 F5 DB FD F5 3E 00 F1 F1 C9`). Requires at least 5 bytes; the first 2 are checked before every call ([Service & Resident](internals/service-and-resident.md#resident-program-calls)). |
+| `parent <machine>` | 0–1 | Inherit machine-specific game files from `<machine>` when no `<this-machine>.txt` exists (used by `sx2-noexp0` → `parent sx2`). |
 
-A capture variant takes cartridges away. It keeps the machine's ROMs, and every
-other cartridge stays in its slot. The image built from the capture variant's
-snapshot is still for the user's machine and is checked there. So the restorer finds
-the RAM pages in the slots that the snapshot names. Two of the HB-F700P's capture
-variants also run a model whose slot 0 is not expanded, for the loaders that fail
-because the real slot 0 is expanded
-([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)).
-Such a capture variant has `noexp0` after the model in its name, and its `firmware`
-line names the model, which `make firmware` makes. A capture variant's name follows
-the same rule as a machine file's name. By that rule, the name gives the cartridges
-that the capture variant holds, and not the cartridges that the capture variant
-leaves out. So two machines whose capture variants hold the same cartridges share
-one capture variant. For example, the VG-8020 with a Carnivore2 and the VG-8020 with
-an SD Mapper both list `vg8020`. The capture variant's first comment says which
-machines list that capture variant and why. A game's `capture` line is in the
-machine's game file. The machine's game file already names the machine that the
-image is for, so the `capture` line names only the capture variant.
+### Naming convention
+
+Machine names are lowercase `<model>-<slot1>-<slot2>...`, using `empty` for an empty slot before a cartridge and short cartridge names (`carnivore2`, `ram64k`, `ram512k`, `mfrsd`, `sunriseide`, `sdmapper`, `msxdos2`).
+
+Machine files live in three folders:
+- `machines/` — shipped user machines (`<machine>` argument to `snapcas.py`).
+- `machines/capture/` — capture variants referenced by `variant` / `capture`.
+- `machines/test/` — test-only setups (`test/<name>`).
+
+## Capture variants
+
+A capture variant in `machines/capture/` represents the same MSX model with fewer cartridges (or unexpanded slot 0, named `<model>-noexp0-...`). Games are captured on the variant when a cartridge's RAM or expanded slot 0 breaks the loader, then built and checked for the full target machine. Multiple machines sharing the same stripped setup share one variant file (e.g. `vg8020` is shared by `vg8020-carnivore2` and `vg8020-sdmapper`).
 
 ## Game file
 
-A game file holds one setting per line. A setting is a key, a space, and a value. A
-line that starts with `#` is a comment, and the tools ignore blank lines. In the
-shipped game files, each line after `cas`, `side2`, `sha1`, `url`, and `name` has
-its own comment above it and a blank line before the comment. The comment says why
-the line is there. Times are decimal emulated seconds from the moment when the load
-command is typed. Addresses and bytes are hexadecimal. A game file needs only its
-tape's line, `cas`. This example is for Gauntlet, which loads its levels
-from side 2 of the tape:
+Each game lives in `games/<GAME>/` (or `custom/<GAME>/`) with a `game.txt` that applies to all machines. Lines are `<key> <value>`; `#` starts a comment and blank lines are ignored. Times are decimal emulated seconds after the load command; addresses and bytes are hexadecimal.
 
-```
+```text
+# Gauntlet (1986)(US Gold)(Side A)[RUN'CAS-']
 cas GAUNTLET.CAS
 side2 GAUNTLEB.CAS
 sha1 d9aaa5495dd7d507f1cbdd600ad1c216152ad0a5 d48793329d94266ada63d33c4a2897a85d6400b3
 ```
 
-| Key | Value | Default | File |
+In shipped files, every directive after `cas`/`tsx`/`side2`/`sha1`/`url`/`name` has a blank line and an explanatory comment above it.
+
+| Key | Value | Default | Typical file |
 |---|---|---|---|
-| `cas` | The CAS file of side 1, in the tapes folder | | `game.txt` |
-| `side2` | The file of side 2, in side 1's format | None | `game.txt` |
-| `load` | The load command in quotes, for a tape whose first block is not standard, as in `load 'RUN"CAS:"'` ([INTERNALS.md, Tape files](INTERNALS.md#tape-files)) | From the first block's type | `game.txt` |
-| `start` | The name of a file on side 1, such as `start SKY`, for a game that is not the tape's first program. The load starts at the first file with that name ([INTERNALS.md, A game later on the tape](INTERNALS.md#a-game-later-on-the-tape)) | The tape's start | `game.txt` |
-| `sha1` | The SHA-1 of `cas`, then the SHA-1 of `side2` | None | `game.txt` |
-| `url` | The https link to the zip file that holds `cas`, then the link to the zip file that holds `side2`. A tape is downloaded from its link and found in its zip file by its `sha1`. An apostrophe in a link is written `%27`, because the tools split the game file's lines as a shell splits words | None | `game.txt` |
-| `name` | `<GAME>`, up to 8 letters and digits | The folder name in upper case, cut to 8 letters and digits. A folder name without a letter or a digit gives no name, so that folder's game file needs this line | `game.txt` |
-| `keys` | A time, then a key name ([Key names](#key-names)) or a text of Latin-1 characters in quotes. The key is held for 0.1 seconds, and `openMSX` types the text. Each press has its own line | None | `game.txt` |
-| `continue` | A key name that the capture tries before space and Return, to continue a load that waits for a key | None | `game.txt` |
-| `snapshot` | `at` and a time. The capture takes the snapshot at that time. For a game that asks the player to stop the tape, the time is the moment when the game asks, because `openMSX`'s tape keeps running and the tape service serves every later load | Found by the capture | `game.txt` |
-| `capture` | A capture variant of the machine. The capture loads the game on that capture variant ([Machine file](#machine-file)) | The command's machine file | The machine's game file |
-| `service` | `no` for a game that never reads the rest of its tape, though blocks of the tape stay unread. A game can read those blocks only at its end, so `no` is for a game that someone has played to its end. A compilation's program also takes `no` when its capture reads the tape up to the next program's loader, because the blocks after that point are the later programs' blocks ([INTERNALS.md, A game later on the tape](INTERNALS.md#a-game-later-on-the-tape)). The value can also be `at` and an address xxE1h in page 3, from C0E1h to FEE1h. The tape service's part of page 3 goes at that address ([INTERNALS.md, Build](INTERNALS.md#build)). A second address, anywhere in page 3, puts the part's code block there and only the entries and their data at xxE1h, as in `service at DAE1 F5D1`, for a game whose page 3 has no 158 free bytes from an xxE1h. The addresses end at FEE1h because a part at FFE1h would go past FFFEh. With a second address the entries alone can go at FFE1h, over the BIOS's copies of VDP registers, for a game that never calls the BIOS, as in Power Drift's `service at FFE1 FF01` for `sx2-extramapper-mcp`. The value can also be `t0`, for the tape service without a part in page 3 ([INTERNALS.md, Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)). A file holds at most one `service` line. `capture.py` and `build.py` stop with an error at a second `service` line. The `service` line of a machine's game file replaces the `service` line of `game.txt`, as with any key that both files give | Found by the capture, and by `build.py` | `game.txt`, or the machine's game file for a line that holds only on that machine, as 12 of the 15 shipped `t0` lines do |
-| `patch` | A place, the old bytes, `>`, and the new bytes: `patch page3:215F CD E1 00 > CD E1 FC` | None | `game.txt`. A patch of a slot register's value is in the machine's game file |
-| `rom` | `keep` for a game that must find the ROM in page 0 at the snapshot's slot. With `keep`, T0 does not replace the ROM, and the game reaches the tape service only through calls patched to the entries in page 3. So `rom keep` needs the part in page 3. A game file with `rom keep` and `service t0` is an error. `build.py` stops when it would itself take the mode without a part in page 3 ([INTERNALS.md, Without a part in page 3](INTERNALS.md#without-a-part-in-page-3)) | T0 replaces the ROM when the restorer's rule allows the replacement | `game.txt`, or a machine's game file when the line fits only some machines, as Gauntlet's: the restorer refuses `rom keep` where the main ROM and DOS's mapper share slot 0, as on `sx2-extramapper-mcp` |
-| `subslots` | `keep` for a game that must find the subslots of BASIC's RAM slot as BASIC has them. On an MSX2 whose BASIC has its RAM in an expanded slot, the capture otherwise selects the RAM's subslot in every page of that slot before the load ([INTERNALS.md, The RAM's subslot in every page](INTERNALS.md#the-rams-subslot-in-every-page)) | The RAM's subslot in every page | The machine's game file |
-| `rescall` | For a machine with a `resident` line: the addresses, in four hex digits, of up to 4 of the game's own interrupt routines, or `no`. With addresses, the image holds a wrapper for each that calls the resident program and jumps to that address, and the game file's `patch` lines make the game install the wrapper's address as its interrupt vector, as Gauntlet's file for `sx2-extramapper-mcp` does. A game that installs one routine for its title and another for its play names both. `build.txt`'s `resvector` line gives each wrapper's address. Without the tape service a wrapper takes 6 bytes after the call routine, and with it 17 bytes, so the room before the part's entries holds one. The wrapper is in zeros of the game's page 3, at FD29h or FCC9h without the tape service and at FCC9h with it, or at the address of a `rescode` line, and the build stops when the snapshot has no room for it ([INTERNALS.md, The resident program's call](INTERNALS.md#the-resident-programs-call)). `no` leaves the call out of the game's image. A machine without a `resident` line ignores the line | The call that the snapshot allows | The machine's game file |
-| `rescode` | For a machine with a `resident` line: an address in page 3, in four hex digits, for the image's code of the call, the call routine and the wrappers without the tape service, or the wrappers with it, when the game uses the places that the build tries, FD29h and FCC9h. The bytes there must be zeros in the snapshot, clear of the tail and of the tape service's part, or the build stops. The check fails point 2 when the game writes them. Without the tape service and without a call from H.KEYI or a wrapper, as for a game that takes no interrupt, the line places the routine alone, and the game file's `patch` lines add its calls to the game's code, `CALL` the line's address. The routine's stack is apart, in SLTATR and SLTWRK or at a `resstack` line's address | The build's places | The machine's game file |
-| `resstack` | For a machine with a `resident` line, without the tape service: an address in page 3, in four hex digits, for the stack of the image's call routine, when SLTATR and SLTWRK, FCC9h to FD88h, have no room for it. `res3` takes 64 bytes from the address, its stack and its end, and `resb`, the routine for H.KEYI, 84. The bytes must be zeros in the snapshot, clear of the tail and of the call's code, or the build stops. The check fails point 2 when the game writes them while the stack pointer is outside them. `no` gives the routine no stack of its own, for a game that writes the bytes that the build finds, as Service Ace's clear of D700h to FCFFh on the tape Super MSX n.25 does. Without a place for the stack, or with `no`, the routine runs on the game's stack and leaves the call out while that stack is in the entry's page ([INTERNALS.md, The resident program's call](INTERNALS.md#the-resident-programs-call)) | The build's places | The machine's game file |
+| `cas` / `tsx` | Side 1 tape filename (`.CAS` or `.TSX`). | Required | `game.txt` |
+| `side2` | Side 2 tape filename (same format as Side 1). | None | `game.txt` |
+| `sha1` | SHA-1 of Side 1, then optional SHA-1 of Side 2. Required whenever `patch` or `url` is used. | None | `game.txt` |
+| `url` | HTTPS URL(s) to File-Hunter zip(s) for Side 1 (and Side 2). Encode `'` as `%27`. | None | `game.txt` |
+| `name` | Image stem (`<GAME>`, up to 8 alphanumeric chars). | Uppercase folder name (alphanumeric, max 8) | `game.txt` |
+| `load` | Quoted load command for non-standard first blocks (e.g. `load 'RUN"CAS:"'`). | Auto-detected from first block | `game.txt` |
+| `start` | Filename on Side 1 where loading starts (for compilations, e.g. `start SKY`). | Start of tape | `game.txt` |
+| `keys` | `<seconds> <key\|"text">` — hold `<key>` for 0.1 s or type Latin-1 text. Repeatable. | None | `game.txt` |
+| `continue` | `<key>` tried before Space/Return when capture detects a key prompt during load. | None | `game.txt` |
+| `snapshot` | `at <seconds>` — take snapshot at a fixed time instead of auto-detecting load end. | Auto-detected | `game.txt` or `<machine>.txt` |
+| `capture` | Capture variant name from the machine's `variant` list. | Target machine | `<machine>.txt` |
+| `service` | `no` (disable tape service), `t0` (no page 3 part), `at <xxE1>` (page 3 entry page `C0E1`–`FEE1`), or `at <xxE1> <code>` (split: 26-byte entries at `xxE1`, 132-byte code at `<code>` in page 3). Explicit `service at` accepts `00h` and unused `C9h` BIOS hooks (`FD9Ah`–`FFC8h`), and with a split `<code>` address may place entries at `FFE1h` over BIOS VDP register copies for games that never call BIOS (e.g. `POWER-DR`). At most one per file. | Auto-selected | `game.txt` or `<machine>.txt` |
+| `patch` | `<place> <old hex...> > <new hex...>` where `<place>` is `page<0-3>:<hex>` (snapshot RAM) or `side1:<hex>` / `side2:<hex>` (tape offset). Repeatable. Requires `sha1`. | None | `game.txt` (slot patches in `<machine>.txt`) |
+| `rom` | `keep` — keep original ROM in page 0 instead of `T0`; requires the page 3 tape service (invalid with `service t0` or when ROM and DOS mapper share slot 0). | `T0` replaces ROM when allowed | `game.txt` or `<machine>.txt` |
+| `subslots` | `keep` — leave BASIC's RAM subslot register unchanged during capture instead of selecting RAM in all 4 pages ([Capture](internals/capture.md#subslot-setup)). | Select RAM in all pages | `<machine>.txt` |
+| `rescall` | Up to 4 hex interrupt-handler addresses (e.g. `rescall 6010 6120`) to wrap with resident calls, or `no` to omit resident calls. Ignored without `resident`. | Auto | `<machine>.txt` |
+| `rescode` | Hex address in page 3 (`C000`–`FFFE`) for resident call code/wrappers (`00h` or `C9h` in `FD9Ah`–`FFC8h`). | Auto (`FD29h` / `FCC9h`) | `<machine>.txt` |
+| `resstack` | Hex address in page 3 for resident private stack (64 B for `res3`, 84 B for `resb`; `00h` or `C9h` in `FD9Ah`–`FFC8h`), or `no` to run on the game's stack. | Auto (`SLTATR`/`SLTWRK`) | `<machine>.txt` |
 
-A place is a RAM page as `page<n>:<offset>`. This form names the RAM page that the
-snapshot selects in page n, 0 to 3, and the offset from that RAM page's start. A
-place can also be on the tape, as `side1:<offset>` or `side2:<offset>`. In this
-form, the offset is an offset in the tape file. A patch on the tape changes the tape
-that the capture loads and that the tape service serves. So the patch also reaches
-the code that the capture runs. Neither form names a slot, so a patch line holds on
-every machine that the game runs on, unless the line's new bytes are a slot
-register's value. A patch fits only the dump that the patch was made for. So
-`capture.py` and `build.py` stop with an error when the old bytes differ. They also
-stop with an error when the game file has `patch` lines and `sha1` is missing or
-differs from a tape file's SHA-1.
+## Machine-specific game files
 
-`game.txt` describes the game and its tape, and holds on every machine. A game's
-folder can also hold a machine's game file, which is a game file for one machine. A
-machine's game file is named after the machine file of that machine, such as
-`phc28s-ram64k-carnivore2.txt` for `phc28s-ram64k-carnivore2`. The tools read the
-machine's game file after `game.txt` when they capture, build, or check for that
-machine. The lines of the machine's game file add to the lines of `game.txt`. For a
-key that both files give, the value of the machine's game file applies. A machine's
-game file holds the lines that depend on where the machine's RAM and cartridges are:
+A file `games/<GAME>/<machine>.txt` overrides or appends to `game.txt` when building for `<machine>`. If a machine defines `parent <parent>`, the loader reads `game.txt` → `<parent>.txt` → `<machine>.txt` in order.
 
-| Line | Why it depends on the machine |
-|---|---|
-| `capture` | The line names one of the capture variants that the machine file lists ([Machine file](#machine-file)) |
-| A patch of a slot register's value | The value names slots. Sootland writes FCh to the slot register, for RAM in slot 3, and crashes on the Sanyo PHC-28S. Without Nextor, that machine's BASIC keeps page 3 in the internal RAM, slot 0, and the RAM cartridge in slot 1 holds pages 0 to 2. So a patch to 14h keeps page 3 in the internal RAM and selects slot 1 for pages 1 and 2. The capture itself makes such a patch for a fixed value ([INTERNALS.md, Slot patches](INTERNALS.md#slot-patches)), so a game file needs such a patch only for a value that the game computes |
-| A `snapshot` that a real machine needs | Tokyo Nampa Street's snapshot comes after its music only because of the real PHC-28S ([DESIGN.md, Limits](DESIGN.md#limits)) |
-| `subslots keep` | The line is for a machine whose RAM is all in expanded slots. Macadam Bumper needs it on the NMS 8250, where its stack would write the subslot register at FFFFh. Ci-U-Than Trilogy III needs it on the FS-A1 in both game files, where the loader otherwise runs into memory that the game did not fill |
+Put machine-dependent directives in `<machine>.txt`: `capture`, slot-register `patch` lines, `subslots keep`, machine-only `service` / `rom` / `snapshot`, and `rescall` / `rescode` / `resstack`.
 
-## Shipped files
+## Shipped machines
 
-The repository ships a game file for each game of File-Hunter's MSX CAS collection
-in `games/`. Each game file is in a folder named after the short name of the game's
-side 1 CAS file, such as `games/ABADIA/` for `ABADIA.CAS`. The folder name then also
-names the image. A compilation's programs are the exception. Each program has a game
-file of its own, in a folder named after the program's game. That folder is inside a
-folder named after the collection, such as `games/ENGESOFT/ATHLETIC/`
-([INTERNALS.md, A game later on the tape](INTERNALS.md#a-game-later-on-the-tape)).
-
-Each game file starts with a comment, which is the game's File-Hunter name. The game
-file then has the `sha1` of its dumps and a `url` line with the links to its zip
-files in File-Hunter's MSX1 CAS folder. The `sha1` finds a dump whatever the dump's
-file name is. A side 2 is a zip file of its own in that folder, as Gauntlet's Side B
-is. A side B, a later tape of a set, or an expansion needs a tape before it, so such
-a tape has no game file of its own. The collection's `SIDES.TXT` lists these tapes.
-A dump that File-Hunter marks `[b]`, a bad dump, has no game file either. A game
-with a better dump uses the better dump. A dump that File-Hunter lists more than
-once for one release has one game file. For example, File-Hunter lists Swing Man
-(Spectravideo) as Swing Man, as Swing Man (Side A), and under its catalogue number,
-SM-221, all with the same SHA-1. Only `games/SWING-MA/` holds a game file for that
-dump. A dump in two releases keeps a game file for each release, as a compilation's
-program does
-([INTERNALS.md, A game later on the tape](INTERNALS.md#a-game-later-on-the-tape)). A
-Turbo Pack program that is also its game's own tape is such a dump.
-
-In the shipped game files, the `side2` lines pair the Side A and Side B files of a
-game. The `continue` lines come from the key that the capture reports. The
-`service no` lines come from games played to their end, and the `patch` lines come
-from `check.py` and from traces of failed loads. The lines that hold only on one
-machine are in that machine's game file ([Game file](#game-file)). The other game
-files hold on any machine.
-
-The repository also ships these machine files. Each machine file is checked with
-`check.py` and a single-load game. The table gives the number of machine's game
-files that each machine file has:
-
-| File | Configuration | Machine's game files |
-|---|---|---|
-| `vg8020-carnivore2` | Philips VG-8020: an MSX1 with 64 KB and a Carnivore2 | 123 |
-| `nms8250-carnivore2` | Philips NMS 8250: an MSX2 with its own 128 KB and a floppy drive, and a Carnivore2 under Nextor. This machine file is for the cartridge with a mapper and a disk interface that most MSX2 owners use | 88 |
-| `nms8245-ram512k-sunriseide` | Philips NMS 8245: an MSX2 with a 512 KB RAM cartridge and a Sunrise IDE interface, under Nextor. The machine's own 128 KB leave Nextor too few free segments | 30 |
-| `phc28s-ram64k-carnivore2` | Sanyo PHC-28S: an MSX1 with 16 KB, a RAM cartridge in slot 1, and a Carnivore2 in slot 2 | 85 |
-| `hb75p-mfrsd` | Sony HB-75P: an MSX1 with 64 KB and a MegaFlashROM SCC+ SD in `openMSX`'s stock setup. In that setup, the MegaFlashROM SCC+ SD boots MSX-DOS from the ROM disk in its flash. The check's disk is in SD card slot 1 as drive B: | 70 |
-| `hbf700p-ram512k-msxdos2` | Sony HB-F700P: an MSX2 whose slot 0 is expanded, with a 512 KB RAM cartridge, under MSX-DOS 2. The machine's own mapper holds 256 KB | 264 |
-| `vg8020-sdmapper` | Philips VG-8020 with an SD Mapper v1. The machine has the SD Mapper's 512 KB mapper, and Nextor on the SD Mapper's SD cards. The Makefile downloads the cartridge's firmware, `SDMAPPER.ROM` 1.0.7, which `openMSX` needs | 0 |
-| `xp800-sdmapper` | Gradiente Expert XP-800, a Brazilian MSX1 with 64 KB, with an SD Mapper v1, as in `vg8020-sdmapper` | 0 |
-| `fsa1-mfrsd` | Panasonic FS-A1: an MSX2 with 64 KB and no mapper, with a MegaFlashROM SCC+ SD whose flash holds only Nextor 2.1.4. The Makefile makes that flash. `openMSX`'s stock flash also holds a ROM disk, and the ROM disk's `AUTOEXEC.BAT` starts a file manager on an MSX2. DEL is held from power-on, so the FS-A1 skips its Desk Pac menu | 71 |
-| `hb75p-carnivore2` | Sony HB-75P: an MSX1 with 64 KB in slot 2 and a Carnivore2 in slot 1 | 76 |
-| `sx2` | SX-2: an FPGA MSX2+ on KdL's OCM-PLD firmware, as it starts: slot 0 expanded, with MSX-MUSIC in 0-2 and the Wi-Fi's BIOS in 0-3, 2048 KB in slot 3-0, its MegaSD under Nextor in 3-2, its cartridge slots empty, and its Extra-Mapper off ([MACHINES.md](MACHINES.md)). Its slots copy the Panasonic FS-A1WSX's, so the Makefile makes the model from `openMSX`'s FS-A1WSX and the ROMs of the user's own `OCM-BIOS.DAT`, with a Sunrise IDE in place of the MegaSD, which `openMSX` lacks | 49 |
-| `sx2-extramapper-mcp` | SX-2 as in `sx2`, with its Extra-Mapper of 4096 KB on in slot 0-1, where the BIOS and DOS keep their RAM, and the sx2-mcp project's resident program SX2RES 1.6 or later in the 2048 KB of slot 3-0. Its `resident` line makes each image call SX2RES's game entry at each interrupt, so that SX2RES answers while the game runs on the BIOS's interrupt routine. Its capture variant leaves out the mapper in 3-0 | 184 |
-| `sx2-noexp0` | SX-2 as in `sx2`, with its slot 0 not expanded by `SETSMART -F9FD`, which leaves only the main ROM there | 49 |
-
-The repository also ships these capture variants in `machines/capture/`
-([Machine file](#machine-file)). The games' `capture` lines name these capture
-variants. A row is a capture variant and a machine that lists it. The row's count is
-the number of that machine's game files whose `capture` line names the capture
-variant:
-
-| Variant | Machine | Leaves out | Used by |
+| Machine | Summary | Machine game files | Capture variants |
 |---|---|---|---|
-| `phc28s-ram64k` | `phc28s-ram64k-carnivore2` | The Carnivore2, and so Nextor | 69 game files that crash when a disk system is present, or that select RAM by fixed slot values |
-| `phc28s-empty-carnivore2` | `phc28s-ram64k-carnivore2` | The RAM cartridge in slot 1 | 9 game files whose loader fails because of that cartridge |
-| `vg8020` | `vg8020-carnivore2` | The Carnivore2, and so Nextor | 121 game files that fail in a capture with the Carnivore2 in slot 1. 6 of them also select RAM in slot 2 by fixed slot values |
-| `nms8250` | `nms8250-carnivore2` | The Carnivore2, and so Nextor | 72 game files that fail in a capture with the Carnivore2 in slot 1. Continental Circus and Il Giustiziere also need `service t0`, and so their page 0 RAM outside DOS's mapper |
-| `hbf700p-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1 | 24 game files. One of them is Digger Dungeon, which is in the tests. La Abadia del Crimen crashed with the cartridge in either slot until the RAM search patch. Sootland crashed with the cartridge in either slot until the patch that keeps page 3 ([INTERNALS.md, The RAM search patch](INTERNALS.md#the-ram-search-patch)) |
-| `hbf700p-noexp0-ram512k-msxdos2` | `hbf700p-ram512k-msxdos2` | No cartridge. Its slot 0 is not expanded | 212 game files whose loader fails because slot 0 is expanded ([INTERNALS.md, The capture with slot 0 not expanded](INTERNALS.md#the-capture-with-slot-0-not-expanded)). After the War is one of them, and Fernando Martin, which is in the tests |
-| `hbf700p-noexp0-msxdos2` | `hbf700p-ram512k-msxdos2` | The RAM cartridge in slot 1. Its slot 0 is not expanded | 26 game files. The games run found 24 of them, which pass on none of the variants before this one. Bestial Warrior is one of them, and is in the tests. Continental Circus, Il Giustiziere and Thunder Blade need `service t0`, and so their page 0 RAM outside DOS's mapper |
-| `nms8245` | `nms8245-ram512k-sunriseide` | The RAM cartridge and the Sunrise IDE, and so Nextor | 25 game files that fail in a capture with the cartridges. Continental Circus, Il Giustiziere and Thunder Blade also need `service t0`, and so their page 0 RAM outside DOS's mapper |
-| `vg8020` | `vg8020-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
-| `xp800` | `xp800-sdmapper` | The SD Mapper, and so its mapper and Nextor | No game file yet |
-| `hb75p` | `hb75p-carnivore2` | The Carnivore2, and so Nextor | 74 game files that fail in a capture with the Carnivore2 in slot 1. 4 of them also select RAM by fixed slot values. 1 selects RAM in slot 1, and 3 select RAM in slot 3, the VG-8020's RAM slot |
-| `hb75p` | `hb75p-mfrsd` | The MegaFlashROM SCC+ SD, and so its mapper and Nextor | 70 game files that fail in a capture with the cartridge. Continental Circus, Il Giustiziere and Thunder Blade also need `service t0`, and so their page 0 RAM outside DOS's mapper |
-| `fsa1` | `fsa1-mfrsd` | The MegaFlashROM SCC+ SD, and so its mapper and Nextor | 60 game files that fail in a capture with the cartridge. 10 of them also need `service t0` |
-| `sx2-noexp0` | `sx2` | Slot 0's expansion, and so MSX-MUSIC and the Wi-Fi's BIOS | Counted after the games run |
-| `sx2-extramapper-noram30` | `sx2-extramapper-mcp` | The 2048 KB mapper in slot 3-0, which SX2RES holds. Slot 3 then holds no RAM, so the capture patches a loader's writes to it to the Extra-Mapper's slot | 182 game files whose game keeps a RAM page in 3-0 on the machine itself, which an image cannot restore |
+| `fsa1-mfrsd` | Panasonic FS-A1 (MSX2, 64 KB), MegaFlashROM SCC+ SD (Nextor) | 72 | `fsa1` |
+| `hb75p-carnivore2` | Sony HB-75P (MSX1, 64 KB), Carnivore2 | 77 | `hb75p` |
+| `hb75p-mfrsd` | Sony HB-75P (MSX1, 64 KB), MegaFlashROM SCC+ SD (stock) | 70 | `hb75p` |
+| `hbf700p-ram512k-msxdos2` | Sony HB-F700P (MSX2, 256 KB), 512 KB RAM, MSX-DOS 2 | 265 | `hbf700p-msxdos2`, `hbf700p-noexp0-ram512k-msxdos2`, `hbf700p-noexp0-msxdos2` |
+| `nms8245-ram512k-sunriseide` | Philips NMS 8245 (MSX2, 128 KB), 512 KB RAM, Sunrise IDE | 31 | `nms8245` |
+| `nms8250-carnivore2` | Philips NMS 8250 (MSX2, 128 KB), Carnivore2 | 89 | `nms8250` |
+| `phc28s-ram64k-carnivore2` | Sanyo PHC-28S (MSX1, 16 KB), 64 KB RAM, Carnivore2 | 86 | `phc28s-ram64k`, `phc28s-empty-carnivore2` |
+| `sx2` | SX-2 (MSX2+, 2048 KB), slot 0 expanded | 50 | `sx2-noexp0` |
+| `sx2-extramapper-mcp` | SX-2 (MSX2+, 6144 KB), Extra-Mapper + SX2RES | 770 | `sx2-extramapper-noram30` |
+| `sx2-noexp0` | SX-2 (MSX2+, 2048 KB), slot 0 unexpanded (`parent sx2`) | 0 | — |
+| `vg8020-carnivore2` | Philips VG-8020 (MSX1, 64 KB), Carnivore2 | 125 | `vg8020` |
+| `vg8020-sdmapper` | Philips VG-8020 (MSX1, 64 KB), SD Mapper v1 | 161 | `vg8020` |
+| `xp800-sdmapper` | Gradiente Expert XP-800 (MSX1, 64 KB), SD Mapper v1 | 170 | `xp800` |
 
 ## Compilations
 
-The shipped files give each program of a compilation a game file of its own, so that
-each image is named after its game and not after the tape. The tape holds more than
-one game. The game files of one collection share a folder named after the
-collection, such as `games/ENGESOFT/` for Engesoft's tapes and `games/SUPERMSX/` for
-the 27 issues of the magazine Super MSX:
-
-| Program | Its game file |
-|---|---|
-| The tape's first program | `cas` and `sha1`, without `start`. A magazine's intro belongs to the first program, because the intro itself loads that program |
-| A later program | `cas`, `sha1`, and `start` |
-| A program that File-Hunter also has as a dump of its own | A game file in the collection's folder as well, because a tape's copy can differ from that dump. For example, Exerion on Engesoft's MSXK-06 has a game file there beside `games/EXERION/`. An earlier rule gave such a program no game file in the collection's folder ([DESIGN.md, Decisions](DESIGN.md#decisions)) |
-
-Each program's folder is named after the program's game, as
-`games/ENGESOFT/ATHLETIC/` is for Athletic Land, the second program on Engesoft's
-MSXK-06 side A. A magazine renamed the commercial games that it copied. Such a
-program's folder takes the magazine's title, which the program's title screen shows.
-For example, Super MSX's Attila is a copy of Knightmare, in
-`games/SUPERMSX/ATTILA/`. The game file's first comment names the game, the
-compilation, and the program's place on the compilation. The game file's `url` line
-links the compilation's zip file. A loader's file name, such as ATLET, seldom gives
-the title, so the title comes from a list of the tape's contents. Each program has
-its own machine's game files, because each program has its own loader. Athletic
-Land's capture runs without the disk system on the Sanyo PHC-28S and on the Sony
-HB-75P. The capture of Kung-Fu Master, which is before Athletic Land on the tape,
-runs without the disk system on those two machines and on the Philips VG-8020. A
-program that is not a game also has a game file, as De Demo's programs have.
+Each program on a multi-game compilation tape (e.g. `games/ENGESOFT/`, `games/SUPERMSX/`) has its own folder and `game.txt` so every built `.SNP` is named after the game rather than the compilation. The first program omits `start`; later programs set `start <name>`. Programs that also exist as standalone File-Hunter dumps still get a compilation entry because compilation loaders and dumps often differ.
 
 ## Key names
 
-The key names are the special keys of the MSX keyboard matrix. These keys have the
-same place on every keyboard layout.
+Special MSX keyboard matrix keys accepted by `boot`, `hold`, `press`, `keys`, and `continue`:
 
 | Row | Bit 0 | Bit 1 | Bit 2 | Bit 3 | Bit 4 | Bit 5 | Bit 6 | Bit 7 |
 |---|---|---|---|---|---|---|---|---|

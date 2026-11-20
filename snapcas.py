@@ -51,7 +51,7 @@ EMU_HOME = os.path.join(ROOT, "out", "cache", "openmsx-home")
 NEXTOR_ZIP = ("https://github.com/Konamiman/Nextor/releases/download/v2.1.0/tools.zip",
               "5792ff3fe7ab684b8afd405cdd898e25f6efdb84ca1f2cb9ac1428cc848d924e")
 
-# What each point of check.py's report checks (INTERNALS.md, Check).
+# What each point of check.py's report checks (docs/internals/restorer-and-check.md, Check).
 POINTS = {1: "the restored machine equals the snapshot",
           2: "the game does not write to the tape service in page 3",
           3: "the machine does not reboot",

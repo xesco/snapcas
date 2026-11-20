@@ -1,4 +1,4 @@
-# Procedures of the capture (docs/INTERNALS.md, Capture). tools/capture.py puts
+# Procedures of the capture (docs/internals/capture.md, Capture). tools/capture.py puts
 # the game file's settings and memory.tcl before them, the settings and the Tcl
 # file of each patch kind that works in the capture after them
 # (tools/patches/), and then the start, safe step1.
@@ -117,7 +117,7 @@ proc screen_lines {} {
     join [lmap l [split [screen] \n] {expr {[string trim $l] eq "" ? [continue] : [string trim $l]}}] " | "
 }
 
-# ---- The patch kinds (INTERNALS.md, The tools' code) ----
+# ---- The patch kinds (docs/internals/patches.md, The tools' code) ----
 #
 # A patch kind that works in the capture adds a procedure to a hook's list:
 #   start       runs in step 3, before the load command
@@ -136,7 +136,7 @@ proc patch_line {side offset old new} {
 }
 # Stops the capture with a patch of the tape that a kind has found: its lines
 # go to newpatch.txt, and why to the log. capture.py adds the lines to the
-# tape's patches and runs the capture again on the patched tape (INTERNALS.md,
+# tape's patches and runs the capture again on the patched tape (docs/internals/patches.md,
 # Slot patches).
 proc stop_with_patch {lines why} {
     write_lines newpatch.txt $lines
@@ -152,7 +152,7 @@ proc stop_with_patch {lines why} {
 # the watchpoints, though it keeps the breakpoints. So moment_load puts ::st
 # back and sets the watchpoints again: the PSG's, and those on the slot
 # register and on FFFFh once step 4 has set them. Without them, a RAM page that
-# a game first selects after a rewind is not kept (INTERNALS.md, Capture, step
+# a game first selects after a rewind is not kept (docs/internals/capture.md, Capture, step
 # 5).
 proc moment_file {name} { file join $::S(home) savestates $::S(state)-$name.oms }
 proc moment_saved {name} { info exists ::run(moment,$name) }
@@ -173,7 +173,7 @@ proc moment_load {name} {
     if {$::run(slots_watched)} watch_slots
 }
 
-# ---- What the capture tracks (INTERNALS.md, Capture, steps 1 and 4) ----
+# ---- What the capture tracks (docs/internals/capture.md, Capture, steps 1 and 4) ----
 
 # The PSG register selected last, from port A0h, and the last value written to
 # register 15, from port A1h, which openMSX does not show.
@@ -295,7 +295,7 @@ proc turn_over {} {
 
 # The BIOS's reset routine. The log keeps a reset across a rewind, so that it
 # holds the resets of the seconds after the snapshot's moment, which the check
-# looks for (INTERNALS.md, Check, point 3). A reset during a key try follows the
+# looks for (docs/internals/restorer-and-check.md, Check, point 3). A reset during a key try follows the
 # machine instead, and goes with the try's rewind, because the restored game
 # gets no such key.
 proc on_reset {} {
@@ -309,7 +309,7 @@ proc side1_read {} {
     expr {$::st(tapion) > 0 && $::st(tapin) > 0 && $::st(pos) >= $::S(needed) - 7}
 }
 
-# ---- The steps (INTERNALS.md, Capture) ----
+# ---- The steps (docs/internals/capture.md, Capture) ----
 
 # 1. Watch the PSG's ports, boot, pass the boot menu, wait for BASIC's Ok.
 proc step1 {} {
@@ -544,7 +544,7 @@ proc watch_motor {name} {
 #    sub-ROM is under way in the slot of the game's RAM.
 #
 # With the tape service, the restorer gives page 0 of DOS's mapper's slot the
-# mapper's subslot, for T0 (INTERNALS.md, T0 and the sub-ROM in one slot). While
+# mapper's subslot, for T0 (docs/internals/service-and-resident.md, T0 and the sub-ROM in one slot). While
 # the BIOS calls the sub-ROM in that slot, the slot's subslot register has the
 # sub-ROM's subslot in page 0, and the call's return needs it there. That is so
 # in the sub-ROM's own code and in the main ROM's code that the sub-ROM calls.
@@ -677,7 +677,7 @@ proc take_snapshot {{pc {}}} {
     dict set state tapepos [hex 6 $::st(pos)]
     dict set state service $::st(service)
     # The player's position and side, for the non-standard blocks that the
-    # game has read by its own loader (INTERNALS.md, Tape files).
+    # game has read by its own loader (docs/internals/capture.md, Tape files).
     dict set state tapetime [format %.2f [cassetteplayer getpos]]
     dict set state tapeside [expr {$::st(side2in) ? 2 : 1}]
 

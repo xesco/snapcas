@@ -1,4 +1,4 @@
-# The check (docs/INTERNALS.md, Check), after memory.tcl's procedures, which it
+# The check (docs/internals/restorer-and-check.md, Check), after memory.tcl's procedures, which it
 # uses to read memory through the CPU's view. tools/check.py sets these:
 #   ::C(report)   the report's file
 #   ::C(restore)  the seconds that the restore may take, by the image's size
@@ -126,7 +126,7 @@ proc start_check {} {
     }
     # With the tape service, page 0's bits of the slot register, of DOS's
     # mapper's subslot register, and of SLTTBL, and mapper register FCh, can
-    # select T0 (INTERNALS.md, Restorer, step 1).
+    # select T0 (docs/internals/service-and-resident.md, Restorer, step 1).
     set ::p0mask [expr {$::C(service) ? 0xFC : 0xFF}]
     set jp [expr {$::tail(at) + $::tail(jp)}]
     # The slot register alone can match DOS's own, so the breakpoint also
@@ -302,7 +302,7 @@ proc write_rescall {} {
 }
 
 # Point 3: in the same 60 seconds the restored machine must not reboot
-# (INTERNALS.md, Check, point 3). A reboot shows itself as SNAPCAS.COM starting
+# (docs/internals/restorer-and-check.md, Check, point 3). A reboot shows itself as SNAPCAS.COM starting
 # again, when a reset has booted DOS and AUTOEXEC.BAT runs it, or as the MSX1
 # BIOS's boot screen, whose first line is "MSX  system", at a savestate. BASIC's
 # banner, which a game's restored screen can still hold, does not count. A reset
@@ -359,7 +359,7 @@ proc watch_rst38 {} {
     }
 }
 # Point 4: in the same 60 seconds the game must not stop at a BASIC error
-# (INTERNALS.md, Check, point 4). BASIC prints the message, with "in" and the line
+# (docs/internals/restorer-and-check.md, Check, point 4). BASIC prints the message, with "in" and the line
 # number in a program, and then Ok, in a text mode. The message counts only with
 # the Ok after it, so that a game's own words do not.
 set ::basic_errors {}
@@ -585,7 +585,7 @@ proc state_mask {name} {
         {^sub([0-3])$} {
             # When the worker's page does not select DOS's mapper's slot at
             # the snapshot, that page's bits of the slot's subslot register can
-            # differ (INTERNALS.md, Restorer, step 1).
+            # differ (docs/internals/restorer-and-check.md, Restorer, step 1).
             set ps [lindex $m 1]
             # The image selects the resident program's subslot in its entry's
             # page of its slot (build.py, call_resident).

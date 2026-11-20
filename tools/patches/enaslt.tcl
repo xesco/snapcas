@@ -1,4 +1,4 @@
-# The capture's ENASLT copy patch (docs/INTERNALS.md, The ENASLT copy patch).
+# The capture's ENASLT copy patch (docs/internals/patches.md, The ENASLT copy patch).
 # tools/patches/enaslt.py puts its setting before this file: ::enaslt holds
 # each form in the tape files, as {side offset old new}.
 

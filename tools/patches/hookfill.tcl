@@ -1,4 +1,4 @@
-# The capture's hook fill patch (docs/INTERNALS.md, The hook fill patch).
+# The capture's hook fill patch (docs/internals/patches.md, The hook fill patch).
 # tools/patches/hookfill.py puts its settings before this file:
 #   ::hookfill      each fill in the tape files that goes past FFC9h, as
 #                   {side offset bytes}, where bytes is its count as hex

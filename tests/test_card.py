@@ -1,5 +1,5 @@
 """snapcas.py sync, which copies a machine's images and SNAPCAS.COM to a card
-(docs/CLI.md, Sync a card, and docs/PLAN.md, step 26). The tests make the
+(docs/CLI.md, Sync a card, and docs/BUILD.md, step 26). The tests make the
 images and the card in folders of their own. Pure tier."""
 import os
 import unittest

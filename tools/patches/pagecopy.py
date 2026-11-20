@@ -1,4 +1,4 @@
-"""The page copy patch (docs/INTERNALS.md, The page copy patch): a loader's code
+"""The page copy patch (docs/internals/patches.md, The page copy patch): a loader's code
 that gives pages 0 and 1 the slots of pages 2 and 3, or page 1 the slot of page
 3, from the slot register's value. patches/pagecopy.tcl decides at step 3, by
 the slot map, whether the machine needs the patch. The kind works only in the

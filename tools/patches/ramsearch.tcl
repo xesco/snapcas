@@ -1,5 +1,5 @@
 # The capture's watch for a slot register write that cuts off the code that
-# made it (docs/INTERNALS.md, The RAM search patch). tools/patches/ramsearch.py
+# made it (docs/internals/patches.md, The RAM search patch). tools/patches/ramsearch.py
 # puts its settings before this file, which follows slots.tcl:
 #   ::ramsearch      the bytes of the loader's RAM search
 #   ::ramsearch_at   the offset of the patch in them

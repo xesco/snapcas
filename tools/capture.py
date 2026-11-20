@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Load a cassette game in openMSX and save its snapshot (docs/INTERNALS.md,
+"""Load a cassette game in openMSX and save its snapshot (docs/internals/capture.md,
 Capture).
 
 Usage: capture.py <game> <machine> --tapes <dir> [--capture <variant>]
@@ -44,7 +44,7 @@ def key_tcl(kind, value):
 def load_command(game, data):
     """The load command: the game file's load line, or else the type of the
     first block of the tape file's bytes, which must be a standard block then
-    (INTERNALS.md, Tape files). None when neither gives one."""
+    (docs/internals/capture.md, Tape files). None when neither gives one."""
     if game.load:
         return game.load
     blocks = tape.read(game.tape, data)
@@ -55,7 +55,7 @@ def load_command(game, data):
 
 def settings(game, machine, tape_path, data, snap, state, side2_path=None, side2=b""):
     """The Tcl settings. data and side2 are the tape files' bytes, of which
-    the capture uses the tape service's tapes (INTERNALS.md, Tape files). snap
+    the capture uses the tape service's tapes (docs/internals/service-and-resident.md, Tape files). snap
     is the snapshot's folder, and state starts the names of the capture's
     savestates."""
     keys = [(t, key_tcl(kind, value)) for t, kind, value in game.keys]
@@ -177,7 +177,7 @@ def capture(game_arg, machine_name, tapes_dir, variant=None):
     # by side. An earlier run with the same ID can have left some.
     state = f"snapcas-capture-{os.getpid()}"
     msx.remove_savestates(state)
-    # The patches of the tape that the capture finds (INTERNALS.md, Slot patches,
+    # The patches of the tape that the capture finds (docs/internals/patches.md, Slot patches,
     # The RAM search patch): each one stops the capture, which runs again on the
     # patched tape.
     found = []

@@ -1,4 +1,4 @@
-"""The games run of tools/games.py (docs/INTERNALS.md, The games run): its two
+"""The games run of tools/games.py (docs/internals/restorer-and-check.md, The games run): its two
 lists of failures, the three groups that it prints, its exit status and its
 cache. The tests give the game files and each game's result, so no game runs
 and no openMSX starts. Pure tier."""

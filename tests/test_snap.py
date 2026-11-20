@@ -1,7 +1,7 @@
 """snapcas.py snap on games: the command makes and checks an image, and the
 automatic fixes work on games that needed a game file's line by hand, without
-that line (docs/INTERNALS.md, Slot patches, The page copy patch and Without a
-part in page 3, and docs/PLAN.md, steps 9, 10 and 19). The patterns of the
+that line (docs/internals/patches.md, Slot patches, The page copy patch and Without a
+part in page 3, and docs/BUILD.md, steps 9, 10 and 19). The patterns of the
 patches are in tests/test_patches.py. Emulator tier."""
 import concurrent.futures
 import os

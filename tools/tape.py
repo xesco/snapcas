@@ -1,4 +1,4 @@
-"""The tape model (docs/INTERNALS.md, Tape files): a tape file's blocks, whatever
+"""The tape model (docs/internals/capture.md, Tape files): a tape file's blocks, whatever
 its format, and the tape service's tape that the capture and the build use.
 Also a game's tape files as the capture plays them, with the patch lines
 applied.
@@ -58,7 +58,7 @@ def service(blocks):
 
 def start_blocks(name, data, file):
     """The blocks of a tape file's bytes from the block of the first file named
-    file on, for the game file's start line (INTERNALS.md, A game later on the
+    file on, for the game file's start line (docs/internals/capture.md, A game later on the
     tape). Their offsets are in data, so file_offset gives a place in the whole
     file for an offset in the tape service's tape of start_copy's copy."""
     blocks = read(name, data)
@@ -93,7 +93,7 @@ def start_copy(name, data, file):
 def side2_start(side1_length):
     """Side 2's position after side 1 in the tape service: side 1 padded to
     a multiple of 8 bytes, by at least 1 byte, where TAPIN turns the tape over
-    (INTERNALS.md, Tape service)."""
+    (docs/internals/service-and-resident.md, Tape service)."""
     return side1_length + (-side1_length % 8 or 8)
 
 
@@ -134,7 +134,7 @@ def load_command(tape):
 
 def needed_end(tape):
     """The end of the last block that a load must read: blocks after it are
-    under 16 bytes or equal to a block before them (INTERNALS.md, Capture, step
+    under 16 bytes or equal to a block before them (docs/internals/capture.md, Capture, step
     5)."""
     end, seen = 0, set()
     for start, stop in spans(tape):
@@ -161,7 +161,7 @@ def file_offset(blocks, offset):
 def unread(blocks, seconds):
     """The non-standard blocks that hold bytes and end after seconds into
     the tape: the game reads them after the snapshot with its own loader, which
-    the tape service cannot serve (INTERNALS.md, Tape files). A block counts as
+    the tape service cannot serve (docs/internals/service-and-resident.md, Tape files). A block counts as
     read when the player has passed its end, with 0.1 seconds to spare."""
     return [b for b in blocks if not b.standard and b.data and b.end > seconds + 0.1]
 
@@ -198,7 +198,7 @@ def played(game, tapes_dir, captured=()):
     The game file's patch lines fit the downloaded files, so they come first.
     With a start line, side 1 is then the copy from that file on, and the
     capture's patches, captured, fit the file that it played, so they come last
-    (INTERNALS.md, A game later on the tape)."""
+    (docs/internals/capture.md, A game later on the tape)."""
     side1, side2 = patch_sides(game.patches, *read_files(game, tapes_dir))
     if game.start:
         side1 = start_copy(game.tape, side1, game.start)

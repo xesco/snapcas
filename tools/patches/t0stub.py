@@ -1,4 +1,4 @@
-"""The T0 stub patch (docs/INTERNALS.md, Scan): in the mode without a part in
+"""The T0 stub patch (docs/internals/patches.md, Scan): in the mode without a part in
 page 3, a stub of TAPION that selects the ROM in page 0 itself, and so reaches
 the ROM instead of T0.
 

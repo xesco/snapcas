@@ -1,5 +1,5 @@
 ; The places that service.asm, the restorer and build.py share: the tape
-; service's fixed places (docs/INTERNALS.md, Tape service), the tail's fields and
+; service's fixed places (docs/internals/service-and-resident.md, Tape service), the tail's fields and
 ; the image's layout (docs/FORMATS.md, Image). This file is their one source.
 ; service.asm exports them, and build.py reads them by name from SERVICE.BIN
 ; (docs/FORMATS.md, SERVICE.BIN), as it reads the service's other places, which
@@ -38,7 +38,7 @@ P3_CODE   equ E_STOP+1
 P3_FREE     equ 0FCC9h          ; its first byte
 P3_FREE_END equ 0FD88h          ; its last byte
 
-; The stacks of the calls of a machine's resident program (INTERNALS.md, The
+; The stacks of the calls of a machine's resident program (docs/internals/service-and-resident.md, The
 ; resident program's call), in bytes. The program switches to a stack of its
 ; own at entry (SX2RES 2.8+ uses 6 bytes below SP before switching), staying
 ; within 8 bytes below SP at its entry, and the call's return address takes 2
@@ -61,13 +61,13 @@ T0_END    equ 1B45h             ; the first byte after it
 
 ; The service's data, which tape.inc declares, starts each copy of the
 ; service: at 0000h of the code segment, and at T0_CODE in the mode without a
-; part in page 3 (INTERNALS.md, Without a part in page 3). The restorer writes
+; part in page 3 (docs/internals/service-and-resident.md, Without a part in page 3). The restorer writes
 ; these fields, and service.asm checks their places against tape.inc's.
 SEGS_AT   equ 14h               ; the table of segments in the data
 C_SEGS    equ SEGS_AT           ; restorer: the code segment, then the next tape segments
 SEGS_MAX  equ 64                ; so the tape service holds up to 1 MB
 C_MODE    equ C_SEGS+SEGS_MAX   ; restorer: 1 for the manual tape of /M, 0 for the
-                                ; automatic tape (INTERNALS.md, The manual tape)
+                                ; automatic tape (docs/internals/service-and-resident.md, The manual tape)
 T_SEGS    equ T0_CODE+SEGS_AT   ; restorer: the tape's segments
 T_SEGS_MAX equ 16               ; so the tape holds up to 256 KB
 T_PAGE    equ T_SEGS+T_SEGS_MAX ; the borrowed page's data, 6 bytes. Restorer:
@@ -131,7 +131,7 @@ FLAG_ROM_KEEP equ 1             ; bit 0: the game file's rom keep, so T0 does no
 FLAG_T0   equ 2                 ; bit 1: the tape service without a part in page 3
 FLAG_P0   equ 4                 ; bit 2: sub0 sets page 0's bits of page 3's
                                 ; subslot register around each call of the
-                                ; code segment (INTERNALS.md, Page 0 in another
+                                ; code segment (docs/internals/service-and-resident.md, Page 0 in another
                                 ; subslot of DOS's mapper's slot)
 ; A record's type.
 REC_MAPPER  equ 1               ; a RAM page in a mapper: slot ID, page, segment

@@ -1,4 +1,4 @@
-# The capture's subslot POKE patch (docs/INTERNALS.md, The subslot POKE patch).
+# The capture's subslot POKE patch (docs/internals/patches.md, The subslot POKE patch).
 # tools/patches/subpoke.py puts its setting before this file:
 #   ::subpoke  each POKE &HFFFF,&HAA or POKE -1,168 in the tape files, as
 #              {side offset kind value}, where offset is its value's, kind is

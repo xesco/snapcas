@@ -1,4 +1,4 @@
-"""tools/msx.py without openMSX (docs/INTERNALS.md, The tools' code): machine
+"""tools/msx.py without openMSX (docs/internals/capture.md, The tools' code): machine
 files, the DOS files' folders, the Tcl that it writes, a run's savestates, and
 what it makes of openMSX's end, which the test gives. Runs in openMSX are in
 tests/test_harness.py. Pure tier."""

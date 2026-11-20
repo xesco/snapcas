@@ -1,4 +1,4 @@
-"""The gate: what makes an image pass (docs/INTERNALS.md, Check). check.py
+"""The gate: what makes an image pass (docs/internals/restorer-and-check.md, Check). check.py
 passes an image only when its report holds all four points as passed, and it
 tells a check that fails from a run that broke. The tests give check.py the
 reports and the ends of openMSX, on a game whose snapshot they write, and

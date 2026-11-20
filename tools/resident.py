@@ -1,4 +1,4 @@
-"""Resident-program call planning and code emission for build.py (docs/INTERNALS.md,
+"""Resident-program call planning and code emission for build.py (docs/internals/service-and-resident.md,
 The resident program's call).
 
 Builds the image's calls to a machine's resident program (such as SX2RES on

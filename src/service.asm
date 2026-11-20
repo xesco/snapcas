@@ -68,7 +68,7 @@ tail_end:
 ; does. TAPION and TAPIN run in the code segment, through tramp in page 3,
 ; because page 0 changes under it. TAPIOF and STMOTR run in page 3 too, where
 ; the entries share them. After TAPIN's stub comes T0's own call of a routine
-; in its slot (INTERNALS.md, T0 and the sub-ROM in one slot). The rest of the
+; in its slot (docs/internals/service-and-resident.md, T0 and the sub-ROM in one slot). The rest of the
 ; range is free.
 
 t0_start:
@@ -230,7 +230,7 @@ t0_end:
 ; block, from P3_CODE to E_STACK. By default the code block follows the
 ; entries. A game file's service at can put it at another address in page 3,
 ; and build.py moves its addresses with the list that tools/relocs.py makes
-; (INTERNALS.md, Build).
+; (docs/internals/service-and-resident.md, Build).
 
 p3_start:
         disp E_ENTRY
@@ -261,7 +261,7 @@ p3_code:
         disp P3_CODE
 
 ; STMOTR and TAPIOF stop the manual tape, which waits for the player's key at
-; the next read (INTERNALS.md, The manual tape). STMOTR with A = 1 starts the
+; the next read (docs/internals/service-and-resident.md, The manual tape). STMOTR with A = 1 starts the
 ; motor and leaves the tape as it is. The automatic tape ignores E_STOP. They
 ; run here for the entries and for T0's stubs, with the caller's registers,
 ; stack and interrupts, as the BIOS's do: STMOTR changes only AF, and TAPIOF
@@ -382,7 +382,7 @@ code_start:
 T0MODE  equ 0
         include "tape.inc"
 
-; resc is the call of a machine's resident program (INTERNALS.md, The resident
+; resc is the call of a machine's resident program (docs/internals/service-and-resident.md, The resident
 ; program's call) for a game that takes the interrupt for a routine of its own.
 ; The game's vector goes to a wrapper in page 3, which build.py writes: it
 ; runs resc through e_run and jumps to the game's routine. resc runs on a
@@ -424,7 +424,7 @@ code_end:
 ; ---- T0 without a part in page 3, from 19DDh to 1B44h ----
 ;
 ; T0's data and routines, for a game whose page 3 has no room for the service
-; (INTERNALS.md, Without a part in page 3). The game reaches T0 through DOS's
+; (docs/internals/service-and-resident.md, Without a part in page 3). The game reaches T0 through DOS's
 ; mapper in page 0, where mapper register FCh holds T0, and build.py points the
 ; jump table's entries from 00E1h to 00F3h at the routines here.
 
@@ -434,7 +434,7 @@ t0m_start:
 T0MODE  equ 1
         include "tape.inc"
 ; T0 has no room for the manual tape, so the tape is automatic in this mode
-; (INTERNALS.md, The manual tape), and TAPIOF and STMOTR have nothing to stop.
+; (docs/internals/service-and-resident.md, The manual tape), and TAPIOF and STMOTR have nothing to stop.
 ; Each returns as the BIOS's routine does, as T0's stubs above.
 tapiof:                         ; TAPIOF and TAPOOF
 tapoof:
@@ -622,7 +622,7 @@ resbe:
         assert resbe-res3e = sub0-resbe
 
 ; sub0 is e_run's call of tramp for an image whose page 0 can be in another
-; subslot of the slot of page 3, which is DOS's mapper's (INTERNALS.md, Page 0
+; subslot of the slot of page 3, which is DOS's mapper's (docs/internals/service-and-resident.md, Page 0
 ; in another subslot of DOS's mapper's slot). There the slot register alone
 ; selects the game's subslot in page 0, the main ROM or other RAM, and not the
 ; mapper. build.py writes sub0 into zeros of the game's page 3, points e_run's

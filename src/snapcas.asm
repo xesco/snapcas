@@ -1,4 +1,4 @@
-; SNAPCAS.COM, the snapcas restorer (docs/INTERNALS.md, Restorer).
+; SNAPCAS.COM, the snapcas restorer (docs/internals/restorer-and-check.md, Restorer).
 ;
 ; SNAPCAS <GAME> restores <GAME>.SNP, the snapshot of a cassette game, and
 ; starts the game.
@@ -69,7 +69,7 @@ banner:
         call print
 banner_end:
         ; /M in the command line, its length at 0080h and its text after it,
-        ; asks for the manual tape (INTERNALS.md, The manual tape). It is read
+        ; asks for the manual tape (docs/internals/service-and-resident.md, The manual tape). It is read
         ; first, before a DOS call can use 0080h.
         ld hl,0080h
         ld b,(hl)
@@ -865,7 +865,7 @@ check_records:
 
 ; Returns Z when the image's entry code has sub0 (FLAG_P0, with the part in
 ; page 3) and the snapshot's page 3 is in DOS's mapper, whose slot's subslot
-; register sub0 then writes at FFFFh (INTERNALS.md, Page 0 in another subslot
+; register sub0 then writes at FFFFh (docs/internals/service-and-resident.md, Page 0 in another subslot
 ; of DOS's mapper's slot).
 sub0_on:
         ld a,(HDR+H_FLAGS)

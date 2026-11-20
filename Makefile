@@ -1,4 +1,4 @@
-# snapcas build and tests (docs/PLAN.md).
+# snapcas build and tests (docs/BUILD.md).
 #
 #   make        print this help
 #   make all    build bin/SNAPCAS.COM and bin/SERVICE.BIN
@@ -348,7 +348,7 @@ FULL ?=
 # leaves that out.
 FIX ?= 1
 
-# The run over every shipped game file on a machine (docs/INTERNALS.md, The games
+# The run over every shipped game file on a machine (docs/internals/capture.md, The games
 # run), apart from make test because it takes hours.
 games: bin/SNAPCAS.COM bin/SERVICE.BIN $(NEXTOR)/NEXTOR.SYS $(NEXTOR)/COMMAND2.COM $(FIRMWARE) $(HBF700P_NOEXP0) $(SX2_FIRMWARE)
 	OPENMSX_HOME=$(abspath $(EMU_HOME)) DOS_DIR=$(abspath $(DOS_DIR)) \

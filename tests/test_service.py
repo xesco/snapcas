@@ -1,4 +1,4 @@
-"""The tape service in restored games (docs/INTERNALS.md, Tape service, The
+"""The tape service in restored games (docs/internals/service-and-resident.md, Tape service, The
 manual tape and Without a part in page 3): games that load during play, each
 captured, built and checked on the PHC-28S and then played to its next load,
 the contracts of the service's entries, the manual tape of /M, the place of
@@ -176,7 +176,7 @@ PLAYS = {
 
 
 class Loads(unittest.TestCase):
-    """Computad and Gauntlet, which load during play (PLAN.md, step 5)."""
+    """Computad and Gauntlet, which load during play (docs/BUILD.md, step 5)."""
 
     @classmethod
     def setUpClass(cls):
@@ -260,7 +260,7 @@ class Stubs(unittest.TestCase):
                 self.assertGreater(values["pos"], values["pos0"], values)
 
 
-# Moonwalker, with the tape service in T0 (INTERNALS.md, Without a part in page
+# Moonwalker, with the tape service in T0 (docs/internals/service-and-resident.md, Without a part in page
 # 3): its game file, and the inputs from the intro to the main game's load. Its
 # loader's stub selects the ROM in page 0, so the scan patches it, and the
 # restorer writes the value that selects DOS's mapper there.
@@ -343,7 +343,7 @@ class BorrowedBySlot(unittest.TestCase):
         self.assertEqual(self.values["failed"], 0, self.values)
 
 
-# The contracts of the tape service's entries (INTERNALS.md, Tape service), from
+# The contracts of the tape service's entries (docs/internals/service-and-resident.md, Tape service), from
 # the BIOS's code: what each routine returns, and what it keeps. Each case is
 # the routine, the opcode that sets the interrupts at the call, AF at the call,
 # and what must hold after it: the carry flag, the interrupts, on, off or as
@@ -380,7 +380,7 @@ CONTRACT = [
 ]
 CONTRACT_BLOCKS = [bytes((32 * block + n) & 0xFF for n in range(32)) for block in range(4)]
 
-# The manual tape (INTERNALS.md, The manual tape): the cases, and the key that
+# The manual tape (docs/internals/service-and-resident.md, The manual tape): the cases, and the key that
 # the test gives each read that waits, by its case: RETURN plays on, and
 # CTRL+STOP ends the read with carry and leaves the tape stopped, where it was.
 # The tape is stopped at the snapshot, and TAPIOF stops it again: after 3 bytes
@@ -670,8 +670,8 @@ GUARDS = {
 
 
 class Guard(unittest.TestCase):
-    """The check's guard of the tape service's part of page 3 (INTERNALS.md,
-    Check, point 2, and PLAN.md, step 13), on a game that reads the tape and
+    """The check's guard of the tape service's part of page 3 (docs/internals/service-and-resident.md,
+    Check, point 2, and docs/BUILD.md, step 13), on a game that reads the tape and
     writes the part within the check's 60 seconds."""
 
     @classmethod
@@ -745,7 +745,7 @@ class Guard(unittest.TestCase):
 
 
 class TapeEnd(unittest.TestCase):
-    """7 Card Stud, as shipped (PLAN.md, step 13). Its snapshot is in the
+    """7 Card Stud, as shipped (docs/BUILD.md, step 13). Its snapshot is in the
     middle of its load. The restored game loads the rest of its tape through
     the tape service, and then keeps its own values in the service's part of
     page 3. Those writes do not count for point 2, because the service has
@@ -838,7 +838,7 @@ def build_part(name):
 
 class Parts(unittest.TestCase):
     """The place of the service's part of page 3 by the game file's lines
-    (PLAN.md, step 17)."""
+    (docs/BUILD.md, step 17)."""
 
     @classmethod
     def setUpClass(cls):
@@ -894,7 +894,7 @@ later 0.1 {{
 
 class SubRom(unittest.TestCase):
     """T0's calls of the sub-ROM on a machine that has the sub-ROM in the slot
-    of DOS's mapper (INTERNALS.md, T0 and the sub-ROM in one slot), on a game
+    of DOS's mapper (docs/internals/service-and-resident.md, T0 and the sub-ROM in one slot), on a game
     that calls the sub-ROM through the BIOS and then reads the tape, within
     the check's 60 seconds."""
 
@@ -929,7 +929,7 @@ class SubRom(unittest.TestCase):
 
 class SplitGuard(unittest.TestCase):
     """The check's guard of a part whose code block a game file's service at
-    puts apart (INTERNALS.md, Build), on the guard game: a write into the code
+    puts apart (docs/internals/service-and-resident.md, Build), on the guard game: a write into the code
     block fails point 2, and the service's own code there, which reads the
     tape and writes its scratch bytes, does not."""
 
@@ -960,7 +960,7 @@ class SplitGuard(unittest.TestCase):
 class SubRomSplit(SubRom):
     """The same on a part whose code block a game file's service at puts
     apart, so that T0's stubs and its call of the sub-ROM run the code block's
-    moved addresses (INTERNALS.md, Build)."""
+    moved addresses (docs/internals/service-and-resident.md, Build)."""
 
     NAME, LINES = "subrom-split", "service at FCE1 C480\n"
 

@@ -1,8 +1,8 @@
-# Procedures that the capture and the check share (docs/INTERNALS.md, The tools'
+# Procedures that the capture and the check share (docs/internals/restorer-and-check.md, The tools'
 # code): the CPU's view of memory with a slot selected, the read of VRAM, and
 # the machine's state as state.txt holds it.
 
-# The CPU's view of memory, after selecting a slot in a page (INTERNALS.md, RAM).
+# The CPU's view of memory, after selecting a slot in a page (docs/internals/capture.md, RAM).
 
 # EXPTBL at FCC1h: bit 7 of each slot's byte is set when it is expanded. The
 # capture reads it once, in step 2, because a game can overwrite page 3.

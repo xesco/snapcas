@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Make and check every shipped game file's image on a machine (docs/INTERNALS.md,
+"""Make and check every shipped game file's image on a machine (docs/internals/restorer-and-check.md,
 The games run).
 
 Usage: games.py <machine> [--dos <dir>] [--full] [--no-fix] [--workers <n>]
@@ -51,7 +51,7 @@ import pipeline  # noqa: E402
 GAMES = os.path.join(ROOT, "games")
 REPORTS = os.path.join(ROOT, "out", "games")
 # The game files that fail on a machine in openMSX itself, and those that fail
-# because of snapcas (PLAN.md, step 9).
+# because of snapcas (docs/BUILD.md, step 9).
 OPENMSX_FAILURES = os.path.join(ROOT, "tests", "openmsx-failures.txt")
 SNAPCAS_FAILURES = os.path.join(ROOT, "tests", "snapcas-failures.txt")
 

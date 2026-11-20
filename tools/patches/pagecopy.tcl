@@ -1,4 +1,4 @@
-# The capture's page copy patch (docs/INTERNALS.md, The page copy patch).
+# The capture's page copy patch (docs/internals/patches.md, The page copy patch).
 # tools/patches/pagecopy.py puts its setting before this file, which follows
 # slots.tcl: ::pagecopy holds each form in the tape files, as {side offset bytes
 # copy subslots sum value}, where bytes is the form's bytes as hex, copy is 23

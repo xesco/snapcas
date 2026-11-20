@@ -1,4 +1,4 @@
-"""The automatic patches (docs/INTERNALS.md, The tools' code): the changes that the
+"""The automatic patches (docs/internals/patches.md, The tools' code): the changes that the
 tools make to a game without a line in its game file, one module for each kind.
 
 Each kind has two functions. find(data, context) returns the kind's findings in
@@ -43,7 +43,7 @@ def patch(data, findings):
 def report(ram, unread):
     """scan.txt's text, from [(place, findings)] for the RAM pages and for the
     unread tape."""
-    lines = ["# The scan's findings (docs/INTERNALS.md, Scan), in patch line form.",
+    lines = ["# The scan's findings (docs/internals/patches.md, Scan), in patch line form.",
              "# In the RAM pages, patched where the line has new bytes after >, otherwise only listed:"]
     lines += [f.line(place) for place, findings in ram for f in findings]
     lines += ["# In the unread blocks, not patched: a patch line there must also fix",

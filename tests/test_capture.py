@@ -1,4 +1,4 @@
-"""The capture (docs/INTERNALS.md, Capture, Slot patches and The RAM search
+"""The capture (docs/internals/patches.md, Capture, Slot patches and The RAM search
 patch): the snapshots of single-load games, the capture's Tcl procedures in
 openMSX's C-BIOS machine, the images that build.py makes of captured
 snapshots, and a capture of a patched tape with two sides. Emulator tier."""
@@ -141,7 +141,7 @@ class SingleLoads(unittest.TestCase):
         self.assertEqual(ram.diff_files + ram.left_only + ram.right_only, [])
 
     def test_a_machine_whose_ram_the_loader_finds_gets_no_ram_search_patch(self):
-        # La Abadia del Crimen's loader has the RAM search (PLAN.md, step 14).
+        # La Abadia del Crimen's loader has the RAM search (docs/BUILD.md, step 14).
         # On the NMS 8250 the slot that it finds holds page 3's RAM, so no
         # write cuts off its code, and the tape stays as it is.
         self.assertEqual(support.read_tape("ABADIA.CAS").count(patches.ramsearch.SEARCH), 1)
@@ -331,7 +331,7 @@ later 0.1 {
 }
 """
 
-# Tcl for the watch of the RAM search (INTERNALS.md, The RAM search patch): a
+# Tcl for the watch of the RAM search (docs/internals/patches.md, The RAM search patch): a
 # write to the slot register, from code in page 3, that selects another slot
 # there, where the bytes after the code differ. The search occurs twice on side
 # 1 and once on side 2.
@@ -356,7 +356,7 @@ later 1 {
 """ % patches.ramsearch.SEARCH.hex()
 
 
-# Tcl for the interrupt slot patch (INTERNALS.md, The interrupt slot patch), on
+# Tcl for the interrupt slot patch (docs/internals/patches.md, The interrupt slot patch), on
 # an MSX2: a handler on each side of the tape.
 IRQSLOT = r"""
 set ::irqslot {{1 21 3a53d0} {2 5 3abecf}}
@@ -370,7 +370,7 @@ later 1 {
 """
 
 
-# Tcl for the subslot POKE patch (INTERNALS.md, The subslot POKE patch): a POKE
+# Tcl for the subslot POKE patch (docs/internals/patches.md, The subslot POKE patch): a POKE
 # of each kind on the tape. The C-BIOS machine's RAM is in a slot that is not
 # expanded, so the two procedures that read the slot give an expanded one:
 # first with BASIC's RAM in subslot 2, which the POKE expects, and then in
@@ -406,7 +406,7 @@ later 1 {
 """
 
 
-# Tcl for the trampoline patch (INTERNALS.md, The trampoline patch): a builder
+# Tcl for the trampoline patch (docs/internals/patches.md, The trampoline patch): a builder
 # on each side of the tape. The C-BIOS machine's main ROM is in slot 0, which is
 # not expanded, and the tape keeps its builders. With an expanded slot 0 and
 # BASIC's page 3 in slot 3 the tape keeps them too. With BASIC's RAM in slot
@@ -511,7 +511,7 @@ class Procedures(unittest.TestCase):
 
     def test_the_ram_search_is_patched_at_each_copy_on_the_tape(self):
         # Made in Spain's tape holds the search in each of its loaders
-        # (PLAN.md, step 14): the capture stops with a patch of every copy.
+        # (docs/BUILD.md, step 14): the capture stops with a patch of every copy.
         at = patches.ramsearch.AT
         self.assertEqual(self.read("ramsearch", "newpatch.txt").splitlines(),
                          [f"patch side1:{16 + at:X} CB FF > 00 00", f"patch side1:{16 + 8 + 100 + at:X} CB FF > 00 00",
@@ -728,7 +728,7 @@ class PatchedTape(unittest.TestCase):
 
     def test_the_capture_turns_the_tape_over(self):
         # The game reads on past side 1's end, so side 2 goes in, and the
-        # tape position goes on in side 2 (INTERNALS.md, Capture, step 4).
+        # tape position goes on in side 2 (docs/internals/capture.md, Capture, step 4).
         support.assert_passes(self, self.restored)
         self.assertIn("side 2 inserted", self.restored.read("snap/log.txt"))
         side2_start = tape.side2_start(len(support.read_tape("SOOTLAND.CAS")))

@@ -1,4 +1,4 @@
-"""The hook fill patch (docs/INTERNALS.md, The hook fill patch): a loader's fill
+"""The hook fill patch (docs/internals/patches.md, The hook fill patch): a loader's fill
 of the BIOS's hooks with RET that goes on past them, over an MSX2's copies of
 VDP registers 8 to 23. patches/hookfill.tcl decides at step 3 whether the
 machine needs the patch. The kind works only in the capture, so its find()

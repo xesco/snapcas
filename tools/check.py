@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a game's restorer in openMSX and check the restore (docs/INTERNALS.md,
+"""Run a game's restorer in openMSX and check the restore (docs/internals/restorer-and-check.md,
 Check).
 
 Usage: check.py <game> <machine> --dos <dir>
@@ -40,7 +40,7 @@ READ_RATE = 2048
 
 
 def read_facts(out):
-    """build.txt's facts (INTERNALS.md, Check), under their names: the service
+    """build.txt's facts (docs/internals/service-and-resident.md, Check), under their names: the service
     flag, the tail's address and fields, the area that the service's part of
     page 3 takes by default, the patched ranges, and the tape service's part,
     its code block when a game file puts it apart, moved part, tape positions'
@@ -63,7 +63,7 @@ def read_facts(out):
 
 def capture_reset(snapshot):
     """The seconds from the snapshot to the first reset that the capture's log
-    holds after it, or "" (INTERNALS.md, Check, point 3). The capture goes on
+    holds after it, or "" (docs/internals/restorer-and-check.md, Check, point 3). The capture goes on
     for 29 seconds after the moment that it saves for the snapshot, so the log
     holds the resets of those seconds. A snapshot at a TAPION call's entry is
     earlier than that moment, so a reset can come later after it: one that

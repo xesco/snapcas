@@ -1,4 +1,4 @@
-;; The tape service's data and routines (INTERNALS.md, Tape service), which
+;; The tape service's data and routines (docs/internals/service-and-resident.md, Tape service), which
 ;; service.asm assembles twice: in the code segment, which runs in page 0 and
 ;; reads the tape through the reader in page 3, and in T0 for the mode without
 ;; a part in page 3 (T0MODE), which reads the tape through a borrowed page 1 or
@@ -19,7 +19,7 @@ D_HEADER: db 1Fh,0A6h,0DEh,0BAh,0CCh,13h,7Dh,74h  ; the CAS header (FORMATS.md, 
 ; restorer: the tape's segments in order, the code segment first.
         if T0MODE
 D_SEGS:   ds T_SEGS_MAX,0
-; The borrowed page (INTERNALS.md, Without a part in page 3). next_byte reads
+; The borrowed page (docs/internals/service-and-resident.md, Without a part in page 3). next_byte reads
 ; these 6 bytes in this order.
 D_PAGE:   db 0          ; the game's slot register while TAPIN borrows the page
 D_PAGE_MASK: db 0       ; the slot register's mask that clears the page's bits
@@ -30,7 +30,7 @@ D_PAGE_SEG:  db 0       ; the game's segment in the page
         else
 D_SEGS:   ds SEGS_MAX,0
 D_MODE:   db 0          ; restorer: 1 for the manual tape of /M, 0 for the
-                        ; automatic tape (INTERNALS.md, The manual tape)
+                        ; automatic tape (docs/internals/service-and-resident.md, The manual tape)
         endif
 ; The flash's data (mark).
 D_BORDER: dw 0          ; where the game's VDP register 7 is: RG7SAV or D_VDP7
@@ -266,7 +266,7 @@ next_byte:
 ; shows only the border. It then writes the game's registers 7 and 1 again.
 ; The VDP's registers cannot be read, so D_BORDER and D_SCREEN point to the
 ; game's values: RG7SAV and RG1SAV, or D_VDP7 and D_VDP1 for a game that does
-; not keep them (INTERNALS.md, Tape service).
+; not keep them (docs/internals/service-and-resident.md, Tape service).
 mark:
         in a,(99h)              ; also resets the VDP's register latch
         ld hl,(D_SCREEN)
@@ -406,7 +406,7 @@ lt24:
 
         if !T0MODE
 ; The manual tape stops at the last side's end, and at side 1's end until
-; RETURN goes on to side 2 (INTERNALS.md, The manual tape).
+; RETURN goes on to side 2 (docs/internals/service-and-resident.md, The manual tape).
 wrap_manual:
         ld de,D_TOTAL
         call on_side1.pos

@@ -1,4 +1,4 @@
-"""The subslot POKE patch (docs/INTERNALS.md, The subslot POKE patch): a BASIC
+"""The subslot POKE patch (docs/internals/patches.md, The subslot POKE patch): a BASIC
 program's POKE &HFFFF,&HAA, which selects subslot 2 in every page of page 3's
 slot, or POKE -1,168, which selects it in pages 1 to 3. patches/subpoke.tcl
 decides at step 3 whether the machine needs the patch. The kind works only in

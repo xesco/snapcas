@@ -1,4 +1,4 @@
-"""The reader of CAS files (docs/FORMATS.md, CAS data, and docs/INTERNALS.md,
+"""The reader of CAS files (docs/FORMATS.md, CAS data, and docs/internals/capture.md,
 Tape files).
 
 A CAS file is a sequence of blocks, each after the 8-byte header, and every

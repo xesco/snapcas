@@ -1,5 +1,5 @@
 """tools/pipeline.py: the steps of one game's image on one machine, the trials
-of the capture variants, and their result (docs/INTERNALS.md, The tools'
+of the capture variants, and their result (docs/internals/capture.md, The tools'
 code). The tests give the steps' ends, or openMSX's, and start no openMSX.
 Pure tier."""
 import json
@@ -22,7 +22,7 @@ PASSES = "point 1: pass\npoint 2: pass\npoint 3: pass\npoint 4: pass\n"
 
 class Pipeline(unittest.TestCase):
     """pipeline.py's result, from steps that the test gives, without a run
-    (INTERNALS.md, The tools' code)."""
+    (docs/internals/capture.md, The tools' code)."""
 
     def result(self, name, status, error="", broke=False, output=""):
         return pipeline.result(pipeline.Step(name, status, error, broke, output))

@@ -1,254 +1,135 @@
 # snapcas
 
-`snapcas` lets you play tape games on your MSX without a tape player. On your
-computer, it loads a CAS file in `openMSX`, set up like your own machine, and saves
-the game's memory in a single `.SNP` file. You copy that file to a disk or SD card.
-Then you run `SNAPCAS.COM` on the MSX, and the game starts.
+Play MSX cassette games straight from a disk or SD card—no tape deck needed. `snapcas` loads a `.CAS` tape inside `openMSX` configured to match your real MSX, snapshots the running game into a single `.SNP` image, and restores it on real hardware with `SNAPCAS.COM`.
 
-`snapcas` knows 1,544 games and 13 configurations, each an MSX model with its
-cartridges, and you can add your own. It does not hold the CAS files. It downloads
-them from [File-Hunter](https://download.file-hunter.com) when you make the `.SNP`
-file.
+It ships definitions for **1,544 games** across **13 MSX configurations**, and works with your own `.CAS` files too. Tape files are not stored in this repository; `snapcas` downloads them on demand from [File-Hunter](https://download.file-hunter.com).
 
-## Why another tool
+## How it works
 
-I wrote `snapcas` because most of the games I like did not work with what was available.
-A tool that plays a CAS file as it is, depends on the game's own loader, and many
-loaders expect one machine's memory layout, one slot order, or no disk interface.
+Cassette loaders frequently break on modern MSX setups because cartridge slot order, RAM location, or disk interfaces differ from a stock 1980s machine. `snapcas` solves this at build time:
 
-`snapcas` handles those games in these ways:
-
-- It runs the loader in `openMSX`, set up like your MSX, so the loader sees your
-  slots and your RAM.
-- It patches a game for your machine when its loader still fails, with patch lines
-  that the project keeps for each game and machine.
-- It has a tape service, so games that load from the tape while you play, such as
-  the next level, work without a tape player.
-- It supports games on more than one tape or side. You can rewind the tape and
-  flip it from the keyboard, for a game that says "rewind the tape and press a
-  key".
-- It checks each image in `openMSX` before you copy it to your MSX.
+- **Hardware-accurate capture:** Runs each loader in `openMSX` with your exact MSX model, RAM layout, and cartridges, applying per-game and per-machine patches when needed.
+- **Built-in virtual tape:** Packs any remaining tape data (including Side B) into the `.SNP` file so multi-load games keep loading levels from RAM.
+- **Keyboard tape control:** Rewind, flip sides, or step through loads manually using MSX keys.
+- **Automated check:** Restores every image in `openMSX` and verifies state, memory safety, stability, and BASIC output before writing the final `.SNP`.
 
 ## Requirements
 
-You need three things:
+- **MSX hardware:** An MSX1, MSX2, or MSX2+ with a memory mapper and a disk/SD interface running Nextor, MSX-DOS 2, or MSX-DOS 1.
+- **Host computer:** macOS, Linux, or Windows with Python 3 (standard library only) and [openMSX](https://openmsx.org).
+- **System ROMs:** Your MSX model's BIOS ROMs installed in `openMSX`.
 
-- An MSX with a memory mapper and a disk.
-- A computer with Python 3 and `openMSX`.
-- The system ROMs of your MSX, installed in `openMSX`.
+## Quickstart with an AI agent
 
-## Ask an AI
+Using an AI coding agent? Clone the repository and prompt it to run the matching workflow in [AGENTS.md](AGENTS.md):
 
-An AI coding agent, such as Claude Code, can do the steps of this page for you.
-Clone the repository, open the `snapcas` folder in the agent, and say what you want
-to play:
-
-```
+```sh
 git clone https://github.com/xesco/snapcas.git
 ```
 
-```
-> I want to play Gauntlet on my MSX. Follow "Guide a user" in AGENTS.md.
-```
+- **Play a shipped game:**
+  ```text
+  I want to play Gauntlet on my MSX. Follow "Guide a user" in AGENTS.md.
+  ```
+- **Play your own `.CAS` file:**
+  ```text
+  I want to play ~/Downloads/mygame.cas on my MSX. Follow "Guide a user" in AGENTS.md.
+  ```
+- **Add a new MSX configuration** (slot order, boot menus, and capture variants can be tricky—the agent inspects `openMSX`'s machine XML, creates the machine file and variants, and verifies them):
+  ```text
+  Add my MSX: Toshiba HX-10 (64 KB) with a Carnivore2 in slot 1. Follow "Add a machine" in AGENTS.md.
+  ```
+- **Fix a game that fails `--check` or fails on your real MSX:**
+  ```text
+  Gauntlet fails --check on hb75p-carnivore2. Follow "Fix a game that fails" in AGENTS.md.
+  ```
+  ```text
+  Gauntlet passed --check, but freezes on my real MSX after pressing Space. Follow "Fix a game that fails on the MSX" in AGENTS.md.
+  ```
 
-The agent asks you what it needs to know, such as your MSX's model and its
-cartridges. Then it makes the game's `.SNP` file, copies it to your MSX's card, and
-gives you the commands to type on the MSX.
+## Quickstart from the command line
 
-For a game that `snapcas` does not know, give the agent your own CAS file instead
-of a game's name:
+This walkthrough builds *Gauntlet* for a Sanyo PHC-28S (`phc28s-ram64k-carnivore2`) and launches it on hardware. On Windows, use `py snapcas.py` instead of `./snapcas.py`.
 
-```
-> I want to play the CAS file ~/Downloads/mygame.cas on my MSX. Follow "Guide a
-  user" in AGENTS.md.
-```
+1. **Install `snapcas`** — clone the repo or download a release zip (which includes prebuilt `bin/SNAPCAS.COM` and `bin/SERVICE.BIN`) from the [latest release](https://github.com/xesco/snapcas/releases/latest):
 
-The rest of this page gives the same steps for you to do instead of the agent.
+   ```sh
+   git clone https://github.com/xesco/snapcas.git
+   cd snapcas
+   ```
 
-## How to play a game
+2. **Find your game and machine:**
 
-This example makes the `.SNP` file of Gauntlet for a Sanyo PHC-28S and starts the
-game on that MSX.
+   ```sh
+   ./snapcas.py list gauntlet
+   ./snapcas.py machines
+   ```
 
-### Get snapcas
+   If your exact setup is missing, see [Adding a machine](docs/MACHINES.md#adding-a-machine). Some machines also need a one-time `make firmware` step ([Firmware and ROMs](docs/CLI.md#firmware-and-roms)).
 
-```
-git clone https://github.com/xesco/snapcas.git
-cd snapcas
-```
+3. **Build and check the image:**
 
-Or download `snapcas-<version>.zip` from the
-[latest release](https://github.com/xesco/snapcas/releases/latest) and unzip it. The
-release also holds `SNAPCAS.COM` on its own.
+   ```sh
+   ./snapcas.py snap gauntlet phc28s-ram64k-carnivore2 --check
+   ```
 
-### Find the game
+   `snap` fetches missing tapes from File-Hunter into `downloads/`, captures and builds `images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`, and runs a 4-point check in `openMSX`. All four `check` lines should print `pass`.
 
-```
-./snapcas.py list gauntlet
-```
+   > [!NOTE]
+   > File-Hunter is community-run. Download only the games you intend to play, one at a time.
 
-The command shows the game's name, `GAUNTLET`.
+4. **Sync to your SD card:**
 
-### Find your MSX
+   ```sh
+   ./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
+   ```
 
-```
-./snapcas.py machines
-```
+   `sync` copies `SNAPCAS.COM` into `BIN/` and organizes images under `SNAPCAS/<letter>/` (`0-9` for leading digits), verifying every copy byte-for-byte.
 
-If your MSX is not in the list, add it first. An AI coding agent can add it for
-you. Open the `snapcas` folder in the agent, and tell it your MSX's model and
-what is in each cartridge slot:
+5. **Run on your MSX:**
 
-```
-> Add my MSX to snapcas: a Toshiba HX-10 with a Carnivore2 in slot 1. Follow
-  steps 1 to 5 of "Add a machine" in AGENTS.md.
-```
+   ```text
+   CD \SNAPCAS\G
+   \BIN\SNAPCAS GAUNTLET
+   ```
 
-Or [open an issue](https://github.com/xesco/snapcas/issues) with your MSX's model
-and what is in each cartridge slot. I will add support for your machine and patch
-all the needed games for you.
+   For multi-load games, see [Tape keys](docs/PLAYING.md#tape-keys). If anything misbehaves on real hardware, see [Troubleshooting](docs/PLAYING.md#troubleshooting).
 
-### Make the game's `.SNP` file
+## Using your own CAS files
 
-```
-./snapcas.py snap gauntlet phc28s-ram64k-carnivore2 --check
-```
+Drop your tape file(s) and a one-line `game.txt` into `custom/<GAME>/` ([custom/README.md](custom/README.md)), then build and sync as usual:
 
-Or for the machine that the agent added:
-
-```
-./snapcas.py snap gauntlet hx10-carnivore2 --check
-```
-
-The command downloads the game's tape from
-[File-Hunter](https://download.file-hunter.com) and makes
-`images/phc28s-ram64k-carnivore2/GAUNTLET/GAUNTLET.SNP`. The `--check` option
-also tests the file in `openMSX`. The command prints four lines that start with
-`check`. If all four say `pass`, the game works.
-
-> [!NOTE]
-> File-Hunter is one person's site. Download only the games that you play, one at
-> a time.
-
-### Fix a game that fails
-
-You need this step only if a game fails. An AI coding agent can find the fix for
-you.
-
-If a `check` line says `fail`, or if the command stops with an error, the game needs
-a fix for your MSX:
-
-```
-> Gauntlet fails on phc28s-ram64k-carnivore2. Fix it: follow steps 1 to 4 of
-  "Fix a game that fails" in AGENTS.md. Then run snap with --check again.
-```
-
-If all four `check` lines say `pass` and the game still fails on the MSX, the check
-cannot see it, because it does not play the game. Tell the agent what the screen
-shows when the game fails, and what you pressed:
-
-```
-> Gauntlet hangs on my phc28s-ram64k-carnivore2. The screen shows the title and
-  then stops. Fix it: follow "Fix a game that fails on the MSX" in AGENTS.md. Then
-  run snap with --check again.
-```
-
-### Copy the game to the card
-
-Once the game works, put the MSX's card in your computer and copy the game to it.
-In this example, `/Volumes/MSX` is the card's folder on your computer:
-
-```
+```sh
+./snapcas.py snap custom/MYGAME phc28s-ram64k-carnivore2 --check
 ./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
 ```
 
-The command puts `SNAPCAS.COM` in the card's `BIN` folder. It puts each game in
-the `SNAPCAS` folder, in a folder for the first letter of the game's name: `A` to
-`Z`, or `0-9` for a name that starts with a digit.
+Custom games sync to `\SNAPCAS\CUSTOM`:
 
-### Start the game on the MSX
-
-Put the card back in the MSX. On the MSX, go to the folder of the game's first
-letter and start the game:
-
-```
-CD \SNAPCAS\G
-\BIN\SNAPCAS GAUNTLET
-```
-
-> [!TIP]
-> While you play, three keys control the tape. You need them only for a game that
-> loads its levels from the tape ([Tape keys](docs/PLAYING.md#tape-keys)).
-
-## Add a custom game
-
-If you want to play your own CAS file, you can add the game to the project.
-
-### Make the image of your own game
-
-Ask an AI coding agent to add the game. The agent writes the game's `game.txt`
-file, which tells `snapcas` how to load the game, and makes the game's `.SNP`
-file for your machine:
-
-```
-> Add the CAS file ~/Downloads/mygame.cas to snapcas and make its image for
-  phc28s-ram64k-carnivore2. Follow steps 1 to 4 of "Add a game" in AGENTS.md.
-```
-
-### Copy your games to the card
-
-```
-./snapcas.py sync phc28s-ram64k-carnivore2 /Volumes/MSX
-```
-
-### Start your game on the MSX
-
-On the MSX, your own games are in the folder `\SNAPCAS\CUSTOM`. Go to that
-folder and start the game. The agent tells you the game's name, which is `MYGAME`
-in this example:
-
-```
+```text
 CD \SNAPCAS\CUSTOM
 \BIN\SNAPCAS MYGAME
 ```
 
-## Learn more
+## Documentation
 
-### Use snapcas
+### Users
+- [Playing on the MSX](docs/PLAYING.md) — launching images, tape keys, `/M` manual mode, and hardware troubleshooting
+- [CLI Reference](docs/CLI.md) — `snapcas.py` commands, flags, environment variables, firmware setup, and exit codes
+- [Supported Machines](docs/MACHINES.md) — all 13 shipped MSX setups, SX-2 configuration, and requesting or adding a machine
+- Folders: [custom/](custom/README.md), [dos/](dos/README.md), [downloads/](downloads/README.md), [images/](images/README.md)
 
-- [Playing a game](docs/PLAYING.md): what the MSX needs, and the keys that control
-  the tape while you play.
-- [The `snapcas` command](docs/CLI.md): every `snapcas.py` command and its options.
-- [Supported machines](docs/MACHINES.md): the MSX configurations that `snapcas`
-  supports, and how to ask for another.
-- [Your own games](custom/README.md): how to play a CAS file that `snapcas` does
-  not know.
-- [DOS system files](dos/README.md): the files that `--check` needs.
-- [openMSX](https://openmsx.org): the emulator, and how to install your MSX's
-  system ROMs in it.
+### Contributors & AI Agents
+- [AGENTS.md](AGENTS.md) — operational runbook for guiding users, adding machines/games, and debugging failures
+- [Machine & Game Files](docs/FILES.md) — schema reference for `machines/*.txt` and `games/<GAME>/*.txt`
+- [Build & Test](docs/BUILD.md) — developer setup, `make` targets, test tiers, and known-failure lists
 
-### Add a machine or a game
-
-- [Adding a machine](AGENTS.md#add-a-machine): the steps to add your MSX by hand.
-- [Adding a game](AGENTS.md#add-a-game): the steps to add your own game by hand.
-- [Fixing a game](AGENTS.md#fix-a-game-that-fails): the steps to fix a game by hand.
-- [Machine and game files](docs/FILES.md): every line of a machine file and of a
-  game file.
-
-### How it works
-
-- [The `snapcas` design](docs/DESIGN.md): what each part does and why.
-- [Internals](docs/INTERNALS.md): how each part works, step by step.
-- [Formats](docs/FORMATS.md): the files and memory layouts, byte by byte.
-- [Notes](docs/NOTES.md): the games and findings behind each rule.
-
-### Build and test
-
-- [Build and test](docs/BUILD.md): the folders, and the `make` commands that build
-  and test `snapcas`.
-- [The `snapcas` plan](docs/PLAN.md): the steps that built `snapcas`, and their
-  tests.
+### Architecture & Internals
+- [Design Overview](docs/DESIGN.md) — architecture, pipeline overview, design decisions, and limits
+- [Binary & File Formats](docs/FORMATS.md) — `.SNP` image layout, tail, port writes, `SERVICE.BIN`, and CAS/TSX
+- [Hardware & Game Notes](docs/NOTES.md) — MSX quirks and game case studies behind the rules
+- Internals: [Capture](docs/internals/capture.md) · [Automatic Patches](docs/internals/patches.md) · [Tape Service & Resident Calls](docs/internals/service-and-resident.md) · [Restorer & Check](docs/internals/restorer-and-check.md)
 
 ## License
 
-`snapcas` is under the [MIT License](LICENSE). The license covers the code, and it does not cover the games, the system ROMs, or the DOS files, which this repository does not hold.
+Released under the [MIT License](LICENSE). The license covers this project's code only; games, system ROMs, and DOS files are not included.

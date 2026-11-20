@@ -1,4 +1,4 @@
-# Procedures that every openMSX run gets (docs/INTERNALS.md, The tools' code).
+# Procedures that every openMSX run gets (docs/internals/capture.md, The tools' code).
 # tools/msx.py puts them before each script.
 
 # ::run holds a run's state. ::run(phase) names what the script does now: boot

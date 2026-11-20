@@ -1,5 +1,5 @@
 ; A test game for the check's guard of the tape service's part of page 3
-; (INTERNALS.md, Check, point 2). tests/test_service.py writes this binary to a
+; (docs/internals/restorer-and-check.md, Check, point 2). tests/test_service.py writes this binary to a
 ; CAS file, after it has filled in what the game does, with a block of 32 bytes
 ; after it on side 1, or as side 2.
 ;

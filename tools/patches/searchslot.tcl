@@ -1,4 +1,4 @@
-# The capture's search slot patch (docs/INTERNALS.md, The search slot patch).
+# The capture's search slot patch (docs/internals/patches.md, The search slot patch).
 # tools/patches/searchslot.py puts its settings before this file: ::searchslot
 # holds each search's end in the tape files, as {side offset}, and
 # ::searchslot_old and ::searchslot_new the bytes that the patch replaces and

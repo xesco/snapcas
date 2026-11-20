@@ -1,5 +1,5 @@
 """The harness: openMSX as tools/msx.py runs it, with the prelude's procedures
-(docs/INTERNALS.md, The tools' code, and docs/PLAN.md, step 1). The runs are
+(docs/internals/capture.md, The tools' code, and docs/BUILD.md, step 1). The runs are
 in openMSX's C-BIOS machine, which needs no system ROMs: an error of a script
 must end openMSX and reach the caller, and never leave it waiting. Emulator
 tier."""
@@ -62,7 +62,7 @@ class Run(unittest.TestCase):
 
 
 class Setup(unittest.TestCase):
-    """The tests' own setup (docs/PLAN.md, Test setup)."""
+    """The tests' own setup (docs/BUILD.md, Test setup)."""
 
     def test_the_makefile_lists_each_tape_of_the_tests(self):
         with open(os.path.join(support.ROOT, "Makefile")) as f:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Runs the tests (docs/PLAN.md, Test setup) in parallel, for make test and
+"""Runs the tests (docs/BUILD.md, Test setup) in parallel, for make test and
 make unit: each test class in a process of its own, or a whole module when it
 has setUpModule, so that its setup runs once. Most of the time goes to openMSX,
 so the units overlap well.

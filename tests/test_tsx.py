@@ -1,5 +1,5 @@
-"""TSX tape files of the collection (docs/INTERNALS.md, Tape files and A game
-later on the tape, and docs/PLAN.md, step 15): the reader's times against
+"""TSX tape files of the collection (docs/internals/capture.md, Tape files and A game
+later on the tape, and docs/BUILD.md, step 15): the reader's times against
 openMSX's, and games captured from TSX files, with turbo blocks, at another
 speed, patched, and from a later file of a CAS tape. The readers on bytes that
 a test writes are in tests/test_tape.py. Emulator tier."""

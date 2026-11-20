@@ -1,4 +1,4 @@
-; A test game for T0's calls of the sub-ROM (INTERNALS.md, T0 and the
+; A test game for T0's calls of the sub-ROM (docs/internals/service-and-resident.md, T0 and the
 ; sub-ROM in one slot). tests/test_service.py writes this binary to a CAS file,
 ; with a block of 32 bytes after it on side 1.
 ;
@@ -9,7 +9,7 @@
 ; once through EXTROM. Last it reads 8 bytes of the block through T0's jump
 ; table, and compares them with the bytes 1 to 8. It reaches the tape's entries
 ; through a computed address, so that the scan finds no call to patch
-; (INTERNALS.md, Scan). The byte at result is 1 when the bytes are right, 2
+; (docs/internals/service-and-resident.md, Scan). The byte at result is 1 when the bytes are right, 2
 ; when a tape routine returns carry or a byte differs, and 0 until then.
 
 CHGMOD  equ 005Fh       ; MSX Red Book, chapter 4: sets the screen mode in A

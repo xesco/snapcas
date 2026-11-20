@@ -11,7 +11,7 @@ capture would type, and RUN after a CLOAD once the tape has played. It plays
 the tape as it is, from its start, without the game file's patch lines, keys
 or side 2, so a game that needs them stops where its tape alone stops. The
 screen goes to plain.txt in the game's work folder. A game that fails here as
-it fails with snapcas fails in openMSX itself (PLAN.md, step 9).
+it fails with snapcas fails in openMSX itself (docs/BUILD.md, step 9).
 
 Exit status: 0 when the screen was read, 1 for an error in the input files,
 2 when openMSX fails or stops before the screen.

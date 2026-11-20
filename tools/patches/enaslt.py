@@ -1,4 +1,4 @@
-"""The ENASLT copy patch (docs/INTERNALS.md, The ENASLT copy patch): a loader's
+"""The ENASLT copy patch (docs/internals/patches.md, The ENASLT copy patch): a loader's
 copy of the BIOS's ENASLT that writes the subslot register with AND B, the old
 slot register, where the BIOS has AND H, the mask of the other pages, and the
 same loaders' selection of BASIC's ROM in page 1 by EXPTBL's entry for slot 1.

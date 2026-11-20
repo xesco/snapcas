@@ -1,4 +1,4 @@
-"""The automatic patches of tools/patches/ (docs/INTERNALS.md, The tools'
+"""The automatic patches of tools/patches/ (docs/internals/patches.md, The tools'
 code, Scan, Slot patches, The RAM search patch, The page copy patch, The
 search slot patch, The interrupt slot patch, The subslot POKE patch, The hook fill patch and The
 trampoline patch): each
@@ -147,7 +147,7 @@ class T0Stub(unittest.TestCase):
 
 
 class RamSearch(unittest.TestCase):
-    """The RAM search patch (docs/PLAN.md, step 14). The capture's watch
+    """The RAM search patch (docs/BUILD.md, step 14). The capture's watch
     patches each copy of the search on the tape, in tests/test_capture.py."""
 
     def test_the_patch_writes_two_nops_over_the_set_of_bit_7(self):
@@ -258,7 +258,7 @@ HANDLER = bytes.fromhex("F3 F5 E5 DD E5 3A 53 D0 F5 3A 09 B0 D3 A8 32 53 D0 2A 1
 
 
 class IrqSlot(unittest.TestCase):
-    """The interrupt slot patch (INTERNALS.md, The interrupt slot patch). The
+    """The interrupt slot patch (docs/internals/patches.md, The interrupt slot patch). The
     capture's decision by the machine is in tests/test_capture.py."""
 
     def test_a_handler_is_found_at_its_read_of_the_copy(self):
@@ -294,7 +294,7 @@ if __name__ == "__main__":
 
 
 class SubPoke(unittest.TestCase):
-    """The subslot POKE patch (INTERNALS.md, The subslot POKE patch). The
+    """The subslot POKE patch (docs/internals/patches.md, The subslot POKE patch). The
     capture's decision by the machine is in tests/test_capture.py."""
 
     def test_a_poke_in_a_program_saved_as_text_is_found_at_its_value(self):
@@ -333,7 +333,7 @@ class SubPoke(unittest.TestCase):
 
 
 class HookFill(unittest.TestCase):
-    """The hook fill patch (INTERNALS.md, The hook fill patch). The capture's
+    """The hook fill patch (docs/internals/patches.md, The hook fill patch). The capture's
     decision by the machine is in tests/test_capture.py."""
 
     # Digy Dung's loader: RET from FD9Ah to FFF6h, over an MSX2's RG8SAV to
@@ -373,7 +373,7 @@ def trampoline(builder):
 
 
 class Tramp(unittest.TestCase):
-    """The trampoline patch (INTERNALS.md, The trampoline patch). The capture's
+    """The trampoline patch (docs/internals/patches.md, The trampoline patch). The capture's
     decision by the machine is in tests/test_capture.py, and the build's revert
     in tests/test_build.py."""
 

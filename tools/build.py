@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write a game's image from its snapshot (docs/INTERNALS.md, Build).
+"""Write a game's image from its snapshot (docs/internals/service-and-resident.md, Build).
 
 Usage: build.py <game> <machine> --tapes <dir> [--service <file>]
                 [--capture <variant>]
@@ -177,7 +177,7 @@ UNCHECKED = "stmotr"
 OUTDO = 0x0018  # the entry of OUTDO, whose code follows the tape code
 
 # The two places of the BIOS's CALSLT that T0 sends to its own code, and the
-# routine that the first one calls (INTERNALS.md, T0 and the sub-ROM in one
+# routine that the first one calls (docs/internals/service-and-resident.md, T0 and the sub-ROM in one
 # slot). Every MSX2 and MSX2+ BIOS has them, and an MSX1's has no sub-ROM.
 # SUBSLOT_CALL is the call of the routine that writes the subslot register, in
 # CALSLT's part for an expanded slot:
@@ -222,7 +222,7 @@ RG1SAV, RG7SAV = 0xF3E0, 0xF3E6  # the BIOS's copies of VDP registers 1 and 7
 # service's part of page 3, or None without that part, and the page, 1 or 2,
 # that TAPIN borrows without that part, or 0.
 Mode = collections.namedtuple("Mode", "service entry_page borrowed code_at", defaults=(None,))
-# The mode without a part in page 3 (INTERNALS.md, Without a part in page 3).
+# The mode without a part in page 3 (docs/internals/service-and-resident.md, Without a part in page 3).
 Mode.t0 = property(lambda self: self.service and self.entry_page is None)
 
 # Where the tail goes: its address, and the RAM page that holds it.
@@ -286,7 +286,7 @@ def port_writes(snapshot, v9938):
 # The BIOS's copies of VDP registers 8 to 23 (RG8SAV), MINROM and RG25SAV, on an
 # MSX2 or later. A game that never calls the BIOS leaves them alone, and the
 # tape service and the restorer never read them, so a game file's service at
-# can put a block of the part over them, whatever they hold (INTERNALS.md,
+# can put a block of the part over them, whatever they hold (docs/internals/service-and-resident.md,
 # Build).
 VDP_SAVES = (0xFFE7, 0xFFFA)
 
@@ -306,7 +306,7 @@ def find_entry_page(p3, service, wanted=None, tail=None):
     page of page 3. The part starts at E1h of the entry page: the game file's,
     wanted, or the one that it was assembled for when FCC9h to FD88h are zero,
     or else the highest below the BIOS's work area whose bytes there are zero,
-    or None when no part has room (INTERNALS.md, Build). The bytes of the tail,
+    or None when no part has room (docs/internals/service-and-resident.md, Build). The bytes of the tail,
     at the address tail, are zero at the snapshot too, so a part that holds one
     of them has no room."""
     length = len(service.parts["page3"])
@@ -357,7 +357,7 @@ def check_split_part(p3, service, tail):
 def borrowed_page(snapshot):
     """For the mode without a part in page 3: the page that TAPIN borrows. It
     is page 2 or page 1, the first that is in a mapper at the snapshot, or else
-    page 2 (INTERNALS.md, Without a part in page 3)."""
+    page 2 (docs/internals/service-and-resident.md, Without a part in page 3)."""
 
     def in_mapper(page):
         ram_page = snapshot.selected_ram(page)
@@ -392,7 +392,7 @@ def service_mode(snapshot, p3, service, game, tail=None):
 def check_t0_page0(ram_pages, game):
     """Stops when a RAM page kept for page 0 is in DOS's mapper, where the
     mode without a part in page 3 keeps T0 in mapper register FCh for good
-    (INTERNALS.md, Without a part in page 3). The build knows DOS's mapper
+    (docs/internals/service-and-resident.md, Without a part in page 3). The build knows DOS's mapper
     only when the capture ran on the user's machine itself, without a capture
     variant, and the snapshot's mapper pages are all in one slot, which is then
     DOS's. In every other case the restorer checks it, because it knows DOS's
@@ -410,7 +410,7 @@ def check_t0_page0(ram_pages, game):
 def check_unread(state, blocks, names, service_no):
     """Stops when a non-standard block follows the snapshot: the game reads it
     with its own loader, which the tape service cannot serve, unless the game
-    file has service no (INTERNALS.md, Tape files). state is the snapshot's
+    file has service no (docs/internals/service-and-resident.md, Tape files). state is the snapshot's
     state."""
     if service_no or not any(not b.standard and b.data for side in blocks for b in side):
         return
@@ -441,7 +441,7 @@ def patch_pages(patch_lines, snapshot):
 
 
 def scan_ram(snapshot, context):
-    """Patches the scan's findings in the snapshot's RAM pages (INTERNALS.md,
+    """Patches the scan's findings in the snapshot's RAM pages (docs/internals/patches.md,
     Scan), and returns [(RAM page, findings)]."""
     found = []
     for ram_page in snapshot.ram_pages:
@@ -455,7 +455,7 @@ def scan_unread(side1, side2, blocks, position, context):
     """The scan's findings in the unread blocks of the tape service's tapes
     side1 and side2: side 1 from the tape position, and side 2. Returns
     [(side, findings)], with each finding at its offset in the tape file of
-    blocks, where a patch line has its place (INTERNALS.md, Tape files): a CAS
+    blocks, where a patch line has its place (docs/internals/patches.md, Tape files): a CAS
     file's offsets are the tape service's, and a TSX file's are found through
     the blocks."""
     found = [[f for f in patches.find(side1, context) if f.offset >= position], patches.find(side2, context)]
@@ -523,7 +523,7 @@ class Image(ResidentMixin):
         """With the tape service, makes the builders that the capture's
         trampoline patch changed, in the RAM pages and in the service's tapes
         side1 and side2, and a patched trampoline at FC9Ah, reach the service
-        (INTERNALS.md, The trampoline patch). Returns the tapes and the
+        (docs/internals/patches.md, The trampoline patch). Returns the tapes and the
         changed ranges of the RAM for the check."""
         if not self.mode.service:
             return side1, side2, []
@@ -611,10 +611,10 @@ class Image(ResidentMixin):
     def build_t0(self):
         """T0: the ROM's page 0 with the service's stubs over the BIOS's tape
         code, or, in the mode without a part in page 3, with the service's
-        data and routines there (INTERNALS.md, Tape service). The jump table
+        data and routines there (docs/internals/service-and-resident.md, Tape service). The jump table
         goes to them where the ROM's does not: at STMOTR's entry, and in that
         mode at every entry. With the stubs, an MSX2's CALSLT also goes to
-        T0's code for a call of a routine in T0's own slot (INTERNALS.md, T0
+        T0's code for a call of a routine in T0's own slot (docs/internals/service-and-resident.md, T0
         and the sub-ROM in one slot)."""
         service, t0_mode = self.service, self.mode.t0
         t0 = self.tape_rom()
@@ -641,7 +641,7 @@ class Image(ResidentMixin):
         return t0
 
     def needs_sub0(self):
-        """Whether the entry code needs sub0 (INTERNALS.md, Page 0 in another
+        """Whether the entry code needs sub0 (docs/internals/service-and-resident.md, Page 0 in another
         subslot of DOS's mapper's slot): with the part in page 3, page 3 is in
         an expanded slot, and page 0, or a RAM page kept for page 0, is in
         another subslot of that slot — or page 3 is in expanded slot 0 (with a
@@ -782,7 +782,7 @@ class Image(ResidentMixin):
 
     def service_segments(self, side1, side2):
         """T0, then the code segment and the tape, as 16 KB blocks
-        (INTERNALS.md, Tape service), for the service's tapes side1 and side2.
+        (docs/internals/service-and-resident.md, Tape service), for the service's tapes side1 and side2.
         In the mode without a part in page 3, T0 holds the service's data and
         no code segment comes before the tape."""
         service, t0_mode = self.service, self.mode.t0
@@ -881,7 +881,7 @@ class Image(ResidentMixin):
         return bytes(header)
 
     def facts(self, ranges):
-        """build.txt's text: what the check takes from the build (INTERNALS.md,
+        """build.txt's text: what the check takes from the build (docs/internals/service-and-resident.md,
         Check). tail is the tail's address, then the offsets in the tail of its
         last byte, of the port of the worker's page's mapper register, and of
         its last instruction, the jump to the game. free is the first and the
@@ -900,7 +900,7 @@ class Image(ResidentMixin):
         (src/tape.inc, wrap). sub0 is the first and last byte of sub0 in page
         3, when place_sub0 put it there."""
         service, mode = self.service, self.mode
-        lines = ["# What the check takes from the build (docs/INTERNALS.md, Check).",
+        lines = ["# What the check takes from the build (docs/internals/service-and-resident.md, Check).",
                  f"service {1 if mode.service else 0}",
                  f"tail {self.tail.address} {TAIL_SIZE - 1} {service['TAIL_PORT']} {service['TAIL_JP']}",
                  f"free {service['P3_FREE']} {service['P3_FREE_END']}"]
@@ -937,7 +937,7 @@ def build(snapshot, service_path, game, side1=b"", side2=b"", patch_lines=(), fi
     # state.txt comes first: without it, the folder holds no snapshot.
     state = snapshot.state
     names = (game.tape, game.side2 or "")
-    # The tape service's tapes of the played files (INTERNALS.md, Tape files).
+    # The tape service's tapes of the played files (docs/internals/service-and-resident.md, Tape files).
     blocks = (tape.read(names[0], side1) if side1 else [], tape.read(names[1], side2) if side2 else [])
     check_unread(state, blocks, names, game.service == "no")
     side1, side2 = tape.service(blocks[0]), tape.service(blocks[1])

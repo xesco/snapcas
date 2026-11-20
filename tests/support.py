@@ -1,4 +1,4 @@
-"""What the tests share (docs/PLAN.md, Test setup): the folders, the tools as
+"""What the tests share (docs/BUILD.md, Test setup): the folders, the tools as
 programs, the files that a test writes in place of a capture's, an image's
 header, and the runs in openMSX.
 

@@ -1,4 +1,4 @@
-"""The trampoline patch (docs/INTERNALS.md, The trampoline patch): the tape
+"""The trampoline patch (docs/internals/patches.md, The trampoline patch): the tape
 loader of Opera Soft's, Topo Soft's, Dinamic's and other Spanish tapes, which
 builds a trampoline on the stack at FC9Ah that reaches the BIOS's TAPION by the
 slot register alone. Where the main ROM and the game's RAM share a primary slot,

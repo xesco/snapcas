@@ -72,7 +72,7 @@ class Game:
         # for the routine on the game's stack, or None.
         self.resstack = None
         # subslots keep: the capture leaves the subslot register of BASIC's RAM
-        # slot as BASIC has it (INTERNALS.md, The RAM's subslot in every page).
+        # slot as BASIC has it (docs/internals/capture.md, The RAM's subslot in every page).
         self.subslots_keep = False
         self.patches = []     # [Patch]
 
@@ -151,7 +151,7 @@ def number(text, where):
 def game_names():
     """The game files' folders below games/, in order: a game's, or a
     compilation's program's in its collection's folder, such as SUPERMSX/GOLF,
-    for a folder without a game.txt (INTERNALS.md, A game later on the tape)."""
+    for a folder without a game.txt (docs/internals/capture.md, A game later on the tape)."""
     games = os.path.join(ROOT, "games")
     names = []
     for name in sorted(os.listdir(games)):

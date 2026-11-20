@@ -1,641 +1,215 @@
 # Agents
 
-This page is for an AI agent that works on `snapcas`. The page gives each task as
-steps in order. Each step names the files that the step changes and the command that
-checks the step. Tables give the fix for each message that a step can print. The
-page has six tasks: to guide a user, to make a game's image, to add a machine, to
-add a game, to fix a game that fails, and to fix a game that fails on the MSX. The
-[README](README.md) gives the tasks in
-short form for a person. The reasons behind the rules are in
-[docs/DESIGN.md](docs/DESIGN.md). The formats of the files are in
-[docs/FILES.md](docs/FILES.md), and the games that taught each rule are in
-[docs/NOTES.md](docs/NOTES.md).
+This runbook is for AI coding agents working on `snapcas`. It defines hard rules, key paths, and step-by-step workflows for guiding users, building images, adding machines or games, and debugging failures in `openMSX` or on real MSX hardware. For schemas and internals, follow the linked docs rather than guessing.
 
-## Rules
+## Hard rules
 
-These rules hold for every task:
-
-| Rule | Why |
+| Rule | Reason |
 |---|---|
-| Commit, push, or open a pull request only when the user asks | The user reviews each change first |
-| Start a step that you recommend only when the user tells you to start it | The user decides what comes next |
-| A build prints no warnings | A warning hides the next one |
-| Do not run `./snapcas.py try` yourself. Ask the user to run it | The command opens `openMSX`'s window with the sound on, and the user hears the sound. The other tools run `openMSX` muted, without a window |
-| Never add system ROMs or MSX-DOS to git. Add a tape file to the tests' `tests/tapes/` only when the user agrees | `snapcas` cannot ship ROMs or DOS, and git ignores `dos/`, `downloads/`, `images/`, and `out/`. The tests' tapes are in git, so each tape adds to the repository |
-| Fix a game with lines in its game file, not with code | Each loader differs. Code gets a fix only when one form repeats over many tapes. The automatic patches in `tools/patches/` fix such forms |
-| Above each line that you add to a game file, write a comment that says why. Put a blank line before the comment | The shipped game files have that form, and the next reader needs the reason |
+| Never commit, push, or open a PR unless the user asks | User reviews every change first |
+| Never start a recommended next step until the user approves it | User controls what runs next |
+| Builds must print zero warnings (`make all`) | Warnings mask real regressions |
+| Never run `./snapcas.py try` yourself; ask the user to run it | Opens a visible `openMSX` window with audio; other tools run headless and muted |
+| Never commit system ROMs or MSX-DOS; only add tapes to `tests/tapes/` with user approval | Redistribution limits and repo size |
+| Fix individual games in game files, not in code | Only add code/patchers in `tools/patches/` when one pattern repeats across many tapes |
+| Put a blank line and explanatory comment above every line added to a game file | Matches shipped style and records why each fix exists |
 
-## Where things are
+## Repository map
 
-| Path | What it holds |
+| Path | Purpose |
 |---|---|
-| `machines/<machine>.txt` | A machine: the `openMSX` arguments, the disk, and the boot keys |
-| `machines/capture/<variant>.txt` | A capture variant: a machine with fewer cartridges |
-| `games/<GAME>/game.txt` | A game file: the lines that hold on every machine |
-| `games/<GAME>/<machine>.txt` | A machine's game file: the lines that hold on one machine only |
-| `custom/<GAME>/` | A custom game: its game file and its tape files. Git ignores both ([custom/README.md](custom/README.md)) |
-| `images/<machine>/<GAME>/<GAME>.SNP` | A game's image, which `./snapcas.py snap` makes and `sync` copies to a card |
-| `bin/SNAPCAS.COM` | The restorer, which starts an image on the MSX |
-| `downloads/` | The tape files, which `./snapcas.py snap` downloads |
-| `out/games/<machine>.txt` | The results of `make games`, one line per game |
-| `out/work/<machine>/<GAME>/snap/log.txt` | The capture's log: what the capture typed, each `TAPION`, the motor, each reset, where the load stopped, and the screen at that moment. When the capture failed, the log's last line holds the error and the screen at that moment |
-| `out/work/<machine>/<GAME>/snap/error.txt` | The capture's error, when the capture failed |
-| `out/work/<machine>/<GAME>/scan.txt` | The scan's findings, in `patch` line form |
-| `out/work/<machine>/<GAME>/check/report.txt` | The check's report: a line per point, then what failed and the screen's text |
-| `tests/openmsx-failures.txt` | The games that fail in `openMSX` itself, which `make games` accepts |
-| `tests/snapcas-failures.txt` | The games that fail because of `snapcas` and still need a fix. `make games` accepts these games too, and lists them apart from a new failure |
+| `machines/<machine>.txt` | Machine definition ([docs/FILES.md](docs/FILES.md#machine-file)) |
+| `machines/capture/<variant>.txt` | Capture variant with fewer cartridges or unexpanded slot 0 |
+| `games/<GAME>/game.txt` | Cross-machine game file |
+| `games/<GAME>/<machine>.txt` | Machine-specific overrides (inherited via `parent` if set) |
+| `custom/<GAME>/` | Local user game file + tapes (git-ignored; [custom/README.md](custom/README.md)) |
+| `images/<machine>/<GAME>/<GAME>.SNP` | Built image copied by `sync` |
+| `bin/SNAPCAS.COM`, `bin/SERVICE.BIN` | Prebuilt MSX restorer and service payload |
+| `out/games/<machine>.txt` | Results of `make games` (one line per game) |
+| `out/work/<machine>/<GAME>/snap/log.txt` | Capture log (typed commands, `TAPION`, motor, resets, stop screen, unpatched slot writes) |
+| `out/work/<machine>/<GAME>/snap/error.txt` | Capture failure message |
+| `out/work/<machine>/<GAME>/scan.txt` | Build scan findings in `patch` format |
+| `out/work/<machine>/<GAME>/check/report.txt` | 4-point check report and failure details |
+| `tests/openmsx-failures.txt` | Games failing in plain `openMSX` (accepted by `make games`) |
+| `tests/snapcas-failures.txt` | Known `snapcas` failures awaiting fixes (accepted by `make games`) |
 
 ## Guide a user
 
-The user says what they want to play, a game by its name or a CAS file of their own,
-and may be new to `snapcas`. Do the steps for the user, and ask the user only for
-what the user alone knows or can do, one question at a time. The user's request
-covers every step, so do not ask before each step. Say in one sentence what each
-step does.
+When a user asks to play a game (by name or local `.CAS`), execute the steps for them and ask only for information or physical actions they alone can provide—one question at a time. Explain each step in one sentence as you go.
 
-1. Ask for what the request lacks: the game's name or the CAS file's path, and the
-   MSX's model with what is in each cartridge slot.
-2. Check that Python 3 and `openMSX` run. When one is missing, tell the user how to
-   install it, and wait.
-3. Find the machine ([Find the machine](#2-find-the-machine)). When no machine
-   matches, do steps 1 to 5 of [Add a machine](#add-a-machine).
-4. Make the image. For a game's name, do steps 1 and 3 of
-   [Make a game's image](#make-a-games-image). For a CAS file, do steps 1 to 4 of
-   [Add a game](#add-a-game). When no line fixes the game, tell the user what fails
-   and stop. Add no line to the lists in `tests/`.
-5. Ask the user to put the MSX's card in the computer and to name its folder. Copy
-   the image, and give the user the two lines to type on the MSX
-   ([Copy the images to the card](#4-copy-the-images-to-the-card)). A custom game is
-   in `\SNAPCAS\CUSTOM`.
-6. Ask the user to play the game and to say what they see. The check passed in
-   `openMSX`, so a failure on the MSX needs the user's words:
-
-   | The user sees | Do |
-   |---|---|
-   | A message of `SNAPCAS` at the DOS prompt | Mostly the MSX is not the machine of the image. Ask again what is in each slot, and go back to step 3 |
-   | The game stops when it loads from the tape | Give the user the tape's keys ([docs/PLAYING.md, Tape keys](docs/PLAYING.md#tape-keys)) |
-   | The game hangs, reboots, or fails later | [Fix a game that fails on the MSX](#fix-a-game-that-fails-on-the-msx) |
+1. **Gather missing info:** game name or `.CAS` path, plus MSX model and what is in every cartridge slot.
+2. **Verify tools:** confirm Python 3 and `openMSX` run; if missing, give install instructions and wait.
+3. **Match machine:** run `./snapcas.py machines`. If none matches, run [Add a machine](#add-a-machine) steps 1–5.
+4. **Build and check:** run [Make a game's image](#make-a-games-image) steps 1 & 3 (or [Add a game](#add-a-game) steps 1–4 for a local `.CAS`). If unfixable, explain why and stop; never edit `tests/*-failures.txt` for a user's custom game.
+5. **Sync to card:** ask the user to insert their MSX card and provide its path, run `./snapcas.py sync`, and give the two MSX commands (`CD \SNAPCAS\<letter>` or `\SNAPCAS\CUSTOM`, then `\BIN\SNAPCAS <GAME>`).
+6. **Verify on hardware:** ask the user to play and report what they see:
+   - `SNAPCAS` message at DOS prompt → usually wrong machine/slot match; confirm slots and return to step 3.
+   - Stops during level load → give [Tape keys](docs/PLAYING.md#tape-keys) or `/M` mode.
+   - Hangs, glitches, or reboots → follow [Fix a game that fails on the MSX](#fix-a-game-that-fails-on-the-msx).
 
 ## Make a game's image
 
-The user names a game and their MSX. The result is the game's image, `<GAME>.SNP`.
-You check the image in `openMSX` and, when the user asks, copy the image to the
-user's card.
+1. **Find the game:** `./snapcas.py list <text>` (case-insensitive). Disambiguate if multiple match; if missing and the user has a `.CAS`, follow [Add a game](#add-a-game).
+2. **Find the machine:** `./snapcas.py machines`. Every cartridge difference is a different machine; ask if model or slots are unspecified.
+3. **Build and check:**
+   ```sh
+   ./snapcas.py snap <GAME> <machine> --check
+   ```
+   All 4 `check` lines must say `pass`. Handle failures by output:
 
-### 1. Find the game
+   | Output | Action |
+   |---|---|
+   | Missing ROMs / firmware / DOS files / boot failure | Use the table in [Add a machine step 5](#5-check-three-games). Ask the user for ROMs or MSX-DOS files. |
+   | Download failed | Inform the user, ask for their `.CAS`, and add it under `custom/`. |
+   | `it passes, so the machine's game file needs: capture <variant>` | Add `capture <variant>` to `games/<GAME>/<machine>.txt` ([Write the fix](#4-write-the-fix)). |
+   | `needs N free mapper segments, and DOS has M` | Unfixable hardware limit—report both numbers to the user. |
+   | Any other capture/build error or `check fail` | Follow [Fix a game that fails](#fix-a-game-that-fails). |
 
-Run `./snapcas.py list <text>` to list the games whose folder or title holds the
-text. The command ignores the case of the letters. When several games match, ask the
-user which game they want. When no game matches and the user has the game's tape
-file, add the game first ([Add a game](#add-a-game)).
-
-### 2. Find the machine
-
-To list the machines, run `./snapcas.py machines`. A machine is a model with its
-cartridges in slot order, and a machine with one cartridge more or fewer is another
-machine. So when the user has not named the model or said what is in each cartridge
-slot, ask the user. When no machine matches, add the machine first
-([Add a machine](#add-a-machine)).
-
-### 3. Make and check the image
-
-```
-./snapcas.py snap <GAME> <machine> --check
-```
-
-When the game's tape is missing, the command downloads the tape from File-Hunter
-into `downloads/`. The command prints four `check` lines and the image's path,
-`images/<machine>/<GAME>/<GAME>.SNP`. The image works when all four lines say
-`pass`. Otherwise the command's output says what to do:
-
-| Output | Do |
-|---|---|
-| A message about system ROMs, firmware, DOS files, or the boot | The fix in the table of [Check three games](#5-check-three-games). Ask the user for ROMs and DOS files |
-| The download of the tape fails | Tell the user, and ask for the game's CAS file. Then add the game as a custom game ([Add a game](#add-a-game)) |
-| `it passes, so the machine's game file needs: capture <variant>` | The game loads only on a capture variant. Write that line in the machine's game file ([Write the fix](#4-write-the-fix)) |
-| Another message of the capture or the build, or a `check` line that says `fail` | [Fix a game that fails](#fix-a-game-that-fails) |
-| `the restorer stopped: ... needs N free mapper segments, and DOS has M` | No line fixes this failure. The MSX's mapper is too small for the game, so tell the user both numbers |
-
-After each fix, run the command again.
-
-### 4. Copy the images to the card
-
-Copy the images only when the user asks, to the folder that the user names:
-
-```
-./snapcas.py sync <machine> <destination>
-```
-
-The command copies `SNAPCAS.COM` and the machine's images that are new or changed,
-reads each copy back, and deletes no image on the card
-([docs/CLI.md, Sync a card](docs/CLI.md#sync-a-card)). Then give the user the two
-lines to type on the MSX, `CD \SNAPCAS\<first letter>` and
-`\BIN\SNAPCAS <GAME>` ([docs/PLAYING.md](docs/PLAYING.md)).
-
-### 5. Ask the user to play the game
-
-The check runs the image for 60 seconds in `openMSX`. It does not play the game, and
-it does not run on the real MSX. So ask the user to play the game on their MSX. When
-the game fails, ask the user to say what they see.
+4. **Sync (only when asked):** `./snapcas.py sync <machine> <destination>` and give the MSX launch commands ([docs/PLAYING.md](docs/PLAYING.md#running-an-image)).
+5. **Hardware test:** remind the user that `--check` only runs 60 seconds in `openMSX`, and ask them to test on real hardware.
 
 ## Add a machine
 
-A machine is a file in `machines/` that tells the tools how to start one MSX setup
-in `openMSX`. The file gives the model, its cartridges, and the keys that pass its
-boot ([docs/FILES.md, Machine file](docs/FILES.md#machine-file)). The tools capture
-a game on the machine, and the check restores the image on the machine. The example
-in each step is the Sony HB-75P with a Carnivore2 in slot 1, `hb75p-carnivore2`.
+Full schema: [docs/FILES.md](docs/FILES.md#machine-file). Example: Sony HB-75P with Carnivore2 in slot 1 (`hb75p-carnivore2`).
 
 ### 1. Name the machine
+Use lowercase `<model>-<slot1>-<slot2>...` (`empty` for empty slots before a cartridge; short names: `carnivore2`, `ram64k`, `ram512k`, `mfrsd`, `sunriseide`, `sdmapper`, `msxdos2`). Verify uniqueness with `./snapcas.py machines`.
 
-A machine's name is the model, then each cartridge in slot order, in lower case.
-Write `empty` for an empty slot before a cartridge. A cartridge's name is
-`openMSX`'s name for the cartridge in lower case, or a short form of a long name:
-
-| Cartridge | Name |
-|---|---|
-| Carnivore2 | `carnivore2` |
-| A 64 KB or 512 KB RAM cartridge | `ram64k`, `ram512k` |
-| MegaFlashROM SCC+ SD | `mfrsd` |
-| Sunrise IDE interface | `sunriseide` |
-| SD Mapper v1 | `sdmapper` |
-| The `msxdos2` cartridge | `msxdos2` |
-
-So the Sony HB-75P with a Carnivore2 in slot 1 is `hb75p-carnivore2`. Check with
-`./snapcas.py machines` that the name is new.
-
-### 2. Find the model and its slots in openMSX
-
-`openMSX` describes each model in an XML file in its `share/machines/` folder. On
-macOS with Homebrew, the folder is
-`/opt/homebrew/opt/openmsx/openMSX.app/Contents/Resources/share/machines/`, and on
-Linux the folder is `/usr/share/openmsx/machines/`. The value of `-machine` is the
-file's name without `.xml`. The file's `primary` lines show the slots:
-
+### 2. Inspect model and slots in `openMSX`
+Check `share/machines/<Model>.xml` (`/opt/homebrew/opt/openmsx/openMSX.app/Contents/Resources/share/machines/` on macOS Homebrew; `/usr/share/openmsx/machines/` on Linux):
+```sh
+grep -n 'primary\|<RAM' .../share/machines/Sony_HB-75P.xml
 ```
-$ grep -n 'primary\|<RAM' .../share/machines/Sony_HB-75P.xml
-74:    <primary external="true" slot="1"/>
-76:    <primary slot="2">
-77:      <RAM id="Main RAM">
-82:    <primary external="true" slot="3"/>
-```
+`external="true"` marks cartridge slots; `-ext` fills them in order. Note which slot holds internal RAM (in BASIC without cartridges, `PRINT HEX$(INP(&HA8))` confirms slot layout).
 
-A slot with `external="true"` is a cartridge slot. `openMSX` puts each `-ext`
-cartridge in the next free cartridge slot. So the order of the `-ext` options must
-give each cartridge the slot that the cartridge has on the real machine. Note where
-the machine's own RAM is, because step 4 needs the RAM's location. The HB-75P's RAM
-is in slot 2. The cartridges are in `share/extensions/`, by the same rule.
-`openMSX`'s file follows the real machine, but the user's machine decides. In BASIC,
-without cartridges, `PRINT HEX$(INP(&HA8))` gives the slot of each page, as in
-[Find the slot values](#find-the-slot-values).
+### 3. Write `machines/<name>.txt`
+Copy a similar machine file and update the model. The first comment sentence must follow `<Model> (<MSX gen>, <RAM>) with <cartridges>` (shown by `./snapcas.py machines`).
 
-### 3. Write the machine file
-
-Write `machines/<name>.txt`. Copy the file of a machine with the same cartridge.
-Then change the model:
-
-```
-# Sony HB-75P (MSX1, 64 KB) with a Carnivore2. The Carnivore2 is in slot 1 and runs
-# Nextor. The HB-75P's own RAM is in slot 2.
-openmsx -machine Sony_HB-75P -ext Carnivore2
-disk hda
-boot "DefConfig" space
-variant hb75p
-```
-
-`./snapcas.py machines` shows the first sentence of the first comment. So write that
-sentence as the model, then the MSX generation and the RAM in brackets, then the
-cartridges: `Sony HB-75P (MSX1, 64 KB) with a Carnivore2`. Put the details in the
-sentences after the first sentence. The other lines depend on the cartridge that
-holds the disk:
-
-| Disk cartridge | Lines | Example |
+| Disk cartridge | Required lines | Reference |
 |---|---|---|
-| Carnivore2 | `disk hda` and `boot "DefConfig" space`. The `boot` line passes the Carnivore2's boot menu | `vg8020-carnivore2` |
-| MegaFlashROM SCC+ SD with Nextor only | `disk hda` and `firmware extensions/MegaFlashROM_SCC+_SD_Nextor.xml` | `fsa1-mfrsd` |
-| MegaFlashROM SCC+ SD in `openMSX`'s stock setup | `disk hda` and `dos "A:\>" B`, because the cartridge boots MSX-DOS from its ROM disk | `hb75p-mfrsd` |
-| SD Mapper v1 | `disk hda` and `firmware systemroms/snapcas/SDMAPPER.ROM` | `vg8020-sdmapper` |
-| Sunrise IDE interface | `disk hda` | `nms8245-ram512k-sunriseide` |
-| The machine's own floppy drive | `disk diska`, or `disk diska 360` for a single-sided drive | `hbf700p-ram512k-msxdos2` |
+| Carnivore2 | `disk hda`, `boot "DefConfig" space` | `vg8020-carnivore2` |
+| MegaFlashROM SCC+ SD (Nextor-only) | `disk hda`, `firmware extensions/MegaFlashROM_SCC+_SD_Nextor.xml` | `fsa1-mfrsd` |
+| MegaFlashROM SCC+ SD (stock) | `disk hda`, `dos "A:\>" B` | `hb75p-mfrsd` |
+| SD Mapper v1 | `disk hda`, `firmware systemroms/snapcas/SDMAPPER.ROM` | `vg8020-sdmapper` |
+| Sunrise IDE | `disk hda` | `nms8245-ram512k-sunriseide` |
+| Built-in floppy | `disk diska` (or `disk diska 360`) | `hbf700p-ram512k-msxdos2` |
 
-The DOS is Nextor unless a `dosfiles` line names `msxdos1` or `msxdos2`. A machine
-whose BASIC starts with another width than 37 or 40 needs a `width` line, as `sx2`
-has `width 37` for KdL's sub-ROM, which sets 80 columns. A machine whose firmware
-starts a menu in a graphics mode needs either a `hold` line, or `press` lines that
-choose BASIC in the menu. The FS-A1's `hold del 6` is such a
-`hold` line, and the `hb75p` capture variant has such `press` lines.
-[docs/FILES.md, Machine file](docs/FILES.md#machine-file) describes each line.
+Add `dosfiles`, `width`, `hold`, `press`, `resident`, or `parent` as needed ([docs/FILES.md](docs/FILES.md#machine-file)).
 
-### 4. Add a capture variant
-
-A capture variant is the same machine with fewer cartridges, in `machines/capture/`.
-The capture runs a game on the variant when the game's loader fails with the
-cartridge present. A loader often looks for RAM from slot 0 up, and such a loader
-finds the Carnivore2's RAM in slot 1 before the machine's own RAM. So a machine
-whose disk cartridge is in a lower slot than the machine's own RAM gets a variant
-without that cartridge. Name the variant after the cartridges that the variant
-keeps. Give the machine a `variant` line for the variant:
-
-```
-# Sony HB-75P without cartridges, so without a disk system. It is the capture
-# variant of hb75p-carnivore2, for a game whose loader finds the Carnivore2's RAM
-# in slot 1 before the internal RAM in slot 2.
-# The capture uses no disk, but a machine file needs this line.
-openmsx -machine Sony_HB-75P
-disk hda
-# Without a disk system the HB-75P starts its Personal Data Bank menu, in a
-# graphics mode. BASIC is its fifth item, four cursor moves down from the first.
-press down 8
-press down 8.5
-press down 9
-press down 9.5
-press return 10
-```
-
-A machine whose slot 0 is expanded can need one more variant. Many loaders fail
-because slot 0 is expanded, with or without cartridges
-([docs/INTERNALS.md, The capture with slot 0 not expanded](docs/INTERNALS.md#the-capture-with-slot-0-not-expanded)).
-When slot 0 holds only the main ROM, in subslot 0, add a variant that runs the model
-with its slot 0 not expanded, as `hbf700p-noexp0-ram512k-msxdos2` does. The
-Makefile's rule for `Sony_HB-F700P_noexp0.xml` makes that model from `openMSX`'s
-file, and the variant's `firmware` line names the model. Such a variant has `noexp0`
-after the model in its name.
-
-When a variant with the same cartridges exists, such as `vg8020`, the machine lists
-that variant in place of a new one. A model without a disk system can start a
-program of its own in place of BASIC, as the HB-75P starts its Personal Data Bank
-menu. So the variant can need `hold` or `press` lines that the machine does not
-need. To see the screen, dump the screen with `openMSX`'s `[screen]` command, which
-reads a text mode only. For a graphics mode, dump the screen with
-`debug read_block VRAM 0 16384` and the `vdpreg` values. Put the commands in a
-script that `tools/msx.py`'s `run` passes to a muted `openMSX`.
+### 4. Add capture variant(s)
+If the disk cartridge sits in a lower slot than internal RAM, add a variant in `machines/capture/` without that cartridge (reuse an existing variant like `vg8020` if identical) and reference it with `variant`. If slot 0 is expanded and holds only the main ROM in subslot 0, add a `<model>-noexp0-...` variant (see `Sony_HB-F700P_noexp0.xml` in `Makefile`). Variants without a disk system may boot into built-in firmware menus and need `hold` or `press` lines.
 
 ### 5. Check three games
-
-On the new machine, make and check the image of three games: a game that loads once,
-a game that loads during play, and a game that the capture variant captures. The
-third game is one whose game file for a machine with the same cartridge has a
-`capture` line, such as Alien Syndrome's `vg8020-carnivore2.txt`. In its game file
-for the new machine, the third game needs that line with the new variant:
-
-```
-./snapcas.py snap CALDERO hb75p-carnivore2 --check
-./snapcas.py snap GAUNTLET hb75p-carnivore2 --check
-./snapcas.py snap ALIEN-SY hb75p-carnivore2 --check
+Test a single-load game, a multi-load game, and a variant-captured game (adding the variant's `capture` line for the third):
+```sh
+./snapcas.py snap CALDERO <machine> --check
+./snapcas.py snap GAUNTLET <machine> --check
+./snapcas.py snap ALIEN-SY <machine> --check
 ```
 
-Each command prints four `check pass` lines and the image's path. When a run stops
-with a message instead, the message names the cause:
-
-| Message | Fix |
+| Error | Fix |
 |---|---|
-| `Couldn't find ROM file for ...` | The user's system ROMs lack the model's ROMs. Ask the user for them |
-| `needs ... make firmware makes it` | Run `make firmware` |
-| `boots msxdos1: put its files in dos/msxdos1/` | Ask the user for MSX-DOS's files ([dos/README.md](dos/README.md)) |
-| `capture: BASIC's Ok did not appear within 120 seconds` | The `boot` lines do not pass the boot. Compare the machine file with the machine file of a working machine that has the same disk cartridge. When only the third game stops, the variant boots into a program of the model's own, so add `hold` or `press` lines to the variant ([Add a capture variant](#4-add-a-capture-variant)) |
-| `the tail's jump did not run within 120 seconds`, or more for a large image, with BASIC on the screen | DOS did not start the check's `AUTOEXEC.BAT`, because a `disk`, `dos`, or `dosfiles` line is wrong |
-| `check: the boot text '...' did not appear within 120 seconds` | The check's boot never shows the text of a `boot` line. Compare the machine file with the machine file of a working machine that has the same disk cartridge |
+| `Couldn't find ROM file for ...` | Ask the user for the missing system ROMs. |
+| `needs ... make firmware makes it` | Run `make firmware`. |
+| `boots msxdos1: put its files in dos/msxdos1/` | Ask the user for MSX-DOS files ([dos/README.md](dos/README.md)). |
+| `capture: BASIC's Ok did not appear within 120 seconds` | Fix `boot`/`hold`/`press` lines (compare with a working machine using the same disk cartridge). |
+| `the tail's jump did not run` (BASIC on screen) | Fix `disk`, `dos`, or `dosfiles`. |
+| `check: the boot text '...' did not appear` | Fix `boot` text/keys. |
 
-Another message, or a `check` line that says `fail`, is a failure of that game on
-the new machine, and the table of
-[Make and check the image](#3-make-and-check-the-image) says what to do. When all
-three games fail in the same way, look at the machine file and its capture variant
-before the games.
+### 6. Update docs and run tests
+Update [docs/FILES.md](docs/FILES.md#shipped-machines), [docs/MACHINES.md](docs/MACHINES.md#supported-machines), [docs/CLI.md](docs/CLI.md#machines), and the machine count in [README.md](README.md). `tests/test_machines.py` tests every file in `machines/` automatically—run `make test`.
 
-### 6. List the machine in the docs
-
-Add the machine to each place that lists the shipped machines:
-
-| File | Change |
-|---|---|
-| `docs/FILES.md` | A row in the table of shipped machine files, with 0 machine's game files, and a row in the table of capture variants |
-| `docs/CLI.md` | The output of `./snapcas.py machines` in the example of `machines`, copied from the command |
-| `docs/PLAN.md` | The machine in its DOS's row of the test machines' table |
-| `README.md` | The number of machines, in the last sentence of "What it is" |
-
-The tests need no line for the machine. `Shipped` in `tests/test_machines.py` checks
-Caldero on every machine file of `machines/`, with the DOS files that the machine
-file names. Then run `make test`, which must pass.
-
-### 7. Run the collection
-
-A run of every game takes about 30 minutes. The run needs the tapes in `downloads/`,
-and `snap` downloads the tapes one game at a time. Run every game on the new
-machine:
-
+### 7. Run the full collection
+```sh
+make games MACHINE=<machine>
 ```
-make games MACHINE=hb75p-carnivore2
-```
-
-The run tries each game that fails on the machine's capture variants, as `snap` does
-for one game. When a variant passes, the run writes the `capture` line into the
-machine's game file, under a comment that names the variant and the failure. Most
-failures of a new machine end there, so that the machine starts with its `capture`
-lines. Read a few of the files that the run wrote. `FIX=0` turns the retry off.
-
-Do not change `bin/` or `tools/` during the run. The run keeps each result with a
-hash of the game's files, the machine's files, the code in those two folders, the
-DOS files that the check boots, and `openMSX`'s version. A changed hash makes the
-next run make that game's image again. So a change to the code makes the next run
-take as long as the first. Ctrl-C stops the run, and the run keeps its results so
-far. The results go to `out/games/hb75p-carnivore2.txt`. The image of each game that
-passes goes to `images/hb75p-carnivore2/`, and `./snapcas.py sync` copies the images
-from that folder to a card. Fix each game that fails as in
-[Fix a game that fails](#fix-a-game-that-fails). Then write the number of the
-machine's game files in the machine's row of `docs/FILES.md`.
+Runs all 1,544 games (~30 min), auto-retrying capture variants and writing `capture` lines into `<machine>.txt` (`FIX=0` disables retry). Do not edit `bin/` or `tools/` mid-run (hash changes trigger full rebuilds). Fix remaining failures, then update the machine game-file count in [docs/FILES.md](docs/FILES.md#shipped-machines).
 
 ## Add a game
 
-A game that `snapcas` does not ship is a custom game. A custom game is a folder in
-`custom/` that holds the game's game file and its tape files
-([custom/README.md](custom/README.md)). Git ignores the folder, so the game stays on
-the user's computer. The example is a game named `MYGAME`, on the machine
-`hb75p-carnivore2`.
+Custom games live in `custom/<GAME>/` (git-ignored; [custom/README.md](custom/README.md)).
 
-### 1. Make the game's folder
-
-The image takes the folder's name. So name the folder after the game, in upper case,
-with up to 8 letters and digits. Copy the user's CAS files into the folder. Leave
-the user's own files where they are:
-
-```
-custom/MYGAME/MYGAME.CAS
-```
-
-### 2. Write the game file
-
-Write `custom/MYGAME/game.txt`. The game file needs one line, which names side 1's
-tape with a `cas` line. A game on two tapes gets a `side2` line for the other tape.
-The first comment says which game it is:
-
-```
-# My Game (1986)(Its Publisher)
-cas MYGAME.CAS
-side2 MYGAMEB.CAS
-```
-
-[docs/FILES.md, Game file](docs/FILES.md#game-file) describes each line of a game
-file.
-
-### 3. Make and check its image
-
-```
-./snapcas.py snap custom/MYGAME hb75p-carnivore2 --check
-```
-
-`snap` reads the tapes from the game's folder and never downloads them. The command
-prints four `check` lines, and the image goes to
-`images/hb75p-carnivore2/custom/MYGAME/`.
-
-### 4. Fix what fails
-
-When a `check` line does not say `pass`, the table of
-[Make and check the image](#3-make-and-check-the-image) says what to do, with
-`custom/MYGAME` as the game. The fix's lines go in `custom/MYGAME/game.txt`, or in
-`custom/MYGAME/hb75p-carnivore2.txt` when the lines hold on that machine only, as a
-`capture` line does. A `patch` line needs a `sha1` line in `game.txt`, and
-`shasum custom/MYGAME/*.CAS` prints its values. The lists in `tests/` are for
-shipped games, so add no line there for a custom game.
-
-### 5. Share the game
-
-Share the game only when the user asks. Move the game's folder into `games/`. Add
-the game's `sha1` and `url` lines
-([docs/FILES.md, Game file](docs/FILES.md#game-file)). Move the game's tapes into
-`downloads/`. Then run `make games` on each machine that has results in
-`out/games/`, as in [Check the fix](#6-check-the-fix). Last, add 1 to the number of
-games in the README's "What it is".
+1. Create `custom/<GAME>/` (uppercase, up to 8 alphanumeric chars) and copy the user's `.CAS` file(s) there without moving their originals.
+2. Write `custom/<GAME>/game.txt` with a title comment, `cas <SIDE1>.CAS`, and optional `side2 <SIDE2>.CAS`.
+3. Build and check: `./snapcas.py snap custom/<GAME> <machine> --check`.
+4. Fix any failures in `custom/<GAME>/game.txt` or `custom/<GAME>/<machine>.txt` (add `sha1` via `shasum custom/<GAME>/*.CAS` if using `patch`). Never edit `tests/*-failures.txt` for custom games.
+5. **Share (only if user asks):** move folder to `games/`, add `sha1` and `url`, move tapes to `downloads/`, run `make games` on machines with `out/games/` results, and increment the game count in [README.md](README.md).
 
 ## Fix a game that fails
 
-A game fails when a step of its image stops. The steps are the capture, the build,
-and the check. The capture loads the game in `openMSX` and takes the snapshot, and
-the build makes the image. The check restores the image and runs it for 60 seconds
-([docs/INTERNALS.md, Check](docs/INTERNALS.md#check)). Most failures on a new
-machine have one cause. The game's loader selects RAM by slot, and the new machine
-keeps its RAM in another slot.
-
-### 1. Reproduce the failure
-
-Run the game alone, with the check:
-
-```
+### 1. Reproduce
+```sh
 ./snapcas.py snap <GAME> <machine> --check
 ```
-
-`<GAME>` is the game file's folder, as `make games` and `./snapcas.py list --all`
-show it. When a step fails and the game file has no `capture` line, `snap` runs the
-steps again on each capture variant that the machine file lists. `snap` skips the
-variants when the capture stops at an error in the input files, with status 1,
-because a variant reads the same files. When a variant passes, `snap` prints:
-
+For faster iteration when only page patches or build/check settings change (snapshot already exists):
+```sh
+OPENMSX_HOME=$PWD/out/cache/openmsx-home python3 tools/pipeline.py <GAME> <machine> --dos dos/nextor --skip-capture
 ```
-snapcas.py: it passes, so the machine's game file needs: capture hb75p
-```
+Add `SNAPCAS_KEYS=1` to exercise gameplay-start keys (`Space`, `0`, `1`, `Space`). If `snap` reports a capture variant passes, add `capture <variant>` to `<machine>.txt` and stop.
 
-Then write that line in the machine's game file ([Write the fix](#4-write-the-fix)),
-and the fix is done. `make games MACHINE=<machine>` does both for every game that
-fails on a machine ([Run the collection](#7-run-the-collection)). A `capture` line
-is the most common fix. Of the shipped machine's game files, 660 hold a `capture`
-line. When no variant passes, continue with the next step.
-
-### 2. Read the failure
-
-Read the files that the step's message points to. Also read the same files of a
-machine where the game passes. Find such a machine in `out/games/<machine>.txt`. The
-step's message names the failure:
+### 2. Diagnose from logs
+Read `snap/log.txt`, `snap/error.txt`, `scan.txt`, and `check/report.txt`, comparing with a passing machine from `out/games/<machine>.txt`:
 
 | Message | Cause | Fix |
 |---|---|---|
-| `capture: the CPU is halted with no interrupt, at XXXX` | The loader crashed, mostly because it selected a slot that holds no RAM | A capture variant, or a slot patch ([Patch the code](#3-patch-the-code)) |
-| `capture: step 5 restarted more than 20 times` | The load waits for a key each time, and no key that the capture tries continues the load | `continue <key>` with the key that the game asks for, or `snapshot at <seconds>` |
-| `capture: the load ran for more than 3600 seconds` | The load never stops the motor permanently | `snapshot at <seconds>` with a time after the load. Read the time in `log.txt` |
-| `the first block is a non-standard block` or `is not a binary file, a BASIC` | The tape does not start with a block that the BIOS loads | `load 'RUN"CAS:"'`, or the command that the tape's label gives |
-| `the tape needs N segments, more than M` | The tape is longer than the tape service holds. The tape service holds 64 segments, 1 MB, with the code segment, or 16 segments, 256 KB, in the mode without a part in page 3 | With a limit of 16 segments, `service at <address>` with an address xxE1h in page 3 that the game leaves alone. That line gives the tape service its part of page 3. With a limit of 64 segments, add a line to `tests/snapcas-failures.txt` |
-| `the 26 bytes below SP XXXXh are not in a RAM page that the snapshot keeps`, or `cross a page boundary or include FFFFh` | Mostly, the load failed on this machine, so the snapshot shows BASIC or a crash, with the stack in the ROM. `snap/log.txt` shows where the load stopped and the screen at that moment. Otherwise the stack is too low for the restorer's tail at the snapshot | For a failed load, a capture variant or a slot patch. Otherwise `snapshot at <seconds>` with a later moment, when the stack has moved |
-| `the game's stack reaches FFFFh, the subslot register of slot N`, in `snap/log.txt` | The game's stack is at the top of memory, and page 3 is in an expanded slot. The push writes the slot's subslot register and deselects the game's RAM | A capture variant whose RAM is in a slot that is not expanded. On a machine without one, a patch of the game's `LD SP,0000h` to `LD SP,0FFFEh`, as in Space Beater's game file |
-| `page 3 is not a RAM page that the snapshot keeps` | The load failed on this machine. The loader selected a slot without RAM in page 3, where its own code runs. `snap/log.txt` names the write, with `cuts off its code` | A capture variant, or a slot patch |
-| `page 3 has no room for the tape service's part, and rom keep needs it` | The game fills page 3, and the game file's `rom keep` does not allow the mode without a part in page 3 | `service at <address>` with an address xxE1h in page 3 that the game leaves alone, or the game file without `rom keep` |
-| `the tape service without a part in page 3 keeps T0 in page 0 of DOS's mapper` | Either the game fills page 3 or its game file has `service t0`. The game also keeps RAM of DOS's mapper in page 0, where that mode puts T0 | A capture variant, whose RAM is outside DOS's mapper, or `service at <address>`. When page 3 has no 158 free bytes in one run, `service at <address> <code>` puts the 26 bytes of entries at the address xxE1h and the 132 bytes of the part's code at `<code>`, two runs that the game leaves alone, as Power Drift's `sx2.txt` does |
-| `the bytes at ... are not the patch's old bytes` | The patch was made for another dump | Make the patch again for this dump, with the `sha1` of its tape |
-| `point 1: fail`, `the restorer stopped: ...` | The restorer refused the image and returned to DOS. The line holds the restorer's message | The message says what to fix. Often the problem is too few free segments |
-| `point 1: fail`, `the tail's jump did not run within 120 seconds`, or more for a large image | The restore never reached the game, and the restorer printed no message. The report's screen shows where the restore stopped | DOS's message says what to fix. A restorer that hangs is a failure of `snapcas`, so add a line to `tests/snapcas-failures.txt` |
-| A failed point with another line that starts with `check:` | A callback of `tools/tcl/check.tcl` failed, and the line holds the callback's error | A failure of `snapcas`, so add a line to `tests/snapcas-failures.txt` |
-| `point 1: fail`, `vdp14 is 07, expected 00` and `vramptr is 1C000, expected 00000` | The snapshot's VRAM pointer is 0 in an MSX1 screen mode. The restorer sets that pointer with a carry into register 14, which `openMSX` makes only in MSX2 screen modes | `snapshot at <seconds>` with a moment later, when the pointer has moved, as in Saboteur 2's file for `hbf700p-ram512k-msxdos2` |
-| `point 1: fail` with differences | The restored machine differs from the snapshot | A failure of `snapcas`, so add a line to `tests/snapcas-failures.txt` |
-| `point 2: fail`, `the game writes XXXXh, in the tape service's part of page 3` | The game keeps data where the tape service's part goes | `service at <address>` with an address xxE1h in page 3 that the game leaves alone, or `service t0` |
-| `point 2: fail`, `the game writes XXXXh, in the stack of the call of the machine's resident program in page 3` | The game keeps data where the build put the call's own stack, in the zeros of `SLTATR` and `SLTWRK` | `resstack <address>` with zeros in page 3 that the game leaves alone, as Service Ace's file for `sx2-extramapper-mcp` has |
-| `point 3: fail` | The restored machine rebooted, or the CPU ran more than 100,000 FFh bytes, RST 38h, or entered 0038h with more than 32 values of SP below 0100h, mostly because the loader crashed after the restore | A capture variant, or a slot patch |
-| `point 4: fail` with a BASIC error, such as `Overflow in 130` | The game's BASIC program stops at an error | A patch of the program's text, such as the patch in Field Master's game file |
-
-`log.txt` holds the line `load stopped at tape position ..., screen: ...`. That line
-shows where the load stopped before the snapshot. A reset there, or a screen that
-shows BASIC or the boot screen, means that the loader crashed before the snapshot.
-[docs/FILES.md, Game file](docs/FILES.md#game-file) describes each key of a game
-file.
+| `CPU is halted with no interrupt` | Loader selected an empty slot | Capture variant or slot patch |
+| `step 5 restarted more than 20 times` | Load waits for an untried key | `continue <key>` or `snapshot at <sec>` |
+| `load ran for more than 3600 seconds` | Motor never stays off | `snapshot at <sec>` after load ends |
+| `non-standard block` / `not a binary file` | Non-standard first block | `load 'RUN"CAS:"'` (or tape's command) |
+| `tape needs N segments, more than M` | Tape exceeds service limit (`16` in `t0`, `64` with code segment) | `service at <addr>` (if limit 16); else `tests/snapcas-failures.txt` |
+| `26 bytes below SP ...` | Failed load (stack in ROM) or low SP | Variant/slot patch, or later `snapshot at <sec>` |
+| `stack reaches FFFFh` | Stack hits subslot register in expanded slot | Unexpanded variant, or patch `LD SP,0000h` → `LD SP,0FFFEh` |
+| `page 3 is not a RAM page` | Loader switched page 3 away from RAM (`cuts off its code`) | Capture variant or slot patch |
+| `no room for tape service` / `T0 in page 0 of DOS's mapper` | Page 3 full and page 0 is in DOS's mapper | Variant outside DOS's mapper, `service at <xxE1>`, or split `service at <xxE1> <code>` (entries may use `FFE1h` if game never calls BIOS) |
+| `bytes at ... are not the patch's old bytes` | Patch targets a different dump | Re-derive patch and `sha1` for this dump |
+| `point 1: fail` (`vdp14 is 07`, `vramptr 1C000`) | VRAM pointer = 0 in MSX1 mode | Later `snapshot at <sec>` |
+| `point 1: fail` (other diff / restorer hang) | Restorer bug or segment shortage | Follow restorer message, or log in `tests/snapcas-failures.txt` |
+| `point 2: fail` (writes tape service / `rescode` / `resstack`) | Game overwrites service or resident block in page 3 | `service at <xxE1> [<code>]`, `service t0`, `rescode`, `resstack <addr\|no>`, or `rescall no` |
+| `point 3: fail` (reboot / `RST 38h` / SP wrap) | Crash after restore (slot switch, Spectrum `OUT (0FEh)`, MSX1 BIOS call, etc.) | Capture variant or targeted `patch` |
+| `point 4: fail` (BASIC error) | BASIC program error | Patch BASIC text (note: `SNAPCAS_KEYS=1` typing `0`/`1` into pure BASIC prompts is a false positive) |
 
 ### 3. Patch the code
-
-A slot patch changes the value that the loader writes to the slot register, port
-A8h, so that the loader selects the machine's RAM. On any machine, the tools already
-patch the forms in the next table, by the slot map that the capture makes of the
-machine's RAM. The capture patches most of the forms, and the scan in the build
-patches two. These forms need no line:
-
-| Code | Automatic patch |
-|---|---|
-| `LD A,n / OUT (0A8h),A` or `LD A,n / CALL 013Bh`, run before the snapshot, whose n names a slot that holds nothing | [Slot patches](docs/INTERNALS.md#slot-patches), at each copy in the tape |
-| The same in the snapshot's RAM, run after the snapshot | The scan, in the build |
-| The same, run from page 3, that moves page 3 to a slot where the code differs | [The RAM search patch](docs/INTERNALS.md#the-ram-search-patch), which keeps page 3 |
-| A stub of `TAPION` that selects the ROM in page 0 as `AND H / LD L,A`, in the mode without a part in page 3 | The scan, in the build ([Without a part in page 3](docs/INTERNALS.md#without-a-part-in-page-3)) |
-| Level 9's, CasLink3's, and Engesoft's copies of page 3's slot to the other pages | [The page copy patch](docs/INTERNALS.md#the-page-copy-patch) |
-| The end of the RAM search in the `slots` program of Dinamic's loaders, which gives page 1 the slot of page 2 and not the slot that the search found | [The search slot patch](docs/INTERNALS.md#the-search-slot-patch) |
-| A loader's copy of ENASLT that writes the subslot register with `AND B`, not the BIOS's `AND H`, and its selection of page 1 by EXPTBL's slot 1 entry, as in Arkos and Satan | [The ENASLT copy patch](docs/INTERNALS.md#the-enaslt-copy-patch) |
-| The interrupt handler of Aventuras AD's interpreter, which writes the slot register from the game's copy of it, on an MSX2 | [The interrupt slot patch](docs/INTERNALS.md#the-interrupt-slot-patch) |
-| A BASIC loader's `POKE &HFFFF,&HAA` or `POKE -1,170`, on a machine whose RAM is in an expanded slot and not in subslot 2 | [The subslot POKE patch](docs/INTERNALS.md#the-subslot-poke-patch) |
-| A loader's fill of the hooks with RET that goes past FFC9h, over an MSX2's copies of VDP registers, on an MSX2 | [The hook fill patch](docs/INTERNALS.md#the-hook-fill-patch) |
-| The trampoline at FC9Ah of Opera Soft's, Topo Soft's and Dro Soft's loaders, which reaches `TAPION` by the slot register alone, on a machine whose RAM shares the main ROM's slot, as `sx2-extramapper-mcp` | [The trampoline patch](docs/INTERNALS.md#the-trampoline-patch) |
-
-`log.txt` names each write that the capture saw and did not patch, with
-`for a patch line`. The log names each address and value once, and leaves out the
-writes of the BIOS's own slot routines. Find the loader's write first:
-
-1. Read `scan.txt`, which lists the scan's findings in `patch` line form. The build
-   already patches a finding in the snapshot's RAM pages when the finding's line
-   holds new bytes after `>`. The build does not patch the findings in the tape's
-   unread blocks, so such a finding is a line to add. When the block's loader checks
-   a sum, the line must also fix the block's sum.
-2. Otherwise search the tape file for the forms that write the register:
-
-   | Bytes | Code |
-   |---|---|
-   | `3E nn D3 A8` | `LD A,nn / OUT (0A8h),A` |
-   | `3E nn CD 3B 01` | `LD A,nn / CALL 013Bh`, the BIOS's `WSLREG` |
-   | `DB A8 ...` | `IN A,(0A8h)`, then code that computes the value, such as Level 9's and CasLink3's |
-
-   ```
-   python3 -c "import sys; d = open(sys.argv[1], 'rb').read(); i = d.find(bytes.fromhex('D3A8'))
-   while i >= 0: print(hex(i - 2), d[i - 2:i + 2].hex(' ')); i = d.find(bytes.fromhex('D3A8'), i + 1)" downloads/<GAME>.CAS
-   ```
-
-   The offset of a write in the tape file is the write's place. Give the place as
-   `side1:<offset>` in hex, or as `side2:<offset>` for the side 2 file. A place in
-   the snapshot's RAM is `page<n>:<offset>`, where the offset counts from the start
-   of the RAM page that the snapshot selects in page n.
-
-#### Find the slot values
-
-The slot register holds 2 bits per page. Bits 1 and 0 give page 0's slot, bits 3 and
-2 give page 1's slot, bits 5 and 4 give page 2's slot, and bits 7 and 6 give page
-3's slot. So a value is page 3's slot × 64 + page 2's slot × 16 + page 1's slot ×
-4 + page 0's slot:
-
-| Machine | Slots | Value |
-|---|---|---|
-| Philips VG-8020: ROM in slot 0, RAM in slot 3 | Page 0 in slot 0, pages 1 to 3 in slot 3 | FCh |
-| Sony HB-75P: ROM in slot 0, RAM in slot 2 | Page 0 in slot 0, pages 1 to 3 in slot 2 | A8h |
-| Sanyo PHC-28S: its own RAM in slot 0, page 3 only, and the RAM cartridge in slot 1 | Pages 1 and 2 in slot 1, pages 0 and 3 in slot 0 | 14h |
-
-A loader that computes the value from the register, with `IN A,(0A8h)`, gets a patch
-to `LD A,nn` with `NOP`s (`00`) to the same length. Emerald Isle's game file has
-such a patch, and that game file's last patch also keeps the sum that ends the
-block.
-[docs/NOTES.md, Page 3's slot for the other pages](docs/NOTES.md#page-3s-slot-for-the-other-pages)
-lists the loaders seen so far and their fixes.
+The tools already auto-patch 11 common loader/slot patterns ([docs/internals/patches.md](docs/internals/patches.md#patcher-catalog)). For remaining unpatched writes (logged as `for a patch line` in `snap/log.txt`):
+1. Check `scan.txt` first (unread-block findings aren't auto-patched; fix block checksums if the loader verifies them).
+2. Otherwise locate `D3 A8` (`OUT (0A8h),A`), `CD 3B 01` (`WSLREG`), `D3 FE` (Spectrum beeper on mapper port), or `DB A8` in the tape or snapshot RAM.
+3. Compute slot register value `A8h` = `page3*64 + page2*16 + page1*4 + page0` (e.g. `FCh` = ROM in 0, RAM in 3; `A8h` = ROM in 0, RAM in 2; `14h` = PHC-28S internal page 3 in 0, RAM cart in 1). On expanded slot 0 (e.g. `sx2-extramapper-mcp`), write slot 0's subslot register at `FFFFh` (`54h` = BIOS p0 + RAM p1–3, `55h` = RAM all pages, `50h` = BASIC) and update `SLTTBL` (`FCC5h`) if the game calls `ENASLT`. See [docs/NOTES.md](docs/NOTES.md#loaders-and-slots).
 
 ### 4. Write the fix
+Put universal fixes in `games/<GAME>/game.txt` and machine-specific fixes in `games/<GAME>/<machine>.txt`, with a blank line and explanatory comment above every directive.
 
-A line that holds on every machine goes in `games/<GAME>/game.txt`. The machine's
-game file, `games/<GAME>/<machine>.txt`, gets a line that holds on one machine only.
-Such lines are a `capture` line, a `service t0` line, a `snapshot` line that only
-that machine needs, and a patch whose new bytes are a slot value. The machine's game
-file starts with a comment that names the machine. Each line has a comment above it
-that says why:
-
-```
-# Lines for the Sony HB-75P with a Carnivore2 in slot 1.
-
-# The capture runs without the Carnivore2, whose RAM in slot 1 the game's loader
-# finds before the internal RAM in slot 2.
-capture hb75p
-```
-
-```
-# The game selects RAM in slot 2. The NMS 8250 has its RAM in slot 3.
-# LD A,0A8h / OUT (0A8h),A selects slot 2 in pages 1 to 3. The patch selects
-# slot 3 there.
-patch side1:FD6 3E A8 D3 A8 > 3E FC D3 A8
-```
-
-A `patch` line needs the game file's `sha1` line, which every shipped game file has.
-
-### 5. Decide whether openMSX itself fails
-
-When no line fixes the game, load its tape in plain `openMSX`, without `snapcas`:
-
-```
+### 5. Check whether `openMSX` itself fails
+```sh
 python3 -I tools/plain.py <GAME> <machine>
 ```
+If plain `openMSX` fails identically (confirm against a passing machine's `snap/log.txt` if it prints `a graphics screen`), add an entry to `tests/openmsx-failures.txt`. Otherwise add an entry to `tests/snapcas-failures.txt` with the root cause.
 
-The command prints the screen 60 seconds after the tape's end, or
-`a graphics screen`, an output that usually means that the game runs. The command
-plays the tape as it is, without the game file's patches, keys, or side 2. A loader
-that crashed in a graphics mode prints `a graphics screen` too. So for such an
-output, also compare `snap/log.txt` with the log of a machine where the game passes.
-When the plain load fails as the capture does, the game fails in `openMSX` itself,
-so add a line to `tests/openmsx-failures.txt`. The line holds the machine, the
-folder, and what fails. Otherwise the failure is one of `snapcas`, so add the same
-kind of line to `tests/snapcas-failures.txt`, with the cause when you know it.
-`make games` reads both lists before it starts, and stops at a line that it cannot
-read. It prints the failures of each list as a group of their own, and fails only
-for a game that fails and is in neither list.
-
-### 6. Check the fix
-
-Run `./snapcas.py snap <GAME> <machine> --check` again. The command must pass. Then
-run `make games MACHINE=<machine>`. That command reruns only the games whose files
-changed. When the code in `bin/` or `tools/`, the DOS files, or `openMSX`'s version
-changed, the command reruns every game. A change to `game.txt` holds on every
-machine, so also run `make games` on each machine that has results in `out/games/`.
-Last, run `make test`.
+### 6. Verify
+Re-run `./snapcas.py snap <GAME> <machine> --check`, then `make games MACHINE=<machine>` (and on every machine in `out/games/` if `game.txt` changed), then `make test`.
 
 ## Fix a game that fails on the MSX
 
-All four points of the check pass, and the game still fails on the user's MSX. The
-check runs the image for 60 seconds in `openMSX` and does not play the game, so it
-cannot see every failure ([docs/DESIGN.md, Check](docs/DESIGN.md#check)). Do not run
-`./snapcas.py try`. Ask the user to run it. Ask the user what the screen shows when
-the game fails (a photo is best), what played before, and what the user pressed. Then
-find the row:
+When all 4 check points pass in `openMSX` but the game fails on real hardware, ask the user for a photo/description of the screen, what happened before, and what they pressed (never run `./snapcas.py try` yourself):
 
-| The user sees | Cause | Fix |
+| User sees | Cause | Fix |
 |---|---|---|
-| `... not found`, `is not a snapcas image`, `the file is cut short` | A wrong name or folder, or a bad copy | `./snapcas.py sync` again, and check the `CD` folder |
-| `made for another version of SNAPCAS.COM` | The image is older than the card's `SNAPCAS.COM` | `./snapcas.py snap` again, then `sync` |
-| `made for another machine`, `slot 0 ... is not RAM`, `slot 0 is not expanded as at the capture`, `slot 0 is DOS's mapper ...` | The image is for another machine, or the machine file does not describe this one | Ask for the model and slots again. Otherwise [Add a machine](#add-a-machine) |
-| `DOS's pages are not in one memory mapper`, `MSX-DOS 1 needs a memory mapper ...`, `no page 1 or 2 can hold ...`, `a page's segment is beyond ...` | The MSX has no suitable memory mapper | No line fixes it. Tell the user |
-| `DOS has too few free mapper segments`, `needs N ... DOS has M`, `more than 64 pages ...` | The mapper is too small | No line fixes it. Tell the user the numbers |
-| `a page 0 is in another subslot`, `rom keep needs ...` | Page 0 is in another subslot of DOS's mapper's slot, and the image lacks `sub0`, which selects the mapper there while the tape service runs: page 3 is outside DOS's mapper, or page 3 has no 23 zero bytes for `sub0` at FCC9h, so `build.txt` has no `sub0` line | A `capture` variant whose RAM is outside DOS's mapper, or remove `rom keep` from the machine's game file |
-| `service t0 needs ...`, `T0 cannot take ...` | The game file's `service t0` does not suit this machine | A `capture` variant whose RAM is outside DOS's mapper, or remove the line from the machine's game file |
-| The machine reboots, to the boot screen or into DOS | The loader crashes after the restore. Point 3 can miss it | A `capture` variant, or a slot patch ([Patch the code](#3-patch-the-code)) |
-| The screen stops and no key works | Unknown. Talvisota on `phc28s-ram64k-carnivore2` needed `capture phc28s-ram64k` | `capture <variant>` with the variant without the disk system |
-| The game waits for music that never ends | `PLAY` that runs at the snapshot does not resume on a real PHC-28S | `snapshot at <seconds>` after the music |
-| The game stops while it reads the tape, or the screen turns yellow | The game needs the tape's keys, or keeps data where the tape service's entries are | Give the user the tape keys ([docs/PLAYING.md](docs/PLAYING.md#tape-keys)). Otherwise `service t0` or `service at <address>`, with `patch` lines, as Altered Beast's game file has |
-| Wrong pixels while the game loads from the tape | Unknown. The tape service may return bytes faster than the VDP accepts | No fix is known. For a shipped game, add a line to `tests/snapcas-failures.txt`. For a custom game, tell the user |
-| The joystick or keys do nothing, or the game acts by itself | The game reads a port that the machine leaves in another state, as Navy Moves and Ghostbusters II do | `patch` lines, as in `games/NAVY-MOV/game.txt`. Ask whether the keyboard works |
-| A silent menu, or a title that flashes until a key | The game does this in plain `openMSX` too | Not a failure. Run `python3 -I tools/plain.py <GAME> <machine>` to confirm |
+| `not found` / `not a snapcas image` / `cut short` | Bad path or corrupt copy | Re-run `./snapcas.py sync` and verify `CD` folder |
+| `made for another version of SNAPCAS.COM` | Stale `.SNP` or `SNAPCAS.COM` | Rebuild with `snap`, then `sync` |
+| `made for another machine` / `slot ... is not RAM` / `slot 0 is not expanded` | Wrong machine or slot layout | Re-confirm model & slots, or [Add a machine](#add-a-machine) |
+| `not in one memory mapper` / `too few free mapper segments` / `needs N ... DOS has M` | Hardware mapper limit | Unfixable—report numbers to user |
+| `page 0 is in another subslot` / `rom keep needs` | Missing `sub0` or incompatible `rom keep` | Capture variant outside DOS's mapper, or drop `rom keep` |
+| `service t0 needs` / `T0 cannot take` | `service t0` incompatible with machine | Capture variant outside DOS's mapper, or remove `service t0` |
+| Reboots to boot screen or DOS | Post-restore crash missed by 60 s check | Capture variant or slot patch |
+| Freezes, no keys respond | Disk-interface conflict | Try capture variant without disk system |
+| Waits forever on music | `PLAY` at snapshot doesn't resume (PHC-28S) | `snapshot at <sec>` after music ends |
+| Stops on tape load / yellow screen | Needs tape keys or overwrites tape entries | Give [Tape keys](docs/PLAYING.md#tape-keys); else `service t0` or `service at` |
+| Corrupted pixels during tape load | Tape service faster than VDP accepts | No known fix (`tests/snapcas-failures.txt` if shipped) |
+| Joystick/keys dead or erratic | Port state mismatch | `patch` lines (see `games/NAVY-MOV/game.txt`) |
+| Silent menu or flashing title | Same in plain `openMSX` | Verify with `tools/plain.py`; not a bug |
 
-After each fix, run `./snapcas.py snap <GAME> <machine> --check`, which must still
-pass. Then ask the user to run `./snapcas.py sync` and to play past the screen where
-the game failed. When it still fails, ask again what the screen shows. When the plain
-load in `openMSX` fails the same way, add a line to `tests/openmsx-failures.txt` for
-a shipped game ([Decide whether openMSX itself fails](#5-decide-whether-openmsx-itself-fails)).
-For a custom game, tell the user.
+After each fix, verify with `snap --check`, ask the user to `sync` and test past the failure point, and iterate if needed.
 
-## More
+## See also
 
-- [README.md](README.md): the tasks in short form, for a person.
-- [docs/PLAYING.md](docs/PLAYING.md): what the MSX needs, and the tape's keys.
-- [docs/BUILD.md](docs/BUILD.md): the folders and the `make` commands.
-- [docs/CLI.md](docs/CLI.md): the `snapcas.py` commands.
-- [docs/INTERNALS.md](docs/INTERNALS.md): the capture, the build, and the check.
+- [README.md](README.md) · [docs/PLAYING.md](docs/PLAYING.md) · [docs/CLI.md](docs/CLI.md) · [docs/MACHINES.md](docs/MACHINES.md)
+- [docs/FILES.md](docs/FILES.md) · [docs/BUILD.md](docs/BUILD.md) · [docs/DESIGN.md](docs/DESIGN.md) · [docs/FORMATS.md](docs/FORMATS.md) · [docs/NOTES.md](docs/NOTES.md)
+- [Capture](docs/internals/capture.md) · [Automatic Patches](docs/internals/patches.md) · [Tape Service & Resident Calls](docs/internals/service-and-resident.md) · [Restorer & Check](docs/internals/restorer-and-check.md)

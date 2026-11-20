@@ -1,4 +1,4 @@
-"""The check on games (docs/INTERNALS.md, Check): point 3, which fails a reboot
+"""The check on games (docs/internals/restorer-and-check.md, Check): point 3, which fails a reboot
 of the machine after the restore or a crash into RST 38h, point 4, which fails a game that stops at a
 BASIC error, what check.tcl leaves in the report when one of its own
 callbacks fails, and point 1's limit for the restore. check.py's reading of a report is in tests/test_gate.py, and
